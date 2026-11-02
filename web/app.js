@@ -59,6 +59,31 @@
 	fortschritt.ids.forEach(function (id) { fertig[id] = true; });
 	var hatFortschritt = fortschritt.ids.length > 0;
 
+	/**
+	 * What this quest means for a character.
+	 *
+	 * Same rule as the plugin: a session play is never written to the journal, and
+	 * of two quests that rule each other out only one can be taken. Neither is
+	 * counted, so a finished alternative cannot leave a row "open" for ever.
+	 * A finished entry always counts, even where the game data claims both sides of
+	 * a pair are exclusive.
+	 */
+	function zustandVon(quest) {
+		if (fertig[quest.i] === true) { return 'fertig'; }
+		if (quest.x === 1) { return 'sitzung'; }
+		if (hatFortschritt && quest.e) {
+			for (var index = 0; index < quest.e.length; index += 1) {
+				if (fertig[quest.e[index]] === true) { return 'ausgeschlossen'; }
+			}
+		}
+		return 'offen';
+	}
+
+	function gezaehlt(quest) {
+		var zustand = zustandVon(quest);
+		return zustand !== 'sitzung' && zustand !== 'ausgeschlossen';
+	}
+
 	// --- State ---------------------------------------------------------
 	var zustand = {
 		knoten: null,
@@ -74,6 +99,8 @@
 
 	var karteNachIndex = {};
 	karten.forEach(function (karte) { karteNachIndex[karte.idx] = karte; });
+	var questNachId = {};
+	quests.forEach(function (quest) { questNachId[quest.i] = quest; });
 
 	// --- Text ----------------------------------------------------------
 	var FALTEN = [
@@ -147,9 +174,14 @@
 	sortiere(WURZEL);
 
 	function zaehle(eintraege) {
-		var erledigt = 0;
-		eintraege.forEach(function (quest) { if (fertig[quest.i]) { erledigt += 1; } });
-		return { gesamt: eintraege.length, erledigt: erledigt };
+		// Only what a character can still do is counted (see zustandVon).
+		var erledigt = 0, gesamt = 0;
+		eintraege.forEach(function (quest) {
+			if (!gezaehlt(quest)) { return; }
+			gesamt += 1;
+			if (fertig[quest.i]) { erledigt += 1; }
+		});
+		return { gesamt: gesamt, erledigt: erledigt };
 	}
 
 	/**
@@ -440,13 +472,16 @@
 			var dot = eltern('div', null);
 			dot.className = 'punkt';
 			if (fertig[quest.i]) { dot.classList.add('fertig'); }
+			if (!gezaehlt(quest)) { dot.classList.add('nicht-gezaehlt'); }
 			if (zustand.auswahl && zustand.auswahl.i === quest.i) {
 				dot.classList.add('aktiv');
 			}
 			dot.style.left = (treffer.punkt.x * 100) + '%';
 			dot.style.top = (treffer.punkt.y * 100) + '%';
 			dot.title = quest.n + (quest.l ? ' (' + t('stufe') + ' ' + quest.l + ')' : '') +
-				(fertig[quest.i] ? t('erledigt_suffix') : '');
+				(zustandVon(quest) === 'sitzung' ? ' – ' + t('sitzungsspiel') :
+					(zustandVon(quest) === 'ausgeschlossen' ? ' – ' + t('nicht_moeglich') :
+						(fertig[quest.i] ? t('erledigt_suffix') : '')));
 			dot.addEventListener('click', function (ereignis) {
 				ereignis.stopPropagation();
 				waehle(quest);
@@ -479,15 +514,26 @@
 		zeilen = {};
 		eintraege.slice(0, zustand.sichtbar).forEach(function (quest) {
 			var zeile = eltern('li', null);
-			var erledigt = fertig[quest.i] === true;
+			var lage = zustandVon(quest);
+			var erledigt = lage === 'fertig';
 			zeile.classList.add(erledigt ? 'erledigt' : 'offen');
+			if (lage === 'sitzung' || lage === 'ausgeschlossen') {
+				// Not counted: dim it and say why, but keep the row (the quest exists).
+				zeile.classList.remove('offen');
+				zeile.classList.add('nicht-gezaehlt');
+			}
 			if (zustand.auswahl && zustand.auswahl.i === quest.i) {
 				zeile.classList.add('aktiv');
 			}
-			var haken = eltern('span', erledigt ? '✓' : '·');
+			var haken = eltern('span', erledigt ? '✓' : (lage === 'offen' ? '·' : ''));
 			haken.className = 'haken';
 			zeile.appendChild(haken);
 			zeile.appendChild(eltern('span', quest.n));
+			if (lage === 'sitzung' || lage === 'ausgeschlossen') {
+				var vermerk = eltern('span', lage === 'sitzung' ? t('sitzungsspiel') : t('nicht_moeglich'));
+				vermerk.className = 'vermerk';
+				zeile.appendChild(vermerk);
+			}
 			if (quest.l) {
 				var stufe = eltern('span', t('stufe') + ' ' + quest.l);
 				stufe.className = 'stufe';
@@ -510,7 +556,8 @@
 	/** Progress filter over a quest list. */
 	function gefiltert(eintraege) {
 		if (zustand.filter === 'offen') {
-			return eintraege.filter(function (quest) { return !fertig[quest.i]; });
+			// "Open" means the character can still do it.
+			return eintraege.filter(function (quest) { return zustandVon(quest) === 'offen'; });
 		}
 		if (zustand.filter === 'erledigt') {
 			return eintraege.filter(function (quest) { return fertig[quest.i] === true; });
@@ -561,12 +608,33 @@
 		kennung.push(quest.t.length ?
 			quest.t.length + ' ' + (quest.t.length === 1 ? t('ziel') : t('ziele')) :
 			t('ohne_ziel_kurz'));
+		var lage = zustandVon(quest);
 		if (hatFortschritt) {
-			kennung.push(fertig[quest.i] ? t('erledigt') : t('filter_offen'));
+			if (lage === 'fertig') { kennung.push(t('erledigt')); }
+			else if (lage === 'sitzung') { kennung.push(t('sitzungsspiel')); }
+			else if (lage === 'ausgeschlossen') { kennung.push(t('nicht_moeglich')); }
+			else { kennung.push(t('filter_offen')); }
 		}
 		var zeile = eltern('div', kennung.join(' · '));
 		zeile.className = 'kennung';
 		detail.appendChild(zeile);
+
+		// Why an entry is not counted. Same wording as the plugin.
+		if (lage === 'sitzung') {
+			var sitzungHinweis = eltern('p', t('sitzung_hinweis'));
+			sitzungHinweis.className = 'vermerk-text';
+			detail.appendChild(sitzungHinweis);
+		}
+		if (lage === 'ausgeschlossen') {
+			var sperre = '';
+			for (var index = 0; index < quest.e.length; index += 1) {
+				var andere = questNachId[quest.e[index]];
+				if (andere && fertig[andere.i]) { sperre = andere.n; break; }
+			}
+			var sperrHinweis = eltern('p', ersetze(t('ausgeschlossen_hinweis'), [sperre]));
+			sperrHinweis.className = 'vermerk-text';
+			detail.appendChild(sperrHinweis);
+		}
 
 		if (!quest.t.length) {
 			var hinweisOhne = eltern('p', t('kein_ziel'));

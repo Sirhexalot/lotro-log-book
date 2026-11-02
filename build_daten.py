@@ -200,6 +200,12 @@ def baue(katalog, karten_datei, orte=None, sprache='de'):
             'd': clean(record['d'] if 'd' in record else '',
                        TOKENS[sprache]['zaehler'], sprache),
             's': schritte,
+            # x: session play, e: quests that rule this one out. Passed through as
+            # they stand in the catalogue; the page applies the same rule as the
+            # plugin, using the progress the visitor loads.
+            **({'x': 1} if field(record, 'x', 0) == 1 else {}),
+            **({'e': [str(mate) for mate in step_list(field(record, 'ex'))]}
+               if field(record, 'ex') else {}),
         })
 
     karten = json.loads(Path(karten_datei).read_text(encoding='utf-8'))

@@ -63,6 +63,13 @@ The numbers come from `Progress.lua`. Locally `build_daten.py` reads it during
 the build; on the website the visitor loads it in the browser via "Load
 progress". The file stays there and is not uploaded.
 
+The counters show what a character can still do. The catalogue marks two kinds of
+entry (`x`, `e`) and the page applies the same rule as the plugin: a **session
+play** is never written to the journal, and of two quests that rule each other out
+only one can be taken. Both are dimmed with a note and left out of the numbers;
+a finished entry always counts. The rule is evaluated in the browser, because
+every visitor brings their own progress.
+
 ## Rights
 
 Fan project, not affiliated with Standing Stone Games, Daybreak Game Company or

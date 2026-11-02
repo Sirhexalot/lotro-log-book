@@ -294,6 +294,11 @@ main {
 #liste li.erledigt .haken { color: var(--fertig); }
 #liste li.erledigt > span:nth-child(2) { color: var(--fertig); }
 #liste li.offen .haken { color: var(--offen); }
+/* Not counted: a session play the game never records, or an entry a finished
+   alternative rules out. Dimmed, with a short note instead of a check mark. */
+#liste li.nicht-gezaehlt { opacity: 0.55; }
+#liste li .vermerk { color: var(--schwach); font-size: 11px; margin-left: 6px; font-style: italic; }
+.vermerk-text { color: var(--schwach); font-style: italic; margin: 4px 0 8px; }
 #liste li .stufe { color: var(--schwach); font-size: 11px; margin-left: 6px; }
 
 /* Map area */
