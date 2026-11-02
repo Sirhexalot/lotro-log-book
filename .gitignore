@@ -1,6 +1,7 @@
 # Spielmaterial – entsteht lokal aus dem eigenen Client
 Karten/
 Karten_en/
+Karten_fr/
 webp/
 daten/*.json
 web/daten-*.js
