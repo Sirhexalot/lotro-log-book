@@ -42,6 +42,11 @@ SEKTIONEN = {
         'missions': 'Missions', 'craft': 'Crafting', 'festivals': 'Festivals',
         'instances': 'Instances', 'other': 'No region',
     },
+    'fr': {
+        'story': 'Histoire épique', 'shadow': 'Histoire épique',
+        'missions': 'Missions', 'craft': 'Artisanat', 'festivals': 'Festivals',
+        'instances': 'Instances', 'other': 'Sans région',
+    },
 }
 
 TOKENS = {
@@ -51,6 +56,9 @@ TOKENS = {
     'en': {'PLAYER': 'you', 'PLAYERNAME': 'you', 'SURNAME': 'you',
            'CLASS': 'your class', 'RACE': 'your race',
            'band': 'Book', 'zaehler': '(count in game)', 'wert': '[game value]'},
+    'fr': {'PLAYER': 'vous', 'PLAYERNAME': 'vous', 'SURNAME': 'vous',
+           'CLASS': 'votre classe', 'RACE': 'votre race',
+           'band': 'Livre', 'zaehler': '(nombre en jeu)', 'wert': '[valeur du jeu]'},
 }
 
 
@@ -278,7 +286,7 @@ def regionen_je_karte(quests):
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('--sprache', choices=('de', 'en'), default='de',
+    parser.add_argument('--sprache', choices=('de', 'en', 'fr'), default='de',
                         help='catalogue language; writes web/daten-<language>.js')
     parser.add_argument('--katalog', type=Path, default=None,
                         help='default: Quests_<language>.lua next to the plugin')

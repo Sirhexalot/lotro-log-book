@@ -25,12 +25,12 @@ from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
 WEB = HIER / 'web'
-SPRACHEN = ('de', 'en')
+SPRACHEN = ('de', 'en', 'fr')
 
 DATEIEN = ('app.js', 'start.css', 'style.css', 'texte.js', 'sprache.js',
-           'stand.js', 'start.html', 'start-en.html', 'impressum.html',
-           'datenschutz.html')
-BILDER = ('bild/start.jpg', 'bild/start-en.jpg')
+           'stand.js', 'start.html', 'start-en.html', 'start-fr.html',
+           'impressum.html', 'datenschutz.html')
+BILDER = ('bild/start.jpg', 'bild/start-en.jpg', 'bild/start-fr.jpg')
 
 
 def kopiere(ziel):
@@ -74,6 +74,17 @@ def startseite_anpassen(ziel, sprache):
                '\t</section>')
         text = re.sub(r'<h3>Dein Fortschritt</h3>.*?</section>', neu, text,
                       count=1, flags=re.S)
+    elif sprache == 'fr':
+        neu = ('<h3>Votre progression</h3>\n'
+               '\t\t<p>Les chiffres de l\'arbre et la couleur des points viennent de votre\n'
+               '\t\t<code>Progress.lua</code>. Ouvrez la carte et choisissez\n'
+               '\t\t« Charger la progression » — le fichier est lu dans votre navigateur et y\n'
+               '\t\treste. Aucun envoi, aucun compte, aucune mesure nominative.</p>\n'
+               '\t\t<p>Sans ce fichier, la carte fonctionne quand même — elle n\'affiche alors\n'
+               '\t\tni chiffres ni couleurs. Aucun zéro n\'est inventé.</p>\n'
+               '\t</section>')
+        text = re.sub(r'<h3>Votre progression</h3>.*?</section>', neu, text,
+                      count=1, flags=re.S)
     else:
         neu = ('<h3>Your progress</h3>\n'
                '\t\t<p>The numbers in the tree and the colour of the dots come from your\n'
@@ -94,7 +105,7 @@ ZAEHLER = ('<script data-goatcounter="https://sirhexalot.goatcounter.com/count"\
 
 def zaehler_einbauen(ziel):
     """GoatCounter only in the published version, not locally."""
-    for name in ('index.html', 'start.html', 'start-en.html',
+    for name in ('index.html', 'start.html', 'start-en.html', 'start-fr.html',
                  'impressum.html', 'datenschutz.html'):
         datei = ziel / name
         text = datei.read_text(encoding='utf-8')
@@ -111,6 +122,9 @@ def zaehler_einbauen(ziel):
         ('start-en.html',
          '<p class="leise">This copy runs locally. Nothing is uploaded and nothing is\n\tloaded from the network.</p>',
          '<p class="leise">This site only counts anonymous page views. Your progress stays\n\tin your browser.</p>'),
+        ('start-fr.html',
+         '<p class="leise">Cette page ne compte que des visites anonymes. Votre progression\n\treste dans votre navigateur.</p>',
+         '<p class="leise">Cette page ne compte que des visites anonymes. Votre progression\n\treste dans votre navigateur.</p>'),
     ):
         datei = ziel / name
         text = datei.read_text(encoding='utf-8')

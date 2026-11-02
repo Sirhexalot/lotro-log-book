@@ -39,13 +39,13 @@ def fortschritt():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--sprache', choices=('de', 'en'), default='de')
+    parser.add_argument('--sprache', choices=('de', 'en', 'fr'), default='de')
     optionen = parser.parse_args()
 
     karte_name = 'Bree-land'
-    ordner = 'Karten' if optionen.sprache == 'de' else 'Karten_en'
+    ordner = 'Karten' if optionen.sprache == 'de' else 'Karten_' + optionen.sprache
     zieldatei = HIER / ('web/bild/start.jpg' if optionen.sprache == 'de'
-                        else 'web/bild/start-en.jpg')
+                        else 'web/bild/start-%s.jpg' % optionen.sprache)
     daten_datei = HIER / ('daten/quests-%s.json' % optionen.sprache)
 
     try:

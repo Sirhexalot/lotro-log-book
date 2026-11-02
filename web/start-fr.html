@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carte – Le Seigneur des Anneaux Online</title>
+<link rel="stylesheet" href="start.css">
+</head>
+<body>
+
+<header class="kopf">
+	<div class="kopf-innen">
+		<h1>Carte</h1>
+		<nav class="sprachen" aria-label="Langue">
+			<a href="start.html" lang="de">DE</a>
+			<a href="start-en.html" lang="en">EN</a>
+			<a href="start-fr.html" aria-pressed="true" lang="fr">FR</a>
+		</nav>
+		<a class="knopf klein" href="index.html?lang=fr">Vers la carte</a>
+	</div>
+</header>
+
+<main>
+	<section class="intro">
+		<p class="dach">Le Seigneur des Anneaux Online</p>
+		<h2>Une carte qui montre <em>où</em> se trouvent les objectifs des quêtes.</h2>
+		<p class="lead">Région par région, à côté de votre propre progression. Aucun
+		compte, aucun serveur, aucune marque inventée.</p>
+	</section>
+
+	<figure class="bild">
+		<img src="bild/start-fr.jpg" alt="Carte du Pays de Bree avec des points dorés et verts pour les quêtes à faire et terminées">
+		<figcaption>Pays de Bree : or = à faire, vert = terminée. Chaque point est un objectif, pas une supposition.</figcaption>
+	</figure>
+
+	<section>
+		<h3>Comment ça marche</h3>
+		<ol class="schritte">
+			<li>
+				<strong>Choisir une région.</strong>
+				L'arbre à gauche : région, zone, sous-zone. Chaque ligne indique combien de
+				quêtes existent et combien vous en avez terminées.
+			</li>
+			<li>
+				<strong>Cliquer sur une quête.</strong>
+				Le texte avec toutes les étapes et les objectifs apparaît à droite. Sur la
+				carte, les objectifs sont des points : or = à faire, vert = terminée.
+			</li>
+			<li>
+				<strong>Voir où aller.</strong>
+				Molette pour zoomer, glisser pour déplacer. Une quête sélectionnée affiche ses
+				objectifs sous forme d'anneaux numérotés.
+			</li>
+		</ol>
+	</section>
+
+	<section>
+		<h3>Créer votre progression</h3>
+		<p>Pour les chiffres, il vous faut votre <code>Progress.lua</code>. L'outil la lit
+		dans le jeu en cours ; il ne modifie rien et n'envoie rien.</p>
+		<p><a class="knopf" href="download/mql-spielstand.zip">Télécharger l'outil (12 Ko)</a></p>
+		<ol class="schritte">
+			<li><strong>Décompresser.</strong> Extraire le ZIP dans son propre dossier.</li>
+			<li><strong>Lancer le jeu.</strong> Magic Quest Log doit être installé et le jeu
+			en cours d'exécution.</li>
+			<li><strong>Lancer le script.</strong> Windows : <code>read-journal.bat</code>,
+			macOS : <code>read-journal.command</code>.</li>
+			<li><strong>Choisir le fichier.</strong> Charger le <code>Progress.lua</code>
+			obtenu sur la carte avec « Charger la progression ».</li>
+		</ol>
+	</section>
+
+	<section>
+		<h3>Votre progression</h3>
+		<p>Les chiffres de l'arbre et la couleur des points viennent de votre
+		<code>Progress.lua</code>. Le fichier se trouve dans le dossier du plugin sous
+		<code>MagicQuestLog/Data/</code> et est lu lors de la construction de la page
+		(<code>build_daten.py</code>).</p>
+		<p>Sans ce fichier, la carte fonctionne quand même — elle n'affiche alors ni
+		chiffres ni couleurs. Aucun zéro n'est inventé.</p>
+	</section>
+
+	<section>
+		<h3>Ce que la carte ne fait pas</h3>
+		<ul class="grenzen">
+			<li>Elle montre les <strong>lieux des objectifs</strong>, pas les donneurs de
+			quête. Le lieu d'acceptation ne figure pas dans les données du jeu.</li>
+			<li>15 209 quêtes existent, 8 403 ont une position vérifiée. Les autres sont
+			listées dans l'arbre et la liste, mais sans point — mieux vaut aucune marque
+			qu'une fausse.</li>
+			<li>Elle n'est pas en direct : elle connaît votre progression au moment de
+			l'export.</li>
+		</ul>
+	</section>
+
+	<p class="weiter">
+		<a class="knopf" href="index.html?lang=fr">Vers la carte</a>
+	</p>
+</main>
+
+<footer>
+	<p><a href="impressum.html">Mentions légales</a> · <a href="datenschutz.html">Confidentialité</a></p>
+	<p>Projet de fans, sans lien avec Standing Stone Games, Daybreak Game Company ou
+	Middle-earth Enterprises. Les cartes et les textes du jeu appartiennent à leurs
+	propriétaires respectifs. Aucune publicité, aucun compte, aucun profil — seulement
+	une mesure d'audience anonyme sans cookies.</p>
+	<p class="leise">Cette page ne compte que des visites anonymes. Votre progression
+	reste dans votre navigateur.</p>
+</footer>
+
+</body>
+</html>

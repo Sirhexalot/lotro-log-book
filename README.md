@@ -12,7 +12,7 @@ from your own game and stay local.
 ## What the code does
 
 ```
-hole_karten.py      map images from the client (German/English)
+hole_karten.py      map images from the client (German/English/French)
 baue_geografie.py   daten/geografie.json: which groups are real places?
 baue_startbild.py   web/bild/start*.jpg for the start pages
 build_daten.py      daten/quests-<language>.json and web/daten-<language>.js
@@ -33,13 +33,17 @@ map export, an installed LOTRO client and the plugin
 ```sh
 python3 hole_karten.py                                  # images, ~300 MB per language
 python3 hole_karten.py --sprache en --ziel Karten_en
+python3 hole_karten.py --sprache fr --ziel Karten_fr
 python3 baue_geografie.py
 python3 baue_startbild.py --sprache de
 python3 baue_startbild.py --sprache en
+python3 baue_startbild.py --sprache fr
 python3 build_daten.py --sprache de                     # needs lupa
 python3 build_daten.py --sprache en
+python3 build_daten.py --sprache fr
 python3 baue_webp.py --sprache de
 python3 baue_webp.py --sprache en
+python3 baue_webp.py --sprache fr
 python3 baue_download.py
 python3 baue_website.py
 ```
@@ -48,7 +52,7 @@ Then open `dist-web/` in the browser or upload it.
 
 ## Language
 
-German and English. The site loads only the selected language
+German, English and French. The site loads only the selected language
 (`daten-de.js`/`daten-en.js`, images from `karten/de`/`karten/en`). Order of
 choice: `?lang=`, then `localStorage`, then `navigator.language`, otherwise
 English. Texts live in `web/texte.js`.

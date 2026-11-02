@@ -9,7 +9,7 @@
 (function () {
 	'use strict';
 
-	var ERLAUBT = ['de', 'en'];
+	var ERLAUBT = ['de', 'en', 'fr'];
 	var VORGABE = 'en';
 
 	function waehle() {

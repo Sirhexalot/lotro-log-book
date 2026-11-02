@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
-QUELLEN = {'de': 'Karten', 'en': 'Karten_en'}
+QUELLEN = {'de': 'Karten', 'en': 'Karten_en', 'fr': 'Karten_fr'}
 
 
 def main():

@@ -11,7 +11,7 @@
 	var t = window.MQL_T || function (schluessel) { return schluessel; };
 	var ersetze = window.MQL_ERSETZE || function (muster) { return String(muster); };
 	var sprache = window.MQL_SPRACHE || 'de';
-	var bildOrdner = sprache === 'en' ? '../Karten_en/' : '../Karten/';
+	var bildOrdner = '../Karten' + (sprache === 'de' ? '/' : '_' + sprache + '/');
 	// WebP is about 90 % smaller. Locally it lives under webp/<sprache>/, on the
 	// website under karten/<sprache>/ – hence the {sprache} placeholder.
 	var webpMuster = window.MQL_BILD_PFAD || '../webp/{sprache}/';
