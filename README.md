@@ -1,42 +1,42 @@
 # LotRO Magic Quest Map
 
-Eine Karte zu **Magic Quest Log**: pro Gebiet die Karte, darauf die Ziele der
-Aufgaben – mit dem eigenen Fortschritt daneben.
+A map for **Magic Quest Log**: per region the map, on it the objectives of the
+quests – with your own progress beside it.
 
-Läuft unter **https://mm.sirhexalot.de/**.
+Runs at **https://mm.sirhexalot.de/**.
 
-Dieses Repository enthält **nur den Code**. Kartenbilder, Aufgabentexte und
-Fortschrittsdateien sind Spielmaterial und werden nicht veröffentlicht: sie
-entstehen beim Bau aus dem eigenen Spiel und bleiben lokal.
+This repository contains **only the code**. Map images, quest texts and progress
+files are game material and are not published: they are created during the build
+from your own game and stay local.
 
-## Was der Code macht
+## What the code does
 
 ```
-hole_karten.py      Kartenbilder aus dem Client (deutsch/englisch)
-baue_geografie.py   daten/geografie.json: welche Gruppen sind echte Orte?
-baue_startbild.py   web/bild/start*.jpg für die Startseiten
-build_daten.py      daten/quests-<sprache>.json und web/daten-<sprache>.js
-baue_webp.py        webp/<sprache>/*.webp aus den PNGs
-baue_download.py    web/download/mql-spielstand.zip (Journal-Reader)
-baue_website.py     dist-web/: die veröffentlichte Fassung
-upload.py           dist-web/ per FTPS hochladen
-dat/MapExport.java  liest Karten aus den DAT-Archiven
-web/                die Seite (ohne Server aufrufbar)
+hole_karten.py      map images from the client (German/English)
+baue_geografie.py   daten/geografie.json: which groups are real places?
+baue_startbild.py   web/bild/start*.jpg for the start pages
+build_daten.py      daten/quests-<language>.json and web/daten-<language>.js
+baue_webp.py        webp/<language>/*.webp from the PNGs
+baue_download.py    web/download/mql-spielstand.zip (journal reader)
+baue_website.py     dist-web/: the published version
+upload.py           upload dist-web/ via FTPS
+dat/MapExport.java  reads maps from the DAT archives
+web/                the site (opens without a server)
 ```
 
-## Bauen
+## Building
 
-Voraussetzungen: Python 3, Pillow, `lupa` (für den Lua-Katalog), Java für den
-Kartenexport, ein installierter LOTRO-Client und das Plugin
+Requirements: Python 3, Pillow, `lupa` (for the Lua catalogue), Java for the
+map export, an installed LOTRO client and the plugin
 [MagicQuestLog](https://github.com/Sirhexalot/lotro-magic-quest-log).
 
 ```sh
-python3 hole_karten.py                                  # Bilder, ~300 MB je Sprache
+python3 hole_karten.py                                  # images, ~300 MB per language
 python3 hole_karten.py --sprache en --ziel Karten_en
 python3 baue_geografie.py
 python3 baue_startbild.py --sprache de
 python3 baue_startbild.py --sprache en
-python3 build_daten.py --sprache de                     # braucht lupa
+python3 build_daten.py --sprache de                     # needs lupa
 python3 build_daten.py --sprache en
 python3 baue_webp.py --sprache de
 python3 baue_webp.py --sprache en
@@ -44,24 +44,24 @@ python3 baue_download.py
 python3 baue_website.py
 ```
 
-Danach `dist-web/` im Browser öffnen oder hochladen.
+Then open `dist-web/` in the browser or upload it.
 
-## Sprache
+## Language
 
-Deutsch und Englisch. Die Seite lädt nur die gewählte Sprache
-(`daten-de.js`/`daten-en.js`, Bilder aus `karten/de`/`karten/en`). Erste Wahl:
-`?lang=`, dann `localStorage`, dann `navigator.language`, sonst Englisch.
-Texte stehen in `web/texte.js`.
+German and English. The site loads only the selected language
+(`daten-de.js`/`daten-en.js`, images from `karten/de`/`karten/en`). Order of
+choice: `?lang=`, then `localStorage`, then `navigator.language`, otherwise
+English. Texts live in `web/texte.js`.
 
-## Fortschritt
+## Progress
 
-Die Zahlen kommen aus `Progress.lua`. Lokal liest `build_daten.py` sie beim Bau;
-auf der Website lädt der Besucher sie im Browser über „Spielstand laden". Die
-Datei bleibt dort und wird nicht hochgeladen.
+The numbers come from `Progress.lua`. Locally `build_daten.py` reads it during
+the build; on the website the visitor loads it in the browser via "Load
+progress". The file stays there and is not uploaded.
 
-## Rechte
+## Rights
 
-Fan-Projekt, nicht verbunden mit Standing Stone Games, Daybreak Game Company
-oder Middle-earth Enterprises. Karten und Spieltexte gehören den jeweiligen
-Rechteinhabern. Keine Werbung, keine Konten, keine Profile; auf der Website nur
-eine anonyme Reichweitenmessung ohne Cookies (GoatCounter).
+Fan project, not affiliated with Standing Stone Games, Daybreak Game Company or
+Middle-earth Enterprises. Maps and game texts belong to their respective rights
+holders. No advertising, no accounts, no profiles; on the website only
+anonymous reach measurement without cookies (GoatCounter).

@@ -3,11 +3,11 @@ import delta.games.lotro.dat.data.*;
 import delta.games.lotro.dat.utils.DatIconsUtils;
 
 /**
- * Holt Kartenbilder direkt aus den DAT-Archiven des Clients.
+ * Fetches map images directly from the client's DAT archives.
  *
- * Aufruf: java MapExport CLIENT_DIR LOCALE OUT_DIR DID [DID ...]
+ * Usage: java MapExport CLIENT_DIR LOCALE OUT_DIR DID [DID ...]
  *
- * Die DID ist der imageId-Wert aus maps.xml. Es wird nur gelesen.
+ * The DID is the imageId value from maps.xml. Read-only.
  */
 public class MapExport {
 
@@ -56,6 +56,6 @@ public class MapExport {
         } finally {
             facade.dispose();
         }
-        System.out.println("fertig: " + ok + " Bilder, " + bad + " ohne Ergebnis");
+        System.out.println("fertig: " + ok + " images, " + bad + " without result");
     }
 }

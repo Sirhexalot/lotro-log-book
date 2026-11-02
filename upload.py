@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Lädt `dist-web/` per FTP/FTPS auf den Webserver.
+"""Uploads `dist-web/` to the web server via FTP/FTPS.
 
-Zugangsdaten stehen **nicht** im Projekt, sondern in einer eigenen Datei:
+Credentials are **not** in the project, but in a separate file:
 
     ~/.config/mql-upload.conf   (chmod 600)
 
-Aufbau:
+Structure:
 
     [upload]
     host = www2.your-server.de
@@ -14,11 +14,11 @@ Aufbau:
     path = /public_html/mm
     tls = yes
 
-Aufruf:
+Usage:
 
-    python3 upload.py --probe     # nur verbinden und Verzeichnis zeigen
-    python3 upload.py --dry-run   # zeigen, was hochgeladen würde
-    python3 upload.py             # hochladen, gleiche Dateien überspringen
+    python3 upload.py --probe     # only connect and show the directory
+    python3 upload.py --dry-run   # show what would be uploaded
+    python3 upload.py             # upload, skip identical files
 """
 import argparse
 import configparser
@@ -36,19 +36,19 @@ STAND = Path.home() / '.config/mql-upload-state.json'
 
 def lies_konfig():
     if not KONFIG.is_file():
-        raise SystemExit('FEHLT: %s' % KONFIG)
+        raise SystemExit('MISSING: %s' % KONFIG)
     rechte = KONFIG.stat().st_mode & 0o777
     if rechte & 0o077:
-        print('WARNUNG: %s ist für andere lesbar (chmod 600 empfohlen).' % KONFIG,
+        print('WARNING: %s is readable by others (chmod 600 recommended).' % KONFIG,
               file=sys.stderr)
     teil = configparser.ConfigParser()
     teil.read(KONFIG, encoding='utf-8')
     if 'upload' not in teil:
-        raise SystemExit('In %s fehlt der Abschnitt [upload].' % KONFIG)
+        raise SystemExit('Section [upload] is missing in %s.' % KONFIG)
     daten = teil['upload']
     for feld in ('host', 'user', 'password', 'path'):
         if not daten.get(feld):
-            raise SystemExit('In %s fehlt "%s".' % (KONFIG, feld))
+            raise SystemExit('"%s" is missing in %s.' % (feld, KONFIG))
     return daten
 
 
@@ -58,7 +58,7 @@ def verbinde(daten):
     ftp.login(daten['user'], daten['password'])
     if isinstance(ftp, ftplib.FTP_TLS):
         ftp.prot_p()
-    # Binärmodus: sonst verweigern manche Server SIZE.
+    # Binary mode: otherwise some servers refuse SIZE.
     ftp.voidcmd('TYPE I')
     return ftp
 
@@ -75,7 +75,7 @@ def vorhandene_groesse(ftp, name):
 
 
 def lade_stand():
-    """Zuletzt hochgeladene Fassung: Pfad -> [Größe, mtime]."""
+    """Last uploaded version: path -> [size, mtime]."""
     if not STAND.is_file():
         return {}
     try:
@@ -89,7 +89,7 @@ def sichere_stand(stand):
 
 
 def stelle_sicher(ftp, ordner):
-    """Fehlende Verzeichnisse anlegen, ohne bei Vorhandensein zu scheitern."""
+    """Create missing directories without failing when they exist."""
     teile = [teil for teil in ordner.split('/') if teil]
     for teil in teile:
         try:
@@ -139,19 +139,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--dry-run', action='store_true',
-                        help='nur zeigen, nichts schreiben')
+                        help='only show, write nothing')
     parser.add_argument('--probe', action='store_true',
-                        help='nur verbinden und Verzeichnis öffnen')
+                        help='only connect and open the directory')
     optionen = parser.parse_args()
 
     daten = lies_konfig()
     if not QUELLE.is_dir():
-        raise SystemExit('FEHLT: %s (baue_website.py laufen lassen)' % QUELLE)
+        raise SystemExit('MISSING: %s (run baue_website.py)' % QUELLE)
 
     ftp = verbinde(daten)
     try:
         fernverzeichnis(ftp, daten['path'])
-        print('verbunden: %s%s' % (daten['host'], daten['path']))
+        print('connected: %s%s' % (daten['host'], daten['path']))
         if optionen.probe:
             return 0
         neu, gleich, menge = hochladen(ftp, QUELLE, daten['path'], optionen.dry_run)
@@ -162,10 +162,10 @@ def main():
             ftp.close()
 
     if optionen.dry_run:
-        print('%d Dateien würden geladen (%.1f MB), %d sind schon gleich' %
+        print('%d files would be uploaded (%.1f MB), %d are already identical' %
               (neu, menge / (1024 * 1024), gleich))
     else:
-        print('%d Dateien geladen (%.1f MB), %d unverändert' %
+        print('%d files uploaded (%.1f MB), %d unchanged' %
               (neu, menge / (1024 * 1024), gleich))
     return 0
 

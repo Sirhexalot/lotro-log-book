@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
-"""Holt die Kartenbilder zu den Karten, die der Katalog benutzt.
+"""Fetches the map images for the maps the catalogue uses.
 
-Standardquelle: die DAT-Archive des eigenen Clients (`client_map_*.dat`) über
-`MapExport.java`. Damit kommen die Karten in der Client-Sprache — deutsche
-Beschriftung bei deutschem Client. Es wird nur gelesen.
+Default source: the DAT archives of your own client (`client_map_*.dat`) via
+`MapExport.java`. This yields the maps in the client language — German labels
+with a German client. Read-only.
 
-Ersatzquelle: `--quelle github` lädt dieselben Karten als PNG aus
-LotroCompanion/lotro-maps-db. Nur nötig, wenn kein Client installiert ist; dort
-sind die Beschriftungen englisch.
+Fallback source: `--quelle github` downloads the same maps as PNG from
+LotroCompanion/lotro-maps-db. Only needed when no client is installed; there
+the labels are English.
 
-Aufruf:
+Usage:
 
-    python3 hole_karten.py                      # alle Karten aus dem DAT
-    python3 hole_karten.py --sprache en         # englische Beschriftung
-    python3 hole_karten.py --nur 3              # erst einmal klein testen
+    python3 hole_karten.py                      # all maps from the DAT
+    python3 hole_karten.py --sprache en         # English labels
+    python3 hole_karten.py --nur 3              # small test run first
 
-Ergebnis: `Karten/<Karten-ID>.png` und `daten/karten.json` mit Name, Rahmen
-(N/W/S/O in Spielkoordinaten) und Dateiname je Karte.
+Result: `Karten/<map-ID>.png` and `daten/karten.json` with name, frame
+(N/W/S/E in game coordinates) and file name per map.
 """
 import argparse
 import json
@@ -47,7 +47,7 @@ STANDARD_CLIENT = Path('/Users/adrian/Applications/The Lord of the Rings Online.
 
 
 def moor_map(path):
-    """MoorMap-Kartenindex -> Bild-ID, Rahmen und Ersatzname."""
+    """MoorMap map index -> image ID, frame and fallback name."""
     index = {}
     text = Path(path).read_text(encoding='utf-8', errors='replace')
     for match in re.finditer(r'tmpMapInfo\[(\d+)\]=\{(.*?)\};\s*(?:--\s*(.*))?', text):
@@ -68,11 +68,11 @@ def moor_map(path):
 
 
 def maps_xml(path):
-    """Bild-ID -> Karten-ID, Name und Rahmen.
+    """Image ID -> map ID, name and frame.
 
-    Der Rahmen kommt aus derselben Quelle wie das Bild, deshalb passt er exakt.
-    Bei den vier Übersichtskarten (Eriador, Rhovanion, Mordor, Haradwaith) steht
-    dort ein abstrakter 0..1024-Raum; für die bleiben die MoorMap-Werte.
+    The frame comes from the same source as the image, so it fits exactly.
+    The four overview maps (Eriador, Rhovanion, Mordor, Haradwaith) use an
+    abstract 0..1024 space there; for those the MoorMap values remain.
     """
     index = {}
     for map_record in ET.parse(path).getroot():
@@ -104,7 +104,7 @@ def hole_github(karten_id, ziel):
     with urllib.request.urlopen(anfrage, timeout=120) as antwort:
         daten = antwort.read()
     if not daten.startswith(b'\x89PNG'):
-        raise ValueError('keine PNG-Datei: ' + karten_id)
+        raise ValueError('not a PNG file: ' + karten_id)
     datei.write_bytes(daten)
     return datei, True
 
@@ -116,13 +116,13 @@ def klassenpfad(lib):
     for name in namen:
         treffer = sorted(Path(lib).glob(name + '-[0-9]*.jar'))
         if not treffer:
-            raise FileNotFoundError('JAR fehlt: %s in %s' % (name, lib))
+            raise FileNotFoundError('missing JAR: %s in %s' % (name, lib))
         teile.append(str(treffer[0]))
     return ':'.join(teile)
 
 
 def hole_dat(aufgeloest, ziel, client, lib, sprache):
-    """Karten aus den DAT-Archiven des Clients ziehen (nur lesend)."""
+    """Pull maps from the client's DAT archives (read-only)."""
     werkzeug = HIER / 'dat'
     klasse = werkzeug / 'MapExport.class'
     quelle = werkzeug / 'MapExport.java'
@@ -130,8 +130,8 @@ def hole_dat(aufgeloest, ziel, client, lib, sprache):
 
     if not klasse.is_file():
         if not quelle.is_file():
-            raise FileNotFoundError('MapExport.java fehlt in %s' % werkzeug)
-        print('  MapExport.java übersetzen …')
+            raise FileNotFoundError('MapExport.java missing in %s' % werkzeug)
+        print('  compiling MapExport.java …')
         subprocess.run(['javac', '--release', '8', '-cp', pfad, '-d', str(werkzeug),
                         str(quelle)], check=True)
 
@@ -143,14 +143,14 @@ def hole_dat(aufgeloest, ziel, client, lib, sprache):
     bilder = sorted({str(eintrag['bild_id']) for eintrag in aufgeloest})
     befehl = ['java', '-cp', str(werkzeug) + ':' + pfad, 'MapExport',
               str(client), sprache, str(zwischen)] + bilder
-    print('  %d Bilder aus dem DAT (%s) …' % (len(bilder), sprache))
+    print('  %d images from the DAT (%s) …' % (len(bilder), sprache))
     ergebnis = subprocess.run(befehl, capture_output=True, text=True)
     for zeile in ergebnis.stdout.splitlines():
         if zeile.startswith(('FEHLER', 'LEER', 'SKIP', 'fertig')):
             print('   ', zeile)
     if ergebnis.returncode != 0:
         print(ergebnis.stderr[-800:], file=sys.stderr)
-        raise RuntimeError('MapExport ist fehlgeschlagen')
+        raise RuntimeError('MapExport failed')
 
     fehler = []
     for eintrag in aufgeloest:
@@ -158,12 +158,12 @@ def hole_dat(aufgeloest, ziel, client, lib, sprache):
         if not quelle_datei.is_file():
             fehler.append((eintrag['name'], eintrag['bild_id']))
             continue
-        # Kopieren, nicht verschieben: zwei Karten können dieselbe Bild-ID
-        # teilen (z. B. Glitternde Grotten vor/nach der Dämmerung).
+        # Copy, do not move: two maps can share the same image ID
+        # (e.g. Glittering Caves before/after dusk).
         shutil.copyfile(str(quelle_datei), str(ziel / (eintrag['id'] + '.png')))
     shutil.rmtree(zwischen)
     for name, bild in fehler:
-        print('  FEHLER %s (Bild %s)' % (name, bild))
+        print('  FEHLER %s (image %s)' % (name, bild))
     return len(aufgeloest) - len(fehler), 0, fehler
 
 
@@ -171,11 +171,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--ziel', type=Path, default=HIER / 'Karten',
-                        help='Ordner für die PNG-Dateien')
+                        help='folder for the PNG files')
     parser.add_argument('--nur', type=int, default=0,
-                        help='nur die ersten N Bilder holen (zum Testen)')
+                        help='fetch only the first N images (for testing)')
     parser.add_argument('--quelle', choices=('dat', 'github'), default='dat',
-                        help='dat = eigenes Spiel (sprachrichtig), github = Ersatz')
+                        help='dat = own game (correct language), github = fallback')
     parser.add_argument('--sprache', default='de', choices=('de', 'en', 'fr'))
     parser.add_argument('--client', type=Path, default=STANDARD_CLIENT)
     parser.add_argument('--lib', type=Path, default=STANDARD_LIB)
@@ -187,14 +187,14 @@ def main():
     for name, path in (('Katalog', options.katalog), ('MoorMap', options.moormap),
                        ('maps.xml', options.mapsxml)):
         if not path.is_file():
-            print('FEHLT: %s -> %s' % (name, path), file=sys.stderr)
-            print('Pfad mit --%s angeben.' % name.lower(), file=sys.stderr)
+            print('MISSING: %s -> %s' % (name, path), file=sys.stderr)
+            print('Pass the path with --%s.' % name.lower(), file=sys.stderr)
             return 2
 
     moor = moor_map(options.moormap)
     bilder = maps_xml(options.mapsxml)
     benutzt = benutzte_karten(options.katalog)
-    print('%d Karten im Katalog benutzt, %d davon in MoorMap bekannt' %
+    print('%d maps used in the catalogue, %d of them known in MoorMap' %
           (len(benutzt), sum(1 for index in benutzt if index in moor)))
 
     aufgeloest, offen = [], []
@@ -209,10 +209,10 @@ def main():
         rahmen = treffer.get('rahmen')
         if rahmen is not None and rahmen[2] != 1024.0:
             west, south, east, north = rahmen
-        # Zwei Quellen: maps.xml beschreibt das Bild, MoorMap den im Spiel
-        # kalibrierten Ausschnitt. Bei einigen Karten (Minas Tirith, Pelargir)
-        # hat der maps.xml-Rahmen ein anderes Vorzeichen als die Positionen.
-        # Welcher passt, entscheidet build_daten.py an den echten Positionen.
+        # Two sources: maps.xml describes the image, MoorMap the crop
+        # calibrated in the game. For some maps (Minas Tirith, Pelargir)
+        # the maps.xml frame has a different sign than the positions.
+        # Which one fits is decided by build_daten.py on the real positions.
         aufgeloest.append({'idx': index, 'id': treffer['id'],
                            'bild_id': eintrag['bild_id'],
                            'name': treffer['name'] or eintrag.get('name') or ('Karte %d' % index),
@@ -220,16 +220,16 @@ def main():
                            'tier': eintrag.get('tier', 0),
                            'ersatz': {'north': eintrag['north'], 'west': eintrag['west'],
                                       'south': eintrag['south'], 'east': eintrag['east']}})
-    print('%d Karten aufgelöst, %d ohne Treffer' % (len(aufgeloest), len(offen)))
+    print('%d maps resolved, %d without a match' % (len(aufgeloest), len(offen)))
     if offen:
-        print('  ohne Treffer: %s' % offen)
+        print('  without a match: %s' % offen)
 
     options.ziel.mkdir(parents=True, exist_ok=True)
     for eintrag in aufgeloest:
         eintrag['bild'] = eintrag['id'] + '.png'
 
-    # --nur begrenzt nur das Holen, nicht das Verzeichnis: sonst stünde danach
-    # eine abgeschnittene karten.json da.
+    # --nur limits only the download, not the directory: otherwise a truncated
+    # karten.json would be left behind.
     zu_holen = aufgeloest
     if options.nur:
         zu_holen = sorted(aufgeloest, key=lambda e: e['name'])[:options.nur]
@@ -237,16 +237,16 @@ def main():
     fehler = []
     if options.quelle == 'dat':
         if not Path(options.client).is_dir():
-            print('Kein Client gefunden: %s' % options.client, file=sys.stderr)
-            print('Mit --client angeben oder --quelle github nutzen.', file=sys.stderr)
+            print('No client found: %s' % options.client, file=sys.stderr)
+            print('Pass it with --client or use --quelle github.', file=sys.stderr)
             return 2
         try:
             gut, _, fehler = hole_dat(zu_holen, options.ziel, options.client,
                                       options.lib, options.sprache)
-            print('%d Bilder aus dem DAT geschrieben' % gut)
+            print('%d images written from the DAT' % gut)
         except (FileNotFoundError, RuntimeError) as fehlschlag:
-            print('DAT-Export nicht möglich: %s' % fehlschlag, file=sys.stderr)
-            print('Ersatz: --quelle github', file=sys.stderr)
+            print('DAT export not possible: %s' % fehlschlag, file=sys.stderr)
+            print('Fallback: --quelle github', file=sys.stderr)
             return 1
     else:
         for nummer, eintrag in enumerate(sorted(zu_holen, key=lambda e: e['name']), 1):
@@ -261,8 +261,8 @@ def main():
     zieldatei.parent.mkdir(parents=True, exist_ok=True)
     zieldatei.write_text(json.dumps(aufgeloest, ensure_ascii=False, indent=1),
                          encoding='utf-8')
-    print('\nFertig. Bilder: %s' % options.ziel)
-    print('Kartenverzeichnis: %s (%d Einträge)' % (zieldatei, len(aufgeloest)))
+    print('\nDone. Images: %s' % options.ziel)
+    print('Map index: %s (%d entries)' % (zieldatei, len(aufgeloest)))
     return 0 if not fehler else 1
 
 

@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Packt das Spielstand-Werkzeug als ZIP für die Website.
+"""Packs the progress tool as a ZIP for the website.
 
-Inhalt: nur was ein Spieler braucht, um aus dem laufenden Client eine
-`Progress.lua` zu erzeugen — Starter, Anleitung, vorgebaute Klasse. Keine
-fremden JARs (die liegen in der Companion-Installation), keine technischen
-Notizen.
+Contents: only what a player needs to create a `Progress.lua` from the running
+client — starter, instructions, prebuilt class. No third-party JARs (those live
+in the Companion installation), no technical notes.
 
-Aufruf:
+Usage:
 
     python3 baue_download.py
 """
@@ -29,11 +28,11 @@ DATEIEN = (
 
 def main():
     if not QUELLE.is_dir():
-        print('FEHLT: %s' % QUELLE, file=sys.stderr)
+        print('MISSING: %s' % QUELLE, file=sys.stderr)
         return 2
     fehlend = [name for name in DATEIEN if not (QUELLE / name).is_file()]
     if fehlend:
-        print('FEHLT im Werkzeug: %s' % ', '.join(fehlend), file=sys.stderr)
+        print('MISSING in the tool: %s' % ', '.join(fehlend), file=sys.stderr)
         return 2
 
     ZIEL.parent.mkdir(parents=True, exist_ok=True)
@@ -42,8 +41,8 @@ def main():
             archiv.write(QUELLE / name, name)
 
     groesse = ZIEL.stat().st_size / 1024
-    print('%d Dateien -> %s (%.0f KB)' % (len(DATEIEN), ZIEL.relative_to(HIER),
-                                          groesse))
+    print('%d files -> %s (%.0f KB)' % (len(DATEIEN), ZIEL.relative_to(HIER),
+                                        groesse))
     return 0
 
 

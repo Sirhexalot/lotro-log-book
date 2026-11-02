@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""Baut `dist-web/`: die Fassung, die auf sirhexalot.de hochgeladen wird.
+"""Builds `dist-web/`: the version uploaded to sirhexalot.de.
 
-Unterschiede zur lokalen Fassung:
+Differences from the local version:
 
-- Karten liegen als WebP unter `karten/<sprache>/`, nicht als PNG.
-- `fortschritt.js` ist **leer**. Der Besucher lädt seine eigene `Progress.lua`
-  im Browser; Feldobars Stand wird nicht veröffentlicht.
-- `index.html` bekommt den Bildpfad `karten/<sprache>/` mit.
-- Impressum und Datenschutz liegen daneben.
+- Maps are stored as WebP under `karten/<sprache>/`, not as PNG.
+- `fortschritt.js` is **empty**. The visitor loads their own `Progress.lua`
+  in the browser; Feldobar's state is not published.
+- `index.html` gets the image path `karten/<sprache>/`.
+- Imprint and privacy notice sit next to it.
 
-Aufruf:
+Usage:
 
-    python3 baue_website.py            # nach de/en
+    python3 baue_website.py            # to de/en
     python3 baue_website.py --ziel /tmp/web
 
-Es wird nichts hochgeladen und nichts im Netz angefasst.
+Nothing is uploaded and nothing on the network is touched.
 """
 import argparse
 import json
@@ -37,30 +37,30 @@ def kopiere(ziel):
     for name in DATEIEN:
         quelle = WEB / name
         if not quelle.is_file():
-            raise SystemExit('FEHLT: %s' % quelle)
+            raise SystemExit('MISSING: %s' % quelle)
         shutil.copy2(quelle, ziel / name)
     for name in BILDER:
         quelle = WEB / name
         if not quelle.is_file():
-            raise SystemExit('FEHLT: %s' % quelle)
+            raise SystemExit('MISSING: %s' % quelle)
         (ziel / name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(quelle, ziel / name)
 
 
 def index_bauen(ziel):
-    """index.html übernehmen und den Bildpfad der Website einsetzen."""
+    """Take over index.html and insert the website's image path."""
     text = (WEB / 'index.html').read_text(encoding='utf-8')
-    einschub = ('<script>/* Website: Bilder liegen unter karten/<sprache>/. */\n'
+    einschub = ('<script>/* Website: images live under karten/<sprache>/. */\n'
                 "window.MQL_BILD_PFAD = 'karten/{sprache}/';</script>\n")
     if '<script src="texte.js"></script>' not in text:
-        raise SystemExit('index.html: erwarteter Script-Block fehlt')
+        raise SystemExit('index.html: expected script block missing')
     text = text.replace('<script src="texte.js"></script>',
                         einschub + '<script src="texte.js"></script>', 1)
     (ziel / 'index.html').write_text(text, encoding='utf-8')
 
 
 def startseite_anpassen(ziel, sprache):
-    """Der Fortschritt kommt auf der Website aus der Datei des Besuchers."""
+    """On the website the progress comes from the visitor's file."""
     datei = ziel / ('start.html' if sprache == 'de' else 'start-en.html')
     text = datei.read_text(encoding='utf-8')
     if sprache == 'de':
@@ -93,7 +93,7 @@ ZAEHLER = ('<script data-goatcounter="https://sirhexalot.goatcounter.com/count"\
 
 
 def zaehler_einbauen(ziel):
-    """GoatCounter nur in die veröffentlichte Fassung, nicht lokal."""
+    """GoatCounter only in the published version, not locally."""
     for name in ('index.html', 'start.html', 'start-en.html',
                  'impressum.html', 'datenschutz.html'):
         datei = ziel / name
@@ -103,7 +103,7 @@ def zaehler_einbauen(ziel):
         text = text.replace('</body>', ZAEHLER + '</body>', 1)
         datei.write_text(text, encoding='utf-8')
 
-    # Der lokale Hinweis stimmt auf der Website nicht mehr.
+    # The local note is no longer true on the website.
     for name, alt, neu in (
         ('start.html',
          '<p class="leise">Diese Fassung läuft lokal. Es wird nichts hochgeladen und nichts\n\tnachgeladen.</p>',
@@ -119,9 +119,9 @@ def zaehler_einbauen(ziel):
 
 
 def fortschritt_leeren(ziel):
-    """Keine persönlichen Zahlen veröffentlichen."""
-    inhalt = ('/* Website: absichtlich leer. Der Besucher lädt seine eigene\n'
-              '   Progress.lua; sie bleibt im Browser. */\n'
+    """Do not publish personal numbers."""
+    inhalt = ('/* Website: deliberately empty. The visitor loads their own\n'
+              '   Progress.lua; it stays in the browser. */\n'
               'window.MQL_FORTSCHRITT = {"character":"","date":"","ids":[]};\n')
     (ziel / 'fortschritt.js').write_text(inhalt, encoding='utf-8')
 
@@ -133,13 +133,13 @@ def main():
     optionen = parser.parse_args()
     ziel = optionen.ziel
 
-    # Quellen prüfen, bevor irgendetwas gelöscht wird.
+    # Check the sources before anything is deleted.
     for sprache in SPRACHEN:
         for name in ('daten-%s.js' % sprache, 'webp/%s' % sprache):
             pfad = WEB / name if name.endswith('.js') else HIER / name
             if not pfad.exists():
-                raise SystemExit('FEHLT: %s (build_daten.py bzw. baue_webp.py '
-                                 'laufen lassen)' % pfad)
+                raise SystemExit('MISSING: %s (run build_daten.py or '
+                                 'baue_webp.py)' % pfad)
 
     if ziel.exists():
         shutil.rmtree(ziel)
@@ -154,7 +154,7 @@ def main():
 
     download = WEB / 'download/mql-spielstand.zip'
     if not download.is_file():
-        raise SystemExit('FEHLT: %s (baue_download.py laufen lassen)' % download)
+        raise SystemExit('MISSING: %s (run baue_download.py)' % download)
     (ziel / 'download').mkdir(parents=True, exist_ok=True)
     shutil.copy2(download, ziel / 'download/mql-spielstand.zip')
 
@@ -162,7 +162,7 @@ def main():
         shutil.copy2(WEB / ('daten-%s.js' % sprache), ziel / ('daten-%s.js' % sprache))
         shutil.copytree(HIER / 'webp' / sprache, ziel / 'karten' / sprache)
 
-    # Prüfungen
+    # Checks
     fehler = []
     for sprache in SPRACHEN:
         bilder = list((ziel / 'karten' / sprache).glob('*.webp'))
@@ -171,25 +171,25 @@ def main():
         erwartet = len({karte['bild'].replace('.png', '.webp')
                         for karte in daten['karten']})
         if len(bilder) != erwartet:
-            fehler.append('%s: %d WebP, erwartet %d' %
+            fehler.append('%s: %d WebP, expected %d' %
                           (sprache, len(bilder), erwartet))
 
     impressum = (ziel / 'impressum.html').read_text(encoding='utf-8')
     if '[Name]' in impressum or '[Adresse]' in impressum:
-        print('WARNUNG: impressum.html enthält noch Platzhalter '
-              '([Name], [Adresse]) – vor dem Hochladen ausfüllen.')
+        print('WARNING: impressum.html still contains placeholders '
+              '([Name], [Adresse]) – fill them in before uploading.')
 
     groesse = sum(f.stat().st_size for f in ziel.rglob('*') if f.is_file())
-    print('geschrieben: %s' % ziel)
+    print('written: %s' % ziel)
     for sprache in SPRACHEN:
         teil = sum(f.stat().st_size for f in (ziel / 'karten' / sprache).glob('*'))
-        print('  karten/%-2s %4d Dateien  %5.1f MB' %
+        print('  karten/%-2s %4d files  %5.1f MB' %
               (sprache, len(list((ziel / 'karten' / sprache).glob('*'))),
                teil / (1024 * 1024)))
-    print('  gesamt          %5.1f MB' % (groesse / (1024 * 1024)))
+    print('  total           %5.1f MB' % (groesse / (1024 * 1024)))
     if fehler:
         for text in fehler:
-            print('FEHLER: %s' % text, file=sys.stderr)
+            print('ERROR: %s' % text, file=sys.stderr)
         return 1
     return 0
 

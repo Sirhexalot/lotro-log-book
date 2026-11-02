@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""Macht aus den Karten-PNGs WebP-Dateien fürs Web.
+"""Turns the map PNGs into WebP files for the web.
 
-PNG ist für eine Website zu groß: die 160 Karten eines Gebietssatzes liegen bei
-rund 290 MB. WebP mit Qualität 85 ist erfahrungsgemäß 60–70 % kleiner, bei
-Kartengrafik ohne sichtbaren Verlust.
+PNG is too large for a website: the 160 maps of one region set are around
+290 MB. WebP at quality 85 is typically 60–70 % smaller, with no visible loss
+on map graphics.
 
-Aufruf:
+Usage:
 
     python3 baue_webp.py --sprache de
     python3 baue_webp.py --sprache en
 
-Ergebnis: `webp/<sprache>/<Karten-ID>.webp`, dieselben Dateinamen wie die PNGs.
-Vorhandene WebP-Dateien werden nur ersetzt, wenn sie älter sind als das PNG.
+Result: `webp/<language>/<map-ID>.webp`, the same file names as the PNGs.
+Existing WebP files are only replaced when they are older than the PNG.
 """
 import argparse
 import sys
@@ -27,25 +27,25 @@ def main():
     parser.add_argument('--sprache', choices=tuple(QUELLEN), default='de')
     parser.add_argument('--guete', type=int, default=85)
     parser.add_argument('--ziel', type=Path, default=None,
-                        help='Standard: webp/<sprache>/')
+                        help='default: webp/<sprache>/')
     optionen = parser.parse_args()
 
     try:
         from PIL import Image
     except ImportError:
-        print('Pillow fehlt: python3 -m pip install pillow', file=sys.stderr)
+        print('Pillow missing: python3 -m pip install pillow', file=sys.stderr)
         return 2
 
     quelle = HIER / QUELLEN[optionen.sprache]
     ziel = optionen.ziel or (HIER / 'webp' / optionen.sprache)
     if not quelle.is_dir():
-        print('FEHLT: %s' % quelle, file=sys.stderr)
+        print('MISSING: %s' % quelle, file=sys.stderr)
         return 2
     ziel.mkdir(parents=True, exist_ok=True)
 
     pngs = sorted(quelle.glob('*.png'))
     if not pngs:
-        print('Keine PNG-Dateien in %s' % quelle, file=sys.stderr)
+        print('No PNG files in %s' % quelle, file=sys.stderr)
         return 1
 
     gesamt_png = gesamt_webp = 0
@@ -67,13 +67,13 @@ def main():
 
     png_mb = gesamt_png / (1024 * 1024)
     webp_mb = gesamt_webp / (1024 * 1024)
-    print('%d Karten (%s), %d neu geschrieben' %
+    print('%d maps (%s), %d rewritten' %
           (len(pngs), optionen.sprache, neu))
     print('  PNG:  %6.1f MB' % png_mb)
-    print('  WebP: %6.1f MB  (%.0f %% kleiner, Güte %d)' %
+    print('  WebP: %6.1f MB  (%.0f %% smaller, quality %d)' %
           (webp_mb, (1 - webp_mb / png_mb) * 100 if png_mb else 0,
            optionen.guete))
-    print('  Ziel: %s' % ziel.relative_to(HIER))
+    print('  Target: %s' % ziel.relative_to(HIER))
     return 0
 
 

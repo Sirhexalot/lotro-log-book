@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
-"""Schreibt `daten/geografie.json`: welche Aufgabengruppen sind echte Orte?
+"""Writes `daten/geografie.json`: which quest groups are real places?
 
-Der Katalog führt unter einem Gebiet eine Ebene `category:` ein. Darin steckt
-beides: echte Untergebiete (Wildwald, Fornost, Ferne Auen) und reine
-Gruppierungen (Fest, Hauptmann, Einleitung). Für eine Karte sind nur die Orte
-brauchbar.
+The catalogue introduces a `category:` level below a region. It contains both:
+real sub-regions (Wildwood, Fornost, Far Anórien) and pure groupings (festival,
+captain, introduction). Only the places are usable for a map.
 
-Die DAT-Daten helfen bei der Unterscheidung: `areas.json` enthält alle
-benannten Orte des Spiels, `enum-names.json` den englischen Namen jeder
-Aufgabengruppe. Eine Gruppe gilt als Ort, wenn ihr Name (oder der Teil vor
-einem Doppelpunkt) in `areas.json` steht. Gruppen, deren Name ein Gebiet
-(`zone:`) ist, fallen heraus – das Gebiet steht schon eine Ebene höher.
+The DAT data help with the distinction: `areas.json` contains all named places
+of the game, `enum-names.json` the English name of every quest group. A group
+counts as a place when its name (or the part before a colon) appears in
+`areas.json`. Groups whose name is a region (`zone:`) drop out – the region is
+already one level higher.
 
-Aufruf:
+Usage:
 
     python3 baue_geografie.py
-    # oder mit anderen Pfaden:
-    python3 baue_geografie.py --export <DAT-Export> --enums <enum-names.json>
+    # or with other paths:
+    python3 baue_geografie.py --export <DAT export> --enums <enum-names.json>
 
-Das Ergebnis ist sprachunabhängig, weil nur die Codes gespeichert werden
-(`category:360` bleibt in jeder Sprache dieselbe Gruppe).
+The result is language-independent, because only the codes are stored
+(`category:360` is the same group in every language).
 """
 import argparse
 import json
@@ -36,12 +35,12 @@ STANDARD_ENUMS = LOTRO / 'Companion-Test/source-exporter/enums/enum-names.json'
 STANDARD_KATALOG = LOTRO / 'MagicQuestLog/plugin/MagicQuestLog/Data/Quests_de.lua'
 STANDARD_AUS = HIER / 'daten/geografie.json'
 
-# Namen, die zwar als Ort im Export stehen, aber keine sind.
+# Names that appear as a place in the export but are not one.
 KEINE_ORTE = {'Test'}
 
 
 def fold(text):
-    """Vergleichsform: Kleinschreibung, ohne Akzente, ohne führendes "the"."""
+    """Comparison form: lowercase, without accents, without leading "the"."""
     text = unicodedata.normalize('NFKD', str(text))
     text = text.encode('ascii', 'ignore').decode().lower()
     text = re.sub(r'[^a-z0-9]+', ' ', text).strip()
@@ -49,10 +48,10 @@ def fold(text):
 
 
 def ortsnamen(export):
-    """Alle englischen Ortsnamen aus areas.json."""
+    """All English place names from areas.json."""
     datei = Path(export) / 'areas.json'
     if not datei.is_file():
-        raise SystemExit('FEHLT: %s' % datei)
+        raise SystemExit('MISSING: %s' % datei)
     namen = set()
     for record in json.loads(datei.read_text(encoding='utf-8')):
         props = record.get('properties') or {}
@@ -65,7 +64,7 @@ def ortsnamen(export):
 
 
 def gebietsnamen(katalog):
-    """Englische Gebietsnamen aus den `zone:`-Schlüsseln des Katalogs."""
+    """English region names from the `zone:` keys of the catalogue."""
     text = Path(katalog).read_text(encoding='utf-8')
     return {fold(name) for name in re.findall(r'\["k"\]="zone:([^"]+)"', text)}
 
@@ -80,9 +79,9 @@ def main():
     optionen = parser.parse_args()
 
     for name, pfad in (('Export', optionen.export), ('enums', optionen.enums),
-                       ('Katalog', optionen.katalog)):
+                       ('catalogue', optionen.katalog)):
         if not pfad.exists():
-            print('FEHLT: %s -> %s' % (name, pfad), file=sys.stderr)
+            print('MISSING: %s -> %s' % (name, pfad), file=sys.stderr)
             return 2
 
     kategorien = json.loads(optionen.enums.read_text(encoding='utf-8'))['QuestCategory']
@@ -96,7 +95,7 @@ def main():
             continue
         kopf = englisch.split(':', 1)[0]
         if fold(englisch) in gebiete or fold(kopf) in gebiete:
-            continue          # ist ein Gebiet, steht schon eine Ebene höher
+            continue          # is a region, already one level higher
         if fold(englisch) in orte or fold(kopf) in orte:
             codes[code] = englisch
 
@@ -108,7 +107,7 @@ def main():
     }
     optionen.aus.write_text(json.dumps(inhalt, ensure_ascii=False, indent=1) + '\n',
                             encoding='utf-8')
-    print('%d Ortsgruppen von %d Aufgabengruppen -> %s' %
+    print('%d place groups out of %d quest groups -> %s' %
           (len(codes), len(kategorien), optionen.aus))
     return 0
 

@@ -104,7 +104,7 @@ main {
 	overflow: hidden;
 }
 
-/* Jede Spalte scrollt für sich, die Höhe ist fest: nichts springt. */
+/* Each column scrolls on its own, the height is fixed: nothing jumps. */
 .spalte {
 	min-height: 0;
 	height: 100%;
@@ -132,7 +132,7 @@ main {
 
 .spalten-kopf button { font-size: 11px; padding: 2px 6px; }
 
-/* alle / offen / erledigt */
+/* all / open / done */
 .filter {
 	display: flex;
 	gap: 4px;
@@ -186,10 +186,10 @@ main {
 
 .zweig:hover { background: var(--fläche-hell); }
 
-/* Zeile ohne eine einzige Aufgabe mit Zielort: sichtbar, aber zurückgenommen. */
+/* Row without a single quest with a target: visible, but toned down. */
 .zweig.ohne-punkte { opacity: .5; }
 
-/* Fortschritt der Zeile: grüner Strich am unteren Rand. */
+/* Progress of the row: a green line along the bottom edge. */
 .fortschritt {
 	position: absolute;
 	left: 0;
@@ -208,7 +208,7 @@ main {
 .kinder { display: none; list-style: none; margin: 0; padding: 0; }
 .ast.offen > .kinder { display: block; }
 
-/* Drei Ebenen: Obergebiet, Gebiet, Untergebiet */
+/* Three levels: parent region, region, sub-region */
 .ast.tiefe2 > .zweig { padding-left: 22px; }
 .ast.tiefe3 > .zweig { padding-left: 36px; font-size: 12px; }
 .ast.tiefe4 > .zweig { padding-left: 50px; font-size: 12px; color: var(--schwach); }
@@ -296,7 +296,7 @@ main {
 #liste li.offen .haken { color: var(--offen); }
 #liste li .stufe { color: var(--schwach); font-size: 11px; margin-left: 6px; }
 
-/* Kartenfläche */
+/* Map area */
 .buehne {
 	position: relative;
 	overflow: hidden;
@@ -327,7 +327,7 @@ main {
 	-webkit-user-drag: none;
 }
 
-/* Ohne Bild: Koordinatenraster statt leerer Fläche */
+/* Without an image: coordinate grid instead of an empty area */
 .raster { display: none; position: absolute; inset: 0; }
 .buehne.keinbild .raster {
 	display: block;
@@ -380,8 +380,8 @@ main {
 	justify-content: center;
 }
 
-/* Nummer im Ring, nicht daneben: zwei benachbarte Ringe wurden sonst zu
-   einer unlesbaren Ziffernfolge. */
+/* Number inside the ring, not beside it: two neighbouring rings otherwise
+   became an unreadable string of digits. */
 .schritt.nummer::after {
 	content: attr(data-n);
 	font-size: 10px;
@@ -389,7 +389,7 @@ main {
 	color: #fff;
 }
 
-/* Ungezoomt bleibt der Ring leer, sonst überlappen die Ziffern. */
+/* Unzoomed the ring stays empty, otherwise the digits overlap. */
 .buehne:not(.zoom) .schritt.nummer::after { display: none; }
 
 .legende {
@@ -431,7 +431,7 @@ main {
 .bedienung button { font-size: 12px; padding: 2px 8px; }
 .hinweis { background: rgba(13, 11, 9, .8); padding: 2px 8px; border-radius: 3px; }
 
-/* Detail rechts */
+/* Detail panel on the right */
 .detail {
 	overflow-y: auto;
 	padding: 14px 16px;

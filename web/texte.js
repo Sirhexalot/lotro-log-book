@@ -1,8 +1,8 @@
-/* Oberflächentexte. Deutsch und Englisch.
+/* Interface texts. German and English.
  *
- * Wird vor sprache.js geladen. Neue Sprache: hier einen Block ergänzen und in
- * sprache.js unter ERLAUBT eintragen. Die Kartendaten müssen dann als
- * daten-<sprache>.js vorliegen (build_daten.py --sprache …).
+ * Loaded before sprache.js. New language: add a block here and register it
+ * under ERLAUBT in sprache.js. The map data must then exist as
+ * daten-<sprache>.js (build_daten.py --sprache …).
  */
 window.MQL_TEXTE = {
 	de: {

@@ -1,10 +1,10 @@
-/* Sprache wählen und die passenden Daten laden.
+/* Language selection and loading of the matching data.
  *
- * Reihenfolge: ?lang=… schlägt die gespeicherte Wahl, die schlägt
- * navigator.language; sonst Englisch. Die Wahl bleibt in localStorage unter
- * `mql.sprache`. Geladen wird nur die eine Datendatei, nicht beide.
+ * Order: ?lang=… beats the stored choice, which beats
+ * navigator.language; otherwise English. The choice stays in localStorage under
+ * `mql.sprache`. Only the one data file is loaded, not both.
  *
- * Sprache wechseln: ?lang=en an die Adresse hängen (die Knöpfe tun das).
+ * Switching language: append ?lang=en to the address (the buttons do that).
  */
 (function () {
 	'use strict';
@@ -89,7 +89,7 @@
 	var stil = document.querySelector('link[rel="stylesheet"]');
 	var stempel = function () { return '?v=' + (window.MQL_STAND || '0'); };
 
-	// stand.js zuerst und ohne Cache: darin steht die Kennung des letzten Baus.
+	// stand.js first and without cache: it holds the stamp of the last build.
 	lade('stand.js?t=' + Date.now(), function () {
 		lade('daten-' + sprache + '.js' + stempel(), function () {
 			if (stil) { stil.href = stil.getAttribute('href').split('?')[0] + stempel(); }

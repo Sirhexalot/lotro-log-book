@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Baut die Daten für die Kartenansicht aus dem Plugin-Katalog.
+"""Builds the data for the map view from the plugin catalogue.
 
-Liest `Quests_<sprache>.lua` und `daten/karten.json` und schreibt:
+Reads `Quests_<language>.lua` and `daten/karten.json` and writes:
 
-- `web/daten-<sprache>.js` – wird von der Seite per <script> geladen (kein
-                    fetch, damit die Seite auch per file:// funktioniert)
-- `daten/quests-<sprache>.json` – dieselben Daten als reines JSON, zum Nachsehen
+- `web/daten-<language>.js` – loaded by the page via <script> (no
+                    fetch, so the page also works via file://)
+- `daten/quests-<language>.json` – the same data as plain JSON, for reading
 
-Nur Aufgaben mit belegter Position werden übernommen. Es wird keine Position
-erfunden: was im Katalog kein Ziel hat, erscheint nicht auf der Karte.
+Only quests with a recorded position are included. No position is invented:
+what has no target in the catalogue does not appear on the map.
 
-Aufruf (braucht lupa, wie die Prüfskripte des Plugins):
+Usage (needs lupa, like the plugin's check scripts):
 
     .../.venv/bin/python build_daten.py --sprache de
     .../.venv/bin/python build_daten.py --sprache en
@@ -55,7 +55,7 @@ TOKENS = {
 
 
 def label(schluessel, name, sprache):
-    """Anzeigename eines Pfadteils. "@volume:I" wird zu "Band I" / "Book I"."""
+    """Display name of a path part. "@volume:I" becomes "Band I" / "Book I"."""
     name = str(name or '')
     if not name.startswith('@'):
         return name
@@ -66,10 +66,10 @@ def label(schluessel, name, sprache):
 
 
 def clean(text, zaehler, sprache):
-    """Spieltext lesbar machen: Markup weg, Platzhalter ersetzen.
+    """Make game text readable: strip markup, replace placeholders.
 
-    Für Ziele wird `zaehler` leer übergeben, weil die Seite die Anzahl selbst
-    hinter den Text setzt – sonst steht sie zweimal da.
+    For objectives `zaehler` is passed empty, because the page appends the
+    count itself behind the text – otherwise it would appear twice.
     """
     if not text:
         return ''
@@ -84,7 +84,7 @@ def clean(text, zaehler, sprache):
 
 
 def step_list(container):
-    """Lua-Tabelle 1..n als Liste, nil-sicher."""
+    """Lua table 1..n as a list, nil-safe."""
     if container is None:
         return []
     return [container[index] for index in range(1, len(container) + 1)]
@@ -96,11 +96,10 @@ def field(record, name, default=None):
 
 
 def ortsgruppen(karten_datei):
-    """Codes der Aufgabengruppen, die echte Orte sind (siehe baue_geografie.py).
+    """Codes of the quest groups that are real places (see baue_geografie.py).
 
-    Fehlt die Datei, bleibt die Menge leer: dann verschwinden alle
-    `category:`-Ebenen außerhalb der Abschnitte. Lieber keine Gruppierung als
-    eine falsche Geografie.
+    If the file is missing, the set stays empty: then all `category:` levels
+    outside the sections disappear. Better no grouping than a wrong geography.
     """
     datei = Path(karten_datei).parent / 'geografie.json'
     if not datei.is_file():
@@ -114,7 +113,7 @@ def baue(katalog, karten_datei, orte=None, sprache='de'):
     try:
         from lupa.lua51 import LuaRuntime
     except ImportError:
-        print('lupa fehlt. Mit dem venv des Plugins aufrufen:\n'
+        print('lupa missing. Run with the plugin venv:\n'
               '  %s/.venv/bin/python %s' % (BASIS / 'MagicQuestLog', __file__),
               file=sys.stderr)
         return 2
@@ -128,8 +127,8 @@ def baue(katalog, karten_datei, orte=None, sprache='de'):
         record = records[index]
         targets = step_list(record['t'] if 't' in record else None)
         if not targets:
-            # Aufgabe ohne belegten Zielort: sie gehört in den Baum und in die
-            # Zähler (wie im Plugin), bekommt aber keinen Punkt auf der Karte.
+            # Quest without a recorded target: it belongs in the tree and in the
+            # counters (as in the plugin), but gets no dot on the map.
             ohne_ziel += 1
         region, zone, untergebiet, pfad = '', '', '', []
         for part in step_list(record['p'] if 'p' in record else None):
@@ -140,16 +139,16 @@ def baue(katalog, karten_datei, orte=None, sprache='de'):
             elif key.startswith('zone:'):
                 zone = name
             elif key.startswith('area:'):
-                # Untergebiet, z. B. "Fornost" innerhalb der Nordhöhen. Steht
-                # nicht bei jeder Aufgabe im Pfad.
+                # Sub-region, e.g. "Fornost" within the North Downs. Not in
+                # the path of every quest.
                 untergebiet = name
-        # Alle Ebenen als lesbare Namen, Doppelungen zusammengezogen. Bei der
-        # epischen Geschichte sind das Abschnitt, Band bzw. "Vor dem Schatten"
-        # und die Buchgruppe – vorher fehlten die Kinder ganz.
-        # `category:` ist nur dann eine Ebene, wenn sie einen echten Ort meint
-        # (Wildwald, Fornost …). Gruppierungen wie "Fest" oder "Hauptmann"
-        # gehören nicht in eine Karte; in den Abschnitten sind sie dagegen Band
-        # und Buchgruppe und bleiben.
+        # All levels as readable names, duplicates merged. For the
+        # epic story these are the section, book or "Before the Shadow"
+        # and the book group – the children were missing entirely before.
+        # `category:` is only a level when it means a real place
+        # (Wildwood, Fornost …). Groupings like "Festival" or "Captain"
+        # do not belong on a map; in the sections they are book
+        # and book group and stay.
         etiketten = []
         ist_abschnitt = bool(pfad) and pfad[0].startswith('section:')
         for part in step_list(record['p'] if 'p' in record else None):
@@ -197,19 +196,19 @@ def baue(katalog, karten_datei, orte=None, sprache='de'):
     benutzte = {position[0] for quest in quests for position in quest['t']}
     karten = [karte for karte in karten if karte['idx'] in benutzte]
 
-    print('%d Aufgaben, davon %d ohne belegten Zielort (kein Punkt)' %
+    print('%d quests, %d of them without a recorded target (no dot)' %
           (len(quests), ohne_ziel))
-    print('%d Einzelziele, %d Karten im Verzeichnis' % (ziele, len(karten)))
+    print('%d single objectives, %d maps in the index' % (ziele, len(karten)))
     return quests, karten
 
 
 def fortschritt_lesen(pfad):
-    """Abgeschlossene Aufgaben aus Progress.lua.
+    """Completed quests from Progress.lua.
 
-    Nur eine Liste von IDs, bewusst ohne Auswertung: die Datei ist ein
-    Lua-Dump, und ein Muster dafür ist verlässlicher als ein Interpreter.
-    Eine fremde Charakterdatei wird nicht erkannt – der Charaktername steht
-    nur zur Anzeige daneben.
+    Just a list of IDs, deliberately without evaluation: the file is a
+    Lua dump, and a pattern for it is more reliable than an interpreter.
+    A foreign character file is not detected – the character name is
+    only shown for display next to it.
     """
     if pfad is None or not Path(pfad).is_file():
         return None
@@ -224,9 +223,9 @@ def fortschritt_lesen(pfad):
 
 
 def rahmen_pruefen(karten, positionen):
-    """Karten finden, deren Ziele nicht auf der Zeichnung liegen.
+    """Find maps whose objectives do not lie on the drawing.
 
-    Nutzt Pillow, wenn vorhanden. Ohne Pillow bleibt alles wie bisher.
+    Uses Pillow when available. Without Pillow everything stays as before.
     """
     try:
         from PIL import Image
@@ -263,7 +262,8 @@ def rahmen_pruefen(karten, positionen):
 
 
 def regionen_je_karte(quests):
-    """Obergebiet je Karte: das häufigste der Aufgaben, die dort ihr erstes Ziel haben."""
+    """Parent region per map: the most frequent one among quests with their
+    first target there."""
     zaehler = {}
     for quest in quests:
         if not quest['t']:
@@ -279,22 +279,22 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--sprache', choices=('de', 'en'), default='de',
-                        help='Katalogsprache; schreibt web/daten-<sprache>.js')
+                        help='catalogue language; writes web/daten-<language>.js')
     parser.add_argument('--katalog', type=Path, default=None,
-                        help='Standard: Quests_<sprache>.lua neben dem Plugin')
+                        help='default: Quests_<language>.lua next to the plugin')
     parser.add_argument('--karten', type=Path, default=STANDARD_KARTEN)
     parser.add_argument('--fortschritt', type=Path, default=STANDARD_FORTSCHRITT,
-                        help='Progress.lua des Charakters; fehlt sie, bleibt alles ungefärbt')
+                        help='character Progress.lua; if missing, nothing is coloured')
     options = parser.parse_args()
     if options.katalog is None:
         options.katalog = (STANDARD_KATALOG.parent /
                            ('Quests_%s.lua' % options.sprache))
 
-    for name, path in (('Katalog', options.katalog), ('karten.json', options.karten)):
+    for name, path in (('catalogue', options.katalog), ('karten.json', options.karten)):
         if not path.is_file():
-            print('FEHLT: %s -> %s' % (name, path), file=sys.stderr)
+            print('MISSING: %s -> %s' % (name, path), file=sys.stderr)
             if name == 'karten.json':
-                print('Erst hole_karten.py laufen lassen.', file=sys.stderr)
+                print('Run hole_karten.py first.', file=sys.stderr)
             return 2
 
     ergebnis = baue(options.katalog, options.karten, ortsgruppen(options.karten),
@@ -303,10 +303,10 @@ def main():
         return ergebnis
     quests, karten = ergebnis
 
-    # Rahmen prüfen: der maps.xml-Rahmen beschreibt das Bild, der MoorMap-Rahmen
-    # ist im Spiel kalibriert. Bei einzelnen Karten (Minas Tirith, Pelargir) hat
-    # der eine ein anderes Vorzeichen als die Positionen. Es gewinnt der Rahmen,
-    # in dem die Ziele dieser Karte tatsächlich liegen.
+    # Check frames: the maps.xml frame describes the image, the MoorMap frame
+    # is calibrated in the game. For individual maps (Minas Tirith, Pelargir)
+    # one has a different sign than the positions. The frame in which this
+    # map's objectives actually lie wins.
     positionen = {}
     for quest in quests:
         for ziel in quest['t']:
@@ -345,20 +345,21 @@ def main():
             karte['rahmen'] = 'maps.xml'
         karte.pop('ersatz', None)
     if getauscht:
-        print('Rahmen getauscht (maps.xml passte nicht):')
+        print('Frames swapped (maps.xml did not fit):')
         for name, alt_wert, neu_wert in getauscht:
-            print('  %-26s %5.1f%% -> %5.1f%% der Ziele im Rahmen' %
+            print('  %-26s %5.1f%% -> %5.1f%% of the objectives in the frame' %
                   (name, alt_wert * 100, neu_wert * 100))
 
-    # Sichtprüfung des Rahmens: viele Karten haben einen farbigen Rand, deshalb
-    # sagt "Ziel im Rahmen" noch nicht, dass es auf der Zeichnung liegt. Für
-    # jede Karte wird die bemalte Fläche gesucht; liegen die Ziele überwiegend
-    # daneben, ist der Rahmen unbrauchbar. Dann lieber keine Punkte als falsche.
+    # Visual check of the frame: many maps have a coloured border, so
+    # "objective inside the frame" does not yet mean it lies on the drawing.
+    # For each map the painted area is located; if the objectives are mostly
+    # beside it, the frame is unusable. Then no dots rather than wrong ones.
     unklar = rahmen_pruefen(karten, positionen)
     if unklar:
-        print('Rahmen unbrauchbar (keine Punkte):')
+        print('Frames unusable (no dots):')
         for name, anteil in unklar:
-            print('  %-32s %3.0f%% der Ziele auf der Zeichnung' % (name, anteil * 100))
+            print('  %-32s %3.0f%% of the objectives on the drawing' %
+                  (name, anteil * 100))
 
     regionen = regionen_je_karte(quests)
     for karte in karten:
@@ -366,11 +367,11 @@ def main():
 
     fortschritt = fortschritt_lesen(options.fortschritt)
     if fortschritt is None:
-        print('kein Fortschritt gefunden (%s) – Zahlen und Farben entfallen' %
+        print('no progress found (%s) – numbers and colours omitted' %
               options.fortschritt)
         fortschritt = {'character': '', 'date': '', 'ids': []}
     else:
-        print('Fortschritt: %s, %s, %d abgeschlossene Aufgaben' %
+        print('Progress: %s, %s, %d completed quests' %
               (fortschritt['character'] or '?', fortschritt['date'] or '?',
                len(fortschritt['ids'])))
 
@@ -382,8 +383,8 @@ def main():
     (HIER / ('daten/quests-%s.json' % options.sprache)).write_text(
         als_json, encoding='utf-8')
 
-    # Kennung über die Kartenbilder: der Browser hält sie sonst unter dem
-    # gleichen Dateinamen fest und zeigt nach einem Neuaufbau die alten.
+    # Stamp over the map images: otherwise the browser keeps them under the
+    # same file name and shows the old ones after a rebuild.
     bildordner = 'Karten' if options.sprache == 'de' else 'Karten_' + options.sprache
     stempel = hashlib.sha256()
     for datei in sorted((HIER / bildordner).glob('*.png')):
@@ -394,7 +395,7 @@ def main():
         stempel.update(datei.name.encode())
         stempel.update(str(datei.stat().st_size).encode())
         stempel.update(str(int(datei.stat().st_mtime)).encode())
-    # Auch die eigenen Dateien: sonst bleibt eine geänderte app.js im Cache.
+    # Also the project's own files: otherwise a changed app.js stays cached.
     for name in ('app.js', 'style.css', 'texte.js', 'sprache.js'):
         datei = HIER / 'web' / name
         if datei.is_file():
@@ -402,14 +403,14 @@ def main():
             stempel.update(datei.read_bytes())
     stand = stempel.hexdigest()[:10]
 
-    # Eigene Datei für die Kennung: sprache.js lädt sie zuerst und hängt sie an
-    # Daten, Fortschritt und app.js. Sonst hielte der Browser die alte
-    # daten-<sprache>.js fest und zeigte nach einem Neuaufbau alte Zahlen.
+    # Separate file for the stamp: sprache.js loads it first and appends it to
+    # data, progress and app.js. Otherwise the browser would keep the old
+    # daten-<sprache>.js and show old numbers after a rebuild.
     (HIER / 'web/stand.js').write_text(
-        '/* Erzeugt von build_daten.py. */\nwindow.MQL_STAND = %s;\n' %
+        '/* Generated by build_daten.py. */\nwindow.MQL_STAND = %s;\n' %
         json.dumps(stand), encoding='utf-8')
 
-    js = ('/* Erzeugt von build_daten.py. Nicht von Hand ändern. */\n'
+    js = ('/* Generated by build_daten.py. Do not edit by hand. */\n'
           'window.MQL_STAND = %s;\n'
           'window.MQL_KARTEN = %s;\n'
           'window.MQL_QUESTS = %s;\n' %
@@ -419,13 +420,13 @@ def main():
     datendatei = HIER / ('web/daten-%s.js' % options.sprache)
     datendatei.write_text(js, encoding='utf-8')
 
-    fs = ('/* Erzeugt von build_daten.py. */\n'
+    fs = ('/* Generated by build_daten.py. */\n'
           'window.MQL_FORTSCHRITT = %s;\n' %
           json.dumps(fortschritt, ensure_ascii=False, separators=(',', ':')))
     (HIER / 'web/fortschritt.js').write_text(fs, encoding='utf-8')
 
     groesse = datendatei.stat().st_size / (1024 * 1024)
-    print('geschrieben: %s (%.1f MB), web/fortschritt.js, daten/quests-%s.json' %
+    print('written: %s (%.1f MB), web/fortschritt.js, daten/quests-%s.json' %
           (datendatei.relative_to(HIER), groesse, options.sprache))
     return 0
 

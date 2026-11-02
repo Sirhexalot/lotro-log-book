@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Baut das Startbild: Breeland mit offenen und erledigten Zielen.
+"""Builds the start image: Bree-land with open and completed objectives.
 
-Kein Bildschirmfoto, sondern dieselbe Rechnung wie die Seite: Zielorte aus
-`daten/quests.json`, Rahmen aus `daten/karten.json`, Farbe aus
-`web/fortschritt.js`. So zeigt das Bild genau das, was die Karte zeigt.
+Not a screenshot, but the same calculation as the page: target locations from
+`daten/quests.json`, frame from `daten/karten.json`, colour from
+`web/fortschritt.js`. This way the image shows exactly what the map shows.
 
-Aufruf:
+Usage:
 
     python3 baue_startbild.py
 """
@@ -22,7 +22,7 @@ RAND = (20, 17, 14)
 
 
 def fortschritt():
-    """Abgeschlossene Aufgaben aus web/fortschritt.js, ohne JS-Auswertung."""
+    """Completed quests from web/fortschritt.js, without evaluating JS."""
     datei = HIER / 'web/fortschritt.js'
     if not datei.is_file():
         return set()
@@ -51,19 +51,19 @@ def main():
     try:
         from PIL import Image, ImageDraw
     except ImportError:
-        print('Pillow fehlt: python3 -m pip install pillow', file=sys.stderr)
+        print('Pillow missing: python3 -m pip install pillow', file=sys.stderr)
         return 2
 
     daten = json.loads(daten_datei.read_text(encoding='utf-8'))
     karten = {karte['idx']: karte for karte in daten['karten']}
     karte = next((k for k in daten['karten'] if k['name'] == karte_name), None)
     if karte is None:
-        print('Karte nicht gefunden: %s' % karte_name, file=sys.stderr)
+        print('Map not found: %s' % karte_name, file=sys.stderr)
         return 1
 
     bild_datei = HIER / ordner / karte['bild']
     if not bild_datei.is_file():
-        print('Bild fehlt: %s' % bild_datei, file=sys.stderr)
+        print('Image missing: %s' % bild_datei, file=sys.stderr)
         return 1
 
     fertig = fortschritt()
@@ -91,7 +91,7 @@ def main():
 
     zieldatei.parent.mkdir(parents=True, exist_ok=True)
     bild.save(zieldatei, 'JPEG', quality=86, optimize=True)
-    print('%s: %d Punkte, %d×%d -> %s' %
+    print('%s: %d points, %d×%d -> %s' %
           (karte_name, punkte, BREITE, hoehe, zieldatei.relative_to(HIER)))
     return 0
 

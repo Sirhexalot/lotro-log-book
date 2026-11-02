@@ -1,9 +1,9 @@
-/* Kartenansicht zu Magic Quest Log.
+/* Map view for Magic Quest Log.
  *
- * Reine Anzeige: Daten aus daten.js und fortschritt.js (build_daten.py),
- * Bilder aus ../Karten/. Nichts wird nachgeladen, geschätzt oder erfunden.
+ * Display only: data from daten.js and fortschritt.js (build_daten.py),
+ * images from ../Karten/. Nothing is fetched, estimated or invented.
  *
- * Baum aus dem Katalogpfad: Obergebiet -> Gebiet -> Untergebiet.
+ * Tree from the catalogue path: parent region -> region -> sub-region.
  */
 (function () {
 	'use strict';
@@ -12,16 +12,16 @@
 	var ersetze = window.MQL_ERSETZE || function (muster) { return String(muster); };
 	var sprache = window.MQL_SPRACHE || 'de';
 	var bildOrdner = sprache === 'en' ? '../Karten_en/' : '../Karten/';
-	// WebP ist rund 90 % kleiner. Lokal liegt es unter webp/<sprache>/, auf der
-	// Website unter karten/<sprache>/ – daher der Platzhalter {sprache}.
+	// WebP is about 90 % smaller. Locally it lives under webp/<sprache>/, on the
+	// website under karten/<sprache>/ – hence the {sprache} placeholder.
 	var webpMuster = window.MQL_BILD_PFAD || '../webp/{sprache}/';
 	var webpOrdner = webpMuster.replace('{sprache}', sprache);
 
 	var karten = window.MQL_KARTEN || [];
 	var quests = window.MQL_QUESTS || [];
 	var fortschritt = window.MQL_FORTSCHRITT || { ids: [] };
-	// Auf der Website ist keine Fortschrittsdatei eingebaut. Dort liest der
-	// Besucher seine eigene Progress.lua ein; sie bleibt im Browser.
+	// On the website no progress file is built in. There the visitor loads
+	// their own Progress.lua; it stays in the browser.
 	var eingebaut = (fortschritt.ids || []).length > 0;
 	var eigener = null;
 	try {
@@ -50,16 +50,16 @@
 
 	var ANSICHT_JE_SEITE = 200;
 
-	// Katalograeume ohne Geografie bekommen einen lesbaren Namen.
+	// Catalogue rooms without geography get a readable name.
 	var ABSCHNITTE = (window.MQL_TEXTE && window.MQL_TEXTE[sprache] &&
 		window.MQL_TEXTE[sprache].abschnitte) || {};
 
-	// --- Fortschritt ---------------------------------------------------
+	// --- Progress ------------------------------------------------------
 	var fertig = {};
 	fortschritt.ids.forEach(function (id) { fertig[id] = true; });
 	var hatFortschritt = fortschritt.ids.length > 0;
 
-	// --- Zustand -------------------------------------------------------
+	// --- State ---------------------------------------------------------
 	var zustand = {
 		knoten: null,
 		filter: 'alle',
@@ -99,7 +99,7 @@
 		return erledigt + '/' + gesamt;
 	}
 
-	// --- Baum aus dem Katalogpfad --------------------------------------
+	// --- Tree from the catalogue path ----------------------------------
 	var WURZEL = { schluessel: '', name: '', tiefe: 0, quests: [], kinder: {}, reihenfolge: [] };
 
 	function eintragen(labels, quest) {
@@ -128,11 +128,11 @@
 	}
 
 	quests.forEach(function (quest) {
-		// Alle Aufgaben kommen in den Baum, auch ohne Zielort. Sie zählen wie im
-		// Plugin mit und stehen in der Liste; nur einen Punkt bekommen sie nicht.
-		// Der Katalog liefert den ganzen Pfad als Namen (Abschnitt, Band,
-		// Buchgruppe bzw. Obergebiet, Gebiet, Untergebiet). Fehlt er, wird aus
-		// den Einzelfeldern gebaut.
+		// All quests go into the tree, even without a target. They count as in
+		// the plugin and appear in the list; they just get no dot.
+		// The catalogue supplies the whole path as names (section, book,
+		// book group or parent region, region, sub-region). If it is missing,
+		// the path is built from the individual fields.
 		var labels = quest.f && quest.f.length ? quest.f : (function () {
 			var zone = quest.z || t('ohne_zuordnung');
 			var gebiet = ABSCHNITTE[zone] || zone;
@@ -153,12 +153,12 @@
 	}
 
 	/**
-	 * Karte für ein Gebiet wählen.
+	 * Choose the map for a region.
 	 *
-	 * Entscheidend ist, wie viele Ziele des Gebiets wirklich auf der Karte
-	 * liegen. Der Name zählt nur als Bonus, die MoorMap-Ebene nur als
-	 * Stichentscheid. Vorher gewann eine gleichnamige Stadtkarte (Minas Tirith,
-	 * Pelargir), auf der kein einziges Ziel lag – die Karte blieb leer.
+	 * What matters is how many of the region's objectives really lie on the
+	 * map. The name only counts as a bonus, the MoorMap level only as a
+	 * tiebreaker. Before, a city map with the same name won (Minas Tirith,
+	 * Pelargir) with not a single objective on it – the map stayed empty.
 	 */
 	function besteKarte(eintraege, gebiet) {
 		var kandidaten = {};
@@ -183,21 +183,21 @@
 		return bester === null ? null : Number(bester);
 	}
 
-	// --- Projektion ----------------------------------------------------
+	// --- Projection ----------------------------------------------------
 	function anteil(karte, lat, lon) {
 		var breite = karte.east - karte.west;
 		var hoehe = karte.north - karte.south;
 		if (!(breite > 0) || !(hoehe > 0)) { return null; }
 		var nx = (lon - karte.west) / breite;
 		var ny = (karte.north - lat) / hoehe;
-		// Knapp außerhalb (bis 6 %) wird an den Rand gesetzt statt verworfen:
-		// ein Ziel kurz hinter der Kartengrenze soll sichtbar bleiben, aber
-		// nicht mitten auf der Karte landen.
+		// Just outside (up to 6 %) is pinned to the edge instead of dropped:
+		// an objective slightly beyond the map border should stay visible,
+		// but not land in the middle of the map.
 		if (nx < -0.06 || nx > 1.06 || ny < -0.06 || ny > 1.06) { return null; }
 		return { x: Math.min(1, Math.max(0, nx)), y: Math.min(1, Math.max(0, ny)) };
 	}
 
-	/** Erstes Ziel einer Aufgabe auf dieser Karte, oder null. */
+	/** First objective of a quest on this map, or null. */
 	function zielAuf(quest, karte) {
 		if (!karte || karte.rahmen === 'unklar') { return null; }
 		for (var i = 0; i < quest.t.length; i += 1) {
@@ -209,7 +209,7 @@
 		return null;
 	}
 
-	// --- Baum zeichnen -------------------------------------------------
+	// --- Draw tree -----------------------------------------------------
 	var offen = {};
 	var knoepfe = {};
 
@@ -239,8 +239,8 @@
 		knopf.title = ersetze(t('baum_titel'),
 			[knoten.name, zahlen.erledigt, zahlen.gesamt]);
 
-		// Der Pfeil klappt nur auf und zu, die Zeile selbst wählt aus. Vorher
-		// schaltete jeder Klick beides, dadurch sprang der Baum unter dem Zeiger.
+		// The arrow only expands and collapses, the row itself selects. Before,
+		// every click toggled both, so the tree jumped under the pointer.
 		var pfeil = eltern('span', blatt ? '' : (offen[knoten.schluessel] ? '▾' : '▸'));
 		pfeil.className = 'pfeil';
 		knopf.appendChild(pfeil);
@@ -253,9 +253,9 @@
 		zaehler.className = 'zahl';
 		knopf.appendChild(zaehler);
 
-		// Fortschritt als grüner Unterstrich: Länge = Anteil erledigter
-		// Aufgaben dieser Zeile (mit allen Kindern). Ohne Fortschrittsdatei
-		// gibt es keine Zahlen und damit auch keinen Strich.
+		// Progress as a green underline: length = share of completed
+		// quests in this row (including all children). Without a progress
+		// file there are no numbers and therefore no line.
 		if (hatFortschritt && zahlen.gesamt) {
 			var leiste = eltern('span', null);
 			leiste.className = 'fortschritt';
@@ -276,7 +276,7 @@
 		}
 
 		knopf.addEventListener('click', function () {
-			// Auswählen klappt auf, wenn nötig – aber nie zu.
+			// Selecting expands when needed – but never collapses.
 			if (!blatt && offen[knoten.schluessel] !== true) {
 				offen[knoten.schluessel] = true;
 				wrapper.classList.add('offen');
@@ -309,8 +309,8 @@
 		if (!zustand.knoten || ohneAufklappen === true) { return; }
 		var knopf = knoepfe[zustand.knoten.schluessel];
 		if (!knopf) { return; }
-		// Eltern aufklappen, damit der Eintrag sichtbar ist – ohne den Baum
-		// unter dem Zeiger wegzuscrollen.
+		// Expand the parents so the entry is visible – without scrolling
+		// the tree away under the pointer.
 		var huelle = knopf.closest('.ast');
 		while (huelle) {
 			huelle.classList.add('offen');
@@ -322,7 +322,7 @@
 		}
 	}
 
-	// --- Knoten wählen -------------------------------------------------
+	// --- Select node ---------------------------------------------------
 	function merkeAdresse(knoten) {
 		try {
 			var adresse = new URL(window.location.href);
@@ -469,7 +469,7 @@
 		}
 	}
 
-	// --- Liste ---------------------------------------------------------
+	// --- List ----------------------------------------------------------
 	var zeilen = {};
 
 	function zeigeListe(titel, eintraege) {
@@ -507,7 +507,7 @@
 			[eintraege.length - zustand.sichtbar]);
 	}
 
-	/** Fortschrittsfilter über eine Aufgabenliste. */
+	/** Progress filter over a quest list. */
 	function gefiltert(eintraege) {
 		if (zustand.filter === 'offen') {
 			return eintraege.filter(function (quest) { return !fertig[quest.i]; });
@@ -626,9 +626,9 @@
 		});
 	}
 
-	// --- Auswahl -------------------------------------------------------
-	// Ein Klick in der Liste wechselt die Karte nicht. Wer auf eine andere
-	// Karte will, bekommt im Detailbereich einen Knopf dafür.
+	// --- Selection -----------------------------------------------------
+	// A click in the list does not change the map. Anyone who wants another
+	// map gets a button for it in the detail panel.
 	function waehle(quest) {
 		zustand.auswahl = quest;
 		zeichneListe();
@@ -657,10 +657,10 @@
 			hoehe / 2 - punkt.y * hoehe * zustand.skala);
 	}
 
-	// --- Ansicht -------------------------------------------------------
-	// Die Bilder sind 1024x768, also 4:3. Wird das Bild auf die Fensterbreite
-	// gezerrt, verzieht sich die Karte und die Punkte wirken verschoben.
-	// Deshalb: Bild immer im eigenen Seitenverhältnis, mittig, mit Rand.
+	// --- View ----------------------------------------------------------
+	// The images are 1024x768, so 4:3. If the image is stretched to the
+	// window width, the map distorts and the dots look shifted.
+	// Hence: image always in its own aspect ratio, centred, with a margin.
 	var BILD_SEITE = 4 / 3;
 
 	function passeAn() {
@@ -681,8 +681,8 @@
 		zustand.y = y;
 		welt.style.transform = 'translate(' + zustand.x + 'px,' + zustand.y + 'px) scale(' +
 			zustand.skala + ')';
-		// Schrittnummern erst beim Hineinzoomen: ungezoomt überlappen sie sich
-		// und werden zu unlesbaren Zeichenketten.
+		// Step numbers only when zoomed in: unzoomed they overlap
+		// and become unreadable strings of characters.
 		buehne.classList.toggle('zoom', zustand.skala > 1.05);
 	}
 
@@ -723,7 +723,7 @@
 		setzeAnsicht(zustand.skala, zustand.x, zustand.y);
 	});
 
-	// --- Eingaben ------------------------------------------------------
+	// --- Input ---------------------------------------------------------
 	var suchlauf = null;
 	suche.addEventListener('input', function () {
 		window.clearTimeout(suchlauf);
@@ -756,7 +756,7 @@
 		zeigeListe(listeTitel.textContent, zustand.treffer);
 	});
 
-	// --- Spielstand laden ----------------------------------------------
+	// --- Load progress ------------------------------------------------
 	function leseFortschritt(text) {
 		var kopf = /\["character"\]\s*=\s*"([^"]*)"/.exec(text);
 		var datum = /\["date"\]\s*=\s*"([^"]*)"/.exec(text);
@@ -845,7 +845,7 @@
 		});
 	}
 	if (!start) { start = WURZEL; }
-	// Pfad zum Start aufklappen
+	// Expand the path to the start
 	var teile = start.schluessel.split('|').filter(function (teil) { return teil !== ''; });
 	var pfad = '';
 	teile.forEach(function (teil) {
