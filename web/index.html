@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kartenansicht – Der Herr der Ringe Online</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="kopf">
+	<a class="startlink" href="start.html" data-t="startseite">Startseite</a>
+	<h1 data-t="produkt">Kartenansicht</h1>
+	<label class="feld breit">
+		<span data-t="suche">Suche</span>
+		<input id="suche" type="search" data-t-ph="suche_platzhalter" placeholder="Aufgabenname oder Teil davon" autocomplete="off">
+	</label>
+	<input id="datei" type="file" accept=".lua,text/plain" hidden>
+	<button id="spielstand" type="button" data-t="spielstand_laden" hidden>Spielstand laden</button>
+	<span id="fortschritt-stand" class="stand-klein" hidden></span>
+	<button id="spielstand-weg" type="button" title="Fortschritt entfernen" hidden>×</button>
+	<nav class="sprachen" aria-label="Sprache">
+		<button type="button" data-lang="de" aria-pressed="true">DE</button>
+		<button type="button" data-lang="en" aria-pressed="false">EN</button>
+	</nav>
+	<span id="stand" class="stand"></span>
+</header>
+
+<main>
+	<section class="spalte spalte-gebiete">
+		<div class="spalten-kopf">
+			<strong data-t="gebiete">Gebiete</strong>
+			<button id="zuklappen" data-t="alles_zuklappen" title="Alle Gebiete zuklappen">alles zuklappen</button>
+		</div>
+		<nav class="gebietsspalte" id="baum" aria-label="Gebiete"></nav>
+	</section>
+
+	<section class="spalte spalte-aufgaben">
+		<div class="spalten-kopf">
+			<strong id="liste-titel" data-t="aufgaben">Aufgaben</strong>
+			<button id="liste-mehr" hidden>mehr</button>
+		</div>
+		<div class="filter" id="filter" role="group" aria-label="Fortschritt filtern">
+			<button data-filter="alle" aria-pressed="true" data-t="filter_alle">alle</button>
+			<button data-filter="offen" aria-pressed="false" data-t="filter_offen">offen</button>
+			<button data-filter="erledigt" aria-pressed="false" data-t="filter_erledigt">erledigt</button>
+		</div>
+		<ol id="liste"></ol>
+	</section>
+
+	<section class="buehne" id="buehne">
+		<div class="welt" id="welt">
+			<img id="bild" alt="">
+			<div class="raster" id="raster"></div>
+			<div class="marker" id="marker"></div>
+		</div>
+		<div class="legende" id="legende" hidden>
+			<span><i class="tupfen offen"></i><span data-t="legende_offen">offen</span></span>
+			<span><i class="tupfen fertig"></i><span data-t="legende_erledigt">erledigt</span></span>
+		</div>
+		<div class="bedienung">
+			<button id="zurueck" data-t="zuruecksetzen" title="Ansicht zurücksetzen">zurücksetzen</button>
+			<span id="hinweis" class="hinweis"></span>
+		</div>
+	</section>
+
+	<section class="spalte detail" id="detail">
+		<p class="leer" data-t="detail_leer">Links ein Gebiet wählen, dann auf der Karte einen Punkt anklicken.</p>
+	</section>
+</main>
+
+<script src="texte.js"></script>
+<script src="sprache.js"></script>
+</body>
+</html>

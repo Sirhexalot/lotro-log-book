@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kartenansicht – Der Herr der Ringe Online</title>
+<link rel="stylesheet" href="start.css">
+</head>
+<body>
+
+<header class="kopf">
+	<div class="kopf-innen">
+		<h1>Kartenansicht</h1>
+		<nav class="sprachen" aria-label="Sprache">
+			<a href="start.html" aria-pressed="true" lang="de">DE</a>
+			<a href="start-en.html" lang="en">EN</a>
+		</nav>
+		<a class="knopf klein" href="index.html?lang=de">Zur Karte</a>
+	</div>
+</header>
+
+<main>
+	<section class="intro">
+		<p class="dach">Der Herr der Ringe Online</p>
+		<h2>Eine Karte, die zeigt, <em>wo</em> welche Aufgaben ihre Ziele haben.</h2>
+		<p class="lead">Gebiet für Gebiet, mit deinem eigenen Fortschritt daneben. Kein Konto,
+		kein Server, keine erfundenen Marker.</p>
+	</section>
+
+	<figure class="bild">
+		<img src="bild/start.jpg" alt="Karte von Breeland mit goldenen und grünen Punkten für offene und erledigte Aufgaben">
+		<figcaption>Breeland: gold = offen, grün = erledigt. Jeder Punkt ist ein Ziel, keine Vermutung.</figcaption>
+	</figure>
+
+	<section>
+		<h3>So funktioniert es</h3>
+		<ol class="schritte">
+			<li>
+				<strong>Gebiet wählen.</strong>
+				Links der Baum: Obergebiet, Gebiet, Untergebiet. Hinter jeder Zeile steht,
+				wie viele Aufgaben es dort gibt und wie viele du erledigt hast.
+			</li>
+			<li>
+				<strong>Aufgabe anklicken.</strong>
+				Rechts erscheint der Text mit allen Schritten und Zielen. Auf der Karte
+				siehst du die Zielorte als Punkte: gold = offen, grün = erledigt.
+			</li>
+			<li>
+				<strong>Nachsehen, wo es langgeht.</strong>
+				Rad zum Zoomen, Maus zum Schieben. Ist eine Aufgabe gewählt, zeigen Ringe
+				mit Nummern ihre einzelnen Ziele.
+			</li>
+		</ol>
+	</section>
+
+	<section>
+		<h3>Spielstand erstellen</h3>
+		<p>Für die Zahlen brauchst du deine <code>Progress.lua</code>. Das Werkzeug
+		liest sie aus dem laufenden Spiel; es ändert nichts am Spiel und schickt
+		nichts ins Netz.</p>
+		<p><a class="knopf" href="download/mql-spielstand.zip">Werkzeug herunterladen (12 KB)</a></p>
+		<ol class="schritte">
+			<li><strong>Auspacken.</strong> ZIP in einen eigenen Ordner entpacken.</li>
+			<li><strong>Spiel starten.</strong> Magic Quest Log muss installiert sein und
+			das Spiel laufen.</li>
+			<li><strong>Starter doppelklicken.</strong> Windows:
+			<code>read-journal.bat</code>, macOS: <code>read-journal.command</code>.</li>
+			<li><strong>Datei wählen.</strong> Die entstandene <code>Progress.lua</code>
+			auf der Karte mit „Spielstand laden“ auswählen.</li>
+		</ol>
+	</section>
+
+	<section>
+		<h3>Dein Fortschritt</h3>
+		<p>Die Zahlen im Baum und die Farbe der Punkte kommen aus <code>Progress.lua</code>
+		deines Charakters. Die Datei liegt im Plugin-Ordner unter
+		<code>MagicQuestLog/Data/</code> und wird beim Bau der Seite gelesen
+		(<code>build_daten.py</code>).</p>
+		<p>Fehlt sie, funktioniert die Karte trotzdem – sie zeigt dann nur keine Zahlen und
+		färbt keine Punkte. Es wird keine Null erfunden.</p>
+	</section>
+
+	<section>
+		<h3>Was die Karte nicht kann</h3>
+		<ul class="grenzen">
+			<li>Sie zeigt <strong>Zielorte</strong>, nicht die Auftraggeber. Wo man eine Aufgabe
+			annimmt, steht nicht in den Spieldaten.</li>
+			<li>Von 15.209 Aufgaben haben 8.403 eine belegte Position. Die übrigen stehen im
+			Baum und in der Liste, bekommen aber keinen Punkt – lieber keine Marke als eine
+			falsche.</li>
+			<li>Sie ist keine Live-Karte. Sie kennt deinen Stand vom Zeitpunkt des Exports.</li>
+		</ul>
+	</section>
+
+	<p class="weiter">
+		<a class="knopf" href="index.html?lang=de">Zur Karte</a>
+	</p>
+</main>
+
+<footer>
+	<p><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
+	<p>Fan-Projekt, nicht verbunden mit Standing Stone Games, Daybreak Game Company oder
+	Middle-earth Enterprises. Karten und Spieltexte sind Eigentum der jeweiligen
+	Rechteinhaber. Keine Werbung, keine Konten, keine Profile – nur eine anonyme
+	Reichweitenmessung ohne Cookies (<a href="datenschutz.html">Datenschutz</a>).</p>
+	<p class="leise">Diese Fassung läuft lokal. Es wird nichts hochgeladen und nichts
+	nachgeladen.</p>
+</footer>
+
+</body>
+</html>

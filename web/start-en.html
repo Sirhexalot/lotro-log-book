@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map view – The Lord of the Rings Online</title>
+<link rel="stylesheet" href="start.css">
+</head>
+<body>
+
+<header class="kopf">
+	<div class="kopf-innen">
+		<h1>Map view</h1>
+		<nav class="sprachen" aria-label="Language">
+			<a href="start.html" lang="de">DE</a>
+			<a href="start-en.html" aria-pressed="true" lang="en">EN</a>
+		</nav>
+		<a class="knopf klein" href="index.html?lang=en">To the map</a>
+	</div>
+</header>
+
+<main>
+	<section class="intro">
+		<p class="dach">The Lord of the Rings Online</p>
+		<h2>A map that shows <em>where</em> quests have their objectives.</h2>
+		<p class="lead">Region by region, next to your own progress. No account,
+		no server, no invented markers.</p>
+	</section>
+
+	<figure class="bild">
+		<img src="bild/start-en.jpg" alt="Map of Bree-land with gold and green dots for open and finished quests">
+		<figcaption>Bree-land: gold = open, green = done. Every dot is an objective, not a guess.</figcaption>
+	</figure>
+
+	<section>
+		<h3>How it works</h3>
+		<ol class="schritte">
+			<li>
+				<strong>Pick a region.</strong>
+				The tree on the left: region, area, sub-area. Each row shows how many
+				quests exist there and how many you have finished.
+			</li>
+			<li>
+				<strong>Click a quest.</strong>
+				The text with every step and objective appears on the right. On the map,
+				objectives are dots: gold = open, green = done.
+			</li>
+			<li>
+				<strong>Look where to go.</strong>
+				Scroll to zoom, drag to pan. With a quest selected, numbered rings mark
+				its individual objectives.
+			</li>
+		</ol>
+	</section>
+
+	<section>
+		<h3>Create your progress file</h3>
+		<p>For the numbers you need your <code>Progress.lua</code>. The tool reads it
+		from the running game; it changes nothing and sends nothing anywhere.</p>
+		<p><a class="knopf" href="download/mql-spielstand.zip">Download the tool (12 KB)</a></p>
+		<ol class="schritte">
+			<li><strong>Unpack.</strong> Extract the ZIP into its own folder.</li>
+			<li><strong>Start the game.</strong> Magic Quest Log must be installed and
+			the game running.</li>
+			<li><strong>Run the starter.</strong> Windows: <code>read-journal.bat</code>,
+			macOS: <code>read-journal.command</code>.</li>
+			<li><strong>Choose the file.</strong> Load the resulting
+			<code>Progress.lua</code> on the map with “Load progress”.</li>
+		</ol>
+	</section>
+
+	<section>
+		<h3>Your progress</h3>
+		<p>The numbers in the tree and the colour of the dots come from
+		<code>Progress.lua</code> for your character. The file lives in the plugin
+		folder under <code>MagicQuestLog/Data/</code> and is read when the page is
+		built (<code>build_daten.py</code>).</p>
+		<p>Without it the map still works — it simply shows no numbers and leaves the
+		dots uncoloured. No zero is invented.</p>
+	</section>
+
+	<section>
+		<h3>What the map cannot do</h3>
+		<ul class="grenzen">
+			<li>It shows <strong>objective locations</strong>, not quest givers. Where you
+			accept a quest is not part of the game data.</li>
+			<li>Of 15,209 quests, 8,403 have a verified position. The rest are listed in the
+			tree and the quest list but get no dot — better no marker than a wrong one.</li>
+			<li>It is not live. It knows your progress as of the export.</li>
+		</ul>
+	</section>
+
+	<p class="weiter">
+		<a class="knopf" href="index.html?lang=en">To the map</a>
+	</p>
+</main>
+
+<footer>
+	<p><a href="impressum.html">Imprint</a> · <a href="datenschutz.html">Privacy</a></p>
+	<p>Fan project, not affiliated with or endorsed by Standing Stone Games, Daybreak
+	Game Company or Middle-earth Enterprises. Maps and game texts belong to their
+	respective owners. No advertising, no accounts, no profiles — only anonymous
+	page counting without cookies (<a href="datenschutz.html">privacy</a>).</p>
+	<p class="leise">This copy runs locally. Nothing is uploaded and nothing is
+	loaded from the network.</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Spielmaterial – entsteht lokal aus dem eigenen Client
+Karten/
+Karten_en/
+webp/
+daten/*.json
+web/daten-*.js
+web/fortschritt.js
+web/stand.js
+web/download/
+web/bild/
+
+# Gebautes
+dist-web/
+dat/*.class
+
+# Werkzeuge
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+
+# Zugangsdaten und Upload-Stand
+*.conf
+*mql-upload*

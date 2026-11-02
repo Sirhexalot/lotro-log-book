@@ -1,0 +1,486 @@
+:root {
+	--grund: #14110e;
+	--fläche: #1e1a16;
+	--fläche-hell: #2a251f;
+	--rand: #3a332b;
+	--text: #e8e1d5;
+	--schwach: #a89c8a;
+	--gold: #d6b35a;
+	--offen: #d99a3c;
+	--fertig: #6f9c6a;
+	--marke-aktiv: #e8e1d5;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+	margin: 0;
+	height: 100%;
+	background: var(--grund);
+	color: var(--text);
+	font: 15px/1.5 "Verdana", "Segoe UI", sans-serif;
+}
+
+body {
+	display: grid;
+	grid-template-rows: auto 1fr;
+	height: 100vh;
+}
+
+.kopf {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	padding: 10px 16px;
+	background: var(--fläche);
+	border-bottom: 1px solid var(--rand);
+	flex-wrap: wrap;
+}
+
+.kopf h1 {
+	margin: 0;
+	font-size: 16px;
+	font-weight: normal;
+	letter-spacing: .04em;
+	color: var(--gold);
+}
+
+.feld { display: flex; align-items: center; gap: 8px; }
+.feld.breit { flex: 1 1 260px; }
+.feld > span { color: var(--schwach); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+
+input, button {
+	font: inherit;
+	color: var(--text);
+	background: var(--fläche-hell);
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	padding: 5px 8px;
+}
+
+input { width: 100%; }
+input:focus, button:focus { outline: 1px solid var(--gold); }
+button { cursor: pointer; }
+button:hover { background: #342d25; }
+
+.stand { color: var(--schwach); font-size: 12px; }
+
+.stand-klein {
+	color: var(--schwach);
+	font-size: 11px;
+	white-space: nowrap;
+}
+
+.sprachen { display: flex; gap: 3px; margin-left: auto; }
+
+.sprachen button {
+	font-size: 11px;
+	letter-spacing: .08em;
+	color: var(--schwach);
+	background: transparent;
+	border: 1px solid transparent;
+	padding: 2px 6px;
+}
+
+.sprachen button[aria-pressed="true"] {
+	color: var(--text);
+	border-color: var(--rand);
+	background: var(--fläche-hell);
+}
+
+.startlink {
+	color: var(--schwach);
+	font-size: 12px;
+	text-decoration: none;
+	border-bottom: 1px dotted var(--rand);
+}
+.startlink:hover { color: var(--gold); }
+
+main {
+	display: grid;
+	grid-template-columns: 250px 290px minmax(300px, 1fr) 350px;
+	grid-template-rows: minmax(0, 1fr);
+	min-height: 0;
+	overflow: hidden;
+}
+
+/* Jede Spalte scrollt für sich, die Höhe ist fest: nichts springt. */
+.spalte {
+	min-height: 0;
+	height: 100%;
+	overflow-y: auto;
+	background: var(--fläche);
+	border-right: 1px solid var(--rand);
+}
+
+.spalte-gebiete { display: flex; flex-direction: column; overflow: hidden; }
+.spalte-aufgaben { display: flex; flex-direction: column; overflow: hidden; }
+
+.gebietsspalte { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 4px 0 10px; }
+
+.spalten-kopf {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 8px 10px;
+	border-bottom: 1px solid var(--rand);
+	font-size: 12px;
+	color: var(--schwach);
+	flex: 0 0 auto;
+}
+
+.spalten-kopf button { font-size: 11px; padding: 2px 6px; }
+
+/* alle / offen / erledigt */
+.filter {
+	display: flex;
+	gap: 4px;
+	padding: 6px 10px;
+	border-bottom: 1px solid var(--rand);
+	flex: 0 0 auto;
+}
+
+.filter button {
+	flex: 1;
+	font-size: 12px;
+	padding: 3px 4px;
+	background: transparent;
+	border-color: var(--rand);
+	color: var(--schwach);
+}
+
+.filter button[aria-pressed="true"] {
+	background: #3a3226;
+	border-color: var(--gold);
+	color: var(--text);
+}
+
+
+
+.ast { display: block; }
+
+.zweig {
+	position: relative;
+	width: 100%;
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	background: none;
+	border: 0;
+	border-radius: 0;
+	padding: 5px 10px;
+	text-align: left;
+	font-size: 13px;
+	color: var(--text);
+}
+
+.zweig .pfeil {
+	flex: 0 0 12px;
+	color: var(--schwach);
+	font-size: 10px;
+	cursor: pointer;
+}
+
+.zweig .name { flex: 1 1 auto; }
+
+.zweig:hover { background: var(--fläche-hell); }
+
+/* Zeile ohne eine einzige Aufgabe mit Zielort: sichtbar, aber zurückgenommen. */
+.zweig.ohne-punkte { opacity: .5; }
+
+/* Fortschritt der Zeile: grüner Strich am unteren Rand. */
+.fortschritt {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 2px;
+	background: rgba(255, 255, 255, .06);
+}
+
+.fortschritt .balken {
+	display: block;
+	height: 100%;
+	background: var(--fertig);
+}
+
+.kinder { display: none; list-style: none; margin: 0; padding: 0; }
+.ast.offen > .kinder { display: block; }
+
+/* Drei Ebenen: Obergebiet, Gebiet, Untergebiet */
+.ast.tiefe2 > .zweig { padding-left: 22px; }
+.ast.tiefe3 > .zweig { padding-left: 36px; font-size: 12px; }
+.ast.tiefe4 > .zweig { padding-left: 50px; font-size: 12px; color: var(--schwach); }
+
+.zweig.aktiv { background: #3a3226; color: #fff; }
+.zweig.aktiv .ohneziel {
+	color: var(--schwach);
+	font-size: 10px;
+	opacity: .8;
+	white-space: nowrap;
+}
+
+.zahl { color: var(--text); }
+
+.zweig.einzeln { padding-left: 18px; }
+.zweig.einzeln::before { content: '·'; }
+.zweig.einzeln.aktiv { background: #3a3226; color: #fff; }
+
+.ohneziel {
+	color: var(--schwach);
+	font-size: 10px;
+	opacity: .8;
+	white-space: nowrap;
+}
+
+.zahl {
+	color: var(--schwach);
+	font-size: 11px;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.blatt.aktiv .ohneziel {
+	color: var(--schwach);
+	font-size: 10px;
+	opacity: .8;
+	white-space: nowrap;
+}
+
+.zahl { color: var(--text); }
+
+.liste-kopf {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--rand);
+	font-size: 13px;
+	color: var(--schwach);
+	flex: 0 0 auto;
+}
+
+.liste-kopf button { font-size: 12px; padding: 2px 6px; }
+
+#liste {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	overflow-y: auto;
+	flex: 1 1 auto;
+}
+
+#liste li {
+	display: flex;
+	align-items: baseline;
+	gap: 4px;
+	padding: 6px 12px;
+	border-bottom: 1px solid #241f1a;
+	cursor: pointer;
+	font-size: 13px;
+}
+
+#liste li:hover { background: var(--fläche-hell); }
+#liste li.aktiv { background: #3a3226; color: #fff; }
+#liste li .haken {
+	flex: 0 0 12px;
+	display: inline-block;
+	color: var(--schwach);
+	font-weight: bold;
+}
+
+#liste li.erledigt .haken { color: var(--fertig); }
+#liste li.erledigt > span:nth-child(2) { color: var(--fertig); }
+#liste li.offen .haken { color: var(--offen); }
+#liste li .stufe { color: var(--schwach); font-size: 11px; margin-left: 6px; }
+
+/* Kartenfläche */
+.buehne {
+	position: relative;
+	overflow: hidden;
+	background: #0d0b09;
+	min-height: 0;
+	cursor: grab;
+}
+
+.buehne.zieht { cursor: grabbing; }
+
+.welt {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	transform-origin: 0 0;
+	box-shadow: 0 0 0 1px var(--rand);
+}
+
+.welt img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: fill;
+	user-select: none;
+	-webkit-user-drag: none;
+}
+
+/* Ohne Bild: Koordinatenraster statt leerer Fläche */
+.raster { display: none; position: absolute; inset: 0; }
+.buehne.keinbild .raster {
+	display: block;
+	background-image:
+		linear-gradient(to right, #221d18 1px, transparent 1px),
+		linear-gradient(to bottom, #221d18 1px, transparent 1px);
+	background-size: 10% 10%;
+	background-color: #0f0d0b;
+}
+.buehne.keinbild img { display: none; }
+
+.marker { position: absolute; inset: 0; }
+
+.punkt {
+	position: absolute;
+	width: 11px;
+	height: 11px;
+	margin: -5.5px 0 0 -5.5px;
+	border-radius: 50%;
+	background: var(--offen);
+	border: 1px solid #0d0b09;
+	cursor: pointer;
+	transition: transform .08s;
+}
+
+.punkt.fertig { background: var(--fertig); }
+
+.punkt:hover { transform: scale(1.6); z-index: 5; }
+
+.punkt.aktiv {
+	background: var(--marke-aktiv);
+	box-shadow: 0 0 0 2px var(--offen);
+	transform: scale(1.8);
+	z-index: 6;
+}
+
+.punkt.aktiv.fertig { box-shadow: 0 0 0 2px var(--fertig); }
+
+.schritt {
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	margin: -9px 0 0 -9px;
+	border-radius: 50%;
+	border: 2px solid var(--marke-aktiv);
+	background: rgba(232, 225, 213, .16);
+	pointer-events: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Nummer im Ring, nicht daneben: zwei benachbarte Ringe wurden sonst zu
+   einer unlesbaren Ziffernfolge. */
+.schritt.nummer::after {
+	content: attr(data-n);
+	font-size: 10px;
+	line-height: 1;
+	color: #fff;
+}
+
+/* Ungezoomt bleibt der Ring leer, sonst überlappen die Ziffern. */
+.buehne:not(.zoom) .schritt.nummer::after { display: none; }
+
+.legende {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	display: flex;
+	gap: 14px;
+	background: rgba(13, 11, 9, .82);
+	padding: 5px 10px;
+	border-radius: 3px;
+	font-size: 12px;
+	color: var(--schwach);
+}
+
+.tupfen {
+	display: inline-block;
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	margin-right: 5px;
+	vertical-align: middle;
+}
+
+.tupfen.offen { background: var(--offen); }
+.tupfen.fertig { background: var(--fertig); }
+
+.bedienung {
+	position: absolute;
+	left: 10px;
+	bottom: 10px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 12px;
+	color: var(--schwach);
+}
+
+.bedienung button { font-size: 12px; padding: 2px 8px; }
+.hinweis { background: rgba(13, 11, 9, .8); padding: 2px 8px; border-radius: 3px; }
+
+/* Detail rechts */
+.detail {
+	overflow-y: auto;
+	padding: 14px 16px;
+	background: var(--fläche);
+	font-size: 13px;
+}
+
+.detail h2 {
+	margin: 0 0 4px;
+	font-size: 15px;
+	font-weight: normal;
+	color: var(--gold);
+}
+
+.detail .kennung { color: var(--schwach); font-size: 12px; margin-bottom: 12px; }
+.detail .text { white-space: pre-wrap; margin: 0 0 14px; }
+.detail h3 {
+	margin: 16px 0 6px;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: .08em;
+	color: var(--schwach);
+	font-weight: normal;
+}
+.detail ul { margin: 0; padding-left: 18px; }
+.detail li { margin-bottom: 4px; }
+.detail .leer { color: var(--schwach); }
+.detail .ohneziel {
+	color: var(--schwach);
+	font-size: 10px;
+	opacity: .8;
+	white-space: nowrap;
+}
+
+.zahl { color: var(--gold); }
+
+.detail .wechseln {
+	margin: 0 0 14px;
+	font-size: 12px;
+	padding: 4px 10px;
+	border-color: var(--gold);
+	color: var(--gold);
+}
+
+@media (max-width: 1240px) {
+	main { grid-template-columns: 220px 250px minmax(240px, 1fr) 300px; }
+}
+
+@media (max-width: 1000px) {
+	main { grid-template-columns: 200px 230px minmax(220px, 1fr); }
+	.detail { display: none; }
+}
