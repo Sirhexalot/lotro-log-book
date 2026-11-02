@@ -28,7 +28,10 @@ STANDARD_KATALOG = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Quests_de.lu
 STANDARD_FORTSCHRITT = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Progress.lua'
 STANDARD_KARTEN = HIER / 'daten/karten.json'
 
-MARKUP = (r'<%s*/?%s*rgb[^>]*>', r'<%s*/?%s*[bui]%s*>', r'</%s*[a-zA-Z]+%s*>')
+# Game markup like <rgb=#FF0000>…</rgb>, plus the rare <b>/<i>/<u>/<br>.
+# The old patterns contained "%s" placeholders that were never filled in, so
+# they matched nothing and the tags ended up in the JSON.
+MARKUP = re.compile(r'</?(?:rgb|b|i|u|br)\b[^>]*>', re.IGNORECASE)
 COUNTER = re.compile(r'\(\s*\$\{NUMBER\}\s*/\s*\$\{TOTAL\}\s*\)')
 
 SEKTIONEN = {
@@ -82,8 +85,7 @@ def clean(text, zaehler, sprache):
     if not text:
         return ''
     text = str(text)
-    for pattern in MARKUP:
-        text = re.sub(pattern, '', text)
+    text = MARKUP.sub('', text)
     text = COUNTER.sub(zaehler, text)
     for key in ('PLAYER', 'PLAYERNAME', 'SURNAME', 'CLASS', 'RACE'):
         text = text.replace('${%s}' % key, TOKENS[sprache][key])
