@@ -186,7 +186,9 @@ def main():
         zu_holen = sorted(aufgeloest, key=lambda e: e['name'])[:options.nur]
 
     fehler = []
-    if options.quelle == 'dat':
+    if not zu_holen:
+        pass
+    elif options.quelle == 'dat':
         if not Path(options.client).is_dir():
             print('No client found: %s' % options.client, file=sys.stderr)
             print('Pass it with --client or use --quelle github.', file=sys.stderr)
