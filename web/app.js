@@ -573,6 +573,11 @@
 		listeTitel.textContent = titel;
 		liste.textContent = '';
 		zeilen = {};
+		// Names that occur more than once in this list get their quest giver
+		// beside them, so "Abgetragen" from two givers can be told apart.
+		var anzahl = {}, doppelt = {};
+		eintraege.forEach(function (quest) { anzahl[quest.n] = (anzahl[quest.n] || 0) + 1; });
+		Object.keys(anzahl).forEach(function (name) { if (anzahl[name] > 1) { doppelt[name] = true; } });
 		eintraege.slice(0, zustand.sichtbar).forEach(function (quest) {
 			var zeile = eltern('li', null);
 			var lage = zustandVon(quest);
@@ -591,6 +596,11 @@
 			zeile.appendChild(haken);
 			var questName = eltern('span', quest.n);
 			questName.className = 'qname';
+			if (quest.g && doppelt[quest.n]) {
+				var geber = eltern('span', quest.g);
+				geber.className = 'geber';
+				questName.appendChild(geber);
+			}
 			zeile.appendChild(questName);
 			if (lage === 'sitzung' || lage === 'ausgeschlossen') {
 				var vermerk = eltern('span', lage === 'sitzung' ? t('sitzungsspiel') : t('nicht_moeglich'));
@@ -670,6 +680,7 @@
 		detail.appendChild(eltern('h2', quest.n));
 		var kennung = [];
 		if (quest.l) { kennung.push(t('stufe') + ' ' + quest.l); }
+		if (quest.g) { kennung.push(ersetze(t('auftraggeber'), [quest.g])); }
 		if (quest.z) { kennung.push(ABSCHNITTE[quest.z] || quest.z); }
 		if (quest.u) { kennung.push(quest.u); }
 		if (quest.r && quest.r !== quest.z) { kennung.push(quest.r); }

@@ -255,6 +255,8 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap
         quests.append({
             'i': record['id'],
             'n': clean(record['name'], TOKENS[sprache]['zaehler'], sprache),
+            # g: quest giver (first bestowing NPC), where the game names one.
+            **({'g': str(field(record, 'g'))} if field(record, 'g') else {}),
             'l': str(record['l']) if 'l' in record and record['l'] else '',
             'r': region,
             'z': zone,

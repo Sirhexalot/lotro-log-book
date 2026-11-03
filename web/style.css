@@ -670,3 +670,4 @@ td.haken-zelle.teil { color: var(--laufend); }
 }
 @keyframes lader-dreht { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .lader-kreis { animation: none; } }
+#liste li .qname .geber { display: block; color: var(--schwach); font-size: 11px; }
