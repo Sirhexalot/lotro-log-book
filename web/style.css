@@ -392,6 +392,31 @@ main {
 
 .punkt.aktiv.fertig { box-shadow: 0 0 0 2px var(--fertig); }
 
+/* The selected quest's dot pulses with a widening ring, so it is found at once
+   among hundreds of dots. */
+.punkt.aktiv::after {
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 11px;
+	height: 11px;
+	margin: -6.5px 0 0 -6.5px;
+	border-radius: 50%;
+	border: 2px solid var(--marke-aktiv);
+	animation: puls 1.4s ease-out infinite;
+	pointer-events: none;
+}
+
+@keyframes puls {
+	0% { transform: scale(1); opacity: .95; }
+	100% { transform: scale(4.5); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.punkt.aktiv::after { animation: none; transform: scale(2.4); opacity: .8; }
+}
+
 .schritt {
 	position: absolute;
 	width: 18px;
