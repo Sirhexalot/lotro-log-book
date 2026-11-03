@@ -160,14 +160,18 @@ def main():
     # Checks
     fehler = []
     for sprache in SPRACHEN:
-        bilder = list((ziel / 'karten' / sprache).glob('*.webp'))
-        daten = json.loads((HIER / ('daten/quests-%s.json' % sprache))
-                           .read_text(encoding='utf-8'))
-        erwartet = len({karte['bild'].replace('.png', '.webp')
-                        for karte in daten['karten']})
-        if len(bilder) != erwartet:
-            fehler.append('%s: %d WebP, expected %d' %
-                          (sprache, len(bilder), erwartet))
+        # Every map the quest and deed data names must have its image; extra
+        # images (larger maps fetched as fallbacks) do no harm.
+        bilder = {datei.name for datei in (ziel / 'karten' / sprache).glob('*.webp')}
+        erwartet = set()
+        for datei in ('daten/quests-%s.json', 'daten/taten-%s.json'):
+            pfad = HIER / (datei % sprache)
+            if pfad.is_file():
+                erwartet |= {karte['bild'].replace('.png', '.webp')
+                             for karte in json.loads(pfad.read_text(encoding='utf-8'))['karten']}
+        fehlen = sorted(erwartet - bilder)
+        if fehlen:
+            fehler.append('%s: %d map images missing, e.g. %s' % (sprache, len(fehlen), fehlen[:3]))
 
     impressum = (ziel / 'impressum.html').read_text(encoding='utf-8')
     if '[Name]' in impressum or '[Adresse]' in impressum:
