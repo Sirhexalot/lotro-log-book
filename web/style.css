@@ -817,6 +817,7 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 /* Filter/Notizen: the game's map notes, list as in the game's world map */
 .notizen { position: relative; }
 .notizen > button { font-size: 12px; padding: 2px 8px; }
+.gebietskarte { font-size: 12px; padding: 2px 8px; }
 .notizen-feld { position: absolute; bottom: calc(100% + 6px); left: 0; z-index: 30; width: 280px; max-height: 60vh; overflow-y: auto; background: var(--fläche); border: 1px solid var(--rand); padding: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
 .notizen-alle { display: flex; gap: 6px; margin-bottom: 6px; }
 .notizen-alle button { flex: 1; font-size: 12px; padding: 2px 6px; }

@@ -493,8 +493,15 @@ def main():
                   (name, anteil * 100))
 
     regionen = regionen_je_karte(quests)
+    moor = moormap_tabelle(STANDARD_MOORMAP)
     for karte in karten:
         karte['region'] = regionen.get(karte['idx'], '')
+        # MoorMap's own region number and parent: the page shows an objective on
+        # every map of the same region whose frame contains it.
+        eintrag = moor.get(karte['idx'])
+        if eintrag:
+            karte['mr'] = eintrag['region']
+            karte['eltern'] = eintrag['eltern']
 
     fortschritt = fortschritt_lesen(options.fortschritt)
     if fortschritt is None:

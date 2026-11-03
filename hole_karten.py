@@ -62,6 +62,7 @@ def moor_map(path):
                 'north': float(fields[12]), 'west': float(fields[13]),
                 'south': float(fields[14]), 'east': float(fields[15]),
                 'tier': int(fields[16]),
+                'eltern': int(fields[9]), 'region': int(fields[11]),
                 'name': (match.group(3) or '').strip(),
             }
         except ValueError:
@@ -271,6 +272,7 @@ def main():
                            'name': treffer['name'] or eintrag.get('name') or ('Karte %d' % index),
                            'north': north, 'west': west, 'south': south, 'east': east,
                            'tier': eintrag.get('tier', 0),
+                           'mr': eintrag.get('region'), 'eltern': eintrag.get('eltern'),
                            'ersatz': {'north': eintrag['north'], 'west': eintrag['west'],
                                       'south': eintrag['south'], 'east': eintrag['east']}})
     print('%d maps resolved, %d without a match' % (len(aufgeloest), len(offen)))

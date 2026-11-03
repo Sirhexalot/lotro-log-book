@@ -249,7 +249,16 @@
 			var eigene = orte(quest);
 			if (!eigene.length) { return; }
 			var index = eigene[0][0];
-			if (karteNachIndex[index]) { kandidaten[index] = true; }
+			// The map itself and its MoorMap parents of the same region: a parent
+			// now shows its sub-maps' points and may cover the area best.
+			var gesehen = {};
+			while (karteNachIndex[index] && !gesehen[index]) {
+				gesehen[index] = true;
+				kandidaten[index] = true;
+				var naechste = karteNachIndex[index].eltern;
+				if (!karteNachIndex[naechste] || karteNachIndex[naechste].mr !== karteNachIndex[index].mr) { break; }
+				index = naechste;
+			}
 		});
 		var gesucht = falten(gebiet || '').replace(/[^a-z0-9]/g, '');
 		var bester = null, besterWert = null;
@@ -260,8 +269,10 @@
 			eintraege.forEach(function (quest) {
 				if (zielAuf(quest, karte)) { punkte += 1; }
 			});
+			// Equal counts: the more detailed map wins (MoorMap's rule), so a parent
+			// such as Eriador only wins when it really shows more of the area.
 			var wert = punkte * 1000 +
-				((gesucht !== '' && name === gesucht) ? 100 : 0) - (karte.tier || 9);
+				((gesucht !== '' && name === gesucht) ? 100 : 0) + (karte.tier || 0);
 			if (besterWert === null || wert > besterWert) { besterWert = wert; bester = index; }
 		});
 		return bester === null ? null : Number(bester);
@@ -281,14 +292,29 @@
 		return { x: Math.min(1, Math.max(0, nx)), y: Math.min(1, Math.max(0, ny)) };
 	}
 
+	/**
+	 * Does this map show a place recorded on map `index`? Its own map always; any
+	 * other map of the same MoorMap region when the point lies inside its frame
+	 * (not pinned to the edge). So Breeland also shows what lies in Bree or Archet.
+	 */
+	function zeigtOrt(karte, ziel) {
+		if (ziel[0] === karte.idx) { return anteil(karte, ziel[1], ziel[2]); }
+		var eigene = karteNachIndex[ziel[0]];
+		if (!eigene || eigene.mr == null || eigene.mr !== karte.mr) { return null; }
+		var punkt = anteil(karte, ziel[1], ziel[2]);
+		if (!punkt) { return null; }
+		var nx = (ziel[2] - karte.west) / (karte.east - karte.west);
+		var ny = (karte.north - ziel[1]) / (karte.north - karte.south);
+		return (nx >= 0 && nx <= 1 && ny >= 0 && ny <= 1) ? punkt : null;
+	}
+
 	/** First objective of a quest on this map, or null. */
 	function zielAuf(quest, karte) {
 		if (!karte || karte.rahmen === 'unklar') { return null; }
 		var eigene = orte(quest);
 		for (var i = 0; i < eigene.length; i += 1) {
 			var ziel = eigene[i];
-			if (ziel[0] !== karte.idx) { continue; }
-			var punkt = anteil(karte, ziel[1], ziel[2]);
+			var punkt = zeigtOrt(karte, ziel);
 			if (punkt) { return { punkt: punkt, ziel: ziel }; }
 		}
 		return null;
@@ -513,6 +539,7 @@
 		zustand.auswahl = null;
 		zustand.sichtbar = ANSICHT_JE_SEITE;
 		var index = besteKarte(knoten.quests, knoten.name);
+		zustand.gebietsKarte = index;
 		if (index != null) {
 			zeigeKarte(index);
 		} else {
@@ -560,6 +587,7 @@
 	// The bar under the map names the map and how many entries of the list lie
 	// on it; counts per area are in the detail column.
 	function aktualisiereStand() {
+		zeigeZurueck();
 		if (!zustand.karte) { stand.textContent = ''; return; }
 		var hier = 0, alle = 0;
 		zustand.treffer.forEach(function (quest) {
@@ -604,8 +632,7 @@
 		var ringe = 0;
 		if (zustand.auswahl && zeigtZiele(zustand.auswahl) && karte.rahmen !== 'unklar') {
 			zustand.auswahl.t.forEach(function (ziel) {
-				if (ziel[0] !== karte.idx) { return; }
-				var punkt = anteil(karte, ziel[1], ziel[2]);
+				var punkt = zeigtOrt(karte, ziel);
 				if (!punkt) { return; }
 				ringe += 1;
 				var ring = eltern('div', null);
@@ -770,15 +797,45 @@
 		aktualisiereStand();
 	}
 
-	/** Show the map of a quest's first place (giver, or objective when shown). */
+	/**
+	 * Show the map of a quest's first place (giver, or objective when shown), but
+	 * only when it is more detailed than the map on show. A map that already shows
+	 * the place at least as precisely stays (MoorMap's rule: highest tier wins).
+	 */
 	function folgeKarte(quest) {
 		var erster = orte(quest)[0];
-		if (!erster || !karteNachIndex[erster[0]]) { return; }
-		if (zustand.karte && zustand.karte.idx === erster[0]) { return; }
+		var ziel = erster && karteNachIndex[erster[0]];
+		if (!ziel) { return; }
+		var jetzt = zustand.karte;
+		if (jetzt && (jetzt.idx === ziel.idx ||
+				(jetzt.rahmen !== 'unklar' && zeigtOrt(jetzt, erster) && (jetzt.tier || 0) >= (ziel.tier || 0)))) {
+			return;
+		}
 		var knoten = zustand.knoten;
 		zeigeKarte(erster[0]);
 		zustand.knoten = knoten;
 		zustand.auswahl = quest;
+	}
+
+	// Back to the area's own map after following a quest onto a detail map.
+	var zurueck = document.getElementById('gebietskarte');
+	function zeigeZurueck() {
+		if (!zurueck) { return; }
+		var gebiet = karteNachIndex[zustand.gebietsKarte];
+		var sichtbar = !!(gebiet && zustand.karte && zustand.karte.idx !== gebiet.idx);
+		zurueck.hidden = !sichtbar;
+		if (sichtbar) { zurueck.textContent = ersetze(t('zur_gebietskarte'), [gebiet.name]); }
+	}
+	if (zurueck) {
+		zurueck.addEventListener('click', function () {
+			var auswahl = zustand.auswahl, knoten = zustand.knoten;
+			zeigeKarte(zustand.gebietsKarte);
+			zustand.knoten = knoten;
+			zustand.auswahl = auswahl;
+			zeichneMarker();
+			zeichneDetail();
+			aktualisiereStand();
+		});
 	}
 
 	/** Legend: progress colours with a character loaded, rings while a quest is selected. */
@@ -1217,6 +1274,7 @@
 		zeichneListe();
 		zeichneMarker();
 		zeichneDetail();
+		aktualisiereStand();
 		markiereZeile(quest.i);
 	}
 
