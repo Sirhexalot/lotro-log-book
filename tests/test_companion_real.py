@@ -98,6 +98,12 @@ def main():
         imported = lua.eval('MagicQuestLog.Characters.LoadImport("%s")' % character['name'])
         assert imported is not None, 'the plugin rejected the import of ' + character['name']
         ids = set(imported.completed.keys())
+        # Running counters and the level reach the plugin as well.
+        running = imported.running
+        counted = sum(1 for _ in running.keys())
+        assert counted == len(character['laufend']), 'running entries %d vs %d' % (counted, len(character['laufend']))
+        assert imported.level is not None and int(imported.level) > 0, 'level must reach the plugin'
+        print('  %s: %d running entries and level %s read by the plugin' % (character['name'], counted, imported.level))
         assert ids == set(character['quests']) | set(character['deeds']), 'ids lost on the way'
         assert imported.date and re.match(r'^\d{4}-\d{2}-\d{2}$', imported.date), imported.date
         other = lua.eval('MagicQuestLog.Characters.LoadImport("Someoneelse")')

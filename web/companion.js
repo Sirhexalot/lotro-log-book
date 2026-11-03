@@ -219,11 +219,24 @@
 			'\t["character"] = ' + luaString(entry.name) + ',',
 			'\t["server"] = ' + luaString(entry.server) + ',',
 			'\t["date"] = ' + luaString(entry.date) + ',',
+			'\t["level"] = ' + luaString(entry.level || '') + ',',
 			'\t["source"] = "LOTRO Companion",',
 			'\t["completed"] = {'];
 		var ids = entry.quests.concat(entry.deeds).sort();
 		ids.forEach(function (id, index) {
 			lines.push('\t\t[' + luaString(id) + '] = true' + (index < ids.length - 1 ? ',' : ''));
+		});
+		lines.push('\t},');
+		// Running counters of unfinished entries: "objective:condition:done:count;…",
+		// count "-" when Companion has none. Text, so the client never sees a number.
+		var laufend = entry.laufend || {};
+		var offene = Object.keys(laufend).sort();
+		lines.push('\t["running"] = {');
+		offene.forEach(function (id, index) {
+			var text = laufend[id].map(function (z) {
+				return z[0] + ':' + z[1] + ':' + (z[2] ? 1 : 0) + ':' + (z[3] === null || z[3] === undefined ? '-' : z[3]);
+			}).join(';');
+			lines.push('\t\t[' + luaString(id) + '] = ' + luaString(text) + (index < offene.length - 1 ? ',' : ''));
 		});
 		lines.push('\t}', '}', '');
 		return lines.join('\r\n');
