@@ -1,11 +1,11 @@
-# Middle-earth Logbook (LotRO Magic Quest Map)
+# LOTRO Log Book
 
 The web companion of **Magic Quest Log**: per region the map with the objectives of
 quests and deeds, your progress beside it, and pages for **deeds** with their running
 counters, **reputation** and **crafting** — for every character loaded from LOTRO
-Companion. German: *Mittelerde-Logbuch*, French: *Journal de la Terre du Milieu*.
+Companion. Same name in every language.
 
-Runs at **https://mm.sirhexalot.de/**.
+Runs at **https://llb.sirhexalot.de/**.
 
 This repository contains **only the code**. Map images, quest texts and progress
 files are game material and are not published: they are created during the build

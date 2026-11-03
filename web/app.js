@@ -1,4 +1,4 @@
-/* Map view for Magic Quest Log.
+/* Map of the LOTRO Log Book.
  *
  * Display only: data from daten.js and fortschritt.js (build_daten.py),
  * images from ../Karten/. Nothing is fetched, estimated or invented.

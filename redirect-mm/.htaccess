@@ -1,0 +1,5 @@
+# mm.sirhexalot.de moved to llb.sirhexalot.de (LOTRO Log Book). Both names serve
+# this folder, so only requests for the old name are sent on, path and query kept.
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^mm\.sirhexalot\.de$ [NC]
+RewriteRule ^(.*)$ https://llb.sirhexalot.de/$1 [R=301,L]

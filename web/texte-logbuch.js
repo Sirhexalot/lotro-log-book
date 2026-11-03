@@ -1,4 +1,4 @@
-/* Texts for the Middle-earth Logbook: name, menu, deeds mode, running progress,
+/* Texts for the LOTRO Log Book: name, menu, deeds mode, running progress,
  * reputation and crafting pages. Merged into window.MQL_TEXTE after texte.js; keys
  * ending in _taten replace their plain key while the map shows deeds.
  */
@@ -6,8 +6,8 @@
 	'use strict';
 	var zusatz = {
 		de: {
-			titel: 'Mittelerde-Logbuch – Der Herr der Ringe Online',
-			produkt: 'Mittelerde-Logbuch',
+			titel: 'LOTRO Log Book – Der Herr der Ringe Online',
+			produkt: 'LOTRO Log Book',
 			menue_taten: 'Taten',
 			menue_ruf: 'Ruf',
 			menue_handwerk: 'Handwerk',
@@ -19,7 +19,7 @@
 			suche_platzhalter_taten: 'Name einer Tat oder Teil davon',
 			kein_ziel_taten: 'Für diese Tat ist kein Zielort belegt – sie erscheint deshalb nicht auf der Karte.',
 			ohne_punkte_taten: 'Keine Tat dieser Zeile hat einen belegten Zielort.',
-			titel_taten: 'Taten – Mittelerde-Logbuch',
+			titel_taten: 'Taten – LOTRO Log Book',
 			ohne_charakter: 'Noch kein Spielstand geladen. Auf der Seite <a href="spielstand.html">Spielstand</a> holt Ihr ihn aus LOTRO Companion.',
 			ru_titel: 'Ruf',
 			ru_text: 'Euer Ruf bei allen Fraktionen, so wie LOTRO Companion ihn beim letzten Import gelesen hat. Der Balken zeigt die erreichte Stufe; die Punkte sind die insgesamt verdienten.',
@@ -43,8 +43,8 @@
 			hw_keine_daten: 'Für diesen Charakter wurde kein Handwerk gelesen. Ladet den Companion-Ordner auf der Seite Spielstand neu.'
 		},
 		en: {
-			titel: 'Middle-earth Logbook – The Lord of the Rings Online',
-			produkt: 'Middle-earth Logbook',
+			titel: 'LOTRO Log Book – The Lord of the Rings Online',
+			produkt: 'LOTRO Log Book',
 			menue_taten: 'Deeds',
 			menue_ruf: 'Reputation',
 			menue_handwerk: 'Crafting',
@@ -56,7 +56,7 @@
 			suche_platzhalter_taten: 'Deed name or part of it',
 			kein_ziel_taten: 'No objective position is recorded for this deed, so it does not appear on the map.',
 			ohne_punkte_taten: 'No deed in this row has a verified objective position.',
-			titel_taten: 'Deeds – Middle-earth Logbook',
+			titel_taten: 'Deeds – LOTRO Log Book',
 			ohne_charakter: 'No progress loaded yet. The <a href="spielstand.html">Progress</a> page brings it in from LOTRO Companion.',
 			ru_titel: 'Reputation',
 			ru_text: 'Your standing with every faction, as LOTRO Companion read it at the last import. The bar shows the tier reached; points are the total earned.',
@@ -80,8 +80,8 @@
 			hw_keine_daten: 'No crafting was read for this character. Load the Companion folder again on the Progress page.'
 		},
 		fr: {
-			titel: 'Journal de la Terre du Milieu – Le Seigneur des Anneaux Online',
-			produkt: 'Journal de la Terre du Milieu',
+			titel: 'LOTRO Log Book – Le Seigneur des Anneaux Online',
+			produkt: 'LOTRO Log Book',
 			menue_taten: 'Prouesses',
 			menue_ruf: 'Réputation',
 			menue_handwerk: 'Artisanat',
@@ -93,7 +93,7 @@
 			suche_platzhalter_taten: 'Nom de prouesse ou partie',
 			kein_ziel_taten: 'Aucune position d’objectif n’est enregistrée pour cette prouesse ; elle n’apparaît donc pas sur la carte.',
 			ohne_punkte_taten: 'Aucune prouesse de cette ligne n’a de position vérifiée.',
-			titel_taten: 'Prouesses – Journal de la Terre du Milieu',
+			titel_taten: 'Prouesses – LOTRO Log Book',
 			ohne_charakter: 'Aucune progression chargée. La page <a href="spielstand.html">Progression</a> la récupère depuis LOTRO Companion.',
 			ru_titel: 'Réputation',
 			ru_text: 'Votre réputation auprès de chaque faction, telle que LOTRO Companion l’a lue au dernier import. La barre montre le palier atteint ; les points sont le total gagné.',

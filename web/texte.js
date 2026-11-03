@@ -6,8 +6,8 @@
  */
 window.MQL_TEXTE = {
 	de: {
-		titel: 'Kartenansicht – Der Herr der Ringe Online',
-		produkt: 'Kartenansicht',
+		titel: 'LOTRO Log Book – Der Herr der Ringe Online',
+		produkt: 'LOTRO Log Book',
 		startseite: 'Startseite',
 		sprache: 'Sprache',
 		suche: 'Suche',
@@ -59,8 +59,8 @@ window.MQL_TEXTE = {
 		start_text: 'Startseite'
 	},
 	en: {
-		titel: 'Map view – The Lord of the Rings Online',
-		produkt: 'Map view',
+		titel: 'LOTRO Log Book – The Lord of the Rings Online',
+		produkt: 'LOTRO Log Book',
 		startseite: 'Home',
 		sprache: 'Language',
 		suche: 'Search',
@@ -112,8 +112,8 @@ window.MQL_TEXTE = {
 		start_text: 'Home'
 	},
 	fr: {
-		titel: 'Carte – Le Seigneur des Anneaux Online',
-		produkt: 'Carte',
+		titel: 'LOTRO Log Book – Le Seigneur des Anneaux Online',
+		produkt: 'LOTRO Log Book',
 		startseite: 'Accueil',
 		sprache: 'Langue',
 		suche: 'Recherche',

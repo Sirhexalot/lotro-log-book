@@ -1,4 +1,4 @@
-/* Menu bar shared by every page of the Middle-earth Logbook: the pages and the
+/* Menu bar shared by every page of the LOTRO Log Book: the pages and the
  * character switch. Needs texte.js, sprache.js (MQL_T) and speicher.js first.
  */
 (function () {
