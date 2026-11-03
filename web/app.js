@@ -236,11 +236,14 @@
 	var loesung = window.MQL_ART === 'taten';
 	var zieleOffen = false;
 	function zeigtZiele(quest) {
-		return loesung || (zieleOffen && quest != null && zustand.auswahl === quest);
+		return zieleOffen && quest != null && zustand.auswahl === quest;
 	}
 	function orte(quest) {
 		if (zeigtZiele(quest)) { return quest.t; }
-		return quest.gt ? [[quest.gt[0], quest.gt[1], quest.gt[2], '']] : [];
+		if (quest.gt) { return [[quest.gt[0], quest.gt[1], quest.gt[2], '']]; }
+		// A deed has no giver: one dot at its first objective marks it on the map,
+		// the others and the steps come with "show objectives".
+		return (loesung && quest.t.length) ? [quest.t[0]] : [];
 	}
 
 	function besteKarte(eintraege, gebiet) {
@@ -807,6 +810,10 @@
 		var ziel = erster && karteNachIndex[erster[0]];
 		if (!ziel) { return; }
 		var jetzt = zustand.karte;
+		// Objectives spread over the area (a deed's ruins, a quest's steps): the map
+		// on show already holds some of them, so it stays.
+		if (jetzt && (zeigtZiele(quest) || !quest.gt) && quest.t.length > 1 &&
+				quest.t.some(function (ort) { return zeigtOrt(jetzt, ort); })) { return; }
 		if (jetzt && (jetzt.idx === ziel.idx ||
 				(jetzt.rahmen !== 'unklar' && zeigtOrt(jetzt, erster) && (jetzt.tier || 0) >= (ziel.tier || 0)))) {
 			return;
@@ -1196,7 +1203,7 @@
 		}
 
 		if (!orte(quest).length) {
-			var hinweisOhne = eltern('p', t(zeigtZiele(quest) ? 'kein_ziel' : 'kein_geberort'));
+			var hinweisOhne = eltern('p', t(zeigtZiele(quest) || loesung ? 'kein_ziel' : 'kein_geberort'));
 			hinweisOhne.className = 'leer';
 			detail.appendChild(hinweisOhne);
 		}
@@ -1208,7 +1215,7 @@
 		}
 
 		// One line under the description folds this quest's objectives in or out.
-		if (!loesung && (quest.s || []).length) {
+		if ((quest.s || []).length) {
 			var schalter = eltern('button', (zieleOffen ? '▾ ' + t('ziele_aus') : '▸ ' + t('ziele_ein')) +
 				(quest.t.length ? ' (' + quest.t.length + ')' : ''));
 			schalter.className = 'ziele-schalter';
