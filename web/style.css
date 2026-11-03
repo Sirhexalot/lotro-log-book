@@ -392,6 +392,12 @@ main {
 
 .punkt.aktiv.fertig { box-shadow: 0 0 0 2px var(--fertig); }
 
+/* Place of a quest without a known giver: its first objective, drawn hollow. */
+.punkt.zielort { background: transparent; border: 2px solid var(--offen); }
+.punkt.zielort.fertig { border-color: var(--fertig); }
+.punkt.zielort.laufend { border-color: var(--laufend); }
+.punkt.zielort.aktiv { background: var(--marke-aktiv); }
+
 /* The selected quest's dot pulses with a widening ring, so it is found at once
    among hundreds of dots. */
 .punkt.aktiv::after {

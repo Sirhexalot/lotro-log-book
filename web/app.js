@@ -244,9 +244,10 @@
 	function orte(quest) {
 		if (zeigtZiele(quest)) { return quest.t; }
 		if (quest.gt) { return [[quest.gt[0], quest.gt[1], quest.gt[2], '']]; }
-		// A deed has no giver: one dot at its first objective marks it on the map,
-		// the others and the steps come with "show objectives".
-		return (loesung && quest.t.length) ? [quest.t[0]] : [];
+		// No known giver place (every deed, some quests): one hollow dot at the first
+		// objective marks the area it is in; the other objectives and the steps
+		// come with "show objectives".
+		return quest.t.length ? [quest.t[0]] : [];
 	}
 
 	function besteKarte(eintraege, gebiet) {
@@ -305,6 +306,8 @@
 	 */
 	function zeigtOrt(karte, ziel) {
 		if (ziel[0] === karte.idx) { return anteil(karte, ziel[1], ziel[2]); }
+		// An overview whose frame does not fit its sub-maps shows only its own dots.
+		if (karte.eigen) { return null; }
 		var eigene = karteNachIndex[ziel[0]];
 		if (!eigene || eigene.mr == null || eigene.mr !== karte.mr) { return null; }
 		var punkt = anteil(karte, ziel[1], ziel[2]);
@@ -623,6 +626,8 @@
 			if (fertig[quest.i]) { dot.classList.add('fertig'); }
 			if (laufend[quest.i] && !fertig[quest.i]) { dot.classList.add('laufend'); }
 			if (!gezaehlt(quest)) { dot.classList.add('nicht-gezaehlt'); }
+			var zielort = !quest.gt && !zeigtZiele(quest);
+			if (zielort) { dot.classList.add('zielort'); }
 			if (zustand.auswahl && zustand.auswahl.i === quest.i) {
 				dot.classList.add('aktiv');
 			}
@@ -631,7 +636,8 @@
 			dot.title = quest.n + (quest.l ? ' (' + t('stufe') + ' ' + stufeText(quest) + ')' : '') +
 				(zustandVon(quest) === 'sitzung' ? ' – ' + t('sitzungsspiel') :
 					(zustandVon(quest) === 'ausgeschlossen' ? ' – ' + t('nicht_moeglich') :
-						(fertig[quest.i] ? t('erledigt_suffix') : '')));
+						(fertig[quest.i] ? t('erledigt_suffix') : ''))) +
+				(zielort ? ' – ' + t('zielort_hinweis') : '');
 			dot.addEventListener('click', function (ereignis) {
 				ereignis.stopPropagation();
 				waehle(quest);

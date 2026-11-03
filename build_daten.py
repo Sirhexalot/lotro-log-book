@@ -16,6 +16,7 @@ Usage (needs lupa, like the plugin's check scripts):
     .../.venv/bin/python build_daten.py --sprache en
 """
 import argparse
+import functools
 import hashlib
 import html
 import json
@@ -29,6 +30,8 @@ STANDARD_KATALOG = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Quests_de.lu
 STANDARD_FORTSCHRITT = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Progress.lua'
 STANDARD_KARTEN = HIER / 'daten/karten.json'
 STANDARD_MOORMAP = Path('/Users/adrian/Documents/The Lord of the Rings Online/Plugins/GaranStuff/MoorMap/Defaults.lua')
+# Rhovanion, Mordor, the Shield Isles, Rivendell: sub-map frames do not fit the image.
+OHNE_UNTERPUNKTE = {30, 152, 403, 29}
 STANDARD_KARTENNAMEN = Path('/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/maps/labels')
 
 
@@ -51,6 +54,7 @@ def moormap_tabelle(pfad):
     return tabelle
 
 
+@functools.lru_cache(maxsize=None)
 def kartennamen(sprache):
     """Map id -> map name in this language, from the game's map labels (the same
     source as the English names in karten.json). Empty when the file is missing."""
@@ -59,7 +63,49 @@ def kartennamen(sprache):
         return {}
     namen = {}
     for treffer in re.finditer(r'<label key="(\d+)" value="([^"]*)"', datei.read_text(encoding='utf-8')):
-        namen[treffer.group(1)] = html.unescape(treffer.group(2)).replace('\\q', '"')
+        namen[treffer.group(1)] = kartenname_putzen(html.unescape(treffer.group(2)).replace('\\q', '"'))
+    return namen
+
+
+def kartenname_putzen(name):
+    """Game markup ("[fp]") and MoorMap's image ids (",0x4114…") out of a map name."""
+    name = re.sub(r'\[[a-z]{1,3}\]', '', name or '')
+    name = re.sub(r'\s*,\s*0x[0-9A-Fa-f].*$', '', name)
+    return name.strip()
+
+
+def name_ueber_englisch(name, sprache):
+    """A map our labels miss by id: find its English name among the English labels
+    and take the same label in this language ("helm's deep" -> "Helms Klamm")."""
+    name = kartenname_putzen(name)
+    # "Glittering Caves (before dawn)": the base name is translated, the
+    # parenthesis has no game label and stays.
+    treffer = re.match(r'^(.*?)(\s*\([^)]*\))?$', name)
+    grund, zusatz = treffer.group(1), treffer.group(2) or ''
+
+    def gleich(a, b):
+        a, b = a.lower().strip(), b.lower().strip()
+        return a == b or re.sub(r'^the ', '', a) == re.sub(r'^the ', '', b) or a.endswith(': ' + b)
+
+    for schluessel, wert in kartennamen('en').items():
+        if gleich(wert, grund):
+            return kartennamen(sprache).get(schluessel, wert) + zusatz
+    for englisch, sprachen in gebietsnamen().items():
+        if gleich(englisch, grund):
+            return sprachen.get(sprache, englisch) + zusatz
+    return name[:1].upper() + name[1:]
+
+
+@functools.lru_cache(maxsize=None)
+def gebietsnamen():
+    """English area name -> its names in all languages, from our own DAT export."""
+    datei = BASIS / 'Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/areas.json'
+    namen = {}
+    if datei.is_file():
+        for gebiet in json.loads(datei.read_text(encoding='utf-8')):
+            texte = (gebiet.get('title') or {}).get('texts') or {}
+            if texte.get('en'):
+                namen.setdefault(texte['en'], texte)
     return namen
 
 
@@ -97,22 +143,68 @@ def kartenbaum(sprache, moormap=STANDARD_MOORMAP):
             continue
         kinder = [anderer['name'] for anderer in tabelle.values()
                   if anderer['eltern'] == index and ':' in anderer['name']]
-        vorsilben = {name.split(':', 1)[0].strip() for name in kinder}
-        eintrag['name'] = vorsilben.pop() if len(vorsilben) == 1 else (eintrag['kommentar'] or 'Karte %d' % index)
+        vorsilben = {re.sub(r'\s+', ' ', name.replace('\xa0', ' ').split(':', 1)[0]).strip() for name in kinder}
+        eintrag['name'] = (vorsilben.pop() if len(vorsilben) == 1 else
+                           name_ueber_englisch(eintrag['kommentar'], sprache) or 'Karte %d' % index)
     return tabelle
+
+
+# Area names of the catalogue that name a map under another name, the same in all
+# languages: Imlad Morgul is the Morgul Vale, Umbar the Cape of Umbar.
+NAMENSBEZUG = {'imladmorgul': 202, 'umbar': 404}
+
+
+def abstand(a, b):
+    """Edit distance (insert, delete, replace)."""
+    vorher = list(range(len(b) + 1))
+    for i, zeichen in enumerate(a, 1):
+        jetzt = [i]
+        for j, anderes in enumerate(b, 1):
+            jetzt.append(min(vorher[j] + 1, jetzt[j - 1] + 1, vorher[j - 1] + (zeichen != anderes)))
+        vorher = jetzt
+    return vorher[-1]
 
 
 def kartenpfade(quests, karten, sprache, art):
     """The tree follows the game's maps: Eriador > Breeland > Bree.
 
     A quest hangs on the map of its quest giver, or of its first objective; a deed
-    on the most detailed map that holds all its objectives (the ruins of Bree-land
+    on the most detailed map that holds three quarters of its objectives (the ruins of Bree-land
     on Bree-land, not on Archet). Each level carries its map index in `fk` (None
     for a map without an image, which only groups). Quests the catalogue files
     under a section (epic story, instances, festivals …) keep that section, and a
     quest without any place goes to the map that bears its area's name."""
     baum = kartenbaum(sprache)
     mit_bild = {karte['idx'] for karte in karten}
+    rahmen = {karte['idx']: karte for karte in karten}
+    kinder = {}
+    for index, eintrag in baum.items():
+        if index in mit_bild:
+            kinder.setdefault(eintrag['eltern'], []).append(index)
+
+    def genauer(index, lat, lon):
+        # A point attributed to an overview whose frame lies inside a more detailed
+        # map below it goes down to that map (Rhovanion's frame does not fit, its
+        # sub-maps' frames do).
+        gesehen = set()
+        while index not in gesehen:
+            gesehen.add(index)
+            passend = [kind for kind in kinder.get(index, [])
+                       if rahmen[kind]['south'] <= lat <= rahmen[kind]['north']
+                       and rahmen[kind]['west'] <= lon <= rahmen[kind]['east']]
+            if not passend:
+                return index
+            passend.sort(key=lambda kind: (-baum[kind]['tier'],
+                                           (rahmen[kind]['north'] - rahmen[kind]['south'])
+                                           * (rahmen[kind]['east'] - rahmen[kind]['west'])))
+            index = passend[0]
+        return index
+
+    def normal(name):
+        name = re.sub(r'^.*?:\s*', '', (name or '').replace('\xa0', ' ').lower())
+        name = name.split(',')[0]
+        name = re.sub(r"^(der|die|das|the|le|la|les|l')\s*", '', name)
+        return re.sub(r'[^0-9a-zà-ÿ]', '', name)
 
     def kette(index):
         glieder, gesehen = [], set()
@@ -129,15 +221,57 @@ def kartenpfade(quests, karten, sprache, art):
             laenge += 1
         return erste[:laenge]
 
+    # Every map of the tree can be found by name (also the ones no entry hangs on yet).
     je_name = {}
+    for index in sorted(baum, key=lambda i: -baum[i]['tier']):
+        glieder = kette(index)
+        if glieder:
+            je_name.setdefault(normal(baum[index]['name']),
+                               ([baum[i]['name'] for i in glieder], [i if i in mit_bild else None for i in glieder]))
+
+    def finde(name):
+        schluessel = normal(name)
+        if len(schluessel) < 4:
+            return je_name.get(schluessel)
+        if schluessel in je_name:
+            return je_name[schluessel]
+        if schluessel in NAMENSBEZUG:
+            index = NAMENSBEZUG[schluessel]
+            return ([baum[i]['name'] for i in kette(index)], [i if i in mit_bild else None for i in kette(index)])
+        # Inflection only ("Einsamen Lande" / "Einsame Lande"): at most two letters
+        # apart, same start.
+        for anderer, wert in je_name.items():
+            if len(anderer) >= 6 and anderer[:4] == schluessel[:4] and abstand(anderer, schluessel) <= 2:
+                return wert
+        return None
     zaehler = {'karte': 0, 'name': 0, 'sektion': 0, 'ohne': 0}
     ohne_ort = []
+    for quest in quests:
+        # Every place goes down to the most detailed map whose frame holds it, so
+        # the dot, the tree and a click all name the same map.
+        if quest.get('gt'):
+            quest['gt'][0] = genauer(quest['gt'][0], quest['gt'][1], quest['gt'][2])
+        for ziel in quest['t']:
+            ziel[0] = genauer(ziel[0], ziel[1], ziel[2])
     for quest in quests:
         if quest.get('_sek'):
             zaehler['sektion'] += 1
             continue
         if art == 'taten' and quest['t']:
-            pfad = gemeinsam([kette(ziel[0]) for ziel in quest['t']])
+            # The most detailed map that holds at least three quarters of the
+            # objectives: a few stray ones on the overview must not lift the ruins
+            # of Bree-land up to Eriador.
+            ketten = [kette(ziel[0]) for ziel in quest['t']]
+            pfad = gemeinsam(ketten)
+            for laenge in range(max(len(k) for k in ketten), len(pfad), -1):
+                zaehlung = {}
+                for k in ketten:
+                    if len(k) >= laenge:
+                        zaehlung[tuple(k[:laenge])] = zaehlung.get(tuple(k[:laenge]), 0) + 1
+                bester = max(zaehlung.items(), key=lambda paar: paar[1]) if zaehlung else None
+                if bester and bester[1] >= 0.75 * len(ketten):
+                    pfad = list(bester[0])
+                    break
         else:
             ort = quest.get('gt') or (quest['t'][0] if quest['t'] else None)
             pfad = kette(ort[0]) if ort else []
@@ -146,17 +280,23 @@ def kartenpfade(quests, karten, sprache, art):
             continue
         quest['f'] = [baum[index]['name'] for index in pfad]
         quest['fk'] = [index if index in mit_bild else None for index in pfad]
-        je_name.setdefault(quest['f'][-1], (quest['f'], quest['fk']))
         zaehler['karte'] += 1
     for quest in ohne_ort:
         treffer, stelle = None, -1
         for stelle in range(len(quest['f']) - 1, -1, -1):
-            if quest['f'][stelle] in je_name:
-                treffer = je_name[quest['f'][stelle]]
+            treffer = finde(quest['f'][stelle])
+            if treffer and (stelle > 0 or len(quest['f']) == 1):
                 break
+            treffer = None
         if treffer:
             # Found only by a coarser name: the finer old area stays as a section.
-            rest = quest['f'][stelle + 1:]
+            # Drop parts that only repeat the place ("Täler des Anduin: Laerlad"
+            # under Täler des Anduin becomes "Laerlad").
+            rest = []
+            for teil in quest['f'][stelle + 1:]:
+                teil = re.sub(r'^' + re.escape(quest['f'][stelle]) + r'\s*:\s*', '', teil)
+                if teil and normal(teil) != normal(quest['f'][stelle]) and (not rest or rest[-1] != teil):
+                    rest.append(teil)
             if rest:
                 quest['a'] = ' › '.join(rest + ([quest['a']] if quest.get('a') else []))
                 quest['ak'] = 1
@@ -166,6 +306,10 @@ def kartenpfade(quests, karten, sprache, art):
             zaehler['ohne'] += 1
     for quest in quests:
         quest.pop('_sek', None)
+        if quest.get('a') and quest.get('f') and quest['a'] == quest['f'][-1]:
+            # The old area became the node itself; a section of the same name repeats it.
+            quest.pop('a', None)
+            quest.pop('ak', None)
         if quest.get('fk'):
             # The place names in the details follow the same path as the tree.
             pfad = quest['f']
@@ -626,11 +770,17 @@ def main():
     moor = moormap_tabelle(STANDARD_MOORMAP)
     namen = kartennamen(options.sprache)
     for karte in karten:
-        karte['name'] = namen.get(str(karte.get('id')), karte['name'])
+        karte['name'] = namen.get(str(karte.get('id'))) or name_ueber_englisch(karte['name'], options.sprache)
     for karte in karten:
         karte['region'] = regionen.get(karte['idx'], '')
         # MoorMap's own region number and parent: the page shows an objective on
         # every map of the same region whose frame contains it.
+        # Overview maps whose frame does not match their drawing for the places
+        # below them (checked by drawing each sub-map's frame onto the image,
+        # 03.11.2026): Rhovanion uses another coordinate system (MoorMap says so),
+        # Moria then lands among the Beornings. These show only their own dots.
+        if karte['idx'] in OHNE_UNTERPUNKTE:
+            karte['eigen'] = 1
         eintrag = moor.get(karte['idx'])
         if eintrag:
             karte['mr'] = eintrag['region']
