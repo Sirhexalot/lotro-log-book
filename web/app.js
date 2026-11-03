@@ -814,10 +814,8 @@
 		// on show already holds some of them, so it stays.
 		if (jetzt && (zeigtZiele(quest) || !quest.gt) && quest.t.length > 1 &&
 				quest.t.some(function (ort) { return zeigtOrt(jetzt, ort); })) { return; }
-		if (jetzt && (jetzt.idx === ziel.idx ||
-				(jetzt.rahmen !== 'unklar' && zeigtOrt(jetzt, erster) && (jetzt.tier || 0) >= (ziel.tier || 0)))) {
-			return;
-		}
+		// Otherwise always the most detailed map of the place (Bree, not Breeland).
+		if (jetzt && jetzt.idx === ziel.idx) { return; }
 		var knoten = zustand.knoten;
 		zeigeKarte(erster[0]);
 		zustand.knoten = knoten;
