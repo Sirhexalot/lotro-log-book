@@ -261,6 +261,8 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap
             **({'vo': [str(x) for x in step_list(field(record, 'vo'))]} if field(record, 'vo') else {}),
             **({'vl': int(field(record, 'vl'))} if field(record, 'vl') else {}),
             **({'vb': 1} if field(record, 'vb') else {}),
+            # ls: the level follows the character; l is only a floor.
+            **({'ls': 1} if field(record, 'ls') else {}),
             # g: quest giver (first bestowing NPC), where the game names one.
             **({'g': str(field(record, 'g'))} if field(record, 'g') else {}),
             'l': str(record['l']) if 'l' in record and record['l'] else '',

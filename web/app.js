@@ -300,9 +300,19 @@
 	 * half (25th to 75th percentile), so a few low or high stray quests do
 	 * not stretch it. Shown only with at least five quests that have a level.
 	 */
+	/** "5", or "~" / "~100" when the level follows the character. */
+	function stufeText(quest) {
+		if (!quest.ls) { return String(quest.l); }
+		return Number(quest.l) > 1 ? '~' + quest.l : '~';
+	}
+
 	function stufenSpanne(eintraege) {
-		var stufen = [];
-		eintraege.forEach(function (quest) { if (quest.l > 0) { stufen.push(quest.l); } });
+		var stufen = [], mitwachsend = 0;
+		eintraege.forEach(function (quest) {
+			if (quest.ls) { mitwachsend += 1; } else if (quest.l > 0) { stufen.push(quest.l); }
+		});
+		// Mostly content that grows with the character: say so instead of a range.
+		if (mitwachsend >= 5 && mitwachsend >= stufen.length) { return t('stufe') + ' ~'; }
 		if (stufen.length < 5) { return ''; }
 		stufen.sort(function (a, b) { return a - b; });
 		var unten = stufen[Math.floor((stufen.length - 1) * 0.25)];
@@ -540,7 +550,7 @@
 			}
 			dot.style.left = (treffer.punkt.x * 100) + '%';
 			dot.style.top = (treffer.punkt.y * 100) + '%';
-			dot.title = quest.n + (quest.l ? ' (' + t('stufe') + ' ' + quest.l + ')' : '') +
+			dot.title = quest.n + (quest.l ? ' (' + t('stufe') + ' ' + stufeText(quest) + ')' : '') +
 				(zustandVon(quest) === 'sitzung' ? ' – ' + t('sitzungsspiel') :
 					(zustandVon(quest) === 'ausgeschlossen' ? ' – ' + t('nicht_moeglich') :
 						(fertig[quest.i] ? t('erledigt_suffix') : '')));
@@ -616,7 +626,8 @@
 				zeile.appendChild(stand);
 			}
 			if (quest.l) {
-				var stufe = eltern('span', t('stufe') + ' ' + quest.l);
+				var stufe = eltern('span', t('stufe') + ' ' + stufeText(quest));
+				if (quest.ls) { stufe.title = t('mitwachsend'); }
 				stufe.className = 'stufe';
 				zeile.appendChild(stufe);
 			}
@@ -700,7 +711,7 @@
 		}
 		detail.appendChild(eltern('h2', quest.n));
 		var kennung = [];
-		if (quest.l) { kennung.push(t('stufe') + ' ' + quest.l); }
+		if (quest.l) { kennung.push(t('stufe') + ' ' + stufeText(quest) + (quest.ls ? ' (' + t('mitwachsend') + ')' : '')); }
 		if (quest.g) { kennung.push(ersetze(t('auftraggeber'), [quest.g])); }
 		if (quest.z) { kennung.push(ABSCHNITTE[quest.z] || quest.z); }
 		if (quest.u) { kennung.push(quest.u); }
