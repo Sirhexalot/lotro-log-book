@@ -16,6 +16,7 @@
 			<a href="start-en.html" lang="en">EN</a>
 			<a href="start-fr.html" lang="fr">FR</a>
 		</nav>
+		<a class="knopf klein" href="spielstand.html?lang=de">Spielstand</a>
 		<a class="knopf klein" href="index.html?lang=de">Zur Karte</a>
 	</div>
 </header>
@@ -55,30 +56,17 @@
 	</section>
 
 	<section>
-		<h3>Spielstand erstellen</h3>
-		<p>Für die Zahlen brauchst du deine <code>Progress.lua</code>. Das Werkzeug
-		liest sie aus dem laufenden Spiel; es ändert nichts am Spiel und schickt
-		nichts ins Netz.</p>
-		<p><a class="knopf" href="download/mql-spielstand.zip">Werkzeug herunterladen (12 KB)</a></p>
-		<ol class="schritte">
-			<li><strong>Auspacken.</strong> ZIP in einen eigenen Ordner entpacken.</li>
-			<li><strong>Spiel starten.</strong> Magic Quest Log muss installiert sein und
-			das Spiel laufen.</li>
-			<li><strong>Starter doppelklicken.</strong> Windows:
-			<code>read-journal.bat</code>, macOS: <code>read-journal.command</code>.</li>
-			<li><strong>Datei wählen.</strong> Die entstandene <code>Progress.lua</code>
-			auf der Karte mit „Spielstand laden“ auswählen.</li>
-		</ol>
-	</section>
-
-	<section>
-		<h3>Dein Fortschritt</h3>
-		<p>Die Zahlen im Baum und die Farbe der Punkte kommen aus <code>Progress.lua</code>
-		deines Charakters. Die Datei liegt im Plugin-Ordner unter
-		<code>MagicQuestLog/Data/</code> und wird beim Bau der Seite gelesen
-		(<code>build_daten.py</code>).</p>
-		<p>Fehlt sie, funktioniert die Karte trotzdem – sie zeigt dann nur keine Zahlen und
+		<h3>Dein Spielstand</h3>
+		<p>Die Zahlen im Baum und die Farbe der Punkte kommen aus <strong>LOTRO Companion</strong>.
+		Auf der Seite <a href="spielstand.html?lang=de">Spielstand</a> lädst du Companions Ordner –
+		er wird nur in deinem Browser gelesen, nichts wird hochgeladen. Du kannst mehrere
+		Charaktere laden und oben im Menü zwischen ihnen wechseln. Dieselbe Seite schreibt die
+		Dateien für das Plugin <em>Magic Quest Log</em>.</p>
+		<p><a class="knopf" href="spielstand.html?lang=de">Zum Spielstand</a></p>
+		<p>Ohne Spielstand funktioniert die Karte trotzdem – sie zeigt dann nur keine Zahlen und
 		färbt keine Punkte. Es wird keine Null erfunden.</p>
+		<p>Du sammelst vor allem Taten? Dafür gibt es das ausgereifte Plugin <a href="https://www.lotrointerface.com/downloads/info1139-DeedTracker.html">Deed Tracker</a> von
+		b414213562. Magic Quest Log ist vor allem für Aufgaben gedacht.</p>
 	</section>
 
 	<section>
@@ -89,7 +77,7 @@
 			<li>Von 15.209 Aufgaben haben 8.403 eine belegte Position. Die übrigen stehen im
 			Baum und in der Liste, bekommen aber keinen Punkt – lieber keine Marke als eine
 			falsche.</li>
-			<li>Sie ist keine Live-Karte. Sie kennt deinen Stand vom Zeitpunkt des Exports.</li>
+			<li>Sie ist keine Live-Karte. Sie kennt deinen Stand vom letzten Companion-Import.</li>
 		</ul>
 	</section>
 

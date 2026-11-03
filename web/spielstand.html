@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spielstand – Magic Quest Log</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-seite="spielstand" class="seite-text">
+
+<header class="kopf">
+	<h1 data-t="produkt">Kartenansicht</h1>
+	<nav class="menue" id="menue" aria-label="Menü"></nav>
+	<nav class="sprachen" aria-label="Sprache">
+		<button type="button" data-lang="de" aria-pressed="true">DE</button>
+		<button type="button" data-lang="en" aria-pressed="false">EN</button>
+		<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+	</nav>
+</header>
+
+<main class="seite">
+	<h2 data-t="sp_titel">Spielstand</h2>
+	<p data-t-html="sp_einleitung"></p>
+	<div class="kasten hinweis-gut"><p data-t-html="sp_datenschutz"></p></div>
+
+	<h2 data-t="sp_schritt1">1. Charakter in LOTRO Companion importieren</h2>
+	<p data-t-html="sp_companion"></p>
+	<div class="reiter" role="tablist">
+		<button type="button" data-reiter="windows" aria-pressed="true">Windows</button>
+		<button type="button" data-reiter="mac" aria-pressed="false">macOS</button>
+	</div>
+	<div class="kasten reiter-inhalt" data-inhalt="windows">
+		<ol data-t-html="sp_windows"></ol>
+	</div>
+	<div class="kasten reiter-inhalt" data-inhalt="mac" hidden>
+		<ol data-t-html="sp_mac"></ol>
+		<code class="befehl" id="mac-befehl">for A in "$HOME/Applications" "/Applications"; do
+  S="$A/The Lord of the Rings Online.app/Contents/SharedSupport"; [ -d "$S" ] &amp;&amp; break
+done
+for C in "$HOME/Applications/LotRO Companion" "/Applications/LotRO Companion" "$HOME/Applications/"*/"LotRO Companion"; do
+  [ -d "$C/app" ] &amp;&amp; break
+done
+cd "$C/app" &amp;&amp; WINEPREFIX="$S/prefix" WINEMSYNC=1 WINEESYNC=1 WINEDEBUG=-all \
+  DYLD_FALLBACK_LIBRARY_PATH="$S/wine/lib" "$S/wine/bin/wine64" "../LotRO Companion.exe"</code>
+		<div class="zeile-knoepfe"><button type="button" id="mac-kopieren" data-t="sp_kopieren">Befehl kopieren</button></div>
+		<p class="schwach" data-t-html="sp_mac_warnung"></p>
+	</div>
+
+	<h2 data-t="sp_schritt2">2. Hier laden</h2>
+	<p data-t-html="sp_laden"></p>
+	<div class="kasten">
+		<div class="reiter-inhalt" data-inhalt="windows">
+			<span class="schwach" data-t="sp_ordner_windows">Ordner unter Windows:</span>
+			<code>%USERPROFILE%\.lotrocompanion\data\characters</code>
+		</div>
+		<div class="reiter-inhalt" data-inhalt="mac" hidden>
+			<span class="schwach" data-t="sp_ordner_mac">Ordner auf dem Mac (versteckt; im Auswahldialog ⌘⇧G drücken und einfügen):</span>
+			<code>~/Applications/The Lord of the Rings Online.app/Contents/SharedSupport/prefix/drive_c/users/Wineskin/.lotrocompanion/data/characters</code>
+		</div>
+	</div>
+	<div class="ablage" id="ablage">
+		<p data-t="sp_ablage">Ordner „characters“ hierher ziehen</p>
+		<input id="ordner" type="file" webkitdirectory directory multiple hidden>
+		<button type="button" class="knopf-gold" id="ordner-waehlen" data-t="sp_ordner_waehlen">Ordner wählen …</button>
+	</div>
+	<p class="meldung" id="meldung" role="status"></p>
+
+	<h2 data-t="sp_schritt3">3. Eure Charaktere</h2>
+	<div class="tabellen-rahmen"><table class="tabelle" id="tabelle">
+		<thead><tr>
+			<th data-t="sp_spalte_name">Name</th>
+			<th data-t="sp_spalte_server">Server</th>
+			<th data-t="sp_spalte_klasse">Klasse</th>
+			<th class="zahl" data-t="sp_spalte_stufe">Stufe</th>
+			<th class="zahl" data-t="sp_spalte_aufgaben">Aufgaben</th>
+			<th class="zahl" data-t="sp_spalte_taten">Taten</th>
+			<th data-t="sp_spalte_stand">Stand</th>
+			<th></th>
+		</tr></thead>
+		<tbody id="zeilen"></tbody>
+	</table></div>
+
+	<h2 data-t="sp_schritt4">4. Ins Plugin übernehmen</h2>
+	<p data-t-html="sp_plugin"></p>
+	<div class="zeile-knoepfe">
+		<button type="button" class="knopf-gold" id="schreiben" data-t="sp_schreiben">In den LOTRO-Ordner schreiben</button>
+		<button type="button" id="zip" data-t="sp_zip">Als Zip herunterladen</button>
+	</div>
+	<p class="schwach" id="schreiben-hinweis" data-t-html="sp_schreiben_hinweis"></p>
+	<p class="meldung" id="meldung-plugin" role="status"></p>
+	<div class="kasten">
+		<span class="schwach" data-t="sp_plugindata">Der Ordner „PluginData“ liegt hier:</span><br>
+		Windows: <code>Dokumente\The Lord of the Rings Online\PluginData</code><br>
+		macOS: <code>~/Documents/The Lord of the Rings Online/PluginData</code>
+	</div>
+
+	<h2 data-t="sp_schritt5">5. Sichern</h2>
+	<p data-t-html="sp_sichern"></p>
+	<div class="zeile-knoepfe">
+		<button type="button" id="sicherung" data-t="sp_sicherung">Sicherung herunterladen</button>
+		<button type="button" id="sicherung-laden" data-t="sp_sicherung_laden">Sicherung laden …</button>
+		<input id="sicherung-datei" type="file" accept=".json,application/json" hidden>
+	</div>
+	<p class="meldung" id="meldung-sicherung" role="status"></p>
+
+	<h2 data-t="sp_fragen">Häufige Fragen</h2>
+	<div id="fragen" data-t-html="sp_faq"></div>
+</main>
+
+<script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
+<script src="sprache.js"></script>
+<script src="speicher.js"></script>
+<script src="menue.js"></script>
+<script src="companion.js"></script>
+<script src="spielstand.js"></script>
+</body>
+</html>

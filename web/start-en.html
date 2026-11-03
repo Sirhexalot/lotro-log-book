@@ -16,6 +16,7 @@
 			<a href="start-en.html" aria-pressed="true" lang="en">EN</a>
 			<a href="start-fr.html" lang="fr">FR</a>
 		</nav>
+		<a class="knopf klein" href="spielstand.html?lang=en">Progress</a>
 		<a class="knopf klein" href="index.html?lang=en">To the map</a>
 	</div>
 </header>
@@ -55,29 +56,17 @@
 	</section>
 
 	<section>
-		<h3>Create your progress file</h3>
-		<p>For the numbers you need your <code>Progress.lua</code>. The tool reads it
-		from the running game; it changes nothing and sends nothing anywhere.</p>
-		<p><a class="knopf" href="download/mql-spielstand.zip">Download the tool (12 KB)</a></p>
-		<ol class="schritte">
-			<li><strong>Unpack.</strong> Extract the ZIP into its own folder.</li>
-			<li><strong>Start the game.</strong> Magic Quest Log must be installed and
-			the game running.</li>
-			<li><strong>Run the starter.</strong> Windows: <code>read-journal.bat</code>,
-			macOS: <code>read-journal.command</code>.</li>
-			<li><strong>Choose the file.</strong> Load the resulting
-			<code>Progress.lua</code> on the map with “Load progress”.</li>
-		</ol>
-	</section>
-
-	<section>
 		<h3>Your progress</h3>
-		<p>The numbers in the tree and the colour of the dots come from
-		<code>Progress.lua</code> for your character. The file lives in the plugin
-		folder under <code>MagicQuestLog/Data/</code> and is read when the page is
-		built (<code>build_daten.py</code>).</p>
-		<p>Without it the map still works — it simply shows no numbers and leaves the
-		dots uncoloured. No zero is invented.</p>
+		<p>The numbers in the tree and the colour of the dots come from <strong>LOTRO Companion</strong>.
+		On the <a href="spielstand.html?lang=en">Progress</a> page you load Companion's folder – it is
+		read only in your browser, nothing is uploaded. You can load several characters and switch
+		between them in the menu. The same page writes the files for the <em>Magic Quest Log</em>
+		plugin.</p>
+		<p><a class="knopf" href="spielstand.html?lang=en">Go to progress</a></p>
+		<p>Without progress the map still works – it simply shows no numbers and leaves the dots
+		uncoloured. No zero is invented.</p>
+		<p>Mostly collecting deeds? There is the mature <a href="https://www.lotrointerface.com/downloads/info1139-DeedTracker.html">Deed Tracker</a> plugin by b414213562 for that.
+		Magic Quest Log is mainly about quests.</p>
 	</section>
 
 	<section>
@@ -87,7 +76,7 @@
 			accept a quest is not part of the game data.</li>
 			<li>Of 15,209 quests, 8,403 have a verified position. The rest are listed in the
 			tree and the quest list but get no dot — better no marker than a wrong one.</li>
-			<li>It is not live. It knows your progress as of the export.</li>
+			<li>It is not live. It knows your progress as of your last Companion import.</li>
 		</ul>
 	</section>
 

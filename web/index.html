@@ -6,19 +6,15 @@
 <title>Kartenansicht – Der Herr der Ringe Online</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-seite="karte">
 
 <header class="kopf">
-	<a class="startlink" href="start.html" data-t="startseite">Startseite</a>
 	<h1 data-t="produkt">Kartenansicht</h1>
+	<nav class="menue" id="menue" aria-label="Menü"></nav>
 	<label class="feld breit">
 		<span data-t="suche">Suche</span>
 		<input id="suche" type="search" data-t-ph="suche_platzhalter" placeholder="Aufgabenname oder Teil davon" autocomplete="off">
 	</label>
-	<input id="datei" type="file" accept=".lua,text/plain" hidden>
-	<button id="spielstand" type="button" data-t="spielstand_laden" hidden>Spielstand laden</button>
-	<span id="fortschritt-stand" class="stand-klein" hidden></span>
-	<button id="spielstand-weg" type="button" title="Fortschritt entfernen" hidden>×</button>
 	<nav class="sprachen" aria-label="Sprache">
 		<button type="button" data-lang="de" aria-pressed="true">DE</button>
 		<button type="button" data-lang="en" aria-pressed="false">EN</button>
@@ -71,6 +67,9 @@
 </main>
 
 <script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
 <script src="sprache.js"></script>
+<script src="speicher.js"></script>
+<script src="menue.js"></script>
 </body>
 </html>

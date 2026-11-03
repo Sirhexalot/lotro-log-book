@@ -39,8 +39,6 @@ window.MQL_TEXTE = {
 		sitzung_hinweis: 'Sitzungsspiel: Hier spielt Ihr kurz jemand anderen. Das Spiel trägt es nicht als erledigt ein, deshalb zählt es nicht mit.',
 		ausgeschlossen_hinweis: 'Nicht möglich: „%s“ ist bereits erledigt.',
 		ohne_punkte: 'Keine Aufgabe dieser Zeile hat einen belegten Zielort.',
-		spielstand_laden: 'Spielstand laden',
-		datei_leer: 'In dieser Datei steht kein abgeschlossenes Quest. Erwartet wird Progress.lua aus MagicQuestLog/Data/.',
 		kein_ziel: 'Für diese Aufgabe ist kein Zielort belegt – sie erscheint deshalb nicht auf der Karte.',
 		aufgabe: 'Aufgabe',
 		aufgaben_mehrzahl: 'Aufgaben',
@@ -94,8 +92,6 @@ window.MQL_TEXTE = {
 		sitzung_hinweis: 'Session play: you play someone else for a while. The game does not record it as finished, so it is not counted.',
 		ausgeschlossen_hinweis: 'Not possible: "%s" is already finished.',
 		ohne_punkte: 'No quest in this row has a verified objective position.',
-		spielstand_laden: 'Load progress',
-		datei_leer: 'No completed quest was found in this file. Expected is Progress.lua from MagicQuestLog/Data/.',
 		kein_ziel: 'No objective position is recorded for this quest, so it does not appear on the map.',
 		aufgabe: 'quest',
 		aufgaben_mehrzahl: 'quests',
@@ -166,7 +162,5 @@ window.MQL_TEXTE = {
 		ausgeschlossen_hinweis: 'Impossible : « %s » est déjà terminé.',
 		kein_ziel: 'Aucune position d’objectif n’est enregistrée pour cette quête ; elle n’apparaît donc pas sur la carte.',
 		ohne_punkte: 'Aucune quête de cette ligne n’a de position vérifiée.',
-		spielstand_laden: 'Charger la progression',
-		datei_leer: 'Aucune quête terminée trouvée. Attendu : Progress.lua depuis MagicQuestLog/Data/.'
 	}
 };

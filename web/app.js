@@ -19,16 +19,14 @@
 
 	var karten = window.MQL_KARTEN || [];
 	var quests = window.MQL_QUESTS || [];
-	var fortschritt = window.MQL_FORTSCHRITT || { ids: [] };
-	// On the website no progress file is built in. There the visitor loads
-	// their own Progress.lua; it stays in the browser.
-	var eingebaut = (fortschritt.ids || []).length > 0;
-	var eigener = null;
-	try {
-		eigener = JSON.parse(window.localStorage.getItem('mql.fortschritt') || 'null');
-	} catch (fehler) { eigener = null; }
-	if (!eingebaut && eigener && eigener.ids && eigener.ids.length) {
-		fortschritt = eigener;
+	// Progress: the character chosen in the menu (loaded on the progress page,
+	// kept in this browser). A local build may also carry a built-in file; it is
+	// only used while no character is chosen.
+	var eingebaut = window.MQL_FORTSCHRITT || { ids: [] };
+	var speicher = window.MQL_SPEICHER;
+	var fortschritt = { ids: speicher ? speicher.aktiveIds() : [] };
+	if (!fortschritt.ids.length && !(speicher && speicher.aktiv()) && (eingebaut.ids || []).length) {
+		fortschritt = { ids: eingebaut.ids };
 	}
 
 	var suche = document.getElementById('suche');
@@ -823,65 +821,6 @@
 		zustand.sichtbar += ANSICHT_JE_SEITE;
 		zeigeListe(listeTitel.textContent, zustand.treffer);
 	});
-
-	// --- Load progress ------------------------------------------------
-	function leseFortschritt(text) {
-		var kopf = /\["character"\]\s*=\s*"([^"]*)"/.exec(text);
-		var datum = /\["date"\]\s*=\s*"([^"]*)"/.exec(text);
-		var block = /\["completed"\]\s*=\s*\{(.*?)\n\s*\}/.exec(text);
-		var quelle = block ? block[1] : text;
-		var ids = [], treffer, muster = /\["([0-9A-Fa-f]{8})"\]\s*=\s*true/g;
-		while ((treffer = muster.exec(quelle)) !== null) {
-			ids.push(treffer[1].toUpperCase());
-		}
-		return {
-			character: kopf ? kopf[1] : '',
-			date: datum ? datum[1] : '',
-			ids: ids
-		};
-	}
-
-	var datei = document.getElementById('datei');
-	var laden = document.getElementById('spielstand');
-	var weg = document.getElementById('spielstand-weg');
-	var standKlein = document.getElementById('fortschritt-stand');
-
-	if (laden && datei) {
-		if (!eingebaut && !(fortschritt.ids || []).length) {
-			laden.hidden = false;
-		}
-		if (!eingebaut && (fortschritt.ids || []).length && standKlein) {
-			standKlein.hidden = false;
-			standKlein.textContent = (fortschritt.character || '?') +
-				(fortschritt.date ? ' · ' + fortschritt.date : '') +
-				' · ' + fortschritt.ids.length + ' ' + t('erledigt');
-		}
-		if (!eingebaut && weg) {
-			weg.hidden = !(fortschritt.ids || []).length;
-			weg.addEventListener('click', function () {
-				try { window.localStorage.removeItem('mql.fortschritt'); } catch (fehler) {}
-				window.location.reload();
-			});
-		}
-		laden.addEventListener('click', function () { datei.click(); });
-		datei.addEventListener('change', function () {
-			var gewaehlt = datei.files && datei.files[0];
-			if (!gewaehlt) { return; }
-			var leser = new FileReader();
-			leser.onload = function () {
-				var gelesen = leseFortschritt(String(leser.result || ''));
-				if (!gelesen.ids.length) {
-					window.alert(t('datei_leer'));
-					return;
-				}
-				try {
-					window.localStorage.setItem('mql.fortschritt', JSON.stringify(gelesen));
-				} catch (fehler) {}
-				window.location.reload();
-			};
-			leser.readAsText(gewaehlt);
-		});
-	}
 
 	// --- Start ---------------------------------------------------------
 	if (!karten.length || !quests.length) {

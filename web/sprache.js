@@ -56,6 +56,10 @@
 	document.querySelectorAll('[data-t]').forEach(function (element) {
 		element.textContent = t(element.getAttribute('data-t'));
 	});
+	// Our own texts with a little markup (links, lists, code). Never game or user data.
+	document.querySelectorAll('[data-t-html]').forEach(function (element) {
+		element.innerHTML = t(element.getAttribute('data-t-html'));
+	});
 	document.querySelectorAll('[data-t-ph]').forEach(function (element) {
 		element.setAttribute('placeholder', t(element.getAttribute('data-t-ph')));
 	});
@@ -70,10 +74,6 @@
 		});
 	});
 
-	var startlink = document.querySelector('a.startlink');
-	if (startlink) {
-		startlink.href = sprache === 'en' ? 'start-en.html' : 'start.html';
-	}
 
 	function lade(src, dann) {
 		var skript = document.createElement('script');
@@ -88,6 +88,9 @@
 
 	var stil = document.querySelector('link[rel="stylesheet"]');
 	var stempel = function () { return '?v=' + (window.MQL_STAND || '0'); };
+
+	// Only the map loads the large data files; the progress page needs none.
+	if (document.body.getAttribute('data-seite') !== 'karte') { return; }
 
 	// stand.js first and without cache: it holds the stamp of the last build.
 	lade('stand.js?t=' + Date.now(), function () {

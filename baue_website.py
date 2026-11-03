@@ -4,8 +4,8 @@
 Differences from the local version:
 
 - Maps are stored as WebP under `karten/<sprache>/`, not as PNG.
-- `fortschritt.js` is **empty**. The visitor loads their own `Progress.lua`
-  in the browser; Feldobar's state is not published.
+- `fortschritt.js` is **empty**. Visitors load their own progress from LOTRO
+  Companion on the progress page; it stays in their browser.
 - `index.html` gets the image path `karten/<sprache>/`.
 - Imprint and privacy notice sit next to it.
 
@@ -27,9 +27,10 @@ HIER = Path(__file__).resolve().parent
 WEB = HIER / 'web'
 SPRACHEN = ('de', 'en', 'fr')
 
-DATEIEN = ('app.js', 'start.css', 'style.css', 'texte.js', 'sprache.js',
+DATEIEN = ('app.js', 'start.css', 'style.css', 'texte.js', 'texte-spielstand.js',
+           'sprache.js', 'speicher.js', 'menue.js', 'companion.js', 'spielstand.js',
            'stand.js', 'start.html', 'start-en.html', 'start-fr.html',
-           'impressum.html', 'datenschutz.html')
+           'spielstand.html', 'impressum.html', 'datenschutz.html')
 BILDER = ('bild/start.jpg', 'bild/start-en.jpg', 'bild/start-fr.jpg')
 
 
@@ -59,44 +60,27 @@ def index_bauen(ziel):
     (ziel / 'index.html').write_text(text, encoding='utf-8')
 
 
-def startseite_anpassen(ziel, sprache):
-    """On the website the progress comes from the visitor's file."""
-    datei = ziel / ('start.html' if sprache == 'de' else 'start-en.html')
-    text = datei.read_text(encoding='utf-8')
-    if sprache == 'de':
-        neu = ('<h3>Dein Fortschritt</h3>\n'
-               '\t\t<p>Die Zahlen im Baum und die Farbe der Punkte kommen aus deiner\n'
-               '\t\t<code>Progress.lua</code>. Öffne die Karte und wähle dort\n'
-               '\t\t„Spielstand laden“ – die Datei wird im Browser gelesen und bleibt dort.\n'
-               '\t\tEs gibt keinen Upload, kein Konto und keine Auswertung.</p>\n'
-               '\t\t<p>Ohne Datei funktioniert die Karte trotzdem – sie zeigt dann nur keine\n'
-               '\t\tZahlen und färbt keine Punkte. Es wird keine Null erfunden.</p>\n'
-               '\t</section>')
-        text = re.sub(r'<h3>Dein Fortschritt</h3>.*?</section>', neu, text,
-                      count=1, flags=re.S)
-    elif sprache == 'fr':
-        neu = ('<h3>Votre progression</h3>\n'
-               '\t\t<p>Les chiffres de l\'arbre et la couleur des points viennent de votre\n'
-               '\t\t<code>Progress.lua</code>. Ouvrez la carte et choisissez\n'
-               '\t\t« Charger la progression » — le fichier est lu dans votre navigateur et y\n'
-               '\t\treste. Aucun envoi, aucun compte, aucune mesure nominative.</p>\n'
-               '\t\t<p>Sans ce fichier, la carte fonctionne quand même — elle n\'affiche alors\n'
-               '\t\tni chiffres ni couleurs. Aucun zéro n\'est inventé.</p>\n'
-               '\t</section>')
-        text = re.sub(r'<h3>Votre progression</h3>.*?</section>', neu, text,
-                      count=1, flags=re.S)
-    else:
-        neu = ('<h3>Your progress</h3>\n'
-               '\t\t<p>The numbers in the tree and the colour of the dots come from your\n'
-               '\t\t<code>Progress.lua</code>. Open the map and choose “Load progress” –\n'
-               '\t\tthe file is read in your browser and stays there. No upload, no\n'
-               '\t\taccount, no tracking.</p>\n'
-               '\t\t<p>Without the file the map still works — it simply shows no numbers\n'
-               '\t\tand leaves the dots uncoloured. No zero is invented.</p>\n'
-               '\t</section>')
-        text = re.sub(r'<h3>Your progress</h3>.*?</section>', neu, text,
-                      count=1, flags=re.S)
-    datei.write_text(text, encoding='utf-8')
+def stempeln(ziel):
+    """Version tag on every static script and stylesheet of the HTML pages.
+
+    The map loads its data with the build stamp already; the plain <script> and
+    <link> tags did not, so a browser kept an old texte.js or style.css after an
+    upload and showed a half-old page. The tag is a hash of the files themselves.
+    """
+    import hashlib
+    summe = hashlib.sha256()
+    for name in sorted(DATEIEN):
+        if name.endswith(('.js', '.css')):
+            summe.update((ziel / name).read_bytes())
+    marke = summe.hexdigest()[:10]
+    for seite in ('index.html', 'spielstand.html', 'start.html', 'start-en.html',
+                  'start-fr.html', 'impressum.html', 'datenschutz.html'):
+        datei = ziel / seite
+        text = datei.read_text(encoding='utf-8')
+        text = re.sub(r'(<(?:script|link)[^>]+(?:src|href)=")([\w.-]+\.(?:js|css))(")',
+                      lambda m: m.group(1) + m.group(2) + '?v=' + marke + m.group(3), text)
+        datei.write_text(text, encoding='utf-8')
+    return marke
 
 
 ZAEHLER = ('<script data-goatcounter="https://sirhexalot.goatcounter.com/count"\n'
@@ -106,7 +90,7 @@ ZAEHLER = ('<script data-goatcounter="https://sirhexalot.goatcounter.com/count"\
 def zaehler_einbauen(ziel):
     """GoatCounter only in the published version, not locally."""
     for name in ('index.html', 'start.html', 'start-en.html', 'start-fr.html',
-                 'impressum.html', 'datenschutz.html'):
+                 'spielstand.html', 'impressum.html', 'datenschutz.html'):
         datei = ziel / name
         text = datei.read_text(encoding='utf-8')
         if 'goatcounter' in text:
@@ -134,8 +118,8 @@ def zaehler_einbauen(ziel):
 
 def fortschritt_leeren(ziel):
     """Do not publish personal numbers."""
-    inhalt = ('/* Website: deliberately empty. The visitor loads their own\n'
-              '   Progress.lua; it stays in the browser. */\n'
+    inhalt = ('/* Website: deliberately empty. Visitors load their own progress\n'
+              '   on the progress page; it stays in their browser. */\n'
               'window.MQL_FORTSCHRITT = {"character":"","date":"","ids":[]};\n')
     (ziel / 'fortschritt.js').write_text(inhalt, encoding='utf-8')
 
@@ -162,15 +146,8 @@ def main():
     kopiere(ziel)
     index_bauen(ziel)
     fortschritt_leeren(ziel)
-    for sprache in SPRACHEN:
-        startseite_anpassen(ziel, sprache)
     zaehler_einbauen(ziel)
-
-    download = WEB / 'download/mql-spielstand.zip'
-    if not download.is_file():
-        raise SystemExit('MISSING: %s (run baue_download.py)' % download)
-    (ziel / 'download').mkdir(parents=True, exist_ok=True)
-    shutil.copy2(download, ziel / 'download/mql-spielstand.zip')
+    print('version tag on static files: %s' % stempeln(ziel))
 
     for sprache in SPRACHEN:
         shutil.copy2(WEB / ('daten-%s.js' % sprache), ziel / ('daten-%s.js' % sprache))

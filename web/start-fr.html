@@ -16,6 +16,7 @@
 			<a href="start-en.html" lang="en">EN</a>
 			<a href="start-fr.html" aria-pressed="true" lang="fr">FR</a>
 		</nav>
+		<a class="knopf klein" href="spielstand.html?lang=fr">Progression</a>
 		<a class="knopf klein" href="index.html?lang=fr">Vers la carte</a>
 	</div>
 </header>
@@ -55,29 +56,17 @@
 	</section>
 
 	<section>
-		<h3>Créer votre progression</h3>
-		<p>Pour les chiffres, il vous faut votre <code>Progress.lua</code>. L'outil la lit
-		dans le jeu en cours ; il ne modifie rien et n'envoie rien.</p>
-		<p><a class="knopf" href="download/mql-spielstand.zip">Télécharger l'outil (12 Ko)</a></p>
-		<ol class="schritte">
-			<li><strong>Décompresser.</strong> Extraire le ZIP dans son propre dossier.</li>
-			<li><strong>Lancer le jeu.</strong> Magic Quest Log doit être installé et le jeu
-			en cours d'exécution.</li>
-			<li><strong>Lancer le script.</strong> Windows : <code>read-journal.bat</code>,
-			macOS : <code>read-journal.command</code>.</li>
-			<li><strong>Choisir le fichier.</strong> Charger le <code>Progress.lua</code>
-			obtenu sur la carte avec « Charger la progression ».</li>
-		</ol>
-	</section>
-
-	<section>
 		<h3>Votre progression</h3>
-		<p>Les chiffres de l'arbre et la couleur des points viennent de votre
-		<code>Progress.lua</code>. Le fichier se trouve dans le dossier du plugin sous
-		<code>MagicQuestLog/Data/</code> et est lu lors de la construction de la page
-		(<code>build_daten.py</code>).</p>
-		<p>Sans ce fichier, la carte fonctionne quand même — elle n'affiche alors ni
-		chiffres ni couleurs. Aucun zéro n'est inventé.</p>
+		<p>Les chiffres de l'arbre et la couleur des points viennent de <strong>LOTRO Companion</strong>.
+		Sur la page <a href="spielstand.html?lang=fr">Progression</a>, vous chargez le dossier de
+		Companion – il est lu uniquement dans votre navigateur, rien n'est envoyé. Vous pouvez charger
+		plusieurs personnages et en changer dans le menu. La même page écrit les fichiers pour le plugin
+		<em>Magic Quest Log</em>.</p>
+		<p><a class="knopf" href="spielstand.html?lang=fr">Vers la progression</a></p>
+		<p>Sans progression, la carte fonctionne quand même – elle n'affiche alors ni chiffres ni
+		couleurs. Aucun zéro n'est inventé.</p>
+		<p>Vous collectionnez surtout les prouesses ? Le plugin éprouvé <a href="https://www.lotrointerface.com/downloads/info1139-DeedTracker.html">Deed Tracker</a> de b414213562
+		est fait pour cela. Magic Quest Log vise surtout les quêtes.</p>
 	</section>
 
 	<section>
@@ -88,8 +77,8 @@
 			<li>15 209 quêtes existent, 8 403 ont une position vérifiée. Les autres sont
 			listées dans l'arbre et la liste, mais sans point — mieux vaut aucune marque
 			qu'une fausse.</li>
-			<li>Elle n'est pas en direct : elle connaît votre progression au moment de
-			l'export.</li>
+			<li>Elle n'est pas en direct : elle connaît votre progression au moment du
+			dernier import dans Companion.</li>
 		</ul>
 	</section>
 
