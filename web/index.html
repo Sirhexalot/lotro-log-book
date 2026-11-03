@@ -13,6 +13,10 @@
 <header class="kopf">
 	<h1 data-t="produkt">LOTRO Log Book</h1>
 	<nav class="menue" id="menue" aria-label="Menü"></nav>
+	<div class="globalsuche">
+		<input id="suche" type="search" data-t-ph="suche_global" placeholder="Suchen" autocomplete="off" aria-controls="suchergebnis">
+		<div class="suchergebnis" id="suchergebnis" hidden></div>
+	</div>
 	<nav class="sprachen" aria-label="Sprache">
 		<button type="button" data-lang="de" aria-pressed="true">DE</button>
 		<button type="button" data-lang="en" aria-pressed="false">EN</button>
@@ -21,32 +25,32 @@
 </header>
 
 <main>
-	<section class="spalte spalte-gebiete">
-		<div class="spalten-kopf">
-			<strong data-t="gebiete">Gebiete</strong>
-			<button id="zuklappen" data-t="alles_zuklappen" title="Alle Gebiete zuklappen">alles zuklappen</button>
+	<section class="spalte nav" id="nav">
+		<div class="nav-baum">
+			<div class="spalten-kopf">
+				<strong data-t="gebiete">Gebiete</strong>
+				<button id="zuklappen" data-t="alles_zuklappen" title="Alle Gebiete zuklappen">alles zuklappen</button>
+			</div>
+			<div class="baumsuche">
+				<input id="gebietsuche" type="search" data-t-ph="gebiet_suchen" placeholder="Gebiet suchen" autocomplete="off">
+			</div>
+			<nav class="gebietsspalte" id="baum" aria-label="Gebiete"></nav>
 		</div>
-		<div class="baumsuche">
-			<input id="gebietsuche" type="search" data-t-ph="gebiet_suchen" placeholder="Gebiet suchen" autocomplete="off">
+		<div class="nav-liste">
+			<div class="spalten-kopf pfadkopf">
+				<button id="zum-baum" class="zum-baum" data-t="zurueck_gebiete" title="Zurück zu den Gebieten">‹ Gebiete</button>
+				<button id="liste-mehr" hidden>mehr</button>
+			</div>
+			<div class="pfad" id="pfad"></div>
+			<strong class="liste-titel" id="liste-titel" data-t="aufgaben">Aufgaben</strong>
+			<div class="filter" id="filter" role="group" aria-label="Fortschritt filtern">
+				<button data-filter="alle" aria-pressed="true" data-t="filter_alle">alle</button>
+				<button data-filter="offen" aria-pressed="false" data-t="filter_offen">offen</button>
+				<button data-filter="erledigt" aria-pressed="false" data-t="filter_erledigt">erledigt</button>
+				<button data-filter="machbar" aria-pressed="false" data-t="filter_machbar" id="filter-machbar">annehmbar</button>
+			</div>
+			<ol id="liste"></ol>
 		</div>
-		<nav class="gebietsspalte" id="baum" aria-label="Gebiete"></nav>
-	</section>
-
-	<section class="spalte spalte-aufgaben">
-		<div class="spalten-kopf">
-			<strong id="liste-titel" data-t="aufgaben">Aufgaben</strong>
-			<button id="liste-mehr" hidden>mehr</button>
-		</div>
-		<div class="baumsuche">
-			<input id="suche" type="search" data-t-ph="suche_platzhalter" placeholder="Aufgabenname oder Teil davon" autocomplete="off">
-		</div>
-		<div class="filter" id="filter" role="group" aria-label="Fortschritt filtern">
-			<button data-filter="alle" aria-pressed="true" data-t="filter_alle">alle</button>
-			<button data-filter="offen" aria-pressed="false" data-t="filter_offen">offen</button>
-			<button data-filter="erledigt" aria-pressed="false" data-t="filter_erledigt">erledigt</button>
-			<button data-filter="machbar" aria-pressed="false" data-t="filter_machbar" id="filter-machbar">annehmbar</button>
-		</div>
-		<ol id="liste"></ol>
 	</section>
 
 	<section class="kartenspalte">

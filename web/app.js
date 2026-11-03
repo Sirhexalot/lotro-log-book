@@ -389,7 +389,7 @@
 				wrapper.classList.add('offen');
 				pfeil.textContent = '▾';
 			}
-			waehleKnoten(knoten);
+			waehleKnoten(knoten, true);
 		});
 		wrapper.appendChild(knopf);
 		knoepfe[knoten.schluessel] = knopf;
@@ -439,7 +439,7 @@
 			} else {
 				adresse.searchParams.delete('gebiet');
 			}
-			window.history.replaceState(null, '', adresse.toString());
+			window.history.replaceState(window.history.state, '', adresse.toString());
 		} catch (fehler) {}
 	}
 
@@ -463,9 +463,35 @@
 		return null;
 	}
 
-	function waehleKnoten(knoten) {
+	// --- Navigation column: tree or list ---------------------------------
+	// One column shows either the area tree or the list of the chosen area,
+	// with the path back. The browser's back button returns to the tree.
+	var navSpalte = document.getElementById('nav');
+	var eigeneSchritte = 0;  // history entries this page pushed itself
+	var pfadZeile = document.getElementById('pfad');
+	function zeigeNav(modus) {
+		navSpalte.classList.toggle('liste-offen', modus === 'liste');
+		if (modus === 'baum') { markiereBaum(); }
+	}
+	function zeigePfad(knoten) {
+		var teile = (knoten.schluessel || '').split('|').filter(function (teil) { return teil !== ''; });
+		teile.pop();
+		pfadZeile.textContent = teile.join(' › ');
+	}
+
+	function waehleKnoten(knoten, alsListe, ohneVerlauf) {
 		zustand.knoten = knoten;
 		merkeAdresse(knoten);
+		zeigePfad(knoten);
+		if (alsListe) {
+			zeigeNav('liste');
+			if (!ohneVerlauf) {
+				try {
+					window.history.pushState({ mqlListe: knoten.schluessel }, '', window.location.href);
+					eigeneSchritte += 1;
+				} catch (fehler) {}
+			}
+		}
 		zustand.auswahl = null;
 		zustand.sichtbar = ANSICHT_JE_SEITE;
 		var index = besteKarte(knoten.quests, knoten.name);
@@ -685,15 +711,8 @@
 	}
 
 	function zeichneListe() {
-		var begriff = falten(suche.value.trim());
 		var titel, quelle;
-		if (begriff !== '') {
-			quelle = quests.filter(function (quest) {
-				return falten(quest.n).indexOf(begriff) >= 0;
-			});
-			quelle.sort(function (a, b) { return a.n.localeCompare(b.n, t('locale')); });
-			titel = t('suchtreffer');
-		} else if (zustand.knoten) {
+		if (zustand.knoten) {
 			quelle = zustand.knoten.quests;
 			titel = zustand.knoten.name;
 		} else {
@@ -1001,13 +1020,117 @@
 	});
 
 	// --- Input ---------------------------------------------------------
+	// --- Search over everything (header) ------------------------------
+	// Areas and entries of this page (quests, or deeds with ?art=taten) as you
+	// type; a result opens its area and selects it. Enter shows all matches as
+	// a list. The other kind is one link away.
+	var suchergebnis = document.getElementById('suchergebnis');
 	var suchlauf = null;
+	var alleKnoten = [];
+	(function sammle(knoten) {
+		knoten.reihenfolge.forEach(function (kind) { alleKnoten.push(kind); sammle(kind); });
+	})(WURZEL);
+
+	function suchtreffer(begriff) {
+		var gebiete = alleKnoten.filter(function (k) { return falten(k.name).indexOf(begriff) >= 0; });
+		var eintraege = quests.filter(function (q) { return falten(q.n).indexOf(begriff) >= 0; });
+		eintraege.sort(function (a, b) { return a.n.localeCompare(b.n, t('locale')); });
+		return { gebiete: gebiete, eintraege: eintraege };
+	}
+
+	function trefferListe(begriff, eintraege) {
+		var knoten = { schluessel: '', name: ersetze(t('suche_ergebnis'), [suche.value.trim()]),
+			tiefe: 0, quests: eintraege, kinder: {}, reihenfolge: [] };
+		waehleKnoten(knoten, true);
+	}
+
+	function schliesseSuche() { suchergebnis.hidden = true; }
+
+	function zeigeSuche() {
+		var roh = suche.value.trim();
+		var begriff = falten(roh);
+		suchergebnis.textContent = '';
+		if (begriff.length < 2) { schliesseSuche(); return; }
+		var treffer = suchtreffer(begriff);
+		function gruppe(titelText, anzahl) {
+			var h = eltern('div', titelText + ' · ' + anzahl);
+			h.className = 'such-gruppe';
+			suchergebnis.appendChild(h);
+		}
+		function zeile(text, zusatz, aktion) {
+			var b = eltern('button', null);
+			b.type = 'button';
+			b.className = 'such-zeile';
+			b.appendChild(eltern('span', text));
+			if (zusatz) { var z = eltern('span', zusatz); z.className = 'such-zusatz'; b.appendChild(z); }
+			b.addEventListener('click', function () { schliesseSuche(); aktion(); });
+			suchergebnis.appendChild(b);
+		}
+		if (treffer.gebiete.length) {
+			gruppe(t('gebiete'), treffer.gebiete.length);
+			treffer.gebiete.slice(0, 6).forEach(function (k) {
+				var teile = k.schluessel.split('|').filter(Boolean); teile.pop();
+				zeile(k.name, teile.join(' › '), function () {
+					markiereBaum();
+					waehleKnoten(k, true);
+				});
+			});
+		}
+		gruppe(t('aufgaben'), treffer.eintraege.length);
+		treffer.eintraege.slice(0, 8).forEach(function (q) {
+			zeile(q.n, [q.l ? t('stufe') + ' ' + stufeText(q) : '', q.knoten && q.knoten !== WURZEL ? q.knoten.name : ''].filter(Boolean).join(' · '), function () {
+				var ziel = q.knoten && q.knoten !== WURZEL ? q.knoten : null;
+				if (ziel) {
+					waehleKnoten(ziel, true);
+					zustand.sichtbar = Math.max(zustand.sichtbar, ziel.quests.indexOf(q) + 1);
+				}
+				waehle(q);
+				if (zeilen[q.i]) { zeilen[q.i].scrollIntoView({ block: 'center' }); }
+			});
+		});
+		if (treffer.eintraege.length > 8) {
+			zeile(ersetze(t('suche_alle'), [treffer.eintraege.length]), '', function () {
+				trefferListe(begriff, treffer.eintraege);
+			});
+		}
+		var andere = document.createElement('a');
+		andere.className = 'such-andere';
+		andere.href = 'index.html?' + (window.MQL_ART === 'taten' ? '' : 'art=taten&') + 'lang=' + sprache +
+			'&suche=' + encodeURIComponent(roh);
+		andere.textContent = t(window.MQL_ART === 'taten' ? 'suche_in_aufgaben' : 'suche_in_taten');
+		suchergebnis.appendChild(andere);
+		suchergebnis.hidden = false;
+	}
+
 	suche.addEventListener('input', function () {
 		window.clearTimeout(suchlauf);
-		suchlauf = window.setTimeout(function () {
-			zustand.sichtbar = ANSICHT_JE_SEITE;
-			zeichneListe();
-		}, 120);
+		suchlauf = window.setTimeout(zeigeSuche, 120);
+	});
+	suche.addEventListener('focus', function () { if (suche.value.trim().length >= 2) { zeigeSuche(); } });
+	suche.addEventListener('keydown', function (ereignis) {
+		if (ereignis.key === 'Escape') { schliesseSuche(); suche.blur(); }
+		if (ereignis.key === 'Enter') {
+			var begriff = falten(suche.value.trim());
+			if (begriff.length >= 2) { schliesseSuche(); trefferListe(begriff, suchtreffer(begriff).eintraege); }
+		}
+	});
+	document.addEventListener('click', function (ereignis) {
+		if (!ereignis.target.closest || !ereignis.target.closest('.globalsuche')) { schliesseSuche(); }
+	});
+
+	document.getElementById('zum-baum').addEventListener('click', function () {
+		// Step back only over entries this page added, never off the site.
+		if (eigeneSchritte > 0) { window.history.back(); }
+		else { zeigeNav('baum'); }
+	});
+	window.addEventListener('popstate', function (ereignis) {
+		var ziel = ereignis.state && ereignis.state.mqlListe;
+		eigeneSchritte = Math.max(0, eigeneSchritte - 1);
+		if (ziel && knoepfe[ziel]) {
+			waehleKnoten(findeKnoten(WURZEL, ziel), true, true);
+		} else {
+			zeigeNav('baum');
+		}
 	});
 
 	filterLeiste.addEventListener('click', function (ereignis) {
@@ -1106,7 +1229,12 @@
 		offen[pfad] = true;
 	});
 	baueBaum();
-	waehleKnoten(start);
+	var mitAdresse = !!gewuenscht || !!knotenAusAdresse();
+	waehleKnoten(start, mitAdresse, true);
+	try { window.history.replaceState(mitAdresse ? { mqlListe: start.schluessel } : null, '', window.location.href); } catch (fehler) {}
+	var vorgabeSuche = '';
+	try { vorgabeSuche = new URLSearchParams(window.location.search).get('suche') || ''; } catch (fehler) {}
+	if (vorgabeSuche) { suche.value = vorgabeSuche; zeigeSuche(); suche.focus(); }
 	if (gewuenscht) {
 		zustand.sichtbar = Math.max(zustand.sichtbar, start.quests.indexOf(gewuenscht) + 1);
 		waehle(gewuenscht);

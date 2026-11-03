@@ -734,3 +734,52 @@ td.haken-zelle.teil { color: var(--laufend); }
 
 /* Numbers in tables read as text, gold is for headings and controls. */
 .tabelle td.zahl { color: var(--text); }
+
+/* --- Three columns (03.11.): navigation | map | details ------------------ */
+main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
+@media (max-width: 1240px) { main { grid-template-columns: 280px minmax(300px, 1fr) 300px; } }
+@media (max-width: 1000px) { main { grid-template-columns: 280px minmax(260px, 1fr); } }
+
+.nav { display: flex; flex-direction: column; overflow: hidden; }
+.nav-baum, .nav-liste { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+.nav-liste { display: none; }
+.nav.liste-offen .nav-baum { display: none; }
+.nav.liste-offen .nav-liste { display: flex; }
+.nav #liste { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.pfadkopf .zum-baum { font-size: 12px; padding: 2px 8px; }
+.pfad { padding: 6px 12px 0; font-size: 11px; color: var(--schwach); }
+.pfad:empty { display: none; }
+.liste-titel { display: block; padding: 2px 12px 6px; color: var(--gold); font-size: 14px; }
+
+/* Header search with a result panel */
+.globalsuche { position: relative; flex: 1 1 260px; max-width: 460px; }
+.globalsuche input { font-size: 13px; padding: 5px 10px; }
+.suchergebnis {
+	position: absolute;
+	left: 0; right: 0; top: calc(100% + 4px);
+	max-height: 70vh;
+	overflow-y: auto;
+	background: var(--fläche);
+	border: 1px solid var(--rand);
+	border-radius: 4px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+	z-index: 40;
+	padding: 4px 0;
+}
+.such-gruppe { padding: 6px 12px 2px; font-size: 11px; color: var(--schwach); text-transform: uppercase; letter-spacing: .08em; }
+.such-zeile {
+	display: flex; justify-content: space-between; gap: 10px; width: 100%;
+	text-align: left; background: none; border: 0; border-radius: 0;
+	padding: 5px 12px; font-size: 13px;
+}
+.such-zeile:hover, .such-zeile:focus { background: var(--fläche-hell); }
+.such-zusatz { color: var(--schwach); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
+.such-andere { display: block; padding: 6px 12px 4px; font-size: 12px; color: var(--gold); text-decoration: none; border-top: 1px solid var(--rand); margin-top: 4px; }
+/* The header stays one line: the search gives way first. */
+@media (min-width: 900px) { .kopf { flex-wrap: nowrap; } }
+.kopf .globalsuche { flex: 1 1 160px; min-width: 140px; }
+.kopf .menue { flex-wrap: nowrap; white-space: nowrap; }
+.suchergebnis { left: auto; right: 0; width: max(100%, 440px); }
+.such-zeile { flex-direction: column; align-items: flex-start; gap: 0; }
+.such-zusatz { max-width: 100%; }
+@media (max-width: 1300px) { .kopf .charakterwahl > span { display: none; } }
