@@ -52,6 +52,7 @@
 		var nur = el('nur-begonnen').checked;
 		var ziel = el('zeilen');
 		ziel.textContent = '';
+		offenesFenster = null;
 		var gezeigt = 0, oben = 0;
 		zeilen.forEach(function (zeile) {
 			if (nur && !begonnen(zeile)) { return; }
@@ -89,9 +90,75 @@
 			tr.appendChild(stufe);
 			tr.appendChild(balkenZelle);
 			tr.appendChild(punkte);
+			tr.className = 'klickbar';
+			tr.title = t('ru_klick');
+			tr.addEventListener('click', function () { zeigeQuellen(zeile, tr); });
 			ziel.appendChild(tr);
 		});
 		el('anzahl').textContent = ersetze(t('ru_anzahl'), [gezeigt, oben]);
+	}
+
+	// --- Where to get reputation: opens under a faction on click --------
+	// ruf-quellen-<language>.js lists per faction the quests and deeds that give
+	// reputation with it. Loaded on first use; same build stamp as this script.
+	var quellen = null, offenesFenster = null;
+	var fertigeIds = {};
+	(aktiv.quests || []).concat(aktiv.deeds || []).forEach(function (id) { fertigeIds[id] = true; });
+	function ladeQuellen(dann) {
+		if (quellen) { dann(); return; }
+		var eigenes = document.querySelector('script[src*="ruf.js"]');
+		var stempel = eigenes && eigenes.src.indexOf('?') >= 0 ? eigenes.src.slice(eigenes.src.indexOf('?')) : '';
+		var skript = document.createElement('script');
+		skript.src = 'ruf-quellen-' + sprache + '.js' + stempel;
+		skript.onload = function () { quellen = window.MQL_RUF_QUELLEN || {}; dann(); };
+		skript.onerror = function () { quellen = {}; dann(); };
+		document.body.appendChild(skript);
+	}
+	function zeigeQuellen(zeile, tr) {
+		if (offenesFenster) { offenesFenster.parentNode.removeChild(offenesFenster); }
+		if (offenesFenster && offenesFenster.dataset.id === zeile.id) { offenesFenster = null; return; }
+		ladeQuellen(function () {
+			var liste = quellen[zeile.id] || [];
+			var offeneListe = liste.filter(function (q) { return !fertigeIds[q[0]]; });
+			var fenster = document.createElement('tr');
+			fenster.className = 'quellen';
+			fenster.dataset.id = zeile.id;
+			var td = document.createElement('td');
+			td.colSpan = 4;
+			var kopf = document.createElement('p');
+			kopf.className = 'stufe-klein';
+			kopf.textContent = liste.length
+				? ersetze(t('ru_quellen'), [offeneListe.length, liste.length])
+				: t('ru_keine_quellen');
+			td.appendChild(kopf);
+			if (offeneListe.length) {
+				var ul = document.createElement('ul');
+				offeneListe.slice(0, 200).forEach(function (q) {
+					var li = document.createElement('li');
+					var a = document.createElement('a');
+					a.href = 'index.html?' + (q[3] === 't' ? 'art=taten&' : '') + 'lang=' + sprache + '&id=' + q[0];
+					a.textContent = q[1];
+					li.appendChild(a);
+					var info = document.createElement('span');
+					info.className = 'stufe-klein';
+					info.textContent = ' ' + [q[3] === 't' ? t('ru_tat') : t('ru_aufgabe'),
+						q[2] ? t('hw_stufe') + ' ' + q[2] : '', q[5],
+						q[4] >= 1 && q[4] <= 6 ? new Array(q[4] + 1).join('▮') : ''].filter(Boolean).join(' · ');
+					li.appendChild(info);
+					ul.appendChild(li);
+				});
+				td.appendChild(ul);
+				if (offeneListe.length > 200) {
+					var mehr = document.createElement('p');
+					mehr.className = 'stufe-klein';
+					mehr.textContent = ersetze(t('ru_weitere'), [offeneListe.length - 200]);
+					td.appendChild(mehr);
+				}
+			}
+			fenster.appendChild(td);
+			tr.parentNode.insertBefore(fenster, tr.nextSibling);
+			offenesFenster = fenster;
+		});
 	}
 
 	el('filter').addEventListener('input', zeichne);

@@ -29,7 +29,8 @@ SPRACHEN = ('de', 'en', 'fr')
 
 DATEIEN = ('app.js', 'start.css', 'style.css', 'texte.js', 'texte-spielstand.js',
            'texte-logbuch.js', 'sprache.js', 'speicher.js', 'menue.js', 'companion.js',
-           'spielstand.js', 'referenz.js', 'ruf.js', 'handwerk.js', 'stand.js',
+           'spielstand.js', 'referenz.js', 'ruf.js', 'ruf-quellen-de.js',
+           'ruf-quellen-en.js', 'ruf-quellen-fr.js', 'handwerk.js', 'stand.js',
            'start.html', 'start-en.html', 'start-fr.html', 'spielstand.html',
            'ruf.html', 'handwerk.html', 'impressum.html', 'datenschutz.html')
 BILDER = ('bild/start.jpg', 'bild/start-en.jpg', 'bild/start-fr.jpg')

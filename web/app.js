@@ -182,6 +182,7 @@
 			kind.quests.push(quest);
 			knoten = kind;
 		});
+		quest.knoten = knoten;
 	}
 
 	function sortiere(knoten) {
@@ -992,7 +993,12 @@
 	legende.hidden = !hatFortschritt;
 	baueBaum();
 
-	var start = knotenAusAdresse();
+	// ?id=<quest id> (from the reputation page): open its area and select it.
+	var gewuenscht = null;
+	try {
+		gewuenscht = questNachId[(new URLSearchParams(window.location.search).get('id') || '').toUpperCase()] || null;
+	} catch (fehler) { gewuenscht = null; }
+	var start = gewuenscht && gewuenscht.knoten && gewuenscht.knoten !== WURZEL ? gewuenscht.knoten : knotenAusAdresse();
 	WURZEL.reihenfolge.forEach(function (ast) {
 		if (start) { return; }
 		ast.reihenfolge.forEach(function (gebiet) {
@@ -1018,4 +1024,9 @@
 	});
 	baueBaum();
 	waehleKnoten(start);
+	if (gewuenscht) {
+		zustand.sichtbar = Math.max(zustand.sichtbar, start.quests.indexOf(gewuenscht) + 1);
+		waehle(gewuenscht);
+		if (zeilen[gewuenscht.i]) { zeilen[gewuenscht.i].scrollIntoView({ block: 'center' }); }
+	}
 })();
