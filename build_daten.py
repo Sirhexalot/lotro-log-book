@@ -29,33 +29,20 @@ BASIS = Path('/Users/adrian/Documents/07_Hobbys/Lotro')
 STANDARD_KATALOG = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Quests_de.lua'
 STANDARD_FORTSCHRITT = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Progress.lua'
 STANDARD_KARTEN = HIER / 'daten/karten.json'
-STANDARD_MOORMAP = Path('/Users/adrian/Documents/The Lord of the Rings Online/Plugins/GaranStuff/MoorMap/Defaults.lua')
-# Rhovanion, Mordor, the Shield Isles, Rivendell: sub-map frames do not fit the image.
-OHNE_UNTERPUNKTE = {30, 152, 403, 29}
-# Rhovanion and Mordor: the world overviews' frames do not fit at all (even
-# quests of the Sutcrofts were attributed to Rhovanion). A place on them counts
-# as unknown; no dots are drawn there.
-UNKLARER_RAHMEN = {30, 152}
 STANDARD_KARTENNAMEN = Path('/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/maps/labels')
+sys.path.insert(0, str(BASIS / 'MagicQuestLog/tools'))
+from game_maps import GameMaps  # noqa: E402
+
+# Maps, bounds and hierarchy come from the game (game_maps.py); MoorMap is not read.
+# Maps whose bounds do not hold for the places below them show only their own dots
+# (checked by drawing each sub-map's bounds onto the image, 03.11.2026): the
+# Rivendell steadings' bounds are far too large, Erebor's sub-map lies outside.
+OHNE_UNTERPUNKTE_NAMEN = ('Rivendell', 'Erebor')
 
 
-def moormap_tabelle(pfad):
-    """MoorMap's map geometry: index -> region, frame and tier (map entries only)."""
-    tabelle = {}
-    if not pfad or not Path(pfad).is_file():
-        return tabelle
-    text = Path(pfad).read_text(encoding='utf-8', errors='replace')
-    for treffer in re.finditer(r'tmpMapInfo\[(\d+)\]\s*=\s*\{([^}\n]+)', text):
-        felder = [teil.strip() for teil in treffer.group(2).split(',')]
-        try:
-            if int(felder[10]) != 1:
-                continue
-            tabelle[int(treffer.group(1))] = {
-                'eltern': int(felder[9]), 'region': int(felder[11]), 'north': float(felder[12]), 'west': float(felder[13]),
-                'south': float(felder[14]), 'east': float(felder[15]), 'tier': int(felder[16])}
-        except (ValueError, IndexError):
-            continue
-    return tabelle
+@functools.lru_cache(maxsize=None)
+def spielkarten():
+    return GameMaps()
 
 
 @functools.lru_cache(maxsize=None)
@@ -113,49 +100,27 @@ def gebietsnamen():
     return namen
 
 
-def kartenbaum(sprache, moormap=STANDARD_MOORMAP):
-    """MoorMap's whole map tree (also maps without an image of their own, such as
-    Gondor or East Rohan) with each map's name in this language.
-
-    Names come from the game's map labels, matched by image id; a map the labels
-    do not know takes the part before ':' its children share ("Ost-Rohan: Die
-    Steppe" -> "Ost-Rohan"), and only then MoorMap's English comment."""
-    tabelle = {}
-    if not Path(moormap).is_file():
-        return tabelle
-    text = Path(moormap).read_text(encoding='utf-8', errors='replace')
-    for treffer in re.finditer(r'tmpMapInfo\[(\d+)\]\s*=\s*\{(.*?)\};?[ \t]*(?:--[ \t]*(.*))?$', text, re.M):
-        felder = [teil.strip() for teil in treffer.group(2).split(',')]
-        try:
-            if len(felder) < 17 or int(felder[10]) != 1:
-                continue
-            tabelle[int(treffer.group(1))] = {
-                'eltern': int(felder[9]), 'tier': int(felder[16]), 'bild_id': str(int(felder[2], 0)),
-                'kommentar': (treffer.group(3) or '').split(',')[0].strip()}
-        except ValueError:
-            continue
-    karten_xml = STANDARD_KARTENNAMEN.parent / 'maps' / 'maps.xml'
-    karte_je_bild = {}
-    if karten_xml.is_file():
-        for treffer in re.finditer(r'<map id="(\d+)"[^>]*imageId="(\d+)"', karten_xml.read_text(encoding='utf-8')):
-            karte_je_bild.setdefault(treffer.group(2), treffer.group(1))
-    namen = kartennamen(sprache)
-    for eintrag in tabelle.values():
-        eintrag['name'] = namen.get(karte_je_bild.get(eintrag['bild_id'], ''), '')
-    for index, eintrag in tabelle.items():
-        if eintrag['name']:
-            continue
-        kinder = [anderer['name'] for anderer in tabelle.values()
-                  if anderer['eltern'] == index and ':' in anderer['name']]
-        vorsilben = {re.sub(r'\s+', ' ', name.replace('\xa0', ' ').split(':', 1)[0]).strip() for name in kinder}
-        eintrag['name'] = (vorsilben.pop() if len(vorsilben) == 1 else
-                           name_ueber_englisch(eintrag['kommentar'], sprache) or 'Karte %d' % index)
-    return tabelle
+def kartenname(ident, sprache):
+    """A game map's name in this language. A map the labels miss takes the part
+    before ':' its children share ("Ost-Rohan: Die Steppe" -> "Ost-Rohan"), then its
+    English name looked up among the area names."""
+    spiel = spielkarten()
+    name = kartennamen(sprache).get(str(ident))
+    if name:
+        return name
+    kinder = [kartennamen(sprache).get(str(anderer)) or '' for anderer, eintrag in spiel.maps.items()
+              if eintrag['parent'] == ident]
+    vorsilben = {re.sub(r'\s+', ' ', name.replace('\xa0', ' ').split(':', 1)[0]).strip()
+                 for name in kinder if ':' in name}
+    if len(vorsilben) == 1:
+        return vorsilben.pop()
+    return name_ueber_englisch(spiel.maps[ident]['name'], sprache) or 'Karte %d' % ident
 
 
 # Area names of the catalogue that name a map under another name, the same in all
-# languages: Imlad Morgul is the Morgul Vale, Umbar the Cape of Umbar.
-NAMENSBEZUG = {'imladmorgul': 202, 'umbar': 404}
+# languages: Imlad Morgul is the Morgul Vale, Umbar the Cape of Umbar. Given by the
+# maps' English names in the game data.
+NAMENSBEZUG = {'imladmorgul': 'Morgul Vale', 'umbar': 'Cape of Umbar'}
 
 
 def abstand(a, b):
@@ -178,31 +143,9 @@ def kartenpfade(quests, karten, sprache, art):
     for a map without an image, which only groups). Quests the catalogue files
     under a section (epic story, instances, festivals …) keep that section, and a
     quest without any place goes to the map that bears its area's name."""
-    baum = kartenbaum(sprache)
+    spiel = spielkarten()
     mit_bild = {karte['idx'] for karte in karten}
-    rahmen = {karte['idx']: karte for karte in karten}
-    kinder = {}
-    for index, eintrag in baum.items():
-        if index in mit_bild:
-            kinder.setdefault(eintrag['eltern'], []).append(index)
-
-    def genauer(index, lat, lon):
-        # A point attributed to an overview whose frame lies inside a more detailed
-        # map below it goes down to that map (Rhovanion's frame does not fit, its
-        # sub-maps' frames do).
-        gesehen = set()
-        while index not in gesehen:
-            gesehen.add(index)
-            passend = [kind for kind in kinder.get(index, [])
-                       if rahmen[kind]['south'] <= lat <= rahmen[kind]['north']
-                       and rahmen[kind]['west'] <= lon <= rahmen[kind]['east']]
-            if not passend:
-                return index
-            passend.sort(key=lambda kind: (-baum[kind]['tier'],
-                                           (rahmen[kind]['north'] - rahmen[kind]['south'])
-                                           * (rahmen[kind]['east'] - rahmen[kind]['west'])))
-            index = passend[0]
-        return index
+    baum = {ident: {'name': kartenname(ident, sprache)} for ident in spiel.maps}
 
     def normal(name):
         name = re.sub(r'^.*?:\s*', '', (name or '').replace('\xa0', ' ').lower())
@@ -211,12 +154,7 @@ def kartenpfade(quests, karten, sprache, art):
         return re.sub(r'[^0-9a-zà-ÿ]', '', name)
 
     def kette(index):
-        glieder, gesehen = [], set()
-        while index in baum and index not in gesehen and baum[index]['tier'] > 1:
-            gesehen.add(index)
-            glieder.append(index)
-            index = baum[index]['eltern']
-        return list(reversed(glieder))
+        return spiel.chain(index)
 
     def gemeinsam(ketten):
         erste = ketten[0]
@@ -227,7 +165,7 @@ def kartenpfade(quests, karten, sprache, art):
 
     # Every map of the tree can be found by name (also the ones no entry hangs on yet).
     je_name = {}
-    for index in sorted(baum, key=lambda i: -baum[i]['tier']):
+    for index in sorted(baum, key=lambda i: -spiel.depth(i)):
         glieder = kette(index)
         if glieder:
             je_name.setdefault(normal(baum[index]['name']),
@@ -240,7 +178,7 @@ def kartenpfade(quests, karten, sprache, art):
         if schluessel in je_name:
             return je_name[schluessel]
         if schluessel in NAMENSBEZUG:
-            index = NAMENSBEZUG[schluessel]
+            index = next(i for i, e in spiel.maps.items() if e['name'] == NAMENSBEZUG[schluessel])
             return ([baum[i]['name'] for i in kette(index)], [i if i in mit_bild else None for i in kette(index)])
         # Inflection only ("Einsamen Lande" / "Einsame Lande"): at most two letters
         # apart, same start.
@@ -251,13 +189,6 @@ def kartenpfade(quests, karten, sprache, art):
     zaehler = {'karte': 0, 'name': 0, 'sektion': 0, 'ohne': 0}
     ohne_ort = []
     for quest in quests:
-        # Every place goes down to the most detailed map whose frame holds it, so
-        # the dot, the tree and a click all name the same map.
-        if quest.get('gt'):
-            quest['gt'][0] = genauer(quest['gt'][0], quest['gt'][1], quest['gt'][2])
-        for ziel in quest['t']:
-            ziel[0] = genauer(ziel[0], ziel[1], ziel[2])
-    for quest in quests:
         if quest.get('_sek'):
             zaehler['sektion'] += 1
             continue
@@ -265,7 +196,7 @@ def kartenpfade(quests, karten, sprache, art):
             # The most detailed map that holds at least three quarters of the
             # objectives: a few stray ones on the overview must not lift the ruins
             # of Bree-land up to Eriador.
-            ketten = [kette(ziel[0]) for ziel in quest['t'] if ziel[0] not in UNKLARER_RAHMEN] or [[]]
+            ketten = [kette(ziel[0]) for ziel in quest['t']] or [[]]
             pfad = gemeinsam(ketten)
             for laenge in range(max(len(k) for k in ketten), len(pfad), -1):
                 zaehlung = {}
@@ -278,7 +209,7 @@ def kartenpfade(quests, karten, sprache, art):
                     break
         else:
             ort = quest.get('gt') or (quest['t'][0] if quest['t'] else None)
-            pfad = kette(ort[0]) if ort and ort[0] not in UNKLARER_RAHMEN else []
+            pfad = kette(ort[0]) if ort else []
         if not pfad:
             ohne_ort.append(quest)
             continue
@@ -323,33 +254,6 @@ def kartenpfade(quests, karten, sprache, art):
     print('Map tree: %(karte)d on a map, %(name)d by area name, %(sektion)d in sections, '
           '%(ohne)d keep their old place' % zaehler)
 
-
-def ersatzkarte(tabelle, bekannt, index, lat, lon):
-    """A map with an image for a position whose own map has none (MoorMap's
-    hand-drawn detail maps such as Dale or Cliving, which the game does not have):
-    the most detailed map of the same region with an image that contains the
-    point. None when there is no such map."""
-    eigene = tabelle.get(index)
-    if not eigene:
-        return None
-    # MoorMap names each map's parent (Cliving -> Norcrofts, Dale -> Northern
-    # Mirkwood). Its chain decides first, as long as the point lies in the frame.
-    gesehen, nummer = set(), eigene['eltern']
-    while nummer in tabelle and nummer not in gesehen:
-        gesehen.add(nummer)
-        karte = tabelle[nummer]
-        if nummer in bekannt and karte['south'] <= lat <= karte['north'] and karte['west'] <= lon <= karte['east']:
-            return nummer
-        nummer = karte['eltern']
-    treffer = [(nummer, karte) for nummer, karte in tabelle.items()
-               if nummer in bekannt and karte['region'] == eigene['region']
-               and karte['south'] <= lat <= karte['north'] and karte['west'] <= lon <= karte['east']]
-    if not treffer:
-        return None
-    # Most detailed first; between maps of the same detail the smaller one.
-    treffer.sort(key=lambda paar: (-paar[1]['tier'],
-                                   (paar[1]['north'] - paar[1]['south']) * (paar[1]['east'] - paar[1]['west'])))
-    return treffer[0][0]
 
 # Game markup like <rgb=#FF0000>…</rgb>, plus the rare <b>/<i>/<u>/<br>.
 # The old patterns contained "%s" placeholders that were never filled in, so
@@ -441,9 +345,8 @@ def ortsgruppen(karten_datei):
     return {str(code) for code in inhalt.get('codes', {})}
 
 
-def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap=STANDARD_MOORMAP):
+def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
     orte = orte or set()
-    tabelle = moormap_tabelle(moormap)
     bekannt = {karte['idx'] for karte in json.loads(Path(karten_datei).read_text(encoding='utf-8'))}
     umgelegt = verloren = 0
     try:
@@ -463,11 +366,10 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap
     def geber_ort(ort):
         if ort is None:
             return None
-        karte = int(ort['map'])
+        # gm: the game map the catalogue attributed the position to.
+        karte = int(ort['gm'])
         lat, lon = round(float(ort['lat']), 5), round(float(ort['lon']), 5)
-        if karte not in bekannt:
-            karte = ersatzkarte(tabelle, bekannt, karte, lat, lon)
-        return [karte, lat, lon] if karte is not None else None
+        return [karte, lat, lon] if karte in bekannt else None
     for index in range(1, len(records) + 1):
         record = records[index]
         targets = step_list(record['t'] if 't' in record else None)
@@ -528,17 +430,12 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap
                     zone = key.split(':', 1)[1]
         positions = []
         for target in targets:
-            karte = int(target['map'])
+            karte = int(target['gm'])
             lat, lon = round(float(target['lat']), 5), round(float(target['lon']), 5)
             position = [karte, lat, lon, str(target['step'])]
             if karte not in bekannt:
-                # Fifth value 1: shown on a larger map, its own detail map has no image.
-                ersatz = ersatzkarte(tabelle, bekannt, karte, lat, lon)
-                if ersatz is None:
-                    verloren += 1
-                else:
-                    position = [ersatz, lat, lon, str(target['step']), 1]
-                    umgelegt += 1
+                verloren += 1
+                continue
             positions.append(position)
             ziele += 1
         schritte = []
@@ -598,13 +495,13 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap
         })
 
     karten = json.loads(Path(karten_datei).read_text(encoding='utf-8'))
-    benutzte = {position[0] for quest in quests for position in quest['t']}
-    karten = [karte for karte in karten if karte['idx'] in benutzte]
+    # Every map of karten.json stays: those holding objectives or quest givers and
+    # the maps above them, which the tree shows as its levels.
 
     print('%d quests, %d of them without a recorded target (no dot)' %
           (len(quests), ohne_ziel))
-    print('%d single objectives, %d maps in the index; %d moved to a larger map, '
-          '%d on a map without image' % (ziele, len(karten), umgelegt, verloren))
+    print('%d single objectives, %d maps in the index; %d on a map missing from it'
+          % (ziele, len(karten), verloren))
     return quests, karten
 
 
@@ -712,10 +609,11 @@ def main():
         return ergebnis
     quests, karten = ergebnis
 
-    # Check frames: the maps.xml frame describes the image, the MoorMap frame
-    # is calibrated in the game. For individual maps (Minas Tirith, Pelargir)
-    # one has a different sign than the positions. The frame in which this
-    # map's objectives actually lie wins.
+    # Check frames against the real positions. The bounds come from the game
+    # (maps.xml, for the Eriador overview fitted from its links). A map whose own
+    # objectives mostly lie outside its bounds is not used for dots, and neither is
+    # an overview whose links fit no straight line (Rhovanion, Gondor, Rohan …):
+    # rather no dots than wrong ones.
     positionen = {}
     for quest in quests:
         for ziel in quest['t']:
@@ -734,30 +632,22 @@ def main():
                 drin += 1
         return drin / len(punkte)
 
-    getauscht = []
+    ohne_rahmen = []
     for karte in karten:
         punkte = positionen.get(karte['idx'], [])
-        ersatz = karte.get('ersatz')
-        if not punkte or not ersatz:
-            karte.pop('ersatz', None)
-            continue
-        jetzt = anteil_drin(karte, punkte)
-        anders = anteil_drin(ersatz, punkte)
-        if jetzt < 0.9 and anders > jetzt:
-            karte['north'] = ersatz['north']
-            karte['west'] = ersatz['west']
-            karte['south'] = ersatz['south']
-            karte['east'] = ersatz['east']
-            karte['rahmen'] = 'mormap'
-            getauscht.append((karte['name'], jetzt, anders))
+        if not karte.get('bounds', True):
+            karte['rahmen'] = 'unklar'
+            ohne_rahmen.append((karte['name'], 'overview without fitting bounds'))
+        elif punkte and anteil_drin(karte, punkte) < 0.9:
+            karte['rahmen'] = 'unklar'
+            ohne_rahmen.append((karte['name'], '%.0f %% of its objectives in the bounds'
+                                % (100 * anteil_drin(karte, punkte))))
         else:
-            karte['rahmen'] = 'maps.xml'
-        karte.pop('ersatz', None)
-    if getauscht:
-        print('Frames swapped (maps.xml did not fit):')
-        for name, alt_wert, neu_wert in getauscht:
-            print('  %-26s %5.1f%% -> %5.1f%% of the objectives in the frame' %
-                  (name, alt_wert * 100, neu_wert * 100))
+            karte['rahmen'] = 'spiel'
+    if ohne_rahmen:
+        print('Maps without dots:')
+        for name, grund in ohne_rahmen:
+            print('  %-32s %s' % (name, grund))
 
     # Visual check of the frame: many maps have a coloured border, so
     # "objective inside the frame" does not yet mean it lies on the drawing.
@@ -771,26 +661,14 @@ def main():
                   (name, anteil * 100))
 
     regionen = regionen_je_karte(quests)
-    moor = moormap_tabelle(STANDARD_MOORMAP)
-    namen = kartennamen(options.sprache)
     for karte in karten:
-        karte['name'] = namen.get(str(karte.get('id'))) or name_ueber_englisch(karte['name'], options.sprache)
-    for karte in karten:
+        # mr: the game region number (parchment map), so the page shows an
+        # objective on every map of the same region whose bounds hold it.
+        karte['mr'] = karte.get('region')
+        karte['name'] = kartenname(karte['idx'], options.sprache)
         karte['region'] = regionen.get(karte['idx'], '')
-        # MoorMap's own region number and parent: the page shows an objective on
-        # every map of the same region whose frame contains it.
-        # Overview maps whose frame does not match their drawing for the places
-        # below them (checked by drawing each sub-map's frame onto the image,
-        # 03.11.2026): Rhovanion uses another coordinate system (MoorMap says so),
-        # Moria then lands among the Beornings. These show only their own dots.
-        if karte['idx'] in OHNE_UNTERPUNKTE:
+        if spielkarten().maps[karte['idx']]['name'] in OHNE_UNTERPUNKTE_NAMEN:
             karte['eigen'] = 1
-        if karte['idx'] in UNKLARER_RAHMEN:
-            karte['rahmen'] = 'unklar'
-        eintrag = moor.get(karte['idx'])
-        if eintrag:
-            karte['mr'] = eintrag['region']
-            karte['eltern'] = eintrag['eltern']
 
     kartenpfade(quests, karten, options.sprache, options.art)
 

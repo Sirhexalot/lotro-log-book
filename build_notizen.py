@@ -22,8 +22,8 @@ HIER = Path(__file__).resolve().parent
 BASIS = Path('/Users/adrian/Documents/07_Hobbys/Lotro')
 EXPORT = BASIS / 'Companion-Test/source-exporter'
 sys.path.insert(0, str(BASIS / 'MagicQuestLog/tools'))
-from build_catalog_from_export import moor_map_table, attribute_closest  # noqa: E402
-from build_daten import moormap_tabelle, ersatzkarte, STANDARD_MOORMAP, STANDARD_KARTEN  # noqa: E402
+from game_maps import GameMaps  # noqa: E402
+from build_daten import STANDARD_KARTEN  # noqa: E402
 
 # The game's filter list (world map, "Filter/Notizen"), as MapNoteType keys.
 FILTER = (24, 61, 27, 42, 60, 34, 35, 28, 22, 58, 33, 38, 57, 55, 29, 54, 43, 52, 31, 51, 23, 21, 45, 40, 53)
@@ -44,8 +44,8 @@ def main():
     optionen = parser.parse_args()
 
     namen = json.loads(optionen.enums.read_text(encoding='utf-8'))['MapNoteType']
-    karten = moor_map_table(STANDARD_MOORMAP)
-    tabelle = moormap_tabelle(STANDARD_MOORMAP)
+    # Which map a note is on: the game's own maps (game_maps.py), as for quests.
+    spiel = GameMaps()
     bekannt = {karte['idx'] for karte in json.loads(Path(STANDARD_KARTEN).read_text(encoding='utf-8'))}
 
     orte = defaultdict(set)
@@ -71,14 +71,9 @@ def main():
             name = text(p.get('Name'), sprache)
             titel = text(p.get('OccupationTitle'), sprache)
             for region, lat, lon in sorted(orte[ident]):
-                gewaehlt = attribute_closest(karten, lat, lon, region)
-                if gewaehlt is None:
+                karte = spiel.attribute(lat, lon, region)
+                if karte is None or karte not in bekannt:
                     continue
-                karte = int(gewaehlt['map'])
-                if karte not in bekannt:
-                    karte = ersatzkarte(tabelle, bekannt, karte, lat, lon)
-                    if karte is None:
-                        continue
                 for code in codes:
                     punkte.append([karte, lat, lon, code, name, titel])
                     zahl[code] += 1

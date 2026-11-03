@@ -228,7 +228,7 @@
 	 * Choose the map for a region.
 	 *
 	 * What matters is how many of the region's objectives really lie on the
-	 * map. The name only counts as a bonus, the MoorMap level only as a
+	 * map. The name only counts as a bonus, the map's depth only as a
 	 * tiebreaker. Before, a city map with the same name won (Minas Tirith,
 	 * Pelargir) with not a single objective on it – the map stayed empty.
 	 */
@@ -256,7 +256,7 @@
 			var eigene = orte(quest);
 			if (!eigene.length) { return; }
 			var index = eigene[0][0];
-			// The map itself and its MoorMap parents of the same region: a parent
+			// The map itself and its parents in the game's map tree: a parent
 			// now shows its sub-maps' points and may cover the area best.
 			var gesehen = {};
 			while (karteNachIndex[index] && !gesehen[index]) {
@@ -276,7 +276,7 @@
 			eintraege.forEach(function (quest) {
 				if (zielAuf(quest, karte)) { punkte += 1; }
 			});
-			// Equal counts: the more detailed map wins (MoorMap's rule), so a parent
+			// Equal counts: the more detailed map wins, so a parent
 			// such as Eriador only wins when it really shows more of the area.
 			var wert = punkte * 1000 +
 				((gesucht !== '' && name === gesucht) ? 100 : 0) + (karte.tier || 0);
@@ -301,7 +301,7 @@
 
 	/**
 	 * Does this map show a place recorded on map `index`? Its own map always; any
-	 * other map of the same MoorMap region when the point lies inside its frame
+	 * other map of the same game region when the point lies inside its frame
 	 * (not pinned to the edge). So Breeland also shows what lies in Bree or Archet.
 	 */
 	function zeigtOrt(karte, ziel) {
@@ -816,7 +816,7 @@
 	/**
 	 * Show the map of a quest's first place (giver, or objective when shown), but
 	 * only when it is more detailed than the map on show. A map that already shows
-	 * the place at least as precisely stays (MoorMap's rule: highest tier wins).
+	 * the place at least as precisely stays (the deepest map wins).
 	 */
 	function folgeKarte(quest) {
 		var erster = orte(quest)[0];
@@ -1146,7 +1146,6 @@
 			else if (machbar(quest)) { kennung.push(t('machbar_jetzt')); }
 			else { kennung.push(t('filter_offen')); }
 		}
-		if (orte(quest).some(function (ziel) { return ziel[4] === 1; })) { kennung.push(t('auf_grosser_karte')); }
 		
 		var zeile = eltern('div', kennung.join(' · '));
 		zeile.className = 'kennung';
