@@ -75,6 +75,16 @@ def stempeln(ziel):
         if name.endswith(('.js', '.css')):
             summe.update((ziel / name).read_bytes())
     marke = summe.hexdigest()[:10]
+    # The data files load with window.MQL_STAND from stand.js. build_daten.py writes
+    # that per run, so the last language built wins and a change in another one
+    # kept its old file in the browser cache. The published stamp covers every
+    # data file and the scripts.
+    daten = hashlib.sha256(marke.encode())
+    for datei in sorted(ziel.glob('daten-*.js')):
+        daten.update(datei.name.encode())
+        daten.update(datei.read_bytes())
+    (ziel / 'stand.js').write_text('/* Written by baue_website.py. */\nwindow.MQL_STAND = "%s";\n'
+                                   % daten.hexdigest()[:10], encoding='utf-8')
     for seite in ('index.html', 'spielstand.html', 'ruf.html', 'handwerk.html', 'start.html',
                   'start-en.html', 'start-fr.html', 'impressum.html', 'datenschutz.html'):
         datei = ziel / seite
@@ -150,12 +160,12 @@ def main():
     index_bauen(ziel)
     fortschritt_leeren(ziel)
     zaehler_einbauen(ziel)
-    print('version tag on static files: %s' % stempeln(ziel))
-
     for sprache in SPRACHEN:
         shutil.copy2(WEB / ('daten-%s.js' % sprache), ziel / ('daten-%s.js' % sprache))
         shutil.copy2(WEB / ('daten-taten-%s.js' % sprache), ziel / ('daten-taten-%s.js' % sprache))
         shutil.copytree(HIER / 'webp' / sprache, ziel / 'karten' / sprache)
+    # Stamp after the data is in place: it covers the data files as well.
+    print('version tag on static files: %s' % stempeln(ziel))
 
     # Checks
     fehler = []

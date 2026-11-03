@@ -219,16 +219,34 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap
         # (Wildwood, Fornost …). Groupings like "Festival" or "Captain"
         # do not belong on a map; in the sections they are book
         # and book group and stay.
-        etiketten = []
-        ist_abschnitt = bool(pfad) and pfad[0].startswith('section:')
+        # Two tree levels (region or section, then area or book) and one list
+        # section below: the sub-area or the quest group, "" for the area itself.
+        # abschnitt_art: 1 = sub-area, 0 = quest group (sub-areas are listed first).
+        etiketten, arten = [], []
         for part in step_list(record['p'] if 'p' in record else None):
             schluessel = part['k']
-            if not ist_abschnitt and schluessel.startswith('category:'):
-                if schluessel.split(':', 1)[1] not in orte:
-                    continue
             text = label(schluessel, part['n'], sprache)
-            if text and (not etiketten or etiketten[-1] != text):
+            if text and not text.startswith('@'):
+                # Category names carry game markup as well ("\\q", "[m]").
+                text = re.sub(r'\[[a-z]{1,3}\]', '', clean(text, '', sprache)).strip()
+            # The two tree levels stay even when an area has the region's name
+            # (Mordor > Mordor); merging them pushed groups up into the tree.
+            if text and (len(etiketten) < 2 or etiketten[-1] != text):
                 etiketten.append(text)
+                arten.append(1 if schluessel.startswith('area:') else 0)
+        # A deeper name often repeats what is above it ("Imlad Morgul: Cirith Ungol"
+        # under Cirith Ungol): the area prefix goes, and a part that only repeats
+        # the previous one is dropped.
+        teile = []
+        for teil in etiketten[2:]:
+            for oben in etiketten[:2] + teile:
+                if teil.lower().startswith(oben.lower() + ':'):
+                    teil = teil[len(oben) + 1:].strip()
+            if teil and not (teile and teil.lower() == teile[-1].lower()):
+                teile.append(teil)
+        abschnitt = ' › '.join(teile)
+        abschnitt_art = arten[2] if len(arten) > 2 else 0
+        etiketten = etiketten[:2]
         if not zone:
             for key in pfad:
                 if key.startswith('section:'):
@@ -281,6 +299,7 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap
                      [str(x) for x in step_list(field(record, key))] if key == 'pq' else
                      int(field(record, key)))
                for key in ('nq', 'pq', 'rp', 'dy', 'tl', 'gr', 'ix', 'lp') if field(record, key)},
+            **({'a': abschnitt, 'ak': abschnitt_art} if abschnitt else {}),
             # g: quest giver (first bestowing NPC), where the game names one.
             **({'g': str(field(record, 'g'))} if field(record, 'g') else {}),
             'l': str(record['l']) if 'l' in record and record['l'] else '',

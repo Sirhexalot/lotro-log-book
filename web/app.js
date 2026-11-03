@@ -342,8 +342,7 @@
 		var hatPunkte = knoten.quests.some(function (quest) { return orte(quest).length > 0; });
 		var knopf = eltern('button', null);
 		knopf.className = (blatt ? 'zweig blatt' : 'zweig') +
-			(hatPunkte ? '' : ' ohne-punkte');
-		if (!hatPunkte) { knopf.title = t('ohne_punkte'); }
+			'';
 		knopf.dataset.key = knoten.schluessel;
 		knopf.title = ersetze(t('baum_titel'),
 			[knoten.name, zahlen.erledigt, zahlen.gesamt]);
@@ -396,11 +395,14 @@
 		}
 
 		knopf.addEventListener('click', function () {
-			// Selecting expands when needed – but never collapses.
-			if (!blatt && offen[knoten.schluessel] !== true) {
-				offen[knoten.schluessel] = true;
-				wrapper.classList.add('offen');
-				pfeil.textContent = '▾';
+			// A region only opens and closes; its overview shows on the right. An
+			// area (no children) opens its list.
+			if (!blatt) {
+				offen[knoten.schluessel] = !offen[knoten.schluessel];
+				wrapper.classList.toggle('offen', offen[knoten.schluessel]);
+				pfeil.textContent = offen[knoten.schluessel] ? '▾' : '▸';
+				zeigeRegion(knoten);
+				return;
 			}
 			waehleKnoten(knoten, true);
 		});
@@ -494,6 +496,8 @@
 
 	function waehleKnoten(knoten, alsListe, ohneVerlauf) {
 		zustand.knoten = knoten;
+		zu = {};
+		zustand.suchliste = knoten.schluessel === '';
 		merkeAdresse(knoten);
 		zeigePfad(knoten);
 		if (alsListe) {
@@ -660,6 +664,32 @@
 	// --- List ----------------------------------------------------------
 	var zeilen = {};
 
+	var zu = {};  // folded list sections of the shown area
+
+	/** Right-hand pane for a region: its areas with level range and counts. */
+	function zeigeRegion(knoten) {
+		zustand.auswahl = null;
+		detail.textContent = '';
+		detail.appendChild(eltern('h2', knoten.name));
+		var z = zaehle(knoten.quests);
+		var kopf = eltern('div', ersetze(t('region_kopf'), [knoten.reihenfolge.length, zahl(z.erledigt, z.gesamt)]));
+		kopf.className = 'kennung';
+		detail.appendChild(kopf);
+		var ul = eltern('ul', null);
+		ul.className = 'gebietsliste';
+		knoten.reihenfolge.forEach(function (kind) {
+			var kz = zaehle(kind.quests);
+			var li = eltern('li', null);
+			li.appendChild(eltern('span', kind.name));
+			var info = eltern('span', [stufenSpanne(kind.quests), zahl(kz.erledigt, kz.gesamt)].filter(Boolean).join(' · '));
+			info.className = 'stufe';
+			li.appendChild(info);
+			li.addEventListener('click', function () { waehleKnoten(kind, true); });
+			ul.appendChild(li);
+		});
+		detail.appendChild(ul);
+	}
+
 	function zeigeListe(titel, eintraege) {
 		zustand.treffer = eintraege;
 		listeTitel.textContent = titel;
@@ -670,7 +700,50 @@
 		var anzahl = {}, doppelt = {};
 		eintraege.forEach(function (quest) { anzahl[quest.n] = (anzahl[quest.n] || 0) + 1; });
 		Object.keys(anzahl).forEach(function (name) { if (anzahl[name] > 1) { doppelt[name] = true; } });
-		eintraege.slice(0, zustand.sichtbar).forEach(function (quest) {
+		// Sections: the area itself ("general") first, then sub-areas, then quest
+		// groups, each with a header that folds it. Entries keep their order inside.
+		var reihe = { '': 0 };
+		eintraege.forEach(function (quest) {
+			var name = quest.a || '';
+			if (!(name in reihe)) { reihe[name] = quest.ak ? 1 : 2; }
+		});
+		var nachAbschnitt = eintraege.slice().sort(function (x, y) {
+			var ax = x.a || '', ay = y.a || '';
+			if (ax === ay) { return 0; }
+			if (reihe[ax] !== reihe[ay]) { return reihe[ax] - reihe[ay]; }
+			return ax.localeCompare(ay, t('locale'), { numeric: true });
+		});
+		zustand.treffer = nachAbschnitt;
+		var mitAbschnitten = Object.keys(reihe).length > 1 && !zustand.suchliste;
+		var jeAbschnitt = {}, ohnePunkt = 0;
+		nachAbschnitt.forEach(function (quest) {
+			jeAbschnitt[quest.a || ''] = (jeAbschnitt[quest.a || ''] || 0) + 1;
+			if (!orte(quest).length) { ohnePunkt += 1; }
+		});
+		if (ohnePunkt) {
+			var hinweisZeile = eltern('li', ersetze(t(loesung ? 'ohne_punkt_ziele' : 'ohne_punkt_geber'), [ohnePunkt]));
+			hinweisZeile.className = 'listenhinweis';
+			liste.appendChild(hinweisZeile);
+		}
+		var letzter = null;
+		nachAbschnitt.slice(0, zustand.sichtbar).forEach(function (quest) {
+			var abschnitt = quest.a || '';
+			if (mitAbschnitten && abschnitt !== letzter) {
+				letzter = abschnitt;
+				var kopf = eltern('li', null);
+				kopf.className = 'abschnitt' + (zu[abschnitt] ? ' zu' : '');
+				kopf.appendChild(eltern('span', (zu[abschnitt] ? '▸ ' : '▾ ') +
+					(abschnitt === '' ? t('allgemein') : abschnitt)));
+				var zahlKopf = eltern('span', String(jeAbschnitt[abschnitt]));
+				zahlKopf.className = 'stufe';
+				kopf.appendChild(zahlKopf);
+				kopf.addEventListener('click', function () {
+					zu[abschnitt] = !zu[abschnitt];
+					zeigeListe(listeTitel.textContent, eintraege);
+				});
+				liste.appendChild(kopf);
+			}
+			if (mitAbschnitten && zu[abschnitt]) { return; }
 			var zeile = eltern('li', null);
 			var lage = zustandVon(quest);
 			var erledigt = lage === 'fertig';

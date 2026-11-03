@@ -797,3 +797,13 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 /* Facts from the game as tags */
 .marken { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; }
 .marke { font-size: 11px; padding: 1px 7px; border: 1px solid var(--rand); border-radius: 9px; color: var(--schwach); background: var(--fläche-hell); }
+
+/* List sections and region overview */
+#liste li.abschnitt { background: var(--fläche-hell); color: var(--gold); font-size: 12px; padding: 5px 12px; position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--rand); }
+#liste li.abschnitt span:first-child { flex: 1 1 auto; }
+#liste li.abschnitt.zu { color: var(--schwach); }
+#liste li.listenhinweis { color: var(--schwach); font-size: 11px; font-style: italic; cursor: default; }
+.gebietsliste { list-style: none; padding: 0; margin: 10px 0; }
+.gebietsliste li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--rand); cursor: pointer; font-size: 13px; }
+.gebietsliste li:hover { color: var(--gold); }
+.gebietsliste .stufe { color: var(--schwach); font-size: 12px; white-space: nowrap; }
