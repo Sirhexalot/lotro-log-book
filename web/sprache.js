@@ -89,6 +89,8 @@
 		skript.src = src;
 		skript.onload = dann;
 		skript.onerror = function () {
+			var weg = document.querySelector('.lader');
+			if (weg) { weg.parentNode.removeChild(weg); }
 			var hinweis = document.getElementById('hinweis');
 			if (hinweis) { hinweis.textContent = t('keine_daten'); }
 		};
@@ -101,12 +103,33 @@
 	// Only the map loads the large data files; the progress page needs none.
 	if (document.body.getAttribute('data-seite') !== 'karte') { return; }
 
+	// Loading indicator until the map is drawn: the data file takes a few seconds
+	// on the first visit, after that it comes from the browser cache.
+	var lader = document.createElement('div');
+	lader.className = 'lader';
+	lader.setAttribute('role', 'status');
+	var kreis = document.createElement('span');
+	kreis.className = 'lader-kreis';
+	var ladeText = document.createElement('span');
+	ladeText.textContent = t(art === 'taten' ? 'lade_taten' : 'lade_aufgaben');
+	lader.appendChild(kreis);
+	lader.appendChild(ladeText);
+	document.body.appendChild(lader);
+	function fertig() {
+		lader.classList.add('weg');
+		setTimeout(function () { if (lader.parentNode) { lader.parentNode.removeChild(lader); } }, 400);
+	}
+
 	// stand.js first and without cache: it holds the stamp of the last build.
 	lade('stand.js?t=' + Date.now(), function () {
 		lade('daten-' + (art === 'taten' ? 'taten-' : '') + sprache + '.js' + stempel(), function () {
 			if (stil) { stil.href = stil.getAttribute('href').split('?')[0] + stempel(); }
+			ladeText.textContent = t('lade_karte');
 			lade('fortschritt.js' + stempel(), function () {
-				lade('app.js' + stempel());
+				lade('app.js' + stempel(), function () {
+					// The app draws in the same task; one frame later the page stands.
+					requestAnimationFrame(function () { requestAnimationFrame(fertig); });
+				});
 			});
 		});
 	});

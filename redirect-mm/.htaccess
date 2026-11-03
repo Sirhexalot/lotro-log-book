@@ -3,3 +3,19 @@
 RewriteEngine On
 RewriteCond %{HTTP_HOST} ^mm\.sirhexalot\.de$ [NC]
 RewriteRule ^(.*)$ https://llb.sirhexalot.de/$1 [R=301,L]
+
+# Compress text: the data files shrink from 17 MB to under 4 MB.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain application/javascript text/javascript application/json image/svg+xml
+</IfModule>
+
+# Static files carry ?v=<hash> from the site build, so the browser may keep them.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType application/javascript "access plus 30 days"
+  ExpiresByType text/javascript "access plus 30 days"
+  ExpiresByType text/css "access plus 30 days"
+  ExpiresByType image/webp "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>

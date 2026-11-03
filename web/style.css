@@ -641,3 +641,32 @@ td.haken-zelle { width: 1.5em; text-align: center; }
 td.haken-zelle.fertig { color: var(--fertig); }
 td.haken-zelle.offen { color: var(--schwach); }
 td.haken-zelle.teil { color: var(--laufend); }
+
+/* Loading indicator while the data file arrives */
+.lader {
+	position: fixed;
+	left: 50%;
+	top: 45%;
+	transform: translate(-50%, -50%);
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 20px;
+	background: rgba(13, 11, 9, .92);
+	border: 1px solid #3a3226;
+	border-radius: 6px;
+	color: var(--text);
+	z-index: 50;
+	transition: opacity .35s;
+}
+.lader.weg { opacity: 0; }
+.lader-kreis {
+	width: 18px;
+	height: 18px;
+	border: 2px solid var(--fläche-hell);
+	border-top-color: var(--gold);
+	border-radius: 50%;
+	animation: lader-dreht .9s linear infinite;
+}
+@keyframes lader-dreht { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .lader-kreis { animation: none; } }
