@@ -184,6 +184,15 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap
     records = runtime.globals().MagicQuestLog.Data[('deeds_' if art == 'taten' else 'quests_') + sprache]
 
     quests, ohne_ziel, ziele = [], 0, 0
+
+    def geber_ort(ort):
+        if ort is None:
+            return None
+        karte = int(ort['map'])
+        lat, lon = round(float(ort['lat']), 5), round(float(ort['lon']), 5)
+        if karte not in bekannt:
+            karte = ersatzkarte(tabelle, bekannt, karte, lat, lon)
+        return [karte, lat, lon] if karte is not None else None
     for index in range(1, len(records) + 1):
         record = records[index]
         targets = step_list(record['t'] if 't' in record else None)
@@ -263,6 +272,9 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap
             **({'vb': 1} if field(record, 'vb') else {}),
             # ls: the level follows the character; l is only a floor.
             **({'ls': 1} if field(record, 'ls') else {}),
+            # gt: where the quest giver stands [map, lat, lon], shown by default
+            # instead of the objectives (no spoilers until asked).
+            **({'gt': geber_ort(field(record, 'gt'))} if geber_ort(field(record, 'gt')) else {}),
             # g: quest giver (first bestowing NPC), where the game names one.
             **({'g': str(field(record, 'g'))} if field(record, 'g') else {}),
             'l': str(record['l']) if 'l' in record and record['l'] else '',

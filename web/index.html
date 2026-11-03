@@ -39,7 +39,6 @@
 		<div class="nav-liste">
 			<div class="spalten-kopf pfadkopf">
 				<button id="zum-baum" class="zum-baum" data-t="zurueck_gebiete" title="Zurück zu den Gebieten">‹ Gebiete</button>
-				<button id="liste-mehr" hidden>mehr</button>
 			</div>
 			<div class="pfad" id="pfad"></div>
 			<strong class="liste-titel" id="liste-titel" data-t="aufgaben">Aufgaben</strong>
@@ -70,7 +69,10 @@
 			</div>
 			<span id="stand" class="stand"></span>
 			<span id="hinweis" class="hinweis"></span>
-			<button id="zurueck" data-t="zuruecksetzen" title="Ansicht zurücksetzen">zurücksetzen</button>
+			<div class="umschalter" id="umschalter" role="group" aria-label="Was die Karte zeigt">
+				<button type="button" data-ziele="0" aria-pressed="true" data-t="zeige_geber">Auftraggeber</button>
+				<button type="button" data-ziele="1" aria-pressed="false" data-t="zeige_ziele">Ziele</button>
+			</div>
 		</div>
 	</section>
 
