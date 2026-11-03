@@ -688,3 +688,17 @@ td.haken-zelle.teil { color: var(--laufend); }
 #tabelle tr.quellen ul { margin: 6px 0 0; padding-left: 18px; columns: 2 320px; }
 #tabelle tr.quellen li { font-size: 13px; break-inside: avoid; padding: 1px 0; }
 #tabelle tr.quellen a { color: var(--text); }
+
+/* Area search above the tree */
+.baumsuche { padding: 6px 10px; border-bottom: 1px solid var(--rand); }
+.baumsuche input { font-size: 13px; padding: 4px 8px; }
+.zweig.treffer .name { color: var(--gold); }
+
+/* Legend: the rings of a selected quest */
+.tupfen.ring { background: rgba(232, 225, 213, .16); border: 2px solid var(--marke-aktiv); }
+
+/* Status line under the map, beside "reset" */
+.bedienung { right: 10px; flex-wrap: wrap; }
+.bedienung .stand { background: rgba(13, 11, 9, .8); padding: 2px 8px; border-radius: 3px; font-size: 12px; }
+.bedienung .stand:empty, .hinweis:empty { display: none; }
+.ast[hidden], [hidden] { display: none !important; }

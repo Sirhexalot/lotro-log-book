@@ -27,7 +27,7 @@ HIER = Path(__file__).resolve().parent
 WEB = HIER / 'web'
 SPRACHEN = ('de', 'en', 'fr')
 
-DATEIEN = ('app.js', 'start.css', 'style.css', 'texte.js', 'texte-spielstand.js',
+DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'favicon.svg', 'texte.js', 'texte-spielstand.js',
            'texte-logbuch.js', 'sprache.js', 'speicher.js', 'menue.js', 'companion.js',
            'spielstand.js', 'referenz.js', 'ruf.js', 'ruf-quellen-de.js',
            'ruf-quellen-en.js', 'ruf-quellen-fr.js', 'handwerk.js', 'stand.js',

@@ -28,10 +28,10 @@ a { color: var(--gold); }
 	border-bottom: 1px solid var(--rand);
 }
 
+/* Same header as the app pages: full width. */
 .kopf-innen {
-	max-width: 780px;
-	margin: 0 auto;
-	padding: 14px 20px;
+	margin: 0;
+	padding: 10px 16px;
 	display: flex;
 	align-items: center;
 	gap: 16px;

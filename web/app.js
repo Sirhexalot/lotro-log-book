@@ -561,11 +561,13 @@
 			marker.appendChild(dot);
 		});
 
+		var ringe = 0;
 		if (zustand.auswahl && karte.rahmen !== 'unklar') {
 			zustand.auswahl.t.forEach(function (ziel) {
 				if (ziel[0] !== karte.idx) { return; }
 				var punkt = anteil(karte, ziel[1], ziel[2]);
 				if (!punkt) { return; }
+				ringe += 1;
 				var ring = eltern('div', null);
 				ring.className = 'schritt nummer';
 				ring.dataset.n = ziel[3];
@@ -574,6 +576,16 @@
 				marker.appendChild(ring);
 			});
 		}
+		zeigeLegende(ringe > 0);
+	}
+
+	/** Legend: progress colours with a character loaded, rings while a quest is selected. */
+	function zeigeLegende(mitRingen) {
+		document.getElementById('legende-ziele').hidden = !mitRingen;
+		legende.querySelectorAll('.legende-fortschritt').forEach(function (eintrag) {
+			eintrag.hidden = !hatFortschritt;
+		});
+		legende.hidden = !hatFortschritt && !mitRingen;
 	}
 
 	// --- List ----------------------------------------------------------
@@ -695,7 +707,11 @@
 		}
 		var listeGefiltert = gefiltert(quelle);
 		var zusatz = zustand.filter === 'alle' ? '' : ' · ' + t('filter_' + zustand.filter);
-		zeigeListe(titel + ' · ' + listeGefiltert.length + zusatz, listeGefiltert);
+		var gezaehlt = listeGefiltert.filter(function (quest) {
+			var lage = zustandVon(quest);
+			return lage !== 'sitzung' && lage !== 'ausgeschlossen';
+		}).length;
+		zeigeListe(titel + ' · ' + gezaehlt + zusatz, listeGefiltert);
 		zeichneMarker();
 	}
 
@@ -1001,8 +1017,38 @@
 		return;
 	}
 
-	legende.hidden = !hatFortschritt;
+	zeigeLegende(false);
 	baueBaum();
+
+	// --- Area search over the tree --------------------------------------
+	// Shows matching areas with their parents; a match's children stay
+	// visible. Typing expands, clearing returns to the tree as it was.
+	var gebietsuche = document.getElementById('gebietsuche');
+	function filtereBaum() {
+		var begriff = falten(gebietsuche.value.trim());
+		function geh(knoten, elternTreffer) {
+			var treffer = begriff !== '' && falten(knoten.name).indexOf(begriff) >= 0;
+			var kindTreffer = false;
+			knoten.reihenfolge.forEach(function (kind) {
+				if (geh(kind, elternTreffer || treffer)) { kindTreffer = true; }
+			});
+			var knopf = knoepfe[knoten.schluessel];
+			var huelle = knopf ? knopf.closest('.ast') : null;
+			if (huelle) {
+				huelle.hidden = begriff !== '' && !treffer && !kindTreffer && !elternTreffer;
+				var aufklappen = begriff !== '' ? kindTreffer : offen[knoten.schluessel] === true;
+				if (knoten.reihenfolge.length) {
+					huelle.classList.toggle('offen', aufklappen);
+					var pfeil = knopf.querySelector('.pfeil');
+					if (pfeil) { pfeil.textContent = aufklappen ? '▾' : '▸'; }
+				}
+				knopf.classList.toggle('treffer', treffer);
+			}
+			return treffer || kindTreffer;
+		}
+		WURZEL.reihenfolge.forEach(function (ast) { geh(ast, false); });
+	}
+	gebietsuche.addEventListener('input', filtereBaum);
 
 	// ?id=<quest id> (from the reputation page): open its area and select it.
 	var gewuenscht = null;

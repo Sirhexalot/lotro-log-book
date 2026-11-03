@@ -5,19 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LOTRO Log Book – Der Herr der Ringe Online</title>
 <link rel="stylesheet" href="start.css">
+<link rel="stylesheet" href="gemeinsam.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
-<body>
+<body data-seite="start">
 
 <header class="kopf">
 	<div class="kopf-innen">
 		<h1>LOTRO Log Book</h1>
+		<nav class="menue" id="menue" aria-label="Menü"></nav>
 		<nav class="sprachen" aria-label="Sprache">
-			<a href="start.html" aria-pressed="true" lang="de">DE</a>
-			<a href="start-en.html" lang="en">EN</a>
-			<a href="start-fr.html" lang="fr">FR</a>
+			<button type="button" data-lang="de" aria-pressed="true">DE</button>
+			<button type="button" data-lang="en" aria-pressed="false">EN</button>
+			<button type="button" data-lang="fr" aria-pressed="false">FR</button>
 		</nav>
-		<a class="knopf klein" href="spielstand.html?lang=de">Spielstand</a>
-		<a class="knopf klein" href="index.html?lang=de">Zu den Quests</a>
 	</div>
 </header>
 
@@ -38,7 +39,7 @@
 		<ol class="schritte">
 			<li>
 				<strong><a href="index.html?lang=de">Quests</a>.</strong>
-				15.209 Aufgaben nach Gebiet, mit Stufenbereich, Auftraggeber, allen Schritten und den Zielorten auf der Karte. Der Filter <em>machbar</em> zeigt, was du mit deinem Stand jetzt annehmen kannst.
+				15.209 Aufgaben nach Gebiet, mit Stufenbereich, Auftraggeber, allen Schritten und den Zielorten auf der Karte. Der Filter <em>annehmbar</em> zeigt, was du mit deinem Stand jetzt annehmen kannst.
 			</li>
 			<li>
 				<strong><a href="index.html?art=taten&lang=de">Taten</a>.</strong>
@@ -68,7 +69,7 @@
 		<ul class="grenzen">
 			<li>Es zeigt <strong>Zielorte</strong>. Wer eine Aufgabe vergibt, steht dabei – wo diese Person steht, nicht.</li>
 			<li>8.403 der 15.209 Aufgaben haben eine belegte Position. Die übrigen stehen im Baum und in der Liste, bekommen aber keinen Punkt – lieber keine Marke als eine falsche.</li>
-			<li>„Machbar“ prüft Stufe und vorherige Aufgaben. Klasse, Volk oder Ruf kann es nicht prüfen, und manche alte Aufgabe bietet das Spiel nicht mehr an.</li>
+			<li>„Annehmbar“ prüft Stufe und vorherige Aufgaben. Klasse, Volk oder Ruf kann es nicht prüfen, und manche alte Aufgabe bietet das Spiel nicht mehr an.</li>
 			<li>Es ist nicht live. Es kennt deinen Stand vom letzten Companion-Import.</li>
 		</ul>
 	</section>
@@ -88,5 +89,11 @@
 	nachgeladen.</p>
 </footer>
 
+<script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
+<script src="texte-logbuch.js"></script>
+<script src="sprache.js"></script>
+<script src="speicher.js"></script>
+<script src="menue.js"></script>
 </body>
 </html>

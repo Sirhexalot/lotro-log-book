@@ -1,0 +1,49 @@
+/* Shared by every page: logo, menu, character switch, scrollbars. */
+
+.kopf h1 { margin: 0; font-size: 16px; font-weight: normal; letter-spacing: .04em; }
+.kopf h1 a.logo {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--gold);
+	text-decoration: none;
+}
+.kopf h1 a.logo:hover { color: #ecd08a; }
+.kopf h1 a.logo svg { width: 20px; height: 20px; flex: 0 0 auto; }
+
+.menue { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.menue a {
+	color: var(--schwach);
+	font-size: 13px;
+	text-decoration: none;
+	padding: 2px 0;
+	border-bottom: 2px solid transparent;
+}
+.menue a:hover { color: var(--gold); }
+.menue a[aria-current="page"] { color: var(--text); border-bottom-color: var(--gold); }
+.charakterwahl { display: flex; align-items: center; gap: 6px; margin-left: 6px; }
+.charakterwahl span { color: var(--schwach); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.charakterwahl select {
+	font: inherit;
+	font-size: 13px;
+	color: var(--text);
+	background: var(--fläche-hell);
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	padding: 4px 6px;
+	max-width: 240px;
+}
+
+/* Scrollbars: thin and dark, gold when touched. */
+* { scrollbar-width: thin; scrollbar-color: #4a4034 transparent; }
+*:hover { scrollbar-color: #6b5c45 transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+	background: #4a4034;
+	border-radius: 6px;
+	border: 2px solid transparent;
+	background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--gold); background-clip: padding-box; }
+::-webkit-scrollbar-corner { background: transparent; }

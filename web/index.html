@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LOTRO Log Book – Der Herr der Ringe Online</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="gemeinsam.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
 <body data-seite="karte">
 
@@ -20,7 +22,6 @@
 		<button type="button" data-lang="en" aria-pressed="false">EN</button>
 		<button type="button" data-lang="fr" aria-pressed="false">FR</button>
 	</nav>
-	<span id="stand" class="stand"></span>
 </header>
 
 <main>
@@ -28,6 +29,9 @@
 		<div class="spalten-kopf">
 			<strong data-t="gebiete">Gebiete</strong>
 			<button id="zuklappen" data-t="alles_zuklappen" title="Alle Gebiete zuklappen">alles zuklappen</button>
+		</div>
+		<div class="baumsuche">
+			<input id="gebietsuche" type="search" data-t-ph="gebiet_suchen" placeholder="Gebiet suchen" autocomplete="off">
 		</div>
 		<nav class="gebietsspalte" id="baum" aria-label="Gebiete"></nav>
 	</section>
@@ -41,7 +45,7 @@
 			<button data-filter="alle" aria-pressed="true" data-t="filter_alle">alle</button>
 			<button data-filter="offen" aria-pressed="false" data-t="filter_offen">offen</button>
 			<button data-filter="erledigt" aria-pressed="false" data-t="filter_erledigt">erledigt</button>
-			<button data-filter="machbar" aria-pressed="false" data-t="filter_machbar" id="filter-machbar">machbar</button>
+			<button data-filter="machbar" aria-pressed="false" data-t="filter_machbar" id="filter-machbar">annehmbar</button>
 		</div>
 		<ol id="liste"></ol>
 	</section>
@@ -53,12 +57,14 @@
 			<div class="marker" id="marker"></div>
 		</div>
 		<div class="legende" id="legende" hidden>
-			<span><i class="tupfen offen"></i><span data-t="legende_offen">offen</span></span>
-			<span><i class="tupfen fertig"></i><span data-t="legende_erledigt">erledigt</span></span>
-			<span><i class="tupfen laufend"></i><span data-t="in_arbeit">in Arbeit</span></span>
+			<span class="legende-fortschritt"><i class="tupfen offen"></i><span data-t="legende_offen">offen</span></span>
+			<span class="legende-fortschritt"><i class="tupfen fertig"></i><span data-t="legende_erledigt">erledigt</span></span>
+			<span class="legende-fortschritt"><i class="tupfen laufend"></i><span data-t="in_arbeit">in Arbeit</span></span>
+			<span id="legende-ziele" hidden><i class="tupfen ring"></i><span data-t="legende_ziele">Ziele der gewählten Aufgabe</span></span>
 		</div>
 		<div class="bedienung">
 			<button id="zurueck" data-t="zuruecksetzen" title="Ansicht zurücksetzen">zurücksetzen</button>
+			<span id="stand" class="stand"></span>
 			<span id="hinweis" class="hinweis"></span>
 		</div>
 	</section>

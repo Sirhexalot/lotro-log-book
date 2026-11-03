@@ -13,8 +13,26 @@
 	var seite = document.body.getAttribute('data-seite') || '';
 	if (seite === 'karte' && window.MQL_ART === 'taten') { seite = 'taten'; }
 	var startseite = sprache === 'en' ? 'start-en.html' : (sprache === 'fr' ? 'start-fr.html' : 'start.html');
+
+	// The name in the header is the way home, with the plugin's icon (Lucide
+	// "mop-sparkles", ISC) in front.
+	var titel = document.querySelector('.kopf h1');
+	if (titel) {
+		var logo = document.createElement('a');
+		logo.className = 'logo';
+		logo.href = startseite;
+		logo.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+			'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+			'<path d="M10 22a3 3 0 01-3-3"/><path d="M10 22c2.761 0 5-1.79 5-4-4.42 0-4.08-5-8.5-5a4.501 4.501 0 000 9z"/>' +
+			'<path d="M10 3H8"/><path d="M12.5 11.5 22 2"/><path d="M20 13v4"/><path d="M22 15h-4"/>' +
+			'<path d="M4 5v4"/><path d="M6 7H2"/><path d="m6.98 13.02 2.665-2.664a1.21 1.21 0 011.71 0l2.29 2.288a1.21 1.21 0 010 1.712l-2.088 2.087"/>' +
+			'<path d="M9 2v2"/></svg>';
+		logo.appendChild(document.createTextNode('LOTRO Log Book'));
+		titel.textContent = '';
+		titel.appendChild(logo);
+	}
+
 	[
-		{ seite: 'start', href: startseite, text: t('startseite') },
 		{ seite: 'karte', href: 'index.html?lang=' + sprache, text: t('menue_karte') },
 		{ seite: 'taten', href: 'index.html?art=taten&lang=' + sprache, text: t('menue_taten') },
 		{ seite: 'ruf', href: 'ruf.html?lang=' + sprache, text: t('menue_ruf') },

@@ -12,7 +12,12 @@
 	var ERLAUBT = ['de', 'en', 'fr'];
 	var VORGABE = 'en';
 
+	// Start pages exist once per language (start-en.html …): their language is fixed.
+	var seiteArt = document.body.getAttribute('data-seite') || '';
+	var feste = seiteArt === 'start' ? document.documentElement.getAttribute('lang') : null;
+
 	function waehle() {
+		if (ERLAUBT.indexOf(feste) >= 0) { return feste; }
 		var ausAdresse = null;
 		try {
 			ausAdresse = new URLSearchParams(window.location.search).get('lang');
@@ -60,7 +65,8 @@
 	window.MQL_ERSETZE = ersetze;
 
 	document.documentElement.lang = sprache;
-	document.title = t('titel');
+	// Start and legal pages keep their own title.
+	if (seiteArt !== 'start' && seiteArt !== 'recht') { document.title = t('titel'); }
 
 	document.querySelectorAll('[data-t]').forEach(function (element) {
 		element.textContent = t(element.getAttribute('data-t'));
@@ -77,6 +83,10 @@
 		knopf.addEventListener('click', function () {
 			var ziel = knopf.getAttribute('data-lang');
 			try { window.localStorage.setItem('mql.sprache', ziel); } catch (fehler) {}
+			if (seiteArt === 'start') {
+				window.location.href = ziel === 'en' ? 'start-en.html' : (ziel === 'fr' ? 'start-fr.html' : 'start.html');
+				return;
+			}
 			var adresse = new URL(window.location.href);
 			adresse.searchParams.set('lang', ziel);
 			window.location.href = adresse.toString();

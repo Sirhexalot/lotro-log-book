@@ -5,19 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LOTRO Log Book – The Lord of the Rings Online</title>
 <link rel="stylesheet" href="start.css">
+<link rel="stylesheet" href="gemeinsam.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
-<body>
+<body data-seite="start">
 
 <header class="kopf">
 	<div class="kopf-innen">
 		<h1>LOTRO Log Book</h1>
-		<nav class="sprachen" aria-label="Language">
-			<a href="start.html" lang="de">DE</a>
-			<a href="start-en.html" aria-pressed="true" lang="en">EN</a>
-			<a href="start-fr.html" lang="fr">FR</a>
+		<nav class="menue" id="menue" aria-label="Menü"></nav>
+		<nav class="sprachen" aria-label="Sprache">
+			<button type="button" data-lang="de" aria-pressed="false">DE</button>
+			<button type="button" data-lang="en" aria-pressed="true">EN</button>
+			<button type="button" data-lang="fr" aria-pressed="false">FR</button>
 		</nav>
-		<a class="knopf klein" href="spielstand.html?lang=en">Progress</a>
-		<a class="knopf klein" href="index.html?lang=en">To the quests</a>
 	</div>
 </header>
 
@@ -88,5 +89,11 @@
 	loaded from the network.</p>
 </footer>
 
+<script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
+<script src="texte-logbuch.js"></script>
+<script src="sprache.js"></script>
+<script src="speicher.js"></script>
+<script src="menue.js"></script>
 </body>
 </html>
