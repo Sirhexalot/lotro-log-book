@@ -837,9 +837,55 @@
 			else { kennung.push(t('filter_offen')); }
 		}
 		if (orte(quest).some(function (ziel) { return ziel[4] === 1; })) { kennung.push(t('auf_grosser_karte')); }
+		
 		var zeile = eltern('div', kennung.join(' · '));
 		zeile.className = 'kennung';
 		detail.appendChild(zeile);
+
+		// Facts from the game data as small tags.
+		var marken = [];
+		if (quest.lp) { marken.push(ersetze(t('marke_lp'), [quest.lp])); }
+		if (quest.dy) { marken.push(t('marke_taeglich')); }
+		if (quest.rp === -1) { marken.push(t('marke_wiederholbar')); }
+		else if (quest.rp > 1) { marken.push(ersetze(t('marke_bis'), [quest.rp])); }
+		if (quest.gr === 2) { marken.push(t('marke_gruppe')); }
+		else if (quest.gr === 1) { marken.push(t('marke_kleingruppe')); }
+		if (quest.ix) { marken.push(t('marke_instanz')); }
+		if (quest.tl) { marken.push(ersetze(t('marke_zeit'), [quest.tl >= 120 ? Math.round(quest.tl / 60) + ' min' : quest.tl + ' s'])); }
+		if (marken.length) {
+			var markenZeile = eltern('div', null);
+			markenZeile.className = 'marken';
+			marken.forEach(function (text) {
+				var m = eltern('span', text);
+				m.className = 'marke';
+				markenZeile.appendChild(m);
+			});
+			detail.appendChild(markenZeile);
+		}
+
+		// Quest chain: what leads here and what comes next, each clickable.
+		var davor = (quest.pq || []).map(function (id) { return questNachId[id]; }).filter(Boolean);
+		var danach = quest.nq ? questNachId[quest.nq] : null;
+		if (davor.length || danach) {
+			var kette = eltern('div', null);
+			kette.className = 'bedingungen';
+			kette.appendChild(eltern('h3', t('kette')));
+			var kl = eltern('ul', null);
+			function glied(andere, pfeil) {
+				var li = eltern('li', null);
+				var zeichen = eltern('span', pfeil);
+				zeichen.className = 'zeichen' + (fertig[andere.i] ? ' ok' : '');
+				li.appendChild(zeichen);
+				li.appendChild(document.createTextNode(' ' + andere.n + (fertig[andere.i] ? ' ✓' : '')));
+				li.classList.add('sprung');
+				li.addEventListener('click', function () { waehle(andere); });
+				kl.appendChild(li);
+			}
+			davor.forEach(function (andere) { glied(andere, '←'); });
+			if (danach) { glied(danach, '→'); }
+			kette.appendChild(kl);
+			detail.appendChild(kette);
+		}
 
 		// Requirements, each with its state for the active character.
 		if (quest.v || quest.vo || quest.vl || quest.vb) {

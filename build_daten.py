@@ -275,6 +275,12 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap
             # gt: where the quest giver stands [map, lat, lon], shown by default
             # instead of the objectives (no spoilers until asked).
             **({'gt': geber_ort(field(record, 'gt'))} if geber_ort(field(record, 'gt')) else {}),
+            # Facts from the game: next / previous quests, repeatable, daily, time
+            # limit, group, instance, LOTRO points (see the catalogue generator).
+            **{key: (str(field(record, key)) if key == 'nq' else
+                     [str(x) for x in step_list(field(record, key))] if key == 'pq' else
+                     int(field(record, key)))
+               for key in ('nq', 'pq', 'rp', 'dy', 'tl', 'gr', 'ix', 'lp') if field(record, key)},
             # g: quest giver (first bestowing NPC), where the game names one.
             **({'g': str(field(record, 'g'))} if field(record, 'g') else {}),
             'l': str(record['l']) if 'l' in record and record['l'] else '',

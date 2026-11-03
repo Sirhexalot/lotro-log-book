@@ -793,3 +793,7 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .umschalter button[aria-pressed="true"] { background: #3a3226; border-color: var(--gold); color: var(--text); }
 .umschalter button[aria-pressed="false"] { color: var(--schwach); }
 .schritt { pointer-events: auto; cursor: help; }
+
+/* Facts from the game as tags */
+.marken { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; }
+.marke { font-size: 11px; padding: 1px 7px; border: 1px solid var(--rand); border-radius: 9px; color: var(--schwach); background: var(--fläche-hell); }
