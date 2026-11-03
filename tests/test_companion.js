@@ -90,13 +90,40 @@ const back = require('fs').readFileSync(path.join(tmp, files[0].path), 'utf8');
 assert.strictEqual(back, files[0].text, 'zip content unchanged');
 assert.strictEqual(C.crc32(Buffer.from('123456789')), 0xCBF43926, 'crc32 check value');
 
+// Running counters: objective and condition numbers as the game counts them.
+const laufend = C.finished(deeds, 'deedStatus').running;
+assert.deepStrictEqual(laufend['70000CFB'], [[1, 0, 1, 1]], 'running deed with its condition');
+const zwei = C.conditions('<objectiveStatus index="2" state="UNDERWAY">' +
+	'<conditionStatus index="0" state="UNDERWAY" count="44"/>' +
+	'<conditionStatus index="1" state="COMPLETED"/></objectiveStatus>');
+assert.deepStrictEqual(zwei, [[2, 0, 0, 44], [2, 1, 1, null]], 'count when present, null otherwise');
+
+// Reputation and crafting, as LOTRO Companion writes them (ISO-8859-1, ids only).
+const ruf = C.reputation('<?xml version="1.0" encoding="ISO-8859-1"?><reputation>' +
+	'<faction id="1879091345" currentTier="6" currentReputation="81050"><level tier="1" date="0"/></faction>' +
+	'<faction id="bad" currentTier="3"/>' +
+	'<faction id="1879413167"><level tier="1" date="0"/><level tier="4" date="0"/></faction></reputation>');
+assert.deepStrictEqual(ruf, [['7000A891', 6, 81050], ['700591AF', 4, null]], JSON.stringify(ruf));
+const handwerk = C.crafting('<crafting name="X"><profession id="WOODWORKER">' +
+	'<knownRecipe id="1879066786"/>' +
+	'<level tier="2"><proficiency xp="280" completed="true" completionDate="0"/><mastery xp="10" completed="false"/></level>' +
+	'<level tier="1"><proficiency xp="200" completed="true"/><mastery xp="400" completed="true"/></level>' +
+	'</profession><profession id="lower"><level tier="1"/></profession></crafting>');
+assert.deepStrictEqual(handwerk, { WOODWORKER: [[1, 200, 1, 400, 1], [2, 280, 1, 10, 0]] }, JSON.stringify(handwerk));
+
 // readCharacters on file-like items.
 C.readCharacters([
 	{ path: 'characters/toon-00000/summary.xml', read: async () => summary },
 	{ path: 'characters/toon-00000/questsStatus.xml', read: async () => quests },
 	{ path: 'characters/toon-00000/deedsStatus.xml', read: async () => deeds },
+	{ path: 'characters/toon-00000/reputation.xml', read: async () => '<faction id="1879091345" currentTier="6" currentReputation="81050"/>' },
+	{ path: 'characters/toon-00000/crafting.xml', read: async () => '<profession id="COOK"><level tier="1"><proficiency xp="5" completed="false"/><mastery xp="0" completed="false"/></level></profession>' },
 ]).then((result) => {
 	assert.strictEqual(result.characters.length, 1);
-	assert.strictEqual(result.characters[0].name, 'Feldobar');
-	console.log('PASS: companion.js unit tests (ids, top level only, repeatables, no account data, paths, zip)');
+	const c = result.characters[0];
+	assert.strictEqual(c.name, 'Feldobar');
+	assert.deepStrictEqual(c.ruf, [['7000A891', 6, 81050]]);
+	assert.deepStrictEqual(c.handwerk, { COOK: [[1, 5, 0, 0, 0]] });
+	assert.ok(c.laufend['70000CFB'], 'running deed kept');
+	console.log('PASS: companion.js unit tests (ids, top level only, repeatables, running counters, reputation, crafting, no account data, paths, zip)');
 }).catch((error) => { console.error(error); process.exit(1); });

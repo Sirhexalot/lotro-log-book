@@ -55,6 +55,8 @@
 	// --- Progress ------------------------------------------------------
 	var fertig = {};
 	fortschritt.ids.forEach(function (id) { fertig[id] = true; });
+	var aktiverCharakter = speicher && speicher.aktiv();
+	var laufend = (aktiverCharakter && aktiverCharakter.laufend) || {};
 	var hatFortschritt = fortschritt.ids.length > 0;
 
 	/**
@@ -74,7 +76,45 @@
 				if (fertig[quest.e[index]] === true) { return 'ausgeschlossen'; }
 			}
 		}
+		if (laufend[quest.i]) { return 'laufend'; }
 		return 'offen';
+	}
+
+	/**
+	 * Running counters of an unfinished entry, as LOTRO Companion recorded them:
+	 * rows of [objective, condition, done, count]. "teile" counts sub-goals done
+	 * of those recorded; "zaehler" finds the count for one goal of the catalogue,
+	 * matched by objective index and condition number (never by text).
+	 */
+	function lauf(quest) {
+		var zeilen = laufend[quest.i];
+		if (!zeilen) { return null; }
+		var fertigTeile = 0;
+		zeilen.forEach(function (zeile) { if (zeile[2]) { fertigTeile += 1; } });
+		return {
+			teile: fertigTeile, gesamt: zeilen.length,
+			zaehler: function (schritt, bedingung) {
+				for (var i = 0; i < zeilen.length; i += 1) {
+					if (String(zeilen[i][0]) === String(schritt) && zeilen[i][1] === bedingung) { return zeilen[i]; }
+				}
+				return null;
+			}
+		};
+	}
+
+	/** Short progress text for a running entry: the first real counter, else sub-goals. */
+	function laufText(quest) {
+		var stand = lauf(quest);
+		if (!stand) { return ''; }
+		var text = '';
+		(quest.s || []).some(function (schritt) {
+			return schritt[2].some(function (ziel) {
+				var z = ziel[1] > 1 && ziel[2] >= 0 ? stand.zaehler(schritt[0], ziel[2]) : null;
+				if (z && z[3] !== null && !z[2]) { text = Math.min(z[3], ziel[1]) + '/' + ziel[1]; return true; }
+				return false;
+			});
+		});
+		return text || ersetze(t('teilziele'), [stand.teile, stand.gesamt]);
 	}
 
 	function gezaehlt(quest) {
@@ -470,6 +510,7 @@
 			var dot = eltern('div', null);
 			dot.className = 'punkt';
 			if (fertig[quest.i]) { dot.classList.add('fertig'); }
+			if (laufend[quest.i] && !fertig[quest.i]) { dot.classList.add('laufend'); }
 			if (!gezaehlt(quest)) { dot.classList.add('nicht-gezaehlt'); }
 			if (zustand.auswahl && zustand.auswahl.i === quest.i) {
 				dot.classList.add('aktiv');
@@ -532,6 +573,13 @@
 				vermerk.className = 'vermerk';
 				zeile.appendChild(vermerk);
 			}
+			if (lage === 'laufend') {
+				zeile.classList.add('laufend');
+				haken.textContent = '◐';
+				var stand = eltern('span', laufText(quest));
+				stand.className = 'laufstand';
+				zeile.appendChild(stand);
+			}
 			if (quest.l) {
 				var stufe = eltern('span', t('stufe') + ' ' + quest.l);
 				stufe.className = 'stufe';
@@ -555,7 +603,10 @@
 	function gefiltert(eintraege) {
 		if (zustand.filter === 'offen') {
 			// "Open" means the character can still do it.
-			return eintraege.filter(function (quest) { return zustandVon(quest) === 'offen'; });
+			return eintraege.filter(function (quest) {
+				var lage = zustandVon(quest);
+				return lage === 'offen' || lage === 'laufend';
+			});
 		}
 		if (zustand.filter === 'erledigt') {
 			return eintraege.filter(function (quest) { return fertig[quest.i] === true; });
@@ -611,6 +662,7 @@
 			if (lage === 'fertig') { kennung.push(t('erledigt')); }
 			else if (lage === 'sitzung') { kennung.push(t('sitzungsspiel')); }
 			else if (lage === 'ausgeschlossen') { kennung.push(t('nicht_moeglich')); }
+			else if (lage === 'laufend') { kennung.push(t('in_arbeit') + ' · ' + laufText(quest)); }
 			else { kennung.push(t('filter_offen')); }
 		}
 		var zeile = eltern('div', kennung.join(' · '));
@@ -676,9 +728,30 @@
 			});
 			if (schritt[2].length) {
 				var ul = eltern('ul', null);
+				var stand = lage === 'laufend' ? lauf(quest) : null;
 				schritt[2].forEach(function (ziel) {
 					var li = eltern('li', ziel[0]);
-					if (ziel[1]) {
+					var z = stand && ziel[2] >= 0 ? stand.zaehler(schritt[0], ziel[2]) : null;
+					if (z && z[2]) {
+						// Done according to LOTRO Companion.
+						li.classList.add('ziel-fertig');
+						li.appendChild(document.createTextNode(' '));
+						var ok = eltern('span', '✓');
+						ok.className = 'zahl';
+						li.appendChild(ok);
+					} else if (z && z[3] !== null && ziel[1] > 1) {
+						var wert = Math.min(z[3], ziel[1]);
+						li.appendChild(document.createTextNode(' '));
+						var zahlText = eltern('span', '(' + wert + '/' + ziel[1] + ')');
+						zahlText.className = 'zahl';
+						li.appendChild(zahlText);
+						var leiste = eltern('span', null);
+						leiste.className = 'zielbalken';
+						var balken = eltern('span', null);
+						balken.style.width = Math.round(wert / ziel[1] * 100) + '%';
+						leiste.appendChild(balken);
+						li.appendChild(leiste);
+					} else if (ziel[1]) {
 						li.appendChild(document.createTextNode(' '));
 						var anzahl = eltern('span', '(' + ziel[1] + ')');
 						anzahl.className = 'zahl';

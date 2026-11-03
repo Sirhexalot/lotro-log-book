@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handwerk – Mittelerde-Logbuch</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-seite="handwerk" class="seite-text">
+
+<header class="kopf">
+	<h1 data-t="produkt">Mittelerde-Logbuch</h1>
+	<nav class="menue" id="menue" aria-label="Menü"></nav>
+	<nav class="sprachen" aria-label="Sprache">
+		<button type="button" data-lang="de" aria-pressed="true">DE</button>
+		<button type="button" data-lang="en" aria-pressed="false">EN</button>
+		<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+	</nav>
+</header>
+
+<main class="seite">
+	<h2 data-t="hw_titel">Handwerk</h2>
+	<p data-t="hw_text"></p>
+	<p class="meldung" id="hinweis"></p>
+	<div id="berufe"></div>
+</main>
+
+<script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
+<script src="texte-logbuch.js"></script>
+<script src="sprache.js"></script>
+<script src="speicher.js"></script>
+<script src="menue.js"></script>
+<script src="referenz.js"></script>
+<script src="handwerk.js"></script>
+</body>
+</html>

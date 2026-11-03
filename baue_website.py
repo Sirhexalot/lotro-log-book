@@ -28,9 +28,10 @@ WEB = HIER / 'web'
 SPRACHEN = ('de', 'en', 'fr')
 
 DATEIEN = ('app.js', 'start.css', 'style.css', 'texte.js', 'texte-spielstand.js',
-           'sprache.js', 'speicher.js', 'menue.js', 'companion.js', 'spielstand.js',
-           'stand.js', 'start.html', 'start-en.html', 'start-fr.html',
-           'spielstand.html', 'impressum.html', 'datenschutz.html')
+           'texte-logbuch.js', 'sprache.js', 'speicher.js', 'menue.js', 'companion.js',
+           'spielstand.js', 'referenz.js', 'ruf.js', 'handwerk.js', 'stand.js',
+           'start.html', 'start-en.html', 'start-fr.html', 'spielstand.html',
+           'ruf.html', 'handwerk.html', 'impressum.html', 'datenschutz.html')
 BILDER = ('bild/start.jpg', 'bild/start-en.jpg', 'bild/start-fr.jpg')
 
 
@@ -73,8 +74,8 @@ def stempeln(ziel):
         if name.endswith(('.js', '.css')):
             summe.update((ziel / name).read_bytes())
     marke = summe.hexdigest()[:10]
-    for seite in ('index.html', 'spielstand.html', 'start.html', 'start-en.html',
-                  'start-fr.html', 'impressum.html', 'datenschutz.html'):
+    for seite in ('index.html', 'spielstand.html', 'ruf.html', 'handwerk.html', 'start.html',
+                  'start-en.html', 'start-fr.html', 'impressum.html', 'datenschutz.html'):
         datei = ziel / seite
         text = datei.read_text(encoding='utf-8')
         text = re.sub(r'(<(?:script|link)[^>]+(?:src|href)=")([\w.-]+\.(?:js|css))(")',
@@ -90,7 +91,8 @@ ZAEHLER = ('<script data-goatcounter="https://sirhexalot.goatcounter.com/count"\
 def zaehler_einbauen(ziel):
     """GoatCounter only in the published version, not locally."""
     for name in ('index.html', 'start.html', 'start-en.html', 'start-fr.html',
-                 'spielstand.html', 'impressum.html', 'datenschutz.html'):
+                 'spielstand.html', 'ruf.html', 'handwerk.html', 'impressum.html',
+                 'datenschutz.html'):
         datei = ziel / name
         text = datei.read_text(encoding='utf-8')
         if 'goatcounter' in text:
@@ -133,7 +135,7 @@ def main():
 
     # Check the sources before anything is deleted.
     for sprache in SPRACHEN:
-        for name in ('daten-%s.js' % sprache, 'webp/%s' % sprache):
+        for name in ('daten-%s.js' % sprache, 'daten-taten-%s.js' % sprache, 'webp/%s' % sprache):
             pfad = WEB / name if name.endswith('.js') else HIER / name
             if not pfad.exists():
                 raise SystemExit('MISSING: %s (run build_daten.py or '
@@ -151,6 +153,7 @@ def main():
 
     for sprache in SPRACHEN:
         shutil.copy2(WEB / ('daten-%s.js' % sprache), ziel / ('daten-%s.js' % sprache))
+        shutil.copy2(WEB / ('daten-taten-%s.js' % sprache), ziel / ('daten-taten-%s.js' % sprache))
         shutil.copytree(HIER / 'webp' / sprache, ziel / 'karten' / sprache)
 
     # Checks

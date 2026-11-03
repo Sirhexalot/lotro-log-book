@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruf – Mittelerde-Logbuch</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-seite="ruf" class="seite-text">
+
+<header class="kopf">
+	<h1 data-t="produkt">Mittelerde-Logbuch</h1>
+	<nav class="menue" id="menue" aria-label="Menü"></nav>
+	<nav class="sprachen" aria-label="Sprache">
+		<button type="button" data-lang="de" aria-pressed="true">DE</button>
+		<button type="button" data-lang="en" aria-pressed="false">EN</button>
+		<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+	</nav>
+</header>
+
+<main class="seite">
+	<h2 data-t="ru_titel">Ruf</h2>
+	<p data-t="ru_text"></p>
+	<p class="meldung" id="hinweis"></p>
+	<div class="kopf-zeile" id="steuerung">
+		<input type="search" id="filter" data-t-ph="ru_suche" autocomplete="off">
+		<label><input type="checkbox" id="nur-begonnen" checked> <span data-t="ru_nur_begonnen">nur begonnene</span></label>
+		<span class="stufe-klein" id="anzahl"></span>
+	</div>
+	<div class="tabellen-rahmen"><table class="tabelle" id="tabelle">
+		<thead><tr>
+			<th data-t="ru_fraktion">Fraktion</th>
+			<th data-t="ru_stufe">Stufe</th>
+			<th style="width:30%"></th>
+			<th class="zahl" data-t="ru_punkte">Punkte</th>
+		</tr></thead>
+		<tbody id="zeilen"></tbody>
+	</table></div>
+</main>
+
+<script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
+<script src="texte-logbuch.js"></script>
+<script src="sprache.js"></script>
+<script src="speicher.js"></script>
+<script src="menue.js"></script>
+<script src="referenz.js"></script>
+<script src="ruf.js"></script>
+</body>
+</html>

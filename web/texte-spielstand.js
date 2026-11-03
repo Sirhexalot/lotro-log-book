@@ -16,7 +16,7 @@
 			kein_charakter: 'noch keiner geladen',
 			sp_titel: 'Spielstand',
 			sp_einleitung: 'Hier holt Ihr Euren Fortschritt aus ' + COMPANION + ' auf die Karte und in das Plugin ' + PLUGIN + '. Ihr könnt mehrere Charaktere laden und oben im Menü zwischen ihnen wechseln.',
-			sp_datenschutz: '<strong>Nichts wird hochgeladen.</strong> Die Seite liest Companions Dateien nur hier in Eurem Browser und merkt sich Name, Server, Klasse, Stufe und die erledigten Aufgaben und Taten. Konto-Kennung, Inventar und Geld werden nicht gelesen. Löschen könnt Ihr jeden Charakter unten in der Liste.',
+			sp_datenschutz: '<strong>Nichts wird hochgeladen.</strong> Die Seite liest Companions Dateien nur hier in Eurem Browser und merkt sich Name, Server, Klasse, Stufe, die erledigten und laufenden Aufgaben und Taten, Euren Ruf und Euer Handwerk. Konto-Kennung, Inventar und Geld werden nicht gelesen. Löschen könnt Ihr jeden Charakter unten in der Liste.',
 			sp_schritt1: '1. Charakter in LOTRO Companion importieren',
 			sp_companion: 'LOTRO Companion liest Euren Fortschritt aus dem laufenden Spiel. Ihr braucht es nur dafür; das Plugin selbst braucht es nicht. Herunterladen: ' + COMPANION + ' (kostenlos).',
 			sp_windows: '<li>LOTRO starten und mit dem Charakter <strong>die Welt betreten</strong>.</li>' +
@@ -80,7 +80,7 @@
 			kein_charakter: 'none loaded yet',
 			sp_titel: 'Progress',
 			sp_einleitung: 'Here you bring your progress from ' + COMPANION + ' onto the map and into the ' + PLUGIN + ' plugin. You can load several characters and switch between them in the menu above.',
-			sp_datenschutz: '<strong>Nothing is uploaded.</strong> This page reads Companion\'s files only here in your browser and keeps name, server, class, level and your finished quests and deeds. Account id, inventory and money are not read. You can delete each character in the list below.',
+			sp_datenschutz: '<strong>Nothing is uploaded.</strong> This page reads Companion\'s files only here in your browser and keeps name, server, class, level, your finished and running quests and deeds, your reputation and your crafting. Account id, inventory and money are not read. You can delete each character in the list below.',
 			sp_schritt1: '1. Import your character in LOTRO Companion',
 			sp_companion: 'LOTRO Companion reads your progress from the running game. You only need it for this; the plugin itself does not. Download: ' + COMPANION + ' (free).',
 			sp_windows: '<li>Start LOTRO and <strong>enter the world</strong> with your character.</li>' +
@@ -144,7 +144,7 @@
 			kein_charakter: 'aucun chargé',
 			sp_titel: 'Progression',
 			sp_einleitung: 'Ici, vous amenez votre progression de ' + COMPANION + ' sur la carte et dans le plugin ' + PLUGIN + '. Vous pouvez charger plusieurs personnages et passer de l\'un à l\'autre dans le menu.',
-			sp_datenschutz: '<strong>Rien n\'est envoyé.</strong> Cette page lit les fichiers de Companion uniquement dans votre navigateur et garde le nom, le serveur, la classe, le niveau et les quêtes et prouesses terminées. L\'identifiant de compte, l\'inventaire et l\'argent ne sont pas lus. Chaque personnage peut être supprimé dans la liste ci-dessous.',
+			sp_datenschutz: '<strong>Rien n\'est envoyé.</strong> Cette page lit les fichiers de Companion uniquement dans votre navigateur et garde le nom, le serveur, la classe, le niveau, les quêtes et prouesses terminées ou en cours, votre réputation et votre artisanat. L\'identifiant de compte, l\'inventaire et l\'argent ne sont pas lus. Chaque personnage peut être supprimé dans la liste ci-dessous.',
 			sp_schritt1: '1. Importer le personnage dans LOTRO Companion',
 			sp_companion: 'LOTRO Companion lit votre progression dans le jeu en cours. Il ne sert qu\'à cela ; le plugin lui-même n\'en a pas besoin. Téléchargement : ' + COMPANION + ' (gratuit).',
 			sp_windows: '<li>Lancer LOTRO et <strong>entrer dans le monde</strong> avec le personnage.</li>' +

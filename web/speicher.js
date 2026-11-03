@@ -2,7 +2,8 @@
  *
  * localStorage "mql.charaktere": { aktiv: key or null, liste: { key: entry } }
  * An entry is what companion.js reads from LOTRO Companion: name, server, account,
- * class, race, level, date and the finished quest and deed ids. Nothing leaves the
+ * class, race, level, date, the finished quest and deed ids, the counters of
+ * unfinished ones ("laufend"), reputation ("ruf") and crafting tiers ("handwerk"). Nothing leaves the
  * browser; "Sicherung" downloads it as a file and loads it back.
  *
  * Before 0.2.0 the map kept a single Progress.lua under "mql.fortschritt". That is
@@ -35,12 +36,41 @@
 			return (Array.isArray(liste) ? liste : []).map(function (id) { return String(id).toUpperCase(); })
 				.filter(function (id) { return hex.test(id); });
 		}
+		function zahl(wert) { var n = Number(wert); return isFinite(n) ? n : 0; }
+		// Running counters: { id: [[objective, condition, done, count|null], …] }
+		function laufend(quelle) {
+			var aus = {};
+			Object.keys(quelle && typeof quelle === 'object' ? quelle : {}).forEach(function (id) {
+				var schluessel = String(id).toUpperCase();
+				if (!hex.test(schluessel) || !Array.isArray(quelle[id])) { return; }
+				aus[schluessel] = quelle[id].filter(Array.isArray).map(function (z) {
+					return [zahl(z[0]), zahl(z[1]), z[2] ? 1 : 0, z[3] === null || z[3] === undefined ? null : zahl(z[3])];
+				});
+			});
+			return aus;
+		}
+		function ruf(quelle) {
+			return (Array.isArray(quelle) ? quelle : []).filter(function (z) {
+				return Array.isArray(z) && hex.test(String(z[0]).toUpperCase());
+			}).map(function (z) { return [String(z[0]).toUpperCase(), zahl(z[1]), z[2] === null || z[2] === undefined ? null : zahl(z[2])]; });
+		}
+		function handwerk(quelle) {
+			var aus = {};
+			Object.keys(quelle && typeof quelle === 'object' ? quelle : {}).forEach(function (beruf) {
+				if (!/^[A-Z]+$/.test(beruf) || !Array.isArray(quelle[beruf])) { return; }
+				aus[beruf] = quelle[beruf].filter(Array.isArray).map(function (z) {
+					return [zahl(z[0]), zahl(z[1]), z[2] ? 1 : 0, zahl(z[3]), z[4] ? 1 : 0];
+				});
+			});
+			return aus;
+		}
 		if (!eintrag || typeof eintrag.name !== 'string' || !eintrag.name) { return null; }
 		return {
 			key: String(eintrag.key || [eintrag.account || '', eintrag.server || '', eintrag.name].join('|')),
 			name: eintrag.name, server: String(eintrag.server || ''), account: String(eintrag.account || ''),
 			klasse: String(eintrag.klasse || ''), race: String(eintrag.race || ''), level: String(eintrag.level || ''),
-			date: String(eintrag.date || ''), quests: ids(eintrag.quests), deeds: ids(eintrag.deeds)
+			date: String(eintrag.date || ''), quests: ids(eintrag.quests), deeds: ids(eintrag.deeds),
+			laufend: laufend(eintrag.laufend), ruf: ruf(eintrag.ruf), handwerk: handwerk(eintrag.handwerk)
 		};
 	}
 

@@ -1,7 +1,9 @@
-# LotRO Magic Quest Map
+# Middle-earth Logbook (LotRO Magic Quest Map)
 
-A map for **Magic Quest Log**: per region the map, on it the objectives of the
-quests – with your own progress beside it.
+The web companion of **Magic Quest Log**: per region the map with the objectives of
+quests and deeds, your progress beside it, and pages for **deeds** with their running
+counters, **reputation** and **crafting** — for every character loaded from LOTRO
+Companion. German: *Mittelerde-Logbuch*, French: *Journal de la Terre du Milieu*.
 
 Runs at **https://mm.sirhexalot.de/**.
 
@@ -15,7 +17,9 @@ from your own game and stay local.
 hole_karten.py      map images from the client (German/English/French)
 baue_geografie.py   daten/geografie.json: which groups are real places?
 baue_startbild.py   web/bild/start*.jpg for the start pages
-build_daten.py      daten/quests-<language>.json and web/daten-<language>.js
+build_daten.py      web/daten-<language>.js (quests) and, with --art taten,
+                    web/daten-taten-<language>.js (deeds)
+build_referenz.py   web/referenz.js: faction, tier and profession names (DE/EN/FR)
 baue_webp.py        webp/<language>/*.webp from the PNGs
 baue_website.py     dist-web/: the published version
 upload.py           upload dist-web/ via FTPS
@@ -25,6 +29,9 @@ web/                the site (opens without a server)
   speicher.js       characters and their progress, kept in the browser
   menue.js          menu bar with the character switch
   spielstand.html   the Progress page
+  ruf.html          reputation per faction
+  handwerk.html     crafting per profession and tier
+  index.html        the map; ?art=taten shows deeds instead of quests
 tests/              converter tests (unit, and against a real Companion folder)
 ```
 
@@ -45,6 +52,8 @@ python3 baue_startbild.py --sprache fr
 python3 build_daten.py --sprache de                     # needs lupa
 python3 build_daten.py --sprache en
 python3 build_daten.py --sprache fr
+python3 build_daten.py --sprache de --art taten         # deeds, likewise en/fr
+python3 build_referenz.py                               # reputation/crafting names
 python3 baue_webp.py --sprache de
 python3 baue_webp.py --sprache en
 python3 baue_webp.py --sprache fr
@@ -73,6 +82,26 @@ German, English and French. The site loads only the selected language
 (`daten-de.js`/`daten-en.js`, images from `karten/de`/`karten/en`). Order of
 choice: `?lang=`, then `localStorage`, then `navigator.language`, otherwise
 English. Texts live in `web/texte.js`.
+
+## Reputation, crafting and deed counters
+
+Companion's `reputation.xml`, `crafting.xml` and the nested objective states of
+unfinished quests and deeds are read as well, in the browser like the rest.
+
+- **Names** of factions, reputation tiers, professions and their tier titles come
+  from **our own DAT export** (`build_referenz.py`, source: the source exporter with
+  the faction and profession records). Where the game varies a word by gender
+  ("Geselle"/"Gesellin") both forms are shown. No English fallback was needed.
+- **Reputation** shows the tier reached and the points earned. The game's point
+  thresholds per tier are not in the decodable data, so the bar measures tiers,
+  not points to the next one. For about half the factions Companion records only
+  the tiers reached; their points are shown as unknown ("–"), never as 0.
+- **Crafting** shows every tier with proficiency and mastery; experience against
+  the tier's cap from the DAT; "next" is the first tier not finished.
+- **Deed counters**: Companion numbers each counter by objective and condition, and
+  the catalogue numbers its goals the same way (`k`). A counter is shown only where
+  both match ("44/75"); otherwise the entry reads "3 of 6 sub-goals". Checked on a
+  real character: 301 counters matched, none above its goal's total.
 
 ## Progress
 

@@ -1,12 +1,13 @@
 /* LOTRO Companion -> Magic Quest Log, entirely in the browser.
  *
  * Reads the files LOTRO Companion writes per character
- * (characters/toon-NNNNN/summary.xml, questsStatus.xml, deedsStatus.xml) and turns
- * them into
+ * (characters/toon-NNNNN/summary.xml, questsStatus.xml, deedsStatus.xml,
+ * reputation.xml, crafting.xml) and turns them into
  *   - the progress the map shows, kept per character in this browser, and
  *   - the plugin data file Magic Quest Log reads in the game.
- * Nothing is uploaded. Only name, server, account folder, class, race, level and the
- * finished ids are kept; everything else in those files is ignored.
+ * Nothing is uploaded. Kept are name, server, account folder, class, race, level,
+ * the finished ids, the counters of unfinished ones, reputation and crafting tiers;
+ * everything else in those files is ignored.
  *
  * Works in the browser and in Node (for the tests): no DOM is needed.
  */
@@ -62,10 +63,22 @@
 		var ids = [];
 		var seen = {};
 		var underway = 0;
-		var pattern = new RegExp('<' + tag + '\\b[^>]*>', 'g');
+		var running = {};
+		// One top-level entry: its start tag and, unless self-closing, its body up
+		// to the matching end tag. Nested objective states belong to that entry.
+		var pattern = new RegExp('<' + tag + '\\b([^>]*?)(/?)>', 'g');
 		var match;
-		while ((match = pattern.exec(text || '')) !== null) {
-			var a = attributes(match[0]);
+		var source = text || '';
+		while ((match = pattern.exec(source)) !== null) {
+			var a = attributes(match[1]);
+			var body = '';
+			if (match[2] !== '/') {
+				var end = source.indexOf('</' + tag + '>', pattern.lastIndex);
+				if (end >= 0) {
+					body = source.slice(pattern.lastIndex, end);
+					pattern.lastIndex = end;
+				}
+			}
 			var id = hexId(a.key);
 			if (!id) { continue; }
 			var done = a.state === 'COMPLETED' || Number(a.completionCount || 0) >= 1;
@@ -74,10 +87,94 @@
 				ids.push(id);
 			} else if (!done) {
 				underway += 1;
+				var detail = conditions(body);
+				if (detail.length) { running[id] = detail; }
 			}
 		}
 		ids.sort();
-		return { ids: ids, underway: underway };
+		return { ids: ids, underway: underway, running: running };
+	}
+
+	/**
+	 * Running state of an unfinished quest or deed, as LOTRO Companion records it:
+	 * [objective index, condition index, 1 = done / 0 = open, count or null].
+	 * Objective and condition numbers are the game's; the catalogue numbers its
+	 * goals the same way ("k"), which is how a count finds its goal.
+	 */
+	function conditions(body) {
+		var out = [];
+		var objective = /<objectiveStatus\b([^>]*)>([\s\S]*?)<\/objectiveStatus>/g;
+		var treffer;
+		while ((treffer = objective.exec(body)) !== null) {
+			var o = attributes(treffer[1]);
+			var condition = /<conditionStatus\b([^>]*?)\/?>/g;
+			var c;
+			while ((c = condition.exec(treffer[2])) !== null) {
+				var b = attributes(c[1]);
+				if (o.index === undefined || b.index === undefined) { continue; }
+				out.push([Number(o.index), Number(b.index), b.state === 'COMPLETED' ? 1 : 0,
+					b.count === undefined ? null : Number(b.count)]);
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * reputation.xml: [faction id (hex), current tier, earned reputation or null].
+	 * For some factions Companion only lists the tiers reached, without points:
+	 * then the highest reached tier counts and the points stay unknown (null),
+	 * never zero.
+	 */
+	function reputation(text) {
+		var out = [];
+		var pattern = /<faction\b([^>]*?)(\/?)>/g;
+		var source = text || '';
+		var match;
+		while ((match = pattern.exec(source)) !== null) {
+			var a = attributes(match[1]);
+			var id = hexId(a.id);
+			if (!id) { continue; }
+			if (a.currentTier !== undefined) {
+				out.push([id, Number(a.currentTier), a.currentReputation === undefined ? null : Number(a.currentReputation)]);
+				continue;
+			}
+			if (match[2] === '/') { continue; }
+			var end = source.indexOf('</faction>', pattern.lastIndex);
+			var body = end >= 0 ? source.slice(pattern.lastIndex, end) : '';
+			var highest = null, level = /<level\b[^>]*\btier="(\d+)"/g, l;
+			while ((l = level.exec(body)) !== null) { highest = Math.max(highest || 0, Number(l[1])); }
+			if (highest !== null) { out.push([id, highest, null]); }
+		}
+		return out;
+	}
+
+	/**
+	 * crafting.xml: per profession key (WOODWORKER …) the tiers as
+	 * [tier, proficiency xp, proficiency done, mastery xp, mastery done]. Known
+	 * recipes are not kept.
+	 */
+	function crafting(text) {
+		var out = {};
+		var profession = /<profession\b([^>]*)>([\s\S]*?)<\/profession>/g;
+		var match;
+		while ((match = profession.exec(text || '')) !== null) {
+			var key = attributes(match[1]).id;
+			if (!key || !/^[A-Z]+$/.test(key)) { continue; }
+			var tiers = [];
+			var level = /<level\b([^>]*)>([\s\S]*?)<\/level>/g;
+			var l;
+			while ((l = level.exec(match[2])) !== null) {
+				var tier = Number(attributes(l[1]).tier);
+				var k = /<proficiency\b([^>]*)\/?>/.exec(l[2]);
+				var m = /<mastery\b([^>]*)\/?>/.exec(l[2]);
+				var ka = k ? attributes(k[1]) : {}, ma = m ? attributes(m[1]) : {};
+				tiers.push([tier, Number(ka.xp || 0), ka.completed === 'true' ? 1 : 0,
+					Number(ma.xp || 0), ma.completed === 'true' ? 1 : 0]);
+			}
+			tiers.sort(function (x, y) { return x[0] - y[0]; });
+			out[key] = tiers;
+		}
+		return out;
 	}
 
 	function isoDate(milliseconds) {
@@ -86,20 +183,27 @@
 		return date.toISOString().slice(0, 10);
 	}
 
-	/** One character from the three files' text. Returns null when it is not usable. */
+	/** One character from its files' text. Returns null when it is not usable. */
 	function character(files) {
 		var who = summary(files.summary);
 		if (!who) { return null; }
 		var quests = finished(files.quests, 'questStatus');
 		var deeds = finished(files.deeds, 'deedStatus');
 		if (!quests.ids.length && !deeds.ids.length) { return null; }
+		var running = {};
+		[quests.running, deeds.running].forEach(function (teil) {
+			Object.keys(teil).forEach(function (id) { running[id] = teil[id]; });
+		});
 		return {
 			key: [who.account, who.server, who.name].join('|'),
 			name: who.name, server: who.server, account: who.account,
 			klasse: who.klasse, race: who.race, level: who.level,
 			date: isoDate(who.importDate),
 			quests: quests.ids, deeds: deeds.ids,
-			underway: quests.underway + deeds.underway
+			underway: quests.underway + deeds.underway,
+			laufend: running,
+			ruf: reputation(files.reputation),
+			handwerk: crafting(files.crafting)
 		};
 	}
 
@@ -165,7 +269,8 @@
 		items.forEach(function (item) {
 			var parts = String(item.path).replace(/\\/g, '/').split('/');
 			var file = parts[parts.length - 1];
-			var kind = { 'summary.xml': 'summary', 'questsStatus.xml': 'quests', 'deedsStatus.xml': 'deeds' }[file];
+			var kind = { 'summary.xml': 'summary', 'questsStatus.xml': 'quests', 'deedsStatus.xml': 'deeds',
+				'reputation.xml': 'reputation', 'crafting.xml': 'crafting' }[file];
 			if (!kind) { return; }
 			var folder = parts.slice(0, -1).join('/');
 			// Companion also keeps an account summary.xml; only character folders count.
@@ -180,12 +285,11 @@
 	function readCharacters(items) {
 		var groups = groupFiles(items);
 		return Promise.all(groups.map(function (group) {
-			return Promise.all([
-				group.summary.read(),
-				group.quests ? group.quests.read() : Promise.resolve(''),
-				group.deeds ? group.deeds.read() : Promise.resolve('')
-			]).then(function (texts) {
-				return character({ summary: texts[0], quests: texts[1], deeds: texts[2] });
+			return Promise.all(['summary', 'quests', 'deeds', 'reputation', 'crafting'].map(function (kind) {
+				return group[kind] ? group[kind].read() : Promise.resolve('');
+			})).then(function (texts) {
+				return character({ summary: texts[0], quests: texts[1], deeds: texts[2],
+					reputation: texts[3], crafting: texts[4] });
 			});
 		})).then(function (list) {
 			var characters = list.filter(Boolean);
@@ -248,6 +352,7 @@
 
 	var api = {
 		hexId: hexId, summary: summary, finished: finished, character: character,
+		conditions: conditions, reputation: reputation, crafting: crafting,
 		pluginData: pluginData, indexData: indexData, pluginFiles: pluginFiles,
 		groupFiles: groupFiles, readCharacters: readCharacters, zip: zip, crc32: crc32,
 		IMPORT_KEY: IMPORT_KEY, INDEX_KEY: INDEX_KEY

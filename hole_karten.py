@@ -91,8 +91,16 @@ def maps_xml(path):
 
 
 def benutzte_karten(katalog):
-    text = Path(katalog).read_text(encoding='utf-8', errors='replace')
-    return sorted({int(value) for value in re.findall(r'\["map"\]=(\d+)', text)})
+    """Maps used by the quest catalogue and, next to it, the deed catalogue."""
+    karten = set()
+    dateien = [Path(katalog)]
+    taten = Path(katalog).with_name(Path(katalog).name.replace('Quests_', 'Deeds_'))
+    if taten != Path(katalog) and taten.is_file():
+        dateien.append(taten)
+    for datei in dateien:
+        text = datei.read_text(encoding='utf-8', errors='replace')
+        karten.update(int(value) for value in re.findall(r'\["map"\]=(\d+)', text))
+    return sorted(karten)
 
 
 def hole_github(karten_id, ziel):

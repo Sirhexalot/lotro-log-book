@@ -438,6 +438,7 @@ main {
 
 .tupfen.offen { background: var(--offen); }
 .tupfen.fertig { background: var(--fertig); }
+.tupfen.laufend { background: var(--laufend); }
 
 .bedienung {
 	position: absolute;
@@ -592,3 +593,47 @@ main.seite {
 .seite details { border-bottom: 1px solid var(--rand); padding: 8px 0; }
 .seite summary { cursor: pointer; color: var(--text); }
 .seite details p { margin: 8px 0 4px 16px; color: var(--schwach); }
+
+/* Running: started, not finished – LOTRO Companion recorded its counters. */
+:root { --laufend: #7fa6c9; }
+#liste li.laufend .haken { color: var(--laufend); }
+#liste li .laufstand { color: var(--laufend); font-size: 11px; margin-left: 6px; white-space: nowrap; }
+.punkt.laufend { background: var(--laufend); }
+li.ziel-fertig { color: var(--fertig); }
+.zielbalken {
+	display: inline-block;
+	width: 70px;
+	height: 5px;
+	margin-left: 6px;
+	vertical-align: middle;
+	background: var(--fläche-hell);
+	border-radius: 3px;
+	overflow: hidden;
+}
+.zielbalken > span { display: block; height: 100%; background: var(--laufend); }
+
+/* Reputation and crafting pages */
+.balken-zeile { display: flex; align-items: center; gap: 8px; }
+.balken {
+	flex: 1 1 auto;
+	height: 7px;
+	min-width: 60px;
+	background: var(--fläche-hell);
+	border-radius: 4px;
+	overflow: hidden;
+}
+.balken > span { display: block; height: 100%; background: var(--fertig); }
+.balken.teil > span { background: var(--laufend); }
+.stufe-name { color: var(--text); }
+.stufe-klein { color: var(--schwach); font-size: 12px; }
+.kopf-zeile { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+.kopf-zeile input[type="search"] { width: auto; flex: 1 1 220px; }
+.kopf-zeile label { display: flex; gap: 6px; align-items: center; color: var(--schwach); font-size: 13px; }
+.kopf-zeile label input { width: auto; }
+.beruf { margin: 18px 0 26px; }
+.beruf h3 { margin-bottom: 4px; }
+.beruf .naechste { color: var(--gold); margin: 4px 0 8px; }
+td.haken-zelle { width: 1.5em; text-align: center; }
+td.haken-zelle.fertig { color: var(--fertig); }
+td.haken-zelle.offen { color: var(--schwach); }
+td.haken-zelle.teil { color: var(--laufend); }

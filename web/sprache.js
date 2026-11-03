@@ -34,8 +34,17 @@
 
 	var texte = (window.MQL_TEXTE || {})[sprache] || (window.MQL_TEXTE || {}).de || {};
 
+	// The map shows quests, or deeds with ?art=taten. Texts that differ for deeds
+	// carry the suffix _taten and win in that mode.
+	var art = 'aufgaben';
+	try {
+		art = new URLSearchParams(window.location.search).get('art') === 'taten' ? 'taten' : 'aufgaben';
+	} catch (fehler) { art = 'aufgaben'; }
+	window.MQL_ART = art;
+
 	function t(schluessel) {
-		var wert = texte[schluessel];
+		var wert = art === 'taten' && texte[schluessel + '_taten'] !== undefined
+			? texte[schluessel + '_taten'] : texte[schluessel];
 		if (wert === undefined) { return schluessel; }
 		return String(wert);
 	}
@@ -94,7 +103,7 @@
 
 	// stand.js first and without cache: it holds the stamp of the last build.
 	lade('stand.js?t=' + Date.now(), function () {
-		lade('daten-' + sprache + '.js' + stempel(), function () {
+		lade('daten-' + (art === 'taten' ? 'taten-' : '') + sprache + '.js' + stempel(), function () {
 			if (stil) { stil.href = stil.getAttribute('href').split('?')[0] + stempel(); }
 			lade('fortschritt.js' + stempel(), function () {
 				lade('app.js' + stempel());

@@ -1,4 +1,4 @@
-/* Menu bar shared by the map and the progress page: the three pages and the
+/* Menu bar shared by every page of the Middle-earth Logbook: the pages and the
  * character switch. Needs texte.js, sprache.js (MQL_T) and speicher.js first.
  */
 (function () {
@@ -11,10 +11,14 @@
 	if (!ziel) { return; }
 
 	var seite = document.body.getAttribute('data-seite') || '';
+	if (seite === 'karte' && window.MQL_ART === 'taten') { seite = 'taten'; }
 	var startseite = sprache === 'en' ? 'start-en.html' : (sprache === 'fr' ? 'start-fr.html' : 'start.html');
 	[
 		{ seite: 'start', href: startseite, text: t('startseite') },
 		{ seite: 'karte', href: 'index.html?lang=' + sprache, text: t('menue_karte') },
+		{ seite: 'taten', href: 'index.html?art=taten&lang=' + sprache, text: t('menue_taten') },
+		{ seite: 'ruf', href: 'ruf.html?lang=' + sprache, text: t('menue_ruf') },
+		{ seite: 'handwerk', href: 'handwerk.html?lang=' + sprache, text: t('menue_handwerk') },
 		{ seite: 'spielstand', href: 'spielstand.html?lang=' + sprache, text: t('menue_spielstand') }
 	].forEach(function (punkt) {
 		var link = document.createElement('a');

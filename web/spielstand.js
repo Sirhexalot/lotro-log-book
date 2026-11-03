@@ -150,7 +150,7 @@
 		return new Promise(function (fertig) {
 			if (eintrag.isFile) {
 				var name = eintrag.name;
-				if (!/^(summary|questsStatus|deedsStatus)\.xml$/.test(name)) { fertig(); return; }
+				if (!/^(summary|questsStatus|deedsStatus|reputation|crafting)\.xml$/.test(name)) { fertig(); return; }
 				ziel.push({
 					path: pfad + name,
 					read: function () {

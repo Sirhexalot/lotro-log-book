@@ -45,7 +45,8 @@ C.readCharacters(items).then((result) => {
     fs.writeFileSync(target, f.text);
   }
   console.log(JSON.stringify({ characters: result.characters.map((c) => ({
-    name: c.name, server: c.server, account: c.account, quests: c.quests, deeds: c.deeds })),
+    name: c.name, server: c.server, account: c.account, quests: c.quests, deeds: c.deeds,
+    laufend: c.laufend, ruf: c.ruf, handwerk: c.handwerk })),
     files: files.map((f) => f.path) }));
 });
 '''
@@ -105,6 +106,47 @@ def main():
         index = path.parent / 'MagicQuestLog_Characters.plugindata'
         listed = lua.eval('assert(loadstring(...))()', index.read_text(encoding='utf-8'))
         assert listed[character['name']] is True, 'character missing from the name list'
+
+    # Running counters must land on a goal of the catalogue with the same objective
+    # and condition number, and never exceed that goal's total.
+    goals = {}
+    for kind in ('Quests', 'Deeds'):
+        lua = LuaRuntime()
+        lua.execute((PLUGIN / 'Data' / ('%s_de.lua' % kind)).read_text(encoding='utf-8'))
+        for record in lua.globals().MagicQuestLog.Data[kind.lower() + '_de'].values():
+            for step in record.s.values():
+                for goal in step.g.values():
+                    goals[(record.id, str(step.i), goal.k)] = goal.c
+    for character in result['characters']:
+        matched = above = 0
+        for ident, rows in character['laufend'].items():
+            for objective, condition, done, count in rows:
+                key = (ident, str(objective), condition)
+                if key in goals and goals[key] and count is not None:
+                    matched += 1
+                    if count > goals[key]:
+                        above += 1
+        assert matched > 0, 'no running counter matched a catalogue goal'
+        assert above == 0, '%d counters above their goal total: wrong numbering' % above
+        print('  %s: %d running entries, %d counters matched to a goal with a total, none above it'
+              % (character['name'], len(character['laufend']), matched))
+
+    # Reputation and crafting resolve against the reference data from our own DAT export.
+    referenz_text = (ROOT / 'web' / 'referenz.js').read_text(encoding='utf-8')
+    referenz = json.loads(referenz_text.split('= ', 1)[1].rstrip().rstrip(';'))
+    for character in result['characters']:
+        unknown = [row[0] for row in character['ruf'] if row[0] not in referenz['fraktionen']]
+        assert not unknown, 'factions without a name: %s' % unknown[:5]
+        for faction, tier, points in character['ruf']:
+            info = referenz['fraktionen'][faction]
+            assert info['min'] <= tier <= info['max'], 'tier out of range for %s' % faction
+            assert str(tier) in info['s'], 'no name for tier %s of %s' % (tier, faction)
+        for profession, tiers in character['handwerk'].items():
+            assert profession in referenz['berufe'], 'unknown profession ' + profession
+            known = {stufe['t'] for stufe in referenz['berufe'][profession]['s']}
+            assert all(row[0] in known or row[0] == 0 for row in tiers), 'unknown tier in ' + profession
+        print('  %s: %d factions and %d professions, every one named in DE/EN/FR'
+              % (character['name'], len(character['ruf']), len(character['handwerk'])))
 
     print('PASS: %d character(s) from the real Companion folder reach the plugin intact; %d files'
           % (len(result['characters']), len(result['files'])))

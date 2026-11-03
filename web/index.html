@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kartenansicht – Der Herr der Ringe Online</title>
+<title>Mittelerde-Logbuch – Der Herr der Ringe Online</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body data-seite="karte">
 
 <header class="kopf">
-	<h1 data-t="produkt">Kartenansicht</h1>
+	<h1 data-t="produkt">Mittelerde-Logbuch</h1>
 	<nav class="menue" id="menue" aria-label="Menü"></nav>
 	<label class="feld breit">
 		<span data-t="suche">Suche</span>
@@ -54,6 +54,7 @@
 		<div class="legende" id="legende" hidden>
 			<span><i class="tupfen offen"></i><span data-t="legende_offen">offen</span></span>
 			<span><i class="tupfen fertig"></i><span data-t="legende_erledigt">erledigt</span></span>
+			<span><i class="tupfen laufend"></i><span data-t="in_arbeit">in Arbeit</span></span>
 		</div>
 		<div class="bedienung">
 			<button id="zurueck" data-t="zuruecksetzen" title="Ansicht zurücksetzen">zurücksetzen</button>
@@ -68,6 +69,7 @@
 
 <script src="texte.js"></script>
 <script src="texte-spielstand.js"></script>
+<script src="texte-logbuch.js"></script>
 <script src="sprache.js"></script>
 <script src="speicher.js"></script>
 <script src="menue.js"></script>
