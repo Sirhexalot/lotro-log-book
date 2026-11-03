@@ -9,7 +9,7 @@
 
 	var zusatz = {
 		de: {
-			menue_karte: 'Karte',
+			menue_karte: 'Quests',
 			menue_spielstand: 'Spielstand',
 			charakter: 'Charakter',
 			ohne_spielstand: 'ohne Spielstand',
@@ -73,7 +73,7 @@
 				'<details><summary>Ich sammle vor allem Taten.</summary><p>Dafür gibt es ' + DEEDTRACKER + ' von b414213562: ein ausgereiftes Plugin nur für Taten, mit LOTRO-Punkten, Tugend-Erfahrung und gleichnamigen Taten. Magic Quest Log ist vor allem für Aufgaben gedacht; beide vertragen sich.</p></details>'
 		},
 		en: {
-			menue_karte: 'Map',
+			menue_karte: 'Quests',
 			menue_spielstand: 'Progress',
 			charakter: 'Character',
 			ohne_spielstand: 'no progress',
@@ -137,7 +137,7 @@
 				'<details><summary>I mostly collect deeds.</summary><p>Then have a look at ' + DEEDTRACKER + ' by b414213562: a mature plugin just for deeds, with LOTRO points, virtue experience and identically named deeds. Magic Quest Log is mainly about quests; both work side by side.</p></details>'
 		},
 		fr: {
-			menue_karte: 'Carte',
+			menue_karte: 'Quêtes',
 			menue_spielstand: 'Progression',
 			charakter: 'Personnage',
 			ohne_spielstand: 'sans progression',

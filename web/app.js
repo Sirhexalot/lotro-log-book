@@ -294,6 +294,21 @@
 		});
 	}
 
+	/**
+	 * Level range of a node, from the levels of its own quests: the middle
+	 * half (25th to 75th percentile), so a few low or high stray quests do
+	 * not stretch it. Shown only with at least five quests that have a level.
+	 */
+	function stufenSpanne(eintraege) {
+		var stufen = [];
+		eintraege.forEach(function (quest) { if (quest.l > 0) { stufen.push(quest.l); } });
+		if (stufen.length < 5) { return ''; }
+		stufen.sort(function (a, b) { return a - b; });
+		var unten = stufen[Math.floor((stufen.length - 1) * 0.25)];
+		var oben = stufen[Math.ceil((stufen.length - 1) * 0.75)];
+		return t('stufe') + ' ' + (unten === oben ? unten : unten + '–' + oben);
+	}
+
 	function zeichneAst(knoten) {
 		var wrapper = eltern('div', null);
 		wrapper.className = 'ast tiefe' + knoten.tiefe;
@@ -317,6 +332,13 @@
 
 		var name = eltern('span', knoten.name);
 		name.className = 'name';
+		var spanne = stufenSpanne(knoten.quests);
+		if (spanne) {
+			var bereich = eltern('span', spanne);
+			bereich.className = 'bereich';
+			name.appendChild(bereich);
+			knopf.title += ' · ' + spanne;
+		}
 		knopf.appendChild(name);
 
 		var zaehler = eltern('span', zahl(zahlen.erledigt, zahlen.gesamt));
@@ -567,7 +589,9 @@
 			var haken = eltern('span', erledigt ? '✓' : (lage === 'offen' ? '·' : ''));
 			haken.className = 'haken';
 			zeile.appendChild(haken);
-			zeile.appendChild(eltern('span', quest.n));
+			var questName = eltern('span', quest.n);
+			questName.className = 'qname';
+			zeile.appendChild(questName);
 			if (lage === 'sitzung' || lage === 'ausgeschlossen') {
 				var vermerk = eltern('span', lage === 'sitzung' ? t('sitzungsspiel') : t('nicht_moeglich'));
 				vermerk.className = 'vermerk';
@@ -584,11 +608,6 @@
 				var stufe = eltern('span', t('stufe') + ' ' + quest.l);
 				stufe.className = 'stufe';
 				zeile.appendChild(stufe);
-			}
-			if (!quest.t.length) {
-				var ohne = eltern('span', t('ohne_ziel_kurz'));
-				ohne.className = 'ohneziel';
-				zeile.appendChild(ohne);
 			}
 			zeile.addEventListener('click', function () { waehle(quest); });
 			liste.appendChild(zeile);

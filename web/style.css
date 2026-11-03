@@ -316,7 +316,11 @@ main {
 #liste li.nicht-gezaehlt { opacity: 0.55; }
 #liste li .vermerk { color: var(--schwach); font-size: 11px; margin-left: 6px; font-style: italic; }
 .vermerk-text { color: var(--schwach); font-style: italic; margin: 4px 0 8px; }
-#liste li .stufe { color: var(--schwach); font-size: 11px; margin-left: 6px; }
+#liste li .qname { flex: 1 1 auto; min-width: 0; }
+#liste li .stufe { color: var(--schwach); font-size: 11px; margin-left: auto; padding-left: 8px; white-space: nowrap; flex: 0 0 auto; }
+#liste li .vermerk, #liste li .laufstand { flex: 0 0 auto; }
+/* Level range of a region, on its own small line under the name. */
+.zweig .name .bereich { display: block; color: var(--schwach); font-size: 11px; line-height: 1.3; }
 
 /* Map area */
 .buehne {
