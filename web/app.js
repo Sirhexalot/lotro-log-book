@@ -821,6 +821,8 @@
 	function folgeKarte(quest) {
 		var erster = orte(quest)[0];
 		var ziel = erster && karteNachIndex[erster[0]];
+		// A place on an overview whose frame does not fit counts as unknown.
+		if (ziel && ziel.rahmen === 'unklar') { ziel = null; }
 		if (!ziel) {
 			// No place known: back to the area's map rather than leaving an unrelated
 			// map from the previous click on screen.

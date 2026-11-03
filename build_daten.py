@@ -32,6 +32,10 @@ STANDARD_KARTEN = HIER / 'daten/karten.json'
 STANDARD_MOORMAP = Path('/Users/adrian/Documents/The Lord of the Rings Online/Plugins/GaranStuff/MoorMap/Defaults.lua')
 # Rhovanion, Mordor, the Shield Isles, Rivendell: sub-map frames do not fit the image.
 OHNE_UNTERPUNKTE = {30, 152, 403, 29}
+# Rhovanion and Mordor: the world overviews' frames do not fit at all (even
+# quests of the Sutcrofts were attributed to Rhovanion). A place on them counts
+# as unknown; no dots are drawn there.
+UNKLARER_RAHMEN = {30, 152}
 STANDARD_KARTENNAMEN = Path('/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/maps/labels')
 
 
@@ -261,7 +265,7 @@ def kartenpfade(quests, karten, sprache, art):
             # The most detailed map that holds at least three quarters of the
             # objectives: a few stray ones on the overview must not lift the ruins
             # of Bree-land up to Eriador.
-            ketten = [kette(ziel[0]) for ziel in quest['t']]
+            ketten = [kette(ziel[0]) for ziel in quest['t'] if ziel[0] not in UNKLARER_RAHMEN] or [[]]
             pfad = gemeinsam(ketten)
             for laenge in range(max(len(k) for k in ketten), len(pfad), -1):
                 zaehlung = {}
@@ -274,7 +278,7 @@ def kartenpfade(quests, karten, sprache, art):
                     break
         else:
             ort = quest.get('gt') or (quest['t'][0] if quest['t'] else None)
-            pfad = kette(ort[0]) if ort else []
+            pfad = kette(ort[0]) if ort and ort[0] not in UNKLARER_RAHMEN else []
         if not pfad:
             ohne_ort.append(quest)
             continue
@@ -781,6 +785,8 @@ def main():
         # Moria then lands among the Beornings. These show only their own dots.
         if karte['idx'] in OHNE_UNTERPUNKTE:
             karte['eigen'] = 1
+        if karte['idx'] in UNKLARER_RAHMEN:
+            karte['rahmen'] = 'unklar'
         eintrag = moor.get(karte['idx'])
         if eintrag:
             karte['mr'] = eintrag['region']
