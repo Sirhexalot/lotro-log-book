@@ -807,3 +807,31 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .gebietsliste li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--rand); cursor: pointer; font-size: 13px; }
 .gebietsliste li:hover { color: var(--gold); }
 .gebietsliste .stufe { color: var(--schwach); font-size: 12px; white-space: nowrap; }
+
+/* One line under the description folds a quest's objectives */
+.ziele-schalter { display: block; width: 100%; text-align: left; margin: 10px 0 6px; padding: 6px 10px; background: var(--fläche-hell); border: 1px solid var(--rand); color: var(--gold); font-size: 13px; }
+.ziele-schalter[aria-expanded="true"] { color: var(--text); }
+.detail ul { margin: 4px 0 12px; }
+.detail p.text + ul { margin-top: 2px; }
+
+/* Filter/Notizen: the game's map notes, list as in the game's world map */
+.notizen { position: relative; }
+.notizen > button { font-size: 12px; padding: 2px 8px; }
+.notizen-feld { position: absolute; bottom: calc(100% + 6px); left: 0; z-index: 30; width: 280px; max-height: 60vh; overflow-y: auto; background: var(--fläche); border: 1px solid var(--rand); padding: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+.notizen-alle { display: flex; gap: 6px; margin-bottom: 6px; }
+.notizen-alle button { flex: 1; font-size: 12px; padding: 2px 6px; }
+.notizen-feld ul { list-style: none; margin: 0; padding: 0; }
+.notizen-feld label { display: flex; align-items: center; gap: 8px; padding: 2px 4px; cursor: pointer; color: var(--text); }
+.notizen-feld label:hover { background: var(--fläche-hell); }
+.notizen-feld label img { width: 20px; height: 20px; }
+.notizen-feld label span { flex: 1; }
+.notizen-feld input[type="checkbox"], .geber-schalter input { width: auto; margin: 0; flex: none; }
+.geber-schalter { white-space: nowrap; }
+.notizen-ebene { position: absolute; inset: 0; pointer-events: none; }
+.welt img.notiz { position: absolute; display: block; right: auto; bottom: auto; width: 18px; height: 18px; max-width: none; margin: -9px 0 0 -9px; pointer-events: auto; }
+.welt img.notiz:hover { transform: scale(1.4); z-index: 4; }
+.marker.ohne-geber .punkt { display: none; }
+.marker { pointer-events: none; }
+.marker > * { pointer-events: auto; }
+.geber-schalter { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.koordinate { font-variant-numeric: tabular-nums; min-width: 9em; }

@@ -229,16 +229,17 @@
 	 * tiebreaker. Before, a city map with the same name won (Minas Tirith,
 	 * Pelargir) with not a single objective on it – the map stayed empty.
 	 */
-	// --- Spoilers: quest givers by default, objectives on request ------
-	// The map shows where a quest is picked up; its objectives, rings and steps
-	// only with "Ziele" switched on. The choice is kept in this browser. Deeds
-	// have no giver, so they always show their objectives.
+	// --- Spoilers: quest givers by default, objectives per quest --------
+	// The map shows where a quest is picked up. Its objectives, rings and steps
+	// show only for the selected quest after "Ziele einblenden", and fold again
+	// with the next one. Deeds have no giver: they always show their objectives.
 	var loesung = window.MQL_ART === 'taten';
-	if (!loesung) {
-		try { loesung = window.localStorage.getItem('mql.ziele') === '1'; } catch (fehler) { loesung = false; }
+	var zieleOffen = false;
+	function zeigtZiele(quest) {
+		return loesung || (zieleOffen && quest != null && zustand.auswahl === quest);
 	}
 	function orte(quest) {
-		if (loesung) { return quest.t; }
+		if (zeigtZiele(quest)) { return quest.t; }
 		return quest.gt ? [[quest.gt[0], quest.gt[1], quest.gt[2], '']] : [];
 	}
 
@@ -601,7 +602,7 @@
 		});
 
 		var ringe = 0;
-		if (loesung && zustand.auswahl && karte.rahmen !== 'unklar') {
+		if (zustand.auswahl && zeigtZiele(zustand.auswahl) && karte.rahmen !== 'unklar') {
 			zustand.auswahl.t.forEach(function (ziel) {
 				if (ziel[0] !== karte.idx) { return; }
 				var punkt = anteil(karte, ziel[1], ziel[2]);
@@ -617,39 +618,167 @@
 			});
 		}
 		zeigeLegende(ringe > 0);
+		zeichneNotizen();
 	}
 
-	/** Switch between quest givers and objectives; remembered in this browser. */
-	function setzeLoesung(an) {
-		loesung = an;
-		try { window.localStorage.setItem('mql.ziele', an ? '1' : '0'); } catch (fehler) {}
-		zeigeUmschalter();
-		var gewaehlt = zustand.auswahl;
-		if (zustand.knoten) {
-			var index = besteKarte(zustand.knoten.quests, zustand.knoten.name);
-			if (index != null && (!zustand.karte || zustand.karte.idx !== index)) { zeigeKarte(index); }
+	// --- Filter/Notizen: map notes as in the game's world map -----------
+	// Vendors, stable-masters, mailboxes … from our own DAT export, the same
+	// categories and icons as the game's filter list. All off by default; the
+	// choice is kept in this browser. The data file loads on first use.
+	var notizen = null, notizenAn = {};
+	try { notizenAn = JSON.parse(window.localStorage.getItem('mql.notizen') || '{}') || {}; } catch (fehler) { notizenAn = {}; }
+	var notizenKnopf = document.getElementById('notizen-knopf');
+	var notizenFeld = document.getElementById('notizen-feld');
+	var notizenListe = document.getElementById('notizen-liste');
+	var notizenEbene = eltern('div', null);
+	notizenEbene.className = 'notizen-ebene';
+	marker.parentNode.insertBefore(notizenEbene, marker);
+
+	function notizBild(code) { return 'notizen/' + code + '.png?v=' + (window.MQL_STAND || '0'); }
+	function merkeNotizen() {
+		try { window.localStorage.setItem('mql.notizen', JSON.stringify(notizenAn)); } catch (fehler) { /* private mode */ }
+	}
+	function ladeNotizen(fertig) {
+		if (notizen) { fertig(); return; }
+		var skript = document.createElement('script');
+		skript.src = 'notizen-' + sprache + '.js?v=' + (window.MQL_STAND || '0');
+		skript.onload = function () { notizen = window.MQL_NOTIZEN || { k: [], p: [] }; fertig(); };
+		document.head.appendChild(skript);
+	}
+	function zeichneNotizListe() {
+		notizenListe.textContent = '';
+		notizen.k.forEach(function (art) {
+			var zeile = eltern('li', null);
+			var feld = eltern('label', null);
+			var bildchen = eltern('img', null);
+			bildchen.src = notizBild(art[0]);
+			bildchen.alt = '';
+			var haken = eltern('input', null);
+			haken.type = 'checkbox';
+			haken.checked = !!notizenAn[art[0]];
+			haken.addEventListener('change', function () {
+				notizenAn[art[0]] = haken.checked;
+				merkeNotizen();
+				zeichneNotizen();
+			});
+			feld.appendChild(bildchen);
+			feld.appendChild(eltern('span', art[1]));
+			feld.appendChild(haken);
+			zeile.appendChild(feld);
+			notizenListe.appendChild(zeile);
+		});
+	}
+	function alleNotizen(an) {
+		notizen.k.forEach(function (art) { notizenAn[art[0]] = an; });
+		merkeNotizen();
+		zeichneNotizListe();
+		zeichneNotizen();
+	}
+	function zeichneNotizen() {
+		notizenEbene.textContent = '';
+		var karte = zustand.karte;
+		if (!notizen || !karte || karte.rahmen === 'unklar') { return; }
+		// Things at one spot share one icon place; the tooltip names them all.
+		var stellen = {};
+		notizen.p.forEach(function (ding) {
+			if (ding[0] !== karte.idx || !notizenAn[ding[3]]) { return; }
+			var punkt = anteil(karte, ding[1], ding[2]);
+			if (!punkt) { return; }
+			var schluessel = ding[1] + ',' + ding[2];
+			var stelle = stellen[schluessel];
+			if (!stelle) {
+				stelle = stellen[schluessel] = { punkt: punkt, codes: [], zeilen: [] };
+			}
+			if (stelle.codes.indexOf(ding[3]) < 0) { stelle.codes.push(ding[3]); }
+			var zeile = ding[4] + (ding[5] && ding[5] !== ding[4] ? ' · ' + ding[5] : '');
+			if (stelle.zeilen.indexOf(zeile) < 0) { stelle.zeilen.push(zeile); }
+		});
+		Object.keys(stellen).forEach(function (schluessel) {
+			var stelle = stellen[schluessel];
+			stelle.codes.forEach(function (code, nummer) {
+				var symbol = eltern('img', null);
+				symbol.className = 'notiz';
+				symbol.src = notizBild(code);
+				symbol.alt = '';
+				symbol.title = stelle.zeilen.join('\n');
+				symbol.style.left = 'calc(' + (stelle.punkt.x * 100) + '% + ' + (nummer * 5) + 'px)';
+				symbol.style.top = 'calc(' + (stelle.punkt.y * 100) + '% - ' + (nummer * 5) + 'px)';
+				notizenEbene.appendChild(symbol);
+			});
+		});
+	}
+	if (notizenKnopf) {
+		notizenKnopf.addEventListener('click', function () {
+			var auf = notizenFeld.hidden;
+			notizenFeld.hidden = !auf;
+			notizenKnopf.setAttribute('aria-expanded', String(auf));
+			if (auf) {
+				if (!notizen) {
+					notizenListe.textContent = '';
+					notizenListe.appendChild(eltern('li', t('notizen_lade')));
+				}
+				ladeNotizen(function () { zeichneNotizListe(); zeichneNotizen(); });
+			}
+		});
+		document.getElementById('notizen-alle').addEventListener('click', function () { if (notizen) { alleNotizen(true); } });
+		document.getElementById('notizen-keine').addEventListener('click', function () { if (notizen) { alleNotizen(false); } });
+		document.addEventListener('click', function (ereignis) {
+			if (!notizenFeld.hidden && !document.getElementById('notizen').contains(ereignis.target)) {
+				notizenFeld.hidden = true;
+				notizenKnopf.setAttribute('aria-expanded', 'false');
+			}
+		});
+		// A choice from an earlier visit draws at once.
+		if (Object.keys(notizenAn).some(function (code) { return notizenAn[code]; })) {
+			ladeNotizen(zeichneNotizen);
 		}
-		zustand.auswahl = gewaehlt;
-		baueBaum();
-		markiereBaum(true);
+	}
+
+	// "Aufgabenführer anzeigen": the quest dots, on by default as in the game.
+	var geberSchalter = document.getElementById('geber-schalter');
+	if (geberSchalter) {
+		geberSchalter.addEventListener('change', function () {
+			marker.classList.toggle('ohne-geber', !geberSchalter.checked);
+		});
+	}
+
+	// Coordinate under the mouse, written like the game ("30.9S, 55.9W").
+	var koordinate = document.getElementById('koordinate');
+	if (koordinate) {
+		welt.addEventListener('mousemove', function (ereignis) {
+			var karte = zustand.karte;
+			if (!karte || karte.rahmen === 'unklar') { koordinate.textContent = ''; return; }
+			var rahmen = welt.getBoundingClientRect();
+			var nx = (ereignis.clientX - rahmen.left) / rahmen.width;
+			var ny = (ereignis.clientY - rahmen.top) / rahmen.height;
+			var lat = karte.north - ny * (karte.north - karte.south);
+			var lon = karte.west + nx * (karte.east - karte.west);
+			koordinate.textContent = Math.abs(lat).toFixed(1) + (lat < 0 ? 'S' : 'N') + ', ' +
+				Math.abs(lon).toFixed(1) + (lon < 0 ? 'W' : (sprache === 'de' ? 'O' : 'E'));
+		});
+		welt.addEventListener('mouseleave', function () { koordinate.textContent = ''; });
+	}
+
+	/** Fold the selected quest's objectives in or out; the map follows. */
+	function setzeZiele(an) {
+		zieleOffen = an;
+		var quest = zustand.auswahl;
+		if (quest) { folgeKarte(quest); }
 		zeichneListe();
+		zeichneMarker();
 		zeichneDetail();
 		aktualisiereStand();
 	}
-	var umschalter = document.getElementById('umschalter');
-	function zeigeUmschalter() {
-		if (!umschalter) { return; }
-		umschalter.hidden = window.MQL_ART === 'taten';
-		umschalter.querySelectorAll('button').forEach(function (knopf) {
-			knopf.setAttribute('aria-pressed', String((knopf.dataset.ziele === '1') === loesung));
-		});
-	}
-	if (umschalter) {
-		umschalter.addEventListener('click', function (ereignis) {
-			var knopf = ereignis.target.closest ? ereignis.target.closest('button') : null;
-			if (knopf) { setzeLoesung(knopf.dataset.ziele === '1'); }
-		});
-		zeigeUmschalter();
+
+	/** Show the map of a quest's first place (giver, or objective when shown). */
+	function folgeKarte(quest) {
+		var erster = orte(quest)[0];
+		if (!erster || !karteNachIndex[erster[0]]) { return; }
+		if (zustand.karte && zustand.karte.idx === erster[0]) { return; }
+		var knoten = zustand.knoten;
+		zeigeKarte(erster[0]);
+		zustand.knoten = knoten;
+		zustand.auswahl = quest;
 	}
 
 	/** Legend: progress colours with a character loaded, rings while a quest is selected. */
@@ -715,16 +844,15 @@
 		});
 		zustand.treffer = nachAbschnitt;
 		var mitAbschnitten = Object.keys(reihe).length > 1 && !zustand.suchliste;
-		var jeAbschnitt = {}, ohnePunkt = 0;
+		var jeAbschnitt = {};
 		nachAbschnitt.forEach(function (quest) {
 			jeAbschnitt[quest.a || ''] = (jeAbschnitt[quest.a || ''] || 0) + 1;
-			if (!orte(quest).length) { ohnePunkt += 1; }
 		});
-		if (ohnePunkt) {
-			var hinweisZeile = eltern('li', ersetze(t(loesung ? 'ohne_punkt_ziele' : 'ohne_punkt_geber'), [ohnePunkt]));
-			hinweisZeile.className = 'listenhinweis';
-			liste.appendChild(hinweisZeile);
-		}
+		// Sections start folded; one that is alone stays open.
+		var abschnittZahl = Object.keys(jeAbschnitt).length;
+		Object.keys(jeAbschnitt).forEach(function (name) {
+			if (zu[name] === undefined) { zu[name] = abschnittZahl > 1; }
+		});
 		var letzter = null;
 		nachAbschnitt.slice(0, zustand.sichtbar).forEach(function (quest) {
 			var abschnitt = quest.a || '';
@@ -895,7 +1023,7 @@
 		if (quest.z) { kennung.push(ABSCHNITTE[quest.z] || quest.z); }
 		if (quest.u) { kennung.push(quest.u); }
 		if (quest.r && quest.r !== quest.z) { kennung.push(quest.r); }
-		if (loesung) {
+		if (zeigtZiele(quest)) {
 			kennung.push(quest.t.length ?
 				quest.t.length + ' ' + (quest.t.length === 1 ? t('ziel') : t('ziele')) :
 				t('ohne_ziel_kurz'));
@@ -977,6 +1105,7 @@
 			}
 			function aufgabe(id, vorsilbe) {
 				var andere = questNachId[id];
+				if (!andere) { return; }  // outside the catalogue: says nothing useful
 				var li = punkt((vorsilbe || '') + (andere ? andere.n : t('unbekannte_aufgabe')),
 					hatFortschritt ? fertig[id] === true : null);
 				if (andere) {
@@ -989,7 +1118,7 @@
 			(quest.vo || []).forEach(function (id) { aufgabe(id, t('eine_davon') + ' '); });
 			if (quest.vb) { punkt(t('weitere_bedingung'), null); }
 			bedingungen.appendChild(ul);
-			detail.appendChild(bedingungen);
+			if (ul.children.length) { detail.appendChild(bedingungen); }
 		}
 
 		// Why an entry is not counted. Same wording as the plugin.
@@ -1010,28 +1139,9 @@
 		}
 
 		if (!orte(quest).length) {
-			var hinweisOhne = eltern('p', t(loesung ? 'kein_ziel' : 'kein_geberort'));
+			var hinweisOhne = eltern('p', t(zeigtZiele(quest) ? 'kein_ziel' : 'kein_geberort'));
 			hinweisOhne.className = 'leer';
 			detail.appendChild(hinweisOhne);
-		}
-		var hier = zielAuf(quest, zustand.karte);
-		if (!hier && orte(quest).length) {
-			var andere = karteNachIndex[orte(quest)[0][0]];
-			if (andere) {
-				var wechseln = eltern('button', ersetze(t('zeigen'), [andere.name]));
-				wechseln.className = 'wechseln';
-				wechseln.addEventListener('click', function () {
-					var knoten = zustand.knoten;
-					zeigeKarte(andere.idx);
-					zustand.knoten = knoten;
-					zustand.auswahl = quest;
-					zeichneListe();
-					zeichneMarker();
-					zeichneDetail();
-					aktualisiereStand();
-				});
-				detail.appendChild(wechseln);
-			}
 		}
 
 		if (quest.d) {
@@ -1040,14 +1150,15 @@
 			detail.appendChild(text);
 		}
 
-		if (!loesung) {
-			if ((quest.s || []).length) {
-				var zeigen = eltern('button', t('ziele_zeigen'));
-				zeigen.className = 'wechseln';
-				zeigen.addEventListener('click', function () { setzeLoesung(true); });
-				detail.appendChild(zeigen);
-			}
-			return;
+		// One line under the description folds this quest's objectives in or out.
+		if (!loesung && (quest.s || []).length) {
+			var schalter = eltern('button', (zieleOffen ? '▾ ' + t('ziele_aus') : '▸ ' + t('ziele_ein')) +
+				(quest.t.length ? ' (' + quest.t.length + ')' : ''));
+			schalter.className = 'ziele-schalter';
+			schalter.setAttribute('aria-expanded', String(zieleOffen));
+			schalter.addEventListener('click', function () { setzeZiele(!zieleOffen); });
+			detail.appendChild(schalter);
+			if (!zieleOffen) { return; }
 		}
 		(quest.s || []).forEach(function (schritt) {
 			var block = eltern('div', null);
@@ -1096,10 +1207,13 @@
 	}
 
 	// --- Selection -----------------------------------------------------
-	// A click in the list does not change the map. Anyone who wants another
-	// map gets a button for it in the detail panel.
+	// A click shows the map where the quest is picked up (Adrian, 03.11.); its
+	// objectives start folded, and its list section opens.
 	function waehle(quest) {
 		zustand.auswahl = quest;
+		zieleOffen = false;
+		if (quest.a !== undefined || zu[quest.a || ''] !== undefined) { zu[quest.a || ''] = false; }
+		folgeKarte(quest);
 		zeichneListe();
 		zeichneMarker();
 		zeichneDetail();

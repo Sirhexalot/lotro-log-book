@@ -67,12 +67,17 @@
 				<span class="legende-fortschritt"><i class="tupfen laufend"></i><span data-t="in_arbeit">in Arbeit</span></span>
 				<span id="legende-ziele" hidden><i class="tupfen ring"></i><span data-t="legende_ziele">Ziele der gewählten Aufgabe</span></span>
 			</div>
-			<span id="stand" class="stand"></span>
-			<span id="hinweis" class="hinweis"></span>
-			<div class="umschalter" id="umschalter" role="group" aria-label="Was die Karte zeigt">
-				<button type="button" data-ziele="0" aria-pressed="true" data-t="zeige_geber">Auftraggeber</button>
-				<button type="button" data-ziele="1" aria-pressed="false" data-t="zeige_ziele">Ziele</button>
+			<div class="notizen" id="notizen">
+				<button type="button" id="notizen-knopf" aria-expanded="false" data-t="notizen">Filter/Notizen</button>
+				<div class="notizen-feld" id="notizen-feld" hidden>
+					<div class="notizen-alle"><button type="button" id="notizen-alle" data-t="notizen_alle">Alle auswählen</button><button type="button" id="notizen-keine" data-t="notizen_keine">Alles löschen</button></div>
+					<ul id="notizen-liste"></ul>
+				</div>
 			</div>
+			<label class="geber-schalter"><input type="checkbox" id="geber-schalter" checked> <span data-t="aufgabenfuehrer">Aufgabenführer anzeigen</span></label>
+			<span id="stand" class="stand"></span>
+			<span id="koordinate" class="koordinate"></span>
+			<span id="hinweis" class="hinweis"></span>
 		</div>
 	</section>
 

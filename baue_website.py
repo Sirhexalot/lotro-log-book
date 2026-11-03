@@ -80,7 +80,7 @@ def stempeln(ziel):
     # kept its old file in the browser cache. The published stamp covers every
     # data file and the scripts.
     daten = hashlib.sha256(marke.encode())
-    for datei in sorted(ziel.glob('daten-*.js')):
+    for datei in sorted(list(ziel.glob('daten-*.js')) + list(ziel.glob('notizen-*.js'))):
         daten.update(datei.name.encode())
         daten.update(datei.read_bytes())
     (ziel / 'stand.js').write_text('/* Written by baue_website.py. */\nwindow.MQL_STAND = "%s";\n'
@@ -146,10 +146,10 @@ def main():
 
     # Check the sources before anything is deleted.
     for sprache in SPRACHEN:
-        for name in ('daten-%s.js' % sprache, 'daten-taten-%s.js' % sprache, 'webp/%s' % sprache):
+        for name in ('daten-%s.js' % sprache, 'daten-taten-%s.js' % sprache, 'notizen-%s.js' % sprache, 'webp/%s' % sprache):
             pfad = WEB / name if name.endswith('.js') else HIER / name
             if not pfad.exists():
-                raise SystemExit('MISSING: %s (run build_daten.py or '
+                raise SystemExit('MISSING: %s (run build_daten.py, build_notizen.py or '
                                  'baue_webp.py)' % pfad)
 
     if ziel.exists():
@@ -163,7 +163,9 @@ def main():
     for sprache in SPRACHEN:
         shutil.copy2(WEB / ('daten-%s.js' % sprache), ziel / ('daten-%s.js' % sprache))
         shutil.copy2(WEB / ('daten-taten-%s.js' % sprache), ziel / ('daten-taten-%s.js' % sprache))
+        shutil.copy2(WEB / ('notizen-%s.js' % sprache), ziel / ('notizen-%s.js' % sprache))
         shutil.copytree(HIER / 'webp' / sprache, ziel / 'karten' / sprache)
+    shutil.copytree(WEB / 'notizen', ziel / 'notizen')
     # Stamp after the data is in place: it covers the data files as well.
     print('version tag on static files: %s' % stempeln(ziel))
 
