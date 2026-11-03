@@ -17,6 +17,7 @@ Usage (needs lupa, like the plugin's check scripts):
 """
 import argparse
 import hashlib
+import html
 import json
 import re
 import sys
@@ -28,6 +29,7 @@ STANDARD_KATALOG = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Quests_de.lu
 STANDARD_FORTSCHRITT = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Progress.lua'
 STANDARD_KARTEN = HIER / 'daten/karten.json'
 STANDARD_MOORMAP = Path('/Users/adrian/Documents/The Lord of the Rings Online/Plugins/GaranStuff/MoorMap/Defaults.lua')
+STANDARD_KARTENNAMEN = Path('/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/maps/labels')
 
 
 def moormap_tabelle(pfad):
@@ -47,6 +49,18 @@ def moormap_tabelle(pfad):
         except (ValueError, IndexError):
             continue
     return tabelle
+
+
+def kartennamen(sprache):
+    """Map id -> map name in this language, from the game's map labels (the same
+    source as the English names in karten.json). Empty when the file is missing."""
+    datei = STANDARD_KARTENNAMEN / sprache / 'basemaps.xml'
+    if not datei.is_file():
+        return {}
+    namen = {}
+    for treffer in re.finditer(r'<label key="(\d+)" value="([^"]*)"', datei.read_text(encoding='utf-8')):
+        namen[treffer.group(1)] = html.unescape(treffer.group(2)).replace('\\q', '"')
+    return namen
 
 
 def ersatzkarte(tabelle, bekannt, index, lat, lon):
@@ -494,6 +508,9 @@ def main():
 
     regionen = regionen_je_karte(quests)
     moor = moormap_tabelle(STANDARD_MOORMAP)
+    namen = kartennamen(options.sprache)
+    for karte in karten:
+        karte['name'] = namen.get(str(karte.get('id')), karte['name'])
     for karte in karten:
         karte['region'] = regionen.get(karte['idx'], '')
         # MoorMap's own region number and parent: the page shows an objective on
