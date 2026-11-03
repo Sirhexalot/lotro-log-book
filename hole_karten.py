@@ -50,7 +50,9 @@ def moor_map(path):
     """MoorMap map index -> image ID, frame and fallback name."""
     index = {}
     text = Path(path).read_text(encoding='utf-8', errors='replace')
-    for match in re.finditer(r'tmpMapInfo\[(\d+)\]=\{(.*?)\};\s*(?:--\s*(.*))?', text):
+    # Some lines in MoorMap's table lack the closing ";" (Cardolan, Swanfleet, the
+    # Umbar-môkh maps); they are valid Lua and must not be skipped.
+    for match in re.finditer(r'tmpMapInfo\[(\d+)\]\s*=\s*\{(.*?)\};?[ \t]*(?:--[ \t]*(.*))?$', text, re.M):
         fields = [part.strip() for part in match.group(2).split(',')]
         if len(fields) < 17:
             continue
@@ -65,6 +67,24 @@ def moor_map(path):
         except ValueError:
             continue
     return index
+
+
+def moor_regionen(path):
+    """Every MoorMap map entry with region and frame, including the ones whose
+    image is one of MoorMap's own files."""
+    tabelle = {}
+    text = Path(path).read_text(encoding='utf-8', errors='replace')
+    for match in re.finditer(r'tmpMapInfo\[(\d+)\]\s*=\s*\{([^}\n]+)', text):
+        fields = [part.strip() for part in match.group(2).split(',')]
+        try:
+            if int(fields[10]) != 1:
+                continue
+            tabelle[int(match.group(1))] = {
+                'eltern': int(fields[9]), 'region': int(fields[11]), 'north': float(fields[12]), 'west': float(fields[13]),
+                'south': float(fields[14]), 'east': float(fields[15])}
+        except (ValueError, IndexError):
+            continue
+    return tabelle
 
 
 def maps_xml(path):
@@ -204,6 +224,31 @@ def main():
     benutzt = benutzte_karten(options.katalog)
     print('%d maps used in the catalogue, %d of them known in MoorMap' %
           (len(benutzt), sum(1 for index in benutzt if index in moor)))
+
+    # A used map without a game image (MoorMap's own drawings such as Dale or
+    # Cliving) gets its points on a larger map of the same region; those
+    # larger maps must be fetched too, even if no position names them.
+    roh = moor_regionen(options.moormap)
+    for index in list(benutzt):
+        eintrag = moor.get(index)
+        if eintrag and bilder.get(eintrag['bild_id']):
+            continue
+        eigene = roh.get(index)
+        if not eigene:
+            continue
+        nummer, gesehen = eigene['eltern'], set()
+        while nummer in roh and nummer not in gesehen:
+            gesehen.add(nummer)
+            if nummer not in benutzt and moor.get(nummer) and bilder.get(moor[nummer]['bild_id']):
+                benutzt.append(nummer)
+            nummer = roh[nummer]['eltern']
+        for nummer, karte in roh.items():
+            if (nummer not in benutzt and karte['region'] == eigene['region']
+                    and karte['south'] <= eigene['north'] and karte['north'] >= eigene['south']
+                    and karte['west'] <= eigene['east'] and karte['east'] >= eigene['west']
+                    and moor.get(nummer) and bilder.get(moor[nummer]['bild_id'])):
+                benutzt.append(nummer)
+    benutzt.sort()
 
     aufgeloest, offen = [], []
     for index in benutzt:

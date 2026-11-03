@@ -27,6 +27,54 @@ BASIS = Path('/Users/adrian/Documents/07_Hobbys/Lotro')
 STANDARD_KATALOG = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Quests_de.lua'
 STANDARD_FORTSCHRITT = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Progress.lua'
 STANDARD_KARTEN = HIER / 'daten/karten.json'
+STANDARD_MOORMAP = Path('/Users/adrian/Documents/The Lord of the Rings Online/Plugins/GaranStuff/MoorMap/Defaults.lua')
+
+
+def moormap_tabelle(pfad):
+    """MoorMap's map geometry: index -> region, frame and tier (map entries only)."""
+    tabelle = {}
+    if not pfad or not Path(pfad).is_file():
+        return tabelle
+    text = Path(pfad).read_text(encoding='utf-8', errors='replace')
+    for treffer in re.finditer(r'tmpMapInfo\[(\d+)\]\s*=\s*\{([^}\n]+)', text):
+        felder = [teil.strip() for teil in treffer.group(2).split(',')]
+        try:
+            if int(felder[10]) != 1:
+                continue
+            tabelle[int(treffer.group(1))] = {
+                'eltern': int(felder[9]), 'region': int(felder[11]), 'north': float(felder[12]), 'west': float(felder[13]),
+                'south': float(felder[14]), 'east': float(felder[15]), 'tier': int(felder[16])}
+        except (ValueError, IndexError):
+            continue
+    return tabelle
+
+
+def ersatzkarte(tabelle, bekannt, index, lat, lon):
+    """A map with an image for a position whose own map has none (MoorMap's
+    hand-drawn detail maps such as Dale or Cliving, which the game does not have):
+    the most detailed map of the same region with an image that contains the
+    point. None when there is no such map."""
+    eigene = tabelle.get(index)
+    if not eigene:
+        return None
+    # MoorMap names each map's parent (Cliving -> Norcrofts, Dale -> Northern
+    # Mirkwood). Its chain decides first, as long as the point lies in the frame.
+    gesehen, nummer = set(), eigene['eltern']
+    while nummer in tabelle and nummer not in gesehen:
+        gesehen.add(nummer)
+        karte = tabelle[nummer]
+        if nummer in bekannt and karte['south'] <= lat <= karte['north'] and karte['west'] <= lon <= karte['east']:
+            return nummer
+        nummer = karte['eltern']
+    treffer = [(nummer, karte) for nummer, karte in tabelle.items()
+               if nummer in bekannt and karte['region'] == eigene['region']
+               and karte['south'] <= lat <= karte['north'] and karte['west'] <= lon <= karte['east']]
+    if not treffer:
+        return None
+    # Most detailed first; between maps of the same detail the smaller one.
+    treffer.sort(key=lambda paar: (-paar[1]['tier'],
+                                   (paar[1]['north'] - paar[1]['south']) * (paar[1]['east'] - paar[1]['west'])))
+    return treffer[0][0]
 
 # Game markup like <rgb=#FF0000>…</rgb>, plus the rare <b>/<i>/<u>/<br>.
 # The old patterns contained "%s" placeholders that were never filled in, so
@@ -118,8 +166,11 @@ def ortsgruppen(karten_datei):
     return {str(code) for code in inhalt.get('codes', {})}
 
 
-def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
+def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap=STANDARD_MOORMAP):
     orte = orte or set()
+    tabelle = moormap_tabelle(moormap)
+    bekannt = {karte['idx'] for karte in json.loads(Path(karten_datei).read_text(encoding='utf-8'))}
+    umgelegt = verloren = 0
     try:
         from lupa.lua51 import LuaRuntime
     except ImportError:
@@ -175,8 +226,18 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
                     zone = key.split(':', 1)[1]
         positions = []
         for target in targets:
-            positions.append([int(target['map']), round(float(target['lat']), 5),
-                              round(float(target['lon']), 5), str(target['step'])])
+            karte = int(target['map'])
+            lat, lon = round(float(target['lat']), 5), round(float(target['lon']), 5)
+            position = [karte, lat, lon, str(target['step'])]
+            if karte not in bekannt:
+                # Fifth value 1: shown on a larger map, its own detail map has no image.
+                ersatz = ersatzkarte(tabelle, bekannt, karte, lat, lon)
+                if ersatz is None:
+                    verloren += 1
+                else:
+                    position = [ersatz, lat, lon, str(target['step']), 1]
+                    umgelegt += 1
+            positions.append(position)
             ziele += 1
         schritte = []
         for step in step_list(record['s'] if 's' in record else None):
@@ -217,7 +278,8 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
 
     print('%d quests, %d of them without a recorded target (no dot)' %
           (len(quests), ohne_ziel))
-    print('%d single objectives, %d maps in the index' % (ziele, len(karten)))
+    print('%d single objectives, %d maps in the index; %d moved to a larger map, '
+          '%d on a map without image' % (ziele, len(karten), umgelegt, verloren))
     return quests, karten
 
 

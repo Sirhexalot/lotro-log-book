@@ -682,6 +682,7 @@
 			else if (lage === 'sitzung') { kennung.push(t('sitzungsspiel')); }
 			else if (lage === 'ausgeschlossen') { kennung.push(t('nicht_moeglich')); }
 			else if (lage === 'laufend') { kennung.push(t('in_arbeit') + ' · ' + laufText(quest)); }
+			if (quest.t.some(function (ziel) { return ziel[4] === 1; })) { kennung.push(t('auf_grosser_karte')); }
 			else { kennung.push(t('filter_offen')); }
 		}
 		var zeile = eltern('div', kennung.join(' · '));
