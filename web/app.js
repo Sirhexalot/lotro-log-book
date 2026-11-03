@@ -173,13 +173,16 @@
 			var kind = knoten.kinder[schluessel];
 			if (!kind) {
 				kind = { schluessel: schluessel, name: label, tiefe: index + 1,
-					quests: [], kinder: {}, reihenfolge: [] };
+					quests: [], eigene: [], kinder: {}, reihenfolge: [], karte: null };
 				knoten.kinder[schluessel] = kind;
 				knoten.reihenfolge.push(kind);
 			}
 			kind.quests.push(quest);
+			// The map of this level (the tree follows the game's maps), if it has one.
+			if (quest.fk && quest.fk[index] != null && karteNachIndex[quest.fk[index]]) { kind.karte = quest.fk[index]; }
 			knoten = kind;
 		});
+		(knoten.eigene || (knoten.eigene = [])).push(quest);
 		quest.knoten = knoten;
 	}
 
@@ -431,8 +434,12 @@
 				offen[knoten.schluessel] = !offen[knoten.schluessel];
 				wrapper.classList.toggle('offen', offen[knoten.schluessel]);
 				pfeil.textContent = offen[knoten.schluessel] ? '▾' : '▸';
-				zeigeRegion(knoten);
-				return;
+				// A map with entries of its own opens like a place; a pure group
+				// (Gondor, East Rohan) shows its overview.
+				if (knoten.karte == null || !(knoten.eigene || []).length) {
+					zeigeRegion(knoten);
+					return;
+				}
 			}
 			waehleKnoten(knoten, true);
 		});
@@ -541,7 +548,7 @@
 		}
 		zustand.auswahl = null;
 		zustand.sichtbar = ANSICHT_JE_SEITE;
-		var index = besteKarte(knoten.quests, knoten.name);
+		var index = knoten.karte != null ? knoten.karte : besteKarte(knoten.quests, knoten.name);
 		zustand.gebietsKarte = index;
 		if (index != null) {
 			zeigeKarte(index);
@@ -925,6 +932,21 @@
 		Object.keys(jeAbschnitt).forEach(function (name) {
 			if (zu[name] === undefined) { zu[name] = abschnittZahl > 1; }
 		});
+		// Places on this map (Bree, Archet … on Bree-land) lead to their own list.
+		var hier = zustand.knoten;
+		if (hier && !zustand.suchliste && hier.reihenfolge && hier.reihenfolge.length && hier.eigene) {
+			hier.reihenfolge.forEach(function (kind) {
+				var ort = eltern('li', null);
+				ort.className = 'unterkarte';
+				ort.appendChild(eltern('span', '▸ ' + kind.name));
+				var kz = zaehle(kind.quests);
+				var zahlOrt = eltern('span', zahl(kz.erledigt, kz.gesamt));
+				zahlOrt.className = 'stufe';
+				ort.appendChild(zahlOrt);
+				ort.addEventListener('click', function () { waehleKnoten(kind, true); });
+				liste.appendChild(ort);
+			});
+		}
 		var letzter = null;
 		nachAbschnitt.slice(0, zustand.sichtbar).forEach(function (quest) {
 			var abschnitt = quest.a || '';
@@ -1028,10 +1050,17 @@
 		return eintraege;
 	}
 
+	/** What a node's list shows: a map with places below it lists only what lies
+	 * on this map itself; its places are their own nodes. */
+	function listeVon(knoten) {
+		if (knoten.reihenfolge && knoten.reihenfolge.length && knoten.eigene && !zustand.suchliste) { return knoten.eigene; }
+		return knoten.quests;
+	}
+
 	function zeichneListe() {
 		var titel, quelle;
 		if (zustand.knoten) {
-			quelle = zustand.knoten.quests;
+			quelle = listeVon(zustand.knoten);
 			titel = zustand.knoten.name;
 		} else {
 			zeigeListe(t('aufgaben'), []);

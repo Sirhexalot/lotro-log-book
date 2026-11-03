@@ -861,3 +861,7 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .marker > * { pointer-events: auto; }
 .geber-schalter { display: flex; align-items: center; gap: 4px; cursor: pointer; }
 .koordinate { font-variant-numeric: tabular-nums; min-width: 9em; }
+
+/* Places below the shown map, at the top of its list. */
+#liste li.unterkarte { color: var(--gold, #e0b062); cursor: pointer; font-weight: 600; }
+#liste li.unterkarte:hover { background: rgba(255, 255, 255, .05); }

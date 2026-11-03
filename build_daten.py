@@ -63,6 +63,119 @@ def kartennamen(sprache):
     return namen
 
 
+def kartenbaum(sprache, moormap=STANDARD_MOORMAP):
+    """MoorMap's whole map tree (also maps without an image of their own, such as
+    Gondor or East Rohan) with each map's name in this language.
+
+    Names come from the game's map labels, matched by image id; a map the labels
+    do not know takes the part before ':' its children share ("Ost-Rohan: Die
+    Steppe" -> "Ost-Rohan"), and only then MoorMap's English comment."""
+    tabelle = {}
+    if not Path(moormap).is_file():
+        return tabelle
+    text = Path(moormap).read_text(encoding='utf-8', errors='replace')
+    for treffer in re.finditer(r'tmpMapInfo\[(\d+)\]\s*=\s*\{(.*?)\};?[ \t]*(?:--[ \t]*(.*))?$', text, re.M):
+        felder = [teil.strip() for teil in treffer.group(2).split(',')]
+        try:
+            if len(felder) < 17 or int(felder[10]) != 1:
+                continue
+            tabelle[int(treffer.group(1))] = {
+                'eltern': int(felder[9]), 'tier': int(felder[16]), 'bild_id': str(int(felder[2], 0)),
+                'kommentar': (treffer.group(3) or '').split(',')[0].strip()}
+        except ValueError:
+            continue
+    karten_xml = STANDARD_KARTENNAMEN.parent / 'maps' / 'maps.xml'
+    karte_je_bild = {}
+    if karten_xml.is_file():
+        for treffer in re.finditer(r'<map id="(\d+)"[^>]*imageId="(\d+)"', karten_xml.read_text(encoding='utf-8')):
+            karte_je_bild.setdefault(treffer.group(2), treffer.group(1))
+    namen = kartennamen(sprache)
+    for eintrag in tabelle.values():
+        eintrag['name'] = namen.get(karte_je_bild.get(eintrag['bild_id'], ''), '')
+    for index, eintrag in tabelle.items():
+        if eintrag['name']:
+            continue
+        kinder = [anderer['name'] for anderer in tabelle.values()
+                  if anderer['eltern'] == index and ':' in anderer['name']]
+        vorsilben = {name.split(':', 1)[0].strip() for name in kinder}
+        eintrag['name'] = vorsilben.pop() if len(vorsilben) == 1 else (eintrag['kommentar'] or 'Karte %d' % index)
+    return tabelle
+
+
+def kartenpfade(quests, karten, sprache, art):
+    """The tree follows the game's maps: Eriador > Breeland > Bree.
+
+    A quest hangs on the map of its quest giver, or of its first objective; a deed
+    on the most detailed map that holds all its objectives (the ruins of Bree-land
+    on Bree-land, not on Archet). Each level carries its map index in `fk` (None
+    for a map without an image, which only groups). Quests the catalogue files
+    under a section (epic story, instances, festivals …) keep that section, and a
+    quest without any place goes to the map that bears its area's name."""
+    baum = kartenbaum(sprache)
+    mit_bild = {karte['idx'] for karte in karten}
+
+    def kette(index):
+        glieder, gesehen = [], set()
+        while index in baum and index not in gesehen and baum[index]['tier'] > 1:
+            gesehen.add(index)
+            glieder.append(index)
+            index = baum[index]['eltern']
+        return list(reversed(glieder))
+
+    def gemeinsam(ketten):
+        erste = ketten[0]
+        laenge = 0
+        while laenge < len(erste) and all(len(k) > laenge and k[laenge] == erste[laenge] for k in ketten):
+            laenge += 1
+        return erste[:laenge]
+
+    je_name = {}
+    zaehler = {'karte': 0, 'name': 0, 'sektion': 0, 'ohne': 0}
+    ohne_ort = []
+    for quest in quests:
+        if quest.get('_sek'):
+            zaehler['sektion'] += 1
+            continue
+        if art == 'taten' and quest['t']:
+            pfad = gemeinsam([kette(ziel[0]) for ziel in quest['t']])
+        else:
+            ort = quest.get('gt') or (quest['t'][0] if quest['t'] else None)
+            pfad = kette(ort[0]) if ort else []
+        if not pfad:
+            ohne_ort.append(quest)
+            continue
+        quest['f'] = [baum[index]['name'] for index in pfad]
+        quest['fk'] = [index if index in mit_bild else None for index in pfad]
+        je_name.setdefault(quest['f'][-1], (quest['f'], quest['fk']))
+        zaehler['karte'] += 1
+    for quest in ohne_ort:
+        treffer, stelle = None, -1
+        for stelle in range(len(quest['f']) - 1, -1, -1):
+            if quest['f'][stelle] in je_name:
+                treffer = je_name[quest['f'][stelle]]
+                break
+        if treffer:
+            # Found only by a coarser name: the finer old area stays as a section.
+            rest = quest['f'][stelle + 1:]
+            if rest:
+                quest['a'] = ' › '.join(rest + ([quest['a']] if quest.get('a') else []))
+                quest['ak'] = 1
+            quest['f'], quest['fk'] = list(treffer[0]), list(treffer[1])
+            zaehler['name'] += 1
+        else:
+            zaehler['ohne'] += 1
+    for quest in quests:
+        quest.pop('_sek', None)
+        if quest.get('fk'):
+            # The place names in the details follow the same path as the tree.
+            pfad = quest['f']
+            quest['r'] = pfad[0]
+            quest['z'] = pfad[1] if len(pfad) > 1 else pfad[0]
+            quest['u'] = ' › '.join(pfad[2:])
+    print('Map tree: %(karte)d on a map, %(name)d by area name, %(sektion)d in sections, '
+          '%(ohne)d keep their old place' % zaehler)
+
+
 def ersatzkarte(tabelle, bekannt, index, lat, lon):
     """A map with an image for a position whose own map has none (MoorMap's
     hand-drawn detail maps such as Dale or Cliving, which the game does not have):
@@ -321,6 +434,9 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben', moormap
             'z': zone,
             'u': untergebiet,
             'f': etiketten,
+            # Internal: the catalogue files this under a section of its own (epic
+            # story, instances, festivals, crafting, missions), not under a place.
+            **({'_sek': 1} if any(key.startswith('section:') and key != 'section:other' for key in pfad) else {}),
             't': positions,
             'd': clean(record['d'] if 'd' in record else '',
                        TOKENS[sprache]['zaehler'], sprache),
@@ -519,6 +635,8 @@ def main():
         if eintrag:
             karte['mr'] = eintrag['region']
             karte['eltern'] = eintrag['eltern']
+
+    kartenpfade(quests, karten, options.sprache, options.art)
 
     fortschritt = fortschritt_lesen(options.fortschritt)
     if fortschritt is None:
