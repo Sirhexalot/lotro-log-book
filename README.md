@@ -103,6 +103,20 @@ unfinished quests and deeds are read as well, in the browser like the rest.
   both match ("44/75"); otherwise the entry reads "3 of 6 sub-goals". Checked on a
   real character: 301 counters matched, none above its goal's total.
 
+## Quest givers, requirements and reputation sources
+
+- **Quest giver**: the first NPC that bestows a quest (catalogue field `g`), named in
+  the detail view and beside names that repeat in a list.
+- **Requirements** (`v` all completed, `vo` one of them, `vl` minimum level, `vb`
+  something we cannot check such as class or faction). The **available** filter
+  shows open quests whose requirements the active character meets; the detail view
+  lists each requirement with its state.
+- **Reputation sources** (`rf`: faction and the game's reward tier 1–6; points per
+  tier are not in the data). On the Reputation page a click on a faction lists the
+  open quests and deeds that give reputation there (`ruf-quellen-<language>.js`,
+  written by `build_referenz.py`), each linking to the map (`index.html?id=…`).
+- The server compresses and caches the files (`redirect-mm/.htaccess`).
+
 ## Progress
 
 The **Progress** page (`spielstand.html`) takes the visitor's progress from
