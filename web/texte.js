@@ -36,7 +36,7 @@ window.MQL_TEXTE = {
 		ohne_ziel_kurz: 'kein Zielort',
 		sitzungsspiel: 'Sitzungsspiel',
 		nicht_moeglich: 'nicht möglich',
-		sitzung_hinweis: 'Sitzungsspiel: Hier spielt Ihr kurz jemand anderen. Das Spiel trägt es nicht als erledigt ein, deshalb zählt es nicht mit.',
+		sitzung_hinweis: 'Sitzungsspiel: Hier spielst du kurz jemand anderen. Das Spiel trägt es nicht als erledigt ein, deshalb zählt es nicht mit.',
 		ausgeschlossen_hinweis: 'Nicht möglich: „%s“ ist bereits erledigt.',
 		ohne_punkte: 'Keine Aufgabe dieser Zeile hat einen belegten Zielort.',
 		kein_ziel: 'Für diese Aufgabe ist kein Zielort belegt – sie erscheint deshalb nicht auf der Karte.',

@@ -15,16 +15,16 @@
 			ohne_spielstand: 'ohne Spielstand',
 			kein_charakter: 'noch keiner geladen',
 			sp_titel: 'Spielstand',
-			sp_einleitung: 'Hier holt Ihr Euren Fortschritt aus ' + COMPANION + ' auf die Karte und in das Plugin ' + PLUGIN + '. Ihr könnt mehrere Charaktere laden und oben im Menü zwischen ihnen wechseln.',
-			sp_datenschutz: '<strong>Nichts wird hochgeladen.</strong> Die Seite liest Companions Dateien nur hier in Eurem Browser und merkt sich Name, Server, Klasse, Stufe, die erledigten und laufenden Aufgaben und Taten, Euren Ruf und Euer Handwerk. Konto-Kennung, Inventar und Geld werden nicht gelesen. Löschen könnt Ihr jeden Charakter unten in der Liste.',
+			sp_einleitung: 'Hier holst du deinen Fortschritt aus ' + COMPANION + ' auf die Karte und in das Plugin ' + PLUGIN + '. Du kannst mehrere Charaktere laden und oben im Menü zwischen ihnen wechseln.',
+			sp_datenschutz: '<strong>Nichts wird hochgeladen.</strong> Die Seite liest Companions Dateien nur hier in deinem Browser und merkt sich Name, Server, Klasse, Stufe, die erledigten und laufenden Aufgaben und Taten, deinen Ruf und dein Handwerk. Konto-Kennung, Inventar und Geld werden nicht gelesen. Löschen kannst du jeden Charakter unten in der Liste.',
 			sp_schritt1: '1. Charakter in LOTRO Companion importieren',
-			sp_companion: 'LOTRO Companion liest Euren Fortschritt aus dem laufenden Spiel. Ihr braucht es nur dafür; das Plugin selbst braucht es nicht. Herunterladen: ' + COMPANION + ' (kostenlos).',
+			sp_companion: 'LOTRO Companion liest deinen Fortschritt aus dem laufenden Spiel. Du brauchst es nur dafür; das Plugin selbst braucht es nicht. Herunterladen: ' + COMPANION + ' (kostenlos).',
 			sp_windows: '<li>LOTRO starten und mit dem Charakter <strong>die Welt betreten</strong>.</li>' +
 				'<li>LOTRO Companion starten.</li>' +
 				'<li>Oben unter <strong>Sonstiges</strong> das Symbol <strong>„Import from LOTRO…“</strong> anklicken.</li>' +
 				'<li>Im Fenster <strong>Refresh</strong>, dann <strong>Start</strong>. Nach kurzer Zeit steht dort <em>Import finished!</em></li>' +
 				'<li>Klappt „Start“ nicht: Companion einmal mit Rechtsklick → <em>Als Administrator ausführen</em> starten.</li>',
-			sp_mac: '<li>Companion (die Windows-Version) herunterladen und als Ordner <code>LotRO Companion</code> nach <code>Programme</code> oder in Euren eigenen Ordner <code>Programme</code> legen.</li>' +
+			sp_mac: '<li>Companion (die Windows-Version) herunterladen und als Ordner <code>LotRO Companion</code> nach <code>Programme</code> oder in deinen eigenen Ordner <code>Programme</code> legen.</li>' +
 				'<li>LOTRO starten und mit dem Charakter <strong>die Welt betreten</strong>.</li>' +
 				'<li>Das Programm <em>Terminal</em> öffnen, den Befehl unten einfügen und Return drücken. Companion startet im selben Umfeld wie das Spiel.</li>' +
 				'<li>Unter <strong>Sonstiges</strong> das Symbol <strong>„Import from LOTRO…“</strong>, dann <strong>Refresh</strong> und <strong>Start</strong>.</li>',
@@ -32,7 +32,7 @@
 			sp_kopieren: 'Befehl kopieren',
 			sp_kopiert: 'Kopiert ✓',
 			sp_schritt2: '2. Hier laden',
-			sp_laden: 'Wählt Companions Ordner <code>characters</code> oder zieht ihn in das Feld. Alle Charaktere darin werden gelesen; wer schon da ist, wird aktualisiert.',
+			sp_laden: 'Wähle Companions Ordner <code>characters</code> oder zieh ihn in das Feld. Alle Charaktere darin werden gelesen; wer schon da ist, wird aktualisiert.',
 			sp_ordner_windows: 'Ordner unter Windows (in die Adresszeile des Auswahlfensters einfügen):',
 			sp_ordner_mac: 'Ordner auf dem Mac (versteckt; im Auswahlfenster ⌘⇧G drücken und einfügen):',
 			sp_ablage: 'Ordner „characters“ hierher ziehen',
@@ -41,17 +41,17 @@
 			sp_gelesen: '%s Charakter(e) gelesen: %s',
 			sp_nichts: 'In diesem Ordner wurde kein Charakter von LOTRO Companion gefunden. Gesucht wird ein Ordner mit summary.xml und questsStatus.xml.',
 			sp_speicher_voll: 'Der Browser hat das Speichern abgelehnt (privates Fenster oder voller Speicher).',
-			sp_schritt3: '3. Eure Charaktere',
+			sp_schritt3: '3. Deine Charaktere',
 			sp_spalte_name: 'Name', sp_spalte_server: 'Server', sp_spalte_klasse: 'Klasse', sp_spalte_stufe: 'Stufe',
 			sp_spalte_aufgaben: 'Aufgaben', sp_spalte_taten: 'Taten', sp_spalte_stand: 'Stand vom',
 			sp_keine: 'Noch kein Charakter geladen.',
 			sp_aktiv: 'aktiv', sp_waehlen: 'wählen', sp_karte: 'auf der Karte', sp_entfernen: 'entfernen',
 			sp_entfernen_frage: '%s aus diesem Browser entfernen?',
 			sp_schritt4: '4. Ins Plugin übernehmen',
-			sp_plugin: 'Das Plugin liest für jeden Charakter eine kleine Datei im Ordner <code>PluginData</code> des Spiels. Danach zeigt es oben rechts einen Knopf zum Wechseln zwischen Euren Charakteren. Neue Daten liest es, sobald Ihr das Fenster öffnet; ein Neustart ist nicht nötig.',
+			sp_plugin: 'Das Plugin liest für jeden Charakter eine kleine Datei im Ordner <code>PluginData</code> des Spiels. Danach zeigt es oben rechts einen Knopf zum Wechseln zwischen deinen Charakteren. Neue Daten liest es, sobald du das Fenster öffnest; ein Neustart ist nicht nötig.',
 			sp_schreiben: 'In den LOTRO-Ordner schreiben',
 			sp_zip: 'Als Zip herunterladen',
-			sp_schreiben_hinweis: 'Euer Browser kann nicht direkt in einen Ordner schreiben (das können Chrome und Edge). Ladet das Zip herunter und entpackt es <strong>in</strong> den Ordner <code>PluginData</code>: Es enthält schon die richtigen Unterordner.',
+			sp_schreiben_hinweis: 'Dein Browser kann nicht direkt in einen Ordner schreiben (das können Chrome und Edge). Lade das Zip herunter und entpacke es <strong>in</strong> den Ordner <code>PluginData</code>: Es enthält schon die richtigen Unterordner.',
 			sp_plugindata: 'Der Ordner „PluginData“ liegt hier (beim Schreiben genau diesen wählen):',
 			sp_zip_fertig: 'Zip mit %s Datei(en) erstellt. In den Ordner PluginData entpacken.',
 			sp_geschrieben: '%s Datei(en) geschrieben. Im Spiel das Fenster von Magic Quest Log öffnen.',
@@ -59,7 +59,7 @@
 			sp_schreiben_fehler: 'Schreiben nicht möglich. Nehmt stattdessen das Zip.',
 			sp_nichts_fuer_plugin: 'Kein Charakter mit Konto und Server geladen.',
 			sp_schritt5: '5. Sichern',
-			sp_sichern: 'Der Spielstand liegt nur in diesem Browser. Mit einer Sicherung nehmt Ihr ihn auf einen anderen Rechner mit oder holt ihn nach dem Löschen der Browserdaten zurück.',
+			sp_sichern: 'Der Spielstand liegt nur in diesem Browser. Mit einer Sicherung nimmst du ihn auf einen anderen Rechner mit oder holst ihn nach dem Löschen der Browserdaten zurück.',
 			sp_sicherung: 'Sicherung herunterladen',
 			sp_sicherung_laden: 'Sicherung laden …',
 			sp_sicherung_fertig: 'Sicherung gespeichert.',
@@ -67,7 +67,7 @@
 			sp_sicherung_falsch: 'Das ist keine Sicherung dieser Seite.',
 			sp_fragen: 'Häufige Fragen',
 			sp_faq: '<details><summary>Mein Charakter fehlt in der Liste.</summary><p>Er muss erst in LOTRO Companion importiert sein. Dann den Ordner hier erneut laden.</p></details>' +
-				'<details><summary>Im Plugin fehlt ein Charakter.</summary><p>Das Plugin zeigt die Charaktere des Kontos und Servers, auf dem Ihr gerade spielt. Charaktere anderer Server erscheinen, wenn Ihr dort spielt.</p></details>' +
+				'<details><summary>Im Plugin fehlt ein Charakter.</summary><p>Das Plugin zeigt die Charaktere des Kontos und Servers, auf dem du gerade spielst. Charaktere anderer Server erscheinen, wenn du dort spielst.</p></details>' +
 				'<details><summary>Die Zahlen weichen vom Spiel ab.</summary><p>Sitzungsspiele zeichnet das Spiel nie als erledigt auf, und von zwei Aufgaben, die sich ausschließen, ist nur eine möglich. Beide zählen hier nicht mit. Wiederholbare Aufträge zählen, sobald sie einmal erledigt sind.</p></details>' +
 				'<details><summary>Wie aktualisiere ich meinen Fortschritt?</summary><p>Beim Spielen erkennt das Plugin Abschlüsse selbst. Für den vollen Stand: in Companion erneut importieren, den Ordner hier erneut laden, wieder ins Plugin übernehmen.</p></details>' +
 				'<details><summary>Ich sammle vor allem Taten.</summary><p>Dafür gibt es ' + DEEDTRACKER + ' von b414213562: ein ausgereiftes Plugin nur für Taten, mit LOTRO-Punkten, Tugend-Erfahrung und gleichnamigen Taten. Magic Quest Log ist vor allem für Aufgaben gedacht; beide vertragen sich.</p></details>'

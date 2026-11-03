@@ -343,11 +343,15 @@
 
 		var name = eltern('span', knoten.name);
 		name.className = 'name';
+		// Level range under the name for areas (second level) only; elsewhere
+		// it would double the tree's length, so there it is in the tooltip.
 		var spanne = stufenSpanne(knoten.quests);
 		if (spanne) {
-			var bereich = eltern('span', spanne);
-			bereich.className = 'bereich';
-			name.appendChild(bereich);
+			if (knoten.tiefe === 2) {
+				var bereich = eltern('span', spanne);
+				bereich.className = 'bereich';
+				name.appendChild(bereich);
+			}
 			knopf.title += ' · ' + spanne;
 		}
 		knopf.appendChild(name);
@@ -477,6 +481,7 @@
 		zeichneListe();
 		aktualisiereStand();
 		markiereBaum();
+		zeichneDetail();
 	}
 
 	function zeigeKarte(index) {
@@ -508,28 +513,19 @@
 		zeichneDetail();
 	}
 
+	// The bar under the map names the map and how many entries of the list lie
+	// on it; counts per area are in the detail column.
 	function aktualisiereStand() {
-		if (!zustand.karte) { stand.textContent = t('kein_gebiet'); return; }
-		var zahlen = zustand.knoten ? zaehle(zustand.knoten.quests) : zaehle([]);
-		var text = zustand.karte.name;
-		if (zustand.knoten) { text += ' · ' + zustand.knoten.name; }
-		text += ' · ' + zahlen.gesamt + ' ' +
-			(zahlen.gesamt === 1 ? t('aufgabe') : t('aufgaben_mehrzahl'));
-		if (hatFortschritt) {
-			text += ' · ' + zahlen.erledigt + ' ' + t('erledigt');
-			if (zahlen.gesamt) {
-				text += ' (' + Math.round(zahlen.erledigt / zahlen.gesamt * 100) + ' %)';
-			}
-		}
-		var hier = 0;
+		if (!zustand.karte) { stand.textContent = ''; return; }
+		var hier = 0, alle = 0;
 		zustand.treffer.forEach(function (quest) {
+			if (!gezaehlt(quest)) { return; }
+			alle += 1;
 			if (zielAuf(quest, zustand.karte)) { hier += 1; }
 		});
-		if (hier !== zahlen.gesamt) {
-			text += ' · ' + ersetze(t('davon_karte'), [hier]);
-		}
-		stand.textContent = text;
+		stand.textContent = ersetze(t('karte_stand'), [zustand.karte.name, hier, alle]);
 	}
+
 
 	// --- Marker --------------------------------------------------------
 	function zeichneMarker() {
@@ -628,14 +624,14 @@
 			if (lage === 'sitzung' || lage === 'ausgeschlossen') {
 				var vermerk = eltern('span', lage === 'sitzung' ? t('sitzungsspiel') : t('nicht_moeglich'));
 				vermerk.className = 'vermerk';
-				zeile.appendChild(vermerk);
+				questName.appendChild(vermerk);
 			}
 			if (lage === 'laufend') {
 				zeile.classList.add('laufend');
 				haken.textContent = '◐';
 				var stand = eltern('span', laufText(quest));
 				stand.className = 'laufstand';
-				zeile.appendChild(stand);
+				questName.appendChild(stand);
 			}
 			if (quest.l) {
 				var stufe = eltern('span', t('stufe') + ' ' + stufeText(quest));
@@ -720,7 +716,37 @@
 		detail.textContent = '';
 		var quest = zustand.auswahl;
 		if (!quest) {
-			var leer = eltern('p', t('detail_leer'));
+			if (zustand.knoten && zustand.knoten !== WURZEL) {
+				var k = zustand.knoten;
+				detail.appendChild(eltern('h2', k.name));
+				var spanneText = stufenSpanne(k.quests);
+				if (spanneText) {
+					var unter = eltern('div', spanneText);
+					unter.className = 'kennung';
+					detail.appendChild(unter);
+				}
+				var z = zaehle(k.quests);
+				var werte = [[t('detail_gesamt'), z.gesamt]];
+				if (hatFortschritt) {
+					var nOffen = 0, nLauf = 0, nAnn = 0;
+					k.quests.forEach(function (q) {
+						var lage = zustandVon(q);
+						if (lage === 'offen') { nOffen += 1; }
+						if (lage === 'laufend') { nLauf += 1; }
+						if (window.MQL_ART !== 'taten' && machbar(q)) { nAnn += 1; }
+					});
+					werte.push([t('legende_erledigt'), z.erledigt], [t('legende_offen'), nOffen], [t('in_arbeit'), nLauf]);
+					if (window.MQL_ART !== 'taten') { werte.push([t('filter_machbar'), nAnn]); }
+				}
+				var tabelle = eltern('dl', null);
+				tabelle.className = 'uebersicht';
+				werte.forEach(function (paar) {
+					tabelle.appendChild(eltern('dt', paar[0]));
+					tabelle.appendChild(eltern('dd', String(paar[1])));
+				});
+				detail.appendChild(tabelle);
+			}
+			var leer = eltern('p', zustand.knoten ? t('detail_waehlen') : t('detail_leer'));
 			leer.className = 'leer';
 			detail.appendChild(leer);
 			return;

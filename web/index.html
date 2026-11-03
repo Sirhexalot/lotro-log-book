@@ -13,10 +13,6 @@
 <header class="kopf">
 	<h1 data-t="produkt">LOTRO Log Book</h1>
 	<nav class="menue" id="menue" aria-label="Menü"></nav>
-	<label class="feld breit">
-		<span data-t="suche">Suche</span>
-		<input id="suche" type="search" data-t-ph="suche_platzhalter" placeholder="Aufgabenname oder Teil davon" autocomplete="off">
-	</label>
 	<nav class="sprachen" aria-label="Sprache">
 		<button type="button" data-lang="de" aria-pressed="true">DE</button>
 		<button type="button" data-lang="en" aria-pressed="false">EN</button>
@@ -41,6 +37,9 @@
 			<strong id="liste-titel" data-t="aufgaben">Aufgaben</strong>
 			<button id="liste-mehr" hidden>mehr</button>
 		</div>
+		<div class="baumsuche">
+			<input id="suche" type="search" data-t-ph="suche_platzhalter" placeholder="Aufgabenname oder Teil davon" autocomplete="off">
+		</div>
 		<div class="filter" id="filter" role="group" aria-label="Fortschritt filtern">
 			<button data-filter="alle" aria-pressed="true" data-t="filter_alle">alle</button>
 			<button data-filter="offen" aria-pressed="false" data-t="filter_offen">offen</button>
@@ -50,22 +49,24 @@
 		<ol id="liste"></ol>
 	</section>
 
-	<section class="buehne" id="buehne">
-		<div class="welt" id="welt">
-			<img id="bild" alt="">
-			<div class="raster" id="raster"></div>
-			<div class="marker" id="marker"></div>
+	<section class="kartenspalte">
+		<div class="buehne" id="buehne">
+			<div class="welt" id="welt">
+				<img id="bild" alt="">
+				<div class="raster" id="raster"></div>
+				<div class="marker" id="marker"></div>
+			</div>
 		</div>
-		<div class="legende" id="legende" hidden>
-			<span class="legende-fortschritt"><i class="tupfen offen"></i><span data-t="legende_offen">offen</span></span>
-			<span class="legende-fortschritt"><i class="tupfen fertig"></i><span data-t="legende_erledigt">erledigt</span></span>
-			<span class="legende-fortschritt"><i class="tupfen laufend"></i><span data-t="in_arbeit">in Arbeit</span></span>
-			<span id="legende-ziele" hidden><i class="tupfen ring"></i><span data-t="legende_ziele">Ziele der gewählten Aufgabe</span></span>
-		</div>
-		<div class="bedienung">
-			<button id="zurueck" data-t="zuruecksetzen" title="Ansicht zurücksetzen">zurücksetzen</button>
+		<div class="kartenleiste">
+			<div class="legende" id="legende" hidden>
+				<span class="legende-fortschritt"><i class="tupfen offen"></i><span data-t="legende_offen">offen</span></span>
+				<span class="legende-fortschritt"><i class="tupfen fertig"></i><span data-t="legende_erledigt">erledigt</span></span>
+				<span class="legende-fortschritt"><i class="tupfen laufend"></i><span data-t="in_arbeit">in Arbeit</span></span>
+				<span id="legende-ziele" hidden><i class="tupfen ring"></i><span data-t="legende_ziele">Ziele der gewählten Aufgabe</span></span>
+			</div>
 			<span id="stand" class="stand"></span>
 			<span id="hinweis" class="hinweis"></span>
+			<button id="zurueck" data-t="zuruecksetzen" title="Ansicht zurücksetzen">zurücksetzen</button>
 		</div>
 	</section>
 
