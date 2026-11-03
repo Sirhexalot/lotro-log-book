@@ -808,7 +808,17 @@
 	function folgeKarte(quest) {
 		var erster = orte(quest)[0];
 		var ziel = erster && karteNachIndex[erster[0]];
-		if (!ziel) { return; }
+		if (!ziel) {
+			// No place known: back to the area's map rather than leaving an unrelated
+			// map from the previous click on screen.
+			if (zustand.gebietsKarte != null && (!zustand.karte || zustand.karte.idx !== zustand.gebietsKarte)) {
+				var bereich = zustand.knoten;
+				zeigeKarte(zustand.gebietsKarte);
+				zustand.knoten = bereich;
+				zustand.auswahl = quest;
+			}
+			return;
+		}
 		var jetzt = zustand.karte;
 		// Objectives spread over the area (a deed's ruins, a quest's steps): the map
 		// on show already holds some of them, so it stays.
