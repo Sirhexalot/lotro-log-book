@@ -671,3 +671,12 @@ td.haken-zelle.teil { color: var(--laufend); }
 @keyframes lader-dreht { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .lader-kreis { animation: none; } }
 #liste li .qname .geber { display: block; color: var(--schwach); font-size: 11px; }
+
+/* Requirements in the detail view */
+.bedingungen h3 { font-size: 13px; color: var(--gold); margin: 10px 0 4px; }
+.bedingungen ul { list-style: none; padding: 0; margin: 0 0 8px; }
+.bedingungen li { font-size: 13px; padding: 1px 0; }
+.bedingungen li .zeichen { display: inline-block; width: 1em; color: var(--schwach); }
+.bedingungen li .zeichen.ok { color: var(--fertig); }
+.bedingungen li.sprung { cursor: pointer; }
+.bedingungen li.sprung:hover { text-decoration: underline; }

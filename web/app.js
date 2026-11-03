@@ -628,8 +628,29 @@
 			[eintraege.length - zustand.sichtbar]);
 	}
 
+	/**
+	 * Can the active character take this now, as far as the data says? Open, not
+	 * ruled out, level reached, every required quest completed (v), one of the
+	 * alternatives completed (vo), and nothing we cannot check (vb: class, race,
+	 * faction …). Without a level in the progress, the level is not checked.
+	 */
+	var charakterStufe = Number(aktiverCharakter && aktiverCharakter.level) || 0;
+	// Requirements exist for quests only, and need a character's progress.
+	var machbarKnopf = document.getElementById('filter-machbar');
+	if (machbarKnopf && (window.MQL_ART === 'taten' || !hatFortschritt)) { machbarKnopf.hidden = true; }
+	function machbar(quest) {
+		if (zustandVon(quest) !== 'offen' || quest.vb) { return false; }
+		if (charakterStufe && quest.vl && quest.vl > charakterStufe) { return false; }
+		if (quest.v && !quest.v.every(function (id) { return fertig[id] === true; })) { return false; }
+		if (quest.vo && !quest.vo.some(function (id) { return fertig[id] === true; })) { return false; }
+		return true;
+	}
+
 	/** Progress filter over a quest list. */
 	function gefiltert(eintraege) {
+		if (zustand.filter === 'machbar') {
+			return eintraege.filter(machbar);
+		}
 		if (zustand.filter === 'offen') {
 			// "Open" means the character can still do it.
 			return eintraege.filter(function (quest) {
@@ -661,8 +682,7 @@
 			return;
 		}
 		var listeGefiltert = gefiltert(quelle);
-		var zusatz = zustand.filter === 'alle' ? '' :
-			' · ' + (zustand.filter === 'offen' ? t('filter_offen') : t('filter_erledigt'));
+		var zusatz = zustand.filter === 'alle' ? '' : ' · ' + t('filter_' + zustand.filter);
 		zeigeListe(titel + ' · ' + listeGefiltert.length + zusatz, listeGefiltert);
 		zeichneMarker();
 	}
@@ -693,12 +713,45 @@
 			else if (lage === 'sitzung') { kennung.push(t('sitzungsspiel')); }
 			else if (lage === 'ausgeschlossen') { kennung.push(t('nicht_moeglich')); }
 			else if (lage === 'laufend') { kennung.push(t('in_arbeit') + ' · ' + laufText(quest)); }
-			if (quest.t.some(function (ziel) { return ziel[4] === 1; })) { kennung.push(t('auf_grosser_karte')); }
+			else if (machbar(quest)) { kennung.push(t('machbar_jetzt')); }
 			else { kennung.push(t('filter_offen')); }
 		}
+		if (quest.t.some(function (ziel) { return ziel[4] === 1; })) { kennung.push(t('auf_grosser_karte')); }
 		var zeile = eltern('div', kennung.join(' · '));
 		zeile.className = 'kennung';
 		detail.appendChild(zeile);
+
+		// Requirements, each with its state for the active character.
+		if (quest.v || quest.vo || quest.vl || quest.vb) {
+			var bedingungen = eltern('div', null);
+			bedingungen.className = 'bedingungen';
+			bedingungen.appendChild(eltern('h3', t('voraussetzungen')));
+			var ul = eltern('ul', null);
+			function punkt(text, ok) {
+				var li = eltern('li', null);
+				var zeichen = eltern('span', ok === null ? '·' : (ok ? '✓' : '○'));
+				zeichen.className = 'zeichen' + (ok ? ' ok' : '');
+				li.appendChild(zeichen);
+				li.appendChild(document.createTextNode(' ' + text));
+				ul.appendChild(li);
+				return li;
+			}
+			function aufgabe(id, vorsilbe) {
+				var andere = questNachId[id];
+				var li = punkt((vorsilbe || '') + (andere ? andere.n : t('unbekannte_aufgabe')),
+					hatFortschritt ? fertig[id] === true : null);
+				if (andere) {
+					li.classList.add('sprung');
+					li.addEventListener('click', function () { waehle(andere); });
+				}
+			}
+			if (quest.vl) { punkt(t('stufe') + ' ' + quest.vl, charakterStufe ? charakterStufe >= quest.vl : null); }
+			(quest.v || []).forEach(function (id) { aufgabe(id); });
+			(quest.vo || []).forEach(function (id) { aufgabe(id, t('eine_davon') + ' '); });
+			if (quest.vb) { punkt(t('weitere_bedingung'), null); }
+			bedingungen.appendChild(ul);
+			detail.appendChild(bedingungen);
+		}
 
 		// Why an entry is not counted. Same wording as the plugin.
 		if (lage === 'sitzung') {
