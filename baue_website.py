@@ -111,21 +111,28 @@ def zaehler_einbauen(ziel):
         text = text.replace('</body>', ZAEHLER + '</body>', 1)
         datei.write_text(text, encoding='utf-8')
 
-    # The local note is no longer true on the website.
-    for name, alt, neu in (
-        ('start.html',
-         '<p class="leise">Diese Fassung läuft lokal. Es wird nichts hochgeladen und nichts\n\tnachgeladen.</p>',
-         '<p class="leise">Diese Seite zählt nur anonyme Seitenaufrufe. Dein Fortschritt\n\tbleibt in deinem Browser.</p>'),
-        ('start-en.html',
-         '<p class="leise">This copy runs locally. Nothing is uploaded and nothing is\n\tloaded from the network.</p>',
-         '<p class="leise">This site only counts anonymous page views. Your progress stays\n\tin your browser.</p>'),
-        ('start-fr.html',
-         '<p class="leise">Cette page ne compte que des visites anonymes. Votre progression\n\treste dans votre navigateur.</p>',
-         '<p class="leise">Cette page ne compte que des visites anonymes. Votre progression\n\treste dans votre navigateur.</p>'),
-    ):
-        datei = ziel / name
+def katalogzahlen_einbauen(ziel):
+    """Keep landing-page counts tied to the catalogue actually being shipped."""
+    for sprache, seite, trenner in (('de', 'start.html', '.'),
+                                    ('en', 'start-en.html', ','),
+                                    ('fr', 'start-fr.html', ' ')):
+        # Read the published JS, not an intermediate JSON that might be older.
+        def eintraege(name):
+            text = (ziel / name).read_text(encoding='utf-8')
+            treffer = re.search(r'window\.MQL_QUESTS\s*=\s*', text)
+            if not treffer:
+                raise SystemExit('Missing quest array in %s' % name)
+            return json.JSONDecoder().raw_decode(text[treffer.end():])[0]
+
+        quests = eintraege('daten-%s.js' % sprache)
+        taten = eintraege('daten-taten-%s.js' % sprache)
+        zahlen = {'aufgaben': len(quests), 'taten': len(taten),
+                  'auftraggeber': sum(bool(q.get('gt')) for q in quests),
+                  'ziele': sum(bool(q.get('t')) for q in quests)}
+        datei = ziel / seite
         text = datei.read_text(encoding='utf-8')
-        text = text.replace(alt, neu)
+        text = re.sub(r'(<span data-katalogzahl="(\w+)">)[^<]*(</span>)',
+                      lambda m: m.group(1) + format(zahlen[m.group(2)], ',').replace(',', trenner) + m.group(3), text)
         datei.write_text(text, encoding='utf-8')
 
 
@@ -166,6 +173,7 @@ def main():
         shutil.copy2(WEB / ('notizen-%s.js' % sprache), ziel / ('notizen-%s.js' % sprache))
         shutil.copytree(HIER / 'webp' / sprache, ziel / 'karten' / sprache)
     shutil.copytree(WEB / 'notizen', ziel / 'notizen')
+    katalogzahlen_einbauen(ziel)
     # Stamp after the data is in place: it covers the data files as well.
     print('version tag on static files: %s' % stempeln(ziel))
 

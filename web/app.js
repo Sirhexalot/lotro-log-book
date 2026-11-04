@@ -1578,9 +1578,9 @@
 	};
 	window.addEventListener('resize', listenMass);
 	var ltexte = {
-		de: ['Wohin möchtest du reisen?', '', 'Landschaft suchen', 'Alle Landschaften', 'Zuletzt geöffnet: ', 'Gebietskarte', 'Lokaler Versuch · Landschaft zuerst', 'Weitere Inhalte'],
-		en: ['Where would you like to go?', '', 'Find a landscape', 'All landscapes', 'Last opened: ', 'Landscape map', 'Local preview · Landscape first', 'Other content'],
-		fr: ['Où veux-tu aller ?', '', 'Chercher une région', 'Toutes les régions', 'Dernière région ouverte : ', 'Carte de la région', 'Aperçu local · Régions en premier', 'Autres contenus']
+		de: ['Wohin möchtest du reisen?', '', 'Landschaft suchen', 'Alle Landschaften', 'Zuletzt geöffnet: ', 'Gebietskarte', '', 'Weitere Inhalte'],
+		en: ['Where would you like to go?', '', 'Find a landscape', 'All landscapes', 'Last opened: ', 'Landscape map', '', 'Other content'],
+		fr: ['Où veux-tu aller ?', '', 'Chercher une région', 'Toutes les régions', 'Dernière région ouverte : ', 'Carte de la région', '', 'Autres contenus']
 	}[sprache] || [];
 	var landschaften = [];
 	// Unnamed game-map variants are not separate landscapes. Give them an honest

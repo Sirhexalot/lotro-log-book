@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LOTRO Log Book – The Lord of the Rings Online</title>
+<meta name="description" content="Browse quests and deeds by landscape, volume and book. Maps, reputation, crafting and LOTRO Companion progress, with no registration.">
 <link rel="stylesheet" href="start.css">
 <link rel="stylesheet" href="gemeinsam.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -25,25 +26,35 @@
 <main>
 	<section class="intro">
 		<p class="dach">The Lord of the Rings Online</p>
-		<h2>Your logbook for Middle-earth: <em>where</em> you still have to go – and what you have already done.</h2>
-		<p class="lead">Quests and deeds on the game’s own maps, plus reputation and crafting – for every character you load from LOTRO Companion. No account, no upload, no invented markers.</p>
+		<h2>Quests, deeds and your progress in <em>Middle-earth</em>.</h2>
+		<p class="lead">Choose a landscape or open a book of the epic story. LOTRO Log Book brings together its quests and maps, plus deeds, reputation and crafting. No registration. You can load your progress from LOTRO Companion; the files stay in your browser.</p>
+		<p><a class="knopf" href="index.html?lang=en">Open landscapes and stories</a></p>
 	</section>
 
 	<figure class="bild">
 		<img src="bild/start-en.jpg" alt="Map of Bree-land with gold and green dots for open and finished quests">
-		<figcaption>Bree-land: gold = open, green = done. Every dot is an objective from the game data.</figcaption>
+		<figcaption>Example with imported progress: objective locations in Bree-land, gold = open, green = done. The logbook initially shows quest givers; reveal objectives when you need them.</figcaption>
 	</figure>
+
+	<section>
+		<h3>Finding your way</h3>
+		<ul class="grenzen">
+			<li><strong>Landscapes:</strong> alphabetical within each region. The links above jump to Eriador, Rhovanion, Gondor and the other regions. Open sub-areas from their card or above the map.</li>
+			<li><strong>Stories and other content:</strong> browse the epic story by volume or series, then book. Festivals, crafting, instances and missions have their own groups. Other quests are collected at the bottom.</li>
+			<li><strong>List, map, details:</strong> search quests and areas. Selecting a quest leaves your chosen map in place. Drag the gold divider to widen the list; double-click to reset it.</li>
+		</ul>
+	</section>
 
 	<section>
 		<h3>What is in it</h3>
 		<ol class="schritte">
 			<li>
 				<strong><a href="index.html?lang=en">Quests</a>.</strong>
-				15,209 quests by region, with level range, quest giver, requirements, quest chain and LOTRO points. The map shows where a quest is given. Steps and objectives stay hidden until you choose <em>Show objectives</em> for a quest – so nothing gives the solution away too early. The <em>available</em> filter shows what your character can pick up right now. Below the map, <em>Filter/Notes</em> shows vendors, stable-masters, mailboxes and more, just like in the game.
+				<span data-katalogzahl="aufgaben">15,118</span> catalogue entries with level ranges, quest givers, known requirements, quest chains and LOTRO points where the data provides them. Steps and objectives stay hidden until you choose <em>Show objectives</em> for a quest. The <em>available</em> filter checks your imported progress and known requirements. Below the map, <em>Filter/Notes</em> shows vendors, stable-masters, mailboxes and more.
 			</li>
 			<li>
 				<strong><a href="index.html?art=taten&lang=en">Deeds</a>.</strong>
-				5,534 deeds with your running count, such as “44/75” – so you see how far along you are.
+				<span data-katalogzahl="taten">5,528</span> deeds in the catalogue. Imported progress adds matching objective counters, such as “44/75”.
 			</li>
 			<li>
 				<strong><a href="ruf.html?lang=en">Reputation</a>.</strong>
@@ -60,14 +71,15 @@
 		<h3>Your progress</h3>
 		<p>Progress, counters, reputation and crafting come from <strong>LOTRO Companion</strong>. On the <a href="spielstand.html?lang=en">Progress</a> page you choose Companion’s folder – it is read only in your browser, nothing is uploaded. Several characters? Switch between them in the menu. The same page writes the files for the <em>Magic Quest Log</em> plugin.</p>
 		<p><a class="knopf" href="spielstand.html?lang=en">To your progress</a></p>
-		<p>Without progress everything still works – just without numbers and colours. No zero is invented.</p>
+		<p>You can browse without importing anything. Catalogue totals are still visible; your personal progress remains unknown.</p>
 		<p>Collecting deeds above all? Have a look at the mature plugin <a href="https://www.lotrointerface.com/downloads/info1139-DeedTracker.html">Deed Tracker</a> by b414213562.</p>
 	</section>
 
 	<section>
 		<h3>What the logbook cannot do</h3>
 		<ul class="grenzen">
-			<li>For 6,621 of 15,209 quests we know where the quest giver stands, for 12,010 at least one objective. The rest are in the list, but get no dot – better no marker than a wrong one.</li>
+			<li><span data-katalogzahl="auftraggeber">6,860</span> quests have a recorded quest-giver location; <span data-katalogzahl="ziele">12,444</span> have at least one objective location. Missing locations get no marker. Some groups still have no map assigned; their quests remain accessible in the list.</li>
+			<li>Catalogue totals are not a count of currently playable quests. Repeatable content, alternative entry points and old content may be included.</li>
 			<li>Indoor places have their own coordinates. Whatever stands inside does not appear on the map.</li>
 			<li>“Available” checks level and earlier quests. It cannot check class, race or reputation, and the game no longer offers some old quests.</li>
 			<li>It is not live. It knows your progress from the last Companion import.</li>
@@ -81,14 +93,9 @@
 
 <footer>
 	<p><a href="impressum.html">Imprint</a> · <a href="datenschutz.html">Privacy</a></p>
-	<p>Fan project, not affiliated with or endorsed by Standing Stone Games, Daybreak
-	Game Company or Middle-earth Enterprises. Maps and game texts belong to their
-	respective owners. Map images, map bounds and how the maps nest come from the
-	game data; the map definitions come from
-	<a href="https://github.com/LotroCompanion">LOTRO Companion</a>. No advertising, no accounts, no profiles — only anonymous
-	page counting without cookies (<a href="datenschutz.html">privacy</a>).</p>
-	<p class="leise">This copy runs locally. Nothing is uploaded and nothing is
-	loaded from the network.</p>
+	<p>Private fan project, not affiliated with or endorsed by Standing Stone Games, Daybreak Game Company or Middle-earth Enterprises. Maps and game texts belong to their respective owners.</p>
+	<p>Sources: LOTRO game data and <a href="https://github.com/LotroCompanion">LOTRO Companion</a>. See the <a href="impressum.html">imprint</a> for source details.</p>
+	<p>No advertising or registration. Your imported progress stays in your browser. The published website uses GoatCounter for cookie-free visitor statistics. <a href="datenschutz.html">Privacy details</a>.</p>
 </footer>
 
 <script src="texte.js"></script>

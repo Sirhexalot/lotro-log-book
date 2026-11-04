@@ -21,6 +21,8 @@ __pycache__/
 *.pyc
 .venv/
 .DS_Store
+.playwright-cli/
+output/
 
 # Zugangsdaten und Upload-Stand
 *.conf

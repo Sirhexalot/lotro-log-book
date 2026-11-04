@@ -20,11 +20,14 @@
 <main>
 	<section>
 		<h3>Kurzfassung</h3>
-		<p>Diese Seite setzt keine Cookies, legt keine Konten an, schickt keine Daten an
-		Dritte und wertet nichts aus. Sie speichert nur wenige Dinge im Browser:
-		die gewählte Sprache und deinen Spielstand, wenn du einen lädst. Dateien von
-		LOTRO Companion werden ausschließlich in deinem Browser gelesen und nie an den
-		Server oder an Dritte übertragen.</p>
+		<p>Für das Logbuch brauchst du kein Benutzerkonto. Deine importierten Dateien
+		von LOTRO Companion werden ausschließlich in deinem Browser gelesen. Sie und
+		der daraus geladene Spielstand werden nicht an den Server oder an den
+		Statistikdienst übertragen.</p>
+		<p>Die veröffentlichte Website nutzt <strong>GoatCounter</strong> für eine
+		Besuchsstatistik ohne Cookies. Dafür ruft dein Browser einen externen Dienst
+		auf. Das ist von der lokalen Speicherung deiner Charaktere getrennt; die
+		Einzelheiten stehen unten.</p>
 	</section>
 
 	<section>
@@ -33,15 +36,18 @@
 		<ul class="grenzen">
 			<li><code>mql.sprache</code> – die gewählte Sprache (de, en oder fr).</li>
 			<li><code>mql.charaktere</code> – deine geladenen Charaktere: Name, Server,
-			Kontoname, Klasse, Stufe, Datum, die Kennungen erledigter Aufgaben und Taten, die
+			Kontoname, Klasse, Volk, Stufe, Datum, die Kennungen erledigter Aufgaben und Taten, die
 			Zählerstände laufender, dein Ruf je Fraktion und deine Handwerksstufen.
 			Abo-Kennung, Inventar, Geld und alle anderen Angaben aus Companions Dateien
 			werden nicht gelesen.</li>
 			<li><code>mql.system</code> – ob die Anleitung für Windows oder macOS gezeigt wird.</li>
+			<li><code>llb.preview.letztesGebiet</code> – die zuletzt geöffnete Landschaft oder Inhaltsgruppe.</li>
+			<li><code>llb.preview.listenbreite</code> – die von dir eingestellte Breite der Aufgabenliste. Die technischen Schlüssel heißen noch „preview“, gelten aber auch auf der veröffentlichten Seite.</li>
 		</ul>
-		<p>Das alles bleibt auf deinem Gerät. Es wird nicht übertragen und nicht
-		ausgewertet. Über die Einstellungen des Browsers lässt es sich jederzeit
-		löschen; die Seite funktioniert danach ohne Zahlen weiter.</p>
+		<p>Diese gespeicherten Einstellungen und Charakterdaten bleiben auf deinem
+		Gerät und werden nicht an GoatCounter übertragen. Über die Einstellungen des
+		Browsers kannst du sie löschen; der Katalog funktioniert danach weiterhin,
+		nur ohne deinen persönlichen Fortschritt.</p>
 	</section>
 
 	<section>
@@ -54,16 +60,24 @@
 
 	<section>
 		<h3>Reichweitenmessung mit GoatCounter</h3>
-		<p>Für die Statistik wird <strong>GoatCounter</strong> verwendet. Das Skript
-		wird von <code>gc.zgo.at</code> geladen, die Zählung geht an
-		<code>sirhexalot.goatcounter.com</code>. Erfasst werden Seitenaufrufe,
-		Verweisquelle, Land, Geräteart und Browser – aggregiert, ohne Cookies, ohne
-		Profile und ohne gespeicherte IP-Adresse. Es findet kein siteübergreifendes
-		Tracking statt, und es werden keine Daten an Werbenetzwerke weitergegeben.</p>
-		<p>Rechtsgrundlage ist das berechtigte Interesse an einer anonymen
-		Reichweitenmessung (Art. 6 Abs. 1 lit. f DSGVO). Weil keine Cookies gesetzt
-		und keine personenbezogenen Daten gespeichert werden, ist dafür kein
-		Einwilligungsbanner erforderlich.</p>
+		<p>Das Skript wird von <code>gc.zgo.at</code> geladen, die Zählung geht an
+		<code>sirhexalot.goatcounter.com</code>. Der Dienst verarbeitet unter anderem
+		Seitenaufrufe, Verweisquellen, Browser, Betriebssystem, Sprache, Bildschirmbreite
+		und das aus der IP-Adresse abgeleitete Land. Nicht jede dieser Angaben muss
+		für jeden Aufruf verfügbar sein.</p>
+		<p>Bei diesen Verbindungen erhält der Dienst technisch deine IP-Adresse.
+		Laut <a href="https://www.goatcounter.com/help/privacy">Datenschutzhinweisen von GoatCounter</a>
+		werden IP-Adresse und vollständige Browserkennung nicht in der Datenbank
+		gespeichert. Für die Erkennung wiederholter Besuche hält der Dienst die
+		Zuordnung von Website, IP-Adresse und Browserkennung jedoch bis zu acht
+		Stunden im Arbeitsspeicher. GoatCounter setzt dafür keine Cookies und speichert
+		keine Statistikkennung in deinem Browser.</p>
+		<p>Der Dienst wird von Martin Tournoij in Irland betrieben. Nach Angaben des
+		Anbieters liegen die Server bei Hetzner in Deutschland und Finnland.
+		Die Statistik dient dazu, die Nutzung des Angebots einzuschätzen, nicht der
+		Werbung oder dem Abgleich mit deinen Charakterdaten. Als Rechtsgrundlage wird
+		das berechtigte Interesse an dieser Besuchsstatistik herangezogen
+		(Art. 6 Abs. 1 lit. f DSGVO).</p>
 	</section>
 
 	<section>

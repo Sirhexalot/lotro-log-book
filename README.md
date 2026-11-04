@@ -1,9 +1,12 @@
 # LOTRO Log Book
 
-The web companion of **Magic Quest Log**: per region the map with the objectives of
-quests and deeds, your progress beside it, and pages for **deeds** with their running
-counters, **reputation** and **crafting** — for every character loaded from LOTRO
-Companion. Same name in every language.
+Browse quests and deeds by landscape, volume and book. See the game's maps,
+search the catalogue and import your own progress from **LOTRO Companion** to
+check quests, deed counters, reputation and crafting across characters.
+
+Works without installing a plugin or creating an account, in German, English and
+French. It also exports progress files for the **Magic Quest Log** plugin. The name
+is **LOTRO Log Book** in every language.
 
 Runs at **https://llb.sirhexalot.de/**.
 
@@ -35,9 +38,11 @@ open the original variant.
 See [the missing-map audit](docs/missing-map-audit.md): an unassigned card is not
 necessarily a missing image. No speculative map assignments were added.
 
-This repository contains **only the code**. Map images, quest texts and progress
-files are game material and are not published: they are created during the build
-from your own game and stay local.
+This repository contains **only the code**, not generated map images, quest texts
+or personal progress. Game data and images are generated locally for the website
+build; the deployed website serves those generated catalogue assets. Personal
+progress is different: it stays in the visitor's browser and is never included
+in the deployed build.
 
 ## What the code does
 
@@ -96,6 +101,7 @@ with a new page after an upload.
 
 ```sh
 node tests/test_companion.js                                   # converter, no game data
+python3 -m unittest discover -s tests -p 'test_website.py'      # landing-page counts and analytics injection
 ../MagicQuestLog/.venv/bin/python tests/test_companion_real.py # real Companion folder -> plugin
 ```
 
@@ -109,7 +115,9 @@ own `Characters.lua` in Lua 5.1. Without a Companion folder it is skipped.
 German, English and French. The site loads only the selected language
 (`daten-de.js`/`daten-en.js`, images from `karten/de`/`karten/en`). Order of
 choice: `?lang=`, then `localStorage`, then `navigator.language`, otherwise
-English. Texts live in `web/texte.js`.
+English. Interface texts live in `web/texte.js`; the landing pages have their own
+DE/EN/FR copy. `baue_website.py` replaces their catalogue counts from the exact JS
+catalogues being published, so the text cannot silently keep older totals.
 
 ## Reputation, crafting and deed counters
 
@@ -173,9 +181,32 @@ A local build may still carry a built-in `fortschritt.js` from the plugin's old
 `Progress.lua`; it is shown only while no character is chosen. The published site
 ships it empty.
 
-## Rights
+## Sources, statistics and rights
+
+Map images and game text are read from the local LOTRO installation. Map bounds
+and parent/child relationships come from LOTRO Companion's game-map definitions,
+not MoorMap's geometry. Garan's hand-drawn detail images are not used. MoorMap
+remains an optional map-opening integration in the plugin.
+
+Permission to use Companion's libraries is not a licence from the game's rights
+holders to redistribute game assets. Neither a source credit nor this project's
+fan-project notice supplies that permission.
+
+Companion imports and character data are processed and kept in the browser, not
+uploaded to the website or analytics service. This does **not** mean the website
+makes no external requests: the published build injects GoatCounter's
+`https://gc.zgo.at/count.js`, with the endpoint
+`https://sirhexalot.goatcounter.com/count`, for cookie-free visitor statistics.
+Local source pages do not inject it. See `web/datenschutz.html` and
+[GoatCounter's privacy documentation](https://www.goatcounter.com/help/privacy)
+for the distinction between aggregate statistics and technical processing of IP
+addresses. No assertion of automatic legal compliance follows from using no cookies.
+
+Browser preferences include `mql.sprache`, `mql.charaktere`, `mql.system`,
+`llb.preview.letztesGebiet` and `llb.preview.listenbreite`. The last two names are
+retained for compatibility, including on the published site.
 
 Fan project, not affiliated with Standing Stone Games, Daybreak Game Company or
 Middle-earth Enterprises. Maps and game texts belong to their respective rights
-holders. No advertising, no accounts, no profiles; on the website only
-anonymous reach measurement without cookies (GoatCounter).
+holders. No advertising, registration or donation feature. Character records are
+local to the browser; visitor statistics are separate.

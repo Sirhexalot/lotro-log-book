@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Builds the start image: Bree-land with open and completed objectives.
 
-Not a screenshot, but the same calculation as the page: target locations from
-`daten/quests.json`, frame from `daten/karten.json`, colour from
-`web/fortschritt.js`. This way the image shows exactly what the map shows.
+Not a screenshot: an illustration of objective locations from
+`daten/quests-<language>.json`, with the game map's frame and completion colours
+from `web/fortschritt.js`. The landing-page caption marks it as an example;
+the interactive page initially shows quest givers, not all objectives.
 
 Usage:
 
@@ -15,6 +16,7 @@ import sys
 from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
+BREELAND_ID = 268437653
 BREITE = 1200
 GOLD = (217, 154, 60)
 GRUEN = (111, 156, 106)
@@ -42,7 +44,6 @@ def main():
     parser.add_argument('--sprache', choices=('de', 'en', 'fr'), default='de')
     optionen = parser.parse_args()
 
-    karte_name = 'Bree-land'
     ordner = 'Karten' if optionen.sprache == 'de' else 'Karten_' + optionen.sprache
     zieldatei = HIER / ('web/bild/start.jpg' if optionen.sprache == 'de'
                         else 'web/bild/start-%s.jpg' % optionen.sprache)
@@ -56,9 +57,9 @@ def main():
 
     daten = json.loads(daten_datei.read_text(encoding='utf-8'))
     karten = {karte['idx']: karte for karte in daten['karten']}
-    karte = next((k for k in daten['karten'] if k['name'] == karte_name), None)
+    karte = karten.get(BREELAND_ID)
     if karte is None:
-        print('Map not found: %s' % karte_name, file=sys.stderr)
+        print('Map not found: %s' % BREELAND_ID, file=sys.stderr)
         return 1
 
     bild_datei = HIER / ordner / karte['bild']
@@ -92,7 +93,7 @@ def main():
     zieldatei.parent.mkdir(parents=True, exist_ok=True)
     bild.save(zieldatei, 'JPEG', quality=86, optimize=True)
     print('%s: %d points, %d×%d -> %s' %
-          (karte_name, punkte, BREITE, hoehe, zieldatei.relative_to(HIER)))
+          (karte['name'], punkte, BREITE, hoehe, zieldatei.relative_to(HIER)))
     return 0
 
 
