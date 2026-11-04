@@ -7,6 +7,26 @@ Companion. Same name in every language.
 
 Runs at **https://llb.sirhexalot.de/**.
 
+## Navigation
+
+The quest and deed overview starts with **Other content**, followed by landscapes
+sorted alphabetically within each region. Region links jump within the overview.
+Landscape cards link directly to their sub-areas; the map view repeats these as
+larger buttons with progress counts. Selecting a quest leaves the chosen map alone.
+The list width can be dragged, adjusted with arrow keys, or reset by double-clicking
+the divider; the browser remembers it.
+
+Epic quests use their existing volume/series groups and the catalogue's book
+sections, numerically ordered (including Roman book numbers). Later stories with
+explicit chapter numbers use those numbers; entries without that evidence stay in
+the general group. Festivals, crafting, instances and missions expose the groups
+actually present in the catalogue, not inferred categories. Unassigned entries
+remain searchable and accessible under the collapsed **Other quests** section at
+the bottom. Their original catalogue keys and links are retained.
+
+See [the missing-map audit](docs/missing-map-audit.md): an unassigned card is not
+necessarily a missing image. No speculative map assignments were added.
+
 This repository contains **only the code**. Map images, quest texts and progress
 files are game material and are not published: they are created during the build
 from your own game and stay local.
