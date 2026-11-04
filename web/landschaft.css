@@ -38,7 +38,7 @@ main.landschaft-start > :not(#landschaften) { display: none; }
 .landschaft-orte-kopf strong { font-size: 1rem; color: var(--gold); }
 .landschaft-orte-kopf > span { display: none; }
 .landschaft-orte-auswahl { display: flex; flex: 1 1 300px; min-width: 0; gap: 4px; overflow-x: auto; }
-.landschaft-orte-auswahl > button { flex: 0 0 auto; max-width: 240px; }
+.landschaft-orte-auswahl > button { flex: 0 0 auto; white-space: nowrap; }
 .inhalts-auswahl { margin-top: 10px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
 .landschaft-orte button { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 32px; padding: 4px 8px; font-size: .8rem; text-align: left; }
 .landschaft-orte button small { color: var(--schwach); font-size: .75rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
