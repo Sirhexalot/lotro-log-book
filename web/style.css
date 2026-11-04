@@ -855,12 +855,12 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .notizen-feld ul { list-style: none; margin: 0; padding: 0; }
 .notizen-feld label { display: flex; align-items: center; gap: 8px; padding: 2px 4px; cursor: pointer; color: var(--text); }
 .notizen-feld label:hover { background: var(--fläche-hell); }
-.notizen-feld label img { width: 20px; height: 20px; }
+.notizen-feld label img { width: 24px; height: 24px; flex: none; filter: drop-shadow(0 1px 1px #000); }
 .notizen-feld label span { flex: 1; }
 .notizen-feld input[type="checkbox"], .geber-schalter input { width: auto; margin: 0; flex: none; }
 .geber-schalter { white-space: nowrap; }
 .notizen-ebene { position: absolute; inset: 0; pointer-events: none; }
-.welt img.notiz { position: absolute; display: block; right: auto; bottom: auto; width: 18px; height: 18px; max-width: none; margin: -9px 0 0 -9px; pointer-events: auto; }
+.welt img.notiz { position: absolute; display: block; right: auto; bottom: auto; width: 24px; height: 24px; max-width: none; margin: -12px 0 0 -12px; pointer-events: auto; filter: drop-shadow(0 1px 1px #000) drop-shadow(0 0 1px #000); }
 .welt img.notiz:hover { transform: scale(1.4); z-index: 4; }
 .marker.ohne-geber .punkt { display: none; }
 .marker { pointer-events: none; }

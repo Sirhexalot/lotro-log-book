@@ -678,7 +678,7 @@
 	notizenEbene.className = 'notizen-ebene';
 	marker.parentNode.insertBefore(notizenEbene, marker);
 
-	function notizBild(code) { return 'notizen/' + code + '.png?v=' + (window.MQL_STAND || '0'); }
+	function notizBild(code) { return 'notizen/lesbar/' + code + '.png?v=' + (window.MQL_STAND || '0'); }
 	function merkeNotizen() {
 		try { window.localStorage.setItem('mql.notizen', JSON.stringify(notizenAn)); } catch (fehler) { /* private mode */ }
 	}

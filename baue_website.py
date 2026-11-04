@@ -173,6 +173,8 @@ def main():
         shutil.copy2(WEB / ('notizen-%s.js' % sprache), ziel / ('notizen-%s.js' % sprache))
         shutil.copytree(HIER / 'webp' / sprache, ziel / 'karten' / sprache)
     shutil.copytree(WEB / 'notizen', ziel / 'notizen')
+    from build_notizsymbole import baue as baue_notizsymbole
+    baue_notizsymbole(ziel / 'notizen')
     katalogzahlen_einbauen(ziel)
     # Stamp after the data is in place: it covers the data files as well.
     print('version tag on static files: %s' % stempeln(ziel))
