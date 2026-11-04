@@ -1357,15 +1357,16 @@
 	var BILD_SEITE = 4 / 3;
 
 	function passeAn() {
-		var breite = buehne.clientWidth;
-		var hoehe = buehne.clientHeight;
+		var rahmen = buehne.getBoundingClientRect();
+		var breite = rahmen.width;
+		var hoehe = rahmen.height;
 		if (!breite || !hoehe) { return; }
 		var bildBreite = Math.min(breite, hoehe * BILD_SEITE);
 		var bildHoehe = bildBreite / BILD_SEITE;
 		welt.style.width = bildBreite + 'px';
 		welt.style.height = bildHoehe + 'px';
-		welt.style.left = Math.round((breite - bildBreite) / 2) + 'px';
-		welt.style.top = Math.round((hoehe - bildHoehe) / 2) + 'px';
+		welt.style.left = ((breite - bildBreite) / 2) + 'px';
+		welt.style.top = ((hoehe - bildHoehe) / 2) + 'px';
 	}
 
 	// The map stands still: no zoom and no dragging (Adrian, 03.11.).
@@ -1378,6 +1379,12 @@
 		passeAn();
 		setzeAnsicht(zustand.skala, zustand.x, zustand.y);
 	});
+	// Navigation and legends can change the available height without a window
+	// resize. Keep the image and all marker layers inside the actual map stage.
+	if (window.ResizeObserver) {
+		var kartenGroesse = new ResizeObserver(function () { passeAn(); });
+		kartenGroesse.observe(buehne);
+	}
 
 	// --- Input ---------------------------------------------------------
 	// --- Search over everything (header) ------------------------------
