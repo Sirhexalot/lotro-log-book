@@ -425,12 +425,13 @@ main {
 
 .schritt {
 	position: absolute;
-	width: 18px;
-	height: 18px;
-	margin: -9px 0 0 -9px;
+	width: 26px;
+	height: 26px;
+	margin: -13px 0 0 -13px;
 	border-radius: 50%;
-	border: 2px solid var(--marke-aktiv);
-	background: rgba(232, 225, 213, .16);
+	border: 3px solid #fff5d6;
+	box-shadow: 0 0 0 2px #211a12, inset 0 0 0 1px #211a12;
+	background: transparent;
 	pointer-events: none;
 	display: flex;
 	align-items: center;
@@ -726,7 +727,7 @@ td.haken-zelle.teil { color: var(--laufend); }
 .zweig.treffer .name { color: var(--gold); }
 
 /* Legend: the rings of a selected quest */
-.tupfen.ring { background: rgba(232, 225, 213, .16); border: 2px solid var(--marke-aktiv); }
+.tupfen.ring { background: transparent; border: 2px solid #fff5d6; box-shadow: 0 0 0 1px #211a12; }
 
 /* Status line under the map, beside "reset" */
 .bedienung { right: 10px; flex-wrap: wrap; }
