@@ -21,8 +21,16 @@ sections, numerically ordered (including Roman book numbers). Later stories with
 explicit chapter numbers use those numbers; entries without that evidence stay in
 the general group. Festivals, crafting, instances and missions expose the groups
 actually present in the catalogue, not inferred categories. Unassigned entries
-remain searchable and accessible under the collapsed **Other quests** section at
-the bottom. Their original catalogue keys and links are retained.
+remain searchable and accessible in one full-width **Other quests** card at the
+bottom, without an extra disclosure wrapper. Their original catalogue keys and
+links are retained.
+
+Unnamed map records are shown as labelled map variants rather than numeric
+“Map 268…” placeholders. Unnamed top-level variants that share a game image with
+a named landscape in the same region are grouped into that landscape's card.
+Every variant retains its own map ID and coordinate frame; sharing an image does
+not mean the projections can be interchanged. Existing direct map links still
+open the original variant.
 
 See [the missing-map audit](docs/missing-map-audit.md): an unassigned card is not
 necessarily a missing image. No speculative map assignments were added.

@@ -1,6 +1,7 @@
 /* Landscape-first navigation. */
 .landschaft-rest { margin-top: 30px; }
-.landschaft-rest > summary { cursor: pointer; color: var(--gold); padding: 12px 0; font-weight: bold; }
+.landschaft-rest .landschaft-kacheln { grid-template-columns: minmax(0, 1fr); }
+.landschaft-rest .landschaft-untergebiete { gap: 10px 20px; padding-bottom: 18px; }
 main { grid-template-columns: clamp(280px, var(--listenbreite, 390px), calc(100% - 690px)) minmax(320px, 1fr) 360px; }
 main > #nav { position: relative; padding-right: 10px; min-width: 0; }
 .listen-trenner { position: absolute; top: 0; right: 0; bottom: 0; width: 10px; cursor: col-resize; touch-action: none; background: var(--fläche); z-index: 6; }
