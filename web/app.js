@@ -30,7 +30,6 @@
 	}
 
 	var suche = document.getElementById('suche');
-	var stand = document.getElementById('stand');
 	var baum = document.getElementById('baum');
 	var liste = document.getElementById('liste');
 	var listeTitel = document.getElementById('liste-titel');
@@ -598,18 +597,9 @@
 		zeichneDetail();
 	}
 
-	// The bar under the map names the map and how many entries of the list lie
-	// on it; counts per area are in the detail column.
+	// Keep the return button in sync; the redundant map/count caption is gone.
 	function aktualisiereStand() {
 		zeigeZurueck();
-		if (!zustand.karte) { stand.textContent = ''; return; }
-		var hier = 0, alle = 0;
-		zustand.treffer.forEach(function (quest) {
-			if (!gezaehlt(quest)) { return; }
-			alle += 1;
-			if (zielAuf(quest, zustand.karte)) { hier += 1; }
-		});
-		stand.textContent = ersetze(t('karte_stand'), [zustand.karte.name, hier, alle]);
 	}
 
 
@@ -778,7 +768,7 @@
 		}
 	}
 
-	// "Aufgabenführer anzeigen": the quest dots, on by default as in the game.
+	// "Questgeber anzeigen": the quest dots, on by default as in the game.
 	var geberSchalter = document.getElementById('geber-schalter');
 	if (geberSchalter) {
 		geberSchalter.addEventListener('change', function () {

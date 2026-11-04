@@ -18,7 +18,7 @@
 			notizen_alle: 'Alle auswählen',
 			notizen_keine: 'Alles löschen',
 			notizen_lade: 'Lade …',
-			aufgabenfuehrer: 'Aufgabenführer anzeigen',
+			aufgabenfuehrer: 'Questgeber anzeigen',
 			zur_gebietskarte: '← %s',
 			zielort_hinweis: 'Gegend des ersten Ziels, Auftraggeber unbekannt',
 			ziele_aus: 'Ziele ausblenden',
