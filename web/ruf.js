@@ -99,7 +99,12 @@
 			tr.addEventListener('click', function () { zeigeQuellen(zeile, tr); });
 			ziel.appendChild(tr);
 		});
-		el('anzahl').textContent = ersetze(t('ru_anzahl'), [gezeigt, zeilen.length, oben]);
+		// If the filter hides nothing, say so instead of looking broken.
+		if (nur && gezeigt === zeilen.length) {
+			el('anzahl').textContent = ersetze(t('ru_anzahl_alle'), [zeilen.length]);
+		} else {
+			el('anzahl').textContent = ersetze(t('ru_anzahl'), [gezeigt, zeilen.length, oben]);
+		}
 	}
 
 	// --- Where to get reputation: opens under a faction on click --------
