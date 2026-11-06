@@ -719,6 +719,9 @@ main.seite {
 .zurueck { margin: 0 0 4px; }
 .zurueck a { color: var(--schwach); text-decoration: none; }
 .zurueck a:hover { color: var(--gold); }
+.werte { display: grid; grid-template-columns: auto 1fr; gap: 3px 16px; margin: 12px 0 4px; }
+.werte dt { color: var(--schwach); }
+.werte dd { margin: 0; font-variant-numeric: tabular-nums; }
 .rezept-zeile select { margin-left: 6px; }
 #rezept-tabelle td { vertical-align: top; }
 #rezept-tabelle .schwach { margin-top: 2px; }

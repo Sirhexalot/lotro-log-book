@@ -80,6 +80,8 @@ def baue(quelle, sprache):
             int(recipe.get('t') or 0),
             round(float(recipe.get('ch') or 0) * 100, 1),
             round(float(recipe.get('ti') or 0), 1),
+            round(float(recipe.get('ch') or 0) * 100, 1),
+            round(float(recipe.get('ti') or 0), 1),
         ])
     zeilen.sort(key=lambda row: (row[0].lower(), row[3], row[1]))
     return zeilen

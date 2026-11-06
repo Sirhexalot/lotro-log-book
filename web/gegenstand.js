@@ -70,6 +70,35 @@
 		return baum;
 	}
 
+	/** Armour, damage and the item's own text, where the client has them. */
+	function zeigeWerte(werte) {
+		var block = document.getElementById('gs-werte');
+		var beschreibung = document.getElementById('gs-beschreibung');
+		var zeilen = [];
+		function zahl(wert) { return Number(wert).toLocaleString(t('locale'), { maximumFractionDigits: 2 }); }
+		if (werte.ar) { zeilen.push([t('gs_armour'), zahl(werte.ar)]); }
+		if (werte.dmg) {
+			var zusatz = [];
+			if (werte.dps) { zusatz.push(t('gs_dps') + ' ' + zahl(werte.dps)); }
+			if (werte.spd) { zusatz.push(t('gs_speed') + ' ' + zahl(werte.spd)); }
+			zeilen.push([t('gs_damage'), zahl(werte.dmg) + (zusatz.length ? ' (' + zusatz.join(' · ') + ')' : '')]);
+		}
+		if (zeilen.length) {
+			var liste = eltern('dl');
+			liste.className = 'werte';
+			zeilen.forEach(function (paar) {
+				liste.appendChild(eltern('dt', paar[0]));
+				liste.appendChild(eltern('dd', paar[1]));
+			});
+			block.appendChild(liste);
+			block.hidden = false;
+		}
+		if (werte.d) {
+			beschreibung.textContent = werte.d;
+			beschreibung.hidden = false;
+		}
+	}
+
 	function zeichne() {
 		var parameter = new URLSearchParams(window.location.search);
 		var id = (parameter.get('id') || '').toUpperCase();
@@ -91,6 +120,7 @@
 		if (eintrag[3]) { teile.push(t('stufe') + ' ' + eintrag[3]); }
 		teile.push(eintrag[4] ? t('gs_gebunden') : t('gs_frei'));
 		meta.textContent = teile.join(' · ');
+		zeigeWerte(eintrag[6] || {});
 		if (!eintrag[5] || !eintrag[5].length) { leer.hidden = false; return; }
 		ziel.appendChild(quelleBaum(eintrag[5]));
 	}
