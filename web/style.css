@@ -865,6 +865,17 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .welt img.notiz:hover { transform: scale(1.4); z-index: 4; }
 .zielorte { margin: 8px 0 16px; padding: 6px 10px; background: var(--fläche-hell); border-radius: 3px; }
 .zielorte p { margin: 3px 0; font-size: 12px; font-variant-numeric: tabular-nums; }
+.belohnungen { margin: 14px 0; padding: 10px 12px; background: var(--fläche-hell); border-radius: 4px; }
+.belohnungen h3 { margin: 0 0 6px; font-size: var(--text-normal); color: var(--gold); }
+.belohnungen ul { margin: 0; padding-left: 18px; }
+.belohnungen li { margin: 3px 0; }
+.belohnungen .stufe { color: var(--schwach); margin-left: 8px; font-size: var(--text-bedienung); }
+.belohnungen .merkmal { color: var(--schwach); }
+.belohnungen .auswahl { margin: 8px 0 0; }
+.belohnungen .auswahl strong { color: var(--text); }
+/* Item quality, the game's own colours: common, uncommon, rare, incomparable, legendary. */
+.q1 { color: #d8d2c4; } .q2 { color: #e0c15c; } .q3 { color: #b98cd6; }
+.q4 { color: #6fc3c3; } .q5 { color: #e6a94d; } .q0 { color: inherit; }
 .jagdpunkt { position: absolute; transform: translate(-50%, -50%); width: 24px; height: 24px; border: 2px dashed #f3bc65; border-radius: 50%; background: #4a301bd9; color: #fff2d9; font: bold 11px/20px sans-serif; text-align: center; box-sizing: border-box; }
 .jagdhinweis { border-left: 3px dashed #dba54e; }
 .jagdhinweis button { margin: 4px 6px 0 0; }

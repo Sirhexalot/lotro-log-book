@@ -1286,6 +1286,48 @@
 			detail.appendChild(text);
 		}
 
+		// Rewards come straight from the game's reward table. They are not
+		// objectives, so they stay visible; only item quality is coloured.
+		if ((quest.rw || []).length) {
+			var belohnung = eltern('div', null);
+			belohnung.className = 'belohnungen';
+			belohnung.appendChild(eltern('h3', t('belohnungen')));
+			var liste = eltern('ul', null), auswahl = [];
+			quest.rw.forEach(function (eintrag) {
+				var art = eintrag[0], name = eintrag[1];
+				if (art === 'i' || art === 'c') {
+					var zeile = eltern('li', (eintrag[4] > 1 ? eintrag[4] + ' × ' : '') + name);
+					zeile.className = 'q' + (eintrag[2] || 0);
+					if (eintrag[3]) {
+						var stufe = eltern('span', '· ' + t('stufe') + ' ' + eintrag[3]);
+						stufe.className = 'stufe';
+						zeile.appendChild(stufe);
+					}
+					if (art === 'c') { auswahl.push(eintrag); return; }
+					liste.appendChild(zeile);
+					return;
+				}
+				var merkmal = eltern('li', t({ t: 'belohnung_titel', v: 'belohnung_tugend',
+					tr: 'belohnung_fertigkeit', e: 'belohnung_emote' }[art] || 'belohnung_titel') + ': ' + name);
+				merkmal.className = 'merkmal';
+				liste.appendChild(merkmal);
+			});
+			if (liste.children.length) { belohnung.appendChild(liste); }
+			if (auswahl.length) {
+				var wahl = eltern('p', null);
+				wahl.className = 'auswahl';
+				wahl.appendChild(eltern('strong', t('auswahl') + ': '));
+				auswahl.forEach(function (eintrag, nummer) {
+					if (nummer) { wahl.appendChild(document.createTextNode(' · ')); }
+					var stueck = eltern('span', (eintrag[4] > 1 ? eintrag[4] + ' × ' : '') + eintrag[1]);
+					stueck.className = 'q' + (eintrag[2] || 0);
+					wahl.appendChild(stueck);
+				});
+				belohnung.appendChild(wahl);
+			}
+			detail.appendChild(belohnung);
+		}
+
 		// One line under the description folds this quest's objectives in or out.
 		if ((quest.s || []).length) {
 			var schalter = eltern('button', (zieleOffen ? '▾ ' + t('ziele_aus') : '▸ ' + t('ziele_ein')) +

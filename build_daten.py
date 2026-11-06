@@ -292,6 +292,29 @@ TOKENS = {
 }
 
 
+def belohnungen(wert):
+    """Normalise a catalogue reward list for the page.
+
+    Always six fields so the page can read them by position: kind, name,
+    quality, item level, count, bound. Non-item kinds leave the numbers at 0.
+    """
+    liste = []
+    for eintrag in step_list(wert):
+        art = str(eintrag[1] or '')
+        name = str(eintrag[2] or '')
+        if not art or not name:
+            continue
+        if art == 'i':
+            werte = [int(eintrag[3] or 0), int(eintrag[4] or 0),
+                     int(eintrag[5] or 1), int(eintrag[6] or 0)]
+        elif art == 'c':
+            werte = [int(eintrag[3] or 0), int(eintrag[4] or 0), 1, int(eintrag[5] or 0)]
+        else:
+            werte = [0, 0, 1, 0]
+        liste.append([art, name] + werte)
+    return liste
+
+
 def label(schluessel, name, sprache):
     """Display name of a path part. "@volume:I" becomes "Band I" / "Book I"."""
     name = str(name or '')
@@ -361,6 +384,16 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
     runtime.execute(Path(katalog).read_text(encoding='utf-8'))
     records = runtime.globals().MagicQuestLog.Data[('deeds_' if art == 'taten' else 'quests_') + sprache]
 
+    # Since 0.5.0 a quest's description, steps, targets and rewards live in detail
+    # blocks that the plugin loads when an entry is opened. The page needs them
+    # up front, so they are merged in here (the files stay separate).
+    details = {}
+    if art != 'taten':
+        for pfad in sorted(Path(katalog).parent.glob('QuestDetails_%s_*.lua' % sprache)):
+            runtime.execute(pfad.read_text(encoding='utf-8'))
+            nummer = pfad.stem.rsplit('_', 1)[1]
+            details.update(runtime.globals().MagicQuestLog.Data['questDetails_%s_%s' % (sprache, nummer)])
+
     quests, ohne_ziel, ziele = [], 0, 0
 
     def geber_ort(ort):
@@ -372,6 +405,12 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
         return [karte, lat, lon] if karte in bekannt else None
     for index in range(1, len(records) + 1):
         record = records[index]
+        if details:
+            eintrag = details.get(record['id'])
+            if eintrag is not None:
+                for key in ('d', 's', 't', 'rw'):
+                    if key in eintrag:
+                        record[key] = eintrag[key]
         targets = step_list(record['t'] if 't' in record else None)
         if not targets:
             # Quest without a recorded target: it belongs in the tree and in the
@@ -483,6 +522,10 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
             # story, instances, festivals, crafting, missions), not under a place.
             **({'_sek': 1} if any(key.startswith('section:') and key != 'section:other' for key in pfad) else {}),
             't': positions,
+            # rw: rewards from the game's own reward table. Item entries are
+            # [kind, name, quality, level, count, bound]; kind i = fixed,
+            # c = one of several, t = title, v = virtue, tr = trait, e = emote.
+            **({'rw': belohnungen(field(record, 'rw'))} if field(record, 'rw') else {}),
             # Separate from exact objectives: actual base-world enemy placements.
             **({'h': [[int(p['gm']), float(p['lat']), float(p['lon']), str(p['step'])]
                       for p in step_list(field(record, 'h')) if int(p['gm']) in bekannt]}
