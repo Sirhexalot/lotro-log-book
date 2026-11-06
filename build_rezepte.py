@@ -24,6 +24,7 @@ STANDARD = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-e
 def sauber(text):
     """Game names carry plural/quality tags and gendered forms; strip them."""
     text = html.unescape(text or '')
+    text = text.replace('\\q', '"').replace('\\n', ' ')
     text = re.sub(r'\$\{[A-Z_]+:([^}]*)\}',
                   lambda m: re.sub(r'\[[A-Za-z]{1,4}\]', '', m.group(1).split('|')[0]).strip(), text)
     text = re.sub(r'\[[A-Za-z]{1,4}\]', '', text)

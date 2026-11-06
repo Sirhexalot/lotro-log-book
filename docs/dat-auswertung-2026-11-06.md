@@ -177,6 +177,10 @@ gegenstände wenige MB), die drei Sprachen sind vollständig vorhanden.
   Der Stand ist so alt wie der letzte Companion-Import.
 - Die Rezeptdaten tragen Berufsschlüssel (`WOODWORKER` …), Rezept-ID und
   Stufencode, damit die Zuordnung ohne Namensvergleich funktioniert.
+- **Namen bereinigt:** `\q` wird zum Anführungszeichen (`"Alter Tobi"`),
+  `\n` zum Leerzeichen; `[e]`/`[n]`-Marken, `${…}`-Platzhalter und doppelte
+  Trennzeichen fallen weg. `verify_catalog.py` prüft, dass keine Rohmarkierung
+  in einer Belohnung steht.
 
 ## 7. Prüfmittel
 
