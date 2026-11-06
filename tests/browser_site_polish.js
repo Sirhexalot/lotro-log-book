@@ -2,6 +2,8 @@
  * dist-web/start.html. Checks the same pages in all three languages. */
 async page => {
   const base = new URL('.', page.url()).href;
+  // A character left over from an earlier run would change the crafting page.
+  await page.evaluate(() => localStorage.removeItem('mql.charaktere'));
   const errors = [];
   page.on('pageerror', error => errors.push(String(error)));
   const results = [];
@@ -119,15 +121,49 @@ async page => {
   await page.locator('.rezept-filter input').click();
   await page.waitForTimeout(200);
   const missing = await page.evaluate(() => ({
-    tiers: document.querySelectorAll('#rezept-inhalt tr.rezept-stufe').length,
+    stufenTitel: document.querySelectorAll('#rezept-inhalt tr.rezept-stufe').length,
     rows: document.querySelectorAll('#rezept-inhalt tbody tr:not(.rezept-gruppe):not(.rezept-stufe)').length,
     label: document.getElementById('rezept-anzahl').innerText,
     headers: document.querySelectorAll('.rezept-tabelle thead').length,
+    tierRow: !document.getElementById('rezept-stufen').hidden,
   }));
-  if (missing.tiers < 2 || !missing.rows || !/fehlende/.test(missing.label) ||
-      missing.headers !== 1) throw Error('missing recipes view broken: ' + JSON.stringify(missing));
+  if (missing.stufenTitel < 2 || !missing.rows || !/fehlende/.test(missing.label) ||
+      missing.headers !== 1 || !missing.tierRow) {
+    throw Error('missing recipes view broken: ' + JSON.stringify(missing));
+  }
+  // Reputation filter: factions at their start tier are not "started", so the
+  // filter must really drop rows (it once kept every faction).
+  await page.goto(base + 'ruf.html?lang=de');
+  await page.waitForSelector('#filter', { state: 'attached' });
+  await page.evaluate(() => {
+    const fraktionen = window.MQL_REFERENZ.fraktionen;
+    const ids = Object.keys(fraktionen).slice(0, 10);
+    const ruf = ids.map((id, index) => {
+      const f = fraktionen[id];
+      const tier = index < 6 ? f.start : Math.min(f.max || f.start + 1, f.start + 1);
+      return [id, tier, index < 6 ? 0 : 1000];
+    });
+    localStorage.setItem('mql.charaktere', JSON.stringify({ aktiv: 'T|T|T', liste: {
+      'T|T|T': { key: 'T|T|T', name: 'T', server: 'T', ruf: ruf, quests: [], deeds: [] } } }));
+  });
+  await page.reload();
+  await page.waitForSelector('#zeilen tr', { state: 'visible' });
+  const rufAlle = await page.evaluate(() => ({
+    rows: document.querySelectorAll('#zeilen tr').length,
+    label: document.getElementById('anzahl').innerText,
+  }));
+  await page.locator('#nur-begonnen').check();
+  await page.waitForTimeout(200);
+  const rufGefiltert = await page.evaluate(() => ({
+    rows: document.querySelectorAll('#zeilen tr').length,
+    label: document.getElementById('anzahl').innerText,
+  }));
+  if (rufAlle.rows !== 10 || rufGefiltert.rows !== 4 || !/von 10/.test(rufGefiltert.label)) {
+    throw Error('reputation filter broken: ' + JSON.stringify({ rufAlle, rufGefiltert }));
+  }
   await page.evaluate(() => localStorage.removeItem('mql.charaktere'));
 
   if (errors.length) throw Error(errors.join('\n'));
   return { checked: results.length, pages: results, mapLayout: 'PASS',
-    crafting: { professions: crafting.professions, missingTiers: missing.tiers }, errors };}
+    crafting: { professions: crafting.professions, missingTiers: missing.stufenTitel },
+    reputation: { all: rufAlle.rows, started: rufGefiltert.rows }, errors };}

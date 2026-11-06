@@ -11,6 +11,7 @@
 	var prof = '';
 	var stufe = '';
 	var suche = '';
+	var stufeGewaehlt = false;
 	var nurFehlende = false;
 	var alleBerufe = false;
 	var bekannt = {};
@@ -204,9 +205,6 @@
 			var filterText = eltern('span');
 			filterText.className = 'rezept-filter-text';
 			filterText.appendChild(eltern('span', t('hw_nur_fehlen')));
-			var filterHinweis = eltern('span', t('hw_nur_fehlen_hint'));
-			filterHinweis.className = 'schwach';
-			filterText.appendChild(filterHinweis);
 			fehlendFeld.appendChild(filterText);
 		}
 
@@ -234,6 +232,8 @@
 					alleBerufe = false;
 					alleHaken.checked = false;
 					alleFeld.hidden = true;
+					stufe = '';
+					stufeGewaehlt = true;
 					// Only the character's own professions can be missing anything.
 					if (!istMeinBerufName(prof)) { prof = ''; }
 				} else {
@@ -297,6 +297,7 @@
 			knopf.addEventListener('click', function () {
 				prof = name;
 				stufe = '';
+				stufeGewaehlt = false;
 				markiereBeruf();
 				zeichne();
 			});
@@ -305,20 +306,26 @@
 	}
 
 	function stufenListe() {
-		var namen = {};
+		var namen = {}, gesamt = 0;
 		daten.forEach(function (wert) {
 			if (wert[3] !== prof || !wert[4]) { return; }
 			var eintrag = namen[wert[4]] || (namen[wert[4]] = { n: 0, order: 999 });
 			eintrag.n += 1;
 			eintrag.order = Math.min(eintrag.order, wert[11] || 999);
+			gesamt += 1;
 		});
 		var liste = Object.keys(namen).sort(function (a, b) { return namen[a].order - namen[b].order; });
 		if (!liste.length) { stufenZeile.textContent = ''; stufenKopf.hidden = true; return; }
 		stufenKopf.hidden = false;
-		if (!stufe || !namen[stufe]) {
-			stufe = liste[0];
-		}
+		// Start on the first tier; "all tiers" is a choice, not the default.
+		if (!stufeGewaehlt || (stufe && !namen[stufe])) { stufe = liste[0] === undefined ? '' : liste[0]; }
 		stufenZeile.textContent = '';
+		var alle = eltern('button', t('hw_alle_stufen') + ' (' + gesamt + ')');
+		alle.type = 'button';
+		alle.className = 'rezept-knopf' + (stufe === '' ? ' aktiv' : '');
+		alle.setAttribute('aria-pressed', String(stufe === ''));
+		alle.addEventListener('click', function () { stufe = ''; stufeGewaehlt = true; zeichne(); });
+		stufenZeile.appendChild(alle);
 		liste.forEach(function (name) {
 			var knopf = eltern('button', name + ' (' + namen[name].n + ')');
 			knopf.type = 'button';
@@ -326,6 +333,7 @@
 			knopf.setAttribute('aria-pressed', String(name === stufe));
 			knopf.addEventListener('click', function () {
 				stufe = name;
+				stufeGewaehlt = true;
 				zeichne();
 			});
 			stufenZeile.appendChild(knopf);
@@ -336,36 +344,27 @@
 		stufenZeile.hidden = false;
 		stufenKopf.hidden = false;
 		stufenListe();
-		var zeilen = daten.filter(function (wert) {
-			return wert[3] === prof && wert[4] === stufe && passt(wert);
-		});
-		inhalt.textContent = '';
-		if (!zeilen.length) {
-			inhalt.appendChild(eltern('p', t('hw_keine_rezepte')));
-			anzahl.textContent = '';
-			mehr.hidden = true;
-			return;
-		}
-		inhalt.appendChild(tabelle(nachKategorie(zeilen), { mitBeruf: false, mitStufe: false }));
-		zaehle(zeilen);
-		mehr.hidden = true;
-	}
-
-	/** All recipes the character is still missing, across every tier. */
-	function zeigeFehlende() {
-		stufenZeile.hidden = true;
-		stufenKopf.hidden = true;
 		var alle = daten.filter(function (wert) {
-			return wert[3] === prof && istMeinBeruf(wert) && !istBekannt(wert);
+			return wert[3] === prof && (!stufe || wert[4] === stufe) && passt(wert);
 		});
 		inhalt.textContent = '';
 		if (!alle.length) {
-			inhalt.appendChild(eltern('p', t('hw_nichts_fehlt')));
-			anzahl.textContent = '';
+			inhalt.appendChild(eltern('p', nurFehlende && !suche ? t('hw_nichts_fehlt') : t('hw_keine_rezepte')));
+			anzahl.textContent = nurFehlende ? window.MQL_ERSETZE(t('hw_fehlende'), [0]) : '';
 			mehr.hidden = true;
 			return;
 		}
 		var zeilen = alle.slice(0, grenze);
+		var gruppen = stufe ? nachKategorie(zeilen) : nachStufeUndKategorie(zeilen);
+		inhalt.appendChild(tabelle(gruppen, { mitBeruf: false, mitStufe: false }));
+		zaehle(alle);
+		mehr.hidden = alle.length <= grenze;
+		mehr.textContent = alle.length > grenze
+			? window.MQL_ERSETZE(t('bl_mehr'), [alle.length - grenze]) : '';
+	}
+
+	/** Tier headings with their categories, for the view across all tiers. */
+	function nachStufeUndKategorie(zeilen) {
 		var nachStufe = {};
 		zeilen.forEach(function (wert) {
 			var name = wert[4] || '';
@@ -380,10 +379,7 @@
 				if (name) { gruppen.push({ name: name, zeilen: [], klasse: 'rezept-stufe' }); }
 				nachKategorie(nachStufe[name].zeilen).forEach(function (gruppe) { gruppen.push(gruppe); });
 			});
-		inhalt.appendChild(tabelle(gruppen, { mitBeruf: false, mitStufe: false }));
-		zaehle(alle);
-		mehr.hidden = alle.length <= grenze;
-		mehr.textContent = window.MQL_ERSETZE(t('bl_mehr'), [alle.length - grenze]);
+		return gruppen;
 	}
 
 	function zeigeSuche() {
@@ -412,7 +408,7 @@
 
 	function zeichne() {
 		if (!daten.length) { return; }
-		if (suche) { zeigeSuche(); } else if (nurFehlende) { zeigeFehlende(); } else { zeigeBaum(); }
+		if (suche) { zeigeSuche(); } else { zeigeBaum(); }
 	}
 
 	// --- tabs -------------------------------------------------------------

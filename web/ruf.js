@@ -43,8 +43,12 @@
 		};
 	}).sort(function (a, b) { return a.name.localeCompare(b.name, t('locale')); });
 
+	/** Started means: above the faction's own starting tier, or points earned.
+	 *  Comparing for inequality counted every faction, because a character that
+	 *  is further along sits above its start tier in all of them. */
 	function begonnen(zeile) {
-		return (zeile.punkte || 0) > 0 || (zeile.start !== null && zeile.stufe !== zeile.start);
+		if ((zeile.punkte || 0) > 0) { return true; }
+		return zeile.start !== null && zeile.stufe > zeile.start;
 	}
 
 	function zeichne() {
@@ -95,7 +99,7 @@
 			tr.addEventListener('click', function () { zeigeQuellen(zeile, tr); });
 			ziel.appendChild(tr);
 		});
-		el('anzahl').textContent = ersetze(t('ru_anzahl'), [gezeigt, oben]);
+		el('anzahl').textContent = ersetze(t('ru_anzahl'), [gezeigt, zeilen.length, oben]);
 	}
 
 	// --- Where to get reputation: opens under a faction on click --------
