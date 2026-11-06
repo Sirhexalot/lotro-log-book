@@ -7,7 +7,7 @@ async page => {
   const results = [];
   await page.setViewportSize({ width: 1440, height: 900 });
   for (const lang of ['de', 'en', 'fr']) {
-    for (const name of ['start', 'spielstand', 'ruf', 'handwerk', 'datenschutz', 'impressum', 'index']) {
+    for (const name of ['start', 'spielstand', 'ruf', 'handwerk', 'belohnungen', 'datenschutz', 'impressum', 'index']) {
       const file = name === 'start' && lang !== 'de' ? 'start-' + lang : name;
       await page.goto(base + file + '.html?lang=' + lang);
       await page.waitForSelector('#menue a');
@@ -32,6 +32,30 @@ async page => {
         const action = await page.locator('.einstieg .knopf').first().boundingBox();
         if (action.y + action.height > 900) throw Error('Map action below the fold: ' + lang);
         await page.screenshot({ path: 'output/playwright/start-polish-' + lang + '.png' });
+      }
+      if (name === 'belohnungen') {
+        await page.waitForSelector('.bl-eintrag');
+        const reward = await page.evaluate(() => ({
+          virtues: document.querySelectorAll('.bl-eintrag').length,
+          label: document.getElementById('bl-anzahl').innerText,
+          title: document.title,
+        }));
+        if (reward.virtues < 15 || !/Belohnungen|Rewards|Récompenses/.test(reward.title)) {
+          throw Error('reward index incomplete: ' + JSON.stringify(reward));
+        }
+        await page.locator('[data-bl="g"]').click();
+        if (!(await page.locator('.bl-eintrag').count())) throw Error('reward items missing');
+      }
+      if (name === 'handwerk') {
+        await page.waitForSelector('#rezept-tabelle tbody tr');
+        const recipe = await page.evaluate(() => ({
+          rows: document.querySelectorAll('#rezept-tabelle tbody tr').length,
+          professions: document.querySelectorAll('#rezept-beruf option').length,
+          label: document.getElementById('rezept-anzahl').innerText,
+        }));
+        if (recipe.professions < 5 || recipe.rows < 10) {
+          throw Error('recipe browser incomplete: ' + JSON.stringify(recipe));
+        }
       }
       if (name === 'spielstand') {
         await page.locator('[data-reiter="mac"]').click();

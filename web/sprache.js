@@ -92,7 +92,8 @@
 	document.querySelectorAll('[data-t-ph]').forEach(function (element) {
 		element.setAttribute('placeholder', t(element.getAttribute('data-t-ph')));
 	});
-	var seitentitel = { spielstand: 'sp_titel', ruf: 'ru_titel', handwerk: 'hw_titel' }[seiteArt];
+	var seitentitel = { spielstand: 'sp_titel', ruf: 'ru_titel', handwerk: 'hw_titel',
+		belohnungen: 'bl_titel' }[seiteArt];
 	if (document.body.dataset.recht === 'datenschutz') { seitentitel = 'ds_titel'; }
 	if (seitentitel) { document.title = t(seitentitel) + ' – LOTRO Log Book'; }
 	var attribute = [
@@ -137,8 +138,21 @@
 	var stil = document.querySelector('link[rel="stylesheet"]');
 	var stempel = function () { return '?v=' + (window.MQL_STAND || '0'); };
 
+	// Pages with their own data file: the reward index and the recipe browser.
+	var seite = document.body.getAttribute('data-seite');
+	if (seite === 'belohnungen' || seite === 'handwerk') {
+		lade('stand.js?t=' + Date.now(), function () {
+			var datei = (seite === 'belohnungen' ? 'belohnungen-' : 'rezepte-') + sprache + '.js';
+			lade(datei + stempel(), function () {
+				if (seite === 'belohnungen' && window.MQL_BELOHNUNGEN_ZEICHNEN) { window.MQL_BELOHNUNGEN_ZEICHNEN(); }
+				if (seite === 'handwerk' && window.MQL_REZEPTE_ZEICHNEN) { window.MQL_REZEPTE_ZEICHNEN(); }
+			});
+		});
+		return;
+	}
+
 	// Only the map loads the large data files; the progress page needs none.
-	if (document.body.getAttribute('data-seite') !== 'karte') { return; }
+	if (seite !== 'karte') { return; }
 
 	// Loading indicator until the map is drawn: the data file takes a few seconds
 	// on the first visit, after that it comes from the browser cache.

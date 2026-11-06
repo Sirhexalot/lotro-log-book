@@ -630,6 +630,21 @@ main.seite {
 .seite summary { cursor: pointer; color: var(--text); }
 .seite details p { margin: 8px 0 4px 16px; color: var(--schwach); }
 
+/* Reward index and recipe browser (own pages). */
+.belohnungsfilter { display: flex; align-items: center; gap: 8px; padding: 0 12px 6px; color: var(--schwach); }
+.belohnungsfilter[hidden] { display: none; }
+.bl-liste { list-style: none; margin: 10px 0 0; padding: 0; }
+.bl-eintrag { padding: 8px 0; border-bottom: 1px solid var(--rand); }
+.bl-name { color: inherit; }
+.bl-quellen { color: var(--schwach); margin-top: 3px; }
+.bl-quellen a { color: var(--schwach); text-decoration: none; }
+.bl-quellen a:hover { color: var(--gold); text-decoration: underline; }
+.bl-stufe { color: var(--schwach); margin-left: 6px; }
+.rezept-zeile { padding: 0 0 8px; }
+.rezept-zeile select { margin-left: 6px; }
+#rezept-tabelle td { vertical-align: top; }
+#rezept-tabelle .schwach { margin-top: 2px; }
+
 /* Running: started, not finished – LOTRO Companion recorded its counters. */
 :root { --laufend: #7fa6c9; }
 #liste li.laufend .haken { color: var(--laufend); }

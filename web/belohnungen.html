@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Belohnungen – LOTRO Log Book</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="gemeinsam.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+</head>
+<body data-seite="belohnungen" class="seite-text">
+
+<header class="kopf">
+	<h1 data-t="produkt">LOTRO Log Book</h1>
+	<nav class="menue" id="menue" aria-label="Menü"></nav>
+	<nav class="sprachen" aria-label="Sprache">
+		<button type="button" data-lang="de" aria-pressed="true">DE</button>
+		<button type="button" data-lang="en" aria-pressed="false">EN</button>
+		<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+	</nav>
+</header>
+
+<main class="seite">
+	<h2 data-t="bl_titel">Belohnungen</h2>
+	<p data-t="bl_text">Tugenden, Titel und Gegenstände aus den Belohnungstabellen. Wähle eine Kategorie und suche nach einem Namen.</p>
+
+	<div class="reiter" role="tablist" id="bl-reiter">
+		<button type="button" data-bl="v" aria-pressed="true" data-t="bl_tugenden">Tugenden</button>
+		<button type="button" data-bl="t" aria-pressed="false" data-t="bl_titel_tab">Titel</button>
+		<button type="button" data-bl="g" aria-pressed="false" data-t="bl_gegenstaende">Gegenstände</button>
+	</div>
+
+	<div class="kopf-zeile">
+		<input type="search" id="bl-suche" data-t-ph="bl_suche" autocomplete="off">
+		<span class="stufe-klein" id="bl-anzahl" role="status"></span>
+	</div>
+
+	<ul class="bl-liste" id="bl-liste"></ul>
+	<p class="schwach" id="bl-mehr" hidden></p>
+</main>
+
+<script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
+<script src="texte-logbuch.js"></script>
+<script src="texte-site.js"></script>
+<script src="sprache.js"></script>
+<script src="speicher.js"></script>
+<script src="menue.js"></script>
+<script src="belohnungen.js"></script>
+</body>
+</html>

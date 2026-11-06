@@ -37,6 +37,7 @@
 		{ seite: 'taten', href: 'index.html?art=taten&lang=' + sprache, text: t('menue_taten') },
 		{ seite: 'ruf', href: 'ruf.html?lang=' + sprache, text: t('menue_ruf') },
 		{ seite: 'handwerk', href: 'handwerk.html?lang=' + sprache, text: t('menue_handwerk') },
+		{ seite: 'belohnungen', href: 'belohnungen.html?lang=' + sprache, text: t('menue_belohnungen') },
 		{ seite: 'spielstand', href: 'spielstand.html?lang=' + sprache, text: t('menue_spielstand') }
 	].forEach(function (punkt) {
 		var link = document.createElement('a');

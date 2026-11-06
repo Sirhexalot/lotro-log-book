@@ -138,7 +138,28 @@ gegenstände wenige MB), die drei Sprachen sind vollständig vorhanden.
   `test_struktur.py`, Website-Unittests, `test_i18n.js` und die Browserprüfung
   über 21 Seitenvarianten plus Kartenansicht bestanden.
 
-## 6. Prüfmittel
+## 6. Belohnungsübersicht und Rezepte (6. November 2026)
+
+- **Neue Seite „Belohnungen“** (`belohnungen.html`, DE/EN/FR) mit drei Ansichten:
+  Tugenden (20), Titel (2.509 DE / 2.520 EN / 2.494 FR) und Gegenstände (6.564).
+  Jeder Eintrag nennt die Aufgaben und Taten, die ihn geben, und verlinkt sie.
+  Suche über Namen und Quellen; lange Listen zeigen die ersten 300 Treffer.
+- **Filter auf der Taten-Seite:** „Belohnung: alle / Tugend / Titel / LOTRO-Punkte“.
+  Er gilt nur dort, wo er Sinn ergibt (Taten), und steht im Listenkopf.
+- **Rezepte im Handwerk:** 7.924 Rezepte mit Ergebnis, Zutaten (optional getrennt)
+  und kritischem Erfolg, Beruf und Stufe, Suche und Berufsfilter. Quelle:
+  `export_recipes.py` (Klasse 1024), 9.198 beteiligte Gegenstände, 11 Berufe.
+  Berufs-, Stufen- und Kategorienamen kommen aus den Spiel-Enums und
+  Companion-Labels; Gegenstandsnamen sind in DE/EN/FR aufgelöst.
+- **Datenmodell:** Belohnungsgegenstände tragen jetzt ihre DID (`rw`-Eintrag,
+  letztes Feld), damit die Übersicht gleiche Gegenstände zusammenfassen kann.
+  `build_belohnungen.py` und `build_rezepte.py` schreiben je Sprache eine eigene
+  Datei; `baue_website.py` kopiert und stempelt sie mit.
+- **Titelbereinigung:** doppelte Trennzeichen („, , “) und ein fehlplatzierter
+  Bindestrich vor kleingeschriebenen Wörtern werden entfernt; Wörter bleiben
+  unverändert.
+
+## 7. Prüfmittel
 
 - Vollständige Belohnungstabellen gelesen: 9.594 Tabellen, 0 Lesefehler.
 - 9.693 referenzierte Gegenstands-, Titel-, Trait- und Emote-Datensätze

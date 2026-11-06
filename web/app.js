@@ -123,6 +123,7 @@
 	var zustand = {
 		knoten: null,
 		filter: 'alle',
+		belohnung: 'alle',
 		karte: null,
 		auswahl: null,
 		treffer: [],
@@ -1060,6 +1061,18 @@
 	// Requirements exist for quests only, and need a character's progress.
 	var machbarKnopf = document.getElementById('filter-machbar');
 	if (machbarKnopf && (window.MQL_ART === 'taten' || !hatFortschritt)) { machbarKnopf.hidden = true; }
+	// Deeds can be narrowed to their reward; quests do not offer this.
+	var belohnungsFeld = document.getElementById('belohnungsfilter-feld');
+	var belohnungsWahl = document.getElementById('belohnungsfilter');
+	if (belohnungsFeld && belohnungsWahl && window.MQL_ART === 'taten') {
+		belohnungsFeld.hidden = false;
+		belohnungsWahl.addEventListener('change', function () {
+			zustand.belohnung = belohnungsWahl.value;
+			zeichneListe();
+			zeichneMarker();
+			aktualisiereStand();
+		});
+	}
 	function machbar(quest) {
 		if (zustandVon(quest) !== 'offen' || quest.vb) { return false; }
 		if (charakterStufe && quest.vl && quest.vl > charakterStufe) { return false; }
@@ -1068,8 +1081,19 @@
 		return true;
 	}
 
+	/** Deed list can be narrowed to what a deed actually grants. */
+	function belohnungPasst(quest) {
+		if (zustand.belohnung === 'alle') { return true; }
+		if (zustand.belohnung === 'punkte') { return Number(quest.lp) > 0; }
+		var arten = (quest.rw || []).map(function (eintrag) { return eintrag[0]; });
+		return arten.indexOf(zustand.belohnung === 'tugend' ? 'v' : 't') >= 0;
+	}
+
 	/** Progress filter over a quest list. */
 	function gefiltert(eintraege) {
+		if (window.MQL_ART === 'taten' && zustand.belohnung !== 'alle') {
+			eintraege = eintraege.filter(belohnungPasst);
+		}
 		if (zustand.filter === 'machbar') {
 			return eintraege.filter(machbar);
 		}
@@ -1105,6 +1129,9 @@
 		}
 		var listeGefiltert = gefiltert(quelle);
 		var zusatz = zustand.filter === 'alle' ? '' : ' · ' + t('filter_' + zustand.filter);
+		if (zustand.belohnung !== 'alle') {
+			zusatz += ' · ' + t('belohnung') + ': ' + t('belohnung_' + zustand.belohnung);
+		}
 		var gezaehlt = listeGefiltert.filter(function (quest) {
 			var lage = zustandVon(quest);
 			return lage !== 'sitzung' && lage !== 'ausgeschlossen';

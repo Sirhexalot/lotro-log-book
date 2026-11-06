@@ -50,6 +50,15 @@
 				<button data-filter="erledigt" aria-pressed="false" data-t="filter_erledigt">erledigt</button>
 				<button data-filter="machbar" aria-pressed="false" data-t="filter_machbar" id="filter-machbar">annehmbar</button>
 			</div>
+			<label class="belohnungsfilter" id="belohnungsfilter-feld" hidden>
+				<span data-t="belohnung">Belohnung</span>
+				<select id="belohnungsfilter">
+					<option value="alle" data-t="belohnung_alle">alle</option>
+					<option value="tugend" data-t="belohnung_tugend">Tugend</option>
+					<option value="titel" data-t="belohnung_titel">Titel</option>
+					<option value="punkte" data-t="belohnung_punkte">LOTRO-Punkte</option>
+				</select>
+			</label>
 			<ol id="liste"></ol>
 		</div>
 	</section>

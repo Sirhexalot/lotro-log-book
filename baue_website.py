@@ -29,10 +29,10 @@ SPRACHEN = ('de', 'en', 'fr')
 
 DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'landschaft.css', 'favicon.svg', 'texte.js', 'texte-spielstand.js',
            'texte-logbuch.js', 'texte-site.js', 'sprache.js', 'speicher.js', 'menue.js', 'companion.js',
-           'spielstand.js', 'referenz.js', 'ruf.js', 'ruf-quellen-de.js',
+           'spielstand.js', 'referenz.js', 'ruf.js', 'belohnungen.js', 'rezepte.js', 'ruf-quellen-de.js',
            'ruf-quellen-en.js', 'ruf-quellen-fr.js', 'handwerk.js', 'stand.js',
            'start.html', 'start-en.html', 'start-fr.html', 'spielstand.html',
-           'ruf.html', 'handwerk.html', 'impressum.html', 'datenschutz.html')
+           'ruf.html', 'handwerk.html', 'belohnungen.html', 'impressum.html', 'datenschutz.html')
 BILDER = ('bild/start.jpg', 'bild/start-en.jpg', 'bild/start-fr.jpg')
 
 
@@ -80,13 +80,14 @@ def stempeln(ziel):
     # kept its old file in the browser cache. The published stamp covers every
     # data file and the scripts.
     daten = hashlib.sha256(marke.encode())
-    for datei in sorted(list(ziel.glob('daten-*.js')) + list(ziel.glob('notizen-*.js'))):
+    for datei in sorted(list(ziel.glob('daten-*.js')) + list(ziel.glob('notizen-*.js'))
+                         + list(ziel.glob('belohnungen-*.js')) + list(ziel.glob('rezepte-*.js'))):
         daten.update(datei.name.encode())
         daten.update(datei.read_bytes())
     (ziel / 'stand.js').write_text('/* Written by baue_website.py. */\nwindow.MQL_STAND = "%s";\n'
                                    % daten.hexdigest()[:10], encoding='utf-8')
-    for seite in ('index.html', 'spielstand.html', 'ruf.html', 'handwerk.html', 'start.html',
-                  'start-en.html', 'start-fr.html', 'impressum.html', 'datenschutz.html'):
+    for seite in ('index.html', 'spielstand.html', 'ruf.html', 'handwerk.html', 'belohnungen.html',
+                  'start.html', 'start-en.html', 'start-fr.html', 'impressum.html', 'datenschutz.html'):
         datei = ziel / seite
         text = datei.read_text(encoding='utf-8')
         text = re.sub(r'(<(?:script|link)[^>]+(?:src|href)=")([\w.-]+\.(?:js|css))(")',
@@ -153,7 +154,8 @@ def main():
 
     # Check the sources before anything is deleted.
     for sprache in SPRACHEN:
-        for name in ('daten-%s.js' % sprache, 'daten-taten-%s.js' % sprache, 'notizen-%s.js' % sprache, 'webp/%s' % sprache):
+        for name in ('daten-%s.js' % sprache, 'daten-taten-%s.js' % sprache, 'notizen-%s.js' % sprache,
+                     'belohnungen-%s.js' % sprache, 'rezepte-%s.js' % sprache, 'webp/%s' % sprache):
             pfad = WEB / name if name.endswith('.js') else HIER / name
             if not pfad.exists():
                 raise SystemExit('MISSING: %s (run build_daten.py, build_notizen.py or '
@@ -171,6 +173,8 @@ def main():
         shutil.copy2(WEB / ('daten-%s.js' % sprache), ziel / ('daten-%s.js' % sprache))
         shutil.copy2(WEB / ('daten-taten-%s.js' % sprache), ziel / ('daten-taten-%s.js' % sprache))
         shutil.copy2(WEB / ('notizen-%s.js' % sprache), ziel / ('notizen-%s.js' % sprache))
+        shutil.copy2(WEB / ('belohnungen-%s.js' % sprache), ziel / ('belohnungen-%s.js' % sprache))
+        shutil.copy2(WEB / ('rezepte-%s.js' % sprache), ziel / ('rezepte-%s.js' % sprache))
         shutil.copytree(HIER / 'webp' / sprache, ziel / 'karten' / sprache)
     shutil.copytree(WEB / 'notizen', ziel / 'notizen')
     from build_notizsymbole import baue as baue_notizsymbole

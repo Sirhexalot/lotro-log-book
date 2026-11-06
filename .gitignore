@@ -5,6 +5,8 @@ Karten_fr/
 webp/
 daten/*.json
 web/daten-*.js
+web/belohnungen-*.js
+web/rezepte-*.js
 web/notizen-*.js
 web/notizen/
 web/fortschritt.js
