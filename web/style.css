@@ -652,6 +652,9 @@ main.seite {
 .bl-titel summary { cursor: pointer; display: flex; justify-content: space-between; gap: 10px; }
 .bl-titel-inhalt { padding: 6px 0 4px 14px; }
 .bl-gegenstaende .bl-zeile { cursor: pointer; }
+.bl-gegenstaende td.bl-details { text-align: right; }
+.bl-details-link { color: var(--schwach); text-decoration: none; white-space: nowrap; }
+.bl-details-link:hover { color: var(--gold); text-decoration: underline; }
 .bl-gegenstaende .bl-zeile:hover td,
 .bl-gegenstaende .bl-zeile.offen td { background: var(--fläche-hell); }
 .bl-detail td { background: var(--fläche); padding: 8px 10px; }
