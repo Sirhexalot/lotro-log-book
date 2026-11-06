@@ -11,6 +11,18 @@
 - Ausgelieferter englischer Tatenkatalog: 5.528 Einträge, davon 638 mit
   mindestens einem Zielort und 4.890 ohne Zielort.
 
+Wichtig: Diese 638 Taten enthalten bereits **6.892 Zielpositionszeilen** im
+englischen Webkatalog. Die Tatanzahl darf nicht mit der Anzahl der Pins einer
+anderen Website verglichen werden. Unter anderem sind die acht Blumen im Alten
+Wald sowie die Erkundungsorte des Alten Waldes und der Hügelgräberhöhen enthalten.
+Ob die Pins tatsächlich alle auf der erwarteten Karte angezeigt werden, ist eine
+separate Frage der Kartenzuordnung und Anzeige.
+
+In der rohen Zielpositionstabelle stehen 8.645 Zeilen für 1.099 Taten. Von den
+derzeit ausgelieferten Taten ohne Zielort haben 465 bereits Rohpositionen
+(1.267 Zeilen); diese müssen auf Karten-/Schrittzuordnung und Innenräume geprüft
+werden. Fehlende Anzeige bedeutet also nicht automatisch fehlende DAT-Position.
+
 Keine Positionen aus dem Wiki, Deed Tracker oder Kroels Website übernommen.
 
 ## Befund
@@ -59,3 +71,30 @@ Bis dahin bleibt der veröffentlichte Zielkatalog unverändert. In der Webansich
 werden vorhandene Zielkoordinaten unter dem jeweiligen Schritt angezeigt;
 Ziele müssen dafür eingeblendet sein. Keine Zuordnung zu einzelnen Bedingungen
 vortäuschen, wenn nur die Schrittnummer bekannt ist.
+
+## Vergleich mit Deed Tracker 3.3.0 (06.11.2026)
+
+Vergleich nur lesend mit dem aktuellen ZIP von LOTROInterface, Download-ID 1139;
+Version anhand `CubePlugins/DeedTracker.plugin` geprüft. Das öffentliche
+GitHub-main ist älter und darf nicht als aktuelles Release gezählt werden.
+Keine fremden Positionen in unseren Katalog übernommen.
+
+- `DeedDataEN.lua`: 4.673 Tat-IDs.
+- `DeedObjectiveInfoEN.lua`: 3.278 LAT/LONG-Paare bei 600 Tat-IDs.
+- Unser englischer Webkatalog: 5.528 Tat-IDs, 6.892 Zielpositionszeilen bei 638 IDs.
+- Alle 4.673 Deed-Tracker-Tat-IDs kommen in unserem Katalog vor; wir haben 855
+  weitere IDs. Das beweist nicht, dass diese zusätzlichen Einträge alle spielbar
+  sind.
+- 477 Taten haben bei beiden Projekten Positionen.
+- 123 Taten haben bei Deed Tracker Positionen, bei uns keine.
+- 161 Taten haben bei uns Positionen, bei Deed Tracker keine.
+
+Beispiele der 123 Lücken: Goblin-town, Bilbo's Buttons, Lore of the Forgotten
+Library, Treasures of the Silvertine Lodes, Implements of the Forge. Mehrere
+betreffen Innenräume/Instanzen; deren Koordinaten sind nicht ohne Weiteres Pins
+auf einer Landschaftskarte.
+
+Positionszeilen sind kein Qualitätsranking: mehrere mögliche Positionen für ein
+Ziel, Wiederholungen zwischen verwandten Taten und unterschiedliche Zählweisen
+können die Zahlen stark beeinflussen. Der ID-Abgleich zeigt die echten
+Abdeckungslücken besser als die bloße Pinsumme.
