@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="landschaft.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
-<body data-seite="karte">
+<body data-seite="karte" data-pane="liste">
 
 <header class="kopf">
 	<h1 data-t="produkt">LOTRO Log Book</h1>
@@ -24,6 +24,12 @@
 		<button type="button" data-lang="fr" aria-pressed="false">FR</button>
 	</nav>
 </header>
+
+<nav class="mobil-reiter" id="mobil-reiter" aria-label="Ansicht">
+	<button type="button" data-pane="liste" aria-pressed="true" data-t="mobil_liste">Liste</button>
+	<button type="button" data-pane="karte" aria-pressed="false" data-t="mobil_karte">Karte</button>
+	<button type="button" data-pane="details" aria-pressed="false" data-t="mobil_details">Details</button>
+</nav>
 
 <main>
 	<section id="landschaften" class="landschaften" hidden></section>

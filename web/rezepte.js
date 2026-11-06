@@ -450,6 +450,12 @@
 		charakter();
 		baueSteuerung();
 		berufsListe();
+		// A link from the search page opens the recipe already searched for.
+		var begriff = new URLSearchParams(window.location.search).get('q');
+		if (begriff) {
+			suche = begriff;
+			if (sucheFeld) { sucheFeld.value = begriff; }
+		}
 		zeichne();
 	};
 	if (window.MQL_REZEPTE) { window.MQL_REZEPTE_ZEICHNEN(); }

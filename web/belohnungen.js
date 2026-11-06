@@ -176,8 +176,11 @@
 			var quellen = quellenVon(eintrag[5]);
 			var tr = eltern('tr');
 			tr.className = 'bl-zeile';
-			var name = eltern('td', eintrag[1]);
+			var name = eltern('td');
 			name.className = 'q' + (eintrag[2] || 0);
+			var namenslink = eltern('a', eintrag[1]);
+			namenslink.href = 'gegenstand.html?id=' + eintrag[0] + '&lang=' + sprache;
+			name.appendChild(namenslink);
 			tr.appendChild(name);
 			tr.appendChild(eltern('td', eintrag[3] || ''));
 			var anzahlZelle = eltern('td', quellenZahl(quellen.length));
@@ -274,6 +277,17 @@
 		typeOrder = daten.o || [];
 		if (typWahl) { typWahl.setAttribute('aria-label', t('bl_art')); }
 		if (regionWahl) { regionWahl.setAttribute('aria-label', t('bl_region')); }
+		// A link from the search page opens one tab with a name already filled in.
+		var parameter = new URLSearchParams(window.location.search);
+		var wunsch = parameter.get('tab');
+		if (wunsch && 'vtg'.indexOf(wunsch) >= 0) {
+			art = wunsch;
+			document.querySelectorAll('[data-bl]').forEach(function (knopf) {
+				knopf.setAttribute('aria-pressed', String(knopf.getAttribute('data-bl') === art));
+			});
+		}
+		var begriff = parameter.get('q');
+		if (begriff && suche) { suche.value = begriff; }
 		optionen();
 		zeichne();
 	};
