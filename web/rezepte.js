@@ -33,6 +33,11 @@
 		return Object.keys(meineBerufe).length > 0;
 	}
 
+	/** True when the import also brought the recipes the character knows. */
+	function hatRezepte() {
+		return Object.keys(bekannt).length > 0;
+	}
+
 	function eltern(tag, text) {
 		var node = document.createElement(tag);
 		if (text != null) { node.textContent = text; }
@@ -56,7 +61,7 @@
 	}
 
 	function marker(wert) {
-		if (!hatSpielstand()) { return null; }
+		if (!hatRezepte()) { return null; }
 		var zeichen = eltern('span', istBekannt(wert) ? '✓' : (istMeinBeruf(wert) ? '○' : '–'));
 		zeichen.className = 'rezept-stand ' + (istBekannt(wert) ? 'bekannt' : (istMeinBeruf(wert) ? 'fehlt' : 'fremd'));
 		zeichen.title = istBekannt(wert) ? t('hw_bekannt')
@@ -150,7 +155,7 @@
 	function zaehle(gezeigt, gesamt, bekannt) {
 		if (nurFehlende) {
 			anzahl.textContent = window.MQL_ERSETZE(t('hw_fehlende_von'), [gezeigt, gesamt]);
-		} else if (!hatSpielstand()) {
+		} else if (!hatRezepte()) {
 			anzahl.textContent = window.MQL_ERSETZE(t('bl_anzahl'), [gesamt]);
 		} else {
 			anzahl.textContent = window.MQL_ERSETZE(t('hw_stand'), [bekannt, gesamt]);
@@ -168,6 +173,12 @@
 		sucheFeld.setAttribute('placeholder', t('hw_rezept_suche'));
 		sucheFeld.setAttribute('aria-label', t('hw_rezept_suche'));
 		steuerung.appendChild(sucheFeld);
+		// Without known recipes the filter could not hide anything; say so.
+		if (hatSpielstand() && !hatRezepte()) {
+			var ohneRezepte = eltern('p', t('hw_ohne_rezepte'));
+			ohneRezepte.className = 'schwach';
+			ziel.appendChild(ohneRezepte);
+		}
 		anzahl = eltern('span');
 		anzahl.className = 'stufe-klein';
 		anzahl.id = 'rezept-anzahl';
@@ -194,8 +205,8 @@
 		berufZeile.id = 'rezept-berufe';
 		ziel.appendChild(berufZeile);
 
-		// Only a loaded character knows which recipes it already knows.
-		if (hatSpielstand()) {
+		// Only without known recipes the filter would hide nothing.
+		if (hatRezepte()) {
 			fehlendFeld = eltern('label');
 			fehlendFeld.className = 'rezept-filter';
 			fehlendHaken = eltern('input');
@@ -227,6 +238,9 @@
 		if (fehlendHaken) {
 			fehlendHaken.addEventListener('change', function () {
 				nurFehlende = fehlendHaken.checked;
+				// Missing is about the whole profession, so start on all tiers.
+				// The tier row stays visible and narrows the list on demand.
+				if (nurFehlende) { stufe = ''; stufeGewaehlt = true; }
 				zeichne();
 			});
 		}
@@ -345,6 +359,12 @@
 		}
 		var sichtbar = zeilen.slice(0, grenze);
 		var gruppen = stufe ? nachKategorie(sichtbar) : nachStufeUndKategorie(sichtbar);
+		// In a tier where nothing is known the filter cannot remove a row; say why.
+		if (nurFehlende && zeilen.length === basis.length) {
+			var erklärung = eltern('p', t('hw_nichts_ausgeblendet'));
+			erklärung.className = 'schwach';
+			inhalt.appendChild(erklärung);
+		}
 		inhalt.appendChild(tabelle(gruppen, { mitBeruf: false, mitStufe: false }));
 		zaehle(zeilen.length, basis.length, bekannt);
 		mehr.hidden = zeilen.length <= grenze;
