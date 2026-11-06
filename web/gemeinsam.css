@@ -1,4 +1,15 @@
 /* Shared by every page: logo, menu, character switch, scrollbars. */
+:root {
+	--schrift: Verdana, "Segoe UI", sans-serif;
+	--mono: "SF Mono", Menlo, Consolas, monospace;
+	--text-normal: 1rem;
+	--text-bedienung: .875rem;
+	--text-abschnitt: 1.25rem;
+	--text-titel: 1.75rem;
+}
+html { font-size: 16px; }
+body { font-family: var(--schrift); font-size: var(--text-normal); line-height: 1.6; }
+small { font-size: var(--text-bedienung); }
 
 .kopf h1 { margin: 0; font-size: 16px; font-weight: normal; letter-spacing: .04em; }
 .kopf h1 a.logo {
@@ -47,3 +58,67 @@
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold); background-clip: padding-box; }
 ::-webkit-scrollbar-corner { background: transparent; }
+
+/* One type scale across the app and the editorial pages. Colour, not smaller
+ * print, distinguishes secondary content. Dense map controls use the same
+ * readable control size as navigation, tabs and table actions. */
+body[data-seite] button, body[data-seite] input, body[data-seite] select,
+.menue a, .charakterwahl select, .charakterwahl span,
+.sprachen button, .sprachen a, .knopf, .knopf.klein {
+	font-family: var(--schrift); font-size: var(--text-bedienung); line-height: 1.5;
+	letter-spacing: normal; text-transform: none;
+}
+.kopf h1 { font-size: var(--text-normal); letter-spacing: normal; }
+.charakterwahl span { text-transform: none; letter-spacing: normal; }
+.intro h2, .seite > h2:first-child { font-size: var(--text-titel); line-height: 1.3; letter-spacing: normal; }
+main h3, .seite h2, .seite h3 { font-size: var(--text-abschnitt); line-height: 1.4; font-weight: normal; letter-spacing: normal; text-transform: none; }
+.seite p, .seite li, .seite .schwach, .seite summary, .lead,
+.platzhalter, .funktionen p { font-size: var(--text-normal); line-height: 1.6; }
+.intro .dach, .bild figcaption, footer p, .datum,
+.tabelle, .tabelle th, .kopf-zeile label, .stufe-klein,
+.stand, .hinweis, .koordinate { font-size: var(--text-bedienung); line-height: 1.5; letter-spacing: normal; text-transform: none; }
+.seite code, .seite kbd, code, .befehl { font-family: var(--mono); font-size: var(--text-bedienung); line-height: 1.6; }
+.detail h2 { font-size: var(--text-abschnitt); line-height: 1.4; }
+.detail { font-size: var(--text-normal); }
+body[data-recht] main > h2 { font-size: var(--text-titel); }
+.detail h3, .bedingungen h3 { font-size: var(--text-normal); text-transform: none; letter-spacing: normal; }
+.detail .kennung, .bedingungen li, .zielorte p, .uebersicht,
+.marke, .vermerk-text, .gebietsliste li, .gebietsliste .stufe,
+.kopf .globalsuche input, .such-treffer, .such-zusatz, .such-gruppe, .such-andere,
+.liste-titel, .pfad, #liste li, #liste li .stufe, #liste li .vermerk,
+#liste li .laufstand, #liste li .qname .geber, .zweig .name .bereich,
+#liste li.listenhinweis, #liste li.abschnitt, #tabelle tr.quellen li,
+.ast.tiefe3 > .zweig, .ast.tiefe4 > .zweig {
+	font-size: var(--text-bedienung); line-height: 1.5; letter-spacing: normal; text-transform: none;
+}
+.seite .tabelle th { font-size: var(--text-bedienung); text-transform: none; letter-spacing: normal; }
+.zahl, .legende, .kartenleiste, .pfadkopf .zum-baum { font-size: var(--text-bedienung); line-height: 1.5; }
+footer { border-top: 1px solid var(--rand); background: var(--fläche); }
+footer p { margin: 0 auto; padding: 14px 20px; color: var(--schwach); }
+body.seite-text { display: flex; flex-direction: column; }
+body.seite-text main { width: 100%; flex: 1; }
+/* The map stays a fixed-height app; its footer must consume real layout space. */
+body[data-seite="karte"] { grid-template-rows: auto minmax(0, 1fr) auto; }
+body[data-seite="karte"] footer p { padding: 5px 16px; }
+
+/* Compact start page: useful actions come before screenshots and explanation. */
+body[data-seite="start"] main { max-width: 1000px; padding-top: 24px; }
+.intro { margin-top: 0; }
+.einstieg { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.knopf.sekundaer { color: var(--gold); background: var(--fläche); }
+.knopf.sekundaer:hover { background: var(--fläche-hell); }
+.neuigkeiten { padding: 20px 24px; background: var(--fläche); border-radius: 4px; margin-top: 28px; }
+.neuigkeiten h3 { margin-bottom: 4px; }
+.neuigkeiten .datum { color: var(--schwach); margin: 0 0 12px; }
+.neuigkeiten ul { margin: 0; padding-left: 20px; }
+.neuigkeiten li { margin: 10px 0; }
+.funktionen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 32px; }
+.funktionen h4 { font-size: var(--text-normal); margin: 0 0 6px; }
+.funktionen p { margin: 0; }
+.plugin { border-top: 1px solid var(--rand); padding-top: 24px; }
+.bild img { height: auto; }
+@media (max-width: 640px) {
+	.funktionen { grid-template-columns: 1fr; }
+	.neuigkeiten { padding: 16px; }
+	.intro h2 { font-size: var(--text-titel); }
+}

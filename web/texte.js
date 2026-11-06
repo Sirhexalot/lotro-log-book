@@ -155,6 +155,7 @@ window.MQL_TEXTE = {
 		baum_titel: '%s · %s sur %s terminées',
 		startgebiet: 'Pays de Bree',
 		locale: 'fr',
+		start_text: 'Accueil',
 		ohne_ziel_kurz: 'sans position',
 		sitzungsspiel: 'jeu de session',
 		nicht_moeglich: 'impossible',

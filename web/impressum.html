@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Impressum – LOTRO Log Book</title>
+<title data-t="recht_titel">Impressum – LOTRO Log Book</title>
 <link rel="stylesheet" href="start.css">
 <link rel="stylesheet" href="gemeinsam.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
-<body data-seite="recht">
+<body data-seite="recht" data-recht="impressum">
 
 <header class="kopf">
 	<div class="kopf-innen">
@@ -18,54 +18,87 @@
 </header>
 
 <main>
+	<h2 data-t="footer_recht">Impressum</h2>
 	<section>
-		<h3>Angaben gemäß § 5 DDG</h3>
+		<h3 data-t="recht_angaben">Angaben gemäß § 5 DDG</h3>
 		<p>
 			Adrian Schmolzi<br>
 			Happurger Straße 62<br>
 			90482 Nürnberg<br>
-			Deutschland
+			<span data-t="recht_land">Deutschland</span>
 		</p>
 		<p>E-Mail: <a href="mailto:llb@sirhexalot.de">llb@sirhexalot.de</a></p>
 	</section>
 
 	<section>
-		<h3>Verantwortlich für den Inhalt</h3>
-		<p>Adrian Schmolzi, Anschrift wie oben.</p>
+		<h3 data-t="recht_verantwortlich">Verantwortlich für den Inhalt</h3>
+		<p data-t="recht_adresse">Adrian Schmolzi, Anschrift wie oben.</p>
 	</section>
 
 	<section>
-		<h3>Hinweis zum Projekt</h3>
-		<p>Diese Seite ist ein privates Fan-Projekt. Sie steht in keiner Verbindung zu
+		<h3 data-t="recht_projekt">Hinweis zum Projekt</h3>
+		<p data-t="recht_fan">Diese Seite ist ein privates Fan-Projekt. Sie steht in keiner Verbindung zu
 		Standing Stone Games, Daybreak Game Company oder Middle-earth Enterprises und
 		wird von diesen nicht unterstützt. Karten und Spieltexte sind Eigentum der
 		jeweiligen Rechteinhaber.</p>
-		<p>Kartenbilder und Spieltexte stammen aus den Spieldaten einer lokalen
-		LOTRO-Installation. Kartengrenzen und die Beziehungen zwischen den Karten
-		werden aus den Kartendefinitionen von
-		<a href="https://github.com/LotroCompanion">LOTRO Companion</a> gelesen.
-		Damiens Zustimmung bezieht sich auf die Nutzung seiner Bibliotheken.
-		Sie ist keine Freigabe der Karten und Spieltexte durch deren
-		Rechteinhaber.</p>
-		<p>Das Logbuch übernimmt keine von Garan selbst gezeichneten Detailkarten.
-		Die Nutzung von MoorMap-Geometrie und -Kartenhierarchien wurde abgelöst.
-		Im zugehörigen Plugin dient MoorMap weiterhin als optionaler Kartenaufruf.</p>
-		<p>Es gibt keine Werbung, keine Benutzerkonten und keine Spendenfunktion.
+		<p data-t-html="recht_quelle">Als Quelle nutzt das Logbuch
+		<a href="https://github.com/LotroCompanion">LOTRO Companion</a>.
+		Damien, der Entwickler von LOTRO Companion, hat der Nutzung seiner Bibliotheken zugestimmt.</p>
+		<p data-t-html="recht_statistik">Es gibt keine Werbung, keine Benutzerkonten und keine Spendenfunktion.
 		Die veröffentlichte Website nutzt GoatCounter für eine Besuchsstatistik ohne
 		Cookies. Was dabei verarbeitet wird, erläutert der
 		<a href="datenschutz.html">Datenschutzhinweis</a>.</p>
-		<p>Das Symbol neben dem Namen ist „mop-sparkles“ aus <a href="https://lucide.dev">Lucide</a>
+		<p data-t-html="recht_symbol">Das Symbol neben dem Namen ist „mop-sparkles“ aus <a href="https://lucide.dev">Lucide</a>
 		(ISC-Lizenz), dasselbe wie im Plugin Magic Quest Log.</p>
 	</section>
 </main>
 
 <footer>
-	<p><a href="start.html">Startseite</a> · <a href="datenschutz.html">Datenschutz</a></p>
+	<p><a href="impressum.html?lang=de" data-t="footer_recht">Impressum</a> · <a href="datenschutz.html?lang=de" data-t="footer_datenschutz">Datenschutz</a></p>
 </footer>
 
 <script src="texte.js"></script>
 <script src="texte-spielstand.js"></script>
 <script src="texte-logbuch.js"></script>
+<script>
+(function () {
+	var texte = {
+		de: {
+			recht_titel: 'Impressum – LOTRO Log Book', recht_angaben: 'Angaben gemäß § 5 DDG', recht_land: 'Deutschland',
+			recht_verantwortlich: 'Verantwortlich für den Inhalt', recht_adresse: 'Adrian Schmolzi, Anschrift wie oben.',
+			recht_projekt: 'Hinweis zum Projekt', recht_start: 'Startseite', recht_datenschutz: 'Datenschutz'
+		},
+		en: {
+			recht_titel: 'Legal notice – LOTRO Log Book', recht_angaben: 'Information pursuant to § 5 DDG', recht_land: 'Germany',
+			recht_verantwortlich: 'Responsible for the content', recht_adresse: 'Adrian Schmolzi, address as above.',
+			recht_projekt: 'About this project', recht_start: 'Home', recht_datenschutz: 'Privacy',
+			recht_fan: 'This website is a private fan project. It is not affiliated with or endorsed by Standing Stone Games, Daybreak Game Company or Middle-earth Enterprises. Maps and game texts belong to their respective rights holders.',
+			recht_quelle: 'The Log Book uses <a href="https://github.com/LotroCompanion">LOTRO Companion</a> as a source. Damien, the developer of LOTRO Companion, has given permission to use his libraries.',
+			recht_statistik: 'There are no advertisements, user accounts or donation features. The published website uses GoatCounter for cookie-free visitor statistics. The <a href="datenschutz.html?lang=en">privacy notice</a> explains what data is processed.',
+			recht_symbol: 'The icon next to the name is “mop-sparkles” from <a href="https://lucide.dev">Lucide</a> (ISC licence), the same one used in the Magic Quest Log plugin.'
+		},
+		fr: {
+			recht_titel: 'Mentions légales – LOTRO Log Book', recht_angaben: 'Informations conformément au § 5 DDG', recht_land: 'Allemagne',
+			recht_verantwortlich: 'Responsable du contenu', recht_adresse: 'Adrian Schmolzi, à l’adresse indiquée ci-dessus.',
+			recht_projekt: 'À propos du projet', recht_start: 'Accueil', recht_datenschutz: 'Confidentialité',
+			recht_fan: 'Ce site est un projet privé de fan. Il n’est ni affilié à Standing Stone Games, Daybreak Game Company ou Middle-earth Enterprises, ni soutenu par ces sociétés. Les cartes et les textes du jeu appartiennent à leurs ayants droit respectifs.',
+			recht_quelle: 'Le Log Book utilise <a href="https://github.com/LotroCompanion">LOTRO Companion</a> comme source. Damien, le développeur de LOTRO Companion, a autorisé l’utilisation de ses bibliothèques.',
+			recht_statistik: 'Ce site ne propose ni publicité, ni comptes utilisateurs, ni fonction de don. Le site publié utilise GoatCounter pour des statistiques de fréquentation sans cookies. La <a href="datenschutz.html?lang=fr">politique de confidentialité</a> explique quelles données sont traitées.',
+			recht_symbol: 'L’icône à côté du nom est « mop-sparkles » de <a href="https://lucide.dev">Lucide</a> (licence ISC), la même que dans le plugin Magic Quest Log.'
+		}
+	};
+	document.querySelectorAll('[data-t], [data-t-html]').forEach(function (element) {
+		var cle = element.getAttribute('data-t') || element.getAttribute('data-t-html');
+		if (texte.de[cle] === undefined) {
+			texte.de[cle] = element.hasAttribute('data-t-html') ? element.innerHTML : element.textContent;
+		}
+	});
+	Object.keys(texte).forEach(function (langue) {
+		Object.assign(window.MQL_TEXTE[langue], texte[langue]);
+	});
+})();
+</script>
+<script src="texte-site.js"></script>
 <script src="sprache.js"></script>
 <script src="speicher.js"></script>
 <script src="menue.js"></script>

@@ -3,104 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LOTRO Log Book – Der Herr der Ringe Online</title>
-<meta name="description" content="Aufgaben und Taten nach Landschaft, Band und Buch. Karten, Ruf, Handwerk und dein Fortschritt aus LOTRO Companion – ohne Registrierung.">
+<title>LOTRO Log Book – Aufgaben, Taten und Karten</title>
+<meta name="description" content="Aufgaben und Taten in Mittelerde finden. Karten, Ruf und Handwerk durchsuchen und deinen Fortschritt aus LOTRO Companion importieren.">
 <link rel="stylesheet" href="start.css">
 <link rel="stylesheet" href="gemeinsam.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
 <body data-seite="start">
-
-<header class="kopf">
-	<div class="kopf-innen">
-		<h1>LOTRO Log Book</h1>
-		<nav class="menue" id="menue" aria-label="Menü"></nav>
-		<nav class="sprachen" aria-label="Sprache">
-			<button type="button" data-lang="de" aria-pressed="true">DE</button>
-			<button type="button" data-lang="en" aria-pressed="false">EN</button>
-			<button type="button" data-lang="fr" aria-pressed="false">FR</button>
-		</nav>
-	</div>
-</header>
-
+<header class="kopf"><div class="kopf-innen">
+<h1>LOTRO Log Book</h1>
+<nav class="menue" id="menue" aria-label="Menü"></nav>
+<nav class="sprachen" aria-label="Sprache">
+<button type="button" data-lang="de" aria-pressed="true">DE</button>
+<button type="button" data-lang="en" aria-pressed="false">EN</button>
+<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+</nav></div></header>
 <main>
-	<section class="intro">
-		<p class="dach">Der Herr der Ringe Online</p>
-		<h2>Aufgaben, Taten und dein Fortschritt in <em>Mittelerde</em>.</h2>
-		<p class="lead">Wähle eine Landschaft oder schlage ein Buch der epischen Geschichte auf. LOTRO Log Book zeigt dir die zugehörigen Aufgaben und Karten – dazu Taten, Ruf und Handwerk. Ohne Registrierung. Deinen Spielstand kannst du aus LOTRO Companion laden; die Dateien bleiben in deinem Browser.</p>
-		<p><a class="knopf" href="index.html?lang=de">Landschaften und Geschichten öffnen</a></p>
-	</section>
-
-	<figure class="bild">
-		<img src="bild/start.jpg" alt="Karte von Breeland mit goldenen und grünen Punkten für offene und erledigte Aufgaben">
-		<figcaption>Beispiel mit importiertem Spielstand: Zielorte in Breeland, gold = offen, grün = erledigt. Im Logbuch siehst du zunächst die Auftraggeber; die Ziele blendest du bei Bedarf ein.</figcaption>
-	</figure>
-
-	<section>
-		<h3>So findest du dich zurecht</h3>
-		<ul class="grenzen">
-			<li><strong>Landschaften:</strong> alphabetisch innerhalb jeder Region. Die Links oben springen zu Eriador, Rhovanion, Gondor und den weiteren Regionen. Untergebiete öffnest du direkt auf der Kachel oder über der Karte.</li>
-			<li><strong>Geschichten und weitere Inhalte:</strong> Die epische Geschichte steht nach Band oder Reihe und Buch bereit. Feste, Handwerk, Instanzen und Missionen haben ihre eigenen Gruppen. Weitere Aufgaben findest du gesammelt am Ende.</li>
-			<li><strong>Liste, Karte, Details:</strong> Die Suche findet Aufgaben und Gebiete. Ein Aufgabenklick lässt die gewählte Karte stehen. Am goldenen Trenner ziehst du die Aufgabenliste breiter; ein Doppelklick setzt die Breite zurück.</li>
-		</ul>
-	</section>
-
-	<section>
-		<h3>Was drin ist</h3>
-		<ol class="schritte">
-			<li>
-				<strong><a href="index.html?lang=de">Quests</a>.</strong>
-				<span data-katalogzahl="aufgaben">15.118</span> Katalogeinträge mit Stufenbereich, Auftraggeber, bekannten Voraussetzungen, Aufgabenkette und LOTRO-Punkten, soweit in den Daten vorhanden. Schritte und Zielorte bleiben verborgen, bis du bei einer Aufgabe <em>Ziele einblenden</em> wählst. Der Filter <em>annehmbar</em> berücksichtigt deinen importierten Stand und die bekannten Voraussetzungen. Unter der Karte blendest du über <em>Filter/Notizen</em> Händler, Stallmeister, Briefkästen und mehr ein.
-			</li>
-			<li>
-				<strong><a href="index.html?art=taten&lang=de">Taten</a>.</strong>
-				<span data-katalogzahl="taten">5.528</span> Taten im Katalog. Mit importiertem Spielstand siehst du auch passende Zählerstände, etwa „44/75“.
-			</li>
-			<li>
-				<strong><a href="ruf.html?lang=de">Ruf</a>.</strong>
-				Deine Stufe bei jeder Fraktion. Ein Klick zeigt, welche offenen Aufgaben und Taten dort noch Ruf bringen.
-			</li>
-			<li>
-				<strong><a href="handwerk.html?lang=de">Handwerk</a>.</strong>
-				Jeder Beruf Stufe für Stufe, Können und Meisterschaft, und was als Nächstes kommt.
-			</li>
-		</ol>
-	</section>
-
-	<section>
-		<h3>Dein Spielstand</h3>
-		<p>Fortschritt, Zähler, Ruf und Handwerk kommen aus <strong>LOTRO Companion</strong>. Auf der Seite <a href="spielstand.html?lang=de">Spielstand</a> wählst du Companions Ordner – er wird nur in deinem Browser gelesen, nichts wird hochgeladen. Mehrere Charaktere? Oben im Menü wechselst du zwischen ihnen. Dieselbe Seite schreibt die Dateien für das Plugin <em>Magic Quest Log</em>.</p>
-		<p><a class="knopf" href="spielstand.html?lang=de">Zum Spielstand</a></p>
-		<p>Du kannst auch ohne Import stöbern. Die Größe des Katalogs siehst du trotzdem; dein persönlicher Fortschritt bleibt unbekannt.</p>
-		<p>Du sammelst vor allem Taten? Dafür gibt es das ausgereifte Plugin <a href="https://www.lotrointerface.com/downloads/info1139-DeedTracker.html">Deed Tracker</a> von b414213562.</p>
-	</section>
-
-	<section>
-		<h3>Was das Logbuch nicht kann</h3>
-		<ul class="grenzen">
-			<li>Bei <span data-katalogzahl="auftraggeber">6.860</span> Aufgaben ist ein Auftraggeber-Standort hinterlegt, bei <span data-katalogzahl="ziele">12.445</span> mindestens ein Zielort. Fehlende Standorte bleiben ohne Punkt. Manche Gruppen haben noch keine Kartenzuordnung; sie bleiben in der Liste erreichbar.</li>
-			<li>Katalogzahlen sind keine Zahl aktuell spielbarer Aufgaben. Wiederholungen, alternative Einstiege und alte Inhalte können enthalten sein.</li>
-			<li>Innenräume haben eigene Koordinaten. Was dort steht, erscheint nicht auf der Karte.</li>
-			<li>„Annehmbar“ prüft Stufe und vorherige Aufgaben. Klasse, Volk oder Ruf kann es nicht prüfen, und manche alte Aufgabe bietet das Spiel nicht mehr an.</li>
-			<li>Es ist nicht live. Es kennt deinen Stand vom letzten Companion-Import.</li>
-		</ul>
-	</section>
-
-	<p class="weiter">
-		<a class="knopf" href="index.html?lang=de">Los geht’s</a>
-	</p>
+<section class="intro">
+<p class="dach">Der Herr der Ringe Online</p>
+<h2>Aufgaben und Taten in <em>Mittelerde</em> finden.</h2>
+<p class="lead">Durchsuche Landschaften und die epische Geschichte, finde Aufgaben auf der Karte und behalte deinen Fortschritt im Blick.</p>
+<div class="einstieg">
+<a class="knopf" href="index.html?lang=de">Zur Karte</a>
+<a class="knopf sekundaer" href="index.html?art=taten&amp;lang=de">Taten</a>
+<a class="knopf sekundaer" href="spielstand.html?lang=de">Spielstand importieren</a>
+</div>
+</section>
+<section class="neuigkeiten" aria-labelledby="neu-titel">
+<h3 id="neu-titel">Neu im Logbuch</h3>
+<p class="datum"><time datetime="2026-11-06">6. November 2026</time></p>
+<ul>
+<li><strong>Mehr Orte für Taten:</strong> 30 zusätzliche Zielpositionen und mögliche Jagdorte für 222 Taten. Die Jagdorte stammen aus den Gegnerstandorten der Spieldaten und sind gesondert gekennzeichnet. <a href="index.html?art=taten&amp;lang=de&amp;id=70005BD2">Beispiel ansehen</a></li>
+<li><strong>Koordinaten bei den Zielen:</strong> Nach „Ziele einblenden“ stehen bekannte Kartenpunkte direkt beim jeweiligen Schritt.</li>
+<li><strong>Filter auf der Karte:</strong> Händler, Stallmeister, Briefkästen und weitere Orte lassen sich über „Filter/Notizen“ einblenden.</li>
+</ul>
+</section>
+<figure class="bild">
+<a href="index.html?lang=de"><img src="bild/start.jpg" alt="Aufgabenkarte von Breeland im LOTRO Log Book" loading="lazy" width="1280" height="860"></a>
+<figcaption>Liste, Karte und Aufgabendetails in einer Ansicht.</figcaption>
+</figure>
+<section>
+<h3>Das bietet das Logbuch</h3>
+<div class="funktionen">
+<div><h4><a href="index.html?lang=de">Aufgaben</a></h4><p><span data-katalogzahl="aufgaben">15.118</span> Einträge, geordnet nach Landschaften und Geschichten. Mit Auftraggebern, Voraussetzungen und Zielorten, soweit bekannt.</p></div>
+<div><h4><a href="index.html?art=taten&amp;lang=de">Taten</a></h4><p><span data-katalogzahl="taten">5.528</span> Einträge mit Beschreibungen und Zielen. Dein importierter Fortschritt ergänzt erledigte Taten und Zählerstände.</p></div>
+<div><h4><a href="ruf.html?lang=de">Ruf</a></h4><p>Dein Ruf bei den Fraktionen und offene Aufgaben und Taten, mit denen du ihn steigern kannst.</p></div>
+<div><h4><a href="handwerk.html?lang=de">Handwerk</a></h4><p>Berufe und Handwerksstufen mit deinem Fortschritt bei Können und Meisterschaft.</p></div>
+</div>
+</section>
+<section class="plugin">
+<h3>Auch im Spiel: Magic Quest Log</h3>
+<p>Das zugehörige Plugin zeigt Aufgaben, Taten und deinen Fortschritt direkt in LOTRO. Die Importseite überträgt deinen Companion-Spielstand auch ins Plugin.</p>
+<p><a class="knopf sekundaer" href="https://www.lotrointerface.com/downloads/info1346-MagicQuestLog.html" rel="noopener" target="_blank">Plugin auf LOTROInterface</a></p>
+</section>
 </main>
-
-<footer>
-	<p><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
-	<p>Privates Fan-Projekt, nicht mit Standing Stone Games, Daybreak Game Company oder Middle-earth Enterprises verbunden. Karten und Spieltexte gehören den jeweiligen Rechteinhabern.</p>
-	<p>Quellen: LOTRO-Spieldaten und <a href="https://github.com/LotroCompanion">LOTRO Companion</a>. Was woher kommt, steht im <a href="impressum.html">Impressum</a>.</p>
-	<p>Keine Werbung, keine Registrierung. Dein importierter Spielstand bleibt im Browser. Die veröffentlichte Website nutzt GoatCounter für eine Besuchsstatistik ohne Cookies. <a href="datenschutz.html">Details zum Datenschutz</a>.</p>
-</footer>
-
+<footer><p><a href="impressum.html?lang=de">Impressum</a> · <a href="datenschutz.html?lang=de">Datenschutz</a></p></footer>
 <script src="texte.js"></script>
 <script src="texte-spielstand.js"></script>
 <script src="texte-logbuch.js"></script>
+<script src="texte-site.js"></script>
 <script src="sprache.js"></script>
 <script src="speicher.js"></script>
 <script src="menue.js"></script>

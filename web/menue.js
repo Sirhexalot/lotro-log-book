@@ -46,6 +46,17 @@
 		ziel.appendChild(link);
 	});
 
+	// Keep the footer identical everywhere, including the full-height map app.
+	var footer = document.querySelector('footer');
+	if (!footer) { footer = document.createElement('footer'); document.body.appendChild(footer); }
+	footer.textContent = '';
+	var recht = document.createElement('p');
+	[['impressum.html', 'footer_recht'], ['datenschutz.html', 'footer_datenschutz']].forEach(function (item, index) {
+		if (index) { recht.appendChild(document.createTextNode(' · ')); }
+		var link = document.createElement('a'); link.href = item[0] + '?lang=' + sprache;
+		link.textContent = t(item[1]); recht.appendChild(link);
+	});
+	footer.appendChild(recht);
 	if (!speicher) { return; }
 	var alle = speicher.alle();
 	var feld = document.createElement('label');

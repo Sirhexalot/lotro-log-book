@@ -8,99 +8,25 @@
 <link rel="stylesheet" href="gemeinsam.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
-<body data-seite="recht">
-
-<header class="kopf">
-	<div class="kopf-innen">
-		<h1>LOTRO Log Book</h1>
-		<nav class="menue" id="menue" aria-label="Menü"></nav>
-	</div>
-</header>
-
+<body data-seite="recht" data-recht="datenschutz">
+<header class="kopf"><div class="kopf-innen">
+<h1>LOTRO Log Book</h1>
+<nav class="menue" id="menue" aria-label="Menü"></nav>
+</div></header>
 <main>
-	<section>
-		<h3>Kurzfassung</h3>
-		<p>Für das Logbuch brauchst du kein Benutzerkonto. Deine importierten Dateien
-		von LOTRO Companion werden ausschließlich in deinem Browser gelesen. Sie und
-		der daraus geladene Spielstand werden nicht an den Server oder an den
-		Statistikdienst übertragen.</p>
-		<p>Die veröffentlichte Website nutzt <strong>GoatCounter</strong> für eine
-		Besuchsstatistik ohne Cookies. Dafür ruft dein Browser einen externen Dienst
-		auf. Das ist von der lokalen Speicherung deiner Charaktere getrennt; die
-		Einzelheiten stehen unten.</p>
-	</section>
-
-	<section>
-		<h3>Technisch notwendige Speicherung</h3>
-		<p>Im <code>localStorage</code> deines Browsers liegen:</p>
-		<ul class="grenzen">
-			<li><code>mql.sprache</code> – die gewählte Sprache (de, en oder fr).</li>
-			<li><code>mql.charaktere</code> – deine geladenen Charaktere: Name, Server,
-			Kontoname, Klasse, Volk, Stufe, Datum, die Kennungen erledigter Aufgaben und Taten, die
-			Zählerstände laufender, dein Ruf je Fraktion und deine Handwerksstufen.
-			Abo-Kennung, Inventar, Geld und alle anderen Angaben aus Companions Dateien
-			werden nicht gelesen.</li>
-			<li><code>mql.system</code> – ob die Anleitung für Windows oder macOS gezeigt wird.</li>
-			<li><code>llb.preview.letztesGebiet</code> – die zuletzt geöffnete Landschaft oder Inhaltsgruppe.</li>
-			<li><code>llb.preview.listenbreite</code> – die von dir eingestellte Breite der Aufgabenliste. Die technischen Schlüssel heißen noch „preview“, gelten aber auch auf der veröffentlichten Seite.</li>
-		</ul>
-		<p>Diese gespeicherten Einstellungen und Charakterdaten bleiben auf deinem
-		Gerät und werden nicht an GoatCounter übertragen. Über die Einstellungen des
-		Browsers kannst du sie löschen; der Katalog funktioniert danach weiterhin,
-		nur ohne deinen persönlichen Fortschritt.</p>
-	</section>
-
-	<section>
-		<h3>Server-Protokolle</h3>
-		<p>Der Hoster speichert beim Abruf technisch notwendige Zugriffsdaten
-		(IP-Adresse, Zeitpunkt, abgerufene Datei, Browsertyp) in Server-Logs. Das
-		ist für die Auslieferung der Seite erforderlich und wird nicht mit anderen
-		Daten zusammengeführt.</p>
-	</section>
-
-	<section>
-		<h3>Reichweitenmessung mit GoatCounter</h3>
-		<p>Das Skript wird von <code>gc.zgo.at</code> geladen, die Zählung geht an
-		<code>sirhexalot.goatcounter.com</code>. Der Dienst verarbeitet unter anderem
-		Seitenaufrufe, Verweisquellen, Browser, Betriebssystem, Sprache, Bildschirmbreite
-		und das aus der IP-Adresse abgeleitete Land. Nicht jede dieser Angaben muss
-		für jeden Aufruf verfügbar sein.</p>
-		<p>Bei diesen Verbindungen erhält der Dienst technisch deine IP-Adresse.
-		Laut <a href="https://www.goatcounter.com/help/privacy">Datenschutzhinweisen von GoatCounter</a>
-		werden IP-Adresse und vollständige Browserkennung nicht in der Datenbank
-		gespeichert. Für die Erkennung wiederholter Besuche hält der Dienst die
-		Zuordnung von Website, IP-Adresse und Browserkennung jedoch bis zu acht
-		Stunden im Arbeitsspeicher. GoatCounter setzt dafür keine Cookies und speichert
-		keine Statistikkennung in deinem Browser.</p>
-		<p>Der Dienst wird von Martin Tournoij in Irland betrieben. Nach Angaben des
-		Anbieters liegen die Server bei Hetzner in Deutschland und Finnland.
-		Die Statistik dient dazu, die Nutzung des Angebots einzuschätzen, nicht der
-		Werbung oder dem Abgleich mit deinen Charakterdaten. Als Rechtsgrundlage wird
-		das berechtigte Interesse an dieser Besuchsstatistik herangezogen
-		(Art. 6 Abs. 1 lit. f DSGVO).</p>
-	</section>
-
-	<section>
-		<h3>Fremde Server</h3>
-		<p>Abgesehen vom Statistik-Skript lädt die Seite nichts von fremden Servern:
-		keine Schriftarten, keine Bibliotheken, keine Karten von CDNs. Karten, Daten
-		und Texte kommen von dieser Domain.</p>
-	</section>
-
-	<section>
-		<h3>Verantwortlich</h3>
-		<p>Adrian Schmolzi, Happurger Straße 62, 90482 Nürnberg.</p>
-		<p>Fragen zum Datenschutz: <a href="mailto:llb@sirhexalot.de">llb@sirhexalot.de</a></p>
-	</section>
+<h2 data-t="ds_titel">Datenschutz</h2>
+<section><h3 data-t="ds_verantwortlich">Verantwortlicher</h3><p data-t-html="ds_kontakt">Adrian Schmolzi, Happurger Straße 62, 90482 Nürnberg, Deutschland. Kontakt: <a href="mailto:llb@sirhexalot.de">llb@sirhexalot.de</a>.</p></section>
+<section><h3 data-t="ds_lokal_titel">Import und Einstellungen</h3><p data-t-html="ds_lokal">Importierte Charakterdaten und Einstellungen werden lokal im Browser gespeichert und nicht an unseren Server oder GoatCounter übertragen. Du kannst Charaktere auf der Importseite und alle gespeicherten Daten über die Browsereinstellungen löschen. Die Speicherung dient den von dir gewählten Funktionen (§ 25 Abs. 2 Nr. 2 TDDDG).</p></section>
+<section><h3 data-t="ds_host_titel">Bereitstellung der Website</h3><p data-t-html="ds_host">Hoster ist Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Deutschland. Für Betrieb und Sicherheit verarbeitet der Hoster IP-Adresse, Zeitpunkt, angeforderte Seite und Browserangaben. Nach Angaben von Hetzner werden IP-Adressen in Webhosting-Protokollen anonymisiert; die voreingestellte Löschfrist beträgt sieben Tage und ist konfigurierbar. <a href="https://docs.hetzner.com/general/company-and-policy/data-protection-at-hetzner/">Informationen des Hosters</a>. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.</p></section>
+<section><h3 data-t="ds_stat_titel">Besuchsstatistik</h3><p data-t-html="ds_stat">Für die Besuchsstatistik verbindet sich dein Browser mit gc.zgo.at und sirhexalot.goatcounter.com (GoatCounter, Martin Tournoij, Irland; Server in Deutschland und Finnland). Erfasst werden Aufrufe, Verweisquellen, Browser, System, Sprache, Bildschirmbreite und Land. Keine Cookies, keine Verknüpfung mit Charakterdaten. Laut Anbieter bleiben IP-Adresse und vollständige Browserkennung zur Besuchserkennung höchstens acht Stunden im Arbeitsspeicher, nicht dauerhaft in der Datenbank. Zweck: Auswertung der Seitennutzung. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO. <a href="https://www.goatcounter.com/help/privacy">Datenschutz bei GoatCounter</a>.</p></section>
+<section><h3 data-t="ds_rechte_titel">Deine Rechte</h3><p data-t-html="ds_rechte">Du hast nach Maßgabe der DSGVO das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenübertragbarkeit. Gegen eine Verarbeitung auf Grundlage berechtigter Interessen kannst du aus Gründen deiner besonderen Situation Widerspruch einlegen. Wende dich dazu an die Kontaktadresse oben. Du kannst dich außerdem bei einer Datenschutzaufsichtsbehörde beschweren, etwa beim <a href="https://www.lda.bayern.de/">Bayerischen Landesamt für Datenschutzaufsicht</a>.</p></section>
+<p class="datum" data-t="ds_stand">Stand: 6. November 2026</p>
 </main>
-
-<footer>
-	<p><a href="start.html">Startseite</a> · <a href="impressum.html">Impressum</a></p>
-</footer>
-
+<footer><p><a href="impressum.html?lang=de">Impressum</a> · <a href="datenschutz.html?lang=de">Datenschutz</a></p></footer>
 <script src="texte.js"></script>
 <script src="texte-spielstand.js"></script>
 <script src="texte-logbuch.js"></script>
+<script src="texte-site.js"></script>
 <script src="sprache.js"></script>
 <script src="speicher.js"></script>
 <script src="menue.js"></script>

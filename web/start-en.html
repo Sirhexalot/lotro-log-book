@@ -3,104 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LOTRO Log Book – The Lord of the Rings Online</title>
-<meta name="description" content="Browse quests and deeds by landscape, volume and book. Maps, reputation, crafting and LOTRO Companion progress, with no registration.">
+<title>LOTRO Log Book – Quests, deeds and maps</title>
+<meta name="description" content="Find quests and deeds in Middle-earth. Browse maps, reputation and crafting, and import your progress from LOTRO Companion.">
 <link rel="stylesheet" href="start.css">
 <link rel="stylesheet" href="gemeinsam.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
 <body data-seite="start">
-
-<header class="kopf">
-	<div class="kopf-innen">
-		<h1>LOTRO Log Book</h1>
-		<nav class="menue" id="menue" aria-label="Menü"></nav>
-		<nav class="sprachen" aria-label="Sprache">
-			<button type="button" data-lang="de" aria-pressed="false">DE</button>
-			<button type="button" data-lang="en" aria-pressed="true">EN</button>
-			<button type="button" data-lang="fr" aria-pressed="false">FR</button>
-		</nav>
-	</div>
-</header>
-
+<header class="kopf"><div class="kopf-innen">
+<h1>LOTRO Log Book</h1>
+<nav class="menue" id="menue" aria-label="Menu"></nav>
+<nav class="sprachen" aria-label="Language">
+<button type="button" data-lang="de" aria-pressed="false">DE</button>
+<button type="button" data-lang="en" aria-pressed="true">EN</button>
+<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+</nav></div></header>
 <main>
-	<section class="intro">
-		<p class="dach">The Lord of the Rings Online</p>
-		<h2>Quests, deeds and your progress in <em>Middle-earth</em>.</h2>
-		<p class="lead">Choose a landscape or open a book of the epic story. LOTRO Log Book brings together its quests and maps, plus deeds, reputation and crafting. No registration. You can load your progress from LOTRO Companion; the files stay in your browser.</p>
-		<p><a class="knopf" href="index.html?lang=en">Open landscapes and stories</a></p>
-	</section>
-
-	<figure class="bild">
-		<img src="bild/start-en.jpg" alt="Map of Bree-land with gold and green dots for open and finished quests">
-		<figcaption>Example with imported progress: objective locations in Bree-land, gold = open, green = done. The logbook initially shows quest givers; reveal objectives when you need them.</figcaption>
-	</figure>
-
-	<section>
-		<h3>Finding your way</h3>
-		<ul class="grenzen">
-			<li><strong>Landscapes:</strong> alphabetical within each region. The links above jump to Eriador, Rhovanion, Gondor and the other regions. Open sub-areas from their card or above the map.</li>
-			<li><strong>Stories and other content:</strong> browse the epic story by volume or series, then book. Festivals, crafting, instances and missions have their own groups. Other quests are collected at the bottom.</li>
-			<li><strong>List, map, details:</strong> search quests and areas. Selecting a quest leaves your chosen map in place. Drag the gold divider to widen the list; double-click to reset it.</li>
-		</ul>
-	</section>
-
-	<section>
-		<h3>What is in it</h3>
-		<ol class="schritte">
-			<li>
-				<strong><a href="index.html?lang=en">Quests</a>.</strong>
-				<span data-katalogzahl="aufgaben">15,118</span> catalogue entries with level ranges, quest givers, known requirements, quest chains and LOTRO points where the data provides them. Steps and objectives stay hidden until you choose <em>Show objectives</em> for a quest. The <em>available</em> filter checks your imported progress and known requirements. Below the map, <em>Filter/Notes</em> shows vendors, stable-masters, mailboxes and more.
-			</li>
-			<li>
-				<strong><a href="index.html?art=taten&lang=en">Deeds</a>.</strong>
-				<span data-katalogzahl="taten">5,528</span> deeds in the catalogue. Imported progress adds matching objective counters, such as “44/75”.
-			</li>
-			<li>
-				<strong><a href="ruf.html?lang=en">Reputation</a>.</strong>
-				Your standing with every faction. One click shows which open quests and deeds still give reputation there.
-			</li>
-			<li>
-				<strong><a href="handwerk.html?lang=en">Crafting</a>.</strong>
-				Every profession tier by tier, proficiency and mastery, and what comes next.
-			</li>
-		</ol>
-	</section>
-
-	<section>
-		<h3>Your progress</h3>
-		<p>Progress, counters, reputation and crafting come from <strong>LOTRO Companion</strong>. On the <a href="spielstand.html?lang=en">Progress</a> page you choose Companion’s folder – it is read only in your browser, nothing is uploaded. Several characters? Switch between them in the menu. The same page writes the files for the <em>Magic Quest Log</em> plugin.</p>
-		<p><a class="knopf" href="spielstand.html?lang=en">To your progress</a></p>
-		<p>You can browse without importing anything. Catalogue totals are still visible; your personal progress remains unknown.</p>
-		<p>Collecting deeds above all? Have a look at the mature plugin <a href="https://www.lotrointerface.com/downloads/info1139-DeedTracker.html">Deed Tracker</a> by b414213562.</p>
-	</section>
-
-	<section>
-		<h3>What the logbook cannot do</h3>
-		<ul class="grenzen">
-			<li><span data-katalogzahl="auftraggeber">6,860</span> quests have a recorded quest-giver location; <span data-katalogzahl="ziele">12,444</span> have at least one objective location. Missing locations get no marker. Some groups still have no map assigned; their quests remain accessible in the list.</li>
-			<li>Catalogue totals are not a count of currently playable quests. Repeatable content, alternative entry points and old content may be included.</li>
-			<li>Indoor places have their own coordinates. Whatever stands inside does not appear on the map.</li>
-			<li>“Available” checks level and earlier quests. It cannot check class, race or reputation, and the game no longer offers some old quests.</li>
-			<li>It is not live. It knows your progress from the last Companion import.</li>
-		</ul>
-	</section>
-
-	<p class="weiter">
-		<a class="knopf" href="index.html?lang=en">Let’s go</a>
-	</p>
+<section class="intro">
+<p class="dach">The Lord of the Rings Online</p>
+<h2>Find quests and deeds in <em>Middle-earth</em>.</h2>
+<p class="lead">Browse landscapes and the epic story, locate quests on the map and keep track of your progress.</p>
+<div class="einstieg">
+<a class="knopf" href="index.html?lang=en">Open the map</a>
+<a class="knopf sekundaer" href="index.html?art=taten&amp;lang=en">Deeds</a>
+<a class="knopf sekundaer" href="spielstand.html?lang=en">Import progress</a>
+</div>
+</section>
+<section class="neuigkeiten" aria-labelledby="neu-titel">
+<h3 id="neu-titel">What’s new</h3>
+<p class="datum"><time datetime="2026-11-06">6 November 2026</time></p>
+<ul>
+<li><strong>More deed locations:</strong> 30 additional objective positions and possible hunting locations for 222 deeds. Hunting locations come from enemy placements in the game data and are labelled separately. <a href="index.html?art=taten&amp;lang=en&amp;id=70005BD2">View an example</a></li>
+<li><strong>Coordinates alongside objectives:</strong> Select “Show objectives” to see known map coordinates under each step.</li>
+<li><strong>Map filters:</strong> Show vendors, stable-masters, mailboxes and other locations using “Filter/Notes”.</li>
+</ul>
+</section>
+<figure class="bild">
+<a href="index.html?lang=en"><img src="bild/start-en.jpg" alt="Quest map of Bree-land in LOTRO Log Book" loading="lazy" width="1280" height="860"></a>
+<figcaption>Quest list, map and details in one view.</figcaption>
+</figure>
+<section>
+<h3>Explore the Log Book</h3>
+<div class="funktionen">
+<div><h4><a href="index.html?lang=en">Quests</a></h4><p><span data-katalogzahl="aufgaben">15,118</span> entries organised by landscape and story, with quest givers, requirements and objective locations where known.</p></div>
+<div><h4><a href="index.html?art=taten&amp;lang=en">Deeds</a></h4><p><span data-katalogzahl="taten">5,528</span> entries with descriptions and objectives. Import your progress to see completed deeds and current counters.</p></div>
+<div><h4><a href="ruf.html?lang=en">Reputation</a></h4><p>Your standing with each faction and unfinished quests and deeds that can improve it.</p></div>
+<div><h4><a href="handwerk.html?lang=en">Crafting</a></h4><p>Professions and crafting tiers, including your proficiency and mastery progress.</p></div>
+</div>
+</section>
+<section class="plugin">
+<h3>In the game: Magic Quest Log</h3>
+<p>The companion plugin shows quests, deeds and your progress inside LOTRO. The import page also prepares your Companion progress for the plugin.</p>
+<p><a class="knopf sekundaer" href="https://www.lotrointerface.com/downloads/info1346-MagicQuestLog.html" rel="noopener" target="_blank">Plugin on LOTROInterface</a></p>
+</section>
 </main>
-
-<footer>
-	<p><a href="impressum.html">Imprint</a> · <a href="datenschutz.html">Privacy</a></p>
-	<p>Private fan project, not affiliated with or endorsed by Standing Stone Games, Daybreak Game Company or Middle-earth Enterprises. Maps and game texts belong to their respective owners.</p>
-	<p>Sources: LOTRO game data and <a href="https://github.com/LotroCompanion">LOTRO Companion</a>. See the <a href="impressum.html">imprint</a> for source details.</p>
-	<p>No advertising or registration. Your imported progress stays in your browser. The published website uses GoatCounter for cookie-free visitor statistics. <a href="datenschutz.html">Privacy details</a>.</p>
-</footer>
-
+<footer><p><a href="impressum.html?lang=en">Legal notice</a> · <a href="datenschutz.html?lang=en">Privacy</a></p></footer>
 <script src="texte.js"></script>
 <script src="texte-spielstand.js"></script>
 <script src="texte-logbuch.js"></script>
+<script src="texte-site.js"></script>
 <script src="sprache.js"></script>
 <script src="speicher.js"></script>
 <script src="menue.js"></script>

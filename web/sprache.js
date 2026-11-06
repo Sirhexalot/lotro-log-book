@@ -38,6 +38,20 @@
 	try { window.localStorage.setItem('mql.sprache', sprache); } catch (fehler) {}
 
 	var texte = (window.MQL_TEXTE || {})[sprache] || (window.MQL_TEXTE || {}).de || {};
+	// Legal pages share the same language controls as the app.
+	if (!document.querySelector('.sprachen')) {
+		var kopf = document.querySelector('.kopf-innen') || document.querySelector('.kopf');
+		if (kopf) {
+			var sprachen = document.createElement('nav');
+			sprachen.className = 'sprachen';
+			ERLAUBT.forEach(function (lang) {
+				var knopf = document.createElement('button');
+				knopf.type = 'button'; knopf.dataset.lang = lang; knopf.textContent = lang.toUpperCase();
+				sprachen.appendChild(knopf);
+			});
+			kopf.appendChild(sprachen);
+		}
+	}
 
 	// The map shows quests, or deeds with ?art=taten. Texts that differ for deeds
 	// carry the suffix _taten and win in that mode.
@@ -77,6 +91,19 @@
 	});
 	document.querySelectorAll('[data-t-ph]').forEach(function (element) {
 		element.setAttribute('placeholder', t(element.getAttribute('data-t-ph')));
+	});
+	var seitentitel = { spielstand: 'sp_titel', ruf: 'ru_titel', handwerk: 'hw_titel' }[seiteArt];
+	if (document.body.dataset.recht === 'datenschutz') { seitentitel = 'ds_titel'; }
+	if (seitentitel) { document.title = t(seitentitel) + ' – LOTRO Log Book'; }
+	var attribute = [
+		['.menue', 'aria-label', 'nav_menu'], ['.sprachen', 'aria-label', 'nav_sprache'],
+		['#baum', 'aria-label', 'gebiete'], ['#filter', 'aria-label', 'nav_filter'],
+		['#landschaft-orte', 'aria-label', 'nav_karten'],
+		['#zuklappen', 'title', 'alles_zuklappen'], ['#zum-baum', 'title', 'zurueck_gebiete']
+	];
+	attribute.forEach(function (a) {
+		var element = document.querySelector(a[0]);
+		if (element) { element.setAttribute(a[1], t(a[2])); }
 	});
 	document.querySelectorAll('[data-lang]').forEach(function (knopf) {
 		knopf.setAttribute('aria-pressed', String(knopf.getAttribute('data-lang') === sprache));

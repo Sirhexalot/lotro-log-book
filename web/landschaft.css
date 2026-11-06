@@ -14,23 +14,23 @@ body.liste-ziehen { cursor: col-resize; user-select: none; }
 main.landschaft-start { display: block; overflow: auto; }
 main.landschaft-start > :not(#landschaften) { display: none; }
 .landschaften { padding: 28px; max-width: 1600px; margin: auto; }
-.landschaften h2 { font-size: 1.8rem; color: var(--gold); margin: 0 0 8px; }
+.landschaften h2 { font-size: var(--text-titel); color: var(--gold); margin: 0 0 8px; }
 .landschaft-werkzeuge { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 20px 0; }
 .landschaft-suche { max-width: 420px; }
 .landschaft-spruenge { display: flex; flex-wrap: wrap; gap: 8px; position: sticky; top: 0; z-index: 5; padding: 10px 0; background: var(--grund); }
 .landschaft-spruenge a { padding: 5px 12px; border: 1px solid var(--rand); border-radius: 3px; color: var(--gold); text-decoration: none; background: var(--fläche); }
 .landschaft-spruenge a:hover, .landschaft-spruenge a:focus { border-color: var(--gold); }
 .landschaft-gruppe { scroll-margin-top: 90px; }
-.landschaft-gruppe h3 { font-size: 1.1rem; margin-top: 30px; }
+.landschaft-gruppe h3 { font-size: var(--text-abschnitt); margin-top: 30px; }
 .landschaft-kacheln { display: grid; grid-template-columns: repeat(auto-fill,minmax(235px,1fr)); grid-auto-rows: 1fr; gap: 16px; }
 .landschaft-mit-orten { background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; overflow: hidden; align-self: stretch; }
 .landschaft-kachel { text-align: left; padding: 0; overflow: hidden; background: var(--fläche); width: 100%; border: 0; }
 .landschaft-untergebiete { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 0 13px 14px; }
-.landschaft-untergebiete a { color: var(--text); font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.landschaft-untergebiete a { color: var(--text); font-size: var(--text-bedienung); text-decoration: underline; text-underline-offset: 3px; }
 .landschaft-untergebiete a:hover { color: var(--gold); }
 .landschaft-kachel img { width: 100%; height: 145px; object-fit: cover; display: block; }
 .landschaft-kachel .inhalt { display: block; padding: 13px; }
-.landschaft-kachel strong { display: block; color: var(--gold); font-size: 1.05rem; }
+.landschaft-kachel strong { display: block; color: var(--gold); font-size: var(--text-normal); }
 .landschaft-kachel small { display: block; color: var(--schwach); margin-top: 5px; }
 .landschaft-kachel progress { width: 100%; height: 5px; accent-color: var(--fertig); }
 .landschaft-orte { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 6px 10px; flex-shrink: 0; background: var(--fläche); border-bottom: 1px solid var(--rand); }
@@ -40,8 +40,8 @@ main.landschaft-start > :not(#landschaften) { display: none; }
 .landschaft-orte-auswahl { display: flex; flex: 1 1 300px; min-width: 0; gap: 4px; overflow-x: auto; }
 .landschaft-orte-auswahl > button { flex: 0 0 auto; white-space: nowrap; }
 .inhalts-auswahl { margin-top: 10px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
-.landschaft-orte button { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 32px; padding: 4px 8px; font-size: .8rem; text-align: left; }
-.landschaft-orte button small { color: var(--schwach); font-size: .75rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.landschaft-orte button { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 32px; padding: 4px 8px; font-size: var(--text-bedienung); text-align: left; }
+.landschaft-orte button small { color: var(--schwach); font-size: var(--text-bedienung); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .landschaft-orte button[aria-pressed="true"] { border-color: var(--gold); background: var(--gold); color: var(--grund); font-weight: bold; }
 .landschaft-orte button[aria-pressed="true"] small { color: var(--grund); }
 .landschaft-startknopf { border-color: var(--gold); margin-right: 10px; }

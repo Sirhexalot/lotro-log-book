@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spielstand – LOTRO Log Book</title>
+<title>Spielstand importieren – LOTRO Log Book</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="gemeinsam.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -21,9 +21,9 @@
 </header>
 
 <main class="seite">
-	<h2 data-t="sp_titel">Spielstand</h2>
+	<h2 data-t="sp_titel">Spielstand importieren</h2>
 	<p data-t-html="sp_einleitung"></p>
-	<div class="kasten hinweis-gut"><p data-t-html="sp_datenschutz"></p></div>
+	<p class="schwach" data-t-html="sp_datenschutz"></p>
 
 	<h2 data-t="sp_schritt1">1. Charakter in LOTRO Companion importieren</h2>
 	<p data-t-html="sp_companion"></p>
@@ -92,7 +92,7 @@ cd "$C/app" &amp;&amp; WINEPREFIX="$S/prefix" WINEMSYNC=1 WINEESYNC=1 WINEDEBUG=
 	<p class="meldung" id="meldung-plugin" role="status"></p>
 	<div class="kasten">
 		<span class="schwach" data-t="sp_plugindata">Der Ordner „PluginData“ liegt hier:</span><br>
-		Windows: <code>Dokumente\The Lord of the Rings Online\PluginData</code><br>
+		Windows: <code data-t="sp_plugin_windows_path">Dokumente\The Lord of the Rings Online\PluginData</code><br>
 		macOS: <code>~/Documents/The Lord of the Rings Online/PluginData</code>
 	</div>
 
@@ -112,6 +112,7 @@ cd "$C/app" &amp;&amp; WINEPREFIX="$S/prefix" WINEMSYNC=1 WINEESYNC=1 WINEDEBUG=
 <script src="texte.js"></script>
 <script src="texte-spielstand.js"></script>
 <script src="texte-logbuch.js"></script>
+<script src="texte-site.js"></script>
 <script src="sprache.js"></script>
 <script src="speicher.js"></script>
 <script src="menue.js"></script>
