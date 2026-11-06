@@ -173,17 +173,6 @@
 		anzahl.id = 'rezept-anzahl';
 		anzahl.setAttribute('role', 'status');
 		steuerung.appendChild(anzahl);
-
-		// Only a loaded character knows which professions and recipes are its own.
-		if (hatSpielstand()) {
-			fehlendFeld = eltern('label');
-			fehlendFeld.className = 'rezept-haken';
-			fehlendHaken = eltern('input');
-			fehlendHaken.type = 'checkbox';
-			fehlendFeld.appendChild(fehlendHaken);
-			fehlendFeld.appendChild(eltern('span', t('hw_nur_fehlen')));
-			steuerung.appendChild(fehlendFeld);
-		}
 		ziel.appendChild(steuerung);
 
 		var berufKopf = eltern('div');
@@ -205,12 +194,29 @@
 		berufZeile.id = 'rezept-berufe';
 		ziel.appendChild(berufZeile);
 
+		// Only a loaded character knows which recipes it already knows.
+		if (hatSpielstand()) {
+			fehlendFeld = eltern('label');
+			fehlendFeld.className = 'rezept-filter';
+			fehlendHaken = eltern('input');
+			fehlendHaken.type = 'checkbox';
+			fehlendFeld.appendChild(fehlendHaken);
+			var filterText = eltern('span');
+			filterText.className = 'rezept-filter-text';
+			filterText.appendChild(eltern('span', t('hw_nur_fehlen')));
+			var filterHinweis = eltern('span', t('hw_nur_fehlen_hint'));
+			filterHinweis.className = 'schwach';
+			filterText.appendChild(filterHinweis);
+			fehlendFeld.appendChild(filterText);
+		}
+
 		stufenKopf = ueberschrift(t('hw_stufen'));
 		ziel.appendChild(stufenKopf);
 		stufenZeile = eltern('div');
 		stufenZeile.className = 'rezept-stufen';
 		stufenZeile.id = 'rezept-stufen';
 		ziel.appendChild(stufenZeile);
+		if (fehlendFeld) { ziel.appendChild(fehlendFeld); }
 
 		inhalt = eltern('div');
 		inhalt.id = 'rezept-inhalt';

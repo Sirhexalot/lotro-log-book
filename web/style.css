@@ -659,9 +659,14 @@ main.seite {
 .rezept-steuerung { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
 .rezept-steuerung input[type="search"] { flex: 1 1 240px; }
 .rezept-haken { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-size: var(--text-bedienung); color: var(--schwach); cursor: pointer; }
-.rezept-haken input { accent-color: var(--gold); }
+.rezept-haken input { width: auto; accent-color: var(--gold); }
 .rezept-haken[hidden] { display: none; }
-.rezept-zeile-kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 16px 0 2px; }
+.rezept-zeile-kopf { display: flex; align-items: baseline; gap: 14px; margin: 16px 0 2px; }
+.rezept-filter { display: flex; align-items: flex-start; gap: 8px; margin: 16px 0 2px; cursor: pointer; max-width: 640px; }
+.rezept-filter input { width: auto; margin: 3px 0 0; accent-color: var(--gold); flex: 0 0 auto; }
+.rezept-filter-text { display: flex; flex-direction: column; gap: 2px; }
+.rezept-filter-text > span:first-child { color: var(--text); font-size: var(--text-bedienung); }
+.rezept-filter .schwach { font-size: var(--text-bedienung); }
 .seite h3.rezept-ueberschrift {
 	font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em;
 	color: var(--schwach); font-weight: normal; margin: 16px 0 2px;

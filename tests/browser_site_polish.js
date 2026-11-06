@@ -109,12 +109,14 @@ async page => {
   await page.waitForSelector('#rezept-berufe .rezept-knopf');
   const crafting = await page.evaluate(() => ({
     professions: document.querySelectorAll('#rezept-berufe .rezept-knopf').length,
-    checkboxes: document.querySelectorAll('.rezept-haken').length,
+    checkboxes: document.querySelectorAll('.rezept-haken, .rezept-filter').length,
+    filter: document.querySelector('.rezept-filter').innerText,
   }));
-  if (crafting.professions !== 2 || crafting.checkboxes !== 2) {
+  if (crafting.professions !== 2 || crafting.checkboxes !== 2 ||
+      !/fehlende Rezepte/.test(crafting.filter)) {
     throw Error('crafting professions not limited to the character: ' + JSON.stringify(crafting));
   }
-  await page.locator('.rezept-haken input').first().click();
+  await page.locator('.rezept-filter input').click();
   await page.waitForTimeout(200);
   const missing = await page.evaluate(() => ({
     tiers: document.querySelectorAll('#rezept-inhalt tr.rezept-stufe').length,

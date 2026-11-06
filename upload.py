@@ -24,6 +24,7 @@ import argparse
 import configparser
 import ftplib
 import json
+import re
 import os
 import sys
 from pathlib import Path
@@ -99,10 +100,15 @@ def stelle_sicher(ftp, ordner):
             ftp.cwd(teil)
 
 
+# iCloud Drive recreates conflict copies of files it is syncing; they are no
+# part of the site and must not reach the server ("app 2.js", "123 2.webp").
+DUBLETTE = re.compile(r' \d+\.[a-z]+$')
+
+
 def hochladen(ftp, basis, ziel, trocken):
     dateien = []
     for pfad in sorted(basis.rglob('*')):
-        if pfad.is_file():
+        if pfad.is_file() and not DUBLETTE.search(pfad.name):
             dateien.append(pfad)
     gesamt = len(dateien)
     stand = lade_stand()
@@ -135,6 +141,33 @@ def hochladen(ftp, basis, ziel, trocken):
     return neu, gleich, bytes_neu
 
 
+def aufraeumen(ftp, ziel):
+    """Delete conflict copies that earlier uploads left in the target tree."""
+    entfernt = 0
+    stapel = ['']
+    while stapel:
+        ordner = stapel.pop()
+        ftp.cwd(ziel if not ordner else ziel + '/' + ordner)
+        eintraege = []
+        ftp.retrlines('LIST', eintraege.append)
+        for zeile in eintraege:
+            teile = zeile.split(None, 8)
+            if len(teile) < 9:
+                continue
+            name = teile[8]
+            if name in ('.', '..'):
+                continue
+            if zeile.startswith('d'):
+                stapel.append(name if not ordner else ordner + '/' + name)
+            elif DUBLETTE.search(name):
+                try:
+                    ftp.delete(name)
+                    entfernt += 1
+                except ftplib.error_perm as fehler:
+                    print('  could not delete %s: %s' % (name, fehler))
+    return entfernt
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -142,6 +175,8 @@ def main():
                         help='only show, write nothing')
     parser.add_argument('--probe', action='store_true',
                         help='only connect and open the directory')
+    parser.add_argument('--aufraeumen', action='store_true',
+                        help='delete conflict copies on the server, then upload')
     optionen = parser.parse_args()
 
     daten = lies_konfig()
@@ -154,6 +189,8 @@ def main():
         print('connected: %s%s' % (daten['host'], daten['path']))
         if optionen.probe:
             return 0
+        if optionen.aufraeumen:
+            print('%d conflict copies removed on the server' % aufraeumen(ftp, daten['path']))
         neu, gleich, menge = hochladen(ftp, QUELLE, daten['path'], optionen.dry_run)
     finally:
         try:
