@@ -2,7 +2,7 @@
 (function () {
 	'use strict';
 	var t = window.MQL_T || function (key) { return key; };
-	var ziel = document.getElementById('rezepte');
+	var ziel = document.getElementById('rezepte-liste');
 	if (!ziel) { return; }
 
 	var grenze = 200;
