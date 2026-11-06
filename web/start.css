@@ -220,3 +220,8 @@ footer p:last-child { padding-bottom: 18px; }
 	.intro h2 { font-size: 23px; }
 	main { padding-top: 22px; }
 }
+
+/* Contact: at the end of the page, above the two-link footer. */
+.feedback { border-top: 1px solid var(--rand); padding-top: 24px; }
+.feedback h3 { margin: 0 0 6px; }
+.feedback p { margin: 0; color: var(--schwach); }
