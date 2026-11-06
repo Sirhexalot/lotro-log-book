@@ -17,7 +17,7 @@
 	var meineBerufe = {};
 
 	var steuerung, sucheFeld, fehlendFeld, fehlendHaken, alleFeld, alleHaken;
-	var anzahl, berufZeile, stufenZeile, inhalt, mehr;
+	var anzahl, berufZeile, stufenKopf, stufenZeile, inhalt, mehr;
 
 	function charakter() {
 		var speicher = window.MQL_SPEICHER;
@@ -35,6 +35,13 @@
 	function eltern(tag, text) {
 		var node = document.createElement(tag);
 		if (text != null) { node.textContent = text; }
+		return node;
+	}
+
+	/** Small label above a row of buttons. */
+	function ueberschrift(text) {
+		var node = eltern('h3', text);
+		node.className = 'rezept-ueberschrift';
 		return node;
 	}
 
@@ -161,6 +168,11 @@
 		sucheFeld.setAttribute('placeholder', t('hw_rezept_suche'));
 		sucheFeld.setAttribute('aria-label', t('hw_rezept_suche'));
 		steuerung.appendChild(sucheFeld);
+		anzahl = eltern('span');
+		anzahl.className = 'stufe-klein';
+		anzahl.id = 'rezept-anzahl';
+		anzahl.setAttribute('role', 'status');
+		steuerung.appendChild(anzahl);
 
 		// Only a loaded character knows which professions and recipes are its own.
 		if (hatSpielstand()) {
@@ -171,30 +183,35 @@
 			fehlendFeld.appendChild(fehlendHaken);
 			fehlendFeld.appendChild(eltern('span', t('hw_nur_fehlen')));
 			steuerung.appendChild(fehlendFeld);
+		}
+		ziel.appendChild(steuerung);
 
+		var berufKopf = eltern('div');
+		berufKopf.className = 'rezept-zeile-kopf';
+		berufKopf.appendChild(ueberschrift(t('hw_berufe')));
+		if (hatSpielstand()) {
 			alleFeld = eltern('label');
 			alleFeld.className = 'rezept-haken';
 			alleHaken = eltern('input');
 			alleHaken.type = 'checkbox';
 			alleFeld.appendChild(alleHaken);
 			alleFeld.appendChild(eltern('span', t('hw_alle_berufe')));
-			steuerung.appendChild(alleFeld);
+			berufKopf.appendChild(alleFeld);
 		}
-		anzahl = eltern('span');
-		anzahl.className = 'stufe-klein';
-		anzahl.id = 'rezept-anzahl';
-		anzahl.setAttribute('role', 'status');
-		steuerung.appendChild(anzahl);
-		ziel.appendChild(steuerung);
+		ziel.appendChild(berufKopf);
 
 		berufZeile = eltern('div');
 		berufZeile.className = 'rezept-berufe';
 		berufZeile.id = 'rezept-berufe';
 		ziel.appendChild(berufZeile);
+
+		stufenKopf = ueberschrift(t('hw_stufen'));
+		ziel.appendChild(stufenKopf);
 		stufenZeile = eltern('div');
 		stufenZeile.className = 'rezept-stufen';
 		stufenZeile.id = 'rezept-stufen';
 		ziel.appendChild(stufenZeile);
+
 		inhalt = eltern('div');
 		inhalt.id = 'rezept-inhalt';
 		ziel.appendChild(inhalt);
@@ -290,7 +307,8 @@
 			eintrag.order = Math.min(eintrag.order, wert[11] || 999);
 		});
 		var liste = Object.keys(namen).sort(function (a, b) { return namen[a].order - namen[b].order; });
-		if (!liste.length) { stufenZeile.textContent = ''; return; }
+		if (!liste.length) { stufenZeile.textContent = ''; stufenKopf.hidden = true; return; }
+		stufenKopf.hidden = false;
 		if (!stufe || !namen[stufe]) {
 			stufe = liste[0];
 		}
@@ -310,6 +328,7 @@
 
 	function zeigeBaum() {
 		stufenZeile.hidden = false;
+		stufenKopf.hidden = false;
 		stufenListe();
 		var zeilen = daten.filter(function (wert) {
 			return wert[3] === prof && wert[4] === stufe && passt(wert);
@@ -329,6 +348,7 @@
 	/** All recipes the character is still missing, across every tier. */
 	function zeigeFehlende() {
 		stufenZeile.hidden = true;
+		stufenKopf.hidden = true;
 		var alle = daten.filter(function (wert) {
 			return wert[3] === prof && istMeinBeruf(wert) && !istBekannt(wert);
 		});
@@ -362,6 +382,7 @@
 
 	function zeigeSuche() {
 		stufenZeile.hidden = true;
+		stufenKopf.hidden = true;
 		var text = suche.toLowerCase();
 		var zeilen = daten.filter(function (wert) {
 			if (!passt(wert)) { return false; }

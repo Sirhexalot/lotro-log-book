@@ -661,6 +661,13 @@ main.seite {
 .rezept-haken { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-size: var(--text-bedienung); color: var(--schwach); cursor: pointer; }
 .rezept-haken input { accent-color: var(--gold); }
 .rezept-haken[hidden] { display: none; }
+.rezept-zeile-kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 16px 0 2px; }
+.seite h3.rezept-ueberschrift {
+	font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em;
+	color: var(--schwach); font-weight: normal; margin: 16px 0 2px;
+}
+.rezept-zeile-kopf .rezept-ueberschrift { margin: 0; }
+.seite h3.rezept-ueberschrift[hidden] { display: none; }
 .rezept-berufe, .rezept-stufen { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .rezept-knopf {
 	font-size: var(--text-bedienung); padding: 4px 9px; border: 1px solid var(--rand);
