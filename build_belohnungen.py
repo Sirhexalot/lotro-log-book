@@ -9,6 +9,7 @@ groups every reward by what it grants, with links back to the entries. Writes
 """
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -16,6 +17,7 @@ HIER = Path(__file__).resolve().parent
 BASIS = Path('/Users/adrian/Documents/07_Hobbys/Lotro')
 STANDARD_KATALOG = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data'
 STANDARD_EXPORT = BASIS / 'Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03'
+STANDARD_REWARDS = BASIS / 'Companion-Test/source-exporter/rewards-stats-2026-11-06'
 
 # The deed's own category, from the export. Codes checked against their names:
 # 20 slayer, 1 explorer, 11 quest deeds, 33/34 lore. Everything else (class,
@@ -76,7 +78,36 @@ def eintrag(kind, record, kategorien, labels):
     return [kind, record['id'], record['name'], zone, region, labels[art], level]
 
 
-def baue(katalog_dir, sprache, ziel, export_dir):
+def item_stats(rewards_dir, sprache):
+    """Armour, damage and text per item, from the reward export.
+
+    The item catalogue keeps names only; the numbers are read here so the
+    plugin data stays as it is.
+    """
+    pfad = rewards_dir / 'rewards.json'
+    if not pfad.is_file():
+        return {}
+    items = (json.loads(pfad.read_text(encoding='utf-8')) or {}).get('items') or {}
+    out = {}
+    for ident, eintrag in items.items():
+        werte = {}
+        for key in ('ar', 'dps', 'dmg', 'spd'):
+            wert = eintrag.get(key)
+            if isinstance(wert, (int, float)) and wert:
+                werte[key] = wert
+        text = (eintrag.get('d') or {}).get(sprache)
+        if text:
+            # Game text carries colour tags and ${PLAYERNAME:...} placeholders.
+            text = re.sub(r'<[^>]+>', '', text)
+            text = re.sub(r'\$\{[A-Z_]+:([^}]*)\}', lambda m: m.group(1).split('|')[0], text)
+            text = re.sub(r'\[[A-Za-z]{1,4}\]', '', text)
+            werte['d'] = re.sub(r'\s+', ' ', text).strip()
+        if werte:
+            out[str(ident).upper()] = werte
+    return out
+
+
+def baue(katalog_dir, sprache, ziel, export_dir, rewards_dir):
     # The deed category lives in the export, not in the catalogue.
     kategorien = {}
     deeds = export_dir / 'deeds.json'
@@ -84,6 +115,7 @@ def baue(katalog_dir, sprache, ziel, export_dir):
         for row in json.loads(deeds.read_text(encoding='utf-8')):
             kategorien[row['id']] = (row.get('properties') or {}).get('Accomplishment_Category')
     labels = TYPE_LABELS[sprache]
+    statistik = item_stats(rewards_dir, sprache)
     tugenden, titel, gegenstaende = {}, {}, {}
     for art, kind in (('taten', 'd'), ('aufgaben', 'q')):
         for record in sammle(katalog_dir, sprache, art):
@@ -116,7 +148,8 @@ def baue(katalog_dir, sprache, ziel, export_dir):
     return {
         'v': [[name, sorted({tuple(q) for q in quellen})] for name, quellen in sorted(tugenden.items())],
         't': [[name, sorted({tuple(q) for q in quellen})] for name, quellen in sorted(titel.items())],
-        'g': [[ident, item['n'], item['q'], item['l'], item['b'], sorted(item['s'])]
+        'g': [[ident, item['n'], item['q'], item['l'], item['b'], sorted(item['s']),
+               statistik.get(str(ident).upper(), {})]
               for ident, item in sorted(gegenstaende.items(), key=lambda pair: (pair[1]['n'].lower(), pair[0]))],
         'o': order,
     }
@@ -127,9 +160,10 @@ def main():
     parser.add_argument('--sprache', choices=('de', 'en', 'fr'), default='de')
     parser.add_argument('--katalog', type=Path, default=STANDARD_KATALOG)
     parser.add_argument('--export', type=Path, default=STANDARD_EXPORT)
+    parser.add_argument('--rewards', type=Path, default=STANDARD_REWARDS)
     parser.add_argument('--ziel', type=Path, default=HIER / 'web')
     args = parser.parse_args()
-    data = baue(args.katalog, args.sprache, args.ziel, args.export)
+    data = baue(args.katalog, args.sprache, args.ziel, args.export, args.rewards)
     text = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
     ziel = args.ziel / ('belohnungen-%s.js' % args.sprache)
     ziel.write_text('/* Written by build_belohnungen.py. */\nwindow.MQL_BELOHNUNGEN = %s;\n' % text,

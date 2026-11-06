@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suche – LOTRO Log Book</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="gemeinsam.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TRC8BF95');
+</script>
+</head>
+<body data-seite="suche" class="seite-text">
+
+<header class="kopf">
+	<h1 data-t="produkt">LOTRO Log Book</h1>
+	<nav class="menue" id="menue" aria-label="Menü"></nav>
+	<nav class="sprachen" aria-label="Sprache">
+		<button type="button" data-lang="de" aria-pressed="true">DE</button>
+		<button type="button" data-lang="en" aria-pressed="false">EN</button>
+		<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+	</nav>
+</header>
+
+<main class="seite">
+	<h2 data-t="su_titel">Suche</h2>
+	<p data-t="su_text">Aufgaben, Taten, Titel, Gegenstände und Rezepte in einem Feld.</p>
+	<div class="suche-feld">
+		<input type="search" id="su-feld" data-t-ph="su_platzhalter" autocomplete="off" autofocus>
+		<span class="stufe-klein" id="su-anzahl" role="status"></span>
+	</div>
+	<p class="schwach" id="su-hinweis" data-t="su_min">Mindestens zwei Zeichen.</p>
+	<div id="su-liste"></div>
+</main>
+
+<script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
+<script src="texte-logbuch.js"></script>
+<script src="texte-site.js"></script>
+<script src="sprache.js"></script>
+<script src="speicher.js"></script>
+<script src="menue.js"></script>
+<script src="suche.js"></script>
+</body>
+</html>

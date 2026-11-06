@@ -8,8 +8,14 @@
 <link rel="stylesheet" href="gemeinsam.css">
 <link rel="stylesheet" href="landschaft.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TRC8BF95');
+</script>
 </head>
-<body data-seite="karte">
+<body data-seite="karte" data-pane="liste">
 
 <header class="kopf">
 	<h1 data-t="produkt">LOTRO Log Book</h1>
@@ -24,6 +30,12 @@
 		<button type="button" data-lang="fr" aria-pressed="false">FR</button>
 	</nav>
 </header>
+
+<nav class="mobil-reiter" id="mobil-reiter" aria-label="Ansicht">
+	<button type="button" data-pane="liste" aria-pressed="true" data-t="mobil_liste">Liste</button>
+	<button type="button" data-pane="karte" aria-pressed="false" data-t="mobil_karte">Karte</button>
+	<button type="button" data-pane="details" aria-pressed="false" data-t="mobil_details">Details</button>
+</nav>
 
 <main>
 	<section id="landschaften" class="landschaften" hidden></section>

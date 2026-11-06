@@ -29,10 +29,11 @@ SPRACHEN = ('de', 'en', 'fr')
 
 DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'landschaft.css', 'favicon.svg', 'texte.js', 'texte-spielstand.js',
            'texte-logbuch.js', 'texte-site.js', 'sprache.js', 'speicher.js', 'menue.js', 'companion.js',
-           'spielstand.js', 'referenz.js', 'ruf.js', 'belohnungen.js', 'rezepte.js', 'ruf-quellen-de.js',
+           'spielstand.js', 'referenz.js', 'ruf.js', 'belohnungen.js', 'gegenstand.js', 'rezepte.js',
+           'suche.js', 'suche.html', 'ruf-quellen-de.js',
            'ruf-quellen-en.js', 'ruf-quellen-fr.js', 'handwerk.js', 'stand.js',
            'start.html', 'start-en.html', 'start-fr.html', 'spielstand.html',
-           'ruf.html', 'handwerk.html', 'belohnungen.html', 'impressum.html', 'datenschutz.html')
+           'ruf.html', 'handwerk.html', 'belohnungen.html', 'gegenstand.html', 'impressum.html', 'datenschutz.html')
 BILDER = ('bild/start.jpg', 'bild/start-en.jpg', 'bild/start-fr.jpg')
 
 
@@ -81,7 +82,8 @@ def stempeln(ziel):
     # data file and the scripts.
     daten = hashlib.sha256(marke.encode())
     for datei in sorted(list(ziel.glob('daten-*.js')) + list(ziel.glob('notizen-*.js'))
-                         + list(ziel.glob('belohnungen-*.js')) + list(ziel.glob('rezepte-*.js'))):
+                         + list(ziel.glob('belohnungen-*.js')) + list(ziel.glob('rezepte-*.js'))
+                         + list(ziel.glob('suche-*.js'))):
         daten.update(datei.name.encode())
         daten.update(datei.read_bytes())
     (ziel / 'stand.js').write_text('/* Written by baue_website.py. */\nwindow.MQL_STAND = "%s";\n'
@@ -175,7 +177,12 @@ def main():
         shutil.copy2(WEB / ('notizen-%s.js' % sprache), ziel / ('notizen-%s.js' % sprache))
         shutil.copy2(WEB / ('belohnungen-%s.js' % sprache), ziel / ('belohnungen-%s.js' % sprache))
         shutil.copy2(WEB / ('rezepte-%s.js' % sprache), ziel / ('rezepte-%s.js' % sprache))
-        shutil.copytree(HIER / 'webp' / sprache, ziel / 'karten' / sprache)
+        shutil.copy2(WEB / ('suche-%s.js' % sprache), ziel / ('suche-%s.js' % sprache))
+        # iCloud can resurrect a folder while the build runs: clear it first.
+        kartenziel = ziel / 'karten' / sprache
+        if kartenziel.exists():
+            shutil.rmtree(kartenziel)
+        shutil.copytree(HIER / 'webp' / sprache, kartenziel)
     shutil.copytree(WEB / 'notizen', ziel / 'notizen')
     from build_notizsymbole import baue as baue_notizsymbole
     baue_notizsymbole(ziel / 'notizen')

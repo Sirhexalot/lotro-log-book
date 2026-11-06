@@ -138,13 +138,23 @@
 	var stil = document.querySelector('link[rel="stylesheet"]');
 	var stempel = function () { return '?v=' + (window.MQL_STAND || '0'); };
 
-	// Pages with their own data file: the reward index and the recipe browser.
+	// Pages with their own data file: the reward index, the recipe browser and
+	// a single item (which reads the same reward index).
 	var seite = document.body.getAttribute('data-seite');
-	if (seite === 'belohnungen' || seite === 'handwerk') {
+	if (seite === 'suche') {
 		lade('stand.js?t=' + Date.now(), function () {
-			var datei = (seite === 'belohnungen' ? 'belohnungen-' : 'rezepte-') + sprache + '.js';
+			lade('suche-' + sprache + '.js' + stempel(), function () {
+				if (window.MQL_SUCHE_ZEICHNEN) { window.MQL_SUCHE_ZEICHNEN(); }
+			});
+		});
+		return;
+	}
+	if (seite === 'belohnungen' || seite === 'handwerk' || seite === 'gegenstand') {
+		lade('stand.js?t=' + Date.now(), function () {
+			var datei = (seite === 'handwerk' ? 'rezepte-' : 'belohnungen-') + sprache + '.js';
 			lade(datei + stempel(), function () {
 				if (seite === 'belohnungen' && window.MQL_BELOHNUNGEN_ZEICHNEN) { window.MQL_BELOHNUNGEN_ZEICHNEN(); }
+				if (seite === 'gegenstand' && window.MQL_GEGENSTAND_ZEICHNEN) { window.MQL_GEGENSTAND_ZEICHNEN(); }
 				if (seite === 'handwerk' && window.MQL_REZEPTE_ZEICHNEN) { window.MQL_REZEPTE_ZEICHNEN(); }
 			});
 		});

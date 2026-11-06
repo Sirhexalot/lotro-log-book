@@ -265,17 +265,17 @@ SEKTIONEN = {
     'de': {
         'story': 'Epische Geschichte', 'shadow': 'Epische Geschichte',
         'missions': 'Missionen', 'craft': 'Handwerk', 'festivals': 'Feste',
-        'instances': 'Instanzen', 'other': 'Ohne Gebiet',
+        'instances': 'Instanzen', 'other': 'Ohne Gebiet', 'more': 'Weitere Inhalte',
     },
     'en': {
         'story': 'Epic Story', 'shadow': 'Epic Story',
         'missions': 'Missions', 'craft': 'Crafting', 'festivals': 'Festivals',
-        'instances': 'Instances', 'other': 'No region',
+        'instances': 'Instances', 'other': 'No region', 'more': 'More content',
     },
     'fr': {
         'story': 'Histoire épique', 'shadow': 'Histoire épique',
         'missions': 'Missions', 'craft': 'Artisanat', 'festivals': 'Festivals',
-        'instances': 'Instances', 'other': 'Sans région',
+        'instances': 'Instances', 'other': 'Sans région', 'more': 'Autres contenus',
     },
 }
 

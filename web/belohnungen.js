@@ -170,25 +170,35 @@
 		var tabelle = eltern('table');
 		tabelle.className = 'tabelle bl-gegenstaende';
 		tabelle.innerHTML = '<thead><tr><th>' + t('bl_gegenstand') + '</th><th>' +
-			t('stufe') + '</th><th>' + t('bl_quellen') + '</th></tr></thead>';
+			t('stufe') + '</th><th>' + t('bl_quellen') + '</th><th></th></tr></thead>';
 		var koerper = eltern('tbody');
 		eintraege.slice(0, grenze.g).forEach(function (eintrag) {
 			var quellen = quellenVon(eintrag[5]);
 			var tr = eltern('tr');
 			tr.className = 'bl-zeile';
-			var name = eltern('td', eintrag[1]);
+			var name = eltern('td');
 			name.className = 'q' + (eintrag[2] || 0);
+			name.appendChild(document.createTextNode(eintrag[1]));
 			tr.appendChild(name);
 			tr.appendChild(eltern('td', eintrag[3] || ''));
 			var anzahlZelle = eltern('td', quellenZahl(quellen.length));
 			anzahlZelle.className = 'zahl';
 			tr.appendChild(anzahlZelle);
+			var detailLink = eltern('a', t('bl_details') + ' ›');
+			detailLink.className = 'bl-details-link';
+			detailLink.href = 'gegenstand.html?id=' + eintrag[0] + '&lang=' + sprache;
+			var detailZelle = eltern('td');
+			detailZelle.className = 'bl-details';
+			detailZelle.appendChild(detailLink);
+			// The row toggles the inline sources; the link leaves the page.
+			detailZelle.addEventListener('click', function (ereignis) { ereignis.stopPropagation(); });
+			tr.appendChild(detailZelle);
 			koerper.appendChild(tr);
 			var detail = eltern('tr');
 			detail.className = 'bl-detail';
 			detail.hidden = true;
 			var zelle = eltern('td');
-			zelle.colSpan = 3;
+			zelle.colSpan = 4;
 			var gefuellt = false;
 			tr.addEventListener('click', function () {
 				if (!gefuellt) {
@@ -274,6 +284,17 @@
 		typeOrder = daten.o || [];
 		if (typWahl) { typWahl.setAttribute('aria-label', t('bl_art')); }
 		if (regionWahl) { regionWahl.setAttribute('aria-label', t('bl_region')); }
+		// A link from the search page opens one tab with a name already filled in.
+		var parameter = new URLSearchParams(window.location.search);
+		var wunsch = parameter.get('tab');
+		if (wunsch && 'vtg'.indexOf(wunsch) >= 0) {
+			art = wunsch;
+			document.querySelectorAll('[data-bl]').forEach(function (knopf) {
+				knopf.setAttribute('aria-pressed', String(knopf.getAttribute('data-bl') === art));
+			});
+		}
+		var begriff = parameter.get('q');
+		if (begriff && suche) { suche.value = begriff; }
 		optionen();
 		zeichne();
 	};

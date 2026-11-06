@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gegenstand – LOTRO Log Book</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="gemeinsam.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TRC8BF95');
+</script>
+</head>
+<body data-seite="gegenstand" class="seite-text">
+
+<header class="kopf">
+	<h1 data-t="produkt">LOTRO Log Book</h1>
+	<nav class="menue" id="menue" aria-label="Menü"></nav>
+	<nav class="sprachen" aria-label="Sprache">
+		<button type="button" data-lang="de" aria-pressed="true">DE</button>
+		<button type="button" data-lang="en" aria-pressed="false">EN</button>
+		<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+	</nav>
+</header>
+
+<main class="seite">
+	<p class="zurueck"><a href="belohnungen.html" id="gs-zurueck" data-t="gs_zurueck">‹ Belohnungen</a></p>
+	<h2 id="gs-name">&nbsp;</h2>
+	<p class="stufe-klein" id="gs-meta"></p>
+	<div id="gs-werte" hidden></div>
+	<p id="gs-beschreibung" class="schwach" hidden></p>
+	<h3 data-t="gs_quellen">Quellen</h3>
+	<div id="gs-quellen"></div>
+	<p class="leer-tabelle" id="gs-leer" hidden data-t="gs_keine">Für diesen Gegenstand ist keine Quelle erfasst.</p>
+</main>
+
+<script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
+<script src="texte-logbuch.js"></script>
+<script src="texte-site.js"></script>
+<script src="sprache.js"></script>
+<script src="speicher.js"></script>
+<script src="menue.js"></script>
+<script src="gegenstand.js"></script>
+</body>
+</html>

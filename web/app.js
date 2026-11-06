@@ -1462,6 +1462,7 @@
 		zeichneDetail();
 		aktualisiereStand();
 		markiereZeile(quest.i);
+		if (window.MQL_MOBIL) { window.MQL_MOBIL.zeige('details'); }
 	}
 
 	function markiereZeile(id) {

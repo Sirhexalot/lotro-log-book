@@ -171,6 +171,8 @@ def aufraeumen(ftp, ziel):
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--quelle', type=Path, default=QUELLE,
+                        help='build directory (default: dist-web)')
     parser.add_argument('--dry-run', action='store_true',
                         help='only show, write nothing')
     parser.add_argument('--probe', action='store_true',
@@ -180,8 +182,9 @@ def main():
     optionen = parser.parse_args()
 
     daten = lies_konfig()
-    if not QUELLE.is_dir():
-        raise SystemExit('MISSING: %s (run baue_website.py)' % QUELLE)
+    quelle = optionen.quelle
+    if not quelle.is_dir():
+        raise SystemExit('MISSING: %s (run baue_website.py)' % quelle)
 
     ftp = verbinde(daten)
     try:
@@ -191,7 +194,7 @@ def main():
             return 0
         if optionen.aufraeumen:
             print('%d conflict copies removed on the server' % aufraeumen(ftp, daten['path']))
-        neu, gleich, menge = hochladen(ftp, QUELLE, daten['path'], optionen.dry_run)
+        neu, gleich, menge = hochladen(ftp, quelle, daten['path'], optionen.dry_run)
     finally:
         try:
             ftp.quit()

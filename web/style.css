@@ -6,8 +6,8 @@
 	--text: #e8e1d5;
 	--schwach: #a89c8a;
 	--gold: #d6b35a;
-	--offen: #d99a3c;
-	--fertig: #6f9c6a;
+	--offen: #f0a63c;
+	--fertig: #7fbb72;
 	--marke-aktiv: #e8e1d5;
 }
 
@@ -369,12 +369,13 @@ main {
 
 .punkt {
 	position: absolute;
-	width: 11px;
-	height: 11px;
-	margin: -5.5px 0 0 -5.5px;
+	width: 14px;
+	height: 14px;
+	margin: -7px 0 0 -7px;
 	border-radius: 50%;
 	background: var(--offen);
-	border: 1px solid #0d0b09;
+	border: 2px solid #14100b;
+	box-shadow: 0 0 0 1px rgba(255, 244, 214, .5), 0 1px 3px rgba(0, 0, 0, .55);
 	cursor: pointer;
 	transition: transform .08s;
 }
@@ -405,9 +406,9 @@ main {
 	position: absolute;
 	left: 50%;
 	top: 50%;
-	width: 11px;
-	height: 11px;
-	margin: -6.5px 0 0 -6.5px;
+	width: 14px;
+	height: 14px;
+	margin: -8px 0 0 -8px;
 	border-radius: 50%;
 	border: 2px solid var(--marke-aktiv);
 	animation: puls 1.4s ease-out infinite;
@@ -651,6 +652,9 @@ main.seite {
 .bl-titel summary { cursor: pointer; display: flex; justify-content: space-between; gap: 10px; }
 .bl-titel-inhalt { padding: 6px 0 4px 14px; }
 .bl-gegenstaende .bl-zeile { cursor: pointer; }
+.bl-gegenstaende td.bl-details { text-align: right; }
+.bl-details-link { color: var(--schwach); text-decoration: none; white-space: nowrap; }
+.bl-details-link:hover { color: var(--gold); text-decoration: underline; }
 .bl-gegenstaende .bl-zeile:hover td,
 .bl-gegenstaende .bl-zeile.offen td { background: var(--fläche-hell); }
 .bl-detail td { background: var(--fläche); padding: 8px 10px; }
@@ -699,6 +703,28 @@ main.seite {
 .rezept-tabelle tbody tr:hover td { background: var(--fläche-hell); }
 .rezept-tabelle tbody tr.rezept-gruppe:hover th { background: none; }
 .rezept-kritisch { margin-top: 3px; color: var(--schwach); }
+
+/* Search page and item page. */
+.suche-feld { display: flex; align-items: center; gap: 12px; margin: 12px 0 4px; }
+.suche-feld input { flex: 1 1 auto; }
+.su-gruppe { margin-top: 20px; }
+.su-gruppe h3 {
+	font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em;
+	color: var(--schwach); font-weight: normal; margin: 0 0 4px;
+}
+.su-zeile {
+	display: flex; justify-content: space-between; gap: 14px; align-items: baseline;
+	padding: 7px 2px; border-bottom: 1px solid var(--rand); color: var(--text); text-decoration: none;
+}
+.su-zeile:hover span:first-child { color: var(--gold); }
+.su-zusatz { color: var(--schwach); white-space: nowrap; font-size: var(--text-bedienung); }
+.su-mehr { margin: 12px 0 0; }
+.zurueck { margin: 0 0 4px; }
+.zurueck a { color: var(--schwach); text-decoration: none; }
+.zurueck a:hover { color: var(--gold); }
+.werte { display: grid; grid-template-columns: auto 1fr; gap: 3px 16px; margin: 12px 0 4px; }
+.werte dt { color: var(--schwach); }
+.werte dd { margin: 0; font-variant-numeric: tabular-nums; }
 .rezept-zeile select { margin-left: 6px; }
 #rezept-tabelle td { vertical-align: top; }
 #rezept-tabelle .schwach { margin-top: 2px; }
@@ -789,8 +815,8 @@ td.haken-zelle.teil { color: var(--laufend); }
 /* Reputation: sources under a faction */
 #tabelle tr.klickbar { cursor: pointer; }
 #tabelle tr.klickbar:hover td { background: var(--fläche-hell); }
-#tabelle tr.quellen td { background: #1b1813; padding: 8px 14px 12px; }
-#tabelle tr.quellen ul { margin: 6px 0 0; padding-left: 18px; columns: 2 320px; }
+#tabelle tr.quellen td { background: #1b1813; padding: 8px 14px 12px; white-space: normal; }
+#tabelle tr.quellen ul { margin: 6px 0 0; padding-left: 18px; columns: 2 320px; column-gap: 28px; }
 #tabelle tr.quellen li { font-size: 13px; break-inside: avoid; padding: 1px 0; }
 #tabelle tr.quellen a { color: var(--text); }
 
@@ -961,3 +987,38 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 /* Places below the shown map, at the top of its list. */
 #liste li.unterkarte { color: var(--gold, #e0b062); cursor: pointer; font-weight: 600; }
 #liste li.unterkarte:hover { background: rgba(255, 255, 255, .05); }
+
+/* --- Phone and tablet (06.11.): one pane at a time --------------------- */
+.mobil-reiter { display: none; }
+@media (max-width: 1000px) {
+	body { display: block; height: auto; padding-bottom: 54px; }
+	main { display: block; height: auto; overflow: visible; }
+	.kopf { gap: 8px 12px; padding: 8px 12px; align-items: center; }
+	.kopf h1 { font-size: 15px; }
+	.kopf .menue { order: 3; width: 100%; flex-wrap: wrap; white-space: normal; row-gap: 2px; }
+	.kopf .menue a { white-space: nowrap; }
+	.kopf .landschaft-startknopf { padding: 4px 10px; font-size: 12px; }
+	.kopf .globalsuche { order: 4; flex: 1 1 100%; max-width: none; }
+	.spalte { height: auto; overflow: visible; border-right: none; }
+	.nav-baum, .nav-liste { min-height: 0; flex: 0 1 auto; }
+	.nav #liste { overflow: visible; max-height: none; }
+	.kartenspalte { height: auto; min-height: 0; border-right: none; }
+	.kartenspalte .buehne { height: calc(100vw * 0.75); max-height: 62vh; }
+	.detail { padding: 12px 12px 22px; }
+	body[data-pane="liste"] .kartenspalte,
+	body[data-pane="liste"] .detail,
+	body[data-pane="karte"] .nav,
+	body[data-pane="karte"] .detail,
+	body[data-pane="details"] .nav,
+	body[data-pane="details"] .kartenspalte { display: none; }
+	body[data-pane="details"] .detail { display: block; }
+	.mobil-reiter {
+		display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+		background: var(--fläche); border-top: 1px solid var(--rand);
+	}
+	.mobil-reiter button {
+		flex: 1 1 0; border: 0; border-radius: 0; padding: 13px 6px;
+		font-size: 13px; color: var(--schwach); background: none;
+	}
+	.mobil-reiter button[aria-pressed="true"] { color: var(--gold); box-shadow: inset 0 2px 0 var(--gold); }
+}

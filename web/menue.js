@@ -38,6 +38,7 @@
 		{ seite: 'ruf', href: 'ruf.html?lang=' + sprache, text: t('menue_ruf') },
 		{ seite: 'handwerk', href: 'handwerk.html?lang=' + sprache, text: t('menue_handwerk') },
 		{ seite: 'belohnungen', href: 'belohnungen.html?lang=' + sprache, text: t('menue_belohnungen') },
+		{ seite: 'suche', href: 'suche.html?lang=' + sprache, text: t('menue_suche') },
 		{ seite: 'spielstand', href: 'spielstand.html?lang=' + sprache, text: t('menue_spielstand') }
 	].forEach(function (punkt) {
 		var link = document.createElement('a');
@@ -46,6 +47,23 @@
 		if (punkt.seite === seite) { link.setAttribute('aria-current', 'page'); }
 		ziel.appendChild(link);
 	});
+
+	// One pane at a time on phones: list, map or details.
+	var reiter = document.getElementById('mobil-reiter');
+	if (reiter) {
+		function mobil(name) {
+			document.body.setAttribute('data-pane', name);
+			Array.prototype.forEach.call(reiter.querySelectorAll('button'), function (knopf) {
+				knopf.setAttribute('aria-pressed', String(knopf.getAttribute('data-pane') === name));
+			});
+		}
+		reiter.addEventListener('click', function (ereignis) {
+			var knopf = ereignis.target.closest ? ereignis.target.closest('button[data-pane]') : null;
+			if (knopf) { mobil(knopf.getAttribute('data-pane')); }
+		});
+		mobil(document.body.getAttribute('data-pane') || 'liste');
+		window.MQL_MOBIL = { zeige: mobil };
+	}
 
 	// Keep the footer identical everywhere, including the full-height map app.
 	var footer = document.querySelector('footer');

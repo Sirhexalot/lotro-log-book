@@ -96,7 +96,9 @@
 		zutaten.className = 'rezept-zutaten';
 		zutaten.appendChild(document.createTextNode(wert[6].map(menge).join(', ')));
 		if (wert[7] && wert[7].length) {
-			var optional = eltern('div', t('hw_optional') + ': ' + wert[7].map(menge).join(', '));
+			var optional = eltern('div', t('hw_optional') + ': ' + wert[7].map(function (teil) {
+				return menge(teil) + (teil[2] ? ' (' + Math.round(teil[2] * 100) + ' %)' : '');
+			}).join(', '));
 			optional.className = 'schwach';
 			zutaten.appendChild(optional);
 		}
@@ -104,6 +106,14 @@
 			var kritisch = eltern('div', t('hw_kritisch_kurz') + ': ' + wert[8]);
 			kritisch.className = 'rezept-kritisch';
 			zutaten.appendChild(kritisch);
+		}
+		var meta = [];
+		if (wert[12]) { meta.push(t('hw_kritisch_kurz') + ' ' + wert[12] + ' %'); }
+		if (wert[13]) { meta.push(wert[13] + ' s'); }
+		if (meta.length) {
+			var angaben = eltern('div', meta.join(' · '));
+			angaben.className = 'schwach rezept-meta';
+			zutaten.appendChild(angaben);
 		}
 		tr.appendChild(zutaten);
 		return tr;
@@ -450,6 +460,12 @@
 		charakter();
 		baueSteuerung();
 		berufsListe();
+		// A link from the search page opens the recipe already searched for.
+		var begriff = new URLSearchParams(window.location.search).get('q');
+		if (begriff) {
+			suche = begriff;
+			if (sucheFeld) { sucheFeld.value = begriff; }
+		}
 		zeichne();
 	};
 	if (window.MQL_REZEPTE) { window.MQL_REZEPTE_ZEICHNEN(); }
