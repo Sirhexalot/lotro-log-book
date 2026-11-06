@@ -633,13 +633,28 @@ main.seite {
 /* Reward index and recipe browser (own pages). */
 .belohnungsfilter { display: flex; align-items: center; gap: 8px; padding: 0 12px 6px; color: var(--schwach); }
 .belohnungsfilter[hidden] { display: none; }
-.bl-liste { list-style: none; margin: 10px 0 0; padding: 0; }
-.bl-eintrag { padding: 8px 0; border-bottom: 1px solid var(--rand); }
-.bl-name { color: inherit; }
-.bl-quellen { color: var(--schwach); margin-top: 3px; }
-.bl-quellen a { color: var(--schwach); text-decoration: none; }
-.bl-quellen a:hover { color: var(--gold); text-decoration: underline; }
-.bl-stufe { color: var(--schwach); margin-left: 6px; }
+.bl-liste { margin: 10px 0 0; }
+.bl-karte {
+	border: 1px solid var(--rand); border-radius: 4px; padding: 12px 14px;
+	margin: 12px 0; background: var(--fläche);
+}
+.bl-karte-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.bl-karte-kopf h3 { margin: 0; font-size: var(--text-abschnitt); color: var(--gold); }
+.bl-zahl { color: var(--schwach); white-space: nowrap; }
+.bl-art h4 { margin: 6px 0 4px; font-size: var(--text-normal); }
+.bl-region h5 { margin: 8px 0 2px; font-size: var(--text-bedienung); color: var(--gold); }
+.bl-zone h6 { margin: 4px 0 2px; font-size: var(--text-bedienung); color: var(--schwach); font-weight: normal; }
+.bl-quellen { margin: 0 0 6px; }
+.bl-quellen td { padding: 2px 6px; border-bottom: none; }
+.bl-lvl { white-space: nowrap; color: var(--schwach); }
+.bl-titel { border-bottom: 1px solid var(--rand); padding: 6px 0; }
+.bl-titel summary { cursor: pointer; display: flex; justify-content: space-between; gap: 10px; }
+.bl-titel-inhalt { padding: 6px 0 4px 14px; }
+.bl-gegenstaende .bl-zeile { cursor: pointer; }
+.bl-gegenstaende .bl-zeile:hover td,
+.bl-gegenstaende .bl-zeile.offen td { background: var(--fläche-hell); }
+.bl-detail td { background: var(--fläche); padding: 8px 10px; }
+.bl-detail .bl-baum { margin: 0; }
 .rezept-zeile { padding: 0 0 8px; }
 .rezept-steuerung { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
 .rezept-steuerung input[type="search"] { flex: 1 1 240px; }

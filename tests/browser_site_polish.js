@@ -34,17 +34,24 @@ async page => {
         await page.screenshot({ path: 'output/playwright/start-polish-' + lang + '.png' });
       }
       if (name === 'belohnungen') {
-        await page.waitForSelector('.bl-eintrag');
+        await page.waitForSelector('.bl-karte');
         const reward = await page.evaluate(() => ({
-          virtues: document.querySelectorAll('.bl-eintrag').length,
+          virtues: document.querySelectorAll('.bl-karte').length,
           label: document.getElementById('bl-anzahl').innerText,
           title: document.title,
         }));
         if (reward.virtues < 15 || !/Belohnungen|Rewards|Récompenses/.test(reward.title)) {
           throw Error('reward index incomplete: ' + JSON.stringify(reward));
         }
+        await page.locator('[data-bl="t"]').click();
+        await page.waitForSelector('.bl-titel');
         await page.locator('[data-bl="g"]').click();
-        if (!(await page.locator('.bl-eintrag').count())) throw Error('reward items missing');
+        await page.waitForSelector('.bl-zeile');
+        await page.selectOption('#bl-art', { index: 1 });
+        await page.waitForTimeout(200);
+        const filtered = await page.locator('#bl-anzahl').innerText();
+        if (!/\d/.test(filtered)) throw Error('reward type filter broken');
+        await page.selectOption('#bl-art', '');
       }
       if (name === 'handwerk') {
         await page.locator('[data-hw="rezepte"]').click();

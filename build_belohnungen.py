@@ -15,6 +15,21 @@ from pathlib import Path
 HIER = Path(__file__).resolve().parent
 BASIS = Path('/Users/adrian/Documents/07_Hobbys/Lotro')
 STANDARD_KATALOG = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data'
+STANDARD_EXPORT = BASIS / 'Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03'
+
+# The deed's own category, from the export. Codes checked against their names:
+# 20 slayer, 1 explorer, 11 quest deeds, 33/34 lore. Everything else (class,
+# race, epic, reputation, festivals, instances) stays under "other".
+CATEGORY_TYPE = {20: 'slayer', 1: 'explorer', 11: 'questdeed', 33: 'lore', 34: 'lore'}
+TYPE_ORDER = ('slayer', 'explorer', 'lore', 'questdeed', 'quest', 'other')
+TYPE_LABELS = {
+    'de': {'slayer': 'Bezwinger', 'explorer': 'Entdecker', 'lore': 'Kunde',
+           'questdeed': 'Aufgaben', 'quest': 'Aufgaben', 'other': 'Weitere Taten'},
+    'en': {'slayer': 'Slayer', 'explorer': 'Explorer', 'lore': 'Lore',
+           'questdeed': 'Quests', 'quest': 'Quests', 'other': 'Other deeds'},
+    'fr': {'slayer': 'Vainqueur', 'explorer': 'Explorateur', 'lore': 'Savoir',
+           'questdeed': 'Quêtes', 'quest': 'Quêtes', 'other': 'Autres prouesses'},
+}
 
 
 def liste(wert):
@@ -46,19 +61,33 @@ def sammle(katalog_dir, sprache, art):
     return out
 
 
-def eintrag(kind, record):
-    zone = ''
+def eintrag(kind, record, kategorien, labels):
+    zone, region = '', ''
     for part in liste(record['p'] if 'p' in record else None):
         if str(part['k']).startswith('zone:'):
             zone = part['n']
-    return [kind, record['id'], record['name'], zone]
+        elif str(part['k']).startswith('region:'):
+            region = part['n']
+    if kind == 'd':
+        art = CATEGORY_TYPE.get(kategorien.get(record['id']), 'other')
+    else:
+        art = 'quest'
+    level = record['l'] if 'l' in record and record['l'] else ''
+    return [kind, record['id'], record['name'], zone, region, labels[art], level]
 
 
-def baue(katalog_dir, sprache, ziel):
+def baue(katalog_dir, sprache, ziel, export_dir):
+    # The deed category lives in the export, not in the catalogue.
+    kategorien = {}
+    deeds = export_dir / 'deeds.json'
+    if deeds.is_file():
+        for row in json.loads(deeds.read_text(encoding='utf-8')):
+            kategorien[row['id']] = (row.get('properties') or {}).get('Accomplishment_Category')
+    labels = TYPE_LABELS[sprache]
     tugenden, titel, gegenstaende = {}, {}, {}
     for art, kind in (('taten', 'd'), ('aufgaben', 'q')):
         for record in sammle(katalog_dir, sprache, art):
-            quelle = eintrag(kind, record)
+            quelle = eintrag(kind, record, kategorien, labels)
             for reward in liste(record['rw'] if 'rw' in record else None):
                 art_reward = reward[1]
                 name = reward[2]
@@ -79,11 +108,17 @@ def baue(katalog_dir, sprache, ziel):
                         'n': name, 'q': int(reward[3] or 0), 'l': int(reward[4] or 0),
                         'b': bound, 's': {}})
                     item['s'][tuple(quelle)] = True
+    order = []
+    for key in TYPE_ORDER:
+        label = labels[key]
+        if label not in order:
+            order.append(label)
     return {
         'v': [[name, sorted({tuple(q) for q in quellen})] for name, quellen in sorted(tugenden.items())],
         't': [[name, sorted({tuple(q) for q in quellen})] for name, quellen in sorted(titel.items())],
         'g': [[ident, item['n'], item['q'], item['l'], item['b'], sorted(item['s'])]
               for ident, item in sorted(gegenstaende.items(), key=lambda pair: (pair[1]['n'].lower(), pair[0]))],
+        'o': order,
     }
 
 
@@ -91,9 +126,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--sprache', choices=('de', 'en', 'fr'), default='de')
     parser.add_argument('--katalog', type=Path, default=STANDARD_KATALOG)
+    parser.add_argument('--export', type=Path, default=STANDARD_EXPORT)
     parser.add_argument('--ziel', type=Path, default=HIER / 'web')
     args = parser.parse_args()
-    data = baue(args.katalog, args.sprache, args.ziel)
+    data = baue(args.katalog, args.sprache, args.ziel, args.export)
     text = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
     ziel = args.ziel / ('belohnungen-%s.js' % args.sprache)
     ziel.write_text('/* Written by build_belohnungen.py. */\nwindow.MQL_BELOHNUNGEN = %s;\n' % text,
