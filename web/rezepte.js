@@ -52,8 +52,7 @@
 	function istBekannt(wert) { return bekannt[id(wert)] === true; }
 	function istMeinBeruf(wert) { return meineBerufe[art(wert)] === true; }
 	function passt(wert) {
-		if (nurFehlende) { return istMeinBeruf(wert) && !istBekannt(wert); }
-		return true;
+		return !nurFehlende || !istBekannt(wert);
 	}
 
 	function marker(wert) {
@@ -147,14 +146,14 @@
 		return reihenfolge.map(function (name) { return { name: name, zeilen: gruppen[name] }; });
 	}
 
-	function zaehle(zeilen) {
-		var bekanntAnzahl = zeilen.filter(istBekannt).length;
+	/** Numbers for the current selection: filtered count against its total. */
+	function zaehle(gezeigt, gesamt, bekannt) {
 		if (nurFehlende) {
-			anzahl.textContent = window.MQL_ERSETZE(t('hw_fehlende'), [zeilen.length]);
+			anzahl.textContent = window.MQL_ERSETZE(t('hw_fehlende_von'), [gezeigt, gesamt]);
 		} else if (!hatSpielstand()) {
-			anzahl.textContent = window.MQL_ERSETZE(t('bl_anzahl'), [zeilen.length]);
+			anzahl.textContent = window.MQL_ERSETZE(t('bl_anzahl'), [gesamt]);
 		} else {
-			anzahl.textContent = window.MQL_ERSETZE(t('hw_stand'), [bekanntAnzahl, zeilen.length]);
+			anzahl.textContent = window.MQL_ERSETZE(t('hw_stand'), [bekannt, gesamt]);
 		}
 	}
 
@@ -228,18 +227,6 @@
 		if (fehlendHaken) {
 			fehlendHaken.addEventListener('change', function () {
 				nurFehlende = fehlendHaken.checked;
-				if (nurFehlende) {
-					alleBerufe = false;
-					alleHaken.checked = false;
-					alleFeld.hidden = true;
-					stufe = '';
-					stufeGewaehlt = true;
-					// Only the character's own professions can be missing anything.
-					if (!istMeinBerufName(prof)) { prof = ''; }
-				} else {
-					alleFeld.hidden = false;
-				}
-				berufsListe();
 				zeichne();
 			});
 		}
@@ -277,7 +264,7 @@
 		});
 		var liste = Object.keys(namen).sort();
 		// With a character, show only its professions unless "all" was asked for.
-		if (hatSpielstand() && (nurFehlende || !alleBerufe)) {
+		if (hatSpielstand() && !alleBerufe) {
 			var eigene = liste.filter(function (name) { return meineBerufe[namen[name].key]; });
 			if (eigene.length) { liste = eigene; }
 		}
@@ -344,23 +331,25 @@
 		stufenZeile.hidden = false;
 		stufenKopf.hidden = false;
 		stufenListe();
-		var alle = daten.filter(function (wert) {
-			return wert[3] === prof && (!stufe || wert[4] === stufe) && passt(wert);
+		var basis = daten.filter(function (wert) {
+			return wert[3] === prof && (!stufe || wert[4] === stufe);
 		});
+		var zeilen = basis.filter(passt);
+		var bekannt = basis.filter(istBekannt).length;
 		inhalt.textContent = '';
-		if (!alle.length) {
-			inhalt.appendChild(eltern('p', nurFehlende && !suche ? t('hw_nichts_fehlt') : t('hw_keine_rezepte')));
-			anzahl.textContent = nurFehlende ? window.MQL_ERSETZE(t('hw_fehlende'), [0]) : '';
+		if (!zeilen.length) {
+			inhalt.appendChild(eltern('p', nurFehlende ? t('hw_nichts_fehlt') : t('hw_keine_rezepte')));
+			if (basis.length) { zaehle(0, basis.length, bekannt); } else { anzahl.textContent = ''; }
 			mehr.hidden = true;
 			return;
 		}
-		var zeilen = alle.slice(0, grenze);
-		var gruppen = stufe ? nachKategorie(zeilen) : nachStufeUndKategorie(zeilen);
+		var sichtbar = zeilen.slice(0, grenze);
+		var gruppen = stufe ? nachKategorie(sichtbar) : nachStufeUndKategorie(sichtbar);
 		inhalt.appendChild(tabelle(gruppen, { mitBeruf: false, mitStufe: false }));
-		zaehle(alle);
-		mehr.hidden = alle.length <= grenze;
-		mehr.textContent = alle.length > grenze
-			? window.MQL_ERSETZE(t('bl_mehr'), [alle.length - grenze]) : '';
+		zaehle(zeilen.length, basis.length, bekannt);
+		mehr.hidden = zeilen.length <= grenze;
+		mehr.textContent = zeilen.length > grenze
+			? window.MQL_ERSETZE(t('bl_mehr'), [zeilen.length - grenze]) : '';
 	}
 
 	/** Tier headings with their categories, for the view across all tiers. */
@@ -386,22 +375,26 @@
 		stufenZeile.hidden = true;
 		stufenKopf.hidden = true;
 		var text = suche.toLowerCase();
-		var zeilen = daten.filter(function (wert) {
-			if (!passt(wert)) { return false; }
+		var basis = daten.filter(function (wert) {
 			var heu = wert[0] + ' ' + wert[3] + ' ' + wert[4] + ' ' + wert[5] + ' ' +
 				wert[6].map(function (teil) { return teil[0]; }).join(' ');
 			return heu.toLowerCase().indexOf(text) >= 0;
 		});
+		var zeilen = basis.filter(passt);
 		inhalt.textContent = '';
 		if (!zeilen.length) {
 			inhalt.appendChild(eltern('p', t('bl_keine')));
-			anzahl.textContent = '';
+			if (basis.length) {
+				zaehle(0, basis.length, basis.filter(istBekannt).length);
+			} else {
+				anzahl.textContent = '';
+			}
 			mehr.hidden = true;
 			return;
 		}
 		inhalt.appendChild(tabelle([{ name: '', zeilen: zeilen.slice(0, grenze) }],
 			{ mitBeruf: true, mitStufe: true }));
-		zaehle(zeilen);
+		zaehle(zeilen.length, basis.length, basis.filter(istBekannt).length);
 		mehr.hidden = zeilen.length <= grenze;
 		mehr.textContent = window.MQL_ERSETZE(t('bl_mehr'), [zeilen.length - grenze]);
 	}

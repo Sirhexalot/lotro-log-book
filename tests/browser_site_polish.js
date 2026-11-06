@@ -118,18 +118,32 @@ async page => {
       !/fehlende Rezepte/.test(crafting.filter)) {
     throw Error('crafting professions not limited to the character: ' + JSON.stringify(crafting));
   }
+  const stufeVorher = await page.evaluate(() =>
+    document.querySelector('#rezept-stufen .rezept-knopf.aktiv').textContent);
   await page.locator('.rezept-filter input').click();
   await page.waitForTimeout(200);
   const missing = await page.evaluate(() => ({
-    stufenTitel: document.querySelectorAll('#rezept-inhalt tr.rezept-stufe').length,
+    stufe: document.querySelector('#rezept-stufen .rezept-knopf.aktiv').textContent,
     rows: document.querySelectorAll('#rezept-inhalt tbody tr:not(.rezept-gruppe):not(.rezept-stufe)').length,
     label: document.getElementById('rezept-anzahl').innerText,
     headers: document.querySelectorAll('.rezept-tabelle thead').length,
     tierRow: !document.getElementById('rezept-stufen').hidden,
+    alleBerufe: !!document.querySelector('.rezept-haken'),
   }));
-  if (missing.stufenTitel < 2 || !missing.rows || !/fehlende/.test(missing.label) ||
-      missing.headers !== 1 || !missing.tierRow) {
+  // Filtering keeps the chosen tier and the profession row untouched.
+  if (missing.stufe !== stufeVorher || !missing.rows || !/fehlende von/.test(missing.label) ||
+      missing.headers !== 1 || !missing.tierRow || !missing.alleBerufe) {
     throw Error('missing recipes view broken: ' + JSON.stringify(missing));
+  }
+  await page.locator('#rezept-stufen .rezept-knopf').first().click();
+  await page.waitForTimeout(200);
+  const alleStufen = await page.evaluate(() => ({
+    stufenTitel: document.querySelectorAll('#rezept-inhalt tr.rezept-stufe').length,
+    label: document.getElementById('rezept-anzahl').innerText,
+    tierRow: !document.getElementById('rezept-stufen').hidden,
+  }));
+  if (alleStufen.stufenTitel < 2 || !alleStufen.tierRow || !/fehlende von/.test(alleStufen.label)) {
+    throw Error('missing recipes across tiers broken: ' + JSON.stringify(alleStufen));
   }
   // Reputation filter: factions at their start tier are not "started", so the
   // filter must really drop rows (it once kept every faction).
@@ -165,5 +179,5 @@ async page => {
 
   if (errors.length) throw Error(errors.join('\n'));
   return { checked: results.length, pages: results, mapLayout: 'PASS',
-    crafting: { professions: crafting.professions, missingTiers: missing.stufenTitel },
+    crafting: { professions: crafting.professions, missingTiers: alleStufen.stufenTitel },
     reputation: { all: rufAlle.rows, started: rufGefiltert.rows }, errors };}
