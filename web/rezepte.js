@@ -237,10 +237,8 @@
 		sucheFeld.addEventListener('input', function () { suche = sucheFeld.value.trim(); zeichne(); });
 		if (fehlendHaken) {
 			fehlendHaken.addEventListener('change', function () {
+				// Filter only: the chosen profession and tier stay as they are.
 				nurFehlende = fehlendHaken.checked;
-				// Missing is about the whole profession, so start on all tiers.
-				// The tier row stays visible and narrows the list on demand.
-				if (nurFehlende) { stufe = ''; stufeGewaehlt = true; }
 				zeichne();
 			});
 		}

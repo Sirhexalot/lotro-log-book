@@ -118,10 +118,11 @@ async page => {
       !/fehlende Rezepte/.test(crafting.filter)) {
     throw Error('crafting professions not limited to the character: ' + JSON.stringify(crafting));
   }
+  const stufeVorher = await page.evaluate(() =>
+    document.querySelector('#rezept-stufen .rezept-knopf.aktiv').textContent);
   await page.locator('.rezept-filter input').click();
   await page.waitForTimeout(200);
-  // Missing means the whole profession: the view switches to all tiers, which
-  // stay visible and narrow the list again.
+  // The filter leaves the chosen tier alone and only shortens the list.
   const missing = await page.evaluate(() => ({
     stufe: document.querySelector('#rezept-stufen .rezept-knopf.aktiv').textContent,
     stufenTitel: document.querySelectorAll('#rezept-inhalt tr.rezept-stufe').length,
@@ -131,22 +132,22 @@ async page => {
     tierRow: !document.getElementById('rezept-stufen').hidden,
     alleBerufe: !!document.querySelector('.rezept-haken'),
   }));
-  if (!/^Alle Stufen/.test(missing.stufe) || missing.stufenTitel < 2 || !missing.rows ||
+  if (missing.stufe !== stufeVorher || !missing.rows ||
       !/fehlende von/.test(missing.label) || missing.headers !== 1 ||
       !missing.tierRow || !missing.alleBerufe) {
     throw Error('missing recipes view broken: ' + JSON.stringify(missing));
   }
-  await page.locator('#rezept-stufen .rezept-knopf').nth(1).click();
+  await page.locator('#rezept-stufen .rezept-knopf').first().click();
   await page.waitForTimeout(200);
-  const eineStufe = await page.evaluate(() => ({
+  const alleStufen = await page.evaluate(() => ({
     stufe: document.querySelector('#rezept-stufen .rezept-knopf.aktiv').textContent,
     stufenTitel: document.querySelectorAll('#rezept-inhalt tr.rezept-stufe').length,
     label: document.getElementById('rezept-anzahl').innerText,
     tierRow: !document.getElementById('rezept-stufen').hidden,
   }));
-  if (/^Alle Stufen/.test(eineStufe.stufe) || !eineStufe.tierRow ||
-      !/fehlende von/.test(eineStufe.label)) {
-    throw Error('narrowing to one tier broken: ' + JSON.stringify(eineStufe));
+  if (!/^Alle Stufen/.test(alleStufen.stufe) || alleStufen.stufenTitel < 2 ||
+      !alleStufen.tierRow || !/fehlende von/.test(alleStufen.label)) {
+    throw Error('missing recipes across tiers broken: ' + JSON.stringify(alleStufen));
   }
   // Reputation filter: factions at their start tier are not "started", so the
   // filter must really drop rows (it once kept every faction).
@@ -182,5 +183,5 @@ async page => {
 
   if (errors.length) throw Error(errors.join('\n'));
   return { checked: results.length, pages: results, mapLayout: 'PASS',
-    crafting: { professions: crafting.professions, missingTiers: missing.stufenTitel },
+    crafting: { professions: crafting.professions, missingTiers: alleStufen.stufenTitel },
     reputation: { all: rufAlle.rows, started: rufGefiltert.rows }, errors };}
