@@ -58,7 +58,7 @@
 		knopf.setAttribute('aria-controls', 'menue');
 		knopf.setAttribute('aria-label', t('menue_oeffnen'));
 		knopf.textContent = '\u2630';
-		kopf.insertBefore(knopf, ziel);
+		ziel.parentNode.insertBefore(knopf, ziel);
 		knopf.addEventListener('click', function () {
 			var offen = kopf.classList.toggle('menue-offen');
 			knopf.setAttribute('aria-expanded', String(offen));
