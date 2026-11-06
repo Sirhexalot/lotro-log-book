@@ -144,6 +144,15 @@
 	}
 
 	// --- views ------------------------------------------------------------
+	/** Keep the visible selection in step with `prof`; the row is built once. */
+	function markiereBeruf() {
+		Array.prototype.forEach.call(berufZeile.children, function (knopf) {
+			var aktiv = knopf.getAttribute('data-prof') === prof;
+			knopf.classList.toggle('aktiv', aktiv);
+			knopf.setAttribute('aria-pressed', String(aktiv));
+		});
+	}
+
 	function berufsListe() {
 		var namen = {};
 		daten.forEach(function (wert) {
@@ -166,9 +175,11 @@
 			knopf.type = 'button';
 			knopf.className = 'rezept-knopf' + (name === prof ? ' aktiv' : '');
 			knopf.setAttribute('aria-pressed', String(name === prof));
+			knopf.setAttribute('data-prof', name);
 			knopf.addEventListener('click', function () {
 				prof = name;
 				stufe = '';
+				markiereBeruf();
 				zeichne();
 			});
 			berufZeile.appendChild(knopf);
