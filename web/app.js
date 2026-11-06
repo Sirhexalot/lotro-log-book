@@ -776,6 +776,10 @@
 		});
 	}
 
+	function koordinatenText(lat, lon) {
+		return Math.abs(lat).toFixed(1) + (lat < 0 ? 'S' : 'N') + ', ' +
+			Math.abs(lon).toFixed(1) + (lon < 0 ? 'W' : (sprache === 'de' ? 'O' : 'E'));
+	}
 	// Coordinate under the mouse, written like the game ("30.9S, 55.9W").
 	var koordinate = document.getElementById('koordinate');
 	if (koordinate) {
@@ -787,8 +791,7 @@
 			var ny = (ereignis.clientY - rahmen.top) / rahmen.height;
 			var lat = karte.north - ny * (karte.north - karte.south);
 			var lon = karte.west + nx * (karte.east - karte.west);
-			koordinate.textContent = Math.abs(lat).toFixed(1) + (lat < 0 ? 'S' : 'N') + ', ' +
-				Math.abs(lon).toFixed(1) + (lon < 0 ? 'W' : (sprache === 'de' ? 'O' : 'E'));
+			koordinate.textContent = koordinatenText(lat, lon);
 		});
 		welt.addEventListener('mouseleave', function () { koordinate.textContent = ''; });
 	}
@@ -1312,6 +1315,22 @@
 					ul.appendChild(li);
 				});
 				block.appendChild(ul);
+			}
+			// Coordinates belong to a step, not necessarily to one individual goal.
+			// Keep them behind the objective disclosure, just like the map rings.
+			var punkte = [], gesehen = {};
+			quest.t.forEach(function (ort) {
+				if (String(ort[3]) !== String(schritt[0])) { return; }
+				var karte = karteNachIndex[ort[0]];
+				var zeile = (karte ? karte.name + ' · ' : '') + koordinatenText(ort[1], ort[2]);
+				if (!gesehen[zeile]) { gesehen[zeile] = true; punkte.push(zeile); }
+			});
+			if (punkte.length) {
+				var ortsliste = eltern('div', null);
+				ortsliste.className = 'zielorte';
+				ortsliste.appendChild(eltern('h3', t('kartenpunkte')));
+				punkte.forEach(function (zeile) { ortsliste.appendChild(eltern('p', zeile)); });
+				block.appendChild(ortsliste);
 			}
 			detail.appendChild(block);
 		});

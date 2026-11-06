@@ -863,6 +863,8 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .notizen-ebene { position: absolute; inset: 0; pointer-events: none; }
 .welt img.notiz { position: absolute; display: block; right: auto; bottom: auto; width: 24px; height: 24px; max-width: none; margin: -12px 0 0 -12px; pointer-events: auto; filter: drop-shadow(0 1px 1px #000) drop-shadow(0 0 1px #000); }
 .welt img.notiz:hover { transform: scale(1.4); z-index: 4; }
+.zielorte { margin: 8px 0 16px; padding: 6px 10px; background: var(--fläche-hell); border-radius: 3px; }
+.zielorte p { margin: 3px 0; font-size: 12px; font-variant-numeric: tabular-nums; }
 .marker.ohne-geber .punkt { display: none; }
 .marker { pointer-events: none; }
 .marker > * { pointer-events: auto; }
