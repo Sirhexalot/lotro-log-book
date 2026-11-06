@@ -48,6 +48,23 @@
 		ziel.appendChild(link);
 	});
 
+	// Phones get a burger button instead of a wrapped menu line.
+	var kopf = document.querySelector('.kopf');
+	if (kopf && ziel) {
+		var knopf = document.createElement('button');
+		knopf.type = 'button';
+		knopf.className = 'menue-knopf';
+		knopf.setAttribute('aria-expanded', 'false');
+		knopf.setAttribute('aria-controls', 'menue');
+		knopf.setAttribute('aria-label', t('menue_oeffnen'));
+		knopf.textContent = '\u2630';
+		kopf.insertBefore(knopf, ziel);
+		knopf.addEventListener('click', function () {
+			var offen = kopf.classList.toggle('menue-offen');
+			knopf.setAttribute('aria-expanded', String(offen));
+		});
+	}
+
 	// One pane at a time on phones: list, map or details.
 	var reiter = document.getElementById('mobil-reiter');
 	if (reiter) {
@@ -76,6 +93,10 @@
 		link.textContent = t(item[1]); recht.appendChild(link);
 	});
 	footer.appendChild(recht);
+	// The language buttons moved from the header into the footer: the language
+	// comes from the address, the stored choice or the browser anyway.
+	var sprachen = document.querySelector('.sprachen');
+	if (sprachen && sprachen.parentNode !== footer) { footer.appendChild(sprachen); }
 	if (!speicher) { return; }
 	var alle = speicher.alle();
 	var feld = document.createElement('label');

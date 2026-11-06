@@ -93,13 +93,23 @@ body[data-recht] main > h2 { font-size: var(--text-titel); }
 }
 .seite .tabelle th { font-size: var(--text-bedienung); text-transform: none; letter-spacing: normal; }
 .zahl, .legende, .kartenleiste, .pfadkopf .zum-baum { font-size: var(--text-bedienung); line-height: 1.5; }
-footer { border-top: 1px solid var(--rand); background: var(--fläche); }
+/* Footer: legal links left, language right, readable colours. */
+footer {
+	border-top: 1px solid var(--rand); background: var(--fläche);
+	display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+	gap: 6px 18px; padding: 10px 20px;
+}
+footer p { margin: 0; padding: 0; color: var(--schwach); }
+footer a { color: var(--schwach); text-decoration: none; }
+footer a:hover, footer a:focus { color: var(--gold); text-decoration: underline; }
+footer .sprachen { display: flex; gap: 6px; margin: 0; }
+footer .sprachen button { font-size: 12px; padding: 2px 8px; }
 footer p { margin: 0 auto; padding: 14px 20px; color: var(--schwach); }
 body.seite-text { display: flex; flex-direction: column; }
 body.seite-text main { width: 100%; flex: 1; }
 /* The map stays a fixed-height app; its footer must consume real layout space. */
 body[data-seite="karte"] { grid-template-rows: auto minmax(0, 1fr) auto; }
-body[data-seite="karte"] footer p { padding: 5px 16px; }
+body[data-seite="karte"] footer { padding: 4px 16px; }
 
 /* Compact start page: useful actions come before screenshots and explanation. */
 body[data-seite="start"] main { max-width: 1000px; padding-top: 24px; }
@@ -121,4 +131,22 @@ body[data-seite="start"] main { max-width: 1000px; padding-top: 24px; }
 	.funktionen { grid-template-columns: 1fr; }
 	.neuigkeiten { padding: 16px; }
 	.intro h2 { font-size: var(--text-titel); }
+}
+
+/* Header stays put on wide screens; phones keep the whole viewport. */
+@media (min-width: 1000px) { .kopf { position: sticky; top: 0; z-index: 25; } }
+
+/* Burger menu on phones: the menu only opens on demand. */
+.menue-knopf { display: none; }
+@media (max-width: 1000px) {
+	.menue-knopf {
+		display: inline-flex; align-items: center; justify-content: center;
+		min-width: 40px; height: 34px; order: 2; font-size: 17px; line-height: 1;
+	}
+	.kopf .menue {
+		display: none; order: 6; width: 100%; flex-direction: column; align-items: flex-start;
+		gap: 0; white-space: normal;
+	}
+	.kopf.menue-offen .menue { display: flex; }
+	.kopf .menue a { width: 100%; padding: 9px 2px; border-bottom: 1px solid var(--rand); }
 }

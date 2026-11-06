@@ -8,7 +8,7 @@
 		de: {
 			titel: 'LOTRO Log Book – Der Herr der Ringe Online',
 			produkt: 'LOTRO Log Book',
-			menue_taten: 'Taten',
+			menue_taten: 'Taten', menue_oeffnen: 'Menü öffnen',
 			menue_ruf: 'Ruf',
 			menue_handwerk: 'Handwerk',
 			menue_belohnungen: 'Belohnungen', menue_suche: 'Suche',
@@ -143,7 +143,7 @@
 		en: {
 			titel: 'LOTRO Log Book – The Lord of the Rings Online',
 			produkt: 'LOTRO Log Book',
-			menue_taten: 'Deeds',
+			menue_taten: 'Deeds', menue_oeffnen: 'Open menu',
 			menue_ruf: 'Reputation',
 			menue_handwerk: 'Crafting',
 			menue_belohnungen: 'Rewards', menue_suche: 'Search',
@@ -278,7 +278,7 @@
 		fr: {
 			titel: 'LOTRO Log Book – Le Seigneur des Anneaux Online',
 			produkt: 'LOTRO Log Book',
-			menue_taten: 'Prouesses',
+			menue_taten: 'Prouesses', menue_oeffnen: 'Ouvrir le menu',
 			menue_ruf: 'Réputation',
 			menue_handwerk: 'Artisanat',
 			menue_belohnungen: 'Récompenses', menue_suche: 'Recherche',
