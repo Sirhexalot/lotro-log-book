@@ -192,11 +192,11 @@ def kartenpfade(quests, karten, sprache, art):
         if quest.get('_sek'):
             zaehler['sektion'] += 1
             continue
-        if art == 'taten' and quest['t']:
+        if art == 'taten' and (quest['t'] or quest.get('h')):
             # The most detailed map that holds at least three quarters of the
             # objectives: a few stray ones on the overview must not lift the ruins
             # of Bree-land up to Eriador.
-            ketten = [kette(ziel[0]) for ziel in quest['t']] or [[]]
+            ketten = [kette(ziel[0]) for ziel in (quest['t'] or quest.get('h', []))] or [[]]
             pfad = gemeinsam(ketten)
             for laenge in range(max(len(k) for k in ketten), len(pfad), -1):
                 zaehlung = {}
@@ -483,6 +483,10 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
             # story, instances, festivals, crafting, missions), not under a place.
             **({'_sek': 1} if any(key.startswith('section:') and key != 'section:other' for key in pfad) else {}),
             't': positions,
+            # Separate from exact objectives: actual base-world enemy placements.
+            **({'h': [[int(p['gm']), float(p['lat']), float(p['lon']), str(p['step'])]
+                      for p in step_list(field(record, 'h')) if int(p['gm']) in bekannt]}
+               if field(record, 'h') else {}),
             'd': clean(record['d'] if 'd' in record else '',
                        TOKENS[sprache]['zaehler'], sprache),
             's': schritte,

@@ -1,5 +1,93 @@
 # Tatenpositionen: erneute Prüfung vom 06.11.2026
 
+## Umgesetzter Ausbau (06.11.2026)
+
+**Korrektur der Vorprüfung im Chat:** `GameMaps.attribute` erwartet
+`(latitude, longitude, region)`. Die dort genannten 39 Zeilen/22 Taten und
+200 Jagdtaten wurden mit vertauschten Achsen ermittelt und sind nicht gültig.
+Ebenso unbelegt war die Behauptung, alle übrigen Taten hätten „wirklich keinen
+Ort im DAT“. Der vorliegende Export beweist keine generelle Unmöglichkeit.
+
+Mit richtiger Achsenfolge sind von den 290 Cell-zero-Rohzeilen bislang ortsloser
+Taten 124 auf eine Karte zu beziehen (83 Tat-IDs); 166 sind nicht zuzuordnen.
+Cell zero und ein passendes Kartenrechteck beweisen aber keinen brauchbaren
+Tat-Zielort. Viele Zeilen gehören zu unsichtbaren Instanz-Bestowal-Rollen oder
+Eingangsschritten. Sie werden bewusst nicht als Abschlussziele veröffentlicht.
+
+### Tatsächlich zurückgewonnen
+
+Der Generator berücksichtigt bei Taten zusätzlich den vorhandenen
+`QuestEvent_BillboardProgressOverride`. Für reine direkte Gegner-DID-Ereignisse
+ohne Zieltext bleibt der echte Schritt mit einem neutralen Hinweis erhalten.
+Versteckte Rollenbedingungen bekommen dagegen keinen erfundenen Zieltext.
+
+Das bringt **30 zusätzliche Positionszeilen bei sechs bislang ortslosen Taten**:
+Conquest of Dâr-gazag (4), Tyrants of the Enemy (7), Kill the Enemy's Leaders! (6),
+Conquest of Ringdyr (4), Conqueror of the Towers (7), A Deep Well (2). Alle alten
+englischen Zielpositionen sind unverändert enthalten; die Prüfung erfolgte gegen
+den vor dem Ausbau veröffentlichten Webkatalog.
+
+Neuer gemeinsamer Stand DE/EN/FR: **5.528 Taten, 644 mit exakten Zielpositionen,
+6.922 Zielpositionszeilen**. Katalogzähler und Tat-IDs bleiben unverändert.
+
+### Eigene Jagdort-Ebene
+
+`MagicQuestLog/tools/deed_locations.py` akzeptiert nur ein einzelnes
+Besiegen-Ereignis (`QuestEvent_ID=22`) mit genau einer Regel aus
+`Quest_MonsterRegion` + `Quest_MonsterSpecies`. Unbekannte semantische Felder,
+weitere Bedingungen/Gruppen, Ausschlüsse, Rollen und Gegenstandsereignisse werden
+abgewiesen. Das ist absichtlich ein enger erster Ausbau.
+
+Die Gegnerart kommt aus unserem platzierten Objekt-Export (`Agent_Species`), das
+geforderte Gebiet aus Landblock und `Area_Territory`. Nur `layer=0`, `instance=0`,
+`cell=00000000` und tatsächlich kartenzuordenbare Positionen werden verwendet.
+Der separate Katalogschlüssel `h` hält Herkunft (`dat-enemy-base-world`), Gegner-DID,
+Gebiet, Spezies, Schritt und Koordinaten fest. Keine Hülle, kein erfundener
+Mittelpunkt, keine Garantie gleichzeitig vorhandener Gegner.
+
+Ergebnis: **222 Taten mit 14.977 Gegner-Positionszeilen**, davon **221 Taten ohne
+exakte Ziele**. Die Vereinigungsmenge beträgt damit **865 Taten mit exakten
+Positionen oder ausdrücklich gekennzeichneten Jagdort-Hinweisen**. Diese Zahl
+darf nicht mit ausschließlich exakten Zielorten verglichen werden.
+
+Website: erst nach „Ziele einblenden“, gestrichelte bernsteinfarbene Zeichen statt
+Zielringe. Ein 36-Pixel-Raster fasst nahe Standorte zusammen; der Anker bleibt ein
+realer Standort, die Zahl zählt Positionszeilen, keine lebenden Gegner. Die
+Detailansicht erklärt die Bedeutung und bietet Kartenknöpfe. Bei Auswahl einer
+anderen Tat verschwinden die Hinweise. Plugin: derselbe Hinweis erst nach dem
+Einblenden, optionaler MoorMap-Knopf zum ersten verzeichneten Gegnerstandort.
+
+### Verbleibende Landmarken
+
+Sieben weiterhin ortslose Taten nennen Landmarken: Goblin-town, je zwei
+Skoironk-/Towers-of-the-Teeth-Taten, Explorer of the Black Pits und Explorer of the
+Hiddenhoard. Goblinstadt und Hiddenhoard haben Innenraum-Cell-Koordinaten ohne
+passende Kartenabbildung; Black Pits hat 40 nicht auf die vorhandenen Karten
+abbildbare Cell-zero-Zeilen. Die geprüften Landmark-Datensätze selbst liefern
+keine zusätzliche Koordinatentransformation. Das bleibt eine offene
+Innenraum-/Instanzkarten-Recherche, keine nachgewiesene DAT-Grenze.
+
+Reproduzierbare lesende Prüfung:
+`MagicQuestLog/tools/audit_deed_locations.py EXPORT_DIR WEB_DATEN_TATEN_EN_JS`.
+`test_deed_locations.py` prüft Achsenfolge, Dedup, Weltlayer, Innenräume und das
+Abweisen unvollständig verstandener Ereignisse. Die älteren Abschnitte unten
+dokumentieren den Ausgangsstand und sind keine neuen Ausbauzahlen.
+
+Prüfung: `test_deed_locations.py`, `verify_catalog.py`, `test_plugin.py`,
+`test_features.py`, `test_struktur.py` und die Website-Unittests bestanden.
+Browserprüfung DE/EN/FR: Hinweise zunächst verborgen, sichtbar nach Einblenden,
+verschwinden beim Tatwechsel, Kartenknopf erhält die Auswahl, veränderte
+Fenstergröße erhält die vollständige 4:3-Karte. Veröffentlichungs-Build zusätzlich
+auf Bildladung, Hint-Parität aller Sprachen und leere persönliche
+Fortschrittsdatei geprüft. Screenshot: `output/playwright/deed-hunting-en.png`.
+Plugin-Quellcode und Katalog sind vorbereitet und headless geprüft; Spielprüfung
+und ein neues Plugin-Release stehen noch aus. Keine installierten Spiel- oder
+Fortschrittsdateien verändert.
+
+Website veröffentlicht und unter `https://llb.sirhexalot.de` mit Barghest-slayer
+nachgeprüft: Hinweise verborgen beim Laden, drei gruppierte Zeichen nach dem
+Einblenden, Kartenbild erfolgreich geladen. Upload: 40 Dateien / 10,1 MB.
+
 ## Ausgewertete eigene Daten
 
 - DAT-Export `full-dat-en-de-fr-2026-11-03/deeds.json`, `areas.json` und

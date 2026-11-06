@@ -865,6 +865,9 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .welt img.notiz:hover { transform: scale(1.4); z-index: 4; }
 .zielorte { margin: 8px 0 16px; padding: 6px 10px; background: var(--fläche-hell); border-radius: 3px; }
 .zielorte p { margin: 3px 0; font-size: 12px; font-variant-numeric: tabular-nums; }
+.jagdpunkt { position: absolute; transform: translate(-50%, -50%); width: 24px; height: 24px; border: 2px dashed #f3bc65; border-radius: 50%; background: #4a301bd9; color: #fff2d9; font: bold 11px/20px sans-serif; text-align: center; box-sizing: border-box; }
+.jagdhinweis { border-left: 3px dashed #dba54e; }
+.jagdhinweis button { margin: 4px 6px 0 0; }
 .marker.ohne-geber .punkt { display: none; }
 .marker { pointer-events: none; }
 .marker > * { pointer-events: auto; }

@@ -650,6 +650,28 @@
 				ring.style.top = (punkt.y * 100) + '%';
 				marker.appendChild(ring);
 			});
+			// Enemy hints are NOT exact objective rings. Group nearby screen points,
+			// anchored at a real placement (never a centroid or a claimed area hull).
+			var gruppen = {};
+			var breite = marker.getBoundingClientRect().width || 720;
+			var hoehe = marker.getBoundingClientRect().height || 480;
+			(zustand.auswahl.h || []).forEach(function (ort) {
+				var punkt = zeigtOrt(karte, ort);
+				if (!punkt) { return; }
+				var key = Math.floor(punkt.x * breite / 36) + ':' + Math.floor(punkt.y * hoehe / 36);
+				if (!gruppen[key]) { gruppen[key] = { punkt: punkt, ort: ort, anzahl: 0 }; }
+				gruppen[key].anzahl += 1;
+			});
+			Object.keys(gruppen).forEach(function (key) {
+				var gruppe = gruppen[key];
+				var zeichen = eltern('div', gruppe.anzahl > 1 ? String(gruppe.anzahl) : '');
+				zeichen.className = 'jagdpunkt';
+				zeichen.title = t('jagdorte') + ' · ' + gruppe.anzahl + '\n' +
+					koordinatenText(gruppe.ort[1], gruppe.ort[2]) + '\n' + t('jagd_hinweis');
+				zeichen.style.left = (gruppe.punkt.x * 100) + '%';
+				zeichen.style.top = (gruppe.punkt.y * 100) + '%';
+				marker.appendChild(zeichen);
+			});
 		}
 		zeigeLegende(ringe > 0);
 		zeichneNotizen();
@@ -1141,7 +1163,7 @@
 		if (zeigtZiele(quest)) {
 			kennung.push(quest.t.length ?
 				quest.t.length + ' ' + (quest.t.length === 1 ? t('ziel') : t('ziele')) :
-				t('ohne_ziel_kurz'));
+				(quest.h && quest.h.length ? t('jagdorte') : t('ohne_ziel_kurz')));
 		}
 		var lage = zustandVon(quest);
 		if (hatFortschritt) {
@@ -1252,7 +1274,7 @@
 			detail.appendChild(sperrHinweis);
 		}
 
-		if (!orte(quest).length) {
+		if (!orte(quest).length && !(quest.h && quest.h.length)) {
 			var hinweisOhne = eltern('p', t(zeigtZiele(quest) || loesung ? 'kein_ziel' : 'kein_geberort'));
 			hinweisOhne.className = 'leer';
 			detail.appendChild(hinweisOhne);
@@ -1332,6 +1354,28 @@
 				punkte.forEach(function (zeile) { ortsliste.appendChild(eltern('p', zeile)); });
 				block.appendChild(ortsliste);
 			}
+			var jagd = (quest.h || []).filter(function (ort) { return String(ort[3]) === String(schritt[0]); });
+			if (jagd.length) {
+				var hinweis = eltern('div', null);
+				hinweis.className = 'zielorte jagdhinweis';
+				hinweis.appendChild(eltern('h3', t('jagdorte')));
+				hinweis.appendChild(eltern('p', t('jagd_hinweis')));
+				var karten = {};
+				jagd.forEach(function (ort) { karten[ort[0]] = (karten[ort[0]] || 0) + 1; });
+				Object.keys(karten).forEach(function (id) {
+					var knopf = eltern('button', (karteNachIndex[id] ? karteNachIndex[id].name : '') + ' · ' + karten[id]);
+					knopf.type = 'button';
+					knopf.addEventListener('click', function () {
+						var knoten = zustand.knoten;
+						zeigeKarte(Number(id));
+						zustand.knoten = knoten;
+						zustand.auswahl = quest;
+						zeichneMarker(); zeichneDetail();
+					});
+					hinweis.appendChild(knopf);
+				});
+				block.appendChild(hinweis);
+			}
 			detail.appendChild(block);
 		});
 	}
@@ -1391,7 +1435,7 @@
 	// Navigation and legends can change the available height without a window
 	// resize. Keep the image and all marker layers inside the actual map stage.
 	if (window.ResizeObserver) {
-		var kartenGroesse = new ResizeObserver(function () { passeAn(); });
+		var kartenGroesse = new ResizeObserver(function () { passeAn(); zeichneMarker(); });
 		kartenGroesse.observe(buehne);
 	}
 
