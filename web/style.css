@@ -6,8 +6,8 @@
 	--text: #e8e1d5;
 	--schwach: #a89c8a;
 	--gold: #d6b35a;
-	--offen: #d99a3c;
-	--fertig: #6f9c6a;
+	--offen: #f0a63c;
+	--fertig: #7fbb72;
 	--marke-aktiv: #e8e1d5;
 }
 
@@ -369,12 +369,13 @@ main {
 
 .punkt {
 	position: absolute;
-	width: 11px;
-	height: 11px;
-	margin: -5.5px 0 0 -5.5px;
+	width: 14px;
+	height: 14px;
+	margin: -7px 0 0 -7px;
 	border-radius: 50%;
 	background: var(--offen);
-	border: 1px solid #0d0b09;
+	border: 2px solid #14100b;
+	box-shadow: 0 0 0 1px rgba(255, 244, 214, .5), 0 1px 3px rgba(0, 0, 0, .55);
 	cursor: pointer;
 	transition: transform .08s;
 }
@@ -405,9 +406,9 @@ main {
 	position: absolute;
 	left: 50%;
 	top: 50%;
-	width: 11px;
-	height: 11px;
-	margin: -6.5px 0 0 -6.5px;
+	width: 14px;
+	height: 14px;
+	margin: -8px 0 0 -8px;
 	border-radius: 50%;
 	border: 2px solid var(--marke-aktiv);
 	animation: puls 1.4s ease-out infinite;
