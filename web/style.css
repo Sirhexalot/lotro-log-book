@@ -812,8 +812,8 @@ td.haken-zelle.teil { color: var(--laufend); }
 /* Reputation: sources under a faction */
 #tabelle tr.klickbar { cursor: pointer; }
 #tabelle tr.klickbar:hover td { background: var(--fläche-hell); }
-#tabelle tr.quellen td { background: #1b1813; padding: 8px 14px 12px; }
-#tabelle tr.quellen ul { margin: 6px 0 0; padding-left: 18px; columns: 2 320px; }
+#tabelle tr.quellen td { background: #1b1813; padding: 8px 14px 12px; white-space: normal; }
+#tabelle tr.quellen ul { margin: 6px 0 0; padding-left: 18px; columns: 2 320px; column-gap: 28px; }
 #tabelle tr.quellen li { font-size: 13px; break-inside: avoid; padding: 1px 0; }
 #tabelle tr.quellen a { color: var(--text); }
 

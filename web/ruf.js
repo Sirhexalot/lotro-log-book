@@ -123,11 +123,23 @@
 		skript.onerror = function () { quellen = {}; dann(); };
 		document.body.appendChild(skript);
 	}
+	/** Test and placeholder entries never belong in a player's source list. */
+	function sichtbar(q) {
+		return !/HIDING CONTENT|^DNT\b/i.test(String(q[1] || ''));
+	}
+
+	/** Catalogue labels carry internal keys like "@other"; drop them. */
+	function label(wert) {
+		return String(wert || '').split(' · ').filter(function (teil) {
+			return teil && teil.charAt(0) !== '@';
+		}).join(' · ');
+	}
+
 	function zeigeQuellen(zeile, tr) {
 		if (offenesFenster) { offenesFenster.parentNode.removeChild(offenesFenster); }
 		if (offenesFenster && offenesFenster.dataset.id === zeile.id) { offenesFenster = null; return; }
 		ladeQuellen(function () {
-			var liste = quellen[zeile.id] || [];
+			var liste = (quellen[zeile.id] || []).filter(sichtbar);
 			var offeneListe = liste.filter(function (q) { return !fertigeIds[q[0]]; });
 			var fenster = document.createElement('tr');
 			fenster.className = 'quellen';
@@ -151,7 +163,8 @@
 					var info = document.createElement('span');
 					info.className = 'stufe-klein';
 					info.textContent = ' ' + [q[3] === 't' ? t('ru_tat') : t('ru_aufgabe'),
-						q[2] ? t('hw_stufe') + ' ' + q[2] : '', q[5],
+						q[2] ? t('hw_stufe') + ' ' + q[2] : '',
+						q[5] ? label(q[5]) : '',
 						q[4] >= 1 && q[4] <= 6 ? new Array(q[4] + 1).join('▮') : ''].filter(Boolean).join(' · ');
 					li.appendChild(info);
 					ul.appendChild(li);
