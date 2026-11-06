@@ -94,6 +94,38 @@ async page => {
     }
     await page.setViewportSize({ width: 1440, height: 900 });
   }
+  // Recipe browser with a loaded character: own professions only, and the
+  // missing filter must span every tier instead of only the chosen one.
+  await page.goto(base + 'handwerk.html?lang=de#rezepte');
+  await page.waitForSelector('#rezept-berufe .rezept-knopf');
+  await page.evaluate(() => {
+    const rows = window.MQL_REZEPTE.r;
+    const own = rows.find(row => row[9] === 'WOODWORKER');
+    localStorage.setItem('mql.charaktere', JSON.stringify({ aktiv: 'T|T|T', liste: {
+      'T|T|T': { key: 'T|T|T', name: 'T', server: 'T', handwerk: {
+        WOODWORKER: [[1, 0, 1, 0, 1]], COOK: [[1, 0, 1, 0, 1]] }, rezepte: [own[10]] } } }));
+  });
+  await page.reload();
+  await page.waitForSelector('#rezept-berufe .rezept-knopf');
+  const crafting = await page.evaluate(() => ({
+    professions: document.querySelectorAll('#rezept-berufe .rezept-knopf').length,
+    checkboxes: document.querySelectorAll('.rezept-haken').length,
+  }));
+  if (crafting.professions !== 2 || crafting.checkboxes !== 2) {
+    throw Error('crafting professions not limited to the character: ' + JSON.stringify(crafting));
+  }
+  await page.locator('.rezept-haken input').first().click();
+  await page.waitForTimeout(200);
+  const missing = await page.evaluate(() => ({
+    tiers: document.querySelectorAll('#rezept-inhalt tr.rezept-stufe').length,
+    rows: document.querySelectorAll('#rezept-inhalt tbody tr:not(.rezept-gruppe):not(.rezept-stufe)').length,
+    label: document.getElementById('rezept-anzahl').innerText,
+    headers: document.querySelectorAll('.rezept-tabelle thead').length,
+  }));
+  if (missing.tiers < 2 || !missing.rows || !/fehlende/.test(missing.label) ||
+      missing.headers !== 1) throw Error('missing recipes view broken: ' + JSON.stringify(missing));
+  await page.evaluate(() => localStorage.removeItem('mql.charaktere'));
+
   if (errors.length) throw Error(errors.join('\n'));
-  return { checked: results.length, pages: results, mapLayout: 'PASS', errors };
-}
+  return { checked: results.length, pages: results, mapLayout: 'PASS',
+    crafting: { professions: crafting.professions, missingTiers: missing.tiers }, errors };}

@@ -658,7 +658,9 @@ main.seite {
 .rezept-zeile { padding: 0 0 8px; }
 .rezept-steuerung { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
 .rezept-steuerung input[type="search"] { flex: 1 1 240px; }
-.rezept-nurfehlend { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.rezept-haken { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-size: var(--text-bedienung); color: var(--schwach); cursor: pointer; }
+.rezept-haken input { accent-color: var(--gold); }
+.rezept-haken[hidden] { display: none; }
 .rezept-berufe, .rezept-stufen { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .rezept-knopf {
 	font-size: var(--text-bedienung); padding: 4px 9px; border: 1px solid var(--rand);
@@ -671,6 +673,20 @@ main.seite {
 .rezept-stand.fehlt { color: var(--schwach); }
 .rezept-stand.fremd { color: var(--rand); }
 .rezept-beruf { white-space: nowrap; color: var(--schwach); }
+.tabelle td.rezept-zutaten { white-space: normal; }
+.rezept-tabelle tr.rezept-gruppe th {
+	text-transform: uppercase; letter-spacing: .06em; font-size: 11.5px; font-weight: normal;
+	color: var(--schwach); padding: 16px 0 5px; border-top: 1px solid var(--rand); border-bottom: none;
+}
+.rezept-tabelle tbody:first-of-type tr.rezept-gruppe th { border-top: none; padding-top: 4px; }
+.rezept-tabelle tr.rezept-stufe th {
+	text-transform: none; letter-spacing: 0; font-size: 15px; font-weight: normal;
+	color: var(--text); padding: 24px 0 5px; border-top: 1px solid var(--rand); border-bottom: none;
+}
+.rezept-tabelle tbody:first-of-type tr.rezept-stufe th { border-top: none; padding-top: 4px; }
+.rezept-tabelle tbody tr:hover td { background: var(--fläche-hell); }
+.rezept-tabelle tbody tr.rezept-gruppe:hover th { background: none; }
+.rezept-kritisch { margin-top: 3px; color: var(--schwach); }
 .rezept-zeile select { margin-left: 6px; }
 #rezept-tabelle td { vertical-align: top; }
 #rezept-tabelle .schwach { margin-top: 2px; }
