@@ -177,6 +177,23 @@
 		return out;
 	}
 
+	/**
+	 * crafting.xml: the recipes the character has learned, as eight-digit hex ids.
+	 * The ids match the recipe records in the client data, so the site can mark
+	 * every known recipe. Only ids; no inventory or account data.
+	 */
+	function knownRecipes(text) {
+		var out = [], match;
+		var pattern = /<knownRecipe\b([^>]*)\/?>/g;
+		while ((match = pattern.exec(text || '')) !== null) {
+			var number = Number(attributes(match[1]).id);
+			if (!isFinite(number) || number <= 0) { continue; }
+			var hex = ('00000000' + Math.trunc(number).toString(16).toUpperCase()).slice(-8);
+			if (out.indexOf(hex) < 0) { out.push(hex); }
+		}
+		return out.sort();
+	}
+
 	function isoDate(milliseconds) {
 		var number = Number(milliseconds);
 		var date = isFinite(number) && number > 0 ? new Date(number) : new Date();
@@ -203,7 +220,8 @@
 			underway: quests.underway + deeds.underway,
 			laufend: running,
 			ruf: reputation(files.reputation),
-			handwerk: crafting(files.crafting)
+			handwerk: crafting(files.crafting),
+			rezepte: knownRecipes(files.crafting)
 		};
 	}
 
@@ -365,7 +383,7 @@
 
 	var api = {
 		hexId: hexId, summary: summary, finished: finished, character: character,
-		conditions: conditions, reputation: reputation, crafting: crafting,
+		conditions: conditions, reputation: reputation, crafting: crafting, knownRecipes: knownRecipes,
 		pluginData: pluginData, indexData: indexData, pluginFiles: pluginFiles,
 		groupFiles: groupFiles, readCharacters: readCharacters, zip: zip, crc32: crc32,
 		IMPORT_KEY: IMPORT_KEY, INDEX_KEY: INDEX_KEY

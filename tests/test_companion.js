@@ -110,6 +110,9 @@ const handwerk = C.crafting('<crafting name="X"><profession id="WOODWORKER">' +
 	'<level tier="1"><proficiency xp="200" completed="true"/><mastery xp="400" completed="true"/></level>' +
 	'</profession><profession id="lower"><level tier="1"/></profession></crafting>');
 assert.deepStrictEqual(handwerk, { WOODWORKER: [[1, 200, 1, 400, 1], [2, 280, 1, 10, 0]] }, JSON.stringify(handwerk));
+const rezepte = C.knownRecipes('<profession id="WOODWORKER"><knownRecipe id="1879066786"/>' +
+	'<knownRecipe id="1879069576"/><knownRecipe id="bad"/></profession>');
+assert.deepStrictEqual(rezepte, ['700048A2', '70005388'], JSON.stringify(rezepte));
 
 // readCharacters on file-like items.
 C.readCharacters([
@@ -117,13 +120,15 @@ C.readCharacters([
 	{ path: 'characters/toon-00000/questsStatus.xml', read: async () => quests },
 	{ path: 'characters/toon-00000/deedsStatus.xml', read: async () => deeds },
 	{ path: 'characters/toon-00000/reputation.xml', read: async () => '<faction id="1879091345" currentTier="6" currentReputation="81050"/>' },
-	{ path: 'characters/toon-00000/crafting.xml', read: async () => '<profession id="COOK"><level tier="1"><proficiency xp="5" completed="false"/><mastery xp="0" completed="false"/></level></profession>' },
+	{ path: 'characters/toon-00000/crafting.xml', read: async () => '<profession id="COOK"><knownRecipe id="1879066786"/>' +
+		'<level tier="1"><proficiency xp="5" completed="false"/><mastery xp="0" completed="false"/></level></profession>' },
 ]).then((result) => {
 	assert.strictEqual(result.characters.length, 1);
 	const c = result.characters[0];
 	assert.strictEqual(c.name, 'Feldobar');
 	assert.deepStrictEqual(c.ruf, [['7000A891', 6, 81050]]);
 	assert.deepStrictEqual(c.handwerk, { COOK: [[1, 5, 0, 0, 0]] });
+	assert.deepStrictEqual(c.rezepte, ['700048A2'], 'known recipes kept');
 	assert.ok(c.laufend['70000CFB'], 'running deed kept');
 	console.log('PASS: companion.js unit tests (ids, top level only, repeatables, running counters, reputation, crafting, no account data, paths, zip)');
 }).catch((error) => { console.error(error); process.exit(1); });

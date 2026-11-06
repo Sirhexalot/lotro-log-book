@@ -70,6 +70,7 @@
 			name: eintrag.name, server: String(eintrag.server || ''), account: String(eintrag.account || ''),
 			klasse: String(eintrag.klasse || ''), race: String(eintrag.race || ''), level: String(eintrag.level || ''),
 			date: String(eintrag.date || ''), quests: ids(eintrag.quests), deeds: ids(eintrag.deeds),
+			rezepte: ids(eintrag.rezepte),
 			laufend: laufend(eintrag.laufend), ruf: ruf(eintrag.ruf), handwerk: handwerk(eintrag.handwerk)
 		};
 	}

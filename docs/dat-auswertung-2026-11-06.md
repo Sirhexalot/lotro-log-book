@@ -159,6 +159,25 @@ gegenstände wenige MB), die drei Sprachen sind vollständig vorhanden.
   Bindestrich vor kleingeschriebenen Wörtern werden entfernt; Wörter bleiben
   unverändert.
 
+### Rezeptstruktur und Lernstand
+
+- Die Rezepte folgen der Gliederung von Spiel und Wiki: **Beruf → Stufe →
+  Kategorie**. 10 Berufe, 17 Stufen, 491 rohe Kategorien (163 ohne die
+  Gegenstandsstufe im Namen). Beispiel Drechsler/Doomfold: Instrumente,
+  Warden-Schnitzereien, Essenzen, Waffen, Verarbeitung.
+- Handwerk hat zwei Reiter **Berufe** und **Rezepte**; der Rezeptreiter wählt
+  Beruf und Stufe, darunter stehen die Kategorien mit Tabellen. Die Suche
+  überspringt den Baum und sucht über Ergebnis und Zutaten.
+- **Eigener Lernstand:** `crafting.xml` aus Companion enthält `<knownRecipe>`
+  (Feldobar: 111, davon 108 Drechsler). Der Import liest die IDs jetzt mit
+  (`rezepte` im Charakterspeicher), die Seite zeigt ✓ bekannt, ○ fehlt und
+  „–“ für fremde Berufe. Filter „nur fehlende“; Zähler je Stufe. Der Startberuf
+  ist der mit den meisten bekannten Rezepten.
+- Ohne Import bleibt die Spalte leer; es gibt keine erfundenen Markierungen.
+  Der Stand ist so alt wie der letzte Companion-Import.
+- Die Rezeptdaten tragen Berufsschlüssel (`WOODWORKER` …), Rezept-ID und
+  Stufencode, damit die Zuordnung ohne Namensvergleich funktioniert.
+
 ## 7. Prüfmittel
 
 - Vollständige Belohnungstabellen gelesen: 9.594 Tabellen, 0 Lesefehler.

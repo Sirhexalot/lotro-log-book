@@ -47,13 +47,15 @@ async page => {
         if (!(await page.locator('.bl-eintrag').count())) throw Error('reward items missing');
       }
       if (name === 'handwerk') {
-        await page.waitForSelector('#rezept-tabelle tbody tr');
+        await page.locator('[data-hw="rezepte"]').click();
+        await page.waitForSelector('.rezept-knopf');
         const recipe = await page.evaluate(() => ({
-          rows: document.querySelectorAll('#rezept-tabelle tbody tr').length,
-          professions: document.querySelectorAll('#rezept-beruf option').length,
+          rows: document.querySelectorAll('#rezept-inhalt tbody tr').length,
+          professions: document.querySelectorAll('#rezept-berufe .rezept-knopf').length,
+          tiers: document.querySelectorAll('#rezept-stufen .rezept-knopf').length,
           label: document.getElementById('rezept-anzahl').innerText,
         }));
-        if (recipe.professions < 5 || recipe.rows < 10) {
+        if (recipe.professions < 5 || recipe.tiers < 1 || recipe.rows < 1) {
           throw Error('recipe browser incomplete: ' + JSON.stringify(recipe));
         }
       }

@@ -61,6 +61,9 @@ def baue(quelle, sprache):
         critical = ''
         if recipe.get('cr'):
             critical = name(items.get(recipe['cr'][0]), sprache)
+        # The client's profession key ("WOODWORKER") lets the page match the
+        # character's professions from Companion, which are stored as keys.
+        key = re.sub(r'[^A-Za-z]', '', profession.get('en') or '').upper()
         zeilen.append([
             result_name,
             int(result.get('q') or 0),
@@ -71,6 +74,9 @@ def baue(quelle, sprache):
             zutaten,
             optional,
             critical,
+            key,
+            recipe['id'],
+            int(recipe.get('t') or 0),
         ])
     zeilen.sort(key=lambda row: (row[0].lower(), row[3], row[1]))
     return zeilen

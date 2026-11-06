@@ -641,6 +641,21 @@ main.seite {
 .bl-quellen a:hover { color: var(--gold); text-decoration: underline; }
 .bl-stufe { color: var(--schwach); margin-left: 6px; }
 .rezept-zeile { padding: 0 0 8px; }
+.rezept-steuerung { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
+.rezept-steuerung input[type="search"] { flex: 1 1 240px; }
+.rezept-nurfehlend { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.rezept-berufe, .rezept-stufen { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.rezept-knopf {
+	font-size: var(--text-bedienung); padding: 4px 9px; border: 1px solid var(--rand);
+	background: var(--fläche); color: var(--text); border-radius: 3px; cursor: pointer;
+}
+.rezept-knopf.aktiv { border-color: var(--gold); color: var(--gold); background: var(--fläche-hell); }
+.rezept-knopf:hover { border-color: var(--gold); }
+.rezept-stand { display: inline-block; width: 1.1em; margin-right: 4px; }
+.rezept-stand.bekannt { color: var(--fertig); }
+.rezept-stand.fehlt { color: var(--schwach); }
+.rezept-stand.fremd { color: var(--rand); }
+.rezept-beruf { white-space: nowrap; color: var(--schwach); }
 .rezept-zeile select { margin-left: 6px; }
 #rezept-tabelle td { vertical-align: top; }
 #rezept-tabelle .schwach { margin-top: 2px; }

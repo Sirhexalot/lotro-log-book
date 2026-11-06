@@ -22,13 +22,23 @@
 
 <main class="seite">
 	<h2 data-t="hw_titel">Handwerk</h2>
-	<p data-t="hw_text"></p>
-	<p class="meldung" id="hinweis"></p>
-	<div id="berufe"></div>
+	<div class="reiter" role="tablist" id="hw-reiter">
+		<button type="button" data-hw="berufe" aria-pressed="true" data-t="hw_berufe">Berufe</button>
+		<button type="button" data-hw="rezepte" aria-pressed="false" data-t="hw_rezepte">Rezepte</button>
+	</div>
 
-	<h2 id="rezepte" data-t="hw_rezepte">Rezepte</h2>
-	<p data-t="hw_rezepte_text">Ergebnis, Zutaten und kritischer Erfolg aus den Handwerksdaten.</p>
-	<div id="rezepte-liste"></div>
+	<section id="hw-berufe">
+		<p data-t="hw_text"></p>
+		<p class="meldung" id="hinweis"></p>
+		<div id="berufe"></div>
+	</section>
+
+	<section id="hw-rezepte" hidden>
+		<h2 id="rezepte" data-t="hw_rezepte">Rezepte</h2>
+		<p data-t="hw_rezepte_text">Ergebnis, Zutaten und kritischer Erfolg aus den Handwerksdaten.</p>
+		<p class="schwach" data-t="hw_rezepte_hinweis">Mit importiertem Spielstand zeigt jede Zeile, ob dein Charakter das Rezept schon kennt.</p>
+		<div id="rezepte-liste"></div>
+	</section>
 </main>
 
 <script src="texte.js"></script>
