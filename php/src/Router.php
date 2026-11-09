@@ -51,11 +51,12 @@ final class Router
         }
         // Overview pages: /de/aufgabe/, /de/aufgabe/seite/2/, /de/gegenstand/ruestung/.
         // Their shape is decided by the prepared data, not by a URI pattern.
-        if (preg_match('~^/([a-z]{2})/((?:[a-z0-9]+/)+)$~', $path, $m)) {
+        // Segments may carry a hyphen (French "peu-commun"), never a slash.
+        if (preg_match('~^/([a-z]{2})/((?:[a-z0-9-]+/)+)$~', $path, $m)) {
             return $this->listPage($m[1], $m[2]);
         }
         // /de/aufgabe (no slash) and /de/aufgabe/index.html → 301.
-        if (preg_match('~^/([a-z]{2})/((?:[a-z0-9]+/)*[a-z0-9]+)(?:\.html)?$~', $path, $m)
+        if (preg_match('~^/([a-z]{2})/((?:[a-z0-9-]+/)*[a-z0-9-]+)(?:\.html)?$~', $path, $m)
             && !str_contains($path, '.')) {
             return ['status' => 301, 'redirect' => '/' . $m[1] . '/' . $m[2] . '/'];
         }
