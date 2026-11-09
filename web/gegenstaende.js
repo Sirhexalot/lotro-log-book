@@ -199,6 +199,9 @@
 		var schluessel = (daten.katKey || [])[katWert] || '';
 		if (schluessel === 'WEAPON') { return ['platz', 'art']; }
 		if (schluessel === 'ARMOUR') { return ['art', 'platz']; }
+		// Plain items are jewellery, trophies and the like: their slot is the
+		// only honest grouping the data offers ("Finger", "Handgelenk", …).
+		if (schluessel === 'ITEM') { return ['platz']; }
 		return ['art'];
 	}
 
@@ -268,9 +271,11 @@
 				kinder[erste] = kinder[erste] || {};
 				kinder[erste][zweite] = (kinder[erste][zweite] || 0) + 1;
 			});
-			var ersteWerte = Object.keys(kinder).map(Number).sort(function (a, b) {
-				return (daten.art[a] || '').localeCompare(daten.art[b] || '', 'de');
-			});
+			var ersteWerte = Object.keys(kinder).map(Number)
+				.filter(function (wert) { return beschriftung(ebenen[0], wert).trim() !== ''; })
+				.sort(function (a, b) {
+					return beschriftung(ebenen[0], a).localeCompare(beschriftung(ebenen[0], b), 'de');
+				});
 			// Ein gesetzter Filter muss seinen Zweig aufklappen, sonst ist der
 			// Haken unsichtbar und der Filter scheinbar wirkungslos.
 			function hatAuswahl() {
@@ -288,7 +293,10 @@
 				'kat', katWert, 0, ersteWerte.length > 0, offen));
 			if (!offen) { return; }
 			ersteWerte.forEach(function (ersteWert) {
-				var zweiteWerte = Object.keys(kinder[ersteWert]).map(Number);
+				var zweiteWerte = Object.keys(kinder[ersteWert]).map(Number)
+					.filter(function (wert) {
+						return !ebeneZweite || beschriftung(ebeneZweite, wert).trim() !== '';
+					});
 				var ebeneErste = ebenen[0];
 				var ebeneZweite = ebenen[1];
 				var offenZweit = BAUM_OFFEN[ebeneErste + ':' + ersteWert];

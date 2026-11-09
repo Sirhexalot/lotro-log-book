@@ -59,8 +59,15 @@ def sprache_datei(sprache, items, typen):
         kat = KATEGORIEN.index(kat) if kat in KATEGORIEN else -1
         platz = (item.get('slot') or '').strip()
         platz = ' '.join(platz.split())
+        # Right-hand and left-hand jewellery share one label; two entries for
+        # "Finger" would split the same thing.
+        for seite in ('RIGHT_', 'LEFT_'):
+            if platz.startswith(seite):
+                platz = platz[len(seite):]
         platz_id = -1
-        if platz and kat in (0, 1):
+        # Also for plain items: jewellery and the like are only told apart by
+        # their slot, and that is what people filter for.
+        if platz and kat in (0, 1, 2):
             if platz not in platz_index:
                 platz_index[platz] = len(plaetze)
                 plaetze.append(namen.get(platz) or platz.replace('_', ' ').title())
