@@ -293,7 +293,6 @@
 
 	function adresseSchreiben() {
 		var parameter = new URLSearchParams();
-		parameter.set('lang', sprache);
 		if (S.q) { parameter.set('q', S.q); }
 		['kat', 'qual', 'platz', 'art'].forEach(function (name) {
 			if (S[name].length) { parameter.set(name, S[name].join(',')); }

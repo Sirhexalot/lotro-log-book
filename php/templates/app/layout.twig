@@ -6,6 +6,9 @@
 <html lang="{{ lang }}" data-sprache="{{ lang }}">
 <head>
 <meta charset="utf-8">
+{# The application scripts load their data with relative paths ("daten-de.js").
+   They used to sit at the site root; the base keeps them there. #}
+<base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block seite_titel %}{{ page_seo.title }} – LOTRO Log Book{% endblock %}</title>
 <meta name="description" content="{{ page_seo.description }}">
@@ -25,6 +28,7 @@
 {{ tracking|raw }}
 <link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
+{% block stile %}{% endblock %}
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
 <body{{ block('koerper_attribute') }}>
@@ -33,6 +37,7 @@
 	<div class="kopf-innen">
 		<h1 data-t="produkt">LOTRO Log Book</h1>
 		<nav class="menue" id="menue" aria-label="Menü"></nav>
+		{% block kopf_extra %}{% endblock %}
 		<nav class="sprachen" aria-label="Sprache">
 			{% for sprache in sprachen %}<a class="sprach-knopf" href="{{ sprache.url }}" hreflang="{{ sprache.lang }}" lang="{{ sprache.lang }}"{% if sprache.aktiv %} aria-current="page"{% endif %}>{{ sprache.label }}</a>
 			{% endfor %}
@@ -40,10 +45,14 @@
 	</div>
 </header>
 
+{% block vor_haupt %}{% endblock %}
+
 {% block haupt %}{% endblock %}
 
 {% block fuss %}{% endblock %}
 
+{# The build used to set this inline; the map reads it for its images. #}
+<script>window.MQL_BILD_PFAD = 'karten/{{ lang }}/';</script>
 {% block skripte %}{% endblock %}
 </body>
 </html>

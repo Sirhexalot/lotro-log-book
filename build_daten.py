@@ -593,6 +593,9 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
             # they stand in the catalogue; the page applies the same rule as the
             # plugin, using the progress the visitor loads.
             **({'x': 1} if field(record, 'x', 0) == 1 else {}),
+            # mp: monster play. Creep-side content a normal character never has
+            # in its journal; visible, but never counted as attainable.
+            **({'mp': 1} if field(record, 'mp', 0) == 1 else {}),
             **({'e': [str(mate) for mate in step_list(field(record, 'ex'))]}
                if field(record, 'ex') else {}),
         })

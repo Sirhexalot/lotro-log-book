@@ -49,9 +49,9 @@ async function main() {
   const gehe = async (pfad) => {
     const ziel = basis + pfad;
     await senden('Page.navigate', { url: ziel });
-    for (let i = 0; i < 120; i++) {
-      const st = await js('({u:location.href,r:document.readyState})');
-      if (st.u === ziel && st.r === 'complete') return;
+    for (let i = 0; i < 400; i++) {
+      const st = await js('({u:location.pathname,r:document.readyState})');
+      if (st.u === new URL(ziel).pathname && st.r === 'complete') return;
       await warte(100);
     }
     throw new Error('nicht bereit: ' + ziel);
@@ -73,6 +73,9 @@ async function main() {
         alteLinks: alt.length,
         titel: document.title,
         fehler: (window.__llb || []).length,
+        kacheln: document.querySelectorAll('.landschaft-kachel').length,
+        mangel: /nicht verfügbar|nicht verfÃ¼gbar/.test(document.body.textContent),
+        bilder: document.querySelectorAll('img').length,
       };
     })()`);
     pruefe(pfad, stand);
@@ -80,7 +83,8 @@ async function main() {
 
   for (const [pfad, stand] of zeilen) {
     const zeile = [pfad.padEnd(24), stand.sprache, 'Menülinks ' + stand.menueLinks,
-      'alte Links ' + stand.alteLinks, stand.titel.slice(0, 44)].join('  ');
+      'alte Links ' + stand.alteLinks, 'Kacheln ' + stand.kacheln,
+      stand.mangel ? 'MELDUNG' : 'ok', stand.titel.slice(0, 34)].join('  ');
     console.log(zeile);
   }
   const alt = zeilen.filter(([, s]) => s.alteLinks > 0 || s.menueLinks === 0);

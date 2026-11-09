@@ -70,6 +70,8 @@
 	function zustandVon(quest) {
 		if (fertig[quest.i] === true) { return 'fertig'; }
 		if (quest.x === 1) { return 'sitzung'; }
+		// Monster play: fought as a creep, never in a normal journal.
+		if (quest.mp === 1) { return 'monster'; }
 		if (hatFortschritt && quest.e) {
 			for (var index = 0; index < quest.e.length; index += 1) {
 				if (fertig[quest.e[index]] === true) { return 'ausgeschlossen'; }
@@ -118,7 +120,7 @@
 
 	function gezaehlt(quest) {
 		var zustand = zustandVon(quest);
-		return zustand !== 'sitzung' && zustand !== 'ausgeschlossen';
+		return zustand !== 'sitzung' && zustand !== 'ausgeschlossen' && zustand !== 'monster';
 	}
 
 	// --- State ---------------------------------------------------------
@@ -710,6 +712,7 @@
 				? ersetze(t('haufen_titel'), [stelle.quests.length]) + '\n' + stelle.quests.slice(0, 8).map(function (q) { return '· ' + q.n; }).join('\n')
 				: stelle.quests[0].n + (stelle.quests[0].l ? ' (' + t('stufe') + ' ' + stufeText(stelle.quests[0]) + ')' : '') +
 					(zustandVon(stelle.quests[0]) === 'sitzung' ? ' – ' + t('sitzungsspiel') :
+					 zustandVon(stelle.quests[0]) === 'monster' ? ' – ' + t('monsterspiel') :
 						(zustandVon(stelle.quests[0]) === 'ausgeschlossen' ? ' – ' + t('nicht_moeglich') :
 							(fertig[stelle.quests[0].i] ? t('erledigt_suffix') : ''))) +
 					(!stelle.quests[0].gt ? ' – ' + t('zielort_hinweis') : '');
@@ -1590,7 +1593,7 @@
 			var lage = zustandVon(quest);
 			var erledigt = lage === 'fertig';
 			zeile.classList.add(erledigt ? 'erledigt' : 'offen');
-			if (lage === 'sitzung' || lage === 'ausgeschlossen') {
+			if (lage === 'sitzung' || lage === 'ausgeschlossen' || lage === 'monster') {
 				// Not counted: dim it and say why, but keep the row (the quest exists).
 				zeile.classList.remove('offen');
 				zeile.classList.add('nicht-gezaehlt');
@@ -1609,8 +1612,9 @@
 				questName.appendChild(geber);
 			}
 			zeile.appendChild(questName);
-			if (lage === 'sitzung' || lage === 'ausgeschlossen') {
-				var vermerk = eltern('span', lage === 'sitzung' ? t('sitzungsspiel') : t('nicht_moeglich'));
+			if (lage === 'sitzung' || lage === 'ausgeschlossen' || lage === 'monster') {
+				var vermerk = eltern('span', lage === 'sitzung' ? t('sitzungsspiel')
+					: lage === 'monster' ? t('monsterspiel') : t('nicht_moeglich'));
 				vermerk.className = 'vermerk';
 				questName.appendChild(vermerk);
 			}
@@ -1719,7 +1723,7 @@
 		}
 		var gezaehlt = listeGefiltert.filter(function (quest) {
 			var lage = zustandVon(quest);
-			return lage !== 'sitzung' && lage !== 'ausgeschlossen';
+			return lage !== 'sitzung' && lage !== 'ausgeschlossen' && lage !== 'monster';
 		}).length;
 		// The rows no longer carry a level; the range belongs to the whole area.
 		var spanne = stufenSpanne(quelle);
@@ -1887,6 +1891,7 @@
 		if (hatFortschritt) {
 			if (lage === 'fertig') { teil(t('erledigt')); }
 			else if (lage === 'sitzung') { teil(t('sitzungsspiel')); }
+			else if (lage === 'monster') { teil(t('monster_hinweis')); }
 			else if (lage === 'ausgeschlossen') { teil(t('nicht_moeglich')); }
 			else if (lage === 'laufend') { teil(t('in_arbeit') + ' · ' + laufText(quest)); }
 			else if (machbar(quest)) { teil(t('machbar_jetzt')); }
@@ -2092,7 +2097,10 @@
 		}
 
 		// Why an entry is not counted. Same wording as the plugin.
-		if (lage === 'sitzung') {
+		if (lage === 'monster') {
+			hinweis.textContent = t('monster_hinweis');
+			hinweis.hidden = false;
+		} else if (lage === 'sitzung') {
 			var sitzungHinweis = eltern('p', t('sitzung_hinweis'));
 			sitzungHinweis.className = 'vermerk-text';
 			detail.appendChild(sitzungHinweis);

@@ -30,8 +30,10 @@ if (preg_match($alt, $path)) {
     return true;
 }
 
-$file = realpath($webRoot . $path);
-if ($file !== false && is_file($file) && str_starts_with($file, realpath($webRoot))) {
+// The preview folder carries symlinks into the repository (and to the maps),
+// so the resolved path is not inside the root. A path without ".." is enough
+// here: this router only ever runs on the developer machine.
+if (!str_contains($path, '..') && is_file($webRoot . $path)) {
     return false;
 }
 

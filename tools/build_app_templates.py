@@ -42,9 +42,15 @@ def zerlege(text: str) -> dict:
     koerper = re.search(r'<body([^>]*)>', text).group(1).strip()
     haupt = re.search(r'<main([^>]*)>(.*?)</main>', text, re.S)
     skripte = re.findall(r'<script src="([a-z0-9.\-]+\.js)"></script>', text)
+    stile = [h for h in re.findall(r'<link rel="stylesheet" href="([^"]+)"', text)
+             if h not in ('style.css', 'gemeinsam.css')]
+    suche = re.search(r'<div class="globalsuche">.*?</div>\s*</div>', text, re.S)
+    mobil = re.search(r'<nav class="mobil-reiter".*?</nav>', text, re.S)
     fuss = re.search(r'<footer.*?</footer>', text, re.S)
     return {'titel': titel, 'koerper': koerper, 'haupt_attr': haupt.group(1).strip(),
-            'haupt': haupt.group(2).strip(), 'skripte': skripte,
+            'haupt': haupt.group(2).strip(), 'skripte': skripte, 'stile': stile,
+            'kopf_extra': suche.group(0) if suche else '',
+            'vor_haupt': mobil.group(0) if mobil else '',
             'fuss': fuss.group(0) if fuss else ''}
 
 
@@ -53,6 +59,12 @@ def vorlage(name: str, daten: dict) -> str:
     return """{%% extends 'app/layout.twig' %%}
 
 {%% block koerper_attribute %%}%(koerper)s{%% endblock %%}
+
+{%% block stile %%}%(stile)s{%% endblock %%}
+
+{%% block kopf_extra %%}%(kopf_extra)s{%% endblock %%}
+
+{%% block vor_haupt %%}%(vor_haupt)s{%% endblock %%}
 
 {%% block haupt %%}
 <main%(attr)s>
@@ -69,7 +81,10 @@ def vorlage(name: str, daten: dict) -> str:
        'koerper': (' ' + daten['koerper']) if daten['koerper'] else '',
        'attr': (' ' + daten['haupt_attr']) if daten['haupt_attr'] else '',
        'haupt': daten['haupt'],
-       'skripte': skripte, 'fuss': daten['fuss']}
+       'skripte': skripte, 'fuss': daten['fuss'],
+       'stile': '\n'.join('<link rel="stylesheet" href="/%s?v={{ asset_stand }}">' % s
+                          for s in daten['stile']),
+       'kopf_extra': daten['kopf_extra'], 'vor_haupt': daten['vor_haupt']}
 
 
 def main() -> int:
