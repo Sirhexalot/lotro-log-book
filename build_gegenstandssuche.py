@@ -16,9 +16,10 @@ groups by the game's words instead of inventing buckets.
 """
 import html
 import json
-import re
 import xml.etree.ElementTree as ElementTree
 from pathlib import Path
+
+from itemnamen import sauberer_name
 
 HIER = Path(__file__).resolve().parent
 WEB = HIER / 'web'
@@ -104,13 +105,6 @@ def enum_namen(name: str) -> dict:
     return codes
 
 
-def klare_name(text):
-    """Item names still carry export markers: \\q for quotes, [n]/[i] tags."""
-    text = str(text or '').replace('\\q', '"')
-    text = re.sub(r'\[[A-Za-z]{1,4}\]', '', text)
-    return re.sub(r'\s{2,}', ' ', text).strip()
-
-
 def qualitaet(wert):
     if isinstance(wert, int):
         return wert if 1 <= wert <= 5 else 0
@@ -153,10 +147,10 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
         klasse_code = (klassen.get(ident) or {}).get('klasse') or ''
         gattung_code = (klassen.get(ident) or {}).get('gattung') or ''
 
-        name = klare_name((quelle.get('n') or {}).get(sprache)
-                          or (item.get('n') or {}).get(sprache)
-                          or (quelle.get('n') or {}).get('en')
-                          or (item.get('n') or {}).get('en') or '')
+        name = sauberer_name((quelle.get('n') or {}).get(sprache)
+                             or (item.get('n') or {}).get(sprache)
+                             or (quelle.get('n') or {}).get('en')
+                             or (item.get('n') or {}).get('en') or '', sprache)
         if not name:
             continue
 

@@ -129,6 +129,19 @@ class GegenstandssucheTests(unittest.TestCase):
             andere = [z for z in daten['e'] if z[3] != stelle and z[9] >= 0]
             self.assertFalse(andere, sprache)
 
+    def test_names_carry_no_export_markup(self):
+        """A title must read like the game's title, not like the DAT string."""
+        for sprache in SPRACHEN:
+            daten = lies(sprache)
+            for zeile in daten['e']:
+                for zeichen in ('\\', '$', '[', ']'):
+                    self.assertNotIn(zeichen, zeile[1], (sprache, zeile))
+        namen = {zeile[0]: zeile[1] for zeile in lies('de')['e']}
+        # The two titles that were visibly wrong on the page.
+        self.assertEqual(namen['70017CB2'], 'Erkunder von Ghân-gharâf')
+        self.assertEqual(namen['7005FD7A'],
+                         '\u201eEssenz des lebhaften Erkunders\u201c-Kiste')
+
     def test_page_links_to_the_browser(self):
         # The menu builds one address per language, never an .html form.
         texte = (WEB / 'menue.js').read_text(encoding='utf-8')

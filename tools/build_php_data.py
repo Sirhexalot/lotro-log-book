@@ -34,6 +34,8 @@ HIER = Path(__file__).resolve().parents[1]
 DATEN = HIER / 'daten'
 WEB = HIER / 'web'
 sys.path.insert(0, str(HIER))
+from itemnamen import sauberer_name  # noqa: E402
+
 SPRACHEN = ('de', 'en', 'fr')
 SCHEMA = 1
 
@@ -259,6 +261,9 @@ ITEM_BONI: dict | None = None
 
 BONI_DATEI = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
                   '/items-stats-2026-11-08/items-stats.json')
+# Der vollständige Gegenstands-Export: Symbol, Art und ein sauberer Name.
+VOLL_DATEI = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
+                  '/items-2026-11-08/items.json')
 
 
 def load_item_context(builder, model, lang):
@@ -267,6 +272,21 @@ def load_item_context(builder, model, lang):
     from php_viewmodel import ItemContext
     if ITEM_DETAILS is None:
         ITEM_DETAILS = json.loads((DATEN / 'gegenstand-details.json').read_text(encoding='utf-8')).get('items') or {}
+        # Die Ausrüstungsdatei trägt den Namen nur für einen Teil der
+        # Gegenstände und mit Export-Markup; der volle Export ist die Quelle.
+        voll = (json.loads(VOLL_DATEI.read_text(encoding='utf-8')).get('items') or {}
+                if VOLL_DATEI.is_file() else {})
+        for ident, eintrag in ITEM_DETAILS.items():
+            namen = eintrag.get('name')
+            if not isinstance(namen, dict):
+                namen = eintrag['name'] = {}
+            quelle = (voll.get(str(ident).upper()) or {}).get('n') or {}
+            for sprache in SPRACHEN:
+                sauber = sauberer_name(quelle.get(sprache), sprache)
+                if sauber:
+                    namen[sprache] = sauber
+                elif namen.get(sprache):
+                    namen[sprache] = sauberer_name(namen[sprache], sprache)
         ITEM_SETS = json.loads((DATEN / 'gegenstand-sets.json').read_text(encoding='utf-8')).get('sets') or {}
         ITEM_LABELS = json.loads((DATEN / 'gegenstand-stat-labels.json').read_text(encoding='utf-8'))
         ITEM_TYPEN = json.loads((DATEN / 'gegenstand-typen.json').read_text(encoding='utf-8'))

@@ -18,6 +18,8 @@ import json
 import re
 from pathlib import Path
 
+from itemnamen import sauberer_name
+
 HIER = Path(__file__).resolve().parent
 WEB = HIER / 'web'
 DATEN = HIER / 'daten'
@@ -187,12 +189,19 @@ def baue():
                 continue
             e['vor'].append(list(spalte))
 
-    # 5. Icon: the full item export knows the client's symbol for every item.
+    # 5. Icon and name: the full item export knows every item, the equipment
+    # file only a part of them and with the export's markup still in the name.
     voll = json.loads(VOLL.read_text(encoding='utf-8')).get('items', {}) if VOLL.is_file() else {}
     for iid, e in items.items():
-        symbol = (voll.get(iid) or {}).get('ic')
+        eintrag = voll.get(iid) or {}
+        symbol = eintrag.get('ic')
         if symbol:
             e['ic'] = int(symbol)
+        namen = eintrag.get('n') or {}
+        for sprache in SPRACHEN:
+            sauber = sauberer_name(namen.get(sprache), sprache)
+            if sauber:
+                e['n'][sprache] = sauber
 
     for e in items.values():
         e['zutat'] = sorted(set(e['zutat']))
