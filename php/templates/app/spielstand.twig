@@ -101,13 +101,13 @@ cd "$C/app" &amp;&amp; WINEPREFIX="$S/prefix" WINEMSYNC=1 WINEESYNC=1 WINEDEBUG=
 {% block fuss %}{% endblock %}
 
 {% block skripte %}
-<script src="/texte.js" defer></script>
-<script src="/texte-spielstand.js" defer></script>
-<script src="/texte-logbuch.js" defer></script>
-<script src="/texte-site.js" defer></script>
-<script src="/sprache.js" defer></script>
-<script src="/speicher.js" defer></script>
-<script src="/menue.js" defer></script>
-<script src="/companion.js" defer></script>
-<script src="/spielstand.js" defer></script>
+<script src="/texte.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-spielstand.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-logbuch.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-site.js?v={{ asset_stand }}" defer></script>
+<script src="/sprache.js?v={{ asset_stand }}" defer></script>
+<script src="/speicher.js?v={{ asset_stand }}" defer></script>
+<script src="/menue.js?v={{ asset_stand }}" defer></script>
+<script src="/companion.js?v={{ asset_stand }}" defer></script>
+<script src="/spielstand.js?v={{ asset_stand }}" defer></script>
 {% endblock %}

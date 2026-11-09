@@ -55,7 +55,8 @@ def zerlege(text: str) -> dict:
 
 
 def vorlage(name: str, daten: dict) -> str:
-    skripte = '\n'.join('<script src="/%s" defer></script>' % datei for datei in daten['skripte'])
+    skripte = '\n'.join('<script src="/%s?v={{ asset_stand }}" defer></script>' % datei
+                         for datei in daten['skripte'])
     return """{%% extends 'app/layout.twig' %%}
 
 {%% block koerper_attribute %%}%(koerper)s{%% endblock %%}

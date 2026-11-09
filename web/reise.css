@@ -104,7 +104,13 @@ main.reise {
 	font-weight: bold;
 	cursor: pointer;
 }
-.reise-knopf:hover { filter: brightness(1.08); }
+.reise-knopf:hover,
+.reise-knopf:focus-visible {
+	/* The global button hover paints a dark background; gold stays gold. */
+	background: var(--gold);
+	color: var(--grund);
+	filter: brightness(1.08);
+}
 
 /* Suggestions: name left, area right, keyboard-navigable. */
 .reise-vorschlaege {
@@ -186,7 +192,7 @@ main.reise {
 	cursor: pointer;
 }
 .reise-varianten button + button { border-left: 1px solid var(--rand); }
-.reise-varianten button:hover { color: var(--text); }
+.reise-varianten button:hover { color: var(--text); background: var(--fläche-hell); }
 .reise-varianten button[aria-pressed="true"] { background: var(--fläche-hell); color: var(--gold); }
 .reise-varianten button small { display: block; font-size: .95em; opacity: .8; }
 

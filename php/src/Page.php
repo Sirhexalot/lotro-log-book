@@ -167,10 +167,28 @@ final class Page
                 'fr' => 'Carte du Pays de Bree avec repères de quêtes',
             ][$lang],
             'tracking' => $this->shell->tracking(),
-            'asset_stand' => substr(md5((string) filemtime($this->shell->webRoot() . '/style.css')
-                . (string) filemtime($this->shell->webRoot() . '/gemeinsam.css')), 0, 10),
+            'asset_stand' => $this->assetStand(),
         ];
         return $this->view->render('app/' . $template . '.twig', $context);
+    }
+
+    /** Stamp for every app script and stylesheet.
+     *
+     * The URL has to change when any of them changes, not only the two base
+     * stylesheets: otherwise a browser keeps an old texte-reise.js or
+     * reise.css and the page shows a key name instead of its text.
+     */
+    private function assetStand(): string
+    {
+        $root = $this->shell->webRoot();
+        $teile = [];
+        foreach (['*.js', '*.css'] as $muster) {
+            foreach (glob($root . '/' . $muster) ?: [] as $datei) {
+                $teile[] = basename($datei) . ':' . filemtime($datei);
+            }
+        }
+        sort($teile);
+        return substr(md5(implode('|', $teile)), 0, 10);
     }
 
     private function listCrumbs(string $kind): string
