@@ -123,3 +123,6 @@ body { background: var(--grund); color: var(--text); }
 	.gs-suche input[type="search"] { flex: 1 1 100%; }
 	.gs-suche .knopf { flex: 1 1 100%; text-align: center; }
 }
+
+/* The result rows are the place where the symbol has to carry the eye. */
+.gs-liste .symbol { width: 26px; height: 26px; vertical-align: -7px; }

@@ -2,7 +2,9 @@
 
 {% block koerper_attribute %} data-seite="karte" data-pane="liste"{% endblock %}
 
-{% block stile %}<link rel="stylesheet" href="/landschaft.css?v={{ asset_stand }}">{% endblock %}
+{% block stile %}<link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/landschaft.css?v={{ asset_stand }}">{% endblock %}
 
 {% block kopf_extra %}<div class="globalsuche">
 			<input id="suche" type="search" data-t-ph="suche_global" placeholder="Suchen" autocomplete="off" aria-controls="suchergebnis">

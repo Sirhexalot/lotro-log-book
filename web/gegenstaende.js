@@ -119,26 +119,38 @@
 		block.appendChild(eltern('h2', titel));
 		var listeDer = eltern('div', null);
 		listeDer.className = 'gs-optionen';
-		var grenze = 8;
-		eintraege.forEach(function (eintrag, nummer) {
-			if (nummer >= grenze) { eintrag.zeichen.hidden = true; }
-			listeDer.appendChild(eintrag.zeichen);
-		});
-		if (eintraege.length > grenze) {
+		// Enough values to see the shape of the facet without endless lists, and
+		// a chosen value is never hidden behind "show more".
+		var grenze = 12;
+		function gewaehlt(eintrag) {
+			var haken = eintrag.zeichen.querySelector('input');
+			return Boolean(haken && haken.checked);
+		}
+		function zeige(offen) {
+			var versteckt = 0;
+			eintraege.forEach(function (eintrag, nummer) {
+				var sichtbar = offen || nummer < grenze || gewaehlt(eintrag);
+				eintrag.zeichen.hidden = !sichtbar;
+				if (!sichtbar) { versteckt += 1; }
+			});
+			return versteckt;
+		}
+		eintraege.forEach(function (eintrag) { listeDer.appendChild(eintrag.zeichen); });
+		var versteckt = zeige(false);
+		if (versteckt > 0) {
 			var rest = eltern('button', null);
 			rest.type = 'button';
 			rest.className = 'gs-mehr-optionen';
 			var offen = false;
+			var zahl = versteckt;
 			function beschriften() {
 				rest.textContent = offen ? '− ' + T('gs_weniger')
-					: '+ ' + (eintraege.length - grenze) + ' ' + T('gs_mehr');
+					: '+ ' + zahl + ' ' + T('gs_mehr');
 			}
 			beschriften();
 			rest.addEventListener('click', function () {
 				offen = !offen;
-				eintraege.forEach(function (eintrag, nummer) {
-					if (nummer >= grenze) { eintrag.zeichen.hidden = !offen; }
-				});
+				zahl = zeige(offen);
 				beschriften();
 			});
 			listeDer.appendChild(rest);

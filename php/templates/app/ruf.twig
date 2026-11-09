@@ -2,7 +2,8 @@
 
 {% block koerper_attribute %} data-seite="ruf" class="seite-text"{% endblock %}
 
-{% block stile %}{% endblock %}
+{% block stile %}<link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">{% endblock %}
 
 {% block kopf_extra %}{% endblock %}
 

@@ -42,8 +42,8 @@ def zerlege(text: str) -> dict:
     koerper = re.search(r'<body([^>]*)>', text).group(1).strip()
     haupt = re.search(r'<main([^>]*)>(.*?)</main>', text, re.S)
     skripte = re.findall(r'<script src="([a-z0-9.\-]+\.js)"></script>', text)
-    stile = [h for h in re.findall(r'<link rel="stylesheet" href="([^"]+)"', text)
-             if h not in ('style.css', 'gemeinsam.css')]
+    # Every page brings its own stylesheets; the shell must not add any.
+    stile = re.findall(r'<link rel="stylesheet" href="([^"]+)"', text)
     suche = re.search(r'<div class="globalsuche">.*?</div>\s*</div>', text, re.S)
     mobil = re.search(r'<nav class="mobil-reiter".*?</nav>', text, re.S)
     fuss = re.search(r'<footer.*?</footer>', text, re.S)
