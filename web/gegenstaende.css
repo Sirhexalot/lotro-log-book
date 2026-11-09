@@ -126,3 +126,16 @@ body { background: var(--grund); color: var(--text); }
 
 /* The result rows are the place where the symbol has to carry the eye. */
 .gs-liste .symbol { width: 26px; height: 26px; vertical-align: -7px; }
+
+/* Kategoriebaum wie im Auktionshaus: Kategorie › Art › Platz. */
+.gs-baum .gs-knoten { display: flex; align-items: center; gap: 2px; }
+.gs-baum .gs-option { flex: 1; }
+.gs-pfeil {
+	width: 18px; height: 22px; padding: 0; border: 0; background: none; cursor: pointer;
+	color: var(--schwach); font-size: .8rem; line-height: 1;
+}
+.gs-pfeil:hover { color: var(--gold); }
+.gs-pfeil-leer { display: inline-block; width: 18px; }
+.gs-tiefe-1 { padding-left: 14px; }
+.gs-tiefe-2 { padding-left: 30px; }
+.gs-tiefe-2 .gs-option { font-size: .92rem; }

@@ -48,11 +48,13 @@
 	}
 
 	function passt(z, ohne) {
-		if (ohne !== 'kat' && S.kat.length && S.kat.indexOf(z[3]) < 0) { return false; }
-		if (ohne !== 'qual' && S.qual.length && S.qual.indexOf(z[4]) < 0) { return false; }
-		if (ohne !== 'platz' && S.platz.length && S.platz.indexOf(z[5]) < 0) { return false; }
-		if (ohne !== 'art' && S.art.length && S.art.indexOf(z[6]) < 0) { return false; }
-		if (ohne !== 'stufe' && (S.von !== null || S.bis !== null)) {
+		var aus = Array.isArray(ohne) ? ohne : (ohne ? [ohne] : []);
+		function gilt(name) { return aus.indexOf(name) < 0; }
+		if (gilt('kat') && S.kat.length && S.kat.indexOf(z[3]) < 0) { return false; }
+		if (gilt('qual') && S.qual.length && S.qual.indexOf(z[4]) < 0) { return false; }
+		if (gilt('platz') && S.platz.length && S.platz.indexOf(z[5]) < 0) { return false; }
+		if (gilt('art') && S.art.length && S.art.indexOf(z[6]) < 0) { return false; }
+		if (gilt('stufe') && (S.von !== null || S.bis !== null)) {
 			var stufe = z[7] || 0;
 			if (S.von !== null && stufe < S.von) { return false; }
 			if (S.bis !== null && (stufe === 0 || stufe > S.bis)) { return false; }
@@ -185,6 +187,135 @@
 		});
 	}
 
+
+	/* --- Kategoriebaum ------------------------------------------------ */
+
+	/* Wie im Auktionshaus: erst die grobe Kategorie, darunter die Art, darunter
+	 * der Ausrüstungsplatz. Bei Waffen steht die Handart vorn (Fernkampf,
+	 * Haupthand …), weil sie dort die erste sinnvolle Frage ist. */
+	var BAUM_OFFEN = {};
+
+	function baumEbenen(katWert) {
+		var schluessel = (daten.katKey || [])[katWert] || '';
+		if (schluessel === 'WEAPON') { return ['platz', 'art']; }
+		if (schluessel === 'ARMOUR') { return ['art', 'platz']; }
+		return ['art'];
+	}
+
+	function baumZaehler() {
+		var zaehler = { kat: {}, art: {}, platz: {}, paar: {} };
+		function plus(schluessel, feld) {
+			zaehler[feld][schluessel] = (zaehler[feld][schluessel] || 0) + 1;
+		}
+		daten.e.forEach(function (z) {
+			// Die drei Ebenen selbst schraenken die Zaehlung nicht ein, sonst
+			// waere nach dem ersten Haken jeder Nachbar auf 0.
+			if (!passt(z, ['kat', 'art', 'platz'])) { return; }
+			plus(z[3], 'kat'); plus(z[6], 'art'); plus(z[5], 'platz');
+			var paar = z[3] + '|' + z[6] + '|' + z[5];
+			zaehler.paar[paar] = (zaehler.paar[paar] || 0) + 1;
+		});
+		return zaehler;
+	}
+
+	function baumKnoten(text, anzahl, ebene, wert, tiefe, hatKinder, offen) {
+		var zeile = eltern('div', null);
+		zeile.className = 'gs-knoten gs-tiefe-' + tiefe;
+		if (hatKinder) {
+			var pfeil = eltern('button', offen ? '▾' : '▸');
+			pfeil.type = 'button';
+			pfeil.className = 'gs-pfeil';
+			pfeil.setAttribute('aria-expanded', offen ? 'true' : 'false');
+			pfeil.setAttribute('aria-label', text);
+			pfeil.addEventListener('click', function () {
+				BAUM_OFFEN[ebene + ':' + wert] = !offen;
+				filterZeichnen();
+			});
+			zeile.appendChild(pfeil);
+		} else {
+			var platzhalter = eltern('span', '');
+			platzhalter.className = 'gs-pfeil gs-pfeil-leer';
+			zeile.appendChild(platzhalter);
+		}
+		zeile.appendChild(knopf(S[ebene].indexOf(wert) >= 0, text, anzahl || null, function (an) {
+			var stelle = S[ebene].indexOf(wert);
+			if (an && stelle < 0) { S[ebene].push(wert); }
+			if (!an && stelle >= 0) { S[ebene].splice(stelle, 1); }
+			S.sichtbar = 50;
+			zeichnen();
+		}));
+		return zeile;
+	}
+
+	function kategorieBaum() {
+		var block = eltern('section', null);
+		block.className = 'gs-gruppe gs-baum';
+		block.appendChild(eltern('h2', T('gs_kategorie')));
+		var zaehler = baumZaehler();
+
+		var kats = Object.keys(zaehler.kat).map(Number)
+			.filter(function (wert) { return beschriftung('kat', wert).trim() !== ''; });
+		S.kat.forEach(function (wert) { if (kats.indexOf(wert) < 0) { kats.push(wert); } });
+		kats.sort(function (a, b) { return (zaehler.kat[b] || 0) - (zaehler.kat[a] || 0); });
+
+		kats.forEach(function (katWert) {
+			var kinder = {};
+			var ebenen = baumEbenen(katWert);
+			daten.e.forEach(function (z) {
+				if (z[3] !== katWert || !passt(z, ['kat', 'art', 'platz'])) { return; }
+				var erste = z[ebenen[0] === 'art' ? 6 : 5];
+				var zweite = z[ebenen[0] === 'art' ? 5 : 6];
+				kinder[erste] = kinder[erste] || {};
+				kinder[erste][zweite] = (kinder[erste][zweite] || 0) + 1;
+			});
+			var ersteWerte = Object.keys(kinder).map(Number).sort(function (a, b) {
+				return (daten.art[a] || '').localeCompare(daten.art[b] || '', 'de');
+			});
+			// Ein gesetzter Filter muss seinen Zweig aufklappen, sonst ist der
+			// Haken unsichtbar und der Filter scheinbar wirkungslos.
+			function hatAuswahl() {
+				return ersteWerte.some(function (ersteWert) {
+					if (S[ebenen[0]].indexOf(ersteWert) >= 0) { return true; }
+					if (!ebenen[1]) { return false; }
+					return Object.keys(kinder[ersteWert]).some(function (zweite) {
+						return S[ebenen[1]].indexOf(Number(zweite)) >= 0;
+					});
+				});
+			}
+			var offen = BAUM_OFFEN['kat:' + katWert];
+			if (offen === undefined) { offen = hatAuswahl(); }
+			block.appendChild(baumKnoten(beschriftung('kat', katWert), zaehler.kat[katWert],
+				'kat', katWert, 0, ersteWerte.length > 0, offen));
+			if (!offen) { return; }
+			ersteWerte.forEach(function (ersteWert) {
+				var zweiteWerte = Object.keys(kinder[ersteWert]).map(Number);
+				var ebeneErste = ebenen[0];
+				var ebeneZweite = ebenen[1];
+				var offenZweit = BAUM_OFFEN[ebeneErste + ':' + ersteWert];
+				if (offenZweit === undefined) {
+					offenZweit = ebeneZweite ? S[ebeneZweite].some(function (wert) {
+						return zweiteWerte.indexOf(wert) >= 0;
+					}) : false;
+				}
+				var summe = Object.keys(kinder[ersteWert]).reduce(function (a, k) {
+					return a + kinder[ersteWert][k];
+				}, 0);
+				block.appendChild(baumKnoten(beschriftung(ebeneErste, ersteWert), summe,
+					ebeneErste, ersteWert, 1, Boolean(ebeneZweite) && zweiteWerte.length > 0, offenZweit));
+				if (!ebeneZweite || !offenZweit) { return; }
+				zweiteWerte.sort(function (a, b) {
+					return (daten.platz[a] || '').localeCompare(daten.platz[b] || '', 'de');
+				});
+				zweiteWerte.forEach(function (zweiteWert) {
+					block.appendChild(baumKnoten(beschriftung(ebeneZweite, zweiteWert),
+						kinder[ersteWert][zweiteWert], ebeneZweite, zweiteWert, 2, false, false));
+				});
+			});
+		});
+		if (!kats.length) { return null; }
+		return block;
+	}
+
 	function stufenFeld(werte) {
 		if (!isFinite(werte.kleinste) || werte.groesste <= 0) { return null; }
 		var block = eltern('section', null);
@@ -232,10 +363,8 @@
 		filterFeld.appendChild(kopf);
 
 		var teile = [
-			gruppe(T('gs_kategorie'), optionen('kat', auswahl('kat'))),
-			gruppe(T('gs_qualitaet'), optionen('qual', auswahl('qual'))),
-			gruppe(T('gs_platz'), optionen('platz', auswahl('platz'))),
-			gruppe(T('gs_art'), optionen('art', auswahl('art')))
+			kategorieBaum(),
+			gruppe(T('gs_qualitaet'), optionen('qual', auswahl('qual')))
 		];
 		var stufen = auswahl('stufe');
 		if (stufen.kleinste !== Infinity && stufen.groesste > 0) {
