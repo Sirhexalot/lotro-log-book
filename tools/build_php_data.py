@@ -146,11 +146,16 @@ def write_shards(target: Path, lang: str, kind: str, records: dict) -> int:
 
 def write_sitemaps(target: Path, sections: dict) -> None:
     """The URL set of every sitemap file, ready for PHP to render as XML."""
-    # Application pages stay files; the search and item pages are query driven
-    # and stay out of the sitemap, as before.
-    aus = {'404.html', 'suche.html', 'gegenstand.html', 'gegenstaende.html'}
-    seiten = sorted('/' + path.name for path in (HIER / 'web').glob('*.html')
-                    if path.name not in aus)
+    # Application pages now live at one address per language; the search pages
+    # are query driven and stay out of the sitemap, as before.
+    from php_viewmodel import APP_SEGMENTS
+    seiten = []
+    for lang, seiten_map in APP_SEGMENTS.items():
+        for page, segment in seiten_map.items():
+            if page in ('suche', 'gegenstandssuche'):
+                continue
+            seiten.append('/' + lang + '/' + (segment + '/' if segment else ''))
+    seiten = sorted(set(seiten))
     sections = dict(sections)
     sections['/sitemap-seiten.xml'] = seiten
     payload = {'schema': 1, 'sections': {name: urls for name, urls in sorted(sections.items())},

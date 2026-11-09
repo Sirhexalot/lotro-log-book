@@ -30,6 +30,61 @@ VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link',
         'meta', 'source', 'track', 'wbr'}
 
 
+# Application pages moved from "*.html?lang=de" to "/de/…/". Both sides are
+# normalised to the new form, so the comparison still catches every other
+# difference instead of drowning in the intended URL change.
+APP_SEGMENTE = {
+    'de': {'karte': 'karte', 'taten': 'karte/taten', 'gegenstandssuche': 'gegenstandssuche',
+           'handwerk': 'handwerk/rezepte', 'reise': 'reise', 'ruf': 'ruf',
+           'belohnungen': 'belohnungen', 'spielstand': 'spielstand',
+           'companion': 'companion', 'plugin': 'plugin', 'suche': 'suche'},
+    'en': {'karte': 'map', 'taten': 'map/deeds', 'gegenstandssuche': 'item-search',
+           'handwerk': 'crafting/recipes', 'reise': 'travel', 'ruf': 'reputation',
+           'belohnungen': 'rewards', 'spielstand': 'progress',
+           'companion': 'companion', 'plugin': 'plugin', 'suche': 'search'},
+    'fr': {'karte': 'carte', 'taten': 'carte/prouesses', 'gegenstandssuche': 'recherche-objets',
+           'handwerk': 'artisanat/recettes', 'reise': 'voyage', 'ruf': 'reputation',
+           'belohnungen': 'recompenses', 'spielstand': 'progression',
+           'companion': 'companion', 'plugin': 'plugin', 'suche': 'recherche'},
+}
+DATEI_ZU_SEITE = {
+    'index.html': 'karte', 'gegenstaende.html': 'gegenstandssuche', 'handwerk.html': 'handwerk',
+    'reise.html': 'reise', 'ruf.html': 'ruf', 'belohnungen.html': 'belohnungen',
+    'spielstand.html': 'spielstand', 'companion.html': 'companion', 'plugin.html': 'plugin',
+    'suche.html': 'suche',
+}
+
+
+def neue_app_url(url: str) -> str:
+    """Rewrite an application URL into its language-path form."""
+    from urllib.parse import parse_qsl, urlencode
+    pfad, _, abfrage = url.partition('?')
+    datei = pfad.rsplit('/', 1)[-1]
+    if datei == 'start.html':
+        return '/de/'
+    if datei in ('start-en.html', 'start-fr.html'):
+        return '/' + datei[6:8] + '/'
+    params = dict(parse_qsl(abfrage))
+    lang = params.pop('lang', 'de')
+    if lang not in APP_SEGMENTE:
+        lang = 'de'
+    if datei == 'gegenstand.html':
+        kennung = str(params.get('id') or '').upper()
+        if len(kennung) == 8 and all(c in '0123456789ABCDEF' for c in kennung):
+            return '/' + lang + '/' + {'de': 'gegenstand', 'en': 'item', 'fr': 'objet'}[lang] + '/' + kennung + '/'
+        datei = 'gegenstaende.html'
+        params.pop('id', None)
+    seite = DATEI_ZU_SEITE.get(datei)
+    if seite is None:
+        return url
+    if seite == 'karte' and params.get('art') == 'taten':
+        seite = 'taten'
+    params.pop('art', None)
+    ziel = '/' + lang + '/' + APP_SEGMENTE[lang][seite] + '/'
+    rest = urlencode(list(params.items()))
+    return ziel + ('?' + rest if rest else '')
+
+
 class Canonical(HTMLParser):
     """A normalized token stream of one HTML document."""
 
@@ -57,6 +112,8 @@ class Canonical(HTMLParser):
         out = []
         for name, value in attrs:
             value = '' if value is None else value
+            if name in ('href', 'src') and '.html?' in value:
+                value = neue_app_url(value)
             if name == 'href' or name == 'src':
                 value = re.sub(r'\?v=[0-9a-f]+', '?v=HASH', value)
             out.append((name, value))

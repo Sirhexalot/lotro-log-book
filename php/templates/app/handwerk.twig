@@ -1,0 +1,50 @@
+{% extends 'app/layout.twig' %}
+
+{% block koerper_attribute %} data-seite="handwerk" class="seite-text"{% endblock %}
+
+{% block haupt %}
+<main class="seite">
+<h2 data-t="hw_titel">Handwerk</h2>
+	<div class="reiter" role="tablist" id="hw-reiter">
+		<button type="button" data-hw="berufe" aria-pressed="true" data-t="hw_berufe">Berufe</button>
+		<button type="button" data-hw="rezepte" aria-pressed="false" data-t="hw_rezepte">Rezepte</button>
+		<button type="button" data-hw="rohstoffe" aria-pressed="false" data-t="hw_rohstoffe">Rohstoffe</button>
+	</div>
+
+	<section id="hw-berufe">
+		<p data-t="hw_text"></p>
+		<p class="meldung" id="hinweis"></p>
+		<div id="berufe"></div>
+	</section>
+
+	<section id="hw-rezepte" hidden>
+		<h2 id="rezepte" data-t="hw_rezepte">Rezepte</h2>
+		<p data-t="hw_rezepte_text">Ergebnis, Zutaten und kritischer Erfolg aus den Handwerksdaten.</p>
+		<p class="schwach" data-t="hw_rezepte_hinweis">Mit importiertem Spielstand zeigt jede Zeile, ob dein Charakter das Rezept schon kennt.</p>
+		<div id="rezepte-liste"></div>
+	</section>
+
+	<section id="hw-rohstoffe" hidden>
+		<h2 id="rohstoffe" data-t="hw_rohstoffe">Rohstoffe</h2>
+		<p data-t="hw_rohstoffe_text">Was ein Beruf auf welcher Stufe sammelt – und wo es in der Landschaft liegt.</p>
+		<p class="schwach" data-t="hw_rohstoffe_hinweis">Zahlen sind Fundstellen aus den Spieldaten. Ein Fleck kann mehrere Vorkommen tragen; welches gerade dort steht, wechselt im Spiel.</p>
+		<div id="rohstoffe-liste"></div>
+	</section>
+</main>
+{% endblock %}
+
+{% block fuss %}{% endblock %}
+
+{% block skripte %}
+<script src="/texte.js" defer></script>
+<script src="/texte-spielstand.js" defer></script>
+<script src="/texte-logbuch.js" defer></script>
+<script src="/texte-site.js" defer></script>
+<script src="/sprache.js" defer></script>
+<script src="/speicher.js" defer></script>
+<script src="/menue.js" defer></script>
+<script src="/referenz.js" defer></script>
+<script src="/handwerk.js" defer></script>
+<script src="/rezepte.js" defer></script>
+<script src="/rohstoffe.js" defer></script>
+{% endblock %}

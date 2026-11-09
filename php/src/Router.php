@@ -37,6 +37,16 @@ final class Router
             return ['status' => 404];
         }
 
+        // Application pages: /de/, /de/karte/, /de/karte/taten/, /de/ruf/ …
+        if (preg_match('~^/([a-z]{2})/?$~', $path, $m) && $this->catalogue->isLang($m[1])) {
+            return ['status' => 200, 'app' => 'start', 'lang' => $m[1]];
+        }
+        if (preg_match('~^/([a-z]{2})/((?:[a-z0-9-]+/)+)$~', $path, $m)) {
+            $app = $this->catalogue->appPage($m[1], $m[2]);
+            if ($app !== null) {
+                return ['status' => 200, 'app' => $app, 'lang' => $m[1]];
+            }
+        }
         // /de/aufgabe/700005C0.html → 301 to the canonical directory form.
         if (preg_match('~^/([a-z]{2})/([a-z]+)/([0-9A-Za-z_]+)\.html$~', $path, $m)) {
             return $this->canonical($m[1], $m[2], $m[3], true);
@@ -65,6 +75,47 @@ final class Router
         }
 
         return ['status' => 404];
+    }
+
+    /**
+     * Old application addresses, carried over with a 301.
+     *
+     * The language came as "?lang=de" and the map mode as "?art=taten". Both
+     * move into the path; every other parameter (id, q, kat, …) stays.
+     */
+    public function legacyTarget(string $path, array $query): ?string
+    {
+        $fest = ['/start.html' => 'de', '/start-en.html' => 'en', '/start-fr.html' => 'fr'];
+        $seiten = [
+            '/index.html' => 'karte', '/gegenstaende.html' => 'gegenstandssuche',
+            '/handwerk.html' => 'handwerk', '/reise.html' => 'reise', '/ruf.html' => 'ruf',
+            '/belohnungen.html' => 'belohnungen', '/spielstand.html' => 'spielstand',
+            '/companion.html' => 'companion', '/plugin.html' => 'plugin', '/suche.html' => 'suche',
+        ];
+        $lang = $query['lang'] ?? ($fest[$path] ?? 'de');
+        if (!$this->catalogue->isLang($lang)) {
+            $lang = 'de';
+        }
+        if (isset($fest[$path])) {
+            return $this->catalogue->appRoute($fest[$path], 'start');
+        }
+        if ($path === '/gegenstand.html') {
+            $id = strtoupper((string) ($query['id'] ?? ''));
+            if (preg_match('~^[0-9A-F]{8}$~', $id) && $this->data->has($lang, 'i', $id)) {
+                return $this->catalogue->route($lang, 'i', $id);
+            }
+            return $this->catalogue->appRoute($lang, 'gegenstandssuche');
+        }
+        if (!isset($seiten[$path])) {
+            return null;
+        }
+        $page = $seiten[$path];
+        if ($page === 'karte' && ($query['art'] ?? '') === 'taten') {
+            $page = 'taten';
+        }
+        unset($query['lang'], $query['art']);
+        $ziel = $this->catalogue->appRoute($lang, $page);
+        return $query === [] ? $ziel : $ziel . '?' . http_build_query($query);
     }
 
     /** An overview page is a data lookup; unknown paths stay 404. */

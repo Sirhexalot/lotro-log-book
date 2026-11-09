@@ -27,6 +27,33 @@ def klarer_name(text) -> str:
     return re.sub(r'\s{2,}', ' ', text).strip()
 
 
+# Application pages: language in the path, same segments as Catalogue.php.
+APP_SEGMENTS = {
+    'de': {'start': '', 'karte': 'karte', 'taten': 'karte/taten',
+           'gegenstandssuche': 'gegenstandssuche', 'handwerk': 'handwerk/rezepte',
+           'reise': 'reise', 'ruf': 'ruf', 'belohnungen': 'belohnungen',
+           'spielstand': 'spielstand', 'companion': 'companion', 'plugin': 'plugin',
+           'suche': 'suche'},
+    'en': {'start': '', 'karte': 'map', 'taten': 'map/deeds',
+           'gegenstandssuche': 'item-search', 'handwerk': 'crafting/recipes',
+           'reise': 'travel', 'ruf': 'reputation', 'belohnungen': 'rewards',
+           'spielstand': 'progress', 'companion': 'companion', 'plugin': 'plugin',
+           'suche': 'search'},
+    'fr': {'start': '', 'karte': 'carte', 'taten': 'carte/prouesses',
+           'gegenstandssuche': 'recherche-objets', 'handwerk': 'artisanat/recettes',
+           'reise': 'voyage', 'ruf': 'reputation', 'belohnungen': 'recompenses',
+           'spielstand': 'progression', 'companion': 'companion', 'plugin': 'plugin',
+           'suche': 'recherche'},
+}
+
+
+def app_url(lang: str, page: str, **params) -> str:
+    """Public address of an application page, with optional parameters."""
+    segment = APP_SEGMENTS[lang][page]
+    url = '/' + lang + '/' + (segment + '/' if segment else '')
+    return url + ('?' + urlencode(params) if params else '')
+
+
 def sauber(text) -> str:
     text = re.sub(r'\[[A-Za-z]{1,4}\]', '', str(text or ''))
     return text.strip().casefold()
@@ -144,17 +171,15 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
         travel_point = spot or (goals[0] if goals else None)
         travel = ''
         if travel_point:
-            travel = '/reise.html?' + urlencode({
-                'lang': lang,
-                'nach': '%.1f%s %.1f%s' % (
-                    abs(travel_point[1]), 'S' if travel_point[1] < 0 else 'N',
-                    abs(travel_point[2]), 'W' if travel_point[2] < 0 else 'E')})
+            travel = app_url(lang, 'reise', nach='%.1f%s %.1f%s' % (
+                abs(travel_point[1]), 'S' if travel_point[1] < 0 else 'N',
+                abs(travel_point[2]), 'W' if travel_point[2] < 0 else 'E'))
         place = {
             'image': None, 'pin_x': None, 'pin_y': None,
             'coords': None, 'points': len(goals) if len(goals) > 1 else 0,
             'map_name': None, 'map_url': None,
             'occurrences_url': None,
-            'map_link': '/index.html?lang=%s&id=%s' % (lang, quest['i']),
+            'map_link': app_url(lang, 'karte', id=quest['i']),
             'travel_url': travel,
         }
         if spot:
@@ -170,8 +195,8 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
                     place['pin_y'] = round(min(100.0, max(0.0, (map_entry['north'] - spot[1]) / height * 100)), 1)
             if map_entry:
                 place['map_name'] = map_entry.get('name')
-                place['map_url'] = '/index.html?lang=%s&id=%s' % (lang, quest['i'])
-                place['occurrences_url'] = '/index.html?vorkarte=%s&lang=%s' % (spot[0], lang)
+                place['map_url'] = app_url(lang, 'karte', id=quest['i'])
+                place['occurrences_url'] = app_url(lang, 'karte', vorkarte=spot[0])
 
     requirements = {'level': quest.get('vl'), 'all': [], 'one': [], 'extra': bool(quest.get('vb'))}
     for entry in rel.get('requires') or []:
@@ -276,7 +301,7 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
         'chips': chips,
         'description': quest.get('d') or '',
         'place': place,
-        'giver': ({'url': '/suche.html?lang=%s&q=%s' % (lang, quote_plus(quest['g'])),
+        'giver': ({'url': app_url(lang, 'suche', q=quest['g']),
                    'text': quest['g']} if quest.get('g') else None),
         'area_trail': area_trail,
         'requirements': requirements,
@@ -596,7 +621,7 @@ def area_view(builder: ViewBuilder, entry: dict, kind: str, members: dict) -> di
         'id': ident,
         'name': entry.get('name') or '',
         'icon': 'region' if kind == 'region' else 'gebiet',
-        'map_url': '/index.html?lang=' + lang + '#map-' + ident,
+        'map_url': app_url(lang, 'karte') + '#map-' + ident,
         'parent': parent_link,
         'children': [{'url': route(lang, 'area', key), 'text': value.get('name') or ''}
                      for key, value in sorted(body_children, key=lambda row: (row[1].get('name') or '').casefold())],
@@ -789,7 +814,7 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
             'key': list(key),
             'name': res_name,
             'meta': ' · '.join(part for part in parts if part),
-            'places': [{'url': '/index.html?vorkommen=%s&vorkarte=%s' % (art_id, place[1]),
+            'places': [{'url': app_url(lang, 'karte', vorkommen=art_id, vorkarte=place[1]),
                         'name': place[0], 'count': place[2]} for place in places[:6]],
         })
 
@@ -853,7 +878,7 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
     slot = (details or {}).get('slot') or item.get('slot') or ''
     browse = None
     if category in ('ARMOUR', 'WEAPON') and slot:
-        browse = {'url': '/gegenstaende.html?lang=%s&kat=%s&platz=%s' % (lang, category, slot),
+        browse = {'url': app_url(lang, 'gegenstandssuche', kat=category, platz=slot),
                   'text': w['browse_link'], 'note': w['browse_text']}
 
     return {
@@ -969,7 +994,7 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
                 'symbol': None,
             }
             if kind == 'i' and number == 1:
-                payload['search_hint'] = {'url': '/gegenstaende.html?lang=' + lang,
+                payload['search_hint'] = {'url': app_url(lang, 'gegenstandssuche'),
                                           'text': w['item_search']}
             key = w[kind] + '/' + ('' if number == 1 else 'seite/%d/' % number)
             pages[key] = payload

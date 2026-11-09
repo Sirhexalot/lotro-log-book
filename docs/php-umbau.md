@@ -96,17 +96,47 @@ Der Abgleich hat mehr gefunden als Formatierungsfehler:
 - **Zwei französische Beschriftungen** standen fest im Generator
   (`Utilisation`, `Ressources`) statt in den Sprachdateien.
 
+## Adressen der Anwendungsseiten
+
+Die Anwendung hatte ihre Sprache in der Abfrage (`/index.html?lang=de`). Sie
+liegt jetzt im Pfad, wie im Katalog:
+
+| Bisher | Neu (DE) | EN | FR |
+|---|---|---|---|
+| `start.html` | `/de/` | `/en/` | `/fr/` |
+| `index.html?lang=de` | `/de/karte/` | `/en/map/` | `/fr/carte/` |
+| `index.html?art=taten&lang=de` | `/de/karte/taten/` | `/en/map/deeds/` | `/fr/carte/prouesses/` |
+| `gegenstaende.html?lang=de` | `/de/gegenstandssuche/` | `/en/item-search/` | `/fr/recherche-objets/` |
+| `handwerk.html?lang=de` | `/de/handwerk/rezepte/` | `/en/crafting/recipes/` | `/fr/artisanat/recettes/` |
+| `reise.html?lang=de` | `/de/reise/` | `/en/travel/` | `/fr/voyage/` |
+| `ruf.html?lang=de` | `/de/ruf/` | `/en/reputation/` | `/fr/reputation/` |
+| `belohnungen.html?lang=de` | `/de/belohnungen/` | `/en/rewards/` | `/fr/recompenses/` |
+| `spielstand.html?lang=de` | `/de/spielstand/` | `/en/progress/` | `/fr/progression/` |
+| `companion.html?lang=de` | `/de/companion/` | `/en/companion/` | `/fr/companion/` |
+| `plugin.html?lang=de` | `/de/plugin/` | `/en/plugin/` | `/fr/plugin/` |
+| `suche.html?lang=de` | `/de/suche/` | `/en/search/` | `/fr/recherche/` |
+| `gegenstand.html?lang=de&id=…` | `/de/gegenstand/<ID>/` | … | … |
+
+`handwerk` gehört schon der Katalogseite, deshalb liegt der Handwerksbrowser
+eine Ebene tiefer. Abfrageparameter (`id`, `q`, `kat`, `art`, `nach`,
+`vorkommen`, …) bleiben erhalten; die alte Sprache in der Abfrage fällt weg.
+Alle alten Adressen antworten mit **301** auf die neue, mitgenommene Abfrage
+eingeschlossen.
+
+Die Seiten selbst liegen als Twig-Vorlagen unter `php/templates/app/`; die
+Hülle (Titel, Canonical, `hreflang`, Kopfzeile, Fußnote, Skriptliste) steht in
+`app/layout.twig`. Das JavaScript der Anwendungen ist unverändert, nur
+`menue.js` und `sprache.js` kennen jetzt die neuen Adressen und lesen die
+Sprache aus dem Pfad.
+
 ## Noch offen (Reihenfolge der weiteren Arbeit)
 
-1. **Anwendungsseiten in Twig**: Karte, Suche, Gegenstandssuche, Handwerk,
-   Spielstand, Companion, Plugin, Reise, 404 — Hülle aus PHP, JavaScript
-   unverändert, gleiche Adressen.
-2. **Sitemaps aus PHP** (Index + Teil-Sitemaps aus demselben Routenverzeichnis).
-3. **Härten**: fataler Fehler nie als HTTP 200, strenge Prüfung von Typ und ID,
-   HEAD-Anfragen, Cache-Kopfzeilen, Datenverzeichnis außerhalb des Webroots.
-4. **Umschaltung**: markierter `.htaccess`-Block, alter Bestand bleibt als
-   Rückweg liegen.
-5. **Vollständiger Abgleich** aller Seiten und Sitemaps, dann Browserprüfung
+1. **404 und Rechtstexte** in die Hülle holen (Impressum, Datenschutz, 404).
+2. **Härten**: HEAD-Anfragen, Cache-Kopfzeilen, Datenverzeichnis außerhalb des
+   Webroots, Prüfung von Typ und ID in allen Pfaden.
+3. **Umschaltung**: markierter `.htaccess`-Block für Katalog- und
+   Anwendungsadressen, alter Bestand bleibt als Rückweg liegen.
+4. **Vollständiger Abgleich** aller Seiten und Sitemaps, dann Browserprüfung
    DE/EN/FR, Desktop und Mobil.
 
 ## Abnahme vor der Veröffentlichung

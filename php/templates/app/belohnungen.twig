@@ -1,0 +1,39 @@
+{% extends 'app/layout.twig' %}
+
+{% block koerper_attribute %} data-seite="belohnungen" class="seite-text"{% endblock %}
+
+{% block haupt %}
+<main class="seite">
+<h2 data-t="bl_titel">Belohnungen</h2>
+	<p data-t="bl_text">Tugenden, Titel und Gegenstände aus den Belohnungstabellen. Wähle eine Kategorie und suche nach einem Namen.</p>
+
+	<div class="reiter" role="tablist" id="bl-reiter">
+		<button type="button" data-bl="v" aria-pressed="true" data-t="bl_tugenden">Tugenden</button>
+		<button type="button" data-bl="t" aria-pressed="false" data-t="bl_titel_tab">Titel</button>
+		<button type="button" data-bl="g" aria-pressed="false" data-t="bl_gegenstaende">Gegenstände</button>
+	</div>
+
+	<div class="kopf-zeile">
+		<input type="search" id="bl-suche" data-t-ph="bl_suche" autocomplete="off">
+		<select id="bl-art" aria-label="Art"><option value="" data-t="bl_alle_arten">Alle Arten</option></select>
+		<select id="bl-region" aria-label="Region"><option value="" data-t="bl_alle_regionen">Alle Regionen</option></select>
+		<span class="stufe-klein" id="bl-anzahl" role="status"></span>
+	</div>
+
+	<div class="bl-liste" id="bl-liste"></div>
+	<p class="schwach" id="bl-mehr" hidden></p>
+</main>
+{% endblock %}
+
+{% block fuss %}{% endblock %}
+
+{% block skripte %}
+<script src="/texte.js" defer></script>
+<script src="/texte-spielstand.js" defer></script>
+<script src="/texte-logbuch.js" defer></script>
+<script src="/texte-site.js" defer></script>
+<script src="/sprache.js" defer></script>
+<script src="/speicher.js" defer></script>
+<script src="/menue.js" defer></script>
+<script src="/belohnungen.js" defer></script>
+{% endblock %}

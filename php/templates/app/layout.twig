@@ -1,0 +1,49 @@
+<!doctype html>
+{# Shared shell of the application pages.
+   Head, header and footer come from one file; each page supplies its title,
+   body attributes, main markup and script list. Assets are absolute because
+   the pages now live at /de/karte/ instead of /index.html. #}
+<html lang="{{ lang }}" data-sprache="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block seite_titel %}{{ page_seo.title }} – LOTRO Log Book{% endblock %}</title>
+<meta name="description" content="{{ page_seo.description }}">
+<link rel="canonical" href="{{ base }}{{ canonical_url }}">
+{% for alt in alternates %}<link rel="alternate" hreflang="{{ alt.lang }}" href="{{ base }}{{ alt.url }}">
+{% endfor %}<meta property="og:type" content="website">
+<meta property="og:site_name" content="LOTRO Log Book">
+<meta property="og:title" content="{{ page_seo.title }}">
+<meta property="og:description" content="{{ page_seo.description }}">
+<meta property="og:url" content="{{ base }}{{ canonical_url }}">
+<meta property="og:locale" content="{{ og_locale }}">
+<meta property="og:image" content="{{ base }}/bild/vorschau-{{ lang }}.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ og_image_alt }}">
+<meta name="twitter:card" content="summary_large_image">
+{{ tracking|raw }}
+<link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body{{ block('koerper_attribute') }}>
+
+<header class="kopf">
+	<div class="kopf-innen">
+		<h1 data-t="produkt">LOTRO Log Book</h1>
+		<nav class="menue" id="menue" aria-label="Menü"></nav>
+		<nav class="sprachen" aria-label="Sprache">
+			{% for sprache in sprachen %}<a class="sprach-knopf" href="{{ sprache.url }}" hreflang="{{ sprache.lang }}" lang="{{ sprache.lang }}"{% if sprache.aktiv %} aria-current="page"{% endif %}>{{ sprache.label }}</a>
+			{% endfor %}
+		</nav>
+	</div>
+</header>
+
+{% block haupt %}{% endblock %}
+
+{% block fuss %}{% endblock %}
+
+{% block skripte %}{% endblock %}
+</body>
+</html>

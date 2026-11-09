@@ -121,6 +121,58 @@ final class Page
         return $this->view->render('entity/list.twig', $context);
     }
 
+    /**
+     * An application page: shared shell from `app/layout.twig`, the page's own
+     * main markup and script list from its template.
+     */
+    public function renderApp(string $lang, string $page): ?string
+    {
+        // The deeds view is the map with another mode; the crafting browser
+        // shares its template with nothing else.
+        $template = match ($page) {
+            'start' => 'start-' . $lang,
+            'taten' => 'karte',
+            default => $page,
+        };
+        // The title and description live in build_seo.PAGES, exported with the labels.
+        $datei = match ($page) {
+            'start' => 'start' . ($lang === 'de' ? '' : '-' . $lang) . '.html',
+            'karte', 'taten' => 'index.html',
+            'gegenstandssuche' => 'gegenstaende.html',
+            default => $page . '.html',
+        };
+        $seo = $this->catalogue->appSeo($datei) ?? ['title' => 'LOTRO Log Book', 'description' => ''];
+        $sprachen = [];
+        foreach (Catalogue::LANGS as $other) {
+            $sprachen[] = [
+                'lang' => $other,
+                'label' => strtoupper($other),
+                'url' => $this->catalogue->appRoute($other, $page),
+                'aktiv' => $other === $lang,
+            ];
+        }
+        $context = [
+            'lang' => $lang,
+            'w' => $this->w,
+            'page_seo' => $seo,
+            'base' => $this->catalogue->base,
+            'canonical_url' => $this->catalogue->appRoute($lang, $page),
+            'alternates' => array_map(static fn (array $s): array => [
+                'lang' => $s['lang'], 'url' => $s['url']], $sprachen),
+            'sprachen' => $sprachen,
+            'og_locale' => ['de' => 'de_DE', 'en' => 'en_US', 'fr' => 'fr_FR'][$lang],
+            'og_image_alt' => [
+                'de' => 'Breeland-Karte mit Aufgabenmarkierungen',
+                'en' => 'Bree-land map with quest markers',
+                'fr' => 'Carte du Pays de Bree avec repères de quêtes',
+            ][$lang],
+            'tracking' => $this->shell->tracking(),
+            'asset_stand' => substr(md5((string) filemtime($this->shell->webRoot() . '/style.css')
+                . (string) filemtime($this->shell->webRoot() . '/gemeinsam.css')), 0, 10),
+        ];
+        return $this->view->render('app/' . $template . '.twig', $context);
+    }
+
     private function listCrumbs(string $kind): string
     {
         $parts = [];

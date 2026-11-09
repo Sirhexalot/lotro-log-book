@@ -23,6 +23,11 @@ final class Shell
         $this->words = $catalogue->words($lang);
     }
 
+    public function webRoot(): string
+    {
+        return $this->webRoot;
+    }
+
     public function words(): array
     {
         return $this->words;
@@ -81,26 +86,27 @@ final class Shell
     {
         $w = $this->words;
         $lang = $this->lang;
+        $app = fn (string $page): string => $this->catalogue->appRoute($lang, $page);
         $families = [
-            ['welt', '/index.html?lang=' . $lang, $w['familie_welt'], [
-                ['q', '/index.html?lang=' . $lang, $w['menue_karte'], $w['d_karte']],
-                ['d', '/index.html?art=taten&lang=' . $lang, $w['menue_taten'], $w['d_taten']],
-                ['reise', '/reise.html?lang=' . $lang, $w['menue_reise'], $w['d_reise']],
+            ['welt', $app('karte'), $w['familie_welt'], [
+                ['q', $app('karte'), $w['menue_karte'], $w['d_karte']],
+                ['d', $app('taten'), $w['menue_taten'], $w['d_taten']],
+                ['reise', $app('reise'), $w['menue_reise'], $w['d_reise']],
             ]],
-            ['gegenstaende', '/gegenstaende.html?lang=' . $lang, $w['familie_gegenstaende'], [
-                ['i', '/gegenstaende.html?lang=' . $lang, $w['menue_gegenstaende'], $w['d_gegenstand']],
-                ['craft', '/handwerk.html?lang=' . $lang, $w['menue_handwerk'], $w['d_handwerk']],
+            ['gegenstaende', $app('gegenstandssuche'), $w['familie_gegenstaende'], [
+                ['i', $app('gegenstandssuche'), $w['menue_gegenstaende'], $w['d_gegenstand']],
+                ['craft', $app('handwerk'), $w['menue_handwerk'], $w['d_handwerk']],
                 ['p', $this->catalogue->route($lang, 'p'), $w['menue_berufe'], $w['d_beruf']],
             ]],
-            ['erfolge', '/belohnungen.html?lang=' . $lang, $w['familie_erfolge'], [
+            ['erfolge', $app('belohnungen'), $w['familie_erfolge'], [
                 ['title', $this->catalogue->route($lang, 'title'), $w['menue_titel'], $w['d_titel']],
                 ['virtue', $this->catalogue->route($lang, 'virtue'), $w['menue_tugenden'], $w['d_tugend']],
-                ['ruf', '/ruf.html?lang=' . $lang, $w['menue_ruf'], $w['d_ruf']],
+                ['ruf', $app('ruf'), $w['menue_ruf'], $w['d_ruf']],
             ]],
-            ['charakter', '/spielstand.html?lang=' . $lang, $w['familie_charakter'], [
-                ['spielstand', '/spielstand.html?lang=' . $lang, $w['menue_fortschritt'], $w['d_fortschritt']],
+            ['charakter', $app('spielstand'), $w['familie_charakter'], [
+                ['spielstand', $app('spielstand'), $w['menue_fortschritt'], $w['d_fortschritt']],
                 ['p', $this->catalogue->route($lang, 'p'), $w['menue_meine_berufe'], $w['d_meine_berufe']],
-                ['ruf', '/ruf.html?lang=' . $lang, $w['menue_mein_ruf'], $w['d_mein_ruf']],
+                ['ruf', $app('ruf'), $w['menue_mein_ruf'], $w['d_mein_ruf']],
             ]],
         ];
 
@@ -127,9 +133,9 @@ final class Shell
     {
         return match ($family) {
             'gegenstaende' => $this->catalogue->route($this->lang, 'i'),
-            'erfolge' => '/belohnungen.html?lang=' . $this->lang,
-            'charakter' => '/spielstand.html?lang=' . $this->lang,
-            default => '/index.html?lang=' . $this->lang,
+            'erfolge' => $this->catalogue->appRoute($this->lang, 'belohnungen'),
+            'charakter' => $this->catalogue->appRoute($this->lang, 'spielstand'),
+            default => $this->catalogue->appRoute($this->lang, 'karte'),
         };
     }
 

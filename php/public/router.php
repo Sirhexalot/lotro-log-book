@@ -22,6 +22,14 @@ if ($path === '/') {
     }
 }
 
+// Application pages are rendered by PHP now; their old .html files must not
+// be served as files, so a bookmark still lands on the 301.
+$alt = '~^/(start(-(en|fr))?|index|gegenstaende|handwerk|reise|ruf|belohnungen|spielstand|companion|plugin|suche|gegenstand)\.html$~';
+if (preg_match($alt, $path)) {
+    require __DIR__ . '/index.php';
+    return true;
+}
+
 $file = realpath($webRoot . $path);
 if ($file !== false && is_file($file) && str_starts_with($file, realpath($webRoot))) {
     return false;

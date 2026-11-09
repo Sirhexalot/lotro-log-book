@@ -1,7 +1,7 @@
 /* Language selection and loading of the matching data.
  *
- * Order: ?lang=… beats the stored choice, which beats
- * navigator.language; otherwise English. The choice stays in localStorage under
+ * Order: the language path segment beats ?lang=, which beats the stored
+ * choice, which beats navigator.language; otherwise English. The choice stays in localStorage under
  * `mql.sprache`. Only the one data file is loaded, not both.
  *
  * Switching language: append ?lang=en to the address (the buttons do that).
@@ -18,6 +18,9 @@
 
 	function waehle() {
 		if (ERLAUBT.indexOf(feste) >= 0) { return feste; }
+		// Language in the path wins: /de/karte/ is German, whatever was stored.
+		var ausPfad = String(window.location.pathname || '').split('/')[1] || '';
+		if (ERLAUBT.indexOf(ausPfad) >= 0) { return ausPfad; }
 		var ausAdresse = null;
 		try {
 			ausAdresse = new URLSearchParams(window.location.search).get('lang');

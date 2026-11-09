@@ -24,6 +24,30 @@ final class Catalogue
                  'craft' => 'artisanat', 'title' => 'titre', 'virtue' => 'vertu'],
     ];
 
+    /**
+     * Application pages: same language-in-path shape as the catalogue.
+     *
+     * `handwerk` is taken by the catalogue overview, so the crafting browser
+     * lives one level deeper.
+     */
+    private const APP = [
+        'de' => ['start' => '', 'karte' => 'karte', 'taten' => 'karte/taten',
+                 'gegenstandssuche' => 'gegenstandssuche', 'handwerk' => 'handwerk/rezepte',
+                 'reise' => 'reise', 'ruf' => 'ruf', 'belohnungen' => 'belohnungen',
+                 'spielstand' => 'spielstand', 'companion' => 'companion', 'plugin' => 'plugin',
+                 'suche' => 'suche'],
+        'en' => ['start' => '', 'karte' => 'map', 'taten' => 'map/deeds',
+                 'gegenstandssuche' => 'item-search', 'handwerk' => 'crafting/recipes',
+                 'reise' => 'travel', 'ruf' => 'reputation', 'belohnungen' => 'rewards',
+                 'spielstand' => 'progress', 'companion' => 'companion', 'plugin' => 'plugin',
+                 'suche' => 'search'],
+        'fr' => ['start' => '', 'karte' => 'carte', 'taten' => 'carte/prouesses',
+                 'gegenstandssuche' => 'recherche-objets', 'handwerk' => 'artisanat/recettes',
+                 'reise' => 'voyage', 'ruf' => 'reputation', 'belohnungen' => 'recompenses',
+                 'spielstand' => 'progression', 'companion' => 'companion', 'plugin' => 'plugin',
+                 'suche' => 'recherche'],
+    ];
+
     private array $labels;
 
     public function __construct(private string $labelFile, public readonly string $base)
@@ -45,6 +69,12 @@ final class Catalogue
         return $words;
     }
 
+    /** Title and description of an application page ("ruf.html"). */
+    public function appSeo(string $datei): ?array
+    {
+        return $this->labels['app'][$datei] ?? null;
+    }
+
     public function symbols(): array
     {
         return $this->labels['symbols'] ?? [];
@@ -53,6 +83,25 @@ final class Catalogue
     public function famille(): array
     {
         return $this->labels['familie'] ?? [];
+    }
+
+    /** Public address of an application page, e.g. "/de/karte/". */
+    public function appRoute(string $lang, string $page): string
+    {
+        $segment = self::APP[$lang][$page] ?? throw new InvalidArgumentException('Unbekannte Seite: ' . $page);
+        return '/' . $lang . '/' . ($segment === '' ? '' : $segment . '/');
+    }
+
+    /** Application page that belongs to a path, or null. */
+    public function appPage(string $lang, string $rest): ?string
+    {
+        $rest = trim($rest, '/');
+        foreach (self::APP[$lang] ?? [] as $page => $segment) {
+            if ($segment === $rest) {
+                return $page;
+            }
+        }
+        return null;
     }
 
     public function segment(string $lang, string $kind): string

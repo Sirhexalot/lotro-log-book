@@ -33,7 +33,23 @@
 
 	var seite = document.body.getAttribute('data-seite') || '';
 	if (seite === 'karte' && window.MQL_ART === 'taten') { seite = 'taten'; }
-	var startseite = sprache === 'en' ? 'start-en.html' : (sprache === 'fr' ? 'start-fr.html' : 'start.html');
+	// One address per page and language; the old .html?lang= forms redirect here.
+	var APP = {
+		de: { start: '', karte: 'karte', taten: 'karte/taten', gegenstandssuche: 'gegenstandssuche',
+			handwerk: 'handwerk/rezepte', reise: 'reise', ruf: 'ruf', belohnungen: 'belohnungen',
+			spielstand: 'spielstand', companion: 'companion', plugin: 'plugin', suche: 'suche' },
+		en: { start: '', karte: 'map', taten: 'map/deeds', gegenstandssuche: 'item-search',
+			handwerk: 'crafting/recipes', reise: 'travel', ruf: 'reputation', belohnungen: 'rewards',
+			spielstand: 'progress', companion: 'companion', plugin: 'plugin', suche: 'search' },
+		fr: { start: '', karte: 'carte', taten: 'carte/prouesses', gegenstandssuche: 'recherche-objets',
+			handwerk: 'artisanat/recettes', reise: 'voyage', ruf: 'reputation', belohnungen: 'recompenses',
+			spielstand: 'progression', companion: 'companion', plugin: 'plugin', suche: 'recherche' }
+	};
+	function app(seite) {
+		var teil = (APP[sprache] || {})[seite];
+		return '/' + sprache + '/' + (teil ? teil + '/' : '');
+	}
+	var startseite = app('start');
 
 	// The name in the header is the way home, with the plugin's icon (Lucide
 	// "mop-sparkles", ISC) in front.
@@ -68,22 +84,22 @@
 	}
 
 	var FAMILIEN = [
-		{ key: 'welt', text: t('nav_welt'), href: 'index.html?lang=' + sprache, tab: [
-			{ seite: 'karte', href: 'index.html?lang=' + sprache, text: t('menue_karte'), desc: 'd_karte' },
-			{ seite: 'taten', href: 'index.html?art=taten&lang=' + sprache, text: t('menue_taten'), desc: 'd_taten' },
-			{ seite: 'reise', href: 'reise.html?lang=' + sprache, text: t('menue_reise'), desc: 'd_reise' }] },
-		{ key: 'gegenstaende', text: t('nav_gegenstaende'), href: 'gegenstaende.html?lang=' + sprache, tab: [
-			{ seite: 'gegenstand', href: 'gegenstaende.html?lang=' + sprache, text: t('menue_gegenstaende'), desc: 'd_gegenstand' },
-			{ seite: 'handwerk', href: 'handwerk.html?lang=' + sprache, text: t('menue_handwerk'), desc: 'd_handwerk' },
+		{ key: 'welt', text: t('nav_welt'), href: app('karte'), tab: [
+			{ seite: 'karte', href: app('karte'), text: t('menue_karte'), desc: 'd_karte' },
+			{ seite: 'taten', href: app('taten'), text: t('menue_taten'), desc: 'd_taten' },
+			{ seite: 'reise', href: app('reise'), text: t('menue_reise'), desc: 'd_reise' }] },
+		{ key: 'gegenstaende', text: t('nav_gegenstaende'), href: app('gegenstandssuche'), tab: [
+			{ seite: 'gegenstand', href: app('gegenstandssuche'), text: t('menue_gegenstaende'), desc: 'd_gegenstand' },
+			{ seite: 'handwerk', href: app('handwerk'), text: t('menue_handwerk'), desc: 'd_handwerk' },
 			{ seite: 'beruf', href: pfad('beruf'), text: t('menue_berufe'), desc: 'd_beruf' }] },
-		{ key: 'erfolge', text: t('nav_erfolge'), href: 'belohnungen.html?lang=' + sprache, tab: [
+		{ key: 'erfolge', text: t('nav_erfolge'), href: app('belohnungen'), tab: [
 			{ seite: 'titel', href: pfad('titel'), text: t('menue_titel'), desc: 'd_titel' },
 			{ seite: 'tugend', href: pfad('tugend'), text: t('menue_tugenden'), desc: 'd_tugend' },
-			{ seite: 'ruf', href: 'ruf.html?lang=' + sprache, text: t('menue_ruf'), desc: 'd_ruf' }] },
-		{ key: 'charakter', text: t('nav_charakter'), href: 'spielstand.html?lang=' + sprache, tab: [
-			{ seite: 'spielstand', href: 'spielstand.html?lang=' + sprache, text: t('menue_fortschritt'), desc: 'd_fortschritt' },
+			{ seite: 'ruf', href: app('ruf'), text: t('menue_ruf'), desc: 'd_ruf' }] },
+		{ key: 'charakter', text: t('nav_charakter'), href: app('spielstand'), tab: [
+			{ seite: 'spielstand', href: app('spielstand'), text: t('menue_fortschritt'), desc: 'd_fortschritt' },
 			{ seite: 'beruf', href: pfad('beruf'), text: t('menue_meine_berufe'), desc: 'd_meine_berufe' },
-			{ seite: 'ruf', href: 'ruf.html?lang=' + sprache, text: t('menue_mein_ruf'), desc: 'd_mein_ruf' }] }
+			{ seite: 'ruf', href: app('ruf'), text: t('menue_mein_ruf'), desc: 'd_mein_ruf' }] }
 	];
 
 	// Which family the current page belongs to.

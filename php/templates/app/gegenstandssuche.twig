@@ -1,0 +1,40 @@
+{% extends 'app/layout.twig' %}
+
+{% block koerper_attribute %} class="seite-text gs-seite" data-seite="gegenstaende"{% endblock %}
+
+{% block haupt %}
+<main class="gs">
+<div class="gs-kopf">
+		<h1 data-t="gs_titel">Gegenstände</h1>
+		<p class="gs-unter" data-t="gs_unter">Suche nach Name oder Kennung, dann grenze links ein, was du brauchst.</p>
+		<form class="gs-suche" id="gs-suche" role="search">
+			<input type="search" id="gs-feld" data-t-ph="gs_platzhalter" autocomplete="off"
+			       aria-label="Gegenstände suchen">
+			<button type="submit" class="knopf" data-t="gs_suchen">Suchen</button>
+		</form>
+	</div>
+
+	<div class="gs-raster">
+		<button type="button" class="gs-filter-knopf" id="gs-filter-knopf"
+		        aria-expanded="false" aria-controls="gs-filter" data-t="gs_filter">Filter</button>
+		<aside class="gs-filter" id="gs-filter" aria-label="Filter"></aside>
+		<section class="gs-liste" id="gs-liste">
+			<p class="gs-stand" id="gs-stand" role="status" data-t="gs_lade">Lade Gegenstände …</p>
+			<ul class="gs-ergebnis" id="gs-ergebnis"></ul>
+			<p class="gs-mehr-feld"><button type="button" id="gs-mehr" class="knopf sekundaer" hidden></button></p>
+		</section>
+	</div>
+</main>
+{% endblock %}
+
+{% block fuss %}<footer><p>LOTRO Log Book</p></footer>{% endblock %}
+
+{% block skripte %}
+<script src="/texte.js" defer></script>
+<script src="/texte-spielstand.js" defer></script>
+<script src="/texte-logbuch.js" defer></script>
+<script src="/texte-site.js" defer></script>
+<script src="/sprache.js" defer></script>
+<script src="/menue.js" defer></script>
+<script src="/gegenstaende.js" defer></script>
+{% endblock %}

@@ -80,11 +80,12 @@ async function main() {
     const ziel = basis + pfad;
     await seite.senden('Page.navigate', { url: ziel });
     for (let i = 0; i < 100; i++) {
-      const stand = await js('({ url: location.href, fertig: document.readyState, '
-        + 'marker: !!document.getElementById("katalog-status") '
-        + '&& document.getElementById("katalog-status").dataset.done !== undefined })');
+      const stand = await js('(() => { const el = document.getElementById("katalog-status");'
+        + ' return { url: location.href, fertig: document.readyState, hat: !!el,'
+        + ' marker: !!el && el.dataset.done !== undefined }; })()');
+      // Katalogseiten bekommen ihren Fortschritt vom Skript; darauf warten wir.
       if (stand.url === ziel && stand.fertig === 'complete'
-          && (stand.marker || !ziel.includes('/de/'))) return;
+          && (!stand.hat || stand.marker)) return;
       await warte(100);
     }
     throw new Error('Seite nicht bereit: ' + ziel);
@@ -98,7 +99,7 @@ async function main() {
   };
 
   // 1. Importseite lädt und der Speicher steht bereit.
-  await gehe('/spielstand.html?lang=de');
+  await gehe('/de/spielstand/');
   const bereit = await js('typeof window.MQL_SPEICHER === "object"');
   pruefe('Importseite lädt den Speicher', bereit, true);
 

@@ -1,0 +1,110 @@
+{% extends 'app/layout.twig' %}
+
+{% block koerper_attribute %} data-seite="karte" data-pane="liste"{% endblock %}
+
+{% block haupt %}
+<main>
+<section id="landschaften" class="landschaften" hidden></section>
+	<section class="spalte nav" id="nav">
+		<div class="nav-baum">
+			<div class="spalten-kopf">
+				<strong data-t="gebiete">Gebiete</strong>
+				<button id="zuklappen" data-t="alles_zuklappen" title="Alle Gebiete zuklappen">alles zuklappen</button>
+			</div>
+			<div class="baumsuche">
+				<input id="gebietsuche" type="search" data-t-ph="gebiet_suchen" placeholder="Gebiet suchen" autocomplete="off">
+			</div>
+			<nav class="gebietsspalte" id="baum" aria-label="Gebiete"></nav>
+		</div>
+		<div class="nav-liste">
+			<div class="spalten-kopf pfadkopf">
+				<button id="zum-baum" class="zum-baum" data-t="zurueck_gebiete" title="Zurück zu den Gebieten">‹ Gebiete</button>
+			</div>
+			<div class="pfad" id="pfad"></div>
+			<strong class="liste-titel" id="liste-titel" data-t="aufgaben">Aufgaben</strong>
+			<div class="filter" id="filter" role="group" aria-label="Fortschritt filtern">
+				<button data-filter="alle" aria-pressed="true" data-t="filter_alle">alle</button>
+				<button data-filter="offen" aria-pressed="false" data-t="filter_offen">offen</button>
+				<button data-filter="erledigt" aria-pressed="false" data-t="filter_erledigt">erledigt</button>
+				<button data-filter="machbar" aria-pressed="false" data-t="filter_machbar" id="filter-machbar">annehmbar</button>
+			</div>
+			<label class="belohnungsfilter" id="belohnungsfilter-feld" hidden>
+				<span data-t="belohnung">Belohnung</span>
+				<select id="belohnungsfilter">
+					<option value="alle" data-t="belohnung_alle">alle</option>
+					<option value="tugend" data-t="belohnung_tugend">Tugend</option>
+					<option value="titel" data-t="belohnung_titel">Titel</option>
+					<option value="punkte" data-t="belohnung_punkte">LOTRO-Punkte</option>
+				</select>
+			</label>
+			<ol id="liste"></ol>
+		</div>
+	</section>
+
+	<section class="kartenspalte">
+		<nav id="landschaft-orte" class="landschaft-orte" aria-label="Karten"></nav>
+		<div class="buehne" id="buehne">
+			<div class="welt" id="welt">
+				<img id="bild" alt="">
+				<div class="raster" id="raster"></div>
+				<div class="marker" id="marker"></div>
+			</div>
+			<p class="kartenhinweis" id="hinweis" role="status"></p>
+		</div>
+		<div class="kartenleiste">
+			<div class="legende-zeile">
+				<div class="legende" id="legende" hidden>
+					<span class="legende-eintrag"><i class="legende-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></i><span data-t="legende_auftraggeber">Kreis: Auftraggeber</span></span>
+					<span class="legende-eintrag"><i class="legende-symbol hohl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg></i><span data-t="legende_ziel">Kreis offen: erstes Ziel</span></span>
+					<span class="legende-fortschritt"><i class="tupfen offen"></i><span data-t="legende_offen">offen</span></span>
+					<span class="legende-fortschritt"><i class="tupfen fertig"></i><span data-t="legende_erledigt">erledigt</span></span>
+					<span class="legende-fortschritt" id="legende-teils" hidden><i class="tupfen teils"></i><span data-t="legende_teils">teils erledigt</span></span>
+					<span class="legende-fortschritt" id="legende-laufend" hidden><i class="tupfen laufend"></i><span data-t="in_arbeit">in Arbeit</span></span>
+					<span class="legende-eintrag" id="legende-ziele" hidden><i class="legende-symbol ring"></i><span data-t="legende_ziele">Ring mit Nummer: Ziel der gewählten Aufgabe</span></span>
+					<span class="legende-eintrag" id="legende-jagd" hidden><i class="legende-symbol gestrichelt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></svg></i><span data-t="legende_jagd">Gestrichelt: möglicher Jagdort (Tat)</span></span>
+					<span class="legende-eintrag" id="legende-aufgabenort" hidden><i class="legende-symbol gepunktet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></i><span data-t="legende_aufgabenort">Gepunktet: Ort der zugehörigen Aufgaben (Tat)</span></span>
+					<span class="legende-eintrag" id="legende-vorkommen" hidden></span>
+				</div>
+				<button type="button" class="legende-mehr aus" id="legende-mehr" aria-expanded="false" aria-label="Ganze Zeichenerklärung" title="Ganze Zeichenerklärung">?</button>
+				<div class="legende-voll" id="legende-voll" hidden></div>
+			</div>
+			<div class="leiste-aktionen">
+				<div class="notizen" id="notizen">
+					<button type="button" id="notizen-knopf" aria-expanded="false" data-t="notizen">Filter</button>
+					<div class="notizen-feld" id="notizen-feld" hidden>
+						<div class="notizen-alle"><button type="button" id="notizen-alle" data-t="notizen_alle">Alle auswählen</button><button type="button" id="notizen-keine" data-t="notizen_keine">Alles löschen</button></div>
+						<ul id="notizen-liste"></ul>
+					</div>
+				</div>
+				<div class="notizen" id="vorkommen">
+					<button type="button" id="vorkommen-knopf" aria-expanded="false" data-t="vorkommen">Vorkommen</button>
+					<div class="notizen-feld vorkommen-feld" id="vorkommen-feld" hidden>
+						<div class="notizen-alle"><button type="button" id="vorkommen-alle" data-t="notizen_alle">Alle auswählen</button><button type="button" id="vorkommen-keine" data-t="notizen_keine">Alles löschen</button></div>
+						<div id="vorkommen-liste" class="vorkommen-zeilen"></div>
+					</div>
+				</div>
+				<label class="geber-schalter"><input type="checkbox" id="geber-schalter" checked> <span data-t="aufgabenfuehrer">Questgeber anzeigen</span></label>
+				<button type="button" id="gebietskarte" class="gebietskarte" hidden></button>
+				<span class="leiste-rechts"><span id="koordinate" class="koordinate"></span><span id="karte-stufe" class="karte-stufe" hidden></span></span>
+			</div>
+		</div>
+	</section>
+
+	<section class="spalte detail" id="detail">
+		<p class="leer" data-t="detail_leer">Links ein Gebiet wählen, dann auf der Karte einen Punkt anklicken.</p>
+	</section>
+</main>
+{% endblock %}
+
+{% block fuss %}{% endblock %}
+
+{% block skripte %}
+<script src="/texte.js" defer></script>
+<script src="/texte-spielstand.js" defer></script>
+<script src="/texte-logbuch.js" defer></script>
+<script src="/texte-site.js" defer></script>
+<script src="/symbole.js" defer></script>
+<script src="/sprache.js" defer></script>
+<script src="/speicher.js" defer></script>
+<script src="/menue.js" defer></script>
+{% endblock %}

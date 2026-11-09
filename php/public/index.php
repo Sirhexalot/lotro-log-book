@@ -17,6 +17,23 @@ use Llb\Shell;
 use Llb\View;
 
 $root = dirname(__DIR__, 2);
+
+// A failing page must never look like a successful one.
+set_exception_handler(static function (Throwable $fehler): void {
+    http_response_code(500);
+    header('Content-Type: text/plain; charset=utf-8');
+    error_log('llb: ' . $fehler->getMessage() . ' @ ' . $fehler->getFile() . ':' . $fehler->getLine());
+    echo 'Interner Fehler';
+});
+register_shutdown_function(static function (): void {
+    $fehler = error_get_last();
+    if ($fehler !== null && in_array($fehler['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)
+        && !headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo 'Interner Fehler';
+    }
+});
 // iCloud evicts files in the repository; the local checkouts keep vendor/ out
 // of it. A release bundle carries its own vendor/ next to this file.
 $vendor = getenv('LLB_VENDOR') ?: $root . '/vendor';
@@ -37,6 +54,16 @@ $router = new Router($catalogue, $data);
 $view = new View($root . '/php/templates', is_writable($cacheDir) ? $cacheDir : null);
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+
+// Old application addresses keep working: one 301 to the language path.
+if (preg_match('~^/(start(-(en|fr))?|index|gegenstaende|handwerk|reise|ruf|belohnungen|spielstand|companion|plugin|suche|gegenstand)\.html$~', $path)) {
+    $ziel = $router->legacyTarget($path, $_GET);
+    if ($ziel !== null) {
+        header('Location: ' . $ziel, true, 301);
+        header('X-Robots-Tag: noindex');
+        return;
+    }
+}
 $result = $router->resolve($path);
 
 if ($result['status'] === 301) {
@@ -78,9 +105,11 @@ if (isset($result['sitemap'])) {
 $lang = explode('/', trim($path, '/'))[0];
 $shell = new Shell($catalogue, $data, $webRoot, $lang);
 $page = new Page($catalogue, $data, $shell, $view, $lang);
-$html = isset($result['list'])
-    ? $page->renderList($result['list'])
-    : $page->render($result['kind'], $result['id']);
+$html = match (true) {
+    isset($result['app']) => $page->renderApp($result['lang'], $result['app']),
+    isset($result['list']) => $page->renderList($result['list']),
+    default => $page->render($result['kind'], $result['id']),
+};
 
 if ($html === null) {
     http_response_code(404);
