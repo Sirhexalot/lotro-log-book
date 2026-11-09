@@ -7,7 +7,9 @@
 	--text-abschnitt: 1.25rem;
 	--text-titel: 1.75rem;
 }
-html { font-size: 16px; }
+/* Reserve the scrollbar's space on every page, so the centred column does not
+ * shift by its width when a short page becomes a long one. */
+html { font-size: 16px; scrollbar-gutter: stable; }
 body { font-family: var(--schrift); font-size: var(--text-normal); line-height: 1.6; }
 small { font-size: var(--text-bedienung); }
 
@@ -21,6 +23,75 @@ small { font-size: var(--text-bedienung); }
 }
 .kopf h1 a.logo:hover { color: #ecd08a; }
 .kopf h1 a.logo svg { width: 20px; height: 20px; flex: 0 0 auto; }
+
+/* Header, two rows with two jobs (07.11.): identity above — name, search, the
+ * character you look at — and the catalogue below, with the plugin, which only
+ * concerns the game, at its quiet right end. The character is a state, not a
+ * page, so it no longer competes with the content tabs.
+ *
+ * One container width for the whole site, in Bootstrap's steps (07.11.): the
+ * header uses it on every page, so it never changes width between pages or
+ * page states. The map is the one exception — its panes use the full screen.
+ * .kopf carries background and line over the full width, .kopf-innen holds the
+ * content (menue.js creates the wrapper where it is missing). */
+:root { --huelle: 100%; }
+@media (min-width: 768px) { :root { --huelle: 720px; } }
+@media (min-width: 992px) { :root { --huelle: 960px; } }
+@media (min-width: 1200px) { :root { --huelle: 1140px; } }
+@media (min-width: 1400px) { :root { --huelle: 1320px; } }
+
+.kopf { display: block; padding: 0; }
+
+.kopf-innen {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	grid-template-areas:
+		"marke suche charakter"
+		"tabs tabs tabs";
+	align-items: center;
+	gap: 9px 16px;
+	width: 100%;
+	max-width: var(--huelle);
+	margin-inline: auto;
+	padding: 10px 16px;
+}
+
+.kopf h1 { grid-area: marke; }
+/* Fixed widths keep the row still: a loaded character has a longer name than
+ * the empty option, and a stretching search field moved everything with it. */
+.kopf .globalsuche, .kopf .suchen-knopf { grid-area: suche; justify-self: start; }
+.kopf .globalsuche { width: 360px; max-width: 100%; }
+.kopf .charakterwahl select { min-width: 180px; }
+.kopf .charakter { grid-area: charakter; display: flex; align-items: center; gap: 10px; min-width: 0; }
+.kopf .menue { grid-area: tabs; min-width: 0; padding-top: 7px; border-top: 1px solid var(--rand); }
+.kopf .menue-knopf { grid-area: knopf; }
+.kopf > .sprachen { display: none; }
+.kopf .suchen-knopf {
+	color: var(--schwach); text-decoration: none; justify-self: start;
+	padding: 4px 0; border-bottom: 1px solid transparent;
+}
+.kopf .suchen-knopf::after { content: ' →'; }
+.kopf .suchen-knopf:hover { color: var(--gold); border-bottom-color: var(--gold); }
+.kopf .importieren { color: var(--schwach); text-decoration: none; border-bottom: 2px solid transparent; }
+.kopf .importieren:hover, .kopf .importieren[aria-current="page"] { color: var(--gold); border-bottom-color: var(--gold); }
+/* Age of the imported progress: one clock, three colours. */
+.kopf .standsalter {
+	display: inline-flex; align-items: center; justify-content: center;
+	width: 26px; height: 26px; border-radius: 50%;
+	border: 1px solid var(--rand); background: var(--fläche-hell);
+	text-decoration: none; flex: 0 0 auto;
+}
+.kopf .standsalter svg { width: 14px; height: 14px; }
+.kopf .standsalter.frisch { color: var(--fertig); border-color: var(--fertig); }
+.kopf .standsalter.mittel { color: var(--gold); border-color: var(--gold); }
+.kopf .standsalter.alt { color: #e0827a; border-color: #e0827a; }
+.kopf .standsalter.unbekannt { color: var(--schwach); }
+.kopf .standsalter:hover { filter: brightness(1.15); }
+.kopf .menue-plugin { margin-left: auto; color: var(--schwach); font-size: 12px; }
+.kopf .menue-plugin:hover { color: var(--gold); }
+
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:disabled:hover { background: var(--fläche-hell); }
 
 .menue { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .menue a {
@@ -112,8 +183,10 @@ body[data-seite="karte"] { grid-template-rows: auto minmax(0, 1fr) auto; }
 body[data-seite="karte"] footer { padding: 4px 16px; }
 
 /* Compact start page: useful actions come before screenshots and explanation. */
-body[data-seite="start"] main { max-width: 1000px; padding-top: 24px; }
+body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; padding-top: 24px; }
 .intro { margin-top: 0; }
+/* Same reading measure as the text pages. */
+.intro p, .neuigkeiten li, .plugin p, .funktionen p { max-width: 72ch; }
 .einstieg { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
 .knopf.sekundaer { color: var(--gold); background: var(--fläche); }
 .knopf.sekundaer:hover { background: var(--fläche-hell); }
@@ -133,20 +206,122 @@ body[data-seite="start"] main { max-width: 1000px; padding-top: 24px; }
 	.intro h2 { font-size: var(--text-titel); }
 }
 
-/* Header stays put on wide screens; phones keep the whole viewport. */
-@media (min-width: 1000px) { .kopf { position: sticky; top: 0; z-index: 25; } }
+/* Second header line: the tabs of the current family. It is the only place
+ * that grows when a content type is added, never the family row. */
+.familie-reiter {
+	display: flex; flex-wrap: wrap; gap: 14px;
+	max-width: var(--huelle); margin: 0 auto;
+	padding: 0 16px 8px;
+	font-size: var(--text-bedienung);
+	background: transparent;
+}
+.familie-reiter a { color: var(--schwach); text-decoration: none; padding-bottom: 3px; border-bottom: 2px solid transparent; }
+.familie-reiter a:hover { color: var(--gold); }
+.familie-reiter a[aria-current="page"] { color: var(--text); border-bottom-color: var(--gold); }
+@media (max-width: 1000px) {
+	/* Under the burger the families come first, then their tabs. */
+	.familie-reiter { display: none; padding: 0 12px 10px; gap: 12px; }
+	/* The tab row sits inside .kopf-innen, next to the family list. */
+	.kopf.menue-offen .familie-reiter { display: flex; }
+	.familie-reiter a { font-size: var(--text-bedienung); }
+}
 
-/* Burger menu on phones: the menu only opens on demand. */
+/* The header stays at the top on every page; content scrolls underneath it.
+ * On the map the page itself does not scroll (its panes do), so sticky is a
+ * no-op there. */
+.kopf { position: sticky; top: 0; z-index: 25; }
+
+/* The map keeps the full screen; the header above it stays in the container. */
+
+/* The label above the character switch would make the top row wider than the
+ * catalogue needs; the select shows a character or the word for none anyway. */
+@media (max-width: 1300px) { .kopf .charakterwahl > span { display: none; } }
+
+/* Burger menu on phones: everything but the search waits behind it. */
 .menue-knopf { display: none; }
 @media (max-width: 1000px) {
+	.kopf-innen {
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		grid-template-areas:
+			"marke suche knopf"
+			"menue menue menue"
+			"charakter charakter charakter";
+		gap: 8px 10px;
+		padding: 8px 12px;
+	}
+	.kopf .globalsuche { width: 100%; }
 	.menue-knopf {
 		display: inline-flex; align-items: center; justify-content: center;
-		min-width: 40px; height: 34px; order: 2; font-size: 17px; line-height: 1;
+		min-width: 40px; height: 32px; font-size: 17px; line-height: 1;
 	}
 	.kopf .menue {
-		display: none; order: 6; width: 100%; flex-direction: column; align-items: flex-start;
-		gap: 0; white-space: normal;
+		grid-area: menue; display: none; width: 100%; min-width: 0;
+		flex-direction: column; align-items: flex-start;
+		gap: 0; white-space: normal; padding-top: 0; border-top: 0;
 	}
 	.kopf.menue-offen .menue { display: flex; }
-	.kopf .menue a { width: 100%; padding: 9px 2px; border-bottom: 1px solid var(--rand); }
+	.kopf .menue a {
+		width: 100%; padding: 9px 2px; border-bottom: 1px solid var(--rand);
+	}
+	.kopf .menue .menue-plugin { margin-left: 0; font-size: var(--text-bedienung); }
+	.kopf .charakter { display: none; }
+	.kopf.menue-offen .charakter {
+		display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+		padding-top: 8px; border-top: 1px solid var(--rand);
+	}
+	.kopf .charakterwahl { margin-left: 0; }
+	.kopf .charakterwahl select { max-width: none; }
+}
+
+/* Item symbols: one 32×32 client image per symbol ID, shared by all languages.
+   They are decoration next to the name, so they never replace the text. */
+.symbol {
+	display: inline-block; width: 22px; height: 22px; object-fit: contain;
+	vertical-align: -5px; margin-right: 6px; flex: 0 0 auto;
+}
+.symbol-gross {
+	width: 32px; height: 32px; vertical-align: -6px; margin-right: 9px;
+}
+.katalog-liste .symbol { margin-right: 5px; }
+.zutat { white-space: nowrap; }
+.zutat .symbol { width: 18px; height: 18px; vertical-align: -4px; margin-right: 3px; }
+.rezept-kritisch .symbol { width: 18px; height: 18px; vertical-align: -4px; margin-right: 3px; }
+
+/* A hairline between the family row and its tabs, so the two header lines read
+   as two levels instead of one dense block. */
+.familie-reiter { border-top: 1px solid var(--rand); padding-top: 9px; margin-top: 2px; }
+
+/* Family flyout: the tabs of a family open under its name on hover/focus. */
+.familie-feld { position: relative; display: inline-block; }
+.familie-flieger {
+	/* No gap: a dead zone between the link and the panel closes it mid-move. */
+	position: absolute; top: 100%; left: -10px; z-index: 40;
+	display: none; min-width: 200px; padding: 10px 6px 6px;
+	background: rgba(20, 17, 14, .98); border: 1px solid var(--rand); border-radius: 4px;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, .55);
+}
+.familie-flieger a { display: block; padding: 6px 9px; border-radius: 3px; white-space: nowrap; }
+.familie-flieger a:hover { background: var(--fläche-hell); }
+.familie-feld:hover .familie-flieger,
+.familie-feld:focus-within .familie-flieger { display: block; }
+
+/* Flyout entries: name above, one line of what waits behind it. */
+.familie-flieger a { text-decoration: none; }
+.familie-flieger a strong { display: block; font-weight: 500; color: var(--text); }
+.familie-flieger a span { display: block; margin-top: 2px; color: var(--schwach); font-size: .72rem; }
+.familie-flieger a[aria-current="page"] strong { color: var(--gold); }
+
+/* Phones have no hover: inside the burger menu the family's tabs stand under it
+ * as a short sub-list. The entry that would only repeat the family link stays
+ * out; the family link itself goes to that page. */
+@media (max-width: 1000px) {
+	.kopf .familie-feld { display: block; width: 100%; }
+	.kopf.menue-offen .familie-flieger {
+		position: static; display: block; min-width: 0;
+		padding: 0 0 6px 12px; border: 0; border-radius: 0;
+		background: transparent; box-shadow: none;
+	}
+	.kopf .menue .familie-flieger a { padding: 7px 2px; border-bottom: 0; }
+	.kopf .menue .familie-flieger a strong { font-weight: 400; }
+	.kopf .familie-flieger a.selbst { display: none; }
 }

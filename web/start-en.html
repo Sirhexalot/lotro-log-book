@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LOTRO Log Book – Quests, deeds and maps</title>
-<meta name="description" content="Find quests and deeds in Middle-earth. Browse maps, reputation and crafting, and import your progress from LOTRO Companion.">
+<title>Your companion through Middle-earth – LOTRO Log Book</title>
+<meta name="description" content="Find your next quest, finish deeds and discover gear and recipes for your adventures in The Lord of the Rings Online. Keep track with your own progress.">
 <link rel="stylesheet" href="start.css">
 <link rel="stylesheet" href="gemeinsam.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -15,59 +15,130 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 })(window,document,'script','dataLayer','GTM-TRC8BF95');
 </script>
 </head>
-<body data-seite="start">
-<header class="kopf"><div class="kopf-innen">
-<h1>LOTRO Log Book</h1>
-<nav class="menue" id="menue" aria-label="Menu"></nav>
-<nav class="sprachen" aria-label="Language">
-<button type="button" data-lang="de" aria-pressed="false">DE</button>
-<button type="button" data-lang="en" aria-pressed="true">EN</button>
-<button type="button" data-lang="fr" aria-pressed="false">FR</button>
-</nav></div></header>
+<body class="seite-start landing" data-seite="start">
+<header class="kopf">
+	<div class="kopf-innen">
+		<h1 data-t="produkt">LOTRO Log Book</h1>
+		<nav class="menue" id="menue" aria-label="Menu"></nav>
+		<nav class="sprachen" aria-label="Language">
+			<button type="button" data-lang="de" aria-pressed="false">DE</button>
+			<button type="button" data-lang="en" aria-pressed="true">EN</button>
+			<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+		</nav>
+	</div>
+</header>
 <main>
-<section class="intro">
-<p class="dach">The Lord of the Rings Online</p>
-<h2>Find quests and deeds in <em>Middle-earth</em>.</h2>
-<p class="lead">Browse landscapes and the epic story, locate quests on the map and keep track of your progress.</p>
-<div class="einstieg">
-<a class="knopf" href="index.html?lang=en">Open the map</a>
-<a class="knopf sekundaer" href="index.html?art=taten&amp;lang=en">Deeds</a>
-<a class="knopf sekundaer" href="spielstand.html?lang=en">Import progress</a>
-</div>
+
+<section class="hero">
+	<p class="dach">The Lord of the Rings Online</p>
+	<h2>Your companion through <em>Middle-earth</em>.</h2>
+	<p class="lead">Another chapter of the story, an unfinished deed or a rare recipe to find? Open your log book. Look up quests and items, find your way across the lands and import your progress to keep track of your characters’ adventures.</p>
+	<form class="suche-start" action="suche.html" method="get" role="search">
+		<input type="hidden" name="lang" value="en">
+		<label class="nur-leser" for="start-suche">Search the log book</label>
+		<input id="start-suche" type="search" name="q" placeholder="Quest, item, title or destination" autocomplete="off">
+		<button type="submit" class="knopf">Search</button>
+	</form>
+	<p class="einstieg">
+		<a class="knopf" href="index.html?lang=en">Open the map</a>
+		<a class="knopf sekundaer" href="spielstand.html?lang=en">Import progress</a>
+	</p>
 </section>
-<section class="neuigkeiten" aria-labelledby="neu-titel">
-<h3 id="neu-titel">What’s new</h3>
-<p class="datum"><time datetime="2026-11-06">6 November 2026</time></p>
-<ul>
-<li><strong>Rewards:</strong> every quest and deed now lists its items, titles, virtues and traits – above the objectives, as in game. The overview covers 2,520 titles, 20 virtues and 6,564 items with their sources. <a href="belohnungen.html?lang=en">Overview</a></li>
-<li><strong>Recipes with your progress:</strong> 7,924 recipes by profession and tier, with ingredients and critical success. With an import you see only your professions, ✓ and ○ per recipe, and “missing only”. <a href="handwerk.html?lang=en#rezepte">Open recipes</a></li>
-<li><strong>Reputation:</strong> every faction with your standing. “Started only” hides what you have not begun, and a click shows the quests and deeds that still give reputation there. <a href="ruf.html?lang=en">Open reputation</a></li>
+
+<ul class="zahlen" aria-label="Size of the catalogue">
+	<li><span data-katalogzahl="aufgaben">15,118</span><small>Quests</small></li>
+	<li><span data-katalogzahl="taten">5,528</span><small>Deeds</small></li>
+	<li><span data-katalogzahl="gegenstaende">52,798</span><small>Items</small></li>
+	<li><span data-katalogzahl="rezepte">7,924</span><small>Recipes</small></li>
+	<li><span data-katalogzahl="titel">2,442</span><small>Titles</small></li>
+	<li><span data-katalogzahl="tugenden">20</span><small>Virtues</small></li>
+	<li><span data-katalogzahl="stationen">372</span><small>Travel stations</small></li>
 </ul>
+
+<section class="familien" aria-labelledby="familien-titel">
+	<h3 id="familien-titel">Where will you go next?</h3>
+	<div class="familien-karten">
+		<article class="familie-karte">
+			<h4><a href="index.html?lang=en">World</a></h4>
+			<p>Follow the epic story or see what awaits you off the beaten path.</p>
+			<ul>
+				<li><a href="index.html?lang=en">Quests</a>: explore the lands, follow the books</li>
+				<li><a href="index.html?art=taten&amp;lang=en">Deeds</a>: what to do and what you still need</li>
+				<li><a href="reise.html?lang=en">Travel</a>: find your route from stable to stable</li>
+			</ul>
+		</article>
+		<article class="familie-karte">
+			<h4><a href="/en/item/">Items</a></h4>
+			<p>A better bow, wood for the workbench or something for the cooking pot? Look it up here.</p>
+			<ul>
+				<li><a href="/en/item/">Items</a>: compare stats and find where to get them</li>
+				<li><a href="handwerk.html?lang=en#rezepte">Crafting</a>: recipes, ingredients and resources</li>
+				<li><a href="/en/profession/">Professions</a>: from your first attempts to mastery</li>
+			</ul>
+		</article>
+		<article class="familie-karte">
+			<h4><a href="belohnungen.html?lang=en">Rewards</a></h4>
+			<p>A new title or a stronger virtue: find something worth setting out for.</p>
+			<ul>
+				<li><a href="belohnungen.html?lang=en">Rewards</a>: what your quests and deeds bring you</li>
+				<li><a href="/en/title/">Titles</a>: how to earn them</li>
+				<li><a href="/en/virtue/">Virtues</a> and <a href="ruf.html?lang=en">reputation</a>: choose your next goal</li>
+			</ul>
+		</article>
+		<article class="familie-karte">
+			<h4><a href="spielstand.html?lang=en">Your character</a></h4>
+			<p>You have come a long way. Keep track of your adventures and your craft.</p>
+			<ul>
+				<li><a href="spielstand.html?lang=en">Import progress</a>: bring your adventures into the log book</li>
+				<li><a href="/en/profession/">My professions</a>: what you know and what to learn next</li>
+				<li><a href="ruf.html?lang=en">My reputation</a>: where you have made a name for yourself</li>
+			</ul>
+		</article>
+	</div>
 </section>
+
+<section class="neuigkeiten" aria-labelledby="neu-titel">
+	<h3 id="neu-titel">New in the log book</h3>
+	<article class="neuigkeit">
+		<p class="datum"><time datetime="2026-11-08">8 November 2026</time></p>
+		<h4>On the trail of your next quest</h4>
+		<p>Where does it begin, what must you complete first and what rewards await? Find out how quests fit together and where the story leads next. <a href="/en/quest/70071D89/">Look up a quest</a></p>
+	</article>
+	<article class="neuigkeit">
+		<p class="datum"><time datetime="2026-11-08">8 November 2026</time></p>
+		<h4>The right gear for the road ahead</h4>
+		<p>Browse items by type and quality and check their stats. If swift travel is not unlocked yet, the travel planner can help you find another way. <a href="/en/item/armour/quality/legendary/">Browse legendary armour</a></p>
+	</article>
+	<article class="neuigkeit">
+		<p class="datum"><time datetime="2026-11-06">6 November 2026</time></p>
+		<h4>Rewards, recipes and reputation</h4>
+		<p>Which title is still missing? Which deed will strengthen your virtues? Find rewards to aim for, look up crafting ingredients and discover quests to improve your reputation. <a href="belohnungen.html?lang=en">Explore rewards</a></p>
+	</article>
+</section>
+
 <figure class="bild">
-<a href="index.html?lang=en"><img src="bild/start-en.jpg" alt="Quest map of Bree-land in LOTRO Log Book" loading="lazy" width="1280" height="860"></a>
-<figcaption>Quest list, map and details in one view.</figcaption>
+	<a href="index.html?lang=en"><img src="bild/start-en.jpg" alt="Quest map of Bree-land in LOTRO Log Book" loading="lazy" width="1280" height="860"></a>
+	<figcaption>Out and about in Bree-land: find quests and plan your next journey.</figcaption>
 </figure>
-<section>
-<h3>Explore the Log Book</h3>
-<div class="funktionen">
-<div><h4><a href="index.html?lang=en">Quests</a></h4><p><span data-katalogzahl="aufgaben">15,118</span> entries organised by landscape and story, with quest givers, requirements and objective locations where known.</p></div>
-<div><h4><a href="index.html?art=taten&amp;lang=en">Deeds</a></h4><p><span data-katalogzahl="taten">5,528</span> entries with descriptions and objectives. Import your progress to see completed deeds and current counters.</p></div>
-<div><h4><a href="ruf.html?lang=en">Reputation</a></h4><p>Your standing with each faction and unfinished quests and deeds that can improve it.</p></div>
-<div><h4><a href="handwerk.html?lang=en">Crafting</a></h4><p>Professions and crafting tiers, including your proficiency and mastery progress.</p></div>
-</div>
+
+<section class="import" aria-labelledby="import-titel">
+	<h3 id="import-titel">With your own progress</h3>
+	<p>You have travelled many roads already. Bring your progress over with LOTRO Companion to see the quests and deeds you have completed, the recipes you know and your standing with each faction. Your character data stays on your computer.</p>
+	<p><a class="knopf sekundaer" href="spielstand.html?lang=en">Import progress</a> <a href="companion.html?lang=en">How to use LOTRO Companion</a></p>
 </section>
-<section class="plugin">
-<h3>In the game: Magic Quest Log</h3>
-<p>The companion plugin shows quests, deeds and your progress inside LOTRO. The import page also prepares your Companion progress for the plugin.</p>
-<p><a class="knopf sekundaer" href="https://www.lotrointerface.com/downloads/info1346-MagicQuestLog.html" rel="noopener" target="_blank">Plugin on LOTROInterface</a></p>
+
+<section class="plugin" aria-labelledby="plugin-titel">
+	<h3 id="plugin-titel">Also in game: Magic Quest Log</h3>
+	<p>The companion plugin shows quests, deeds and your progress inside LOTRO. You do not need it for this website.</p>
+	<p><a class="knopf sekundaer" href="plugin.html?lang=en">In-game plugin</a></p>
 </section>
+
 <section class="feedback">
-<h3>Found something wrong?</h3>
-<p>A missing quest, a wrong area, a clumsy phone layout: write to <a href="mailto:llb@sirhexalot.de">llb@sirhexalot.de</a> — or open a <a href="https://github.com/Sirhexalot/lotro-log-book/issues" rel="noopener" target="_blank">GitHub issue</a>.</p>
+	<h3>Found something wrong?</h3>
+	<p>A missing quest, a wrong turn or something not working? Write to <a href="mailto:llb@sirhexalot.de">llb@sirhexalot.de</a> or report it on <a href="https://github.com/Sirhexalot/lotro-log-book/issues" rel="noopener" target="_blank">GitHub</a>.</p>
 </section>
 </main>
-<footer><p><a href="impressum.html?lang=en">Legal notice</a> · <a href="datenschutz.html?lang=en">Privacy</a></p></footer>
+<footer><p>LOTRO Log Book · <a href="impressum.html?lang=en">Legal notice</a> · <a href="datenschutz.html?lang=en">Privacy</a></p></footer>
 <script src="texte.js"></script>
 <script src="texte-spielstand.js"></script>
 <script src="texte-logbuch.js"></script>

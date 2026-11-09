@@ -1,0 +1,17 @@
+{% extends 'layout.twig' %}
+
+{# Deed page: same order as quests, but deeds have no giver and no chain.
+   "Woher" names the deed type and category, "Zusammenhang" links neighbours
+   in the same area or of the same kind. #}
+{% block inhalt %}
+<article><div class="katalog-kopf"><h1>{{ icon|raw }}{{ symbol_gross|raw }}{{ page.name }}</h1></div><p id="katalog-status" hidden data-id="{{ page.id }}" data-kind="{{ kind }}" data-profession=""></p>
+{% if page.chips %}<p class="katalog-chips">{% for chip in page.chips %}<span class="katalog-chip">{{ chip }}</span>{% endfor %}</p>{% endif %}
+<p class="katalog-aktionen"><a href="{{ page.map_link }}" class="katalog-knopf">{{ w.map }}</a></p>
+{% if page.description %}<section><h2>{{ w.description }}</h2><p class="katalog-text">{{ page.description }}</p></section>{% endif %}
+{% if page.place %}<section><h2>{{ w.place }}</h2>{% for map in page.place.images %}<figure class="katalog-ort"><img src="/karten/{{ lang }}/{{ map.map }}.webp" alt="" width="320" height="240" loading="lazy" decoding="async"><i class="katalog-pin" style="left:{{ map.pin_x|pin }}%;top:{{ map.pin_y|pin }}%"></i></figure>{% endfor %}<p class="katalog-hinweis">{{ page.place.hint }}</p></section>{% endif %}
+{% if page.facts %}<section><h2>{{ w.where_from }}</h2><dl class="katalog-fakten">{% for fact in page.facts %}<dt>{{ fact.label }}</dt><dd>{{ fact.text }}</dd>{% endfor %}</dl></section>{% endif %}
+{% if page.rewards_fixed or page.rewards_choice %}<section><h2>{{ w.wofuer }}</h2>{% if page.rewards_fixed %}<div class="katalog-gaben">{% for item in page.rewards_fixed %}{% include 'entity/reward.twig' with {'item': item} only %}{% endfor %}</div>{% endif %}{% if page.rewards_choice %}<h3>{{ w.choice }}</h3><div class="katalog-gaben">{% for item in page.rewards_choice %}{% include 'entity/reward.twig' with {'item': item} only %}{% endfor %}</div>{% endif %}</section>{% endif %}
+{% if page.more_area or page.more_kind %}<section><h2>{{ w.context }}</h2>{% if page.more_area %}<h3>{{ page.more_area.title }} · {{ page.more_area.count }}</h3><ul>{% for entry in page.more_area.entries %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul>{% if page.more_area.rest %}<p class="katalog-hinweis">{{ w.more_in_list|replace({'%s': page.more_area.rest}) }}</p>{% endif %}{% endif %}{% if page.more_kind %}<h3>{{ page.more_kind.title }} · {{ page.more_kind.count }}</h3><ul>{% for entry in page.more_kind.entries %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul>{% if page.more_kind.rest %}<p class="katalog-hinweis">{{ w.more_in_list|replace({'%s': page.more_kind.rest}) }}</p>{% endif %}{% endif %}</section>{% endif %}
+{% if page.steps %}<details class="katalog-ziele" data-nosnippet><summary>{{ w.objectives }}</summary><ol>{% for step in page.steps %}<li>{% for paragraph in step.paragraphs %}<p class="katalog-text">{{ paragraph }}</p>{% endfor %}<ul>{% for goal in step.objectives %}<li>{{ goal }}</li>{% endfor %}</ul></li>{% endfor %}</ol></details>{% endif %}
+</article>
+{% endblock %}

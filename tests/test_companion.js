@@ -70,6 +70,17 @@ assert.deepStrictEqual(paths, [
 const index = files.find((f) => f.path === 'Sirhexalot/Meriadoc/AllCharacters/MagicQuestLog_Characters.plugindata').text;
 assert.ok(index.includes('["Feldobar"] = true,') && index.includes('["Meri"] = true\r\n}'), index);
 
+// Accented LOTRO names must not silently disappear from exports or their index.
+for (const name of ['Éowyn', 'Frödo', 'François', 'Łukasz']) {
+	const exported = C.pluginFiles([Object.assign({}, entry, { name })]);
+	assert.strictEqual(exported.length, 2, 'missing export for ' + name);
+	assert.ok(exported[0].path.endsWith('MagicQuestLog_Import_' + name + '.plugindata'));
+	assert.ok(exported[1].text.includes('["' + name + '"] = true'));
+}
+for (const name of ['../Escape', 'a/b', 'a\\b', 'a.b', '×', '÷']) {
+	assert.deepStrictEqual(C.pluginFiles([Object.assign({}, entry, { name })]), [], 'unsafe name ' + name);
+}
+
 // Grouping picked files: the account summary.xml is not a character.
 const groups = C.groupFiles([
 	{ path: 'characters/toon-00000/summary.xml' }, { path: 'characters/toon-00000/questsStatus.xml' },

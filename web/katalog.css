@@ -1,0 +1,173 @@
+/* Static catalogue pages use the site's tokens and header container. */
+body.katalog-seite { display: block; height: auto; min-height: 100vh; }
+.katalog-marke { grid-area: marke; color: var(--gold); text-decoration: none; white-space: nowrap; letter-spacing: .04em; }
+.katalog-inhalt { display: block; width: 100%; max-width: var(--huelle); margin: 0 auto; padding: 24px 16px 48px; }
+.katalog-inhalt article { max-width: 960px; }
+.katalog-inhalt h1 { font-size: var(--text-titel); line-height: 1.3; overflow-wrap: anywhere; }
+.katalog-inhalt h2 { font-size: var(--text-abschnitt); margin-top: 28px; }
+.katalog-inhalt h3 { font-size: var(--text-normal); }
+.katalog-seite a { color: var(--gold); }
+.katalog-pfad { font-size: var(--text-bedienung); color: var(--schwach); overflow-wrap: anywhere; }
+.katalog-fakten { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 20px; }
+.katalog-fakten dt { color: var(--schwach); }
+.katalog-fakten dd { margin: 0; overflow-wrap: anywhere; }
+.katalog-text { white-space: pre-line; }
+.katalog-liste { columns: 2 300px; padding-left: 22px; }
+.katalog-liste li { break-inside: avoid; margin-bottom: 10px; }
+.katalog-knopf { display: inline-block; background: var(--fläche-hell); border: 1px solid var(--rand); border-radius: 3px; padding: 8px 14px; text-decoration: none; }
+.katalog-hinweis { color: var(--schwach); }
+.katalog-ziele { margin-top: 28px; padding: 14px; background: var(--fläche); border-radius: 4px; }
+.katalog-ziele summary { cursor: pointer; color: var(--gold); }
+.katalog-seite footer { padding: 16px; }
+#katalog-status { color: var(--schwach); }
+#katalog-status[data-done="true"] { color: var(--fertig); }
+@media (max-width: 640px) {
+    .katalog-inhalt { padding-inline: 12px; }
+    .katalog-fakten { grid-template-columns: 1fr; gap: 0; }
+    .katalog-fakten dd { margin-bottom: 10px; }
+    .katalog-ziele ol { padding-left: 20px; }
+}
+
+/* Quest page: one place gets a map cut with a pin, many places only the count. */
+.katalog-ort { position: relative; margin: 12px 0; max-width: 320px; aspect-ratio: 4 / 3;
+	border: 1px solid var(--rand); border-radius: 4px; overflow: hidden; background: #14110e; }
+.katalog-ort img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.katalog-pin { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%;
+	background: #f0a63c; border: 2px solid #14110e; box-shadow: 0 0 0 3px rgba(240, 166, 60, .25); }
+.katalog-marken { color: var(--schwach); font-size: var(--text-bedienung); }
+.katalog-inhalt h1 svg.symbol { width: 26px; height: 26px; vertical-align: -3px; margin-right: 10px; color: var(--gold); }
+/* The item's own picture stays bigger than the entity mark. */
+.katalog-inhalt h1 img.symbol { width: 34px; height: 34px; vertical-align: -6px; margin-right: 10px; }
+
+/* Entity page: a short chip row under the title, then the sections. */
+.katalog-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; }
+.katalog-chip {
+	border: 1px solid var(--rand); border-radius: 999px; padding: 3px 9px;
+	font-size: var(--text-bedienung); color: var(--text); white-space: nowrap;
+}
+/* Rewards: two columns on desktop, one on phones. */
+.katalog-gaben { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+.katalog-gabe {
+	display: flex; align-items: center; gap: 7px; padding: 6px 0;
+	border-bottom: 1px solid var(--rand); font-size: var(--text-bedienung);
+}
+.katalog-gabe .symbol { width: 20px; height: 20px; margin-right: 0; vertical-align: middle; }
+.katalog-gabe svg { width: 18px; height: 18px; color: var(--gold); flex: 0 0 auto; }
+.katalog-gabe-art { color: var(--schwach); }
+@media (max-width: 640px) {
+	.katalog-gaben { grid-template-columns: 1fr; }
+}
+
+/* Quest page header: title and actions on one line, facts as chips under it. */
+.katalog-kopf { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
+.katalog-kopf h1 { flex: 1 1 320px; margin: 0; }
+.katalog-kopf .katalog-aktionen { margin: 0; display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+.katalog-kopf .katalog-aktionen .katalog-link { color: var(--gold); }
+.katalog-abschnitt { margin-top: 26px; }
+.katalog-abschnitt > h2 {
+	font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; font-weight: 500;
+	color: var(--schwach); margin: 0 0 8px;
+}
+.katalog-abschnitt h3 { font-size: var(--text-bedienung); color: var(--gold); margin: 12px 0 4px; font-weight: 500; }
+.katalog-abschnitt ul { margin: 0; padding-left: 20px; }
+/* Place: the map cut beside its description, not above it. */
+.katalog-ort-flex { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+.katalog-ort-flex .katalog-ort { margin: 0; flex: 0 0 240px; }
+.katalog-ort-flex > div { flex: 1 1 260px; }
+.katalog-ort-flex p { margin: 0 0 6px; }
+/* Rewards in two columns; each row is a line with the item symbol. */
+.katalog-gaben { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+.katalog-geben { display: block; }
+.katalog-geben + .katalog-geben { margin-top: 10px; }
+.katalog-geben-art { color: var(--schwach); font-size: var(--text-bedienung); margin-bottom: 2px; }
+.katalog-gabe { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--rand); font-size: var(--text-bedienung); }
+/* A link must look like one, but the quality colour carries information. */
+.katalog-gabe a { color: inherit; text-decoration: underline; text-underline-offset: 2px;
+	text-decoration-color: color-mix(in srgb, currentColor 45%, transparent); }
+.katalog-gabe a:hover { color: var(--gold); text-decoration-color: currentColor; }
+/* The picture reads as an item, not as a bullet: framed, twice the old size. */
+.katalog-gabe .symbol { width: 36px; height: 36px; flex: 0 0 auto; border-radius: 4px;
+	background: radial-gradient(circle at 50% 35%, #2a251f, #14110e 70%);
+	box-shadow: inset 0 0 0 1px var(--rand), 0 1px 2px rgba(0, 0, 0, .5); }
+/* Context: two blocks of label/value pairs side by side. */
+.katalog-zwei { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 44px; }
+@media (max-width: 760px) {
+	.katalog-gaben, .katalog-zwei { grid-template-columns: 1fr; }
+	.katalog-ort-flex .katalog-ort { flex: 1 1 100%; max-width: 100%; }
+}
+
+/* Item page: the entity symbol is small, the item's own symbol is the picture. */
+.katalog-inhalt h1 img.symbol-gross {
+	width: 38px; height: 38px; object-fit: contain; vertical-align: -8px; margin-right: 10px;
+}
+.katalog-werte { grid-template-columns: 1fr auto; }
+.katalog-werte dd { text-align: right; font-variant-numeric: tabular-nums; }
+.katalog-chips a.katalog-chip { color: var(--gold); text-decoration: none; }
+.katalog-chip.aktiv { border-color: var(--gold); color: var(--gold); }
+
+/* Header on catalogue pages: same logo mark as the app, and the tab row must
+   line up with the brand instead of indenting by the wrapper's padding. */
+.katalog-marke::before {
+	content: ''; display: inline-block; width: 20px; height: 20px; margin-right: 8px;
+	vertical-align: -4px; background: center / 20px 20px no-repeat;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d6b35a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 22a3 3 0 01-3-3'/%3E%3Cpath d='M10 22c2.761 0 5-1.79 5-4-4.42 0-4.08-5-8.5-5a4.501 4.501 0 000 9z'/%3E%3Cpath d='M10 3H8'/%3E%3Cpath d='M12.5 11.5 22 2'/%3E%3Cpath d='M20 13v4'/%3E%3Cpath d='M22 15h-4'/%3E%3Cpath d='M4 5v4'/%3E%3Cpath d='M6 7H2'/%3E%3Cpath d='m6.98 13.02 2.665-2.664a1.21 1.21 0 011.71 0l2.29 2.288a1.21 1.21 0 010 1.712l-2.088 2.087'/%3E%3Cpath d='M9 2v2'/%3E%3C/svg%3E");
+}
+.kopf-innen .familie-reiter { padding-left: 0; padding-right: 0; }
+/* The search opens the search page; it should look like a link, not a field. */
+.suchen-knopf {
+	display: inline-flex; align-items: center; padding: 4px 0;
+	color: var(--schwach); font-size: var(--text-bedienung); text-decoration: none;
+	border-bottom: 1px solid transparent;
+}
+.suchen-knopf:hover { color: var(--gold); border-bottom-color: var(--gold); }
+/* Space between breadcrumb and title, and between title and chips. */
+.katalog-pfad { margin: 8px 0 14px; }
+.katalog-kopf { margin-bottom: 8px; }
+/* Item symbols in reward rows: readable, not tiny. */
+.katalog-gabe { padding: 9px 0; }
+
+/* Action row under the chips on quest pages. */
+.katalog-aktionen { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 0; }
+
+/* Item index: two jumping-off selects above the list. */
+.katalog-filter { display: flex; flex-wrap: wrap; gap: 12px 20px; margin: 6px 0 14px; }
+.katalog-wahl { display: flex; align-items: center; gap: 8px; font-size: var(--text-bedienung); color: var(--schwach); }
+.katalog-wahl select { padding: 7px 10px; border: 1px solid var(--rand); border-radius: 4px;
+	background: var(--fläche); color: var(--text); font-size: var(--text-bedienung); }
+
+/* --- Item page (09.11.2026): the values a player compares, not a fact table.
+ * The eyebrow names slot and type, the heading carries the quality colour, the
+ * armour value stands alone and every bonus follows as "+n Name". */
+.katalog-augenbraue {
+	margin: 0 0 2px; color: var(--schwach); font-size: .78rem; letter-spacing: .02em;
+}
+body[data-art="i"] .katalog-kopf h1 { font-size: 1.9rem; line-height: 1.2; }
+body[data-art="i"] .katalog-kopf h1.q1 { color: #d8d2c4; }
+body[data-art="i"] .katalog-kopf h1.q2 { color: #e0c15c; }
+body[data-art="i"] .katalog-kopf h1.q3 { color: #b98cd6; }
+body[data-art="i"] .katalog-kopf h1.q4 { color: #6fc3c3; }
+body[data-art="i"] .katalog-kopf h1.q5 { color: #e6a94d; }
+body[data-art="i"] .katalog-kopf .symbol-gross {
+	width: 64px; height: 64px; padding: 8px; margin-right: 14px;
+	background: var(--fläche); border: 1px solid var(--rand); border-radius: 4px;
+	vertical-align: middle;
+}
+body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
+
+.katalog-grundwert {
+	display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+	margin: 0 0 10px; padding: 0 0 12px; border-bottom: 1px solid var(--rand);
+	color: var(--schwach);
+}
+.katalog-grundwert b { font-size: 1.7rem; font-weight: normal; color: var(--text); }
+
+.katalog-boni { list-style: none; margin: 0; padding: 0; }
+.katalog-boni li { display: flex; gap: 10px; align-items: baseline; padding: 5px 0; }
+.katalog-boni b { min-width: 3.2em; font-weight: normal; color: #8ab681; font-variant-numeric: tabular-nums; }
+.katalog-boni span { color: var(--text); }
+
+@media (max-width: 640px) {
+	body[data-art="i"] .katalog-kopf h1 { font-size: 1.55rem; }
+	body[data-art="i"] .katalog-kopf .symbol-gross { width: 54px; height: 54px; }
+	.katalog-grundwert b { font-size: 1.4rem; }
+}

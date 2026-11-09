@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Frodo sucht den Weg – LOTRO Log Book</title>
+<script>
+/* Tracking also on the error page: broken links only become visible here. */
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,s);
+})(window,document,'script','dataLayer','GTM-TRC8BF95');
+</script>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/gemeinsam.css">
+<style>
+body { display: block; height: auto; min-height: 100vh; }
+.fehler-kopf, .fehler-inhalt, .fehler-fuss { width: 100%; max-width: var(--huelle); margin: auto; padding: 20px 16px; }
+.fehler-kopf { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+a { color: var(--gold); }
+.fehler-logo { text-decoration: none; letter-spacing: .04em; }
+.fehler-sprachen { display: flex; gap: 4px; }
+.fehler-sprachen a { padding: 5px 9px; text-decoration: none; border-radius: 3px; border: 1px solid transparent; }
+.fehler-sprachen a[aria-current="true"] { background: var(--fläche-hell); border-color: var(--rand); }
+.fehler-inhalt { display: grid; grid-template-columns: minmax(220px, .85fr) minmax(0, 1.15fr); gap: 5%; align-items: center; padding-block: 54px; }
+.fehler-bild { width: 100%; max-width: 450px; margin: auto; }
+.fehler-inhalt section { margin-block: 24px; }
+.fehler-inhalt section[hidden] { display: none; }
+.fehler-inhalt h1, .fehler-inhalt h2 { font-size: clamp(1.8rem, 3vw, 2.7rem); font-weight: normal; line-height: 1.2; margin: 16px 0 24px; color: var(--text); }
+.fehler-inhalt p { max-width: 46ch; }
+.fehler-kicker { font: .875rem var(--mono); letter-spacing: .07em; color: var(--gold); }
+.fehler-text { color: var(--schwach); }
+.fehler-wege { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 24px; padding: 0; list-style: none; }
+.fehler-wege a { display: inline-block; padding: 9px 15px; background: var(--fläche-hell); border: 1px solid var(--rand); border-radius: 4px; text-decoration: none; }
+.fehler-wege li:first-child a { color: var(--grund); background: var(--gold); border-color: var(--gold); }
+.fehler-wege a:hover { filter: brightness(1.15); }
+.fehler-mehr { display: flex; flex-wrap: wrap; gap: 10px 20px; padding: 0; list-style: none; font-size: var(--text-bedienung); }
+.fehler-fuss { display: block; color: var(--schwach); font-size: var(--text-bedienung); border-top: 1px solid var(--rand); }
+.fehler-fuss a { color: var(--schwach); }
+@media (max-width: 767px) {
+    .fehler-inhalt { grid-template-columns: 1fr; padding-top: 16px; gap: 0; }
+    .fehler-bild { max-width: 250px; }
+    .fehler-inhalt section { margin-top: 0; }
+    .fehler-kopf { padding-inline: 12px; }
+}
+</style>
+</head>
+<body>
+<header class="kopf"><div class="fehler-kopf">
+<a class="fehler-logo" href="/start.html">LOTRO Log Book</a>
+<nav class="fehler-sprachen" aria-label="Sprache / Language / Langue">
+<a href="#de" data-error-lang="de" lang="de">DE</a>
+<a href="#en" data-error-lang="en" lang="en">EN</a>
+<a href="#fr" data-error-lang="fr" lang="fr">FR</a>
+</nav></div></header>
+<main class="fehler-inhalt">
+<!-- Decorative, hand-drawn SVG: a small traveller at a fork, not a game screenshot. -->
+<svg class="fehler-bild" viewBox="0 0 440 420" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<radialGradient id="licht"><stop stop-color="#d6b35a" stop-opacity=".15"/><stop offset="1" stop-color="#d6b35a" stop-opacity="0"/></radialGradient>
+<linearGradient id="pfad" x2="0" y2="1"><stop stop-color="#8f7540" stop-opacity=".15"/><stop offset="1" stop-color="#d6b35a" stop-opacity=".45"/></linearGradient>
+</defs>
+<circle cx="222" cy="185" r="180" fill="url(#licht)"/>
+<circle cx="325" cy="77" r="27" fill="none" stroke="#d6b35a" stroke-width="3" opacity=".65"/>
+<circle cx="325" cy="77" r="21" fill="none" stroke="#d6b35a" opacity=".25"/>
+<path d="M33 218 96 142 145 195 195 122 255 202 302 165 403 224" fill="none" stroke="#4c5140" stroke-width="2"/>
+<path d="M20 292 Q115 242 216 276 T419 278" fill="none" stroke="#53543a" stroke-width="2"/>
+<path d="M131 408 Q230 347 226 294 Q206 262 135 231 M226 294 Q265 252 344 232" fill="none" stroke="url(#pfad)" stroke-width="24"/>
+<path d="M97 280 90 233 76 253 89 222 81 230 94 199 108 230 101 225 115 253 101 244 106 280M363 288 363 241 347 262 358 230 351 236 367 202 380 236 373 233 388 261 374 250 375 288" fill="#303a2d"/>
+<!-- A signpost with two equally unhelpful directions. -->
+<path d="M281 189 276 310" stroke="#8e7447" stroke-width="9" stroke-linecap="round"/>
+<path d="m236 191 70 3 17 17-19 13-70-4z" fill="#453a26" stroke="#ae8f4e" stroke-width="2"/>
+<path d="m283 231 62 3 15 17-17 11-62-4z" fill="#453a26" stroke="#ae8f4e" stroke-width="2"/>
+<text x="261" y="214" fill="#d6b35a" font-size="20" font-family="Georgia,serif">?</text>
+<text x="312" y="254" fill="#d6b35a" font-size="20" font-family="Georgia,serif">?</text>
+<!-- Bare feet, green travelling cloak, unruly curls and a walking stick. -->
+<ellipse cx="176" cy="353" rx="21" ry="8" fill="#b69b74" transform="rotate(-12 176 353)"/>
+<ellipse cx="212" cy="354" rx="20" ry="8" fill="#b69b74" transform="rotate(12 212 354)"/>
+<path d="m175 331-1 17m33-17 3 19" stroke="#796444" stroke-width="11"/>
+<path d="M183 237 Q160 256 151 325 Q191 348 231 324 Q229 259 205 237" fill="#3c533e" stroke="#78906a" stroke-width="2"/>
+<path d="m193 247-7 80m17-67 12 62" fill="none" stroke="#9aad80" stroke-opacity=".35" stroke-width="2"/>
+<path d="m219 282 21 7" stroke="#b69b74" stroke-width="9" stroke-linecap="round"/>
+<path d="m241 257-5 101" stroke="#a38b60" stroke-width="5" stroke-linecap="round"/>
+<circle cx="193" cy="226" r="24" fill="#b69b74"/>
+<path d="M169 232 Q157 221 170 211 Q165 199 179 199 Q187 187 197 199 Q213 191 217 205 Q232 210 218 225 Q208 220 205 228 Q192 219 186 229 Q174 222 169 232" fill="#382b22" stroke="#756047" stroke-width="2"/>
+<path d="M176 246 Q193 260 210 245" fill="none" stroke="#8ba17b" stroke-width="3"/>
+<circle cx="198" cy="251" r="3" fill="#d6b35a"/>
+<path d="m150 370-8-12m-3 14-10-5m115 0 9-13m1 14 10-4" stroke="#737749" stroke-width="2"/>
+<text x="33" y="88" fill="#d6b35a" opacity=".45" font-family="Georgia,serif" font-size="51">404</text>
+</svg>
+<div>
+<section lang="de" id="de">
+<p class="fehler-kicker">404 · Ein kleiner Umweg</p>
+<h1>Frodo sucht noch den Weg.</h1>
+<p class="fehler-text">Hier ist er jedenfalls nicht. Diese Seite gibt es nicht – vielleicht fehlt dem Link ein Stück. Zum Glück führen andere Wege zurück nach Mittelerde.</p>
+<p>Hier geht es nach …</p>
+<ul class="fehler-wege">
+<li><a href="/start.html">Startseite</a></li><li><a href="/index.html?lang=de">Aufgaben</a></li>
+<li><a href="/index.html?art=taten&amp;lang=de">Taten</a></li><li><a href="/suche.html?lang=de">Suche</a></li>
+</ul>
+<ul class="fehler-mehr">
+<li><a href="/ruf.html?lang=de">Ruf</a></li><li><a href="/handwerk.html?lang=de">Handwerk</a></li>
+<li><a href="/belohnungen.html?lang=de">Belohnungen</a></li><li><a href="/plugin.html?lang=de">Plugin fürs Spiel</a></li>
+</ul>
+</section>
+<section lang="en" id="en">
+<p class="fehler-kicker">404 · A little detour</p>
+<h1>Frodo is still looking for the path.</h1>
+<p class="fehler-text">It isn’t here, that’s for sure. This page doesn’t exist – perhaps a piece of the link went missing. Luckily, there are other ways back to Middle-earth.</p>
+<p>This way to …</p>
+<ul class="fehler-wege">
+<li><a href="/start-en.html">Home</a></li><li><a href="/index.html?lang=en">Quests</a></li>
+<li><a href="/index.html?art=taten&amp;lang=en">Deeds</a></li><li><a href="/suche.html?lang=en">Search</a></li>
+</ul>
+<ul class="fehler-mehr">
+<li><a href="/ruf.html?lang=en">Reputation</a></li><li><a href="/handwerk.html?lang=en">Crafting</a></li>
+<li><a href="/belohnungen.html?lang=en">Rewards</a></li><li><a href="/plugin.html?lang=en">In-game plugin</a></li>
+</ul>
+</section>
+<section lang="fr" id="fr">
+<p class="fehler-kicker">404 · Un petit détour</p>
+<h1>Frodon cherche encore son chemin.</h1>
+<p class="fehler-text">Ce n’est pas par ici, en tout cas. Cette page n’existe pas : il manque peut-être un morceau du lien. Heureusement, d’autres chemins ramènent en Terre du Milieu.</p>
+<p>Par ici pour …</p>
+<ul class="fehler-wege">
+<li><a href="/start-fr.html">Accueil</a></li><li><a href="/index.html?lang=fr">Quêtes</a></li>
+<li><a href="/index.html?art=taten&amp;lang=fr">Prouesses</a></li><li><a href="/suche.html?lang=fr">Recherche</a></li>
+</ul>
+<ul class="fehler-mehr">
+<li><a href="/ruf.html?lang=fr">Réputation</a></li><li><a href="/handwerk.html?lang=fr">Artisanat</a></li>
+<li><a href="/belohnungen.html?lang=fr">Récompenses</a></li><li><a href="/plugin.html?lang=fr">Plugin en jeu</a></li>
+</ul>
+</section>
+</div>
+</main>
+<footer class="fehler-fuss"><a href="/impressum.html">Impressum / Legal notice / Mentions légales</a> · <a href="/datenschutz.html">Datenschutz / Privacy / Confidentialité</a></footer>
+<script>
+(function () {
+    'use strict';
+    var languages = ['de', 'en', 'fr'];
+    function show(lang) {
+        if (languages.indexOf(lang) === -1) { lang = 'de'; }
+        document.documentElement.lang = lang;
+        languages.forEach(function (code) { document.getElementById(code).hidden = code !== lang; });
+        document.querySelectorAll('[data-error-lang]').forEach(function (link) {
+            link.setAttribute('aria-current', String(link.getAttribute('data-error-lang') === lang));
+        });
+        document.querySelector('.fehler-logo').href = lang === 'de' ? '/start.html' : '/start-' + lang + '.html';
+        document.title = {de: 'Frodo sucht den Weg', en: 'Frodo is looking for the path', fr: 'Frodon cherche son chemin'}[lang] + ' – LOTRO Log Book';
+    }
+    var query = new URLSearchParams(location.search).get('lang');
+    var path = location.pathname.split('/')[1];
+    var hash = location.hash.slice(1);
+    show(languages.indexOf(hash) !== -1 ? hash : languages.indexOf(path) !== -1 ? path :
+        languages.indexOf(query) !== -1 ? query : (navigator.language || 'de').slice(0, 2));
+    document.querySelectorAll('[data-error-lang]').forEach(function (link) {
+        link.addEventListener('click', function (event) { event.preventDefault(); show(link.getAttribute('data-error-lang')); });
+    });
+})();
+</script>
+<script data-goatcounter="https://sirhexalot.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

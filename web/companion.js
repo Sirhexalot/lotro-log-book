@@ -279,7 +279,8 @@
 		var files = [];
 		var groups = {};
 		characters.forEach(function (entry) {
-			if (!/^[A-Za-z]+$/.test(entry.name) || !entry.account || !entry.server) { return; }
+			// Match the plugin's Latin-letter name validation, including accents.
+			if (!/^[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u017F]+$/.test(entry.name) || !entry.account || !entry.server) { return; }
 			var folder = entry.account + '/' + entry.server + '/AllCharacters/';
 			files.push({ path: folder + IMPORT_KEY + entry.name + '.plugindata', text: pluginData(entry) });
 			(groups[folder] = groups[folder] || []).push(entry.name);

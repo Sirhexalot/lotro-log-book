@@ -3,6 +3,7 @@
 (function () {
 	'use strict';
 	var t = window.MQL_T || function (key) { return key; };
+	var sprache = window.MQL_SPRACHE || 'de';
 	var ziel = document.getElementById('rezepte-liste');
 	if (!ziel) { return; }
 
@@ -16,6 +17,19 @@
 	var alleBerufe = false;
 	var bekannt = {};
 	var meineBerufe = {};
+
+	var SEGMENT = {
+		gegenstand: { de: 'gegenstand', en: 'item', fr: 'objet' },
+		rezept: { de: 'rezept', en: 'recipe', fr: 'recette' }
+	};
+
+	function itemUrl(id) {
+		return id ? '/' + sprache + '/' + SEGMENT.gegenstand[sprache] + '/' + id + '/' : '';
+	}
+
+	function recipeUrl(id) {
+		return id ? '/' + sprache + '/' + SEGMENT.rezept[sprache] + '/' + id + '/' : '';
+	}
 
 	var steuerung, sucheFeld, fehlendFeld, fehlendHaken, alleFeld, alleHaken;
 	var anzahl, berufZeile, stufenKopf, stufenZeile, inhalt, mehr;
@@ -73,6 +87,43 @@
 		return (teil[1] > 1 ? teil[1] + ' × ' : '') + teil[0];
 	}
 
+	/** The client's 32×32 symbol, one file per symbol ID and language-neutral. */
+	function bild(symbol) {
+		if (!symbol) { return null; }
+		var img = eltern('img');
+		img.className = 'symbol';
+		img.src = '/bild/items/' + symbol + '.webp';
+		img.alt = '';
+		img.width = 22;
+		img.height = 22;
+		img.loading = 'lazy';
+		img.decoding = 'async';
+		return img;
+	}
+
+	/** Ingredients keep their symbol beside the name, not in a separate column. */
+	function zutat(teil) {
+		var id = teil[3] || '';
+		var stueck = eltern(id ? 'a' : 'span');
+		stueck.className = 'zutat';
+		if (id) { stueck.href = itemUrl(id); }
+		var symbol = bild(teil[2]);
+		if (symbol) { stueck.appendChild(symbol); }
+		stueck.appendChild(document.createTextNode(menge(teil)));
+		return stueck;
+	}
+
+	function zutatenZeile(teile, zusatz) {
+		var zeile = eltern('span');
+		zeile.className = 'zutaten-zeile';
+		teile.forEach(function (teil, nummer) {
+			if (nummer) { zeile.appendChild(document.createTextNode(', ')); }
+			zeile.appendChild(zutat(teil));
+		});
+		if (zusatz) { zeile.appendChild(document.createTextNode(zusatz)); }
+		return zeile;
+	}
+
 	/** One recipe row: result, ingredients (optional and critical below), profession. */
 	function zeile(wert, optionen) {
 		var tr = document.createElement('tr');
@@ -80,7 +131,11 @@
 		name.className = 'q' + (wert[1] || 0);
 		var zeichen = marker(wert);
 		if (zeichen) { name.appendChild(zeichen); }
-		name.appendChild(document.createTextNode(wert[0]));
+		var ergebnis = bild(wert[16]);
+		if (ergebnis) { name.appendChild(ergebnis); }
+		var ergebnisLink = eltern(wert[18] ? 'a' : 'span', wert[0]);
+		if (wert[18]) { ergebnisLink.href = itemUrl(wert[18]); }
+		name.appendChild(ergebnisLink);
 		if (optionen.mitStufe && wert[2]) {
 			var stufeText = eltern('span', ' · ' + t('stufe') + ' ' + wert[2]);
 			stufeText.className = 'bl-stufe';
@@ -94,17 +149,34 @@
 		}
 		var zutaten = eltern('td');
 		zutaten.className = 'rezept-zutaten';
-		zutaten.appendChild(document.createTextNode(wert[6].map(menge).join(', ')));
+		zutaten.appendChild(zutatenZeile(wert[6]));
 		if (wert[7] && wert[7].length) {
-			var optional = eltern('div', t('hw_optional') + ': ' + wert[7].map(function (teil) {
-				return menge(teil) + (teil[2] ? ' (' + Math.round(teil[2] * 100) + ' %)' : '');
-			}).join(', '));
+			var optional = eltern('div');
 			optional.className = 'schwach';
+			optional.appendChild(document.createTextNode(t('hw_optional') + ': '));
+			wert[7].forEach(function (teil, nummer) {
+				if (nummer) { optional.appendChild(document.createTextNode(', ')); }
+				var stueck = eltern('span');
+				stueck.className = 'zutat';
+				var symbol = bild(teil[3]);
+				if (symbol) { stueck.appendChild(symbol); }
+				var optionalLink = eltern(teil[4] ? 'a' : 'span', menge(teil) +
+					(teil[2] ? ' (' + Math.round(teil[2] * 100) + ' %)' : ''));
+				if (teil[4]) { optionalLink.href = itemUrl(teil[4]); }
+				stueck.appendChild(optionalLink);
+				optional.appendChild(stueck);
+			});
 			zutaten.appendChild(optional);
 		}
 		if (wert[8] && wert[8] !== wert[0]) {
-			var kritisch = eltern('div', t('hw_kritisch_kurz') + ': ' + wert[8]);
+			var kritisch = eltern('div');
 			kritisch.className = 'rezept-kritisch';
+			kritisch.appendChild(document.createTextNode(t('hw_kritisch_kurz') + ': '));
+			var symbol = bild(wert[17]);
+			if (symbol) { kritisch.appendChild(symbol); }
+			var kritischLink = eltern(wert[19] ? 'a' : 'span', wert[8]);
+			if (wert[19]) { kritischLink.href = itemUrl(wert[19]); }
+			kritisch.appendChild(kritischLink);
 			zutaten.appendChild(kritisch);
 		}
 		var meta = [];
@@ -115,6 +187,12 @@
 			angaben.className = 'schwach rezept-meta';
 			zutaten.appendChild(angaben);
 		}
+		var detail = eltern('div');
+		detail.className = 'rezept-detail';
+		var detailLink = eltern('a', t('hw_rezept_details'));
+		detailLink.href = recipeUrl(wert[10]);
+		detail.appendChild(detailLink);
+		zutaten.appendChild(detail);
 		tr.appendChild(zutaten);
 		return tr;
 	}
@@ -439,8 +517,10 @@
 		});
 		var berufe = document.getElementById('hw-berufe');
 		var rezepte = document.getElementById('hw-rezepte');
+		var rohstoffe = document.getElementById('hw-rohstoffe');
 		if (berufe) { berufe.hidden = wahl !== 'berufe'; }
 		if (rezepte) { rezepte.hidden = wahl !== 'rezepte'; }
+		if (rohstoffe) { rohstoffe.hidden = wahl !== 'rohstoffe'; }
 	}
 	document.querySelectorAll('[data-hw]').forEach(function (knopf) {
 		knopf.addEventListener('click', function () {
@@ -449,9 +529,13 @@
 			if (wahl === 'rezepte' && location.hash !== '#rezepte') {
 				try { history.replaceState(null, '', '#rezepte'); } catch (fehler) { /* file:// */ }
 			}
+			if (wahl === 'rohstoffe' && location.hash !== '#rohstoffe') {
+				try { history.replaceState(null, '', '#rohstoffe'); } catch (fehler) { /* file:// */ }
+			}
 		});
 	});
 	if (/rezepte/.test(location.hash) || /reiter=rezepte/.test(location.search)) { reiter('rezepte'); }
+	if (/rohstoffe/.test(location.hash) || /reiter=rohstoffe/.test(location.search)) { reiter('rohstoffe'); }
 
 	// --- start ------------------------------------------------------------
 	window.MQL_REZEPTE_ZEICHNEN = function () {

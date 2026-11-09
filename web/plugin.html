@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plugin fürs Spiel – LOTRO Log Book</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="gemeinsam.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TRC8BF95');
+</script>
+</head>
+<body data-seite="plugin" class="seite-text">
+
+<header class="kopf">
+	<div class="kopf-innen">
+		<h1 data-t="produkt">LOTRO Log Book</h1>
+		<nav class="menue" id="menue" aria-label="Menü"></nav>
+		<nav class="sprachen" aria-label="Sprache">
+			<button type="button" data-lang="de" aria-pressed="true">DE</button>
+			<button type="button" data-lang="en" aria-pressed="false">EN</button>
+			<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+		</nav>
+	</div>
+</header>
+
+<main class="seite">
+	<h2 data-t="pl_titel">Plugin fürs Spiel</h2>
+	<p data-t-html="pl_einleitung"></p>
+	<ul data-t-html="pl_was"></ul>
+
+	<h2 data-t="pl_download_titel">1. Herunterladen</h2>
+	<p data-t="pl_download"></p>
+	<p class="zeile-knoepfe">
+		<a class="knopf-gold" href="https://www.lotrointerface.com/downloads/info1346-MagicQuestLog.html" rel="noopener" target="_blank" data-t="pl_download_knopf">Magic Quest Log bei LOTROInterface</a>
+	</p>
+
+	<h2 data-t="pl_install_titel">2. Installieren</h2>
+	<ol data-t-html="pl_install"></ol>
+	<p class="schwach" data-t-html="pl_neustart"></p>
+
+	<h2 data-t="pl_fortschritt_titel">3. Fortschritt übernehmen</h2>
+	<p data-t-html="pl_fortschritt"></p>
+	<p id="ohne-charakter">
+		<span data-t="pl_ohne">Noch kein Charakter im Browser:</span>
+		<a data-ziel="spielstand.html" href="spielstand.html?lang=de" data-t="menue_spielstand">Spielstand importieren</a>
+	</p>
+	<div class="zeile-knoepfe">
+		<button type="button" class="knopf-gold" id="schreiben" data-t="pl_schreiben">In den LOTRO-Ordner schreiben</button>
+		<button type="button" id="zip" data-t="pl_zip">Als Zip herunterladen</button>
+	</div>
+	<p class="schwach" id="schreiben-hinweis" data-t-html="pl_hinweis"></p>
+	<p class="meldung" id="meldung-plugin" role="status"></p>
+	<div class="kasten">
+		<span class="schwach" data-t="pl_plugindata">Der Ordner „PluginData“ liegt hier (beim Schreiben genau diesen wählen):</span><br>
+		Windows: <code data-t="pl_plugin_windows_path">Dokumente\The Lord of the Rings Online\PluginData</code><br>
+		macOS: <code>~/Documents/The Lord of the Rings Online/PluginData</code>
+	</div>
+</main>
+
+<script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
+<script src="texte-logbuch.js"></script>
+<script src="texte-site.js"></script>
+<script src="texte-plugin.js"></script>
+<script src="sprache.js"></script>
+<script src="speicher.js"></script>
+<script src="menue.js"></script>
+<script src="companion.js"></script>
+<script src="plugin.js"></script>
+</body>
+</html>

@@ -4,9 +4,11 @@
 Reads `recipes.json` (export_recipes.py) and writes `web/rezepte-<language>.js`:
 
     window.MQL_REZEPTE = {r: [[name, quality, level, profession, tier, category,
-                               [[ingredient, quantity], …],
-                               [[optional, quantity, critical bonus], …],
-                               critical result name], …]}
+                               [[ingredient, quantity, symbol, item ID], …],
+                               [[optional, quantity, critical bonus, symbol, item ID], …],
+                               critical result name, profession key, recipe ID,
+                               tier, crit %, time, crit %, time, result symbol,
+                               critical symbol, result item ID, critical item ID], …]}
 
     .../.venv/bin/python build_rezepte.py --sprache de --quelle <rezepte-dir>
 """
@@ -41,6 +43,12 @@ def name(record, sprache):
 def baue(quelle, sprache):
     data = json.loads(quelle.read_text(encoding='utf-8'))
     items = data.get('items') or {}
+    # Symbol per item, from the shared item model. The recipe data then carries
+    # the file name directly and no page needs a second lookup.
+    seite = json.loads((HIER / 'daten' / 'items.json').read_text(encoding='utf-8')).get('items') or {}
+
+    def symbol(item_id):
+        return (seite.get(str(item_id)) or {}).get('ic') or ''
     professions = data.get('professions') or {}
     tiers = data.get('tiers') or {}
     categories = data.get('categories') or {}
@@ -55,10 +63,11 @@ def baue(quelle, sprache):
         category = (categories.get(str(recipe.get('c', ''))) or {})
         zutaten = []
         for item, quantity in recipe.get('i') or []:
-            zutaten.append([name(items.get(item), sprache), quantity])
+            zutaten.append([name(items.get(item), sprache), quantity, symbol(item), item])
         optional = []
         for part in recipe.get('o') or []:
-            optional.append([name(items.get(part[0]), sprache), part[1], part[2] if len(part) > 2 else 0])
+            optional.append([name(items.get(part[0]), sprache), part[1],
+                             part[2] if len(part) > 2 else 0, symbol(part[0]), part[0]])
         critical = ''
         if recipe.get('cr'):
             critical = name(items.get(recipe['cr'][0]), sprache)
@@ -82,6 +91,12 @@ def baue(quelle, sprache):
             round(float(recipe.get('ti') or 0), 1),
             round(float(recipe.get('ch') or 0) * 100, 1),
             round(float(recipe.get('ti') or 0), 1),
+            # Symbol file names for result and critical result, so the page
+            # shows the icon without a second lookup.
+            symbol(recipe['r'][0]),
+            symbol((recipe.get('cr') or [''])[0]),
+            recipe['r'][0],
+            (recipe.get('cr') or [''])[0],
         ])
     zeilen.sort(key=lambda row: (row[0].lower(), row[3], row[1]))
     return zeilen

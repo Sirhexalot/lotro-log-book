@@ -28,15 +28,8 @@ a { color: var(--gold); }
 	border-bottom: 1px solid var(--rand);
 }
 
-/* Same header as the app pages: full width. */
-.kopf-innen {
-	margin: 0;
-	padding: 10px 16px;
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	flex-wrap: wrap;
-}
+/* Same header as the app pages, two rows: see .kopf in gemeinsam.css. */
+.kopf-innen { margin: 0; }
 
 .kopf h1 {
 	margin: 0;
@@ -80,7 +73,7 @@ main {
 	width: 100%;
 	max-width: 780px;
 	margin: 0 auto;
-	padding: 32px 20px 48px;
+	padding: 32px 16px 48px;
 }
 
 .intro .dach {
@@ -225,3 +218,121 @@ footer p:last-child { padding-bottom: 18px; }
 .feedback { border-top: 1px solid var(--rand); padding-top: 24px; }
 .feedback h3 { margin: 0 0 6px; }
 .feedback p { margin: 0; color: var(--schwach); }
+
+/* --- Landing page -------------------------------------------------------
+ * The start page is the front door: one hero with search, the size of the
+ * catalogue, the four families, the news and the screenshot. Scoped to
+ * .landing so datenschutz.html and impressum.html keep the narrow column. */
+body.landing main { max-width: 1140px; padding: 0 20px 56px; }
+
+.nur-leser {
+	position: absolute; width: 1px; height: 1px; margin: -1px;
+	padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+body.landing .hero {
+	margin: 0 -20px;
+	padding: 44px 20px 34px;
+	background: radial-gradient(120% 140% at 50% -20%, rgba(214, 179, 90, .10), transparent 60%);
+	border-bottom: 1px solid var(--rand);
+}
+body.landing .hero > * { max-width: 780px; margin-left: auto; margin-right: auto; }
+body.landing .hero h2 {
+	margin-top: 0;
+	margin-bottom: 14px;
+	font-size: 38px;
+	line-height: 1.2;
+	letter-spacing: -.01em;
+}
+body.landing .lead { font-size: 17px; max-width: 720px; margin: 0 auto 22px; }
+
+.suche-start {
+	display: flex;
+	gap: 8px;
+	align-items: stretch;
+	max-width: 620px !important;
+	margin: 0 auto 16px !important;
+}
+.suche-start input[type="search"] {
+	flex: 1;
+	min-width: 0;
+	font: inherit;
+	font-size: 15px;
+	color: var(--text);
+	background: var(--fläche);
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	padding: 10px 12px;
+}
+.suche-start input[type="search"]:focus { border-color: var(--gold); outline: none; }
+.suche-start .knopf { border: 1px solid var(--gold); }
+
+/* gemeinsam.css makes this a flex row; centre it like the search field above. */
+body.landing .einstieg { margin: 0 auto; justify-content: center; flex-wrap: wrap; }
+body.landing .einstieg .knopf { margin: 0 4px; }
+
+.knopf.sekundaer {
+	color: var(--gold);
+	background: transparent;
+	border-color: var(--rand);
+}
+.knopf.sekundaer:hover { background: var(--fläche-hell); }
+
+/* Size of the catalogue: one row of numbers, not a marketing grid. */
+.zahlen {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 26px;
+	margin: 0 0 8px;
+	padding: 0 0 22px;
+	list-style: none;
+	border-bottom: 1px solid var(--rand);
+}
+.zahlen li { display: flex; align-items: baseline; gap: 7px; }
+.zahlen span { font-size: 20px; color: var(--gold); }
+.zahlen small { font-size: 13px; color: var(--schwach); }
+
+.familien-karten {
+	display: grid;
+	gap: 14px;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+.familie-karte {
+	border: 1px solid var(--rand);
+	border-radius: 4px;
+	background: var(--fläche);
+	padding: 16px 18px 18px;
+}
+.familie-karte h4 { margin: 0 0 6px; font-size: 17px; font-weight: normal; }
+.familie-karte h4 a { text-decoration: none; }
+.familie-karte h4 a:hover { text-decoration: underline; }
+.familie-karte p { margin: 0 0 10px; color: var(--schwach); font-size: 14px; }
+.familie-karte ul { margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.familie-karte li + li { margin-top: 7px; }
+.familie-karte li { color: var(--schwach); }
+
+.neuigkeit {
+	border-left: 3px solid var(--gold);
+	padding: 0 0 0 16px;
+}
+.neuigkeit + .neuigkeit { margin-top: 22px; }
+.neuigkeit .datum { margin: 0; color: var(--schwach); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+.neuigkeit h4 { margin: 3px 0 6px; font-size: 17px; font-weight: normal; color: var(--text); }
+.neuigkeit p { margin: 0 0 6px; color: var(--schwach); font-size: 15px; }
+.neuigkeit p:last-child { color: var(--text); }
+.neuigkeit a { color: var(--gold); }
+
+body.landing .bild { margin: 36px 0 4px; }
+body.landing section { margin-top: 34px; }
+
+@media (max-width: 700px) {
+	body.landing .hero { padding: 28px 16px 24px; margin: 0 -16px; }
+	body.landing .hero h2 { font-size: 26px; }
+	body.landing .lead { font-size: 15px; }
+	.suche-start { flex-wrap: wrap; }
+	.suche-start input[type="search"] { flex: 1 1 100%; }
+	.suche-start .knopf { flex: 1 1 100%; text-align: center; }
+	.zahlen { gap: 8px 18px; }
+	.zahlen span { font-size: 17px; }
+	body.landing main { padding: 0 16px 44px; }
+}

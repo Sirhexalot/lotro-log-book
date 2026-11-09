@@ -48,12 +48,17 @@ STANDARD_CLIENT = Path('/Users/adrian/Applications/The Lord of the Rings Online.
 
 
 def benutzte_karten(katalog):
-    """Game maps used by the quest catalogue and, next to it, the deed catalogue."""
+    """Game maps used by the quest catalogue and, next to it, the deed catalogue.
+
+    Since 0.5.0 a quest's objectives live in QuestDetails_<lang>_<n>.lua, and that is
+    where most map ids are: the core only holds the first objective."""
     karten = set()
     dateien = [Path(katalog)]
-    taten = Path(katalog).with_name(Path(katalog).name.replace('Quests_', 'Deeds_'))
-    if taten != Path(katalog) and taten.is_file():
-        dateien.append(taten)
+    for umgebung in (Path(katalog).with_name(Path(katalog).name.replace('Quests_', 'Deeds_')),
+                     *sorted(Path(katalog).parent.glob('QuestDetails_%s_*.lua'
+                                                       % Path(katalog).stem.rsplit('_', 1)[-1]))):
+        if umgebung != Path(katalog) and umgebung.is_file():
+            dateien.append(umgebung)
     for datei in dateien:
         text = datei.read_text(encoding='utf-8', errors='replace')
         karten.update(int(value) for value in re.findall(r'\["gm"\]=(\d+)', text))
@@ -158,17 +163,32 @@ def main():
     benutzt = set()
     for ident in benutzte_karten(options.katalog):
         # The map and every map above it: the tree shows them as its levels.
-        benutzt.update(spiel.chain(ident))
+        # An interior map has no chain of its own; it is taken as it is.
+        if ident in spiel.maps:
+            benutzt.update(spiel.chain(ident))
+        elif ident in spiel.interior:
+            benutzt.add(ident)
+        else:
+            print('SKIP unknown map id %d' % ident)
     aufgeloest = []
     for ident in sorted(benutzt):
-        karte = spiel.maps[ident]
+        if ident in spiel.maps:
+            karte = spiel.maps[ident]
+        elif ident in spiel.interior:
+            # An interior map (inn, jail, cave): its own small frame, no parent in
+            # the parchment tree. The website hangs it under the area of its quests.
+            karte = spiel.interior[ident]
+        else:
+            print('SKIP unknown map id %d' % ident)
+            continue
         aufgeloest.append({'idx': ident, 'id': str(ident), 'bild_id': karte['image'],
                            'name': spiel.name(ident, 'en'),
                            'north': karte['north'], 'west': karte['west'],
                            'south': karte['south'], 'east': karte['east'],
                            # bounds false: an overview whose links fit no straight line;
                            # it is shown for navigation, without dots.
-                           'bounds': karte['bounds'], 'tier': spiel.depth(ident),
+                           'bounds': karte['bounds'],
+                           'tier': spiel.depth(ident) if ident in spiel.maps else 1,
                            'region': karte['region'], 'eltern': karte['parent']})
     print('%d game maps used in the catalogue (with the maps above them)' % len(aufgeloest))
 

@@ -1,0 +1,11 @@
+{% extends 'layout.twig' %}
+
+{# Area or region page: map entry point, parent, sub-areas and what lies here. #}
+{% block inhalt %}
+<article><div class="katalog-kopf"><h1>{{ page.name }}</h1></div>
+<p><a href="{{ page.map_url }}">{{ w.area_map }}</a></p>
+{% if page.parent %}<p></p><a href="{{ page.parent.url }}">{{ page.parent.text }}</a>{% endif %}
+{% if page.children %}<section><h2>{{ page.children_title }}</h2><ul class="katalog-liste">{% for child in page.children %}<li><a href="{{ child.url }}">{{ child.text }}</a></li>{% endfor %}</ul></section>{% endif %}
+{% for section in page.sections %}<section><h2>{{ section.title }}</h2><ul class="katalog-liste">{% for entry in section.entries %}<li>{% if entry.icon %}<img class="symbol" src="/bild/items/{{ entry.icon }}.webp" alt="" width="22" height="22" decoding="async">{% endif %}<a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul></section>{% if section.excerpt %}<p class="katalog-hinweis">{{ w.excerpt }}</p>{% endif %}{% endfor %}
+</article>
+{% endblock %}

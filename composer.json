@@ -1,0 +1,26 @@
+{
+    "name": "sirhexalot/lotro-log-book",
+    "description": "LOTRO Log Book: catalogue of quests, deeds, items and recipes for The Lord of the Rings Online.",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.1",
+        "ext-json": "*",
+        "twig/twig": "^3.8"
+    },
+    "config": {
+        "platform": {
+            "php": "8.1.0"
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Llb\\": "php/src/"
+        },
+        "files": [
+            "php/src/Escape.php"
+        ]
+    }
+}

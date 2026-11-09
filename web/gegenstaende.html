@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gegenstände – LOTRO Log Book</title>
+<meta name="description" content="Alle Gegenstände aus Mittelerde: nach Name oder Kennung suchen und nach Kategorie, Seltenheit, Ausrüstungsplatz und Stufe eingrenzen.">
+<link rel="stylesheet" href="gemeinsam.css">
+<link rel="stylesheet" href="gegenstaende.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TRC8BF95');
+</script>
+</head>
+<body class="seite-text gs-seite" data-seite="gegenstaende">
+
+<header class="kopf">
+	<div class="kopf-innen">
+		<h1 data-t="produkt">LOTRO Log Book</h1>
+		<nav class="menue" id="menue" aria-label="Menü"></nav>
+		<nav class="sprachen" aria-label="Sprache">
+			<button type="button" data-lang="de" aria-pressed="true">DE</button>
+			<button type="button" data-lang="en" aria-pressed="false">EN</button>
+			<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+		</nav>
+	</div>
+</header>
+
+<main class="gs">
+	<div class="gs-kopf">
+		<h1 data-t="gs_titel">Gegenstände</h1>
+		<p class="gs-unter" data-t="gs_unter">Suche nach Name oder Kennung, dann grenze links ein, was du brauchst.</p>
+		<form class="gs-suche" id="gs-suche" role="search">
+			<input type="search" id="gs-feld" data-t-ph="gs_platzhalter" autocomplete="off"
+			       aria-label="Gegenstände suchen">
+			<button type="submit" class="knopf" data-t="gs_suchen">Suchen</button>
+		</form>
+	</div>
+
+	<div class="gs-raster">
+		<button type="button" class="gs-filter-knopf" id="gs-filter-knopf"
+		        aria-expanded="false" aria-controls="gs-filter" data-t="gs_filter">Filter</button>
+		<aside class="gs-filter" id="gs-filter" aria-label="Filter"></aside>
+		<section class="gs-liste" id="gs-liste">
+			<p class="gs-stand" id="gs-stand" role="status" data-t="gs_lade">Lade Gegenstände …</p>
+			<ul class="gs-ergebnis" id="gs-ergebnis"></ul>
+			<p class="gs-mehr-feld"><button type="button" id="gs-mehr" class="knopf sekundaer" hidden></button></p>
+		</section>
+	</div>
+</main>
+
+<footer><p>LOTRO Log Book</p></footer>
+<script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
+<script src="texte-logbuch.js"></script>
+<script src="texte-site.js"></script>
+<script src="sprache.js"></script>
+<script src="menue.js"></script>
+<script src="gegenstaende.js"></script>
+</body>
+</html>

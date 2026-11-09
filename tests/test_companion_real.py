@@ -119,7 +119,17 @@ def main():
     for kind in ('Quests', 'Deeds'):
         lua = LuaRuntime()
         lua.execute((PLUGIN / 'Data' / ('%s_de.lua' % kind)).read_text(encoding='utf-8'))
+        # Since 0.5.0 quest steps live in separately loaded detail blocks.
+        if kind == 'Quests':
+            for block in sorted((PLUGIN / 'Data').glob('QuestDetails_de_*.lua')):
+                lua.execute(block.read_text(encoding='utf-8'))
         for record in lua.globals().MagicQuestLog.Data[kind.lower() + '_de'].values():
+            if record.blk is not None:
+                block = lua.globals().MagicQuestLog.Data['questDetails_de_%d' % record.blk]
+                assert block is not None and block[record.id] is not None, 'missing details for ' + record.id
+                record.s = block[record.id].s
+            if record.s is None:
+                continue
             for step in record.s.values():
                 for goal in step.g.values():
                     goals[(record.id, str(step.i), goal.k)] = goal.c

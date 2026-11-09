@@ -1,0 +1,9 @@
+{% extends 'layout.twig' %}
+
+{# Title or virtue page: the award sources and the limits of the catalogue. #}
+{% block inhalt %}
+<article><div class="katalog-kopf"><h1>{{ icon|raw }}{{ symbol_gross|raw }}{{ page.name }}</h1></div>
+<section><h2>{{ w.sources }}</h2><ul>{% for source in page.sources %}<li>{% if source.url %}<a href="{{ source.url }}">{{ source.text }}</a>{% else %}{{ source.text }}{% endif %}{% if source.extra %} · {{ source.extra }}{% endif %}</li>{% endfor %}</ul></section>
+{% if page.ranked %}<p class="katalog-hinweis">{{ w.ranked }}</p>{% endif %}
+</article>
+{% endblock %}

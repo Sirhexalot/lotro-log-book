@@ -41,8 +41,10 @@ class WebsiteBuildTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             target = Path(folder)
             pages = ('index.html', 'start.html', 'start-en.html', 'start-fr.html',
-                     'spielstand.html', 'ruf.html', 'handwerk.html',
-                     'impressum.html', 'datenschutz.html')
+                     'spielstand.html', 'plugin.html', 'companion.html', 'ruf.html', 'handwerk.html',
+                     'impressum.html', 'datenschutz.html',
+                     # These three were skipped until 08.11.2026 and had no counter.
+                     'belohnungen.html', 'gegenstand.html', 'suche.html', 'reise.html')
             for page in pages:
                 (target / page).write_text('<body>Test</body>', encoding='utf-8')
             BUILD.zaehler_einbauen(target)
@@ -52,6 +54,12 @@ class WebsiteBuildTests(unittest.TestCase):
                 self.assertEqual(text.count('data-goatcounter='), 1)
                 self.assertIn('https://sirhexalot.goatcounter.com/count', text)
                 self.assertIn('//gc.zgo.at/count.js', text)
+
+    def test_error_page_carries_both_counters(self):
+        text = (Path(__file__).resolve().parents[1] / 'web' / '404.html').read_text(encoding='utf-8')
+        self.assertEqual(text.count('GTM-TRC8BF95'), 1)
+        self.assertEqual(text.count('data-goatcounter='), 1)
+        self.assertIn('content="noindex"', text)
 
 
 if __name__ == '__main__':

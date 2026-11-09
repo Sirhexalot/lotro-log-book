@@ -1,0 +1,125 @@
+/* Item browser: search on top, facets left, results right.
+ * Same shell as every other page; only the middle is a two-column workspace. */
+
+/* gemeinsam.css carries the type scale only; the palette comes from style.css
+ * on the map pages. This page brings its own copy, like start.css does. */
+:root {
+	--grund: #14110e;
+	--fläche: #1e1a16;
+	--fläche-hell: #2a251f;
+	--rand: #3a332b;
+	--text: #e8e1d5;
+	--schwach: #a89c8a;
+	--gold: #d6b35a;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+a { color: var(--gold); }
+body { background: var(--grund); color: var(--text); }
+
+.gs { max-width: var(--huelle); margin: 0 auto; padding: 24px 16px 56px; }
+
+.gs-kopf h1 { margin: 0 0 6px; font-size: 1.75rem; font-weight: normal; }
+.gs-unter { margin: 0 0 16px; color: var(--schwach); max-width: 70ch; }
+
+.gs-suche { display: flex; gap: 8px; max-width: 720px; margin-bottom: 24px; }
+.gs-suche input[type="search"] {
+	flex: 1; min-width: 0; font: inherit; font-size: 1rem; color: var(--text);
+	background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; padding: 10px 12px;
+}
+.gs-suche input[type="search"]:focus { border-color: var(--gold); outline: none; }
+.gs-suche .knopf {
+	background: var(--gold); color: #14110e; border: 1px solid var(--gold);
+	border-radius: 3px; padding: 10px 18px; font: inherit; font-weight: bold; cursor: pointer;
+}
+.gs-suche .knopf:hover { background: #e6c46d; }
+
+.gs-raster { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 28px; align-items: start; }
+
+/* --- Filter ---------------------------------------------------------- */
+.gs-filter { position: sticky; top: 16px; border-right: 1px solid var(--rand); padding-right: 20px; }
+.gs-filter-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.gs-filter-kopf strong { font-size: 1rem; color: var(--gold); font-weight: normal; }
+.gs-reset {
+	background: none; border: 0; padding: 0; color: var(--schwach);
+	font: inherit; font-size: .8rem; cursor: pointer; text-decoration: underline;
+}
+.gs-reset:hover { color: var(--gold); }
+
+.gs-filter-knopf { display: none; }
+.gs-gruppe { border-top: 1px solid var(--rand); padding-top: 12px; margin-bottom: 14px; }
+.gs-gruppe h2 {
+	margin: 0 0 8px; font-size: .8rem; font-weight: normal; color: var(--schwach);
+	text-transform: uppercase; letter-spacing: .08em;
+}
+.gs-optionen { display: flex; flex-direction: column; gap: 2px; }
+.gs-option {
+	display: flex; align-items: center; gap: 8px; padding: 3px 0;
+	font-size: .875rem; cursor: pointer; border-radius: 3px;
+}
+.gs-option:hover { color: var(--gold); }
+.gs-option input {
+	appearance: none; -webkit-appearance: none; flex: 0 0 auto;
+	width: 15px; height: 15px; margin: 0; border: 1px solid var(--rand);
+	border-radius: 3px; background: var(--fläche); cursor: pointer;
+	display: grid; place-content: center;
+}
+.gs-option input:checked { border-color: var(--gold); }
+.gs-option input:checked::after { content: ''; width: 9px; height: 9px; background: var(--gold); border-radius: 1px; }
+.gs-option input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.gs-option span:first-of-type { flex: 1; }
+.gs-anzahl { color: var(--schwach); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.gs-mehr-optionen {
+	background: none; border: 0; padding: 4px 0; color: var(--gold);
+	font: inherit; font-size: .8rem; cursor: pointer; text-align: left;
+}
+.gs-stufenbereich p { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; font-size: .8rem; color: var(--schwach); }
+.gs-stufenbereich input {
+	width: 64px; font: inherit; font-size: .8rem; color: var(--text);
+	background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; padding: 4px 6px;
+}
+
+/* --- Results --------------------------------------------------------- */
+.gs-stand { margin: 0 0 10px; color: var(--schwach); font-size: .875rem; }
+.gs-ergebnis { list-style: none; margin: 0; padding: 0; }
+.gs-ergebnis li { border-bottom: 1px solid var(--rand); }
+.gs-zeile {
+	display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px;
+	padding: 8px 4px; text-decoration: none; align-items: center;
+}
+.gs-zeile:hover { background: var(--fläche); }
+.gs-zeile .symbol { grid-row: span 2; width: 22px; height: 22px; }
+.gs-name { color: inherit; font-size: .95rem; }
+.gs-name.q1 { color: #d8d2c4; } .gs-name.q2 { color: #e0c15c; } .gs-name.q3 { color: #b98cd6; }
+.gs-name.q4 { color: #6fc3c3; } .gs-name.q5 { color: #e6a94d; }
+.gs-meta { grid-column: 2; color: var(--schwach); font-size: .78rem; }
+.gs-leer { padding: 14px 4px; color: var(--schwach); }
+.gs-mehr-feld { margin: 16px 0 0; }
+.gs-mehr-feld .knopf {
+	border: 1px solid var(--rand); color: var(--gold); background: transparent;
+	border-radius: 3px; padding: 8px 16px; font: inherit; cursor: pointer;
+}
+.gs-mehr-feld .knopf:hover { background: var(--fläche); }
+
+@media (max-width: 900px) {
+	.gs-raster { grid-template-columns: minmax(0, 1fr); }
+	.gs-filter-knopf {
+		display: block; width: 100%; font: inherit; font-size: .9rem; cursor: pointer;
+		background: var(--fläche); color: var(--gold); border: 1px solid var(--rand);
+		border-radius: 3px; padding: 9px 12px; text-align: left; margin-bottom: 10px;
+	}
+	.gs-filter-knopf::after { content: ' ▾'; }
+	.gs-filter-knopf[aria-expanded="true"]::after { content: ' ▴'; }
+	.gs-filter[hidden] { display: none; }
+	.gs-filter { margin-bottom: 14px; }
+	.gs-filter {
+		position: static; border-right: 0; border-bottom: 1px solid var(--rand);
+		padding: 0 0 14px; margin-bottom: 8px;
+	}
+	.gs-suche { flex-wrap: wrap; }
+	.gs-suche input[type="search"] { flex: 1 1 100%; }
+	.gs-suche .knopf { flex: 1 1 100%; text-align: center; }
+}

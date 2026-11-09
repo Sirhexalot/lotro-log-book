@@ -12,9 +12,16 @@
 	var hinweis = document.getElementById('su-hinweis');
 
 	var ARTEN = [
-		['q', 'su_aufgaben'], ['d', 'su_taten'], ['t', 'su_titel_tab'],
-		['g', 'su_gegenstaende'], ['r', 'su_rezepte']
+		['q', 'su_aufgaben'], ['d', 'su_taten'], ['g', 'su_gegenstaende'],
+		['r', 'su_rezepte'], ['t', 'su_titel_tab'], ['v', 'menue_tugenden']
 	];
+	var SYMBOL = { q: 'aufgabe', d: 'tat', g: 'gegenstand',
+		r: 'rezept', t: 'titel', v: 'tugend' };
+	var ART_TEXT = {
+		armour: { de: 'Rüstung', en: 'Armour', fr: 'Armure' },
+		weapon: { de: 'Waffe', en: 'Weapon', fr: 'Arme' },
+		jewellery: { de: 'Schmuck', en: 'Jewellery', fr: 'Bijoux' }
+	};
 	var geoeffnet = {};
 	var daten = [];
 
@@ -29,26 +36,45 @@
 		return node;
 	}
 
+	// Every item type now shares one namespace and one page per item.
+	var GEGENSTAND = { de: 'gegenstand', en: 'item', fr: 'objet' }[sprache] || 'gegenstand';
+	var TITEL = { de: 'titel', en: 'title', fr: 'titre' }[sprache] || 'titel';
+	var TUGEND = { de: 'tugend', en: 'virtue', fr: 'vertu' }[sprache] || 'tugend';
+
 	function zielFuer(art, id, name) {
 		if (art === 'q') { return 'index.html?lang=' + sprache + '&id=' + id; }
 		if (art === 'd') { return 'index.html?art=taten&lang=' + sprache + '&id=' + id; }
-		if (art === 'g') { return 'gegenstand.html?id=' + id + '&lang=' + sprache; }
-		if (art === 't') { return 'belohnungen.html?lang=' + sprache + '&tab=t&q=' + encodeURIComponent(name); }
+		if (art === 'g' && id) { return '/' + sprache + '/' + GEGENSTAND + '/' + id + '/'; }
+		if (art === 't' && id) { return '/' + sprache + '/' + TITEL + '/' + id + '/'; }
+		if (art === 'v' && id) { return '/' + sprache + '/' + TUGEND + '/' + id + '/'; }
+		if (art === 't' || art === 'v') { return 'belohnungen.html?lang=' + sprache + '&tab=t&q=' + encodeURIComponent(name); }
 		return 'handwerk.html?lang=' + sprache + '&q=' + encodeURIComponent(name) + '#rezepte';
 	}
 
-	function zeile(art, id, name, kontext, stufe) {
+	function zeichen(art) {
+		var span = eltern('span');
+		span.className = 'su-symbol';
+		if (window.MQL_SYMBOL) { span.innerHTML = window.MQL_SYMBOL(SYMBOL[art] || 'gebiet'); }
+		return span;
+	}
+
+	function zeile(art, id, name, kontext, stufe, ziel) {
 		var a = eltern('a');
-		a.className = 'su-zeile q' + (art === 'g' ? '' : '');
+		a.className = 'su-zeile';
 		a.href = zielFuer(art, id, name);
-		a.appendChild(eltern('span', name));
+		var haupt = eltern('span');
+		haupt.className = 'su-haupt';
+		haupt.appendChild(zeichen(art));
+		haupt.appendChild(eltern('span', name));
+		a.appendChild(haupt);
+		if (art === 'g' && ART_TEXT[kontext]) { kontext = ART_TEXT[kontext][sprache] || kontext; }
 		var teile = [kontext, stufe ? t('stufe') + ' ' + stufe : ''].filter(Boolean).join(' · ');
 		if (teile) {
 			var zusatz = eltern('span', teile);
 			zusatz.className = 'su-zusatz';
 			a.appendChild(zusatz);
 		}
-		liste.appendChild(a);
+		(ziel || liste).appendChild(a);
 	}
 
 	function zeichne() {
@@ -74,11 +100,14 @@
 			if (!eigene.length) { return; }
 			var block = eltern('section');
 			block.className = 'su-gruppe';
-			block.appendChild(eltern('h3', t(paar[1]) + ' (' + eigene.length + ')'));
+			var kopf = eltern('h3');
+			kopf.appendChild(zeichen(art));
+			kopf.appendChild(eltern('span', t(paar[1]) + ' (' + eigene.length + ')'));
+			block.appendChild(kopf);
 			var offen = geoeffnet[art] || eigene.length <= 10;
 			var grenze = offen ? Math.min(eigene.length, 300) : 10;
 			eigene.slice(0, grenze).forEach(function (row) {
-				zeile(row[0], row[1], row[2], row[3], row[4]);
+				zeile(row[0], row[1], row[2], row[3], row[4], block);
 			});
 			if (eigene.length > 10) {
 				var knopf = eltern('button', offen

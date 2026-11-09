@@ -27,14 +27,10 @@ body {
 	height: 100vh;
 }
 
+/* Layout of the header lives in gemeinsam.css: two rows, see .kopf there. */
 .kopf {
-	display: flex;
-	align-items: center;
-	gap: 18px;
-	padding: 10px 16px;
 	background: var(--fläche);
 	border-bottom: 1px solid var(--rand);
-	flex-wrap: wrap;
 }
 
 .kopf h1 {
@@ -115,7 +111,7 @@ select:focus { outline: 1px solid var(--gold); }
 
 main {
 	display: grid;
-	grid-template-columns: 250px 290px minmax(300px, 1fr) 350px;
+	grid-template-columns: 250px 290px minmax(300px, 1fr) 410px;
 	grid-template-rows: minmax(0, 1fr);
 	min-height: 0;
 	overflow: hidden;
@@ -365,6 +361,16 @@ main {
 }
 .buehne.keinbild img { display: none; }
 
+/* Messages about the map itself sit on the map, not in the bar: a bar row would
+   resize the map every time one appears (08.11.2026). */
+.kartenhinweis {
+	position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+	margin: 0; padding: 3px 10px; max-width: calc(100% - 24px);
+	background: rgba(13, 11, 9, .86); border: 1px solid var(--rand); border-radius: 3px;
+	font-size: 12px; color: var(--offen); text-align: center; pointer-events: none;
+}
+.kartenhinweis:empty { display: none; }
+
 .marker { position: absolute; inset: 0; }
 
 .punkt {
@@ -398,6 +404,53 @@ main {
 .punkt.zielort.fertig { border-color: var(--fertig); }
 .punkt.zielort.laufend { border-color: var(--laufend); }
 .punkt.zielort.aktiv { background: var(--marke-aktiv); }
+
+/* A pile with some quests done: half green, so the progress is visible inside it. */
+.punkt.teils { background: linear-gradient(to right, var(--fertig) 50%, var(--offen) 50%); }
+.punkt.zielort.teils { background: linear-gradient(to right, var(--fertig) 50%, transparent 50%); }
+
+/* Several quests on one spot: one dot, the number says how many. */
+.punkt.stapel {
+	width: 20px;
+	height: 20px;
+	margin: -10px 0 0 -10px;
+	font: bold 11px/18px sans-serif;
+	color: #1b1611;
+	text-align: center;
+	box-shadow: 0 0 0 2px rgba(13, 11, 9, .75);
+}
+.punkt.hervor { transform: scale(1.9); z-index: 7; box-shadow: 0 0 0 3px rgba(240, 166, 60, .55); }
+#liste li.hervor { background: rgba(240, 166, 60, .16); }
+
+/* The list behind a stack, right at its dot (a child of the marker layer, so the
+ * dot's hover scale does not enlarge it). */
+.haufen {
+	position: fixed;
+	z-index: 60;
+	min-width: 180px;
+	max-width: 280px;
+	max-height: 260px;
+	overflow: auto;
+	padding: 6px;
+	background: rgba(20, 17, 14, .97);
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	box-shadow: 0 6px 20px rgba(0, 0, 0, .5);
+	cursor: default;
+}
+.haufen p { margin: 0 0 4px; font-size: 12px; color: var(--schwach); }
+.haufen button {
+	display: block;
+	width: 100%;
+	text-align: left;
+	font-size: 12px;
+	padding: 4px 6px;
+	background: none;
+	border: 0;
+	border-radius: 2px;
+}
+.haufen button:hover { background: var(--fläche-hell); color: var(--gold); }
+.haufen button.fertig { color: var(--fertig); }
 
 /* The selected quest's dot pulses with a widening ring, so it is found at once
    among hundreds of dots. */
@@ -451,18 +504,30 @@ main {
 /* Unzoomed the ring stays empty, otherwise the digits overlap. */
 .buehne:not(.zoom) .schritt.nummer::after { display: none; }
 
+/* The shapes on the map are not self-explanatory: the legend names every one of
+ * them and stays in the bar under the map, wrapping on narrow screens. */
 .legende {
-	position: absolute;
-	right: 10px;
-	top: 10px;
+	position: static;
 	display: flex;
-	gap: 14px;
-	background: rgba(13, 11, 9, .82);
-	padding: 5px 10px;
-	border-radius: 3px;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 16px;
+	background: none;
+	border: 0;
+	padding: 0;
 	font-size: 12px;
 	color: var(--schwach);
 }
+.legende-eintrag { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.legende-symbol {
+	display: inline-flex; align-items: center; justify-content: center;
+	width: 15px; height: 15px; flex: 0 0 auto; color: var(--offen);
+}
+.legende-symbol svg { width: 15px; height: 15px; }
+.legende-symbol.hohl { color: var(--schwach); }
+.legende-symbol.ring { border: 2px solid var(--offen); border-radius: 50%; color: transparent; }
+.legende-symbol.gestrichelt { border: 2px dashed #f3bc65; border-radius: 50%; color: #f3bc65; padding: 1px; }
+.legende-symbol.gepunktet { border: 2px dotted var(--gold); border-radius: 50%; color: var(--gold); padding: 1px; }
 
 .tupfen {
 	display: inline-block;
@@ -476,6 +541,7 @@ main {
 .tupfen.offen { background: var(--offen); }
 .tupfen.fertig { background: var(--fertig); }
 .tupfen.laufend { background: var(--laufend); }
+.tupfen.teils { background: linear-gradient(to right, var(--fertig) 50%, var(--offen) 50%); }
 
 .bedienung {
 	position: absolute;
@@ -537,7 +603,7 @@ main {
 }
 
 @media (max-width: 1240px) {
-	main { grid-template-columns: 220px 250px minmax(240px, 1fr) 300px; }
+	main { grid-template-columns: 220px 250px minmax(240px, 1fr) 350px; }
 }
 
 @media (max-width: 1000px) {
@@ -556,10 +622,19 @@ main.seite {
 	height: auto;
 }
 .seite {
-	max-width: 960px;
+	max-width: var(--huelle);
 	margin: 0 auto;
-	padding: 24px 20px 60px;
+	padding: 24px 16px 60px;
 }
+/* Running text stays readable inside the wide container: about 72 characters,
+ * left-aligned, so the first letter keeps the header's edge. Tables, controls
+ * and cards use the full width. */
+.seite > p, .seite > ul, .seite > ol, .seite > details,
+.seite > div > p, .seite > div > ul, .seite > div > ol,
+.seite details p, .seite details li { max-width: 72ch; }
+.seite .bild { margin: 18px 0 6px; max-width: 100%; }
+.seite .bild img { max-width: 100%; height: auto; border: 1px solid var(--rand); border-radius: 3px; }
+.seite .bild figcaption { color: var(--schwach); margin-top: 6px; }
 .seite h2 { color: var(--gold); font-size: 20px; font-weight: normal; margin: 32px 0 10px; letter-spacing: .03em; }
 .seite h2:first-child { margin-top: 8px; }
 .seite h3 { font-size: 15px; margin: 18px 0 6px; color: var(--text); }
@@ -604,6 +679,11 @@ main.seite {
 .zeile-knoepfe { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
 .knopf-gold { background: #3a2f1c; border-color: var(--gold); color: var(--gold); }
 .knopf-gold:hover { background: #4a3c22; }
+/* Links that should look like a button on the plain pages (import, plugin). */
+a.knopf-gold {
+	display: inline-block; padding: 5px 12px; border: 1px solid var(--gold);
+	border-radius: 3px; text-decoration: none;
+}
 .ablage {
 	border: 2px dashed var(--rand);
 	border-radius: 8px;
@@ -690,6 +770,12 @@ main.seite {
 .rezept-stand.fremd { color: var(--rand); }
 .rezept-beruf { white-space: nowrap; color: var(--schwach); }
 .tabelle td.rezept-zutaten { white-space: normal; }
+.roh-tabelle td:last-child { white-space: normal; }
+.roh-farbe { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+.roh-tabelle tr.hervor td { background: #2a2419; }
+.roh-tabelle td.roh-gebiete { font-size: .875rem; line-height: 1.5; }
+.roh-tabelle td.roh-gebiete a { color: var(--gold); }
+.roh-ohne { margin: 2px 0 12px; color: var(--text); font-size: .9375rem; line-height: 1.5; }
 .rezept-tabelle tr.rezept-gruppe th {
 	text-transform: uppercase; letter-spacing: .06em; font-size: 11.5px; font-weight: normal;
 	color: var(--schwach); padding: 16px 0 5px; border-top: 1px solid var(--rand); border-bottom: none;
@@ -709,13 +795,17 @@ main.seite {
 .suche-feld input { flex: 1 1 auto; }
 .su-gruppe { margin-top: 20px; }
 .su-gruppe h3 {
+	display: flex; align-items: center; gap: 7px;
 	font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em;
 	color: var(--schwach); font-weight: normal; margin: 0 0 4px;
 }
 .su-zeile {
-	display: flex; justify-content: space-between; gap: 14px; align-items: baseline;
+	display: flex; justify-content: space-between; gap: 14px; align-items: center;
 	padding: 7px 2px; border-bottom: 1px solid var(--rand); color: var(--text); text-decoration: none;
 }
+.su-haupt { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.su-symbol { display: inline-flex; align-items: center; justify-content: center; color: var(--gold); flex: 0 0 auto; }
+.su-symbol svg { width: 16px; height: 16px; }
 .su-zeile:hover span:first-child { color: var(--gold); }
 .su-zusatz { color: var(--schwach); white-space: nowrap; font-size: var(--text-bedienung); }
 .su-mehr { margin: 12px 0 0; }
@@ -835,24 +925,50 @@ td.haken-zelle.teil { color: var(--laufend); }
 .ast[hidden], [hidden] { display: none !important; }
 
 /* --- Tidy-up 03.11. -------------------------------------------------- */
-/* Map column: the map above, one bar below with legend, numbers and reset. */
+/* Map column: the map above, then a bar of two fixed rows – legend on top,
+   actions below. The rows never change height, so the 4:3 map keeps its size
+   whether dots, numbered rings or resource colours are shown (08.11.2026). */
 .kartenspalte { display: flex; flex-direction: column; min-height: 0; overflow: hidden; border-right: 1px solid var(--rand); }
 .kartenspalte .buehne { flex: 1 1 auto; }
 .kartenleiste {
-	display: flex;
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: 20px minmax(28px, auto);
 	align-items: center;
-	gap: 6px 14px;
-	flex-wrap: wrap;
-	padding: 6px 10px;
+	gap: 2px;
+	padding: 4px 10px;
 	background: var(--fläche);
 	border-top: 1px solid var(--rand);
 	font-size: 12px;
 	color: var(--schwach);
 }
-.kartenleiste .legende { position: static; background: none; padding: 0; gap: 12px; flex-wrap: wrap; }
-.kartenleiste .stand { flex: 1 1 200px; background: none; padding: 0; }
-.kartenleiste .hinweis { background: none; padding: 0; color: var(--offen); }
-.kartenleiste #zurueck { margin-left: auto; font-size: 12px; padding: 2px 8px; }
+.legende-zeile { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.kartenleiste .legende {
+	position: static; flex: 1 1 auto; min-width: 0;
+	display: flex; flex-wrap: nowrap; align-items: center; gap: 6px 16px;
+	overflow: hidden; background: none; padding: 0;
+	font-size: 12px;
+}
+/* Items keep their size instead of shrinking into two-line stubs. Entries that
+   do not fit are dropped whole – a cut word looks like a defect. */
+.kartenleiste .legende > * { flex: 0 0 auto; white-space: nowrap; }
+.kartenleiste .legende > .zu-breit { display: none; }
+.legende-mehr { flex: 0 0 auto; padding: 1px 7px; font-size: 11px; line-height: 1.4; }
+/* The button keeps its space whether it is needed or not, so the legend's own
+   width never changes while it is being measured. */
+.legende-mehr.aus { visibility: hidden; }
+.legende-voll {
+	position: absolute; right: 10px; bottom: calc(100% + 6px); z-index: 30;
+	display: flex; flex-wrap: wrap; gap: 4px 16px;
+	max-width: min(560px, calc(100% - 20px));
+	padding: 8px 10px; background: var(--fläche); border: 1px solid var(--rand);
+	box-shadow: 0 4px 14px rgba(0, 0, 0, .5); color: var(--schwach); font-size: 12px;
+}
+.leiste-aktionen { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; min-width: 0; }
+.leiste-rechts { margin-left: auto; display: inline-flex; align-items: center; gap: 12px; }
+.karte-stufe { min-width: 9em; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.kartenleiste .koordinate { text-align: right; }
 
 /* List: notes and counters sit under the name, the level stays right. */
 #liste li .qname .vermerk,
@@ -882,8 +998,8 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .pfad:empty { display: none; }
 .liste-titel { display: block; padding: 2px 12px 6px; color: var(--gold); font-size: 14px; }
 
-/* Header search with a result panel */
-.globalsuche { position: relative; flex: 1 1 260px; max-width: 460px; }
+/* Header search with a result panel. Width per gemeinsam.css: one fixed size. */
+.globalsuche { position: relative; }
 .globalsuche input { font-size: 13px; padding: 5px 10px; }
 .suchergebnis {
 	position: absolute;
@@ -897,23 +1013,28 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 	z-index: 40;
 	padding: 4px 0;
 }
-.such-gruppe { padding: 6px 12px 2px; font-size: 11px; color: var(--schwach); text-transform: uppercase; letter-spacing: .08em; }
+.such-gruppe { display: flex; align-items: center; gap: 6px; padding: 6px 12px 2px; font-size: 11px; color: var(--schwach); text-transform: uppercase; letter-spacing: .08em; }
+.such-gruppe-symbol, .such-symbol { display: inline-flex; align-items: center; justify-content: center; color: var(--gold); flex: 0 0 auto; }
+.such-gruppe-symbol svg, .such-symbol svg { width: 16px; height: 16px; }
 .such-zeile {
 	display: flex; justify-content: space-between; gap: 10px; width: 100%;
 	text-align: left; background: none; border: 0; border-radius: 0;
 	padding: 5px 12px; font-size: 13px;
 }
 .such-zeile:hover, .such-zeile:focus { background: var(--fläche-hell); }
+.such-haupt { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.such-mehr { display: block; padding: 4px 12px 5px; color: var(--gold); font-size: 11px; text-decoration: none; }
+.such-mehr:hover { text-decoration: underline; }
+.such-laden { padding: 6px 12px 4px; color: var(--schwach); font-size: 11px; }
 .such-zusatz { color: var(--schwach); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
 .such-andere { display: block; padding: 6px 12px 4px; font-size: 12px; color: var(--gold); text-decoration: none; border-top: 1px solid var(--rand); margin-top: 4px; }
-/* The header stays one line: the search gives way first. */
-@media (min-width: 900px) { .kopf { flex-wrap: nowrap; } }
-.kopf .globalsuche { flex: 1 1 160px; min-width: 140px; }
+/* The header keeps one line; its widths live in gemeinsam.css so the row does
+ * not move when the content changes. */
 .kopf .menue { flex-wrap: nowrap; white-space: nowrap; }
-.suchergebnis { left: auto; right: 0; width: max(100%, 440px); }
+.suchergebnis { left: auto; right: 0; width: max(100%, 440px); max-width: calc(100vw - 24px); }
 .such-zeile { flex-direction: column; align-items: flex-start; gap: 0; }
 .such-zusatz { max-width: 100%; }
-@media (max-width: 1300px) { .kopf .charakterwahl > span { display: none; } }
+/* The "Charakter" label is in gemeinsam.css: the start pages show the same header. */
 
 /* Map without zoom; switch between quest givers and objectives */
 .buehne { cursor: default; }
@@ -958,6 +1079,42 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .notizen-feld label img { width: 24px; height: 24px; flex: none; filter: drop-shadow(0 1px 1px #000); }
 .notizen-feld label span { flex: 1; }
 .notizen-feld input[type="checkbox"], .geber-schalter input { width: auto; margin: 0; flex: none; }
+
+/* Vorkommen: crafting resources from the game's placements. One switch group of
+   its own next to the game's filter list; the colour is the legend. */
+.vorkommen-feld { width: 300px; }
+.vorkommen-feld label i { width: 12px; height: 12px; border-radius: 2px; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.55); }
+/* One line per trade, each with its own kind; nothing is shown until chosen. */
+.vorkommen-zeilen { display: flex; flex-direction: column; gap: 6px; margin: 6px 0 0; }
+.vorkommen-zeile { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+.vorkommen-zeile > span { flex: 0 0 auto; min-width: 62px; }
+.vorkommen-zeile select { flex: 1 1 auto; min-width: 0; font-size: 12px; padding: 2px; }
+.vorkommen-ebene { position: absolute; inset: 0; pointer-events: auto; cursor: crosshair; }
+#vorkommen.an > button { border-color: var(--gold); color: var(--gold); }
+/* One entry, not one per profession: the swatch carries all chosen colours and
+   the list next to the switch names them (08.11.2026). */
+.vorkommen-farbe { width: 9px; height: 9px; border-radius: 1px; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.6); }
+.vorkommen-tip {
+	position: fixed;
+	z-index: 60;
+	min-width: 190px;
+	max-width: 300px;
+	max-height: 260px;
+	overflow: auto;
+	padding: 6px 8px;
+	background: rgba(20, 17, 14, .97);
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+	font-size: 12px;
+	color: var(--text);
+}
+.vorkommen-tip p { margin: 0 0 4px; color: var(--schwach); }
+.vorkommen-tip ul { list-style: none; margin: 0; padding: 0; }
+.vorkommen-tip li { display: flex; align-items: center; gap: 6px; padding: 1px 0; }
+.vorkommen-tip li i { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.vorkommen-tip a { display: inline-block; margin-top: 6px; font-size: 12px; color: var(--gold); }
+.vorkommen-tip .klein { color: var(--schwach); font-size: 11px; margin: 4px 0 0; }
 .geber-schalter { white-space: nowrap; }
 .notizen-ebene { position: absolute; inset: 0; pointer-events: none; }
 .welt img.notiz { position: absolute; display: block; right: auto; bottom: auto; width: 24px; height: 24px; max-width: none; margin: -12px 0 0 -12px; pointer-events: auto; filter: drop-shadow(0 1px 1px #000) drop-shadow(0 0 1px #000); }
@@ -968,6 +1125,19 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .belohnungen h3 { margin: 0 0 6px; font-size: var(--text-normal); color: var(--gold); }
 .belohnungen ul { margin: 0; padding-left: 18px; }
 .belohnungen li { margin: 3px 0; }
+.belohnungen li .stufe { margin-left: 8px; }
+.belohnungen .auswahl span { display: inline; }
+.belohnungen .auswahl img { vertical-align: -5px; margin-right: 5px; }
+.belohnungen li a { color: inherit; }
+.belohnungen li a:hover { color: var(--gold); }
+.gegenstand-symbol { width: 20px; height: 20px; border-radius: 2px; object-fit: contain;
+	background: #14110e; box-shadow: 0 0 0 1px var(--rand); vertical-align: -5px; margin-right: 6px; }
+.belohnungen .auswahl span { display: inline-flex; align-items: center; gap: 5px; vertical-align: middle; }
+.belohnungen .auswahl a { color: inherit; }
+.detail h2 { display: flex; align-items: center; gap: 8px; }
+.detail h2 .entitaet-symbol { width: 20px; height: 20px; flex: none; color: var(--gold); }
+.detail .gebietsprung { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--schwach); }
+.detail .gebietsprung:hover { color: var(--gold); }
 .belohnungen .stufe { color: var(--schwach); margin-left: 8px; font-size: var(--text-bedienung); }
 .belohnungen .merkmal { color: var(--schwach); }
 .belohnungen .auswahl { margin: 8px 0 0; }
@@ -976,6 +1146,8 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .q1 { color: #d8d2c4; } .q2 { color: #e0c15c; } .q3 { color: #b98cd6; }
 .q4 { color: #6fc3c3; } .q5 { color: #e6a94d; } .q0 { color: inherit; }
 .jagdpunkt { position: absolute; transform: translate(-50%, -50%); width: 24px; height: 24px; border: 2px dashed #f3bc65; border-radius: 50%; background: #4a301bd9; color: #fff2d9; font: bold 11px/20px sans-serif; text-align: center; box-sizing: border-box; }
+/* Places of the quests a deed asks for: a hint like a hunting spot, but dotted gold. */
+.hinweispunkt { position: absolute; transform: translate(-50%, -50%); width: 22px; height: 22px; border: 2px dotted var(--gold); border-radius: 50%; background: #3a2f1cd9; color: #f4e6c4; font: bold 10px/18px sans-serif; text-align: center; box-sizing: border-box; }
 .jagdhinweis { border-left: 3px dashed #dba54e; }
 .jagdhinweis button { margin: 4px 6px 0 0; }
 .marker.ohne-geber .punkt { display: none; }
@@ -993,12 +1165,7 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 @media (max-width: 1000px) {
 	body { display: block; height: auto; padding-bottom: 54px; }
 	main { display: block; height: auto; overflow: visible; }
-	.kopf { gap: 8px 12px; padding: 8px 12px; align-items: center; }
 	.kopf h1 { font-size: 15px; }
-	.kopf .menue { order: 3; width: 100%; flex-wrap: wrap; white-space: normal; row-gap: 2px; }
-	.kopf .menue a { white-space: nowrap; }
-	.kopf .landschaft-startknopf { padding: 4px 10px; font-size: 12px; }
-	.kopf .globalsuche { order: 4; flex: 1 1 100%; max-width: none; }
 	.spalte { height: auto; overflow: visible; border-right: none; }
 	.nav-baum, .nav-liste { min-height: 0; flex: 0 1 auto; }
 	.nav #liste { overflow: visible; max-height: none; }
@@ -1021,4 +1188,77 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 		font-size: 13px; color: var(--schwach); background: none;
 	}
 	.mobil-reiter button[aria-pressed="true"] { color: var(--gold); box-shadow: inset 0 2px 0 var(--gold); }
+	/* Filter panels are 280–300 px wide and would hang over the right edge on a
+	   phone; there they become a sheet above the map bar. The map keeps its fixed
+	   height here, so the action row may wrap without anything jumping. */
+	.kartenleiste { grid-template-rows: 20px auto; }
+	/* The bar is the bottom of the column: filter sheets open upwards and must
+	   not be clipped by the column's overflow. */
+	.kartenspalte { overflow: visible; }
+	.leiste-aktionen { flex-wrap: wrap; gap: 4px 12px; padding: 1px 0 2px; }
+	.kartenleiste .koordinate { display: none; }
+	.karte-stufe { min-width: 0; }
+	/* The sheet resolves against the bar, not the small button: full width and
+	   always above the bar, however many rows the actions need. */
+	.leiste-aktionen .notizen { position: static; }
+	.notizen-feld {
+		position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); top: auto;
+		width: auto; max-height: min(calc(100vw * 0.75), 62vh);
+	}
 }
+
+/* Detail column: same reading size as the quest list, and a little wider than
+   before so the reward rows keep their line. */
+.spalte.detail { font-size: .875rem; line-height: 1.55; }
+.spalte.detail h2 { font-size: 1rem; margin-bottom: 8px; }
+.spalte.detail .kennung { margin-bottom: 10px; }
+.spalte.detail .text { margin-bottom: 12px; }
+.spalte.detail h3 { margin: 18px 0 8px; }
+.spalte.detail .belohnungen { padding: 12px 14px; margin: 14px 0; }
+.spalte.detail .belohnungen li { margin: 6px 0; line-height: 1.45; }
+.spalte.detail .bedingungen li { padding: 3px 0; }
+.spalte.detail .marken { margin-bottom: 12px; }
+/* Wider detail column; landschaft.css sets the list column, so this needs
+   more weight than a bare `main`. */
+body main { grid-template-columns: clamp(280px, var(--listenbreite, 390px), calc(100% - 750px)) minmax(320px, 1fr) 420px; }
+.detail .kennung, .detail .marken { font-size: .75rem; }
+
+/* Travel planner link under the facts line of the detail column. */
+.detail-reise { display: inline-block; margin: 0 0 10px; font-size: .8125rem; color: var(--gold); }
+
+/* Preview flyout for linked quests: small map cut, first line, nothing more. */
+.vorschau { position: fixed; z-index: 70; width: 250px; padding: 10px 12px;
+	background: rgba(20, 17, 14, .98); border: 1px solid var(--rand); border-radius: 4px;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, .55); font-size: .8125rem; color: var(--text); }
+.vorschau strong { display: block; color: var(--gold); font-weight: 500; margin-bottom: 2px; }
+.vorschau-zeile { color: var(--schwach); font-size: .75rem; margin-bottom: 6px; }
+.vorschau-karte { position: relative; aspect-ratio: 4 / 3; margin: 0 0 6px; border-radius: 3px;
+	overflow: hidden; background: #14110e; border: 1px solid var(--rand); }
+.vorschau-karte img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vorschau-pin { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
+	background: #f0a63c; border: 2px solid #14110e; }
+.vorschau p { margin: 0; line-height: 1.4; color: #cfc5b5; }
+
+/* The way to the full catalogue page stays at the bottom of the column. */
+.detail-ganz { position: sticky; bottom: -14px; display: block; margin: 18px -16px -14px;
+	padding: 12px 16px; background: var(--fläche); border-top: 1px solid var(--rand);
+	color: var(--gold); font-size: .8125rem; text-decoration: none; }
+.detail-ganz:hover { background: var(--fläche-hell); }
+
+/* Phones: the result panel belongs to the viewport, not to the narrow search
+   field; otherwise it is clipped on the left. */
+@media (max-width: 700px) {
+	.globalsuche { position: static; }
+	.suchergebnis { left: 12px; right: 12px; width: auto; max-width: none; top: calc(100% + 4px); }
+}
+
+/* Recipe list: result, ingredients and the recipe itself are links. */
+.rezept-tabelle a.zutat { color: inherit; text-decoration: none; }
+.rezept-tabelle a.zutat:hover { color: var(--gold); text-decoration: underline; }
+.rezept-detail { margin-top: 4px; font-size: 11px; }
+.rezept-detail a { color: var(--schwach); text-decoration: none; }
+.rezept-detail a:hover { color: var(--gold); text-decoration: underline; }
+.rezept-tabelle td a { text-decoration: none; }
+.rezept-tabelle td a:hover { text-decoration: underline; }
+.rezept-tabelle td:first-child a { color: inherit; }
+.rezept-tabelle td:first-child a:hover { color: var(--gold); text-decoration: underline; }

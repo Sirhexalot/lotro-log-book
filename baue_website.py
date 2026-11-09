@@ -28,13 +28,17 @@ WEB = HIER / 'web'
 SPRACHEN = ('de', 'en', 'fr')
 
 DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'landschaft.css', 'favicon.svg', 'texte.js', 'texte-spielstand.js',
-           'texte-logbuch.js', 'texte-site.js', 'sprache.js', 'speicher.js', 'menue.js', 'companion.js',
-           'spielstand.js', 'referenz.js', 'ruf.js', 'belohnungen.js', 'gegenstand.js', 'rezepte.js',
+           'texte-logbuch.js', 'texte-site.js', 'texte-plugin.js', 'texte-companion.js', 'texte-reise.js',
+           'sprache.js', 'speicher.js', 'menue.js', 'symbole.js', 'companion.js', 'reise.js', 'reise.html',
+           'spielstand.js', 'plugin.js', 'anleitung.js', 'referenz.js', 'ruf.js', 'belohnungen.js', 'gegenstand.js', 'rezepte.js',
+           'gegenstaende.html', 'gegenstaende.js', 'gegenstaende.css',
            'suche.js', 'suche.html', 'ruf-quellen-de.js',
-           'ruf-quellen-en.js', 'ruf-quellen-fr.js', 'handwerk.js', 'stand.js',
-           'start.html', 'start-en.html', 'start-fr.html', 'spielstand.html',
-           'ruf.html', 'handwerk.html', 'belohnungen.html', 'gegenstand.html', 'impressum.html', 'datenschutz.html')
-BILDER = ('bild/start.jpg', 'bild/start-en.jpg', 'bild/start-fr.jpg')
+           'ruf-quellen-en.js', 'ruf-quellen-fr.js', 'handwerk.js',
+           'stand.js', 'kennung.php', 'rohstoffe.js',
+            'start.html', 'start-en.html', 'start-fr.html', 'spielstand.html', '404.html',
+           'plugin.html', 'companion.html', 'ruf.html', 'handwerk.html', 'belohnungen.html', 'gegenstand.html', 'impressum.html', 'datenschutz.html')
+BILDER = ('bild/start.jpg', 'bild/start-en.jpg', 'bild/start-fr.jpg',
+          'bild/companion-import-knopf.png')
 
 
 def kopiere(ziel):
@@ -47,8 +51,20 @@ def kopiere(ziel):
         quelle = WEB / name
         if not quelle.is_file():
             raise SystemExit('MISSING: %s' % quelle)
-        (ziel / name).parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(quelle, ziel / name)
+        ziel_datei = ziel / name
+        # A local build may link bild/ to the source tree; never copy a file
+        # onto itself through that link.
+        if ziel_datei.exists() and ziel_datei.resolve() == quelle.resolve():
+            continue
+        ziel_datei.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(quelle, ziel_datei)
+    # One client symbol per file, shared by every language (build_icons.py).
+    ordner = WEB / 'bild' / 'items'
+    if not ordner.is_dir():
+        raise SystemExit('MISSING: %s (build_icons.py)' % ordner)
+    ziel_ordner = ziel / 'bild' / 'items'
+    if not (ziel_ordner.exists() and ziel_ordner.resolve() == ordner.resolve()):
+        shutil.copytree(ordner, ziel_ordner, dirs_exist_ok=True)
 
 
 def index_bauen(ziel):
@@ -83,13 +99,15 @@ def stempeln(ziel):
     daten = hashlib.sha256(marke.encode())
     for datei in sorted(list(ziel.glob('daten-*.js')) + list(ziel.glob('notizen-*.js'))
                          + list(ziel.glob('belohnungen-*.js')) + list(ziel.glob('rezepte-*.js'))
-                         + list(ziel.glob('suche-*.js'))):
+                         + list(ziel.glob('suche-*.js')) + list(ziel.glob('reise-*.js'))
+                         + list(ziel.glob('vorkommen-*.js'))):
         daten.update(datei.name.encode())
         daten.update(datei.read_bytes())
     (ziel / 'stand.js').write_text('/* Written by baue_website.py. */\nwindow.MQL_STAND = "%s";\n'
                                    % daten.hexdigest()[:10], encoding='utf-8')
-    for seite in ('index.html', 'spielstand.html', 'ruf.html', 'handwerk.html', 'belohnungen.html',
-                  'start.html', 'start-en.html', 'start-fr.html', 'impressum.html', 'datenschutz.html'):
+    for seite in ('index.html', 'spielstand.html', 'plugin.html', 'companion.html', 'ruf.html', 'handwerk.html', 'belohnungen.html', 'reise.html',
+                  'start.html', 'start-en.html', 'start-fr.html', 'impressum.html', 'datenschutz.html', 'suche.html',
+                  'gegenstaende.html'):
         datei = ziel / seite
         text = datei.read_text(encoding='utf-8')
         text = re.sub(r'(<(?:script|link)[^>]+(?:src|href)=")([\w.-]+\.(?:js|css))(")',
@@ -105,8 +123,8 @@ ZAEHLER = ('<script data-goatcounter="https://sirhexalot.goatcounter.com/count"\
 def zaehler_einbauen(ziel):
     """GoatCounter only in the published version, not locally."""
     for name in ('index.html', 'start.html', 'start-en.html', 'start-fr.html',
-                 'spielstand.html', 'ruf.html', 'handwerk.html', 'impressum.html',
-                 'datenschutz.html'):
+                 'spielstand.html', 'plugin.html', 'companion.html', 'ruf.html', 'handwerk.html', 'impressum.html',
+                 'datenschutz.html', 'belohnungen.html', 'gegenstand.html', 'suche.html', 'reise.html'):
         datei = ziel / name
         text = datei.read_text(encoding='utf-8')
         if 'goatcounter' in text:
@@ -114,17 +132,49 @@ def zaehler_einbauen(ziel):
         text = text.replace('</body>', ZAEHLER + '</body>', 1)
         datei.write_text(text, encoding='utf-8')
 
+def zusatz_zahlen(ziel, sprache, eintraege):
+    """The rest of the landing-page counts, from the files that ship.
+
+    Anything unreadable stays out of the dict, and the page keeps the number it
+    was written with — a wrong count is worse than an old one.
+    """
+    aus = {}
+    try:
+        items = json.loads((HIER / 'daten/items.json').read_text(encoding='utf-8'))['items']
+        aus['gegenstaende'] = len(items)
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    for schluessel, datei, marker, feld in (('rezepte', 'rezepte-%s.js', 'MQL_REZEPTE', 'r'),
+                                            ('stationen', 'reise-%s.js', 'MQL_REISE', 'knoten')):
+        try:
+            aus[schluessel] = len(eintraege(datei % sprache, marker)[feld])
+        except (OSError, ValueError, KeyError, TypeError, SystemExit):
+            pass
+    for schluessel, datei in (('titel', 'titel.json'), ('tugenden', 'tugenden.json')):
+        try:
+            eintrag = json.loads((HIER / 'daten' / datei).read_text(encoding='utf-8'))['eintraege']
+            # Same fallback as the catalogue pages: own language, else English.
+            aus[schluessel] = sum(
+                1 for wert in eintrag.values()
+                if (wert['n'].get(sprache) or wert['n'].get('en') or '').strip())
+        except (OSError, ValueError, KeyError, TypeError):
+            pass
+    return aus
+
+
 def katalogzahlen_einbauen(ziel):
     """Keep landing-page counts tied to the catalogue actually being shipped."""
     for sprache, seite, trenner in (('de', 'start.html', '.'),
                                     ('en', 'start-en.html', ','),
                                     ('fr', 'start-fr.html', ' ')):
         # Read the published JS, not an intermediate JSON that might be older.
-        def eintraege(name):
+        def eintraege(name, marker='MQL_QUESTS'):
+            # The data files also carry MQL_STAND and MQL_KARTEN; ask for the
+            # one array this call is about.
             text = (ziel / name).read_text(encoding='utf-8')
-            treffer = re.search(r'window\.MQL_QUESTS\s*=\s*', text)
+            treffer = re.search(r'window\.%s\s*=\s*' % marker, text)
             if not treffer:
-                raise SystemExit('Missing quest array in %s' % name)
+                raise SystemExit('Missing %s in %s' % (marker, name))
             return json.JSONDecoder().raw_decode(text[treffer.end():])[0]
 
         quests = eintraege('daten-%s.js' % sprache)
@@ -132,10 +182,12 @@ def katalogzahlen_einbauen(ziel):
         zahlen = {'aufgaben': len(quests), 'taten': len(taten),
                   'auftraggeber': sum(bool(q.get('gt')) for q in quests),
                   'ziele': sum(bool(q.get('t')) for q in quests)}
+        zahlen.update(zusatz_zahlen(ziel, sprache, eintraege))
         datei = ziel / seite
         text = datei.read_text(encoding='utf-8')
         text = re.sub(r'(<span data-katalogzahl="(\w+)">)[^<]*(</span>)',
-                      lambda m: m.group(1) + format(zahlen[m.group(2)], ',').replace(',', trenner) + m.group(3), text)
+                      lambda m: (m.group(1) + format(zahlen[m.group(2)], ',').replace(',', trenner)
+                                 + m.group(3)) if m.group(2) in zahlen else m.group(0), text)
         datei.write_text(text, encoding='utf-8')
 
 
@@ -147,6 +199,13 @@ def fortschritt_leeren(ziel):
     (ziel / 'fortschritt.js').write_text(inhalt, encoding='utf-8')
 
 
+def vorkommen_kopieren(ziel):
+    """Ship the lazy-loaded resource catalogue and every map point file."""
+    for sprache in SPRACHEN:
+        shutil.copy2(WEB / ('vorkommen-%s.js' % sprache), ziel / ('vorkommen-%s.js' % sprache))
+    shutil.copytree(WEB / 'vorkommen', ziel / 'vorkommen')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -155,9 +214,13 @@ def main():
     ziel = optionen.ziel
 
     # Check the sources before anything is deleted.
+    if not (WEB / 'vorkommen').is_dir():
+        raise SystemExit('MISSING: %s (run build_vorkommen.py)' % (WEB / 'vorkommen'))
     for sprache in SPRACHEN:
         for name in ('daten-%s.js' % sprache, 'daten-taten-%s.js' % sprache, 'notizen-%s.js' % sprache,
-                     'belohnungen-%s.js' % sprache, 'rezepte-%s.js' % sprache, 'webp/%s' % sprache):
+                     'belohnungen-%s.js' % sprache, 'rezepte-%s.js' % sprache, 'reise-%s.js' % sprache,
+                     'vorkommen-%s.js' % sprache,
+                     'webp/%s' % sprache):
             pfad = WEB / name if name.endswith('.js') else HIER / name
             if not pfad.exists():
                 raise SystemExit('MISSING: %s (run build_daten.py, build_notizen.py or '
@@ -168,16 +231,19 @@ def main():
     ziel.mkdir(parents=True)
 
     kopiere(ziel)
+    vorkommen_kopieren(ziel)
     index_bauen(ziel)
     fortschritt_leeren(ziel)
     zaehler_einbauen(ziel)
     for sprache in SPRACHEN:
+        shutil.copy2(WEB / ('reise-%s.js' % sprache), ziel / ('reise-%s.js' % sprache))
         shutil.copy2(WEB / ('daten-%s.js' % sprache), ziel / ('daten-%s.js' % sprache))
         shutil.copy2(WEB / ('daten-taten-%s.js' % sprache), ziel / ('daten-taten-%s.js' % sprache))
         shutil.copy2(WEB / ('notizen-%s.js' % sprache), ziel / ('notizen-%s.js' % sprache))
         shutil.copy2(WEB / ('belohnungen-%s.js' % sprache), ziel / ('belohnungen-%s.js' % sprache))
         shutil.copy2(WEB / ('rezepte-%s.js' % sprache), ziel / ('rezepte-%s.js' % sprache))
         shutil.copy2(WEB / ('suche-%s.js' % sprache), ziel / ('suche-%s.js' % sprache))
+        shutil.copy2(WEB / ('gegenstaende-%s.js' % sprache), ziel / ('gegenstaende-%s.js' % sprache))
         # iCloud can resurrect a folder while the build runs: clear it first.
         kartenziel = ziel / 'karten' / sprache
         if kartenziel.exists():
@@ -187,6 +253,10 @@ def main():
     from build_notizsymbole import baue as baue_notizsymbole
     baue_notizsymbole(ziel / 'notizen')
     katalogzahlen_einbauen(ziel)
+    from build_seo import build as build_seo
+    build_seo(ziel)
+    from build_katalogseiten import build as build_katalogseiten
+    build_katalogseiten(ziel)
     # Stamp after the data is in place: it covers the data files as well.
     print('version tag on static files: %s' % stempeln(ziel))
 

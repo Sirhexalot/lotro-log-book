@@ -104,10 +104,13 @@
 			zeilen.appendChild(zeile);
 		});
 		var leer2 = !alle.length;
-		el('schreiben').disabled = leer2;
-		el('zip').disabled = leer2;
+		el('import-fertig').hidden = leer2;
 		el('sicherung').disabled = leer2;
 	}
+
+	el('fertig-karte').addEventListener('click', function () {
+		window.location.href = 'index.html?lang=' + sprache;
+	});
 
 	// --- Reading Companion's folder ------------------------------------------
 	function ausDateiliste(liste) {
@@ -117,6 +120,12 @@
 				read: function () { return datei.text(); }
 			};
 		});
+	}
+
+	/** Counts imports for Google Analytics through the GTM container; no names, no IDs. */
+	function meldeImport(anzahl, art) {
+		window.dataLayer = window.dataLayer || [];
+		window.dataLayer.push({ event: 'charakter_import', anzahl: anzahl, art: art });
 	}
 
 	function verarbeite(eintraege) {
@@ -131,6 +140,7 @@
 				melde('meldung', t('sp_speicher_voll'), 'fehler');
 				return;
 			}
+			meldeImport(ergebnis.characters.length, 'companion');
 			var namen = ergebnis.characters.map(function (c) { return c.name; }).join(', ');
 			melde('meldung', ersetze(t('sp_gelesen'), [ergebnis.characters.length, namen]), 'gut');
 			window.setTimeout(function () { window.location.reload(); }, 900);
@@ -200,7 +210,9 @@
 			.then(function () { verarbeite(ziel); });
 	});
 
-	// --- Plugin files -----------------------------------------------------------
+	// The plugin's own page (plugin.html) writes the files Magic Quest Log reads;
+	// this page only keeps the progress in the browser and backs it up.
+
 	function speichereDatei(name, inhalt, typ) {
 		var blob = new Blob([inhalt], { type: typ });
 		var link = document.createElement('a');
@@ -210,59 +222,6 @@
 		link.click();
 		window.setTimeout(function () { URL.revokeObjectURL(link.href); link.remove(); }, 1000);
 	}
-
-	var direkt = typeof window.showDirectoryPicker === 'function';
-	el('schreiben').hidden = !direkt;
-	el('schreiben-hinweis').hidden = direkt;
-
-	el('zip').addEventListener('click', function () {
-		var dateien = companion.pluginFiles(speicher.alle());
-		if (!dateien.length) { melde('meldung-plugin', t('sp_nichts_fuer_plugin'), 'fehler'); return; }
-		speichereDatei('MagicQuestLog-PluginData.zip', companion.zip(dateien), 'application/zip');
-		melde('meldung-plugin', ersetze(t('sp_zip_fertig'), [dateien.length]), 'gut');
-	});
-
-	function schreibeIn(ordner, pfad, text) {
-		var teile = pfad.split('/');
-		var name = teile.pop();
-		return teile.reduce(function (weiter, teil) {
-			return weiter.then(function (aktuell) { return aktuell.getDirectoryHandle(teil, { create: true }); });
-		}, Promise.resolve(ordner)).then(function (ziel) {
-			return ziel.getFileHandle(name, { create: true });
-		}).then(function (datei) {
-			return datei.createWritable();
-		}).then(function (schreiber) {
-			return schreiber.write(text).then(function () { return schreiber.close(); });
-		});
-	}
-
-	el('schreiben').addEventListener('click', function () {
-		var dateien = companion.pluginFiles(speicher.alle());
-		if (!dateien.length) { melde('meldung-plugin', t('sp_nichts_fuer_plugin'), 'fehler'); return; }
-		window.showDirectoryPicker({ id: 'mql-plugindata', mode: 'readwrite' }).then(function (ordner) {
-			// The account folders must already exist: the game creates them. A wrong
-			// folder (e.g. "Plugins") would otherwise get a stray account tree.
-			var konten = {};
-			dateien.forEach(function (datei) { konten[datei.path.split('/')[0]] = true; });
-			return Promise.all(Object.keys(konten).map(function (konto) {
-				return ordner.getDirectoryHandle(konto).then(function () { return null; }, function () { return konto; });
-			})).then(function (fehlend) {
-				fehlend = fehlend.filter(Boolean);
-				if (fehlend.length) {
-					melde('meldung-plugin', ersetze(t('sp_falscher_ordner'), [ordner.name, fehlend.join(', ')]), 'fehler');
-					return;
-				}
-				return dateien.reduce(function (weiter, datei) {
-					return weiter.then(function () { return schreibeIn(ordner, datei.path, datei.text); });
-				}, Promise.resolve()).then(function () {
-					melde('meldung-plugin', ersetze(t('sp_geschrieben'), [dateien.length]), 'gut');
-				});
-			});
-		}).catch(function (fehler) {
-			if (fehler && fehler.name === 'AbortError') { return; }
-			melde('meldung-plugin', t('sp_schreiben_fehler'), 'fehler');
-		});
-	});
 
 	// --- Backup ---------------------------------------------------------------
 	el('sicherung').addEventListener('click', function () {
@@ -277,6 +236,7 @@
 		datei.text().then(function (text) {
 			var anzahl = speicher.ladeSicherung(text);
 			if (anzahl < 0) { melde('meldung-sicherung', t('sp_sicherung_falsch'), 'fehler'); return; }
+			if (anzahl > 0) { meldeImport(anzahl, 'sicherung'); }
 			melde('meldung-sicherung', ersetze(t('sp_sicherung_geladen'), [anzahl]), 'gut');
 			window.setTimeout(function () { window.location.reload(); }, 900);
 		});

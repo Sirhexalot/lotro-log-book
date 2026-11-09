@@ -6,7 +6,8 @@ const assert = require('assert/strict');
 const root = path.join(__dirname, '..', 'web');
 const context = { window: {} };
 vm.createContext(context);
-for (const file of ['texte.js', 'texte-spielstand.js', 'texte-logbuch.js', 'texte-site.js']) {
+for (const file of ['texte.js', 'texte-spielstand.js', 'texte-logbuch.js', 'texte-site.js',
+  'texte-companion.js', 'texte-plugin.js', 'texte-reise.js']) {
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context);
 }
 const texts = context.window.MQL_TEXTE;
@@ -31,9 +32,13 @@ for (const file of fs.readdirSync(root).filter(f => f.endsWith('.html'))) {
 for (const [lang, file] of [['de', 'start.html'], ['en', 'start-en.html'], ['fr', 'start-fr.html']]) {
   const html = fs.readFileSync(path.join(root, file), 'utf8');
   assert(html.includes('datetime="2026-11-06"'), 'dated news: ' + lang);
-  assert(html.includes('info1346-MagicQuestLog.html'), 'plugin link: ' + lang);
+  assert(html.includes('plugin.html?lang=' + lang), 'plugin guide link: ' + lang);
   assert(html.indexOf('class="einstieg"') < html.indexOf('class="bild"'), 'map entry before image: ' + lang);
-  assert.equal((html.match(/data-katalogzahl=/g) || []).length, 2, 'catalogue counts: ' + lang);
+  const counts = [...html.matchAll(/data-katalogzahl="([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(counts, ['aufgaben', 'taten', 'gegenstaende', 'rezepte', 'titel', 'tugenden', 'stationen'],
+    'build-managed catalogue counts: ' + lang);
+  assert(!/JavaScript|\bID\b/.test(html), 'developer copy on landing page: ' + lang);
+  assert.equal((html.match(/class="neuigkeit"/g) || []).length, 3, 'three news items: ' + lang);
 }
 assert.equal(texts.de.sp_titel, 'Spielstand importieren');
 assert.equal(texts.en.sp_titel, 'Import progress');

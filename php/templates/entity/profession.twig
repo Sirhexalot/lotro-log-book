@@ -1,0 +1,9 @@
+{% extends 'layout.twig' %}
+
+{# Profession page: its recipes, grouped by crafting tier. #}
+{% block inhalt %}
+<article><div class="katalog-kopf"><h1>{{ page.name }}</h1></div>
+<p><a href="{{ page.craft_url }}">{{ w.craftlist }}</a></p>
+{% for group in page.groups %}<section><h2>{{ group.title }}</h2><ul class="katalog-liste">{% for entry in group.entries %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul></section>{% endfor %}
+</article>
+{% endblock %}

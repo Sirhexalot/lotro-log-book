@@ -4,11 +4,14 @@ Karten_en/
 Karten_fr/
 webp/
 daten/*.json
+daten/vorkommen/
 web/daten-*.js
 web/belohnungen-*.js
 web/rezepte-*.js
 web/notizen-*.js
 web/notizen/
+web/vorkommen-*.js
+web/vorkommen/
 web/fortschritt.js
 web/stand.js
 web/download/

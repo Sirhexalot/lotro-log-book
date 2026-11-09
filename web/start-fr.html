@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LOTRO Log Book – Quêtes, prouesses et cartes</title>
-<meta name="description" content="Retrouvez les quêtes et prouesses de la Terre du Milieu. Consultez les cartes, la réputation et l’artisanat, et importez votre progression depuis LOTRO Companion.">
+<title>Votre compagnon en Terre du Milieu – LOTRO Log Book</title>
+<meta name="description" content="Trouvez votre prochaine quête, accomplissez des prouesses et découvrez équipements et recettes pour vos aventures dans LOTRO. Suivez votre progression.">
 <link rel="stylesheet" href="start.css">
 <link rel="stylesheet" href="gemeinsam.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -15,59 +15,130 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 })(window,document,'script','dataLayer','GTM-TRC8BF95');
 </script>
 </head>
-<body data-seite="start">
-<header class="kopf"><div class="kopf-innen">
-<h1>LOTRO Log Book</h1>
-<nav class="menue" id="menue" aria-label="Menu"></nav>
-<nav class="sprachen" aria-label="Langue">
-<button type="button" data-lang="de" aria-pressed="false">DE</button>
-<button type="button" data-lang="en" aria-pressed="false">EN</button>
-<button type="button" data-lang="fr" aria-pressed="true">FR</button>
-</nav></div></header>
+<body class="seite-start landing" data-seite="start">
+<header class="kopf">
+	<div class="kopf-innen">
+		<h1 data-t="produkt">LOTRO Log Book</h1>
+		<nav class="menue" id="menue" aria-label="Menu"></nav>
+		<nav class="sprachen" aria-label="Langue">
+			<button type="button" data-lang="de" aria-pressed="false">DE</button>
+			<button type="button" data-lang="en" aria-pressed="false">EN</button>
+			<button type="button" data-lang="fr" aria-pressed="true">FR</button>
+		</nav>
+	</div>
+</header>
 <main>
-<section class="intro">
-<p class="dach">Le Seigneur des Anneaux Online</p>
-<h2>Retrouvez les quêtes et prouesses de la <em>Terre du Milieu</em>.</h2>
-<p class="lead">Parcourez les régions et l’histoire épique, repérez les quêtes sur la carte et suivez votre progression.</p>
-<div class="einstieg">
-<a class="knopf" href="index.html?lang=fr">Ouvrir la carte</a>
-<a class="knopf sekundaer" href="index.html?art=taten&amp;lang=fr">Prouesses</a>
-<a class="knopf sekundaer" href="spielstand.html?lang=fr">Importer la progression</a>
-</div>
+
+<section class="hero">
+	<p class="dach">Le Seigneur des Anneaux Online</p>
+	<h2>Votre compagnon en <em>Terre du Milieu</em>.</h2>
+	<p class="lead">Poursuivre une histoire, accomplir une prouesse ou dénicher une recette rare ? Ouvrez votre journal. Retrouvez quêtes et objets, préparez vos voyages et importez votre progression pour garder le fil des aventures de vos personnages.</p>
+	<form class="suche-start" action="suche.html" method="get" role="search">
+		<input type="hidden" name="lang" value="fr">
+		<label class="nur-leser" for="start-suche">Rechercher dans le journal</label>
+		<input id="start-suche" type="search" name="q" placeholder="Quête, objet, titre ou destination" autocomplete="off">
+		<button type="submit" class="knopf">Rechercher</button>
+	</form>
+	<p class="einstieg">
+		<a class="knopf" href="index.html?lang=fr">Ouvrir la carte</a>
+		<a class="knopf sekundaer" href="spielstand.html?lang=fr">Importer la progression</a>
+	</p>
 </section>
-<section class="neuigkeiten" aria-labelledby="neu-titel">
-<h3 id="neu-titel">Nouveautés</h3>
-<p class="datum"><time datetime="2026-11-06">6 novembre 2026</time></p>
-<ul>
-<li><strong>Récompenses :</strong> chaque quête et prouesse indique désormais objets, titres, vertus et traits – avant les objectifs, comme en jeu. L’aperçu recense 2 494 titres, 20 vertus et 6 564 objets avec leur source. <a href="belohnungen.html?lang=fr">Aperçu</a></li>
-<li><strong>Recettes avec votre progression :</strong> 7 924 recettes par métier et palier, avec ingrédients et réussite critique. Avec un import, seuls vos métiers, ✓ et ○ par recette, et « manquantes seulement ». <a href="handwerk.html?lang=fr#rezepte">Voir les recettes</a></li>
-<li><strong>Réputation :</strong> toutes les factions avec votre niveau. « Commencées seulement » masque ce que vous n’avez pas entamé, et un clic montre les quêtes et prouesses qui rapportent encore de la réputation. <a href="ruf.html?lang=fr">Voir la réputation</a></li>
+
+<ul class="zahlen" aria-label="Taille du catalogue">
+	<li><span data-katalogzahl="aufgaben">15 118</span><small>Quêtes</small></li>
+	<li><span data-katalogzahl="taten">5 528</span><small>Prouesses</small></li>
+	<li><span data-katalogzahl="gegenstaende">52 798</span><small>Objets</small></li>
+	<li><span data-katalogzahl="rezepte">7 924</span><small>Recettes</small></li>
+	<li><span data-katalogzahl="titel">2 491</span><small>Titres</small></li>
+	<li><span data-katalogzahl="tugenden">20</span><small>Vertus</small></li>
+	<li><span data-katalogzahl="stationen">372</span><small>Stations de voyage</small></li>
 </ul>
+
+<section class="familien" aria-labelledby="familien-titel">
+	<h3 id="familien-titel">Quelle sera votre prochaine aventure ?</h3>
+	<div class="familien-karten">
+		<article class="familie-karte">
+			<h4><a href="index.html?lang=fr">Monde</a></h4>
+			<p>Suivez l’histoire épique ou découvrez ce qui vous attend hors des sentiers battus.</p>
+			<ul>
+				<li><a href="index.html?lang=fr">Quêtes</a> : parcourir les régions, suivre les livres</li>
+				<li><a href="index.html?art=taten&amp;lang=fr">Prouesses</a> : ce qu’il faut faire et ce qu’il vous reste</li>
+				<li><a href="reise.html?lang=fr">Voyage</a> : votre chemin d’écurie en écurie</li>
+			</ul>
+		</article>
+		<article class="familie-karte">
+			<h4><a href="/fr/objet/">Objets</a></h4>
+			<p>Un meilleur arc, du bois pour l’établi ou de quoi remplir la marmite ? Faites vos recherches ici.</p>
+			<ul>
+				<li><a href="/fr/objet/">Objets</a> : comparer leurs caractéristiques et savoir où les trouver</li>
+				<li><a href="handwerk.html?lang=fr#rezepte">Artisanat</a> : recettes, ingrédients et ressources</li>
+				<li><a href="/fr/metier/">Métiers</a> : des premiers essais à la maîtrise</li>
+			</ul>
+		</article>
+		<article class="familie-karte">
+			<h4><a href="belohnungen.html?lang=fr">Récompenses</a></h4>
+			<p>Un nouveau titre ou une vertu à renforcer : trouvez une bonne raison de reprendre la route.</p>
+			<ul>
+				<li><a href="belohnungen.html?lang=fr">Récompenses</a> : ce que rapportent vos quêtes et prouesses</li>
+				<li><a href="/fr/titre/">Titres</a> : comment les obtenir</li>
+				<li><a href="/fr/vertu/">Vertus</a> et <a href="ruf.html?lang=fr">réputation</a> : vos prochains objectifs</li>
+			</ul>
+		</article>
+		<article class="familie-karte">
+			<h4><a href="spielstand.html?lang=fr">Votre personnage</a></h4>
+			<p>Vous avez déjà fait du chemin. Gardez une vue d’ensemble de vos aventures et de vos métiers.</p>
+			<ul>
+				<li><a href="spielstand.html?lang=fr">Importer la progression</a> : retrouver votre parcours dans le journal</li>
+				<li><a href="/fr/metier/">Mes métiers</a> : vos acquis et vos prochains apprentissages</li>
+				<li><a href="ruf.html?lang=fr">Ma réputation</a> : là où vous vous êtes fait un nom</li>
+			</ul>
+		</article>
+	</div>
 </section>
+
+<section class="neuigkeiten" aria-labelledby="neu-titel">
+	<h3 id="neu-titel">Nouveau dans le journal</h3>
+	<article class="neuigkeit">
+		<p class="datum"><time datetime="2026-11-08">8 novembre 2026</time></p>
+		<h4>Sur la piste de votre prochaine quête</h4>
+		<p>Où commence-t-elle, que faut-il accomplir avant et quelles récompenses vous attendent ? Retrouvez le fil des quêtes et découvrez où l’histoire vous mène ensuite. <a href="/fr/quete/70071D89/">Consulter une quête</a></p>
+	</article>
+	<article class="neuigkeit">
+		<p class="datum"><time datetime="2026-11-08">8 novembre 2026</time></p>
+		<h4>Bien s’équiper avant de reprendre la route</h4>
+		<p>Cherchez les objets par type et qualité et consultez leurs caractéristiques. Si le voyage rapide n’est pas encore débloqué, le planificateur vous aide à trouver un autre chemin. <a href="/fr/objet/armure/qualite/legendaire/">Voir les armures légendaires</a></p>
+	</article>
+	<article class="neuigkeit">
+		<p class="datum"><time datetime="2026-11-06">6 novembre 2026</time></p>
+		<h4>Récompenses, recettes et réputation</h4>
+		<p>Quel titre vous manque encore ? Quelle prouesse renforcera vos vertus ? Trouvez les récompenses qui vous tentent, les ingrédients pour votre artisanat et les quêtes qui amélioreront votre réputation. <a href="belohnungen.html?lang=fr">Découvrir les récompenses</a></p>
+	</article>
+</section>
+
 <figure class="bild">
-<a href="index.html?lang=fr"><img src="bild/start-fr.jpg" alt="Carte des quêtes du Pays de Bree dans LOTRO Log Book" loading="lazy" width="1280" height="860"></a>
-<figcaption>Liste des quêtes, carte et détails dans une seule vue.</figcaption>
+	<a href="index.html?lang=fr"><img src="bild/start-fr.jpg" alt="Carte des quêtes du Pays de Bree dans LOTRO Log Book" loading="lazy" width="1280" height="860"></a>
+	<figcaption>En chemin dans le Pays de Bree : retrouver les quêtes et préparer la suite du voyage.</figcaption>
 </figure>
-<section>
-<h3>Dans le Log Book</h3>
-<div class="funktionen">
-<div><h4><a href="index.html?lang=fr">Quêtes</a></h4><p><span data-katalogzahl="aufgaben">15 118</span> entrées classées par région et par histoire, avec les donneurs de quêtes, prérequis et lieux des objectifs connus.</p></div>
-<div><h4><a href="index.html?art=taten&amp;lang=fr">Prouesses</a></h4><p><span data-katalogzahl="taten">5 528</span> entrées avec descriptions et objectifs. Importez votre progression pour retrouver vos prouesses terminées et vos compteurs.</p></div>
-<div><h4><a href="ruf.html?lang=fr">Réputation</a></h4><p>Votre réputation auprès des factions et les quêtes et prouesses encore à accomplir pour l’améliorer.</p></div>
-<div><h4><a href="handwerk.html?lang=fr">Artisanat</a></h4><p>Vos professions et paliers d’artisanat, avec votre progression en compétence et en maîtrise.</p></div>
-</div>
+
+<section class="import" aria-labelledby="import-titel">
+	<h3 id="import-titel">Avec votre progression</h3>
+	<p>Vous avez déjà parcouru bien des chemins. Importez votre progression avec LOTRO Companion pour retrouver vos quêtes et prouesses accomplies, vos recettes connues et votre réputation. Les données de vos personnages restent sur votre ordinateur.</p>
+	<p><a class="knopf sekundaer" href="spielstand.html?lang=fr">Importer la progression</a> <a href="companion.html?lang=fr">Comment utiliser LOTRO Companion</a></p>
 </section>
-<section class="plugin">
-<h3>Dans le jeu : Magic Quest Log</h3>
-<p>Le plugin associé affiche les quêtes, les prouesses et votre progression dans LOTRO. La page d’import prépare aussi votre progression Companion pour le plugin.</p>
-<p><a class="knopf sekundaer" href="https://www.lotrointerface.com/downloads/info1346-MagicQuestLog.html" rel="noopener" target="_blank">Plugin sur LOTROInterface</a></p>
+
+<section class="plugin" aria-labelledby="plugin-titel">
+	<h3 id="plugin-titel">Aussi en jeu : Magic Quest Log</h3>
+	<p>Le plugin complémentaire affiche quêtes, prouesses et votre progression directement dans LOTRO. Il n'est pas nécessaire pour ce site.</p>
+	<p><a class="knopf sekundaer" href="plugin.html?lang=fr">Plugin en jeu</a></p>
 </section>
+
 <section class="feedback">
-<h3>Quelque chose qui cloche ?</h3>
-<p>Une quête manquante, une zone erronée, une version mobile maladroite : écrivez à <a href="mailto:llb@sirhexalot.de">llb@sirhexalot.de</a> — ou ouvrez un <a href="https://github.com/Sirhexalot/lotro-log-book/issues" rel="noopener" target="_blank">ticket GitHub</a>.</p>
+	<h3>Quelque chose ne va pas ?</h3>
+	<p>Une quête manque, un trajet semble faux ou quelque chose ne fonctionne pas ? Écrivez à <a href="mailto:llb@sirhexalot.de">llb@sirhexalot.de</a> ou signalez-le sur <a href="https://github.com/Sirhexalot/lotro-log-book/issues" rel="noopener" target="_blank">GitHub</a>.</p>
 </section>
 </main>
-<footer><p><a href="impressum.html?lang=fr">Mentions légales</a> · <a href="datenschutz.html?lang=fr">Confidentialité</a></p></footer>
+<footer><p>LOTRO Log Book · <a href="impressum.html?lang=fr">Mentions légales</a> · <a href="datenschutz.html?lang=fr">Confidentialité</a></p></footer>
 <script src="texte.js"></script>
 <script src="texte-spielstand.js"></script>
 <script src="texte-logbuch.js"></script>

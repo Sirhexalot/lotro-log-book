@@ -92,14 +92,25 @@
 	document.querySelectorAll('[data-t-ph]').forEach(function (element) {
 		element.setAttribute('placeholder', t(element.getAttribute('data-t-ph')));
 	});
-	var seitentitel = { spielstand: 'sp_titel', ruf: 'ru_titel', handwerk: 'hw_titel',
-		belohnungen: 'bl_titel' }[seiteArt];
+	// One pattern for every page: "<content> – LOTRO Log Book". The map names its
+	// content, so quests and deeds no longer share the game's name as a title.
+	var seitentitel = { gegenstaende: 'gs_titel', spielstand: 'sp_titel', ruf: 'ru_titel', handwerk: 'hw_titel',
+		belohnungen: 'bl_titel', plugin: 'pl_titel', companion: 'cp_titel',
+		karte: 'titel_karte' }[seiteArt];
 	if (document.body.dataset.recht === 'datenschutz') { seitentitel = 'ds_titel'; }
-	if (seitentitel) { document.title = t(seitentitel) + ' – LOTRO Log Book'; }
+	// Deeds bring their own, complete title; appending the suffix again gave
+	// "Taten – LOTRO Log Book – LOTRO Log Book".
+	if (seiteArt === 'karte' && art === 'taten') {
+		document.title = t('titel_taten');
+	} else if (seitentitel) {
+		document.title = t(seitentitel) + ' – LOTRO Log Book';
+	}
 	var attribute = [
 		['.menue', 'aria-label', 'nav_menu'], ['.sprachen', 'aria-label', 'nav_sprache'],
 		['#baum', 'aria-label', 'gebiete'], ['#filter', 'aria-label', 'nav_filter'],
 		['#landschaft-orte', 'aria-label', 'nav_karten'],
+		['#legende-mehr', 'title', 'legende_mehr'],
+		['#legende-mehr', 'aria-label', 'legende_mehr'],
 		['#zuklappen', 'title', 'alles_zuklappen'], ['#zum-baum', 'title', 'zurueck_gebiete']
 	];
 	attribute.forEach(function (a) {
@@ -149,13 +160,26 @@
 		});
 		return;
 	}
+	if (seite === 'gegenstaende') {
+		lade('stand.js?t=' + Date.now(), function () {
+			lade('gegenstaende-' + sprache + '.js' + stempel(), function () {
+				if (window.MQL_GEGENSTAENDE_ZEICHNEN) { window.MQL_GEGENSTAENDE_ZEICHNEN(); }
+			});
+		});
+		return;
+	}
 	if (seite === 'belohnungen' || seite === 'handwerk' || seite === 'gegenstand') {
 		lade('stand.js?t=' + Date.now(), function () {
 			var datei = (seite === 'handwerk' ? 'rezepte-' : 'belohnungen-') + sprache + '.js';
 			lade(datei + stempel(), function () {
 				if (seite === 'belohnungen' && window.MQL_BELOHNUNGEN_ZEICHNEN) { window.MQL_BELOHNUNGEN_ZEICHNEN(); }
 				if (seite === 'gegenstand' && window.MQL_GEGENSTAND_ZEICHNEN) { window.MQL_GEGENSTAND_ZEICHNEN(); }
-				if (seite === 'handwerk' && window.MQL_REZEPTE_ZEICHNEN) { window.MQL_REZEPTE_ZEICHNEN(); }
+				if (seite !== 'handwerk') { return; }
+				if (window.MQL_REZEPTE_ZEICHNEN) { window.MQL_REZEPTE_ZEICHNEN(); }
+				// The resource tab shares the map layer's data file.
+				lade('vorkommen-' + sprache + '.js' + stempel(), function () {
+					if (window.MQL_ROHSTOFFE_ZEICHNEN) { window.MQL_ROHSTOFFE_ZEICHNEN(); }
+				});
 			});
 		});
 		return;

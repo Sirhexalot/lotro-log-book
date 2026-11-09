@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LOTRO Log Book – Aufgaben, Taten und Karten</title>
-<meta name="description" content="Aufgaben und Taten in Mittelerde finden. Karten, Ruf und Handwerk durchsuchen und deinen Fortschritt aus LOTRO Companion importieren.">
+<title>Dein Begleiter durch Mittelerde – LOTRO Log Book</title>
+<meta name="description" content="Finde deine nächste Aufgabe, vollende offene Taten und entdecke Ausrüstung und Rezepte für deine Abenteuer in Der Herr der Ringe Online. Mit deinem Spielstand.">
 <link rel="stylesheet" href="start.css">
 <link rel="stylesheet" href="gemeinsam.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -15,59 +15,130 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 })(window,document,'script','dataLayer','GTM-TRC8BF95');
 </script>
 </head>
-<body data-seite="start">
-<header class="kopf"><div class="kopf-innen">
-<h1>LOTRO Log Book</h1>
-<nav class="menue" id="menue" aria-label="Menü"></nav>
-<nav class="sprachen" aria-label="Sprache">
-<button type="button" data-lang="de" aria-pressed="true">DE</button>
-<button type="button" data-lang="en" aria-pressed="false">EN</button>
-<button type="button" data-lang="fr" aria-pressed="false">FR</button>
-</nav></div></header>
+<body class="seite-start landing" data-seite="start">
+<header class="kopf">
+	<div class="kopf-innen">
+		<h1 data-t="produkt">LOTRO Log Book</h1>
+		<nav class="menue" id="menue" aria-label="Menü"></nav>
+		<nav class="sprachen" aria-label="Sprache">
+			<button type="button" data-lang="de" aria-pressed="true">DE</button>
+			<button type="button" data-lang="en" aria-pressed="false">EN</button>
+			<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+		</nav>
+	</div>
+</header>
 <main>
-<section class="intro">
-<p class="dach">Der Herr der Ringe Online</p>
-<h2>Aufgaben und Taten in <em>Mittelerde</em> finden.</h2>
-<p class="lead">Durchsuche Landschaften und die epische Geschichte, finde Aufgaben auf der Karte und behalte deinen Fortschritt im Blick.</p>
-<div class="einstieg">
-<a class="knopf" href="index.html?lang=de">Zur Karte</a>
-<a class="knopf sekundaer" href="index.html?art=taten&amp;lang=de">Taten</a>
-<a class="knopf sekundaer" href="spielstand.html?lang=de">Spielstand importieren</a>
-</div>
+
+<section class="hero">
+	<p class="dach">Der Herr der Ringe Online</p>
+	<h2>Dein Begleiter durch <em>Mittelerde</em>.</h2>
+	<p class="lead">Eine Geschichte weiterspielen, eine offene Tat vollenden oder ein seltenes Rezept finden? Schlag dein Logbuch auf. Hier findest du Aufgaben, Gegenstände und Wege durch die Lande. Mit deinem Spielstand behältst du im Blick, was deine Charaktere schon erlebt haben.</p>
+	<form class="suche-start" action="suche.html" method="get" role="search">
+		<input type="hidden" name="lang" value="de">
+		<label class="nur-leser" for="start-suche">Im Logbuch suchen</label>
+		<input id="start-suche" type="search" name="q" placeholder="Aufgabe, Gegenstand, Titel oder Reiseziel" autocomplete="off">
+		<button type="submit" class="knopf">Suchen</button>
+	</form>
+	<p class="einstieg">
+		<a class="knopf" href="index.html?lang=de">Zur Karte</a>
+		<a class="knopf sekundaer" href="spielstand.html?lang=de">Spielstand importieren</a>
+	</p>
 </section>
-<section class="neuigkeiten" aria-labelledby="neu-titel">
-<h3 id="neu-titel">Neu im Logbuch</h3>
-<p class="datum"><time datetime="2026-11-06">6. November 2026</time></p>
-<ul>
-<li><strong>Belohnungen:</strong> Jede Aufgabe und Tat zeigt Gegenstände, Titel, Tugenden und Traits – vor den Zielen, wie im Spiel. Die Übersicht nennt alle 2.509 Titel, 20 Tugenden und 6.564 Gegenstände samt Quelle. <a href="belohnungen.html?lang=de">Übersicht</a></li>
-<li><strong>Rezepte mit deinem Stand:</strong> 7.924 Rezepte nach Beruf und Stufe, mit Zutaten und kritischem Erfolg. Mit importiertem Spielstand nur deine Berufe, ✓ und ○ je Rezept und „nur fehlende“. <a href="handwerk.html?lang=de#rezepte">Rezepte öffnen</a></li>
-<li><strong>Ruf:</strong> Alle Fraktionen mit deinem Stand. „Nur begonnene“ blendet aus, was du noch nicht angefangen hast, und ein Klick zeigt die Aufgaben und Taten, die dort noch Ruf bringen. <a href="ruf.html?lang=de">Ruf öffnen</a></li>
+
+<ul class="zahlen" aria-label="Umfang des Katalogs">
+	<li><span data-katalogzahl="aufgaben">15.118</span><small>Aufgaben</small></li>
+	<li><span data-katalogzahl="taten">5.528</span><small>Taten</small></li>
+	<li><span data-katalogzahl="gegenstaende">52.798</span><small>Gegenstände</small></li>
+	<li><span data-katalogzahl="rezepte">7.924</span><small>Rezepte</small></li>
+	<li><span data-katalogzahl="titel">2.486</span><small>Titel</small></li>
+	<li><span data-katalogzahl="tugenden">20</span><small>Tugenden</small></li>
+	<li><span data-katalogzahl="stationen">372</span><small>Reisestationen</small></li>
 </ul>
+
+<section class="familien" aria-labelledby="familien-titel">
+	<h3 id="familien-titel">Was hast du als Nächstes vor?</h3>
+	<div class="familien-karten">
+		<article class="familie-karte">
+			<h4><a href="index.html?lang=de">Welt</a></h4>
+			<p>Folge der epischen Geschichte oder schau, was es abseits des Weges noch zu entdecken gibt.</p>
+			<ul>
+				<li><a href="index.html?lang=de">Aufgaben</a>: durch die Landschaften und Buch für Buch</li>
+				<li><a href="index.html?art=taten&amp;lang=de">Taten</a>: was zu tun ist und was dir noch fehlt</li>
+				<li><a href="reise.html?lang=de">Reise</a>: dein Weg von Stallmeister zu Stallmeister</li>
+			</ul>
+		</article>
+		<article class="familie-karte">
+			<h4><a href="/de/gegenstand/">Gegenstände</a></h4>
+			<p>Ein besserer Bogen, Holz für die Werkbank oder etwas für den Kochtopf? Hier kannst du nachschlagen.</p>
+			<ul>
+				<li><a href="/de/gegenstand/">Gegenstände</a>: Werte vergleichen und Fundorte nachschlagen</li>
+				<li><a href="handwerk.html?lang=de#rezepte">Handwerk</a>: Rezepte, Zutaten und Rohstoffe</li>
+				<li><a href="/de/beruf/">Berufe</a>: von den ersten Versuchen zur Meisterschaft</li>
+			</ul>
+		</article>
+		<article class="familie-karte">
+			<h4><a href="belohnungen.html?lang=de">Erfolge</a></h4>
+			<p>Ein neuer Titel oder eine stärkere Tugend: Finde ein Ziel, für das sich der Aufbruch lohnt.</p>
+			<ul>
+				<li><a href="belohnungen.html?lang=de">Belohnungen</a>: was deine Aufgaben und Taten einbringen</li>
+				<li><a href="/de/titel/">Titel</a>: wie du sie dir verdienst</li>
+				<li><a href="/de/tugend/">Tugenden</a> und <a href="ruf.html?lang=de">Ruf</a>: deine nächsten Ziele</li>
+			</ul>
+		</article>
+		<article class="familie-karte">
+			<h4><a href="spielstand.html?lang=de">Dein Charakter</a></h4>
+			<p>Du bist schon weit gekommen. Behalte deine Abenteuer und dein Handwerk im Blick.</p>
+			<ul>
+				<li><a href="spielstand.html?lang=de">Spielstand importieren</a>: deinen Fortschritt übernehmen</li>
+				<li><a href="/de/beruf/">Meine Berufe</a>: was du kannst und noch lernen möchtest</li>
+				<li><a href="ruf.html?lang=de">Mein Ruf</a>: wo du dir einen Namen gemacht hast</li>
+			</ul>
+		</article>
+	</div>
 </section>
+
+<section class="neuigkeiten" aria-labelledby="neu-titel">
+	<h3 id="neu-titel">Neu im Logbuch</h3>
+	<article class="neuigkeit">
+		<p class="datum"><time datetime="2026-11-08">8. November 2026</time></p>
+		<h4>Deiner nächsten Aufgabe auf der Spur</h4>
+		<p>Wo beginnt sie, was musst du vorher erledigen und welche Belohnung wartet auf dich? Schau nach, wie die Aufgaben zusammenhängen und wo die Geschichte weitergeht. <a href="/de/aufgabe/70071D89/">Aufgabe ansehen</a></p>
+	</article>
+	<article class="neuigkeit">
+		<p class="datum"><time datetime="2026-11-08">8. November 2026</time></p>
+		<h4>Die passende Ausrüstung, der nächste Aufbruch</h4>
+		<p>Suche Gegenstände nach Art und Qualität und schlage ihre Werte nach. Und wenn die Schnellreise noch nicht freigeschaltet ist, hilft dir der Reiseplaner, einen anderen Weg zu finden. <a href="/de/gegenstand/ruestung/qualitaet/legendaer/">Legendäre Rüstung ansehen</a></p>
+	</article>
+	<article class="neuigkeit">
+		<p class="datum"><time datetime="2026-11-06">6. November 2026</time></p>
+		<h4>Belohnungen, Rezepte und Ruf</h4>
+		<p>Welcher Titel fehlt dir noch? Welche Tat stärkt deine Tugenden? Finde die passenden Belohnungen, schlage Zutaten für dein Handwerk nach und entdecke Aufgaben, die deinen Ruf verbessern. <a href="belohnungen.html?lang=de">Belohnungen entdecken</a></p>
+	</article>
+</section>
+
 <figure class="bild">
-<a href="index.html?lang=de"><img src="bild/start.jpg" alt="Aufgabenkarte von Breeland im LOTRO Log Book" loading="lazy" width="1280" height="860"></a>
-<figcaption>Liste, Karte und Aufgabendetails in einer Ansicht.</figcaption>
+	<a href="index.html?lang=de"><img src="bild/start.jpg" alt="Aufgabenkarte von Breeland im LOTRO Log Book" loading="lazy" width="1280" height="860"></a>
+	<figcaption>Unterwegs in Breeland: Aufgaben finden und den nächsten Weg planen.</figcaption>
 </figure>
-<section>
-<h3>Das bietet das Logbuch</h3>
-<div class="funktionen">
-<div><h4><a href="index.html?lang=de">Aufgaben</a></h4><p><span data-katalogzahl="aufgaben">15.118</span> Einträge, geordnet nach Landschaften und Geschichten. Mit Auftraggebern, Voraussetzungen und Zielorten, soweit bekannt.</p></div>
-<div><h4><a href="index.html?art=taten&amp;lang=de">Taten</a></h4><p><span data-katalogzahl="taten">5.528</span> Einträge mit Beschreibungen und Zielen. Dein importierter Fortschritt ergänzt erledigte Taten und Zählerstände.</p></div>
-<div><h4><a href="ruf.html?lang=de">Ruf</a></h4><p>Dein Ruf bei den Fraktionen und offene Aufgaben und Taten, mit denen du ihn steigern kannst.</p></div>
-<div><h4><a href="handwerk.html?lang=de">Handwerk</a></h4><p>Berufe und Handwerksstufen mit deinem Fortschritt bei Können und Meisterschaft.</p></div>
-</div>
+
+<section class="import" aria-labelledby="import-titel">
+	<h3 id="import-titel">Mit deinem Spielstand</h3>
+	<p>So viele Wege liegen schon hinter dir. Übernimm deinen Spielstand mit LOTRO Companion und sieh nach, welche Aufgaben und Taten du vollendet hast, welche Rezepte du kennst und wie dein Ruf steht. Deine Charakterdaten bleiben auf deinem Rechner.</p>
+	<p><a class="knopf sekundaer" href="spielstand.html?lang=de">Spielstand importieren</a> <a href="companion.html?lang=de">So geht es mit LOTRO Companion</a></p>
 </section>
-<section class="plugin">
-<h3>Auch im Spiel: Magic Quest Log</h3>
-<p>Das zugehörige Plugin zeigt Aufgaben, Taten und deinen Fortschritt direkt in LOTRO. Die Importseite überträgt deinen Companion-Spielstand auch ins Plugin.</p>
-<p><a class="knopf sekundaer" href="https://www.lotrointerface.com/downloads/info1346-MagicQuestLog.html" rel="noopener" target="_blank">Plugin auf LOTROInterface</a></p>
+
+<section class="plugin" aria-labelledby="plugin-titel">
+	<h3 id="plugin-titel">Auch im Spiel: Magic Quest Log</h3>
+	<p>Das zugehörige Plugin zeigt Aufgaben, Taten und deinen Fortschritt direkt in LOTRO. Für diese Website brauchst du es nicht.</p>
+	<p><a class="knopf sekundaer" href="plugin.html?lang=de">Plugin fürs Spiel</a></p>
 </section>
+
 <section class="feedback">
-<h3>Etwas falsch gefunden?</h3>
-<p>Fehlende Aufgabe, falsches Gebiet, holprige Handy-Ansicht: schreib mir an <a href="mailto:llb@sirhexalot.de">llb@sirhexalot.de</a> — oder als <a href="https://github.com/Sirhexalot/lotro-log-book/issues" rel="noopener" target="_blank">GitHub-Issue</a>.</p>
+	<h3>Etwas falsch gefunden?</h3>
+	<p>Eine Aufgabe fehlt, ein Weg stimmt nicht oder etwas funktioniert nicht? Schreib mir an <a href="mailto:llb@sirhexalot.de">llb@sirhexalot.de</a> oder melde es auf <a href="https://github.com/Sirhexalot/lotro-log-book/issues" rel="noopener" target="_blank">GitHub</a>.</p>
 </section>
 </main>
-<footer><p><a href="impressum.html?lang=de">Impressum</a> · <a href="datenschutz.html?lang=de">Datenschutz</a></p></footer>
+<footer><p>LOTRO Log Book · <a href="impressum.html?lang=de">Impressum</a> · <a href="datenschutz.html?lang=de">Datenschutz</a></p></footer>
 <script src="texte.js"></script>
 <script src="texte-spielstand.js"></script>
 <script src="texte-logbuch.js"></script>

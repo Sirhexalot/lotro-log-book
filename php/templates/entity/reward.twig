@@ -1,0 +1,14 @@
+{# One reward line, shared by deeds and other entity pages. #}
+<div class="katalog-gabe">
+{%- if item.kind == 'item' -%}
+{%- if item.icon %}<img class="symbol" src="/bild/items/{{ item.icon }}.webp" alt="" width="22" height="22" decoding="async">{% endif -%}
+{%- if item.qty %}{{ item.qty }} × {% endif -%}
+{%- if item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif -%}
+{%- elseif item.kind == 'title' -%}
+{{ symbol('titel')|raw }}<span><span class="katalog-gabe-art">{{ item.label }}</span> {{ item.text }}</span>
+{%- elseif item.kind == 'virtue' -%}
+{{ symbol('tugend')|raw }}<span><span class="katalog-gabe-art">{{ item.label }}</span> {{ item.text }}</span>
+{%- else -%}
+<span class="katalog-gabe-art">{{ item.label }}</span> {{ item.text }}
+{%- endif -%}
+</div>

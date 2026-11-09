@@ -186,6 +186,28 @@ def kartenpfade(quests, karten, sprache, art):
             if len(anderer) >= 6 and anderer[:4] == schluessel[:4] and abstand(anderer, schluessel) <= 2:
                 return wert
         return None
+    # Interior maps hang under the area whose quests play there: their own frame
+    # lies in reserved space, so the geometry cannot tie them to a landscape.
+    orte_je_karte = {}
+    for quest in quests:
+        for ziel in quest.get('t') or []:
+            orte_je_karte.setdefault(ziel[0], []).append(quest)
+    for ident, eintrag in spiel.maps.items():
+        if not eintrag.get('interior') or eintrag.get('parent'):
+            continue
+        belegt = orte_je_karte.get(ident) or []
+        if not belegt:
+            continue
+        zaehlung = {}
+        for quest in belegt:
+            schluessel = (quest.get('r') or '', quest.get('z') or '')
+            zaehlung[schluessel] = zaehlung.get(schluessel, 0) + 1
+        (_, zone), _ = max(zaehlung.items(), key=lambda paar: paar[1])
+        pfad = finde(zone) if zone else None
+        keys = [index for index in (pfad[1] if pfad else []) if index is not None]
+        if keys:
+            eintrag['parent'] = keys[-1]
+
     zaehler = {'karte': 0, 'name': 0, 'sektion': 0, 'ohne': 0}
     ohne_ort = []
     for quest in quests:
@@ -292,12 +314,40 @@ TOKENS = {
 }
 
 
-def belohnungen(wert):
+# The game's reward table names an item but carries no ID; the reward index
+# built by build_belohnungen.py lists every item with the quests/deeds that
+# award it. That pair (source id, name) is the key — names alone are ambiguous
+# (520 item names exist two or three times).
+_REWARD_IDS = {}
+
+
+def belohnungs_ids(sprache):
+    """(source id, item name) -> item ID, read once per run."""
+    if sprache in _REWARD_IDS:
+        return _REWARD_IDS[sprache]
+    index = {}
+    datei = HIER / 'web' / ('belohnungen-%s.js' % sprache)
+    if datei.is_file():
+        text = datei.read_text(encoding='utf-8')
+        marke = 'window.MQL_BELOHNUNGEN = '
+        if marke in text:
+            daten = json.loads(text[text.index(marke) + len(marke):text.rindex(';')])
+            for eintrag in daten.get('g') or []:
+                kennung, name = str(eintrag[0]), eintrag[1]
+                for quelle in eintrag[5] or []:
+                    index[(str(quelle[1]), name)] = kennung
+    _REWARD_IDS[sprache] = index
+    return index
+
+
+def belohnungen(wert, kennung=None, sprache='de'):
     """Normalise a catalogue reward list for the page.
 
-    Always six fields so the page can read them by position: kind, name,
-    quality, item level, count, bound. Non-item kinds leave the numbers at 0.
+    Always seven fields so the page can read them by position: kind, name,
+    quality, item level, count, bound, item ID. The ID is empty where the
+    reward index does not know the pair. Non-item kinds leave the numbers at 0.
     """
+    ids = belohnungs_ids(sprache) if kennung else {}
     liste = []
     for eintrag in step_list(wert):
         art = str(eintrag[1] or '')
@@ -311,7 +361,7 @@ def belohnungen(wert):
             werte = [int(eintrag[3] or 0), int(eintrag[4] or 0), 1, int(eintrag[5] or 0)]
         else:
             werte = [0, 0, 1, 0]
-        liste.append([art, name] + werte)
+        liste.append([art, name] + werte + [ids.get((str(kennung), name), '')])
     return liste
 
 
@@ -525,11 +575,17 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
             # rw: rewards from the game's own reward table. Item entries are
             # [kind, name, quality, level, count, bound]; kind i = fixed,
             # c = one of several, t = title, v = virtue, tr = trait, e = emote.
-            **({'rw': belohnungen(field(record, 'rw'))} if field(record, 'rw') else {}),
+            **({'rw': belohnungen(field(record, 'rw'), record['id'], sprache)}
+               if field(record, 'rw') else {}),
             # Separate from exact objectives: actual base-world enemy placements.
             **({'h': [[int(p['gm']), float(p['lat']), float(p['lon']), str(p['step'])]
                       for p in step_list(field(record, 'h')) if int(p['gm']) in bekannt]}
                if field(record, 'h') else {}),
+            # hz: where the quests of a deed happen, for deeds that only say
+            # "complete quest X" and name no spot of their own.
+            **({'hz': [[int(p['gm']), float(p['lat']), float(p['lon']), str(p['step'])]
+                       for p in step_list(field(record, 'hz')) if int(p['gm']) in bekannt]}
+               if field(record, 'hz') else {}),
             'd': clean(record['d'] if 'd' in record else '',
                        TOKENS[sprache]['zaehler'], sprache),
             's': schritte,
@@ -544,12 +600,31 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
     karten = json.loads(Path(karten_datei).read_text(encoding='utf-8'))
     # Every map of karten.json stays: those holding objectives or quest givers and
     # the maps above them, which the tree shows as its levels.
+    innenkarten_anmelden(karten)
 
     print('%d quests, %d of them without a recorded target (no dot)' %
           (len(quests), ohne_ziel))
     print('%d single objectives, %d maps in the index; %d on a map missing from it'
           % (ziele, len(karten), verloren))
     return quests, karten
+
+
+def innenkarten_anmelden(karten):
+    """Interior maps (inns, jails, caves) from karten.json, so the tree can hang them.
+
+    They are not in the parchment tree, so GameMaps does not know them; the page
+    needs them in the same shape. Their parent is set later, from the area of the
+    quests that play there (kartenpfade)."""
+    spiel = spielkarten()
+    for karte in karten:
+        if karte['idx'] in spiel.maps:
+            continue
+        spiel.maps[karte['idx']] = {
+            'id': karte['idx'], 'image': int(karte.get('bild_id') or 0), 'factor': 1.0,
+            'west': karte['west'], 'south': karte['south'],
+            'east': karte['east'], 'north': karte['north'],
+            'name': karte.get('name', ''), 'region': 0, 'parent': None,
+            'bounds': True, 'overview': False, 'interior': True}
 
 
 def fortschritt_lesen(pfad):

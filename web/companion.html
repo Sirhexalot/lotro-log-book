@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Companion auslesen – LOTRO Log Book</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="gemeinsam.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TRC8BF95');
+</script>
+</head>
+<body data-seite="companion" class="seite-text">
+
+<header class="kopf">
+	<div class="kopf-innen">
+		<h1 data-t="produkt">LOTRO Log Book</h1>
+		<nav class="menue" id="menue" aria-label="Menü"></nav>
+		<nav class="sprachen" aria-label="Sprache">
+			<button type="button" data-lang="de" aria-pressed="true">DE</button>
+			<button type="button" data-lang="en" aria-pressed="false">EN</button>
+			<button type="button" data-lang="fr" aria-pressed="false">FR</button>
+		</nav>
+	</div>
+</header>
+
+<main class="seite">
+	<h2 data-t="cp_titel">Spielstand mit LOTRO Companion auslesen</h2>
+	<p data-t-html="cp_einleitung"></p>
+	<ul data-t-html="cp_brauchst"></ul>
+
+	<h2 data-t="cp_schritt1">1. Companion starten</h2>
+	<div class="reiter" role="tablist">
+		<button type="button" data-reiter="windows" aria-pressed="true">Windows</button>
+		<button type="button" data-reiter="mac" aria-pressed="false">macOS</button>
+	</div>
+	<div class="kasten reiter-inhalt" data-inhalt="windows">
+		<ol data-t-html="cp_windows"></ol>
+	</div>
+	<div class="kasten reiter-inhalt" data-inhalt="mac" hidden>
+		<ol data-t-html="cp_mac"></ol>
+		<code class="befehl" id="mac-befehl">for A in "$HOME/Applications" "/Applications"; do
+  S="$A/The Lord of the Rings Online.app/Contents/SharedSupport"; [ -d "$S" ] &amp;&amp; break
+done
+for C in "$HOME/Applications/LotRO Companion" "/Applications/LotRO Companion" "$HOME/Applications/"*/"LotRO Companion"; do
+  [ -d "$C/app" ] &amp;&amp; break
+done
+cd "$C/app" &amp;&amp; WINEPREFIX="$S/prefix" WINEMSYNC=1 WINEESYNC=1 WINEDEBUG=-all \
+  DYLD_FALLBACK_LIBRARY_PATH="$S/wine/lib" "$S/wine/bin/wine64" "../LotRO Companion.exe"</code>
+		<div class="zeile-knoepfe"><button type="button" id="mac-kopieren" data-t="cp_kopieren">Befehl kopieren</button></div>
+		<p class="schwach" data-t-html="cp_mac_warnung"></p>
+	</div>
+
+	<h2 data-t="cp_schritt2">2. Beim ersten Mal: LOTRO finden</h2>
+	<p data-t-html="cp_pfad"></p>
+
+	<h2 data-t="cp_schritt3">3. Den Charakter auslesen</h2>
+	<figure class="bild">
+		<img src="bild/companion-import-knopf.png" width="912" height="115" loading="lazy"
+			alt="Companion, Leiste Sonstiges mit dem Knopf Importieren von HdRO">
+		<figcaption data-t="cp_bild1"></figcaption>
+	</figure>
+	<ol data-t-html="cp_auslesen"></ol>
+	<p class="schwach" data-t-html="cp_admin"></p>
+
+	<h2 data-t="cp_schritt4">4. Deinen Spielstand finden</h2>
+	<p data-t-html="cp_dateien"></p>
+	<div class="kasten">
+		<div class="reiter-inhalt" data-inhalt="windows"><span data-t-html="cp_pfad_windows"></span></div>
+		<div class="reiter-inhalt" data-inhalt="mac" hidden><span data-t-html="cp_pfad_mac"></span></div>
+	</div>
+
+	<h2 data-t="cp_schritt5">5. Zurück zur Importseite</h2>
+	<p data-t-html="cp_import"></p>
+	<p data-t="cp_mehrere"></p>
+	<p class="schwach" data-t="cp_wiederholen"></p>
+	<div class="zeile-knoepfe">
+		<a class="knopf-gold" data-ziel="spielstand.html" href="spielstand.html?lang=de" data-t="cp_weiter">Zur Importseite</a>
+	</div>
+
+	<h2 data-t="cp_fragen">Wenn es klemmt</h2>
+	<div data-t-html="cp_faq"></div>
+</main>
+
+<script src="texte.js"></script>
+<script src="texte-spielstand.js"></script>
+<script src="texte-logbuch.js"></script>
+<script src="texte-site.js"></script>
+<script src="texte-companion.js"></script>
+<script src="sprache.js"></script>
+<script src="speicher.js"></script>
+<script src="menue.js"></script>
+<script src="anleitung.js"></script>
+</body>
+</html>

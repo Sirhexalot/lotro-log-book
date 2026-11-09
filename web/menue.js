@@ -1,5 +1,11 @@
-/* Menu bar shared by every page of the LOTRO Log Book: the pages and the
- * character switch. Needs texte.js, sprache.js (MQL_T) and speicher.js first.
+/* Menu bar shared by every page of the LOTRO Log Book.
+ *
+ * Two rows with two jobs. The top row is identity: the name, the search and the
+ * character you are looking at. The bottom row is content: the pages themselves,
+ * plus the plugin at its quiet right end. Search sits above because it is a tool,
+ * the character above because it is a state, not a page.
+ *
+ * Needs texte.js, sprache.js (MQL_T) and speicher.js first.
  */
 (function () {
 	'use strict';
@@ -9,6 +15,21 @@
 	var speicher = window.MQL_SPEICHER;
 	var ziel = document.getElementById('menue');
 	if (!ziel) { return; }
+
+	// One fixed column inside the full-width bar: .kopf carries background and
+	// line, .kopf-innen the content. Created here where the page has none, so
+	// every page has the same header structure.
+	var kopf = document.querySelector('.kopf');
+	var behaelter = kopf;
+	if (kopf) {
+		behaelter = kopf.querySelector(':scope > .kopf-innen');
+		if (!behaelter) {
+			behaelter = document.createElement('div');
+			behaelter.className = 'kopf-innen';
+			while (kopf.firstChild) { behaelter.appendChild(kopf.firstChild); }
+			kopf.appendChild(behaelter);
+		}
+	}
 
 	var seite = document.body.getAttribute('data-seite') || '';
 	if (seite === 'karte' && window.MQL_ART === 'taten') { seite = 'taten'; }
@@ -32,24 +53,180 @@
 		titel.appendChild(logo);
 	}
 
-	[
-		{ seite: 'karte', href: 'index.html?lang=' + sprache, text: t('menue_karte') },
-		{ seite: 'taten', href: 'index.html?art=taten&lang=' + sprache, text: t('menue_taten') },
-		{ seite: 'ruf', href: 'ruf.html?lang=' + sprache, text: t('menue_ruf') },
-		{ seite: 'handwerk', href: 'handwerk.html?lang=' + sprache, text: t('menue_handwerk') },
-		{ seite: 'belohnungen', href: 'belohnungen.html?lang=' + sprache, text: t('menue_belohnungen') },
-		{ seite: 'suche', href: 'suche.html?lang=' + sprache, text: t('menue_suche') },
-		{ seite: 'spielstand', href: 'spielstand.html?lang=' + sprache, text: t('menue_spielstand') }
-	].forEach(function (punkt) {
+	// Four families, one row. Their tabs sit in a second line below, so the
+	// header never grows when a content type is added (see README, navigation).
+	var SEGMENT = {
+		de: { gegenstand: 'gegenstand', beruf: 'beruf', titel: 'titel', tugend: 'tugend' },
+		en: { gegenstand: 'item', beruf: 'profession', titel: 'title', tugend: 'virtue' },
+		fr: { gegenstand: 'objet', beruf: 'metier', titel: 'titre', tugend: 'vertu' }
+	}[sprache] || {};
+	function pfad(art) { return '/' + sprache + '/' + (SEGMENT[art] || art) + '/'; }
+	function seiten(url) {
+		var adresse = String(url || '');
+		return adresse.indexOf('index.html') >= 0 ? (adresse.indexOf('art=taten') >= 0 ? 'taten' : 'karte')
+			: adresse.replace(/[^a-z]/g, '').slice(0, 12);
+	}
+
+	var FAMILIEN = [
+		{ key: 'welt', text: t('nav_welt'), href: 'index.html?lang=' + sprache, tab: [
+			{ seite: 'karte', href: 'index.html?lang=' + sprache, text: t('menue_karte'), desc: 'd_karte' },
+			{ seite: 'taten', href: 'index.html?art=taten&lang=' + sprache, text: t('menue_taten'), desc: 'd_taten' },
+			{ seite: 'reise', href: 'reise.html?lang=' + sprache, text: t('menue_reise'), desc: 'd_reise' }] },
+		{ key: 'gegenstaende', text: t('nav_gegenstaende'), href: 'gegenstaende.html?lang=' + sprache, tab: [
+			{ seite: 'gegenstand', href: 'gegenstaende.html?lang=' + sprache, text: t('menue_gegenstaende'), desc: 'd_gegenstand' },
+			{ seite: 'handwerk', href: 'handwerk.html?lang=' + sprache, text: t('menue_handwerk'), desc: 'd_handwerk' },
+			{ seite: 'beruf', href: pfad('beruf'), text: t('menue_berufe'), desc: 'd_beruf' }] },
+		{ key: 'erfolge', text: t('nav_erfolge'), href: 'belohnungen.html?lang=' + sprache, tab: [
+			{ seite: 'titel', href: pfad('titel'), text: t('menue_titel'), desc: 'd_titel' },
+			{ seite: 'tugend', href: pfad('tugend'), text: t('menue_tugenden'), desc: 'd_tugend' },
+			{ seite: 'ruf', href: 'ruf.html?lang=' + sprache, text: t('menue_ruf'), desc: 'd_ruf' }] },
+		{ key: 'charakter', text: t('nav_charakter'), href: 'spielstand.html?lang=' + sprache, tab: [
+			{ seite: 'spielstand', href: 'spielstand.html?lang=' + sprache, text: t('menue_fortschritt'), desc: 'd_fortschritt' },
+			{ seite: 'beruf', href: pfad('beruf'), text: t('menue_meine_berufe'), desc: 'd_meine_berufe' },
+			{ seite: 'ruf', href: 'ruf.html?lang=' + sprache, text: t('menue_mein_ruf'), desc: 'd_mein_ruf' }] }
+	];
+
+	// Which family the current page belongs to.
+	var ZUORDNUNG = { karte: 'welt', taten: 'welt', reise: 'welt', gegenstand: 'gegenstaende',
+		handwerk: 'gegenstaende', beruf: 'gegenstaende', titel: 'erfolge', tugend: 'erfolge',
+		ruf: 'erfolge', belohnungen: 'erfolge', spielstand: 'charakter', plugin: 'charakter' };
+	var familie = ZUORDNUNG[seite] || 'welt';
+
+	FAMILIEN.forEach(function (gruppe) {
+		// Each family carries its own tabs as a flyout, so the second level is
+		// one hover away without pushing the header taller.
+		var feld = document.createElement('span');
+		feld.className = 'familie-feld';
 		var link = document.createElement('a');
-		link.href = punkt.href;
-		link.textContent = punkt.text;
-		if (punkt.seite === seite) { link.setAttribute('aria-current', 'page'); }
-		ziel.appendChild(link);
+		link.href = gruppe.href;
+		link.textContent = gruppe.text;
+		if (gruppe.key === familie) { link.setAttribute('aria-current', 'page'); }
+		feld.appendChild(link);
+		if (gruppe.tab.length > 1) {
+			var flieger = document.createElement('span');
+			flieger.className = 'familie-flieger';
+			gruppe.tab.forEach(function (punkt) {
+				var a = document.createElement('a');
+				a.href = punkt.href;
+				var name = document.createElement('strong');
+				name.textContent = punkt.text;
+				var beschreibung = document.createElement('span');
+				beschreibung.textContent = t(punkt.desc || 'd_karte');
+				a.appendChild(name);
+				a.appendChild(beschreibung);
+				if (punkt.href === gruppe.href) { a.className = 'selbst'; }
+				if (punkt.seite === seite) { a.setAttribute('aria-current', 'page'); }
+				flieger.appendChild(a);
+			});
+			feld.appendChild(flieger);
+		}
+		ziel.appendChild(feld);
 	});
 
-	// Phones get a burger button instead of a wrapped menu line.
-	var kopf = document.querySelector('.kopf');
+	// Search: the map page has its own field with results, every other page gets
+	// the way there. The search page itself needs neither.
+	// The start page carries its own wide search field; a second one in the
+	// header would only compete with it.
+	if (behaelter && !document.getElementById('suche') && seite !== 'suche'
+			&& seite !== 'start' && !document.querySelector('.suche-start')) {
+		var suchlink = document.createElement('a');
+		suchlink.className = 'suchen-knopf';
+		suchlink.href = 'suche.html?lang=' + sprache;
+		suchlink.textContent = t('menue_suche_kurz');
+		behaelter.appendChild(suchlink);
+	}
+
+	// Character: a state, not a page. It goes first in the top row next to the
+	// way to change it.
+	var charakter = document.createElement('div');
+	charakter.className = 'charakter';
+	if (speicher) {
+		var feld = document.createElement('label');
+		feld.className = 'charakterwahl';
+		var beschriftung = document.createElement('span');
+		beschriftung.textContent = t('charakter');
+		var auswahl = document.createElement('select');
+		auswahl.id = 'charakter';
+		var ohne = document.createElement('option');
+		var alle = speicher.alle();
+		var aktiv = speicher.aktiv();
+		ohne.value = '';
+		ohne.textContent = alle.length ? t('ohne_spielstand') : t('kein_charakter');
+		auswahl.appendChild(ohne);
+		alle.forEach(function (eintrag) {
+			var option = document.createElement('option');
+			option.value = eintrag.key;
+			option.textContent = eintrag.name + (eintrag.server ? ' · ' + eintrag.server : '');
+			if (aktiv && aktiv.key === eintrag.key) { option.selected = true; }
+			auswahl.appendChild(option);
+		});
+		auswahl.addEventListener('change', function () {
+			speicher.setzeAktiv(auswahl.value || null);
+			window.location.reload();
+		});
+		feld.appendChild(beschriftung);
+		feld.appendChild(auswahl);
+		charakter.appendChild(feld);
+		// How old is the imported progress? A clock next to the character says it
+		// without opening the import page; the colour is the whole message.
+		if (aktiv) { charakter.appendChild(standsalter(aktiv)); }
+	}
+	/** Lucide "clock", coloured by the age of the imported progress. */
+	function tageSeit(datum) {
+		if (!datum) { return null; }
+		var tag = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datum);
+		if (!tag) { return null; }
+		var damals = Date.UTC(Number(tag[1]), Number(tag[2]) - 1, Number(tag[3]));
+		var heute = new Date();
+		var jetzt = Date.UTC(heute.getFullYear(), heute.getMonth(), heute.getDate());
+		return Math.max(0, Math.round((jetzt - damals) / 86400000));
+	}
+
+	function standsalterText(tage) {
+		if (tage === 0) { return t('alter_heute'); }
+		if (tage === 1) { return t('alter_gestern'); }
+		return t('alter_vor_tagen').replace('%s', String(tage));
+	}
+
+	function standsalterFarbe(tage) {
+		if (tage <= 3) { return 'frisch'; }
+		if (tage <= 14) { return 'mittel'; }
+		return 'alt';
+	}
+
+	function standsalterSvg() {
+		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+			'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+			'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+	}
+
+	/** Small link to the import page, showing when the progress was read. */
+	function standsalter(eintrag) {
+		var tage = tageSeit(eintrag.date);
+		var link = document.createElement('a');
+		link.className = 'standsalter' + (tage === null ? ' unbekannt' : ' ' + standsalterFarbe(tage));
+		link.href = 'spielstand.html?lang=' + sprache;
+		link.innerHTML = standsalterSvg();
+		if (tage === null) {
+			link.title = t('alter_unbekannt');
+			link.setAttribute('aria-label', t('alter_unbekannt'));
+		} else {
+			var text = t('alter_import') + ': ' + eintrag.date + ' · ' + standsalterText(tage);
+			link.title = text;
+			link.setAttribute('aria-label', text);
+		}
+		return link;
+	}
+
+	var importieren = document.createElement('a');
+	importieren.className = 'importieren';
+	importieren.href = 'spielstand.html?lang=' + sprache;
+	importieren.textContent = t('menue_import_kurz');
+	if (seite === 'spielstand') { importieren.setAttribute('aria-current', 'page'); }
+	charakter.appendChild(importieren);
+	if (behaelter) { behaelter.appendChild(charakter); }
+
+	// Phones get a burger button: everything but the search waits behind it.
 	if (kopf && ziel) {
 		var knopf = document.createElement('button');
 		knopf.type = 'button';
@@ -64,6 +241,11 @@
 			knopf.setAttribute('aria-expanded', String(offen));
 		});
 	}
+
+	// Links written without a language in the page take the current one.
+	Array.prototype.forEach.call(document.querySelectorAll('a[data-ziel]'), function (link) {
+		link.href = link.getAttribute('data-ziel') + '?lang=' + sprache;
+	});
 
 	// One pane at a time on phones: list, map or details.
 	var reiter = document.getElementById('mobil-reiter');
@@ -97,31 +279,4 @@
 	// comes from the address, the stored choice or the browser anyway.
 	var sprachen = document.querySelector('.sprachen');
 	if (sprachen && sprachen.parentNode !== footer) { footer.appendChild(sprachen); }
-	if (!speicher) { return; }
-	var alle = speicher.alle();
-	var feld = document.createElement('label');
-	feld.className = 'charakterwahl';
-	var beschriftung = document.createElement('span');
-	beschriftung.textContent = t('charakter');
-	var auswahl = document.createElement('select');
-	auswahl.id = 'charakter';
-	var ohne = document.createElement('option');
-	ohne.value = '';
-	ohne.textContent = alle.length ? t('ohne_spielstand') : t('kein_charakter');
-	auswahl.appendChild(ohne);
-	var aktiv = speicher.aktiv();
-	alle.forEach(function (eintrag) {
-		var option = document.createElement('option');
-		option.value = eintrag.key;
-		option.textContent = eintrag.name + (eintrag.server ? ' · ' + eintrag.server : '');
-		if (aktiv && aktiv.key === eintrag.key) { option.selected = true; }
-		auswahl.appendChild(option);
-	});
-	auswahl.addEventListener('change', function () {
-		speicher.setzeAktiv(auswahl.value || null);
-		window.location.reload();
-	});
-	feld.appendChild(beschriftung);
-	feld.appendChild(auswahl);
-	ziel.appendChild(feld);
 })();

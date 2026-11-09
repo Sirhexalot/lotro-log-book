@@ -1,0 +1,36 @@
+{# Shared page shell for every catalogue page.
+   The markup mirrors what the static generator wrote, so the switch from
+   files to PHP does not change a single visible detail. #}
+<!doctype html>
+<html lang="{{ lang }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ page_seo.title }} – LOTRO Log Book</title><meta name="description" content="{{ page_seo.description }}">
+<link rel="canonical" href="{{ base }}{{ canonical_url }}">
+{% for alt in alternates %}<link rel="alternate" hreflang="{{ alt.lang }}" href="{{ base }}{{ alt.url }}">
+{% endfor %}<meta property="og:type" content="website">
+<meta property="og:site_name" content="LOTRO Log Book">
+<meta property="og:title" content="{{ page_seo.title }} – LOTRO Log Book">
+<meta property="og:description" content="{{ page_seo.description }}">
+<meta property="og:url" content="{{ base }}{{ canonical_url }}">
+<meta property="og:locale" content="{{ og_locale }}">
+<meta property="og:image" content="{{ base }}/bild/vorschau-{{ lang }}.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ og_image_alt }}">
+<meta name="twitter:card" content="summary_large_image">
+{{ tracking|raw }}
+{{ styles|raw }}<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<noscript><style>.kopf .menue,.kopf .charakter{display:flex}.menue-knopf{display:none}</style></noscript>
+</head><body class="seite-text katalog-seite" data-art="{{ kind }}" data-katalog-texte="{{ katalog_texte }}">
+<header class="kopf"><div class="kopf-innen">
+<a class="katalog-marke" href="{{ start_page }}">LOTRO Log Book</a>
+<a class="suchen-knopf" href="/suche.html?lang={{ lang }}">{{ w.search }}</a>
+<button class="menue-knopf" type="button" aria-label="{{ w.menu }}" aria-controls="menue" aria-expanded="false">☰</button>
+<nav class="menue" id="menue">{{ menu|raw }}</nav>
+
+<div class="charakter"><label class="charakterwahl" hidden><select id="katalog-charakter" aria-label="{{ w.none }}"></select></label><a href="/spielstand.html?lang={{ lang }}" class="importieren">{{ w.import_ }}</a></div>
+</div></header>
+<main class="katalog-inhalt"><nav aria-label="Breadcrumb" class="katalog-pfad">{{ crumbs|raw }}</nav>
+{% block inhalt %}{% endblock %}</main>
+<footer><p>{{ legal|raw }} · {{ privacy|raw }}</p><nav aria-label="Languages">{{ languages|raw }}</nav></footer>
+{{ scripts|raw }}
+</body></html>

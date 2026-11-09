@@ -57,10 +57,27 @@ def baue(katalog_dir, sprache):
             rows.append([kind, ident, name, zone, level])
 
     belohnungen = js_datei(HIER / 'web' / ('belohnungen-%s.js' % sprache), 'MQL_BELOHNUNGEN')
-    for name, _quellen in belohnungen['t']:
-        rows.append(['t', '', name, '', ''])
-    for ident, name, _q, level, _b, _s in belohnungen['g']:
-        rows.append(['g', ident, name, '', level])
+    # Titles and virtues: build_titel.py matched them to IDs where the join is
+    # unambiguous. Entries without an ID stay searchable but lead to the index.
+    for art, datei, buchstabe in (('t', 'titel.json', 't'), ('v', 'tugenden.json', 'v')):
+        quelle = HIER / 'daten' / datei
+        mit_id = {}
+        if quelle.is_file():
+            for ident, eintrag in json.loads(quelle.read_text(encoding='utf-8'))['eintraege'].items():
+                name = (eintrag['n'].get(sprache) or eintrag['n'].get('en') or '').strip()
+                if name:
+                    mit_id[name] = ident
+        for name, _quellen in belohnungen[art]:
+            rows.append([buchstabe, mit_id.get(name, ''), name, '', ''])
+
+    # Items come from the merged namespace (build_items.py): equipment, reward
+    # items and crafting items in one list with one ID.
+    gegenstaende = json.loads((HIER / 'daten' / 'items.json').read_text(encoding='utf-8'))['items']
+    for ident, eintrag in gegenstaende.items():
+        name = (eintrag['n'].get(sprache) or eintrag['n'].get('en') or '').strip()
+        if not name:
+            continue
+        rows.append(['g', ident, name, (eintrag.get('kat') or '').lower(), eintrag.get('l') or ''])
 
     rezepte = js_datei(HIER / 'web' / ('rezepte-%s.js' % sprache), 'MQL_REZEPTE')['r']
     seen = set()

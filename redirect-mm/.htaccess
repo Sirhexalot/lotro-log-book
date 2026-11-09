@@ -4,6 +4,33 @@ RewriteEngine On
 RewriteCond %{HTTP_HOST} ^mm\.sirhexalot\.de$ [NC]
 RewriteRule ^(.*)$ https://llb.sirhexalot.de/$1 [R=301,L]
 
+# A local error document preserves HTTP 404 and applies to all subdirectories.
+ErrorDocument 404 /404.html
+
+# Stable entity URLs; flat HTML storage avoids one directory per game record.
+# Exactly one public form per page, the trailing-slash URL: the flat file and the
+# form without the slash are sent there with 301, so search engines never see
+# three addresses for the same entity.
+# BEGIN LLB ENTITY URLS
+# Filtered item lists have deeper paths; only rewrite to files that exist.
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(de|en|fr)/(.+)\.html$ /$1/$2/ [R=301,END]
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(de|en|fr)/(.+[^/])$ /$1/$2/ [R=301,END]
+RewriteCond %{DOCUMENT_ROOT}/$1/$2.html -f
+RewriteRule ^(de|en|fr)/(.+)/$ $1/$2.html [END]
+RewriteRule ^(de|en|fr)/(aufgabe|tat|gegenstand|gebiet|region|beruf|rezept|handwerk|katalog|titel|tugend|quest|deed|item|area|profession|recipe|crafting|catalogue|title|virtue|quete|prouesse|objet|zone|metier|recette|artisanat|titre|vertu)/seite/([0-9]+)\.html$ /$1/$2/seite/$3/ [R=301,END]
+RewriteRule ^(de|en|fr)/(aufgabe|tat|gegenstand|gebiet|region|beruf|rezept|handwerk|katalog|titel|tugend|quest|deed|item|area|profession|recipe|crafting|catalogue|title|virtue|quete|prouesse|objet|zone|metier|recette|artisanat|titre|vertu)/([0-9A-Za-z_]+)\.html$ /$1/$2/$3/ [R=301,END]
+RewriteRule ^(de|en|fr)/(aufgabe|tat|gegenstand|gebiet|region|beruf|rezept|handwerk|katalog|titel|tugend|quest|deed|item|area|profession|recipe|crafting|catalogue|title|virtue|quete|prouesse|objet|zone|metier|recette|artisanat|titre|vertu)/seite/([0-9]+)$ /$1/$2/seite/$3/ [R=301,END]
+RewriteRule ^(de|en|fr)/(aufgabe|tat|gegenstand|gebiet|region|beruf|rezept|handwerk|katalog|titel|tugend|quest|deed|item|area|profession|recipe|crafting|catalogue|title|virtue|quete|prouesse|objet|zone|metier|recette|artisanat|titre|vertu)/([0-9A-Z_]+)$ /$1/$2/$3/ [R=301,END]
+RewriteRule ^(de|en|fr)/(aufgabe|tat|gegenstand|gebiet|region|beruf|rezept|handwerk|katalog|titel|tugend|quest|deed|item|area|profession|recipe|crafting|catalogue|title|virtue|quete|prouesse|objet|zone|metier|recette|artisanat|titre|vertu)/seite/([0-9]+)/$ $1/$2/seite/$3.html [END]
+RewriteRule ^(de|en|fr)/(aufgabe|tat|gegenstand|gebiet|region|beruf|rezept|handwerk|katalog|titel|tugend|quest|deed|item|area|profession|recipe|crafting|catalogue|title|virtue|quete|prouesse|objet|zone|metier|recette|artisanat|titre|vertu)/([0-9A-Z_]*[a-z][0-9A-Za-z_]*)/?$ /kennung.php [END]
+RewriteRule ^(de|en|fr)/(aufgabe|tat|gegenstand|gebiet|region|beruf|rezept|handwerk|katalog|titel|tugend|quest|deed|item|area|profession|recipe|crafting|catalogue|title|virtue|quete|prouesse|objet|zone|metier|recette|artisanat|titre|vertu)/([0-9A-Za-z_]+)/?$ $1/$2/$3.html [END,NC]
+# Catalogue IDs are uppercase. An ID containing a lowercase letter goes to
+# kennung.php, which answers 301 to the stored address or the real 404 page:
+# the host does not load mod_speling, and Apache cannot change case.
+# END LLB ENTITY URLS
+
 # Compress text: the data files shrink from 17 MB to under 4 MB.
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/css text/plain application/javascript text/javascript application/json image/svg+xml
