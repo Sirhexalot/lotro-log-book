@@ -44,6 +44,19 @@ final class Data
         return $entities[$identifier] ?? null;
     }
 
+    /**
+     * One overview page model ("de/aufgabe/seite/2/"), or null.
+     *
+     * List pages are addressed by their own path: the catalogue has too many
+     * shapes (type index, pagination, category, quality) for a URI pattern.
+     */
+    public function listPage(string $key): ?array
+    {
+        $file = $this->root . '/page-list/' . self::shard($key) . '.json';
+        $pages = $this->read($file)['pages'] ?? [];
+        return $pages[$key] ?? null;
+    }
+
     public function maps(string $lang): array
     {
         return $this->read($this->root . '/' . $lang . '/maps.json')['maps'] ?? [];

@@ -61,11 +61,17 @@ kleine Datei und läuft nicht durch den Katalog.
 
 - Grundgerüst, Router und gemeinsame Hülle (Kopfzeile, Menü, Breadcrumb,
   Fußzeile, Assets mit Versionsstempel, Tracking aus dem gebauten Index).
-- **Aufgabenseiten** in DE/EN/FR: Chips, Beschreibung, Ort mit Karte und
-  Koordinaten, Auftraggeber, Gebietsweg, Voraussetzungen, Belohnungen,
-  „wird vorausgesetzt von“, Zusammenhang, Ziele hinter `<details>`.
-- **Tatenseiten** in DE/EN/FR: Chips, Ort, Tat-Art, Kategorie, Belohnungen
-  (mit Titel/Tugend-Symbol), Nachbartaten nach Gebiet und Art.
+- **Aufgabenseiten**: Chips, Beschreibung, Ort mit Karte und Koordinaten,
+  Auftraggeber, Gebietsweg, Voraussetzungen, Belohnungen, „wird vorausgesetzt
+  von“, Zusammenhang, Ziele hinter `<details>`.
+- **Tatenseiten**: Chips, Ort, Tat-Art, Kategorie, Belohnungen mit
+  Titel-/Tugend-Symbol, Nachbartaten nach Gebiet und Art.
+- **Titel-, Tugend-, Rezept-, Berufs-, Gebiets- und Regionsseiten.**
+- **Gegenstandsseiten** (52.798 je Sprache): Werte, Boni, Vorkommen, Quellen,
+  Herstellung, Verwendung, Set-Zusammenhang, Weg in die Gegenstandssuche.
+- **Listen und Übersichten**: Typindizes mit 200 Einträgen je Seite,
+  Seitennavigation, Gegenstände nach Art und Seltenheit (auch kombiniert),
+  Handwerks- und Katalogseite. Insgesamt 3.252 Seiten in drei Sprachen.
 - Titel, Beschreibung, Canonical, `hreflang`, Open Graph und Twitter-Karte
   werden wie bisher erzeugt.
 - 301 für `.html` und für die Adresse ohne Schrägstrich, 301 für
@@ -73,23 +79,35 @@ kleine Datei und läuft nicht durch den Katalog.
 
 Prüfung: `tests/test_php_parity.py` vergleicht die PHP-Ausgabe tokenweise mit
 der Ausgabe des bisherigen Generators (Überschriften, Texte, Links, Attribute,
-Reihenfolge). Geprüfte Aufgabenseiten in DE/EN/FR sind **abweichungsfrei**;
-Tatenseiten ebenso.
+Reihenfolge).
+
+### Befunde aus dem Abgleich
+
+Der Abgleich hat mehr gefunden als Formatierungsfehler:
+
+- **Seltenheitsstufen waren verdreht** (1 = legendär, nicht gewöhnlich).
+- **Platzhalter im Namen** (`Ernte[n]`) fehlten in der Bereinigung.
+- **Zwei tote Pfade im alten Bau**: „Ausprägungen“ (Varianten) und verlinkte
+  Set-Teile werden nie gerendert, weil der Zugriff auf `model['all']` ins Leere
+  läuft. Für die Parität bleibt das so; die Aktivierung ist eine eigene
+  Entscheidung nach der Umschaltung.
+- **Leere Überschrift „Werte“** auf 10 von 52.802 Gegenstandsseiten – ein
+  Defekt des alten Baus, der bewusst mit übernommen und danach korrigiert wird.
+- **Zwei französische Beschriftungen** standen fest im Generator
+  (`Utilisation`, `Ressources`) statt in den Sprachdateien.
 
 ## Noch offen (Reihenfolge der weiteren Arbeit)
 
-1. **Gegenstandsseiten** (52.798 je Sprache, größter Block): Werte, Stats,
-   Varianten, Quellen, Herstellung, Verwendung, Vorkommen.
-2. **Rezeptseiten** und **Berufsseiten**.
-3. **Titel-** und **Tugendseiten**.
-4. **Gebiets- und Regionsseiten**.
-5. **Listen- und Übersichtsseiten** (200 Einträge je Seite, Seitennavigation,
-   Gegenstandsliste mit Verweis auf die Suche).
-6. **Sitemaps aus PHP** (Index + Teil-Sitemaps, aus dem Routenverzeichnis).
-7. **Umschaltung**: `.htaccess`-Block, damit PHP die Katalogpfade bedient;
-   alter Bestand bleibt als Rückweg liegen.
-8. **Vollständiger Abgleich** aller Seiten und Sitemaps gegen den bisherigen
-   Stand, dann Browserprüfung DE/EN/FR, Desktop und Mobil.
+1. **Anwendungsseiten in Twig**: Karte, Suche, Gegenstandssuche, Handwerk,
+   Spielstand, Companion, Plugin, Reise, 404 — Hülle aus PHP, JavaScript
+   unverändert, gleiche Adressen.
+2. **Sitemaps aus PHP** (Index + Teil-Sitemaps aus demselben Routenverzeichnis).
+3. **Härten**: fataler Fehler nie als HTTP 200, strenge Prüfung von Typ und ID,
+   HEAD-Anfragen, Cache-Kopfzeilen, Datenverzeichnis außerhalb des Webroots.
+4. **Umschaltung**: markierter `.htaccess`-Block, alter Bestand bleibt als
+   Rückweg liegen.
+5. **Vollständiger Abgleich** aller Seiten und Sitemaps, dann Browserprüfung
+   DE/EN/FR, Desktop und Mobil.
 
 ## Abnahme vor der Veröffentlichung
 
@@ -101,9 +119,16 @@ Tatenseiten ebenso.
 - Startseite, Karte, Suche, Import und Spielstand unverändert nutzbar.
 - Rückweg auf den alten Stand erprobt.
 
-## iCloud
+## Arbeitsort
 
-Das Repository liegt in `~/Documents` und damit in iCloud. Nicht zuletzt
+Das Repository liegt seit 09.11.2026 lokal unter `~/Developer/lotro-log-book`;
+der frühere iCloud-Ordner ist nur noch Lesestand. `vendor/` gehört ins Repo,
+weil Composer den Projektpfad ins Autoload schreibt – liegt es außerhalb,
+lauten die Klassenpfade auf ein anderes Verzeichnis.
+
+## iCloud (Historie)
+
+Der frühere Stand lag in `~/Documents` und damit in iCloud. Nicht zuletzt
 benutzte Dateien sind dort nur Platzhalter (`compressed,dataless`); Lesen
 erzwingt einen Download. Gemessen am 09.11.2026: **1534 ms je Datei** in
 `phpdata` gegenüber **0,2 ms** auf lokalem Speicher, `daten/*.json` 2270 ms,
@@ -112,10 +137,9 @@ und ein von iCloud evakuiertes `vendor/` (Composer-Fatals).
 
 Deshalb:
 
-- erzeugte Daten, `vendor/` und Twig-Cache liegen außerhalb: `~/.cache/llb-php/`
-  (`LLB_DATA`, `LLB_VENDOR`, `LLB_CACHE`),
-- das Projekt wird nach `~/Developer/lotro-log-book` verschoben; iCloud dient
-  nur noch als Sicherung.
+- erzeugte Daten und Twig-Cache liegen außerhalb: `~/.cache/llb-php/`
+  (`LLB_DATA`, `LLB_CACHE`); `vendor/` bleibt im Repo,
+- `Companion-Test` und `MagicQuestLog` bleiben in iCloud und werden nur gelesen.
 
 ## Lokal ausprobieren
 

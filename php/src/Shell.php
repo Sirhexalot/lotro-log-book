@@ -104,7 +104,9 @@ final class Shell
             ]],
         ];
 
-        $current = $this->catalogue->famille()[$kind] ?? 'welt';
+        // The generator only marks a family that is really mapped to the type;
+        // 'craft' has none, so no family link is current there.
+        $current = $this->catalogue->famille()[$kind] ?? null;
         $out = '';
         foreach ($families as [$key, $target, $text, $tabs]) {
             $flyout = '';

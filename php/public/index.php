@@ -58,10 +58,29 @@ if ($result['status'] === 404) {
     return;
 }
 
+if (isset($result['sitemap'])) {
+    $sitemaps = new Sitemap($dataDir, $base);
+    $xml = $result['sitemap'] === '/sitemap.xml'
+        ? $sitemaps->index()
+        : $sitemaps->section($result['sitemap']);
+    if ($xml === null) {
+        http_response_code(404);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo 'Unbekannte Sitemap';
+        return;
+    }
+    header('Content-Type: application/xml; charset=utf-8');
+    header('Cache-Control: public, max-age=3600');
+    echo $xml;
+    return;
+}
+
 $lang = explode('/', trim($path, '/'))[0];
 $shell = new Shell($catalogue, $data, $webRoot, $lang);
 $page = new Page($catalogue, $data, $shell, $view, $lang);
-$html = $page->render($result['kind'], $result['id']);
+$html = isset($result['list'])
+    ? $page->renderList($result['list'])
+    : $page->render($result['kind'], $result['id']);
 
 if ($html === null) {
     http_response_code(404);

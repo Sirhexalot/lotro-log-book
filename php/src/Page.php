@@ -69,6 +69,78 @@ final class Page
         return $this->view->render($template, $context);
     }
 
+    /**
+     * An overview page: same shell, list body from `entity/list.twig`.
+     *
+     * The model already carries its canonical address and its per-language
+     * alternates, because item sub-indexes have paths no rule can derive.
+     */
+    public function renderList(string $key): ?string
+    {
+        $page = $this->data->listPage($key);
+        if ($page === null) {
+            return null;
+        }
+        // Every overview model carries the same keys, so the template can
+        // stay free of `is defined` checks under strict_variables.
+        $page += ['intro' => '', 'entries' => [], 'sections' => [], 'links' => [],
+                  'nav' => null, 'search_hint' => null, 'foot_link' => null, 'symbol' => null];
+        $kind = $page['kind'];
+        $context = [
+            'lang' => $this->lang,
+            'kind' => $kind,
+            'w' => $this->w,
+            'page' => $page,
+            'page_seo' => $page['seo'],
+            'base' => $this->catalogue->base,
+            'canonical_url' => $page['canonical'],
+            'alternates' => array_map(
+                static fn (string $other, string $url): array => ['lang' => $other, 'url' => $url],
+                array_keys($page['alternates']),
+                $page['alternates']
+            ),
+            'og_locale' => ['de' => 'de_DE', 'en' => 'en_US', 'fr' => 'fr_FR'][$this->lang],
+            'og_image_alt' => [
+                'de' => 'Breeland-Karte mit Aufgabenmarkierungen',
+                'en' => 'Bree-land map with quest markers',
+                'fr' => 'Carte du Pays de Bree avec repères de quêtes',
+            ][$this->lang],
+            'tracking' => $this->shell->tracking(),
+            'styles' => $this->shell->styles(),
+            'scripts' => $this->shell->scripts(),
+            'menu' => $this->shell->menu($kind),
+            'start_page' => $this->shell->startPage(),
+            'katalog_texte' => $this->katalogTexte(),
+            'crumbs' => $this->listCrumbs($kind),
+            'languages' => $this->listLanguages($page),
+            'legal' => link_tag('/impressum.html?lang=' . $this->lang, $this->w['legal']),
+            'privacy' => link_tag('/datenschutz.html?lang=' . $this->lang, $this->w['privacy']),
+            'icon' => $this->shell->icon($page['symbol'] ?? ''),
+            'symbol_gross' => '',
+        ];
+        return $this->view->render('entity/list.twig', $context);
+    }
+
+    private function listCrumbs(string $kind): string
+    {
+        $parts = [];
+        foreach ($this->shell->crumbs($kind) as $crumb) {
+            $parts[] = $crumb['url'] === null
+                ? esc($crumb['text'])
+                : link_tag($crumb['url'], $crumb['text']);
+        }
+        return implode(' › ', $parts);
+    }
+
+    private function listLanguages(array $page): string
+    {
+        $parts = [];
+        foreach ($page['language_urls'] ?? $page['alternates'] as $other => $url) {
+            $parts[] = link_tag($url, strtoupper($other), ['hreflang' => $other, 'lang' => $other]);
+        }
+        return implode(' · ', $parts);
+    }
+
     private static function templateFor(string $kind): string
     {
         return match ($kind) {

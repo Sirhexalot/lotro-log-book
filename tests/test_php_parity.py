@@ -89,7 +89,18 @@ def php_render(url: str) -> str:
 
 
 def static_path(url: str) -> Path:
+    """Where the static generator put this page.
+
+    Detail pages are flat files (de/aufgabe/700005C0.html); overview pages are
+    index.html in their folder, pagination is seite/N.html.
+    """
     parts = url.strip('/').split('/')
+    if url.endswith('/'):
+        # Pagination and item sub-indexes are flat files, type indexes are not.
+        flach = STATIC.joinpath(*parts[:-1], parts[-1] + '.html')
+        if parts[-1].isdigit() or flach.is_file():
+            return flach
+        return STATIC.joinpath(*parts, 'index.html')
     return STATIC.joinpath(*parts[:-1], parts[-1] + '.html')
 
 

@@ -144,6 +144,35 @@ def write_shards(target: Path, lang: str, kind: str, records: dict) -> int:
     return len(shards)
 
 
+def write_sitemaps(target: Path, sections: dict) -> None:
+    """The URL set of every sitemap file, ready for PHP to render as XML."""
+    # Application pages stay files; the search and item pages are query driven
+    # and stay out of the sitemap, as before.
+    aus = {'404.html', 'suche.html', 'gegenstand.html', 'gegenstaende.html'}
+    seiten = sorted('/' + path.name for path in (HIER / 'web').glob('*.html')
+                    if path.name not in aus)
+    sections = dict(sections)
+    sections['/sitemap-seiten.xml'] = seiten
+    payload = {'schema': 1, 'sections': {name: urls for name, urls in sorted(sections.items())},
+               'index': sorted(sections)}
+    (target / 'sitemaps.json').write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+
+
+def write_list_shards(target: Path, pages: dict) -> int:
+    """Overview pages, keyed by full path ("de/aufgabe/seite/2/")."""
+    shards = defaultdict(dict)
+    for key, record in pages.items():
+        shards[shard_for(key)][key] = record
+    folder = target / 'page-list'
+    folder.mkdir(parents=True, exist_ok=True)
+    for shard, entries in shards.items():
+        payload = json.dumps({'pages': entries}, ensure_ascii=False,
+                             separators=(',', ':'), sort_keys=True)
+        (folder / ('%s.json' % shard)).write_text(payload, encoding='utf-8')
+    return len(shards)
+
+
 def write_pages(target: Path, lang: str, kind: str, pages: dict) -> int:
     """Render-ready view models, one shard per hash bucket.
 
@@ -285,6 +314,10 @@ def main() -> int:
         except json.JSONDecodeError:
             pass
 
+    # Overview pages of all languages are collected first: their shards are
+    # keyed by path, so writing per language would overwrite earlier shards.
+    listen: dict = {}
+    detail_routes: dict = {}
     for lang in languages:
         model = load_language(lang)
         data = language_data(model, lang)
@@ -310,7 +343,7 @@ def main() -> int:
         # the static generator (tools/php_viewmodel.py).
         sys.path.insert(0, str(HIER / 'tools'))
         from php_viewmodel import (ItemContext, ViewBuilder, area_view, deed_index,
-                                   deed_view, honor_view, item_view, members_index,
+                                   deed_view, honor_view, item_view, list_pages, members_index,
                                    profession_view, quest_view, recipe_view)
         builder = ViewBuilder(lang, model, maps)
         quest_pages = {ident: quest_view(builder, quest) for ident, quest in data['q'].items()}
@@ -356,10 +389,50 @@ def main() -> int:
         counts['page-p'] = len(profession_pages)
         write_pages(target, lang, 'p', profession_pages)
 
+        # Overview pages, addressed by their own path instead of an id.
+        lists = {lang + '/' + key: value for key, value in list_pages(builder, model, data).items()}
+        counts['page-list'] = len(lists)
+        listen.update(lists)
+        from php_viewmodel import route as _route
+        detail_routes[lang] = {}
+        for kind in ('q', 'd', 'i', 'area', 'region', 'p', 'recipe', 'title', 'virtue'):
+            ids = data[kind].keys()
+            segment = _route(lang, kind).strip('/').split('/')[1]
+            detail_routes[lang][segment] = sorted(_route(lang, kind, ident) for ident in ids)
+
         manifest['languages'][lang] = counts
         if not options.still:
             print('%s: %s' % (lang, ', '.join('%s %d' % (k, v) for k, v in counts.items())),
                   flush=True)
+
+    # Sitemaps come from the same page list the router serves, so they cannot
+    # drift from the catalogue. 45.000 URLs per file, as the static build.
+    if listen:
+        write_list_shards(target, listen)
+
+        sections: dict = defaultdict(list)
+        for key, page in listen.items():
+            lang, segment = page['canonical'].strip('/').split('/')[:2]
+            sections['/%s/%s/sitemap.xml' % (lang, segment)].append(page['canonical'])
+        for lang, kinds in detail_routes.items():
+            for segment, paths in kinds.items():
+                sections['/%s/%s/sitemap.xml' % (lang, segment)].extend(paths)
+
+        split: dict = {}
+        for name, urls in sections.items():
+            if len(urls) <= 45000:
+                split[name] = sorted(set(urls))
+                continue
+            unique = sorted(set(urls))
+            for number, start in enumerate(range(0, len(unique), 45000), 1):
+                split[name.replace('.xml', '-%d.xml' % number)] = unique[start:start + 45000]
+        write_sitemaps(target, split)
+        if not options.still:
+            print('sitemaps: %d Dateien, %d URLs' % (len(split), sum(len(u) for u in split.values())),
+                  flush=True)
+
+        if not options.still:
+            print('page-list gesamt: %d Seiten' % len(listen), flush=True)
 
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=1, sort_keys=True),
                              encoding='utf-8')

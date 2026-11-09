@@ -883,3 +883,172 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         'browse': browse,
         'seo': {'title': name, 'description': '%s: %s. %s' % (w['ilabel'], name, w['item_intro'])},
     }
+
+
+# --- lists and overview pages ------------------------------------------
+
+PAGE_SIZE = 200
+
+
+def page_route(lang: str, kind: str, number: int = 1) -> str:
+    base = route(lang, kind)
+    return base if number == 1 else base + 'seite/%d/' % number
+
+
+def _katalog():
+    """Constants of the static generator, imported once."""
+    global _KATALOG
+    if _KATALOG is None:
+        import build_katalogseiten
+        _KATALOG = build_katalogseiten
+    return _KATALOG
+
+
+_KATALOG = None
+
+
+def _entries(builder: ViewBuilder, kind: str, rows: list) -> list:
+    out = []
+    for ident, value in rows:
+        out.append({'url': route(builder.lang, kind, ident),
+                    'text': builder.name_of(kind, value),
+                    'icon': value.get('ic') if kind == 'i' else None})
+    return out
+
+
+def _sorted(builder: ViewBuilder, kind: str, rows) -> list:
+    return sorted(rows, key=lambda row: builder.name_of(kind, row[1]).casefold())
+
+
+def _nav(w, lang: str, kind: str, number: int, seiten: int, base: dict | None = None) -> dict:
+    """Pagination line, exactly as the generator writes it."""
+    ziel = (lambda n: base[lang] if n == 1 else base[lang] + 'seite/%d/' % n) if base \
+        else (lambda n: page_route(lang, kind, n))
+    return {
+        'prev': ziel(number - 1) if number > 1 else None,
+        'next': ziel(number + 1) if number < seiten else None,
+        'label': '%s %d / %d' % (w['page'], number, seiten),
+    }
+
+
+def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
+    """Every overview page of one language, keyed by its path without language.
+
+    Keys are relative to the language folder, e.g. "aufgabe/",
+    "aufgabe/seite/2/", "gegenstand/ruestung/selten/". The router only looks
+    the request path up; it does not rebuild the catalogue structure.
+    """
+    w, lang = builder.w, builder.lang
+    katalog = _katalog()
+    pilot = bool(model.get('pilot'))
+    intro = w['pilot'] if pilot else w['overview']
+    pages = {}
+
+    # Plain type indexes, 200 entries per page.
+    for kind in ('q', 'd', 'i', 'area', 'region', 'p', 'recipe', 'title', 'virtue'):
+        source = {'q': builder.quests, 'd': builder.deeds, 'i': builder.items,
+                  'area': data['area'], 'region': data['region'], 'p': data['p'],
+                  'recipe': {ident: row for ident, row in data['recipe'].items()},
+                  'title': data['title'], 'virtue': data['virtue']}[kind]
+        rows = _sorted(builder, kind, list(source.items()))
+        seiten = max(1, (len(rows) + PAGE_SIZE - 1) // PAGE_SIZE)
+        for number in range(1, seiten + 1):
+            teil = rows[(number - 1) * PAGE_SIZE:number * PAGE_SIZE]
+            titel = w[kind + 'list'] + (' – %s %d' % (w['page'], number) if number > 1 else '')
+            payload = {
+                'kind': kind,
+                'page': number,
+                'title': titel,
+                'canonical': page_route(lang, kind, number),
+                'intro': intro,
+                'seo': {'title': titel, 'description': w['overview']},
+                'alternates': {o: page_route(o, kind, number) for o in ('de', 'en', 'fr')},
+                'language_urls': {o: page_route(o, kind, number) for o in ('de', 'en', 'fr')},
+                'entries': _entries(builder, kind, teil),
+                'nav': _nav(w, lang, kind, number, seiten),
+                'symbol': None,
+            }
+            if kind == 'i' and number == 1:
+                payload['search_hint'] = {'url': '/gegenstaende.html?lang=' + lang,
+                                          'text': w['item_search']}
+            key = w[kind] + '/' + ('' if number == 1 else 'seite/%d/' % number)
+            pages[key] = payload
+
+    # Item sub-indexes: category, quality, and both at once.
+    gruppen = []
+    for art in ('ARMOUR', 'WEAPON', 'ITEM', ''):
+        zeilen = [(k, v) for k, v in data['i'].items() if (v.get('kat') or '') == art]
+        if not zeilen or (art == '' and gruppen):
+            continue
+        titel = w.get('kat_' + art.lower()) if art else w['ilist']
+        gruppen.append(({o: route(o, 'i') + katalog.ARTEN[art][o] + '/' for o in ('de', 'en', 'fr')},
+                        titel, zeilen))
+    gueten = {}
+    for k, v in data['i'].items():
+        wert = katalog.GUETE.get(str(v.get('q'))) or int(v.get('q') or 0)
+        if wert:
+            gueten.setdefault(wert, []).append((k, v))
+    for wert in sorted(gueten):
+        gruppen.append(({o: route(o, 'i') + katalog.WORDS[o]['qualityslug'] + '/'
+                         + katalog.GUETE_SLUG[wert][o] + '/' for o in ('de', 'en', 'fr')},
+                        w.get('guete_%d' % wert) or str(wert), gueten[wert]))
+    for art in ('ARMOUR', 'WEAPON', 'ITEM'):
+        for wert in sorted(gueten):
+            zeilen = [(k, v) for k, v in gueten[wert] if (v.get('kat') or '') == art]
+            if not zeilen:
+                continue
+            titel = '%s · %s' % (w.get('kat_' + art.lower()) or art,
+                                 w.get('guete_%d' % wert) or str(wert))
+            gruppen.append(({o: route(o, 'i') + katalog.ARTEN[art][o] + '/'
+                             + katalog.WORDS[o]['qualityslug'] + '/' + katalog.GUETE_SLUG[wert][o] + '/'
+                             for o in ('de', 'en', 'fr')}, titel, zeilen))
+
+    for pfade, titel, zeilen in gruppen:
+        zeilen = _sorted(builder, 'i', zeilen)
+        seiten = max(1, (len(zeilen) + PAGE_SIZE - 1) // PAGE_SIZE)
+        for number in range(1, seiten + 1):
+            teil = zeilen[(number - 1) * PAGE_SIZE:number * PAGE_SIZE]
+            adressen = {o: pfade[o] if number == 1 else pfade[o] + 'seite/%d/' % number
+                        for o in ('de', 'en', 'fr')}
+            key = adressen[lang].lstrip('/').split('/', 1)[1]
+            pages[key] = {
+                'kind': 'i',
+                'page': number,
+                'title': titel,
+                'seo': {'title': titel, 'description': '%s: %s' % (w['ilist'], titel)},
+                'canonical': adressen[lang],
+                'alternates': adressen,
+                'language_urls': {o: route(o, 'i') for o in ('de', 'en', 'fr')},
+                'entries': _entries(builder, 'i', teil),
+                'nav': _nav(w, lang, 'i', number, seiten, pfade) if seiten > 1 else None,
+                'symbol': 'gegenstand',
+                # Item sub-indexes carry no intro: the generator starts with the list.
+                'intro': '',
+            }
+
+    # Craft overview and the catalogue hub.
+    pages[w['craft'] + '/'] = {
+        'kind': 'craft', 'page': 1, 'title': w['craftlist'],
+        'seo': {'title': w['craftlist'], 'description': w['overview']},
+        'canonical': route(lang, 'craft'),
+        'alternates': {o: route(o, 'craft') for o in ('de', 'en', 'fr')},
+        'language_urls': {o: route(o, 'craft') for o in ('de', 'en', 'fr')},
+        'entries': [], 'nav': None, 'symbol': None, 'intro': intro,
+        'sections': [{'title': w['plist'],
+                      'entries': _entries(builder, 'p', _sorted(builder, 'p', list(data['p'].items())))}],
+        'links': [], 'foot_link': {'url': route(lang, 'recipe'), 'text': w['recipelist']},
+    }
+    hub = []
+    for kind in ('q', 'd', 'i', 'area', 'region', 'p', 'recipe', 'craft'):
+        label = w['craftlist'] if kind == 'craft' else w[kind + 'list']
+        hub.append({'url': route(lang, kind), 'text': label})
+    pages[w['catalog'] + '/'] = {
+        'kind': 'catalog', 'page': 1, 'title': w['cataloglabel'],
+        'seo': {'title': w['cataloglabel'], 'description': w['overview']},
+        'canonical': route(lang, 'catalog'),
+        'alternates': {o: route(o, 'catalog') for o in ('de', 'en', 'fr')},
+        'language_urls': {o: route(o, 'catalog') for o in ('de', 'en', 'fr')},
+        'entries': [], 'nav': None, 'symbol': None, 'intro': intro,
+        'sections': [], 'links': hub,
+    }
+    return pages
