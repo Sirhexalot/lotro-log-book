@@ -32,3 +32,8 @@ output/
 # Zugangsdaten und Upload-Stand
 *.conf
 *mql-upload*
+
+# PHP-Abhaengigkeiten und Zwischenstaende
+vendor/
+phpdata/
+phptmp/

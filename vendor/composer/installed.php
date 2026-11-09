@@ -3,7 +3,7 @@
         'name' => 'sirhexalot/lotro-log-book',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '8fe0d38fa8366a3c78a44b36ca2d89e6ae43a090',
+        'reference' => '9bcc3cbb16db3ed03c0baff34b2c40916e9e5b8f',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'sirhexalot/lotro-log-book' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '8fe0d38fa8366a3c78a44b36ca2d89e6ae43a090',
+            'reference' => '9bcc3cbb16db3ed03c0baff34b2c40916e9e5b8f',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

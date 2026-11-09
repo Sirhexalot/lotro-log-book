@@ -631,7 +631,7 @@ def profession_view(builder: ViewBuilder, key: str, entry: dict, recipes: list) 
 
 # --- items -------------------------------------------------------------
 
-QUALITY_BY_KEY = {1: 'COMMON', 2: 'UNCOMMON', 3: 'RARE', 4: 'INCOMPARABLE', 5: 'LEGENDARY'}
+QUALITY_BY_KEY = {1: 'LEGENDARY', 2: 'RARE', 3: 'INCOMPARABLE', 4: 'UNCOMMON', 5: 'COMMON'}
 QUALITY_NUMBER = {'COMMON': 1, 'UNCOMMON': 2, 'RARE': 3, 'INCOMPARABLE': 4, 'LEGENDARY': 5}
 
 
@@ -700,7 +700,7 @@ class ItemContext:
 
 def builder_name(builder: ViewBuilder, item: dict) -> str:
     names = item.get('n') or {}
-    return names.get(builder.lang) or names.get('en') or ''
+    return klarer_name(names.get(builder.lang) or names.get('en') or '')
 
 
 def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) -> dict:
@@ -733,9 +733,6 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         chips.append({'cls': '', 'text': w['unique']})
     if (details or {}).get('essenceSlots'):
         chips.append({'cls': '', 'text': '%s %s' % (w['essence_slots'], details['essenceSlots'])})
-    count = len(ctx.variants(item, ident)) + 1
-    if count > 1:
-        chips.append({'cls': '', 'text': w['variants_count'] % count})
 
     values = item.get('w') or {}
     armour = (details or {}).get('armour') or values.get('armour')
@@ -743,22 +740,29 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
     damage = (details or {}).get('damage') or values.get('damage')
     speed = (details or {}).get('speed') or values.get('speed')
     damage_type = (details or {}).get('damageType') or values.get('damageType')
+    def zahl(value):
+        return str(value)
+
     basic, seen = [], set()
     if dps:
-        basic.append({'label': 'DPS', 'value': dps})
+        basic.append({'label': 'DPS', 'value': zahl(dps)})
     if damage:
-        basic.append({'label': w['damage'], 'value': damage})
+        basic.append({'label': w['damage'], 'value': zahl(damage)})
     if speed:
-        basic.append({'label': w['speed'], 'value': speed})
+        basic.append({'label': w['speed'], 'value': zahl(speed)})
     if damage_type:
-        basic.append({'label': w['damage_type'], 'value': damage_type})
+        basic.append({'label': w['damage_type'], 'value': zahl(damage_type)})
     bonuses = []
     for stat_id, value in (details or {}).get('stats') or []:
         if not value:
             continue
         label, percent = ctx.stat_name(stat_id)
         seen.add(label.casefold())
-        bonuses.append({'label': label, 'value': ('%s %%' % value) if percent else value})
+        # The generator prints a leading sign only for plain numbers.
+        text = ('%s %%' % value) if percent else (
+            ('+' + str(value)) if isinstance(value, (int, float)) and value
+            else ('–' if value is None else str(value)))
+        bonuses.append({'label': label, 'display': text})
     for key, value in (ctx.boni.get(ident) or {}).get('s') or []:
         if key == 'ARMOUR':
             continue
@@ -767,7 +771,9 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         if label.casefold() in seen:
             continue
         seen.add(label.casefold())
-        bonuses.append({'label': label, 'value': value})
+        text = ('+' + str(value)) if isinstance(value, (int, float)) and value else (
+            '–' if value is None else str(value))
+        bonuses.append({'label': label, 'display': text})
     scale = (details or {}).get('scale')
 
     resources = []
@@ -803,16 +809,9 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
     used_in = [{'url': route(lang, 'recipe', rid), 'text': builder.recipes[rid][0]}
                for rid in item.get('zutat') or [] if rid in builder.recipes]
 
-    variants = ctx.variants(item, ident)
-    variant_chips = []
-    if variants:
-        by_level = {}
-        for other, entry in variants:
-            by_level.setdefault(entry.get('l') or 0, []).append((other, entry))
-        for level in sorted(by_level):
-            other = by_level[level][0][0]
-            variant_chips.append({'url': route(lang, 'i', other), 'level': level or '?',
-                                  'active': item.get('l') == level})
+    # Varianten bleiben vorerst aussen vor: der statische Bau rendert sie nie
+    # (sein Zugriff auf model['all'] laeuft ins Leere). Sie zu aktivieren ist
+    # eine eigene Entscheidung, kein Umbauschritt.
 
     set_block = None
     set_id = (details or {}).get('set')
@@ -825,10 +824,12 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         head = set_name
         if level:
             head += ' · %s %s%s' % (w['level'], level, ('–%s' % top) if top and top != level else '')
+        # The static build lists set members as plain names (its lookup into
+        # model['all'] misses), so the migration keeps them unlinked.
         members = []
         for iid in set_data.get('items') or []:
             if iid in builder.items:
-                members.append({'url': route(lang, 'i', iid), 'text': builder_name(builder, builder.items[iid])})
+                members.append({'url': None, 'text': builder_name(builder, builder.items[iid])})
             elif iid in ctx.details:
                 other = ctx.details[iid].get('name') or {}
                 text = other.get(lang) or other.get('en') or other.get('de') or ''
@@ -866,6 +867,9 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         'chips': chips,
         'description': description,
         'armour': armour,
+        # The generator emits the values section when it has any value or a
+        # raw scale record, even if that record renders no text (10 pages).
+        'has_values': bool(armour or basic or bonuses or scale),
         'values': basic,
         'bonuses': bonuses,
         'scale': scale[0] if scale and scale[0] else None,
@@ -874,8 +878,6 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         'vendor': bool((details or {}).get('vendors')),
         'crafted_by': crafted_by,
         'used_in': used_in,
-        'variants': variant_chips,
-        'variant_count': len(variants) + 1 if variants else 0,
         'set': set_block,
         'required_class': (details or {}).get('requiredClass'),
         'browse': browse,

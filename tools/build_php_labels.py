@@ -34,10 +34,13 @@ def main() -> int:
         # Section titles that the static generators keep as local literals.
         'sections': {
             'de': {'where_from': 'Woher', 'context': 'Zusammenhang',
+                   'occurrences': 'Vorkommen', 'used_in': 'Wofür',
                    'no_spots': 'Hier sind noch keine Fundstellen bekannt.'},
             'en': {'where_from': 'Where from', 'context': 'Context',
+                   'occurrences': 'Resources', 'used_in': 'Used for',
                    'no_spots': 'No gathering spots are known here yet.'},
             'fr': {'where_from': 'Provenance', 'context': 'Contexte',
+                   'occurrences': 'Ressources', 'used_in': 'Utilisation',
                    'no_spots': 'Aucun lieu de récolte n’est encore connu ici.'},
         },
     }

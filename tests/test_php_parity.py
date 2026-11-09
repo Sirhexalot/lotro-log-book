@@ -24,7 +24,7 @@ from pathlib import Path
 HIER = Path(__file__).resolve().parents[1]
 import os
 STATIC = Path(os.environ.get('LLB_ORACLE', str(Path.home() / '.cache' / 'llb-release-20261108-player-copy')))
-PHPDATA = HIER / 'phpdata'
+PHPDATA = Path(os.environ.get('LLB_DATA') or (HIER / 'phpdata'))
 
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link',
         'meta', 'source', 'track', 'wbr'}
@@ -72,7 +72,7 @@ def canonical(html: str) -> list:
 def php_render(url: str) -> str:
     """Render through the same front controller the server uses."""
     env = dict(**__import__('os').environ)
-    env.setdefault('LLB_VENDOR', str(Path.home() / '.cache/llb-php/vendor'))
+    env.setdefault('LLB_VENDOR', str(HIER / 'vendor'))
     # Tracking snippets and asset files come from the build the static pages
     # belong to, so both sides see the same sources.
     env.setdefault('LLB_WEB', str(STATIC))

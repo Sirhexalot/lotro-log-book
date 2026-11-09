@@ -7,6 +7,12 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'Llb\\Catalogue' => $baseDir . '/php/src/Catalogue.php',
+    'Llb\\Data' => $baseDir . '/php/src/Data.php',
+    'Llb\\Page' => $baseDir . '/php/src/Page.php',
+    'Llb\\Router' => $baseDir . '/php/src/Router.php',
+    'Llb\\Shell' => $baseDir . '/php/src/Shell.php',
+    'Llb\\View' => $baseDir . '/php/src/View.php',
     'Symfony\\Polyfill\\Ctype\\Ctype' => $vendorDir . '/symfony/polyfill-ctype/Ctype.php',
     'Symfony\\Polyfill\\Mbstring\\Mbstring' => $vendorDir . '/symfony/polyfill-mbstring/Mbstring.php',
     'Twig\\AbstractTwigCallable' => $vendorDir . '/twig/twig/src/AbstractTwigCallable.php',

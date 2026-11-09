@@ -14,6 +14,7 @@ class ComposerStaticInit9ea7f741f588c70e9c81da7252e6d03b
         'ffecb95d45175fd40f75be8a23b34f90' => __DIR__ . '/..' . '/twig/twig/src/Resources/debug.php',
         'c7baa00073ee9c61edf148c51917cfb4' => __DIR__ . '/..' . '/twig/twig/src/Resources/escaper.php',
         'f844ccf1d25df8663951193c3fc307c8' => __DIR__ . '/..' . '/twig/twig/src/Resources/string_loader.php',
+        'ade96f220259dac283455e4c900ff4cf' => __DIR__ . '/../..' . '/php/src/Escape.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -53,6 +54,12 @@ class ComposerStaticInit9ea7f741f588c70e9c81da7252e6d03b
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Llb\\Catalogue' => __DIR__ . '/../..' . '/php/src/Catalogue.php',
+        'Llb\\Data' => __DIR__ . '/../..' . '/php/src/Data.php',
+        'Llb\\Page' => __DIR__ . '/../..' . '/php/src/Page.php',
+        'Llb\\Router' => __DIR__ . '/../..' . '/php/src/Router.php',
+        'Llb\\Shell' => __DIR__ . '/../..' . '/php/src/Shell.php',
+        'Llb\\View' => __DIR__ . '/../..' . '/php/src/View.php',
         'Symfony\\Polyfill\\Ctype\\Ctype' => __DIR__ . '/..' . '/symfony/polyfill-ctype/Ctype.php',
         'Symfony\\Polyfill\\Mbstring\\Mbstring' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/Mbstring.php',
         'Twig\\AbstractTwigCallable' => __DIR__ . '/..' . '/twig/twig/src/AbstractTwigCallable.php',

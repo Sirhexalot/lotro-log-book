@@ -21,6 +21,10 @@ final class View
             'autoescape' => 'html',
             'strict_variables' => true,
             'debug' => false,
+            // Twig keeps compiled templates until told otherwise. During the
+            // migration a stale template looks like a code bug, so reload
+            // unless the deployment sets LLB_PRODUCTION=1.
+            'auto_reload' => getenv('LLB_PRODUCTION') !== '1',
         ]);
         // The generator compares px values with one decimal; keep that format.
         $this->twig->addFilter(new TwigFilter('pin', static function ($value): string {
