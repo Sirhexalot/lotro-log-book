@@ -4,6 +4,10 @@
  * No durations and no kilometres: the game data carries prices, minimum levels
  * and requirements, but no riding time. What the player needs to know is which
  * way to go, not how long a horse takes.
+ *
+ * The right side is a map stage: Middle-earth while nothing is planned, then
+ * the game maps of the route with a marker at every stop. No lines are drawn –
+ * we know where the stables are, not which path a horse takes.
  */
 (function () {
 	'use strict';
@@ -20,11 +24,20 @@
 	var ergebnis = document.getElementById('reise-ergebnis');
 	var klassenFeld = document.getElementById('reise-klasse');
 	var portListe = document.getElementById('reise-ports');
+	var seite = document.getElementById('reise');
+	var buehne = document.getElementById('reise-karten');
+	var weltBild = document.getElementById('reise-welt');
+
+	// Map images live under karten/<sprache>/ on the site, under webp/<sprache>/
+	// in a local checkout – the same rule the map page uses.
+	var BILDPFAD = (window.MQL_BILD_PFAD || '../webp/{sprache}/').replace('{sprache}', sprache);
 
 	var stationen = [];
 	var nachId = {};
 	var kanten = {};
 	var skills = [];
+	var karten = {};
+	var kartenListe = [];
 	var gewaehlt = { von: null, nach: null };
 
 	function normal(text) {
@@ -105,7 +118,11 @@
 		if (!text) { return null; }
 		var funke = koordinaten(text);
 		if (funke) { return funke; }
-		var treffer = orteSuchen(text, 2);
+		var treffer = orteSuchen(text, 8);
+		// A name typed exactly means that stable, even when other places only
+		// contain it ("Bree" must not become "Bree-land Homesteads").
+		var genau = treffer.filter(function (ort) { return normal(ort.n) === normal(text); });
+		if (genau.length === 1) { return { ort: genau[0] }; }
 		if (treffer.length === 1) { return { ort: treffer[0] }; }
 		if (treffer.length > 1) { return { unklar: treffer }; }
 		return { unbekannt: true };
@@ -114,33 +131,93 @@
 	function vorschlaegeZeigen(feld, liste, schluessel) {
 		var treffer = orteSuchen(feld.value, 8);
 		liste.textContent = '';
+		feld.setAttribute('aria-expanded', 'false');
 		if (!treffer.length) { liste.hidden = true; return; }
 		treffer.forEach(function (ort) {
 			var punkt = eltern('li');
+			punkt.setAttribute('role', 'presentation');
 			var knopf = eltern('button');
 			knopf.type = 'button';
+			knopf.setAttribute('role', 'option');
 			knopf.appendChild(eltern('span', ort.n));
 			if (ort.gebiet) { knopf.appendChild(eltern('small', ort.gebiet)); }
-			knopf.addEventListener('mousedown', function (ereignis) {
+			// pointerdown, not click: the field keeps the focus and the list does
+			// not close before the choice is read (mouse, pen and touch alike).
+			knopf.addEventListener('pointerdown', function (ereignis) {
 				ereignis.preventDefault();
 				feld.value = ort.n;
 				gewaehlt[schluessel] = ort;
 				liste.hidden = true;
+				feld.setAttribute('aria-expanded', 'false');
 				feld.focus();
 			});
 			punkt.appendChild(knopf);
 			liste.appendChild(punkt);
 		});
 		liste.hidden = false;
+		feld.setAttribute('aria-expanded', 'true');
 	}
 
 	function binde(feld, liste, schluessel) {
-		feld.addEventListener('input', function () { vorschlaegeZeigen(feld, liste, schluessel); });
-		feld.addEventListener('focus', function () { vorschlaegeZeigen(feld, liste, schluessel); });
-		feld.addEventListener('blur', function () { setTimeout(function () { liste.hidden = true; }, 150); });
-		feld.addEventListener('keydown', function (ereignis) {
-			if (ereignis.key !== 'Escape') { return; }
+		var aktiv = -1;
+		function knoepfe() {
+			return Array.prototype.slice.call(liste.querySelectorAll('button'));
+		}
+		function markiere(nummer) {
+			var alle = knoepfe();
+			alle.forEach(function (knopf, stelle) {
+				knopf.classList.toggle('ist-aktiv', stelle === nummer);
+			});
+			aktiv = nummer;
+			if (nummer >= 0 && alle[nummer]) { alle[nummer].scrollIntoView({ block: 'nearest' }); }
+		}
+		function waehlen(knopf) {
+			if (!knopf) { return; }
+			feld.value = knopf.querySelector('span').textContent;
+			var ort = orteSuchen(feld.value, 8).filter(function (k) {
+				return normal(k.n) === normal(feld.value);
+			})[0] || null;
+			gewaehlt[schluessel] = ort;
 			liste.hidden = true;
+			feld.setAttribute('aria-expanded', 'false');
+			markiere(-1);
+		}
+		feld.addEventListener('input', function () {
+			vorschlaegeZeigen(feld, liste, schluessel);
+			markiere(-1);
+		});
+		feld.addEventListener('focus', function () {
+			vorschlaegeZeigen(feld, liste, schluessel);
+			markiere(-1);
+		});
+		feld.addEventListener('blur', function () {
+			setTimeout(function () {
+				liste.hidden = true;
+				feld.setAttribute('aria-expanded', 'false');
+			}, 150);
+		});
+		feld.addEventListener('keydown', function (ereignis) {
+			if (ereignis.key === 'Escape') {
+				liste.hidden = true;
+				feld.setAttribute('aria-expanded', 'false');
+				markiere(-1);
+				return;
+			}
+			if (ereignis.key !== 'ArrowDown' && ereignis.key !== 'ArrowUp') {
+				if (ereignis.key === 'Enter' && aktiv >= 0) {
+					ereignis.preventDefault();
+					waehlen(knoepfe()[aktiv]);
+				}
+				return;
+			}
+			var alle = knoepfe();
+			if (!alle.length) { vorschlaegeZeigen(feld, liste, schluessel); alle = knoepfe(); }
+			if (!alle.length) { return; }
+			ereignis.preventDefault();
+			var naechste = ereignis.key === 'ArrowDown'
+				? (aktiv + 1) % alle.length
+				: (aktiv <= 0 ? alle.length - 1 : aktiv - 1);
+			markiere(naechste);
 		});
 	}
 
@@ -190,9 +267,21 @@
 
 	/* --- Ausgabe -------------------------------------------------------- */
 
-	function fehlerText(text) {
+	function ergebnisLeeren() {
 		ergebnis.textContent = '';
+		if (buehne) { buehne.textContent = ''; buehne.hidden = true; }
+		if (seite) { seite.removeAttribute('data-geplant'); }
+	}
+
+	function fehlerText(text) {
+		ergebnisLeeren();
 		ergebnis.appendChild(eltern('p', text, 'reise-fehler'));
+	}
+
+	function rolleText(art) {
+		if (art === 'start') { return t('reise_karte_start'); }
+		if (art === 'ziel') { return t('reise_karte_ziel'); }
+		return t('reise_karte_umstieg');
 	}
 
 	function zeigeDeutung(feld, deutung) {
@@ -206,26 +295,102 @@
 		return null;
 	}
 
+	function vonName(id) {
+		return nachId[id] ? nachId[id].n : id;
+	}
+
 	/** One leg list, used for the planned route and for the way without swift travel. */
 	function ketteListe(kette) {
 		var liste = eltern('ol', null, 'reise-kette');
-		kette.forEach(function (kante) {
-			var punkt = eltern('li');
-			punkt.appendChild(eltern('span', vonName(kante.von), 'station'));
-			punkt.appendChild(document.createTextNode(' → '));
-			punkt.appendChild(eltern('span', vonName(kante.nach), 'station'));
-			var art = eltern('span', kante.schnell ? t('reise_schnell') : t('reise_langsam'),
-				'art ' + (kante.schnell ? 'schnell' : 'langsam'));
-			punkt.appendChild(art);
-			var angaben = [];
-			if (kante.kosten != null) { angaben.push(silber(kante.kosten)); }
-			if (kante.stufe) { angaben.push(t('reise_stufe') + ' ' + kante.stufe); }
-			if (kante.quest) { angaben.push(t('reise_quest_bedingung')); }
-			if (kante.ruf) { angaben.push(t('reise_ruf_bedingung')); }
-			if (angaben.length) { punkt.appendChild(eltern('span', angaben.join(' · '), 'preis')); }
+		kette.forEach(function (kante, nummer) {
+			var punkt = eltern('li', null, 'reise-schritt');
+			punkt.appendChild(eltern('span', String(nummer + 1), 'reise-schritt-nr'));
+			var text = eltern('span', null, 'reise-schritt-text');
+			text.appendChild(document.createTextNode(vonName(kante.von)));
+			text.appendChild(eltern('span', '→', 'pfeil'));
+			text.appendChild(document.createTextNode(vonName(kante.nach)));
+			punkt.appendChild(text);
+			var angaben = eltern('span', null, 'reise-schritt-meta');
+			angaben.appendChild(eltern('span', kante.schnell ? t('reise_schnell') : t('reise_langsam'),
+				'art ' + (kante.schnell ? 'schnell' : 'langsam')));
+			if (kante.kosten != null) { angaben.appendChild(eltern('span', silber(kante.kosten))); }
+			if (kante.stufe) { angaben.appendChild(eltern('span', t('reise_stufe') + ' ' + kante.stufe)); }
+			if (kante.quest) { angaben.appendChild(eltern('span', t('reise_quest_bedingung'))); }
+			if (kante.ruf) { angaben.appendChild(eltern('span', t('reise_ruf_bedingung'))); }
+			punkt.appendChild(angaben);
 			liste.appendChild(punkt);
 		});
 		return liste;
+	}
+
+	/* --- Karten --------------------------------------------------------- */
+
+	function prozent(wert, von, bis) {
+		if (bis === von) { return 50; }
+		return Math.max(0, Math.min(100, (wert - von) / (bis - von) * 100));
+	}
+
+	/** One map card with a marker for every stop that lies on it. */
+	function karteKnoten(gruppe) {
+		var karte = gruppe.karte;
+		var bild = eltern('figure', null, 'reise-karte');
+		var rahmen = eltern('div', null, 'reise-karte-bild');
+		var bildFeld = eltern('img');
+		bildFeld.loading = 'lazy';
+		bildFeld.decoding = 'async';
+		bildFeld.alt = '';
+		bildFeld.src = BILDPFAD + karte.bild;
+		rahmen.appendChild(bildFeld);
+
+		gruppe.orte.forEach(function (eintrag) {
+			var marker = eltern('span', eintrag.nr == null ? '' : String(eintrag.nr), 'reise-marker');
+			marker.setAttribute('data-art', eintrag.art);
+			marker.style.setProperty('--x', prozent(eintrag.ort.lon, karte.w, karte.o).toFixed(2) + '%');
+			// CSS counts from the top, the map's frame from the south.
+			marker.style.setProperty('--y', (100 - prozent(eintrag.ort.lat, karte.s, karte.no)).toFixed(2) + '%');
+			marker.title = eintrag.ort.n + ' – ' + rolleText(eintrag.art);
+			rahmen.appendChild(marker);
+		});
+		bild.appendChild(rahmen);
+
+		var fuss = eltern('figcaption');
+		fuss.appendChild(eltern('strong', karte.nm || t('reise_karte')));
+		var liste = eltern('ul', null, 'reise-karte-liste');
+		gruppe.orte.forEach(function (eintrag) {
+			var punkt = eltern('li');
+			var nummer = eltern('span', eintrag.nr == null ? '●' : String(eintrag.nr), 'nr');
+			punkt.appendChild(nummer);
+			punkt.appendChild(eltern('span', eintrag.ort.n));
+			punkt.appendChild(eltern('span', rolleText(eintrag.art), 'rolle'));
+			liste.appendChild(punkt);
+		});
+		fuss.appendChild(liste);
+		bild.appendChild(fuss);
+		return bild;
+	}
+
+	/** The maps of the route, in the order the stops reach them. */
+	function kartenZeigen(orte) {
+		if (!buehne) { return; }
+		buehne.textContent = '';
+		var gruppen = [], nachKarte = {};
+		orte.forEach(function (eintrag) {
+			var karte = karten[eintrag.ort.karte];
+			if (!karte) { return; }
+			var gruppe = nachKarte[karte.i];
+			if (!gruppe) {
+				gruppe = nachKarte[karte.i] = { karte: karte, orte: [] };
+				gruppen.push(gruppe);
+			}
+			gruppe.orte.push(eintrag);
+		});
+		if (!gruppen.length) {
+			buehne.appendChild(eltern('p', t('reise_karte_ohne'), 'reise-karten-leer'));
+		} else {
+			gruppen.forEach(function (gruppe) { buehne.appendChild(karteKnoten(gruppe)); });
+		}
+		buehne.hidden = false;
+		if (seite) { seite.setAttribute('data-geplant', '1'); }
 	}
 
 	function zeigeWeg(start, ziel) {
@@ -237,9 +402,8 @@
 		var langsam = route(vonOrt.id, nachOrt.id, true);
 		var charakter = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv ? window.MQL_SPEICHER.aktiv() : null;
 		var meineStufe = charakter && charakter.level ? Number(charakter.level) : 0;
-		ergebnis.textContent = '';
-		var kopf = eltern('h3', t('reise_ergebnis'));
-		ergebnis.appendChild(kopf);
+		ergebnisLeeren();
+		ergebnis.appendChild(eltern('h3', t('reise_ergebnis')));
 
 		if (!start.ort) {
 			ergebnis.appendChild(eltern('p', t('reise_naechster') + ': ' + vonOrt.n + ' (' + t('reise_zu_fuss') + ')', 'reise-hinweis'));
@@ -293,10 +457,18 @@
 		if (port) {
 			ergebnis.appendChild(eltern('p', t('reise_port_direkt') + ': ' + port.n, 'reise-hinweis'));
 		}
-	}
 
-	function vonName(id) {
-		return nachId[id] ? nachId[id].n : id;
+		// Stops in travel order: the departure carries no number, every arrival
+		// carries the step that led to it.
+		var orte = [{ ort: vonOrt, art: 'start', nr: null }];
+		kette.forEach(function (kante, nummer) {
+			orte.push({
+				ort: nachId[kante.nach],
+				art: nummer === kette.length - 1 ? 'ziel' : 'umstieg',
+				nr: nummer + 1
+			});
+		});
+		kartenZeigen(orte);
 	}
 
 	/** The class skill that leads straight to this stable, if the class has one. */
@@ -345,11 +517,13 @@
 			var nurZiel = deuten(feldNach, listeNach, 'nach');
 			if (nurZiel && (nurZiel.ort || nurZiel.lat !== undefined)) {
 				var zielOrt = nurZiel.ort || naechsteStation(nurZiel.lat, nurZiel.lon);
-				ergebnis.textContent = '';
+				ergebnisLeeren();
 				ergebnis.appendChild(eltern('h3', t('reise_ergebnis')));
 				ergebnis.appendChild(eltern('p', t('reise_ziel_ist') + ': ' + (zielOrt ? zielOrt.n : ''),
 					'reise-hinweis'));
 				ergebnis.appendChild(eltern('p', t('reise_start_fehlt')));
+				// The destination alone is worth a map: it answers "where is that?".
+				if (zielOrt) { kartenZeigen([{ ort: zielOrt, art: 'ziel', nr: null }]); }
 				return;
 			}
 			if (!ergebnis.textContent) { fehlerText(t('reise_start_fehlt')); }
@@ -378,6 +552,17 @@
 	function starte(daten) {
 		stationen = daten.knoten.slice();
 		skills = daten.skills || [];
+		kartenListe = daten.karten || [];
+		karten = {};
+		kartenListe.forEach(function (karte) { karten[karte.i] = karte; });
+
+		// The background before the first route: Middle-earth itself.
+		var welt = kartenListe.filter(function (karte) { return karte.welt; })[0];
+		if (weltBild && welt) {
+			weltBild.src = BILDPFAD + welt.bild;
+			weltBild.alt = '';
+		}
+
 		nachId = {};
 		kanten = {};
 		stationen.forEach(function (ort) {
@@ -397,6 +582,7 @@
 		formular.addEventListener('submit', auswerten);
 		var tauschen = document.getElementById('reise-tauschen');
 		if (tauschen) {
+			tauschen.title = t('reise_tauschen');
 			tauschen.addEventListener('click', function () {
 				var a = feldVon.value, b = feldNach.value;
 				var ga = gewaehlt.von, gb = gewaehlt.nach;
@@ -419,7 +605,12 @@
 				});
 			if (charakter && /j.ger|hunter/i.test(charakter.klasse || '')) { klassenFeld.value = 'guide'; }
 			if (charakter && /w.chter|warden/i.test(charakter.klasse || '')) { klassenFeld.value = 'muster'; }
-			klassenFeld.addEventListener('change', function () { zeigePorts(); auswerten(); });
+			klassenFeld.addEventListener('change', function () {
+				zeigePorts();
+				// Only a shown route needs a new class note; empty fields should not
+				// turn into an error just because the class changed.
+				if (feldVon.value.trim() || feldNach.value.trim()) { auswerten(); }
+			});
 		}
 		zeigePorts();
 

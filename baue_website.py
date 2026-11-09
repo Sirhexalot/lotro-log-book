@@ -29,7 +29,7 @@ SPRACHEN = ('de', 'en', 'fr')
 
 DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'landschaft.css', 'favicon.svg', 'texte.js', 'texte-spielstand.js',
            'texte-logbuch.js', 'texte-site.js', 'texte-plugin.js', 'texte-companion.js', 'texte-reise.js',
-           'sprache.js', 'speicher.js', 'menue.js', 'symbole.js', 'companion.js', 'reise.js', 'reise.html',
+           'sprache.js', 'speicher.js', 'menue.js', 'symbole.js', 'companion.js', 'reise.js', 'reise.css', 'reise.html',
            'spielstand.js', 'plugin.js', 'anleitung.js', 'referenz.js', 'ruf.js', 'belohnungen.js', 'gegenstand.js', 'rezepte.js',
            'gegenstaende.html', 'gegenstaende.js', 'gegenstaende.css',
            'suche.js', 'suche.html', 'ruf-quellen-de.js',
@@ -68,15 +68,21 @@ def kopiere(ziel):
 
 
 def index_bauen(ziel):
-    """Take over index.html and insert the website's image path."""
-    text = (WEB / 'index.html').read_text(encoding='utf-8')
+    """Take over index.html and insert the website's image path.
+
+    The travel page loads map images from the same place and needs the path just
+    as much: on the site they live under karten/<sprache>/, in a local checkout
+    under webp/<sprache>/.
+    """
     einschub = ('<script>/* Website: images live under karten/<sprache>/. */\n'
                 "window.MQL_BILD_PFAD = 'karten/{sprache}/';</script>\n")
-    if '<script src="texte.js"></script>' not in text:
-        raise SystemExit('index.html: expected script block missing')
-    text = text.replace('<script src="texte.js"></script>',
-                        einschub + '<script src="texte.js"></script>', 1)
-    (ziel / 'index.html').write_text(text, encoding='utf-8')
+    for name in ('index.html', 'reise.html'):
+        text = (WEB / name).read_text(encoding='utf-8')
+        if '<script src="texte.js"></script>' not in text:
+            raise SystemExit('%s: expected script block missing' % name)
+        text = text.replace('<script src="texte.js"></script>',
+                            einschub + '<script src="texte.js"></script>', 1)
+        (ziel / name).write_text(text, encoding='utf-8')
 
 
 def stempeln(ziel):
@@ -272,6 +278,9 @@ def main():
             if pfad.is_file():
                 erwartet |= {karte['bild'].replace('.png', '.webp')
                              for karte in json.loads(pfad.read_text(encoding='utf-8'))['karten']}
+        # The travel page needs Middle-earth as its background; the root map is
+        # not part of the quest data, so it is named here.
+        erwartet.add('268437554.webp')
         fehlen = sorted(erwartet - bilder)
         if fehlen:
             fehler.append('%s: %d map images missing, e.g. %s' % (sprache, len(fehlen), fehlen[:3]))

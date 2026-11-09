@@ -1,0 +1,400 @@
+/* Travel planner: planning bar on the left, map stage on the right.
+ *
+ * The stage shows Middle-earth while nothing is planned and the area maps of
+ * the route afterwards. One file for the static page and the PHP app, so both
+ * always look the same.
+ */
+
+body[data-seite="reise"] { height: auto; min-height: 100vh; }
+
+main.reise {
+	display: grid;
+	grid-template-columns: minmax(340px, 400px) minmax(0, 1fr);
+	align-items: start;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	min-height: calc(100vh - 108px);
+}
+
+/* --- Planungsleiste ---------------------------------------------------- */
+
+.reise-panel {
+	position: relative;
+	z-index: 3;
+	align-self: stretch;
+	min-height: calc(100vh - 108px);
+	max-height: calc(100vh - 108px);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 20px 20px 32px;
+	background: linear-gradient(180deg, rgba(20, 17, 14, .98), rgba(20, 17, 14, .94));
+	border-right: 1px solid var(--rand);
+}
+
+.reise-panel > h2 { margin-top: 0; }
+.reise-einleitung { color: var(--schwach); margin: 0 0 18px; }
+.reise-hilfe { color: var(--schwach); font-size: var(--text-bedienung); margin: 8px 0 0; }
+.reise-hilfe code { white-space: nowrap; }
+
+/* Two fields one above the other, the swap button between them – the order in
+ * which the question is asked. */
+.reise-formular {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	grid-template-areas: "von tausch" "nach tausch" "knopf knopf";
+	gap: 10px 8px;
+	align-items: center;
+	margin: 0 0 6px;
+}
+.reise-feld { position: relative; min-width: 0; grid-column: 1; }
+.reise-feld label { display: block; color: var(--gold); font-size: var(--text-bedienung); margin-bottom: 4px; padding-left: 18px; }
+.reise-feld input {
+	width: 100%;
+	font-size: var(--text-normal);
+	padding: 9px 10px 9px 30px;
+	background: var(--fläche);
+	border: 1px solid var(--rand);
+	border-radius: 4px;
+	color: var(--text);
+}
+.reise-feld input:focus { border-color: var(--gold); outline: none; }
+.reise-feld-von { grid-area: von; }
+.reise-feld-nach { grid-area: nach; }
+
+/* Start dot and destination dot, as on a map. */
+.reise-marke {
+	position: absolute;
+	left: 8px;
+	top: 31px;
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+	border: 2px solid var(--gold);
+	background: var(--grund);
+	pointer-events: none;
+}
+.reise-marke-ziel { background: var(--gold); box-shadow: 0 0 0 3px rgba(214, 179, 90, .18); }
+
+.reise-tausch {
+	grid-area: tausch;
+	align-self: center;
+	width: 34px;
+	height: 34px;
+	display: grid;
+	place-items: center;
+	padding: 0;
+	background: var(--fläche-hell);
+	border: 1px solid var(--rand);
+	border-radius: 50%;
+	color: var(--schwach);
+	cursor: pointer;
+}
+.reise-tausch:hover { color: var(--gold); border-color: var(--gold); }
+.reise-tausch svg { width: 16px; height: 16px; }
+
+.reise-knopf {
+	grid-area: knopf;
+	margin-top: 2px;
+	font-size: var(--text-normal);
+	padding: 10px 16px;
+	color: var(--grund);
+	background: var(--gold);
+	border: 1px solid var(--gold);
+	border-radius: 4px;
+	font-weight: bold;
+	cursor: pointer;
+}
+.reise-knopf:hover { filter: brightness(1.08); }
+
+/* Suggestions: name left, area right, keyboard-navigable. */
+.reise-vorschlaege {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 100%;
+	z-index: 30;
+	margin: 4px 0 0;
+	padding: 0;
+	list-style: none;
+	max-height: 260px;
+	overflow-y: auto;
+	background: var(--fläche);
+	border: 1px solid var(--rand);
+	border-radius: 4px;
+	box-shadow: 0 10px 24px rgba(0, 0, 0, .45);
+}
+.reise-vorschlaege li { margin: 0; }
+.reise-vorschlaege button {
+	display: flex;
+	justify-content: space-between;
+	gap: 10px;
+	width: 100%;
+	padding: 7px 11px;
+	background: none;
+	border: 0;
+	border-radius: 0;
+	text-align: left;
+	color: var(--text);
+	font-size: var(--text-bedienung);
+	cursor: pointer;
+}
+.reise-vorschlaege button:hover,
+.reise-vorschlaege button.ist-aktiv { background: var(--fläche-hell); }
+.reise-vorschlaege small { color: var(--schwach); white-space: nowrap; }
+
+.reise-zeile { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0 0; }
+.reise-leise {
+	color: var(--schwach);
+	font-size: var(--text-bedienung);
+	background: none;
+	border: 1px solid var(--rand);
+	border-radius: 4px;
+	padding: 7px 12px;
+	cursor: pointer;
+}
+.reise-leise:hover { color: var(--gold); border-color: var(--gold); }
+
+/* --- Ergebnis in der Leiste -------------------------------------------- */
+
+.reise-ergebnis:empty { display: none; }
+.reise-ergebnis { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--rand); }
+.reise-ergebnis h3 { margin: 0 0 10px; }
+.reise-ergebnis p { margin: 8px 0; }
+.reise-block { margin: 22px 0 0; }
+
+.reise-hinweis {
+	border-left: 3px solid var(--gold);
+	padding-left: 12px;
+	color: var(--schwach);
+	font-size: var(--text-bedienung);
+}
+.reise-fehler { color: var(--offen); }
+
+.reise-summe {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 16px;
+	margin: 12px 0 0;
+	color: var(--schwach);
+	font-size: var(--text-bedienung);
+}
+.reise-summe span { white-space: nowrap; }
+
+.reise-kette { list-style: none; margin: 0; padding: 0; }
+.reise-schritt {
+	position: relative;
+	display: grid;
+	grid-template-columns: 28px minmax(0, 1fr);
+	gap: 2px 10px;
+	padding: 10px 0;
+	border-bottom: 1px solid var(--rand);
+}
+.reise-schritt:last-child { border-bottom: 0; }
+.reise-schritt-nr {
+	grid-row: 1 / span 2;
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	background: var(--fläche-hell);
+	border: 1px solid var(--rand);
+	color: var(--gold);
+	font-size: var(--text-bedienung);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-variant-numeric: tabular-nums;
+}
+.reise-schritt-text { font-weight: bold; line-height: 1.4; }
+.reise-schritt-text .pfeil { color: var(--schwach); font-weight: normal; padding: 0 6px; }
+.reise-schritt-meta { color: var(--schwach); font-size: var(--text-bedienung); }
+.reise-schritt-meta .art.schnell { color: var(--gold); }
+.reise-schritt-meta .art.langsam { color: var(--schwach); }
+.reise-schritt-meta span + span::before { content: ' · '; white-space: pre; }
+
+.reise-umweg { margin: 18px 0 0; border-top: 1px solid var(--rand); padding-top: 10px; }
+.reise-umweg summary { cursor: pointer; color: var(--gold); font-size: var(--text-bedienung); }
+.reise-umweg[open] summary { margin-bottom: 8px; }
+
+/* Class skills: folded away until asked for. */
+.reise-skills {
+	margin-top: 22px;
+	padding-top: 14px;
+	border-top: 1px solid var(--rand);
+}
+.reise-skills summary { cursor: pointer; color: var(--gold); font-size: var(--text-normal); }
+.reise-skills[open] summary { margin-bottom: 8px; }
+.reise-skills label { display: block; color: var(--schwach); font-size: var(--text-bedienung); margin: 10px 0 4px; }
+.reise-klasse {
+	width: 100%;
+	font-size: var(--text-bedienung);
+	padding: 7px 9px;
+	background: var(--fläche);
+	border: 1px solid var(--rand);
+	border-radius: 4px;
+	color: var(--text);
+}
+.reise-ports { columns: 2 220px; margin: 12px 0 0; padding-left: 18px; }
+.reise-ports li { break-inside: avoid; margin-bottom: 6px; font-size: var(--text-bedienung); }
+.reise-ports .schwach { color: var(--schwach); }
+
+/* --- Kartenbühne ------------------------------------------------------- */
+
+.reise-buehne {
+	position: sticky;
+	top: 0;
+	align-self: start;
+	min-height: calc(100vh - 108px);
+	overflow: hidden;
+	background:
+		radial-gradient(ellipse at 55% 40%, #1b1712 0, #100d0a 65%, #0b0908 100%);
+}
+.reise-welt {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	opacity: .62;
+	filter: saturate(.85) contrast(1.02);
+	transition: opacity .35s ease;
+}
+.reise-buehne::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background: radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(11, 9, 8, .72) 100%);
+}
+.reise-welt-hinweis {
+	position: absolute;
+	z-index: 2;
+	left: 50%;
+	bottom: 9%;
+	transform: translateX(-50%);
+	margin: 0;
+	padding: 10px 18px;
+	max-width: min(520px, 80%);
+	text-align: center;
+	color: var(--text);
+	background: rgba(20, 17, 14, .78);
+	border: 1px solid var(--rand);
+	border-radius: 999px;
+	font-size: var(--text-bedienung);
+	backdrop-filter: blur(2px);
+}
+
+/* Planned: the world map steps back, the route maps come forward. */
+.reise[data-geplant="1"] .reise-welt { opacity: .16; }
+.reise[data-geplant="1"] .reise-welt-hinweis { display: none; }
+
+.reise-karten[hidden] { display: none; }
+.reise-karten {
+	position: relative;
+	z-index: 2;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 16px;
+	align-content: start;
+	padding: 18px;
+	max-height: calc(100vh - 108px);
+	overflow-y: auto;
+}
+.reise-karten-titel {
+	grid-column: 1 / -1;
+	margin: 0;
+	color: var(--gold);
+	font-size: var(--text-abschnitt);
+	font-weight: normal;
+}
+.reise-karte {
+	margin: 0;
+	background: var(--fläche);
+	border: 1px solid var(--rand);
+	border-radius: 6px;
+	overflow: hidden;
+}
+.reise-karte-bild { position: relative; aspect-ratio: 4 / 3; background: #000; }
+.reise-karte-bild img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.reise-karte figcaption { padding: 8px 10px 10px; font-size: var(--text-bedienung); color: var(--schwach); }
+.reise-karte figcaption strong { display: block; color: var(--text); font-size: var(--text-normal); font-weight: normal; margin-bottom: 4px; }
+.reise-karte-liste { margin: 0; padding: 0; list-style: none; }
+.reise-karte-liste li { margin: 2px 0; }
+.reise-karte-liste .nr {
+	display: inline-block;
+	width: 17px;
+	height: 17px;
+	margin-right: 6px;
+	border-radius: 50%;
+	background: var(--gold);
+	color: var(--grund);
+	font-size: 11px;
+	line-height: 17px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+}
+.reise-karte-liste .rolle { color: var(--schwach); }
+.reise-karte-liste .rolle::before { content: ' · '; white-space: pre; }
+
+/* Marker on the map: a dot with the step number, the name on hover. */
+.reise-marker {
+	position: absolute;
+	left: var(--x);
+	top: var(--y);
+	transform: translate(-50%, -50%);
+	width: 17px;
+	height: 17px;
+	border-radius: 50%;
+	background: var(--gold);
+	color: var(--grund);
+	border: 2px solid rgba(20, 17, 14, .9);
+	font-size: 10px;
+	line-height: 13px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+	cursor: default;
+}
+.reise-marker[data-art="start"] { background: var(--text); color: var(--grund); box-shadow: 0 0 0 4px rgba(232, 225, 213, .22), 0 1px 4px rgba(0, 0, 0, .6); }
+.reise-marker[data-art="ziel"] { background: var(--gold); box-shadow: 0 0 0 4px rgba(214, 179, 90, .25), 0 1px 4px rgba(0, 0, 0, .6); }
+.reise-marker[data-art="umstieg"] { background: var(--fläche-hell); color: var(--gold); border-color: var(--gold); }
+
+.reise-karten-leer {
+	grid-column: 1 / -1;
+	margin: 0;
+	padding: 16px 18px;
+	color: var(--schwach);
+	background: rgba(20, 17, 14, .8);
+	border: 1px solid var(--rand);
+	border-radius: 6px;
+	font-size: var(--text-bedienung);
+}
+
+/* --- Small screens ----------------------------------------------------- */
+
+@media (max-width: 900px) {
+	main.reise { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+	.reise-panel {
+		max-height: none;
+		overflow: visible;
+		border-right: 0;
+		border-bottom: 1px solid var(--rand);
+		padding: 18px 14px 24px;
+	}
+	.reise-buehne {
+		position: relative;
+		min-height: 60vh;
+		order: 2;
+	}
+	.reise-karten {
+		grid-template-columns: minmax(0, 1fr);
+		max-height: none;
+		padding: 14px;
+	}
+	.reise-welt-hinweis { bottom: 6%; max-width: 88%; border-radius: 8px; }
+	.reise-formular { grid-template-columns: 1fr 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.reise-welt { transition: none; }
+}

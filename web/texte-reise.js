@@ -7,6 +7,12 @@
 	var zusatz = {
 		de: {
 			reise_titel: 'Reise',
+			reise_welt_hinweis: 'Gib Start und Ziel ein – dann siehst du deinen Weg auf der Karte.',
+			reise_karte: 'Karte',
+			reise_karte_start: 'Start',
+			reise_karte_ziel: 'Ziel',
+			reise_karte_umstieg: 'Umstieg',
+			reise_karte_ohne: 'Für diese Strecke gibt es keine Spielkarte. Die Stationen stehen links als Liste.',
 			reise_einleitung: 'Auch ein weiter Weg beginnt beim nächsten Stallmeister. Gib deinen Standort und dein Ziel an, dann findest du die passenden Verbindungen, ihre Preise und die Möglichkeiten zur Schnellreise.',
 			reise_von: 'Wo bin ich?',
 			reise_von_platz: 'Koordinaten einfügen oder Ort eingeben',
@@ -69,6 +75,12 @@
 		},
 		en: {
 			reise_titel: 'Travel',
+			reise_welt_hinweis: 'Enter where you are and where you want to go – then you see your route on the map.',
+			reise_karte: 'Map',
+			reise_karte_start: 'Start',
+			reise_karte_ziel: 'Destination',
+			reise_karte_umstieg: 'Change',
+			reise_karte_ohne: 'There is no game map for this route. The stops are listed on the left.',
 			reise_einleitung: 'Even a long journey starts with the next stable-master. Enter where you are and where you want to go to find connections, fares and swift-travel options.',
 			reise_von: 'Where am I?',
 			reise_von_platz: 'Paste coordinates or type a place',
@@ -131,6 +143,12 @@
 		},
 		fr: {
 			reise_titel: 'Voyage',
+			reise_welt_hinweis: 'Indiquez votre départ et votre destination – vous verrez ensuite votre trajet sur la carte.',
+			reise_karte: 'Carte',
+			reise_karte_start: 'Départ',
+			reise_karte_ziel: 'Arrivée',
+			reise_karte_umstieg: 'Correspondance',
+			reise_karte_ohne: 'Aucune carte du jeu n’existe pour ce trajet. Les étapes sont listées à gauche.',
 			reise_einleitung: 'Même un long voyage commence chez le prochain maître d’écurie. Indiquez votre départ et votre destination pour trouver les correspondances, les tarifs et les possibilités de voyage rapide.',
 			reise_von: 'Où suis-je ?',
 			reise_von_platz: 'Coller des coordonnées ou saisir un lieu',

@@ -11,6 +11,12 @@ def lade(sprache):
     return json.loads((DATEN / ('reise-%s.json' % sprache)).read_text(encoding='utf-8'))
 
 
+def lade_seite(sprache):
+    """What the page really loads: build_reise.py adds regions and maps."""
+    text = (DATEN.parent / 'web' / ('reise-%s.js' % sprache)).read_text(encoding='utf-8')
+    return json.loads(text[text.index('{', text.index('=')):text.rindex(';')])
+
+
 class ReiseDatenTest(unittest.TestCase):
     def test_every_language_has_the_same_network(self):
         daten = {sprache: lade(sprache) for sprache in SPRACHEN}
@@ -130,6 +136,42 @@ class ReiseDatenTest(unittest.TestCase):
         self.assertGreater(len(ports), 20)
         for port in ports:
             self.assertIn(port['knoten'], knoten)
+
+    def test_every_map_the_page_draws_exists_as_an_image(self):
+        for sprache in SPRACHEN:
+            inhalt = lade_seite(sprache)
+            self.assertTrue(inhalt['karten'], sprache)
+            self.assertEqual(len([k for k in inhalt['karten'] if k.get('welt')]), 1, sprache)
+            for karte in inhalt['karten']:
+                self.assertTrue(karte['nm'].strip(), (sprache, karte))
+                bild = Path(__file__).resolve().parents[1] / 'webp' / sprache / karte['bild']
+                self.assertTrue(bild.is_file(), (sprache, bild))
+
+    def test_stations_know_their_region_and_their_map(self):
+        """A marker must lie inside the frame of the map it is drawn on."""
+        for sprache in SPRACHEN:
+            inhalt = lade_seite(sprache)
+            karten = {k['i']: k for k in inhalt['karten']}
+            ohne_karte = 0
+            for ort in inhalt['knoten']:
+                self.assertIn('region', ort, ort['n'])
+                if ort.get('karte') is None:
+                    ohne_karte += 1
+                    continue
+                karte = karten.get(ort['karte'])
+                self.assertIsNotNone(karte, (sprache, ort['n']))
+                self.assertTrue(karte['w'] <= ort['lon'] <= karte['o'], (ort['n'], karte['nm']))
+                self.assertTrue(karte['s'] <= ort['lat'] <= karte['no'], (ort['n'], karte['nm']))
+            # Only a handful of interior places have no map with a frame.
+            self.assertLess(ohne_karte, 15, (sprache, ohne_karte))
+
+    def test_known_station_sits_on_the_expected_map(self):
+        inhalt = lade_seite('de')
+        karten = {k['i']: k for k in inhalt['karten']}
+        suedbree = next(k for k in inhalt['knoten'] if k['n'] == 'Südbree')
+        self.assertEqual(karten[suedbree['karte']]['nm'], 'Bree')
+        udun = next(k for k in inhalt['knoten'] if k['n'] == 'Udûn-Brückenkopf')
+        self.assertEqual(karten[udun['karte']]['nm'], 'Udûn')
 
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@
 <title>Reise – LOTRO Log Book</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="gemeinsam.css">
+<link rel="stylesheet" href="reise.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script>
 (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
@@ -13,43 +14,6 @@ var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+
 j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-TRC8BF95');
 </script>
-<style>
-	.reise-formular { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 12px; align-items: end; margin: 18px 0 26px; }
-	.reise-feld { position: relative; min-width: 0; }
-	.reise-feld label { display: block; color: var(--gold); font-size: var(--text-bedienung); margin-bottom: 4px; }
-	.reise-feld input { width: 100%; font-size: var(--text-normal); padding: 9px 10px; }
-	.reise-hilfe { color: var(--schwach); font-size: var(--text-bedienung); margin-top: 6px; }
-	.reise-vorschlaege { position: absolute; left: 0; right: 0; top: 100%; z-index: 20; margin: 2px 0 0; padding: 0; list-style: none; max-height: 260px; overflow-y: auto; background: var(--fläche); border: 1px solid var(--rand); border-radius: 4px; box-shadow: 0 10px 24px rgba(0,0,0,.45); }
-	.reise-vorschlaege li { margin: 0; }
-	.reise-vorschlaege button { display: flex; justify-content: space-between; gap: 10px; width: 100%; padding: 7px 11px; background: none; border: 0; border-radius: 0; text-align: left; font-size: var(--text-bedienung); }
-	.reise-vorschlaege button:hover, .reise-vorschlaege button:focus { background: var(--fläche-hell); }
-	.reise-vorschlaege small { color: var(--schwach); white-space: nowrap; }
-	.reise-zeile { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; }
-	.reise-knopf { font-size: var(--text-normal); padding: 10px 16px; color: var(--grund); background: var(--gold); border-color: var(--gold); font-weight: bold; }
-	.reise-leise { color: var(--schwach); font-size: var(--text-bedienung); background: none; border: 1px solid var(--rand); }
-	.reise-block { margin: 26px 0; }
-	.reise-block h3 { margin: 0 0 8px; }
-	.reise-kette { list-style: none; margin: 0; padding: 0; counter-reset: schritt; }
-	.reise-kette li { position: relative; padding: 10px 0 10px 42px; border-bottom: 1px solid var(--rand); }
-	.reise-kette li::before { counter-increment: schritt; content: counter(schritt); position: absolute; left: 0; top: 10px; width: 26px; height: 26px; border-radius: 50%; background: var(--fläche-hell); border: 1px solid var(--rand); color: var(--gold); font-size: var(--text-bedienung); display: flex; align-items: center; justify-content: center; }
-	.reise-kette .station { font-weight: bold; }
-	.reise-kette .art { margin-left: 6px; font-size: var(--text-bedienung); }
-	.reise-kette .art.schnell { color: var(--gold); }
-	.reise-kette .art.langsam { color: var(--schwach); }
-	.reise-kette .preis { color: var(--schwach); font-size: var(--text-bedienung); display: block; }
-	.reise-summe { display: flex; flex-wrap: wrap; gap: 18px; margin: 12px 0 0; color: var(--schwach); font-size: var(--text-bedienung); }
-	.reise-hinweis { border-left: 3px solid var(--gold); padding-left: 12px; color: var(--schwach); }
-	.reise-umweg { margin: 18px 0 0; border-top: 1px solid var(--rand); padding-top: 10px; }
-	.reise-umweg summary { cursor: pointer; color: var(--gold); font-size: var(--text-bedienung); }
-	.reise-umweg[open] summary { margin-bottom: 8px; }
-	.reise-umweg .reise-kette li { padding-top: 8px; padding-bottom: 8px; }
-	.reise-fehler { color: #f0a63c; }
-	.reise-ports { columns: 2 260px; margin: 0; padding-left: 18px; }
-	.reise-ports li { break-inside: avoid; margin-bottom: 6px; }
-	@media (max-width: 860px) {
-		.reise-formular { grid-template-columns: 1fr; }
-	}
-</style>
 </head>
 <body data-seite="reise" class="seite-text">
 
@@ -65,43 +29,56 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 	</div>
 </header>
 
-<main class="seite">
-	<h2 data-t="reise_titel">Reise</h2>
-	<p data-t="reise_einleitung"></p>
+<main class="seite reise" id="reise">
+	<aside class="reise-panel">
+		<h2 data-t="reise_titel">Reise</h2>
+		<p class="reise-einleitung" data-t="reise_einleitung"></p>
 
-	<form class="reise-formular" id="reise-formular" autocomplete="off">
-		<div class="reise-feld">
-			<label for="reise-von" data-t="reise_von">Wo bin ich?</label>
-			<input id="reise-von" type="text" data-t-ph="reise_von_platz" aria-autocomplete="list" aria-controls="reise-von-liste">
-			<ul class="reise-vorschlaege" id="reise-von-liste" hidden></ul>
-		</div>
-		<div class="reise-feld">
-			<label for="reise-nach" data-t="reise_nach">Wohin?</label>
-			<input id="reise-nach" type="text" data-t-ph="reise_nach_platz" aria-autocomplete="list" aria-controls="reise-nach-liste">
-			<ul class="reise-vorschlaege" id="reise-nach-liste" hidden></ul>
-		</div>
-		<div class="reise-zeile">
+		<form class="reise-formular" id="reise-formular" autocomplete="off">
+			<div class="reise-feld reise-feld-von">
+				<span class="reise-marke" aria-hidden="true"></span>
+				<label for="reise-von" data-t="reise_von">Wo bin ich?</label>
+				<input id="reise-von" type="text" data-t-ph="reise_von_platz"
+					aria-autocomplete="list" aria-controls="reise-von-liste" aria-expanded="false">
+				<ul class="reise-vorschlaege" id="reise-von-liste" role="listbox" hidden></ul>
+			</div>
+			<button type="button" class="reise-tausch" id="reise-tauschen" aria-label="Start und Ziel tauschen">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+					stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M7 4v13"/><path d="m4 14 3 3 3-3"/><path d="M17 20V7"/><path d="m14 10 3-3 3 3"/>
+				</svg>
+			</button>
+			<div class="reise-feld reise-feld-nach">
+				<span class="reise-marke reise-marke-ziel" aria-hidden="true"></span>
+				<label for="reise-nach" data-t="reise_nach">Wohin?</label>
+				<input id="reise-nach" type="text" data-t-ph="reise_nach_platz"
+					aria-autocomplete="list" aria-controls="reise-nach-liste" aria-expanded="false">
+				<ul class="reise-vorschlaege" id="reise-nach-liste" role="listbox" hidden></ul>
+			</div>
 			<button type="submit" class="reise-knopf" data-t="reise_knopf">Weg zeigen</button>
-		</div>
-	</form>
+		</form>
 
-	<p class="reise-hilfe" data-t-html="reise_von_hilfe"></p>
-	<p class="reise-zeile">
-		<button type="button" class="reise-leise" id="reise-tauschen" data-t="reise_tauschen">Start und Ziel tauschen</button>
-		<button type="button" class="reise-leise" id="reise-beispiel" data-t="reise_beispiel_knopf">Beispiel laden</button>
-	</p>
+		<p class="reise-hilfe" data-t-html="reise_von_hilfe"></p>
+		<p class="reise-zeile">
+			<button type="button" class="reise-leise" id="reise-beispiel" data-t="reise_beispiel_knopf">Beispiel laden</button>
+		</p>
 
-	<section id="reise-ergebnis" class="reise-block" aria-live="polite"></section>
+		<section id="reise-ergebnis" class="reise-ergebnis" aria-live="polite"></section>
 
-	<section class="reise-block">
-		<h3 data-t="reise_klasse">Deine Klassenports</h3>
-		<p class="reise-hilfe" data-t="reise_klasse_hinweis"></p>
-		<div class="reise-zeile">
-			<label for="reise-klasse" class="reise-hilfe" data-t="reise_klasse_waehlen">Klasse</label>
+		<details class="reise-skills" id="reise-skills">
+			<summary data-t="reise_klasse">Reisefertigkeiten deiner Klasse</summary>
+			<p class="reise-hilfe" data-t="reise_klasse_hinweis"></p>
+			<label for="reise-klasse" data-t="reise_klasse_waehlen">Klasse</label>
 			<select id="reise-klasse" class="reise-klasse"></select>
-		</div>
-		<ul class="reise-ports" id="reise-ports"></ul>
-	</section>
+			<ul class="reise-ports" id="reise-ports"></ul>
+		</details>
+	</aside>
+
+	<div class="reise-buehne" id="reise-buehne">
+		<img class="reise-welt" id="reise-welt" alt="" decoding="async">
+		<p class="reise-welt-hinweis" id="reise-welt-hinweis" data-t="reise_welt_hinweis"></p>
+		<div class="reise-karten" id="reise-karten" hidden></div>
+	</div>
 </main>
 
 <script src="texte.js"></script>
