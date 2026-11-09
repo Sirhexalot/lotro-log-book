@@ -69,6 +69,11 @@ kleine Datei und läuft nicht durch den Katalog.
 - **Titel-, Tugend-, Rezept-, Berufs-, Gebiets- und Regionsseiten.**
 - **Gegenstandsseiten** (52.798 je Sprache): Werte, Boni, Vorkommen, Quellen,
   Herstellung, Verwendung, Set-Zusammenhang, Weg in die Gegenstandssuche.
+- **Gegenstandssuche**: Baumfilter Kategorie → Art/Hand/Klasse → Platz aus den
+  Client-Feldern `category`, `class`, `equipmentCategory`, `slot`, `armourType`
+  und `weaponType`; Schmuck ist die Client-Klasse „Geschmeide“ mit Ring,
+  Armband, Ohrring, Halskette und Talisman. Eine Auswahl ist ein Zweig, nicht
+  ein loses Einzelfeld.
 - **Listen und Übersichten**: Typindizes mit 200 Einträgen je Seite,
   Seitennavigation, Gegenstände nach Art und Seltenheit (auch kombiniert),
   Handwerks- und Katalogseite. Insgesamt 3.252 Seiten in drei Sprachen.

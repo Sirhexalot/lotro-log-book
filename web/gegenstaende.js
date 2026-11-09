@@ -1,8 +1,9 @@
 /* Item browser: one search field, facets on the left, results on the right.
  *
  * Data comes from gegenstaende-<sprache>.js (build_gegenstandssuche.py): every
- * item with name, symbol, category, quality, slot, type and level. Nothing here
- * invents values; unknown stays "ohne Angabe" and is only offered when it occurs.
+ * item with name, symbol, category, quality, slot, type, class and level.
+ * Nothing here invents values; unknown stays empty and is only offered when it
+ * occurs. The groups are the game's own words (Geschmeide, Ring, Kopf …).
  */
 (function () {
 	'use strict';
@@ -20,8 +21,21 @@
 	var mehr = document.getElementById('gs-mehr');
 	if (!formular || !filterFeld || !liste) { return; }
 
-	var S = { q: '', kat: [], qual: [], platz: [], art: [], von: null, bis: null, sichtbar: 50 };
+	/* A filter is a path through the tree: every level the user opened adds one
+	 * condition. "Leichte Rüstung › Füße" therefore stays one branch and does
+	 * not also tick feet in medium and heavy armour. */
+	var S = { q: '', pfade: [], qual: [], von: null, bis: null, sichtbar: 50 };
 	var daten = null;
+
+	var FELD = { kat: 3, qual: 4, platz: 5, art: 6, stufe: 7, klasse: 8, gattung: 9 };
+	/* The order people look for, not the alphabet: armour from light to heavy,
+	 * weapons from the main hand outwards. Everything else stays alphabetical. */
+	var REIHENFOLGE = {
+		art: ['LIGHT', 'MEDIUM', 'HEAVY', 'SHIELD', 'HEAVY_SHIELD', 'WARDEN_SHIELD'],
+		platz: ['MAIN_HAND', 'EITHER_HAND', 'RANGED_ITEM', 'OFF_HAND', 'CLASS_SLOT', 'BRIDLE']
+	};
+	var BAUM_OFFEN = {};
+	var BAUM_MEHR = {};
 
 	function falten(text) {
 		return String(text || '').toLowerCase()
@@ -47,17 +61,58 @@
 		return falten(S.q).split(/\s+/).filter(Boolean);
 	}
 
+	function pfadPasst(pfad, z) {
+		for (var name in pfad) {
+			if (!Object.prototype.hasOwnProperty.call(pfad, name)) { continue; }
+			if (pfad[name] !== z[FELD[name]]) { return false; }
+		}
+		return true;
+	}
+
+	function pfadSchluessel(pfad) {
+		return Object.keys(pfad).sort().map(function (name) {
+			return name + ':' + pfad[name];
+		}).join('|');
+	}
+
+	function pfadGleich(a, b) {
+		return pfadSchluessel(a) === pfadSchluessel(b);
+	}
+
+	function pfadGewaehlt(pfad) {
+		return S.pfade.some(function (gewaehlt) { return pfadGleich(gewaehlt, pfad); });
+	}
+
+	/** True when the selected path lies inside this branch. */
+	function pfadEnthaelt(zweig, pfad) {
+		for (var name in zweig) {
+			if (!Object.prototype.hasOwnProperty.call(zweig, name)) { continue; }
+			if (zweig[name] !== pfad[name]) { return false; }
+		}
+		return true;
+	}
+
+	function pfadUmschalten(pfad, an) {
+		var stelle = -1;
+		S.pfade.forEach(function (gewaehlt, nummer) {
+			if (pfadGleich(gewaehlt, pfad)) { stelle = nummer; }
+		});
+		if (an && stelle < 0) { S.pfade.push(pfad); }
+		if (!an && stelle >= 0) { S.pfade.splice(stelle, 1); }
+		S.sichtbar = 50;
+		zeichnen();
+	}
+
 	function passt(z, ohne) {
-		var aus = Array.isArray(ohne) ? ohne : (ohne ? [ohne] : []);
-		function gilt(name) { return aus.indexOf(name) < 0; }
-		if (gilt('kat') && S.kat.length && S.kat.indexOf(z[3]) < 0) { return false; }
-		if (gilt('qual') && S.qual.length && S.qual.indexOf(z[4]) < 0) { return false; }
-		if (gilt('platz') && S.platz.length && S.platz.indexOf(z[5]) < 0) { return false; }
-		if (gilt('art') && S.art.length && S.art.indexOf(z[6]) < 0) { return false; }
-		if (gilt('stufe') && (S.von !== null || S.bis !== null)) {
+		if (ohne !== 'qual' && S.qual.length && S.qual.indexOf(z[4]) < 0) { return false; }
+		if (ohne !== 'stufe' && (S.von !== null || S.bis !== null)) {
 			var stufe = z[7] || 0;
 			if (S.von !== null && stufe < S.von) { return false; }
 			if (S.bis !== null && (stufe === 0 || stufe > S.bis)) { return false; }
+		}
+		if (ohne !== 'baum' && S.pfade.length) {
+			var trifft = S.pfade.some(function (pfad) { return pfadPasst(pfad, z); });
+			if (!trifft) { return false; }
 		}
 		var woerter = begriffe();
 		if (woerter.length) {
@@ -75,7 +130,7 @@
 		var kleinste = Infinity, groesste = 0;
 		daten.e.forEach(function (z) {
 			if (!passt(z, dimension)) { return; }
-			var schluessel = z[{ kat: 3, qual: 4, platz: 5, art: 6, stufe: 7 }[dimension]];
+			var schluessel = z[FELD[dimension]];
 			zaehler[schluessel] = (zaehler[schluessel] || 0) + 1;
 			if (dimension === 'stufe') {
 				kleinste = Math.min(kleinste, z[7]);
@@ -88,13 +143,13 @@
 	/* --- Anzeige ------------------------------------------------------ */
 
 	function beschriftung(dimension, wert) {
-		if (dimension === 'kat') {
-			if (wert === -1) { return T('gs_kat_ohne'); }
-			return (daten.kat[wert] || '');
-		}
+		if (dimension === 'kat') { return (daten.kat[wert] || ''); }
 		if (dimension === 'qual') { return T('gs_qual_' + wert); }
-		if (dimension === 'platz') { return daten.platz[wert] || ''; }
-		return daten.art[wert] || '';
+		var text = (daten[dimension] || [])[wert] || '';
+		// Der Client kennt eine Klasse ohne Namen ("Undef"); solche Gegenstände
+		// sollen nicht stillschweigend aus dem Baum fallen.
+		if (dimension === 'klasse' && wert >= 0 && !text.trim()) { return T('gs_kat_ohne'); }
+		return text;
 	}
 
 	function knopf(haken, text, anzahl, umschalten) {
@@ -187,43 +242,46 @@
 		});
 	}
 
-
 	/* --- Kategoriebaum ------------------------------------------------ */
 
-	/* Wie im Auktionshaus: erst die grobe Kategorie, darunter die Art, darunter
-	 * der Ausrüstungsplatz. Bei Waffen steht die Handart vorn (Fernkampf,
-	 * Haupthand …), weil sie dort die erste sinnvolle Frage ist. */
-	var BAUM_OFFEN = {};
-
+	/* Wie im Auktionshaus: erst die Art des Gegenstands, darunter die nächste
+	 * sinnvolle Frage. Welche Ebenen das sind, sagt die Art selbst – Rüstung
+	 * fragt nach der Rüstungsart, Waffen nach der Hand, Schmuck nach Ring,
+	 * Armband, Ohrring …, und Sonstiges nach der Gegenstandsklasse des Clients. */
 	function baumEbenen(katWert) {
 		var schluessel = (daten.katKey || [])[katWert] || '';
-		if (schluessel === 'WEAPON' || schluessel === 'LEGENDARY_WEAPON') { return ['platz', 'art']; }
 		if (schluessel === 'ARMOUR') { return ['art', 'platz']; }
-		// Plain items are jewellery, trophies and the like: their slot is the
-		// only honest grouping the data offers ("Finger", "Handgelenk", …).
-		if (schluessel === 'ITEM' || schluessel === 'LEGENDARY_ITEM') { return ['platz']; }
+		if (schluessel === 'WEAPON' || schluessel === 'LEGENDARY_WEAPON') { return ['platz', 'art']; }
+		if (schluessel === 'JEWELLERY') { return ['gattung']; }
+		if (schluessel === 'LEGENDARY_ITEM') { return ['platz']; }
+		if (schluessel === 'ITEM') { return ['klasse']; }
 		return [];
 	}
 
-	function baumZaehler() {
-		var zaehler = { kat: {}, art: {}, platz: {}, paar: {} };
-		function plus(schluessel, feld) {
-			zaehler[feld][schluessel] = (zaehler[feld][schluessel] || 0) + 1;
+	function reihenfolge(dimension, a, b) {
+		var rang = REIHENFOLGE[dimension] || [];
+		var schluessel = daten[dimension + 'Key'] || [];
+		var ia = rang.indexOf(schluessel[a]);
+		var ib = rang.indexOf(schluessel[b]);
+		if (ia >= 0 || ib >= 0) {
+			if (ia < 0) { ia = rang.length; }
+			if (ib < 0) { ib = rang.length; }
+			if (ia !== ib) { return ia - ib; }
 		}
-		daten.e.forEach(function (z) {
-			// Die drei Ebenen selbst schraenken die Zaehlung nicht ein, sonst
-			// waere nach dem ersten Haken jeder Nachbar auf 0.
-			if (!passt(z, ['kat', 'art', 'platz'])) { return; }
-			plus(z[3], 'kat'); plus(z[6], 'art'); plus(z[5], 'platz');
-			var paar = z[3] + '|' + z[6] + '|' + z[5];
-			zaehler.paar[paar] = (zaehler.paar[paar] || 0) + 1;
-		});
-		return zaehler;
+		return beschriftung(dimension, a).localeCompare(beschriftung(dimension, b), sprache);
 	}
 
-	function baumKnoten(text, anzahl, ebene, wert, tiefe, hatKinder, offen) {
+	/** Entries that carry a label on this level – no empty knots. */
+	function hatWerte(menge, dimension) {
+		return menge.some(function (z) {
+			return beschriftung(dimension, z[FELD[dimension]]).trim() !== '';
+		});
+	}
+
+	function baumKnoten(block, tiefe, text, anzahl, pfad, hatKinder, offen) {
 		var zeile = eltern('div', null);
 		zeile.className = 'gs-knoten gs-tiefe-' + tiefe;
+		var schluessel = pfadSchluessel(pfad);
 		if (hatKinder) {
 			var pfeil = eltern('button', offen ? '▾' : '▸');
 			pfeil.type = 'button';
@@ -231,7 +289,7 @@
 			pfeil.setAttribute('aria-expanded', offen ? 'true' : 'false');
 			pfeil.setAttribute('aria-label', text);
 			pfeil.addEventListener('click', function () {
-				BAUM_OFFEN[ebene + ':' + wert] = !offen;
+				BAUM_OFFEN[schluessel] = !offen;
 				filterZeichnen();
 			});
 			zeile.appendChild(pfeil);
@@ -240,87 +298,108 @@
 			platzhalter.className = 'gs-pfeil gs-pfeil-leer';
 			zeile.appendChild(platzhalter);
 		}
-		zeile.appendChild(knopf(S[ebene].indexOf(wert) >= 0, text, anzahl || null, function (an) {
-			var stelle = S[ebene].indexOf(wert);
-			if (an && stelle < 0) { S[ebene].push(wert); }
-			if (!an && stelle >= 0) { S[ebene].splice(stelle, 1); }
-			S.sichtbar = 50;
-			zeichnen();
+		zeile.appendChild(knopf(pfadGewaehlt(pfad), text, anzahl || null, function (an) {
+			pfadUmschalten(pfad, an);
 		}));
-		return zeile;
+		block.appendChild(zeile);
+	}
+
+	function istOffen(pfad) {
+		var schluessel = pfadSchluessel(pfad);
+		if (BAUM_OFFEN[schluessel] !== undefined) { return BAUM_OFFEN[schluessel]; }
+		// Ein gesetzter Filter muss seinen Zweig aufklappen, sonst ist der Haken
+		// unsichtbar und der Filter scheint wirkungslos.
+		return S.pfade.some(function (gewaehlt) { return pfadEnthaelt(pfad, gewaehlt); });
+	}
+
+	function baumZweig(block, pfad, ebenen, tiefe, menge) {
+		var dimension = ebenen[0];
+		var rest = ebenen.slice(1);
+		var gruppen = {}, reihe = [];
+		menge.forEach(function (z) {
+			var wert = z[FELD[dimension]];
+			if (beschriftung(dimension, wert).trim() === '') { return; }
+			if (!Object.prototype.hasOwnProperty.call(gruppen, wert)) {
+				gruppen[wert] = 0;
+				reihe.push(wert);
+			}
+			gruppen[wert] += 1;
+		});
+		if (dimension === 'klasse') {
+			// The long tail of item classes is not worth opening by default;
+			// the frequent ones come first.
+			reihe.sort(function (a, b) {
+				return gruppen[b] - gruppen[a]
+					|| beschriftung('klasse', a).localeCompare(beschriftung('klasse', b), sprache);
+			});
+		} else {
+			reihe.sort(function (a, b) { return reihenfolge(dimension, a, b); });
+		}
+
+		var grenze = dimension === 'klasse' ? 12 : reihe.length;
+		var schluessel = pfadSchluessel(pfad);
+		var alle = Boolean(BAUM_MEHR[schluessel]);
+		var zeigen = alle ? reihe : reihe.slice(0, grenze);
+
+		zeigen.forEach(function (wert) {
+			var unterpfad = {};
+			Object.keys(pfad).forEach(function (name) { unterpfad[name] = pfad[name]; });
+			unterpfad[dimension] = wert;
+			var untermenge = menge.filter(function (z) { return z[FELD[dimension]] === wert; });
+			var kinder = rest.length > 0 && hatWerte(untermenge, rest[0]);
+			var offen = kinder && istOffen(unterpfad);
+			baumKnoten(block, tiefe, beschriftung(dimension, wert), gruppen[wert],
+				unterpfad, kinder, offen);
+			if (offen) { baumZweig(block, unterpfad, rest, tiefe + 1, untermenge); }
+		});
+
+		if (!alle && reihe.length > grenze) {
+			var weitere = eltern('button', null);
+			weitere.type = 'button';
+			weitere.className = 'gs-mehr-optionen';
+			weitere.textContent = '+ ' + (reihe.length - grenze) + ' ' + T('gs_mehr');
+			weitere.addEventListener('click', function () {
+				BAUM_MEHR[schluessel] = true;
+				filterZeichnen();
+			});
+			var huelle = eltern('div', null);
+			huelle.className = 'gs-knoten gs-tiefe-' + tiefe;
+			var platzhalter = eltern('span', '');
+			platzhalter.className = 'gs-pfeil gs-pfeil-leer';
+			huelle.appendChild(platzhalter);
+			huelle.appendChild(weitere);
+			block.appendChild(huelle);
+		}
 	}
 
 	function kategorieBaum() {
 		var block = eltern('section', null);
 		block.className = 'gs-gruppe gs-baum';
 		block.appendChild(eltern('h2', T('gs_kategorie')));
-		var zaehler = baumZaehler();
 
-		var kats = Object.keys(zaehler.kat).map(Number)
+		// Die Baumebenen selbst filtern hier nicht, sonst stünde nach dem ersten
+		// Haken jeder Nachbar auf 0.
+		var menge = daten.e.filter(function (z) { return passt(z, 'baum'); });
+		var zaehler = {};
+		menge.forEach(function (z) {
+			zaehler[z[3]] = (zaehler[z[3]] || 0) + 1;
+		});
+
+		var kats = Object.keys(zaehler).map(Number)
 			.filter(function (wert) { return beschriftung('kat', wert).trim() !== ''; });
-		S.kat.forEach(function (wert) { if (kats.indexOf(wert) < 0) { kats.push(wert); } });
-		kats.sort(function (a, b) { return (zaehler.kat[b] || 0) - (zaehler.kat[a] || 0); });
+		kats.sort(function (a, b) { return zaehler[b] - zaehler[a]; });
+		if (!kats.length) { return null; }
 
 		kats.forEach(function (katWert) {
-			var kinder = {};
+			var untermenge = menge.filter(function (z) { return z[3] === katWert; });
 			var ebenen = baumEbenen(katWert);
-			daten.e.forEach(function (z) {
-				if (z[3] !== katWert || !passt(z, ['kat', 'art', 'platz'])) { return; }
-				var erste = z[ebenen[0] === 'art' ? 6 : 5];
-				var zweite = z[ebenen[0] === 'art' ? 5 : 6];
-				kinder[erste] = kinder[erste] || {};
-				kinder[erste][zweite] = (kinder[erste][zweite] || 0) + 1;
-			});
-			var ersteWerte = Object.keys(kinder).map(Number)
-				.filter(function (wert) { return beschriftung(ebenen[0], wert).trim() !== ''; })
-				.sort(function (a, b) {
-					return beschriftung(ebenen[0], a).localeCompare(beschriftung(ebenen[0], b), 'de');
-				});
-			// Ein gesetzter Filter muss seinen Zweig aufklappen, sonst ist der
-			// Haken unsichtbar und der Filter scheinbar wirkungslos.
-			function hatAuswahl() {
-				return ersteWerte.some(function (ersteWert) {
-					if (S[ebenen[0]].indexOf(ersteWert) >= 0) { return true; }
-					if (!ebenen[1]) { return false; }
-					return Object.keys(kinder[ersteWert]).some(function (zweite) {
-						return S[ebenen[1]].indexOf(Number(zweite)) >= 0;
-					});
-				});
-			}
-			var offen = BAUM_OFFEN['kat:' + katWert];
-			if (offen === undefined) { offen = hatAuswahl(); }
-			block.appendChild(baumKnoten(beschriftung('kat', katWert), zaehler.kat[katWert],
-				'kat', katWert, 0, ersteWerte.length > 0, offen));
-			if (!offen) { return; }
-			ersteWerte.forEach(function (ersteWert) {
-				var zweiteWerte = Object.keys(kinder[ersteWert]).map(Number)
-					.filter(function (wert) {
-						return !ebeneZweite || beschriftung(ebeneZweite, wert).trim() !== '';
-					});
-				var ebeneErste = ebenen[0];
-				var ebeneZweite = ebenen[1];
-				var offenZweit = BAUM_OFFEN[ebeneErste + ':' + ersteWert];
-				if (offenZweit === undefined) {
-					offenZweit = ebeneZweite ? S[ebeneZweite].some(function (wert) {
-						return zweiteWerte.indexOf(wert) >= 0;
-					}) : false;
-				}
-				var summe = Object.keys(kinder[ersteWert]).reduce(function (a, k) {
-					return a + kinder[ersteWert][k];
-				}, 0);
-				block.appendChild(baumKnoten(beschriftung(ebeneErste, ersteWert), summe,
-					ebeneErste, ersteWert, 1, Boolean(ebeneZweite) && zweiteWerte.length > 0, offenZweit));
-				if (!ebeneZweite || !offenZweit) { return; }
-				zweiteWerte.sort(function (a, b) {
-					return (daten.platz[a] || '').localeCompare(daten.platz[b] || '', 'de');
-				});
-				zweiteWerte.forEach(function (zweiteWert) {
-					block.appendChild(baumKnoten(beschriftung(ebeneZweite, zweiteWert),
-						kinder[ersteWert][zweiteWert], ebeneZweite, zweiteWert, 2, false, false));
-				});
-			});
+			var pfad = { kat: katWert };
+			var kinder = ebenen.length > 0 && hatWerte(untermenge, ebenen[0]);
+			var offen = kinder && istOffen(pfad);
+			baumKnoten(block, 0, beschriftung('kat', katWert), untermenge.length,
+				pfad, kinder, offen);
+			if (offen) { baumZweig(block, pfad, ebenen, 1, untermenge); }
 		});
-		if (!kats.length) { return null; }
 		return block;
 	}
 
@@ -363,7 +442,7 @@
 		zurueck.type = 'button';
 		zurueck.className = 'gs-reset';
 		zurueck.addEventListener('click', function () {
-			S.kat = []; S.qual = []; S.platz = []; S.art = []; S.von = null; S.bis = null;
+			S.pfade = []; S.qual = []; S.von = null; S.bis = null;
 			S.sichtbar = 50;
 			zeichnen();
 		});
@@ -426,8 +505,17 @@
 		var teile = [];
 		if (z[3] >= 0) { teile.push(daten.kat[z[3]]); }
 		if (z[4]) { teile.push(T('gs_qual_' + z[4])); }
-		if (z[5] >= 0) { teile.push(daten.platz[z[5]]); }
-		if (z[6] >= 0) { teile.push(daten.art[z[6]]); }
+		if (z[6] >= 0) {
+			teile.push(daten.art[z[6]]);
+			if (z[5] >= 0) { teile.push(daten.platz[z[5]]); }
+		} else if (z[9] >= 0) {
+			// Schmuck: "Ring" sagt dasselbe wie der Platz "Finger".
+			teile.push(daten.gattung[z[9]]);
+		} else if (z[8] >= 0) {
+			teile.push(daten.klasse[z[8]]);
+		} else if (z[5] >= 0) {
+			teile.push(daten.platz[z[5]]);
+		}
 		if (z[7]) { teile.push(T('gs_stufe') + ' ' + z[7]); }
 		if (teile.length) {
 			var meta = eltern('span', teile.join(' · '));
@@ -440,12 +528,47 @@
 
 	/* --- Adresse ------------------------------------------------------ */
 
+	var BAUM_EBENEN = ['kat', 'art', 'platz', 'klasse', 'gattung'];
+
+	/** A value as a stable key ("ARMOUR", "HEAD", "37"), never a label. */
+	function schluesselWert(dimension, wert) {
+		var schluessel = (daten[dimension + 'Key'] || [])[wert];
+		return schluessel === undefined ? String(wert) : String(schluessel);
+	}
+
+	/** A filter value in the address: a stable key, or an index in older links. */
+	function wertFuer(dimension, roh) {
+		if (roh === '') { return null; }
+		var schluessel = daten[dimension + 'Key'] || [];
+		var stelle = schluessel.indexOf(roh.toUpperCase());
+		if (stelle >= 0) { return stelle; }
+		// Item class and equipment category are identified by their client code;
+		// for those, a bare number is a key, never a position.
+		if (dimension === 'klasse' || dimension === 'gattung') { return null; }
+		if (/^\d+$/.test(roh)) {
+			var nummer = parseInt(roh, 10);
+			if (nummer >= 0 && nummer < (daten[dimension] || []).length) { return nummer; }
+		}
+		return null;
+	}
+
 	function adresseSchreiben() {
 		var parameter = new URLSearchParams();
 		if (S.q) { parameter.set('q', S.q); }
-		['kat', 'qual', 'platz', 'art'].forEach(function (name) {
-			if (S[name].length) { parameter.set(name, S[name].join(',')); }
-		});
+		if (S.pfade.length === 1) {
+			var pfad = S.pfade[0];
+			BAUM_EBENEN.forEach(function (name) {
+				if (pfad[name] === undefined) { return; }
+				parameter.set(name, schluesselWert(name, pfad[name]));
+			});
+		} else if (S.pfade.length > 1) {
+			S.pfade.forEach(function (pfad) {
+				parameter.append('k', Object.keys(pfad).sort().map(function (name) {
+					return name + ':' + schluesselWert(name, pfad[name]);
+				}).join('|'));
+			});
+		}
+		if (S.qual.length) { parameter.set('qual', S.qual.join(',')); }
 		if (S.von !== null) { parameter.set('von', String(S.von)); }
 		if (S.bis !== null) { parameter.set('bis', String(S.bis)); }
 		try {
@@ -453,33 +576,43 @@
 		} catch (fehler) { /* a file:// page may refuse */ }
 	}
 
-	/** A filter value in the address: a number, or a stable key from a
-	 * catalogue page ("ARMOUR", "HEAD", "LIGHT"). Labels are never parsed. */
-	function wertFuer(dimension, roh, kategorien) {
-		if (roh === '') { return null; }
-		var zahlWert = parseInt(roh, 10);
-		if (!isNaN(zahlWert) && String(zahlWert) === roh) { return zahlWert; }
-		if (dimension === 'kat') {
-			var stelle = (daten.katKey || []).indexOf(roh.toUpperCase());
-			return stelle < 0 ? null : stelle;
-		}
-		var schluessel = dimension === 'platz' ? 'platzKey' : dimension === 'art' ? 'artKey' : null;
-		if (!schluessel) { return null; }
-		var index = (daten[schluessel] || []).indexOf(roh.toUpperCase());
-		return index < 0 ? null : index;
-	}
-
 	function adresseLesen() {
 		var parameter;
 		try { parameter = new URLSearchParams(window.location.search); } catch (fehler) { return; }
 		S.q = parameter.get('q') || '';
-		var desKatalogs = daten.kat || [];   // labels, used for the katKey lookup
-		['kat', 'qual', 'platz', 'art'].forEach(function (name) {
-			var roh = parameter.get(name) || '';
-			S[name] = roh.split(',').map(function (teil) {
-				return wertFuer(name, teil.trim(), desKatalogs);
-			}).filter(function (wert) { return wert !== null; });
+		S.pfade = [];
+
+		// Several branches ("Leichte Rüstung › Füße" and "Schwere Rüstung › Füße").
+		parameter.getAll('k').forEach(function (roh) {
+			var pfad = {};
+			roh.split('|').forEach(function (teil) {
+				var trenner = teil.indexOf(':');
+				if (trenner < 0) { return; }
+				var name = teil.slice(0, trenner);
+				if (BAUM_EBENEN.indexOf(name) < 0) { return; }
+				var wert = wertFuer(name, teil.slice(trenner + 1));
+				if (wert !== null) { pfad[name] = wert; }
+			});
+			if (Object.keys(pfad).length) { S.pfade.push(pfad); }
 		});
+		// One branch as plain parameters, the form older links use.
+		if (!S.pfade.length) {
+			var einzeln = {};
+			BAUM_EBENEN.forEach(function (name) {
+				var roh = parameter.get(name);
+				if (!roh) { return; }
+				var wert = wertFuer(name, roh.trim());
+				if (wert !== null) { einzeln[name] = wert; }
+			});
+			if (Object.keys(einzeln).length) { S.pfade.push(einzeln); }
+		}
+
+		var qual = parameter.get('qual') || '';
+		S.qual = qual.split(',').map(function (teil) {
+			var wert = parseInt(teil.trim(), 10);
+			return isNaN(wert) ? null : wert;
+		}).filter(function (wert) { return wert !== null; });
+
 		var von = parseInt(parameter.get('von'), 10);
 		var bis = parseInt(parameter.get('bis'), 10);
 		S.von = isNaN(von) ? null : von;
@@ -488,7 +621,7 @@
 	}
 
 	function aktiveFilter() {
-		return S.kat.length + S.qual.length + S.platz.length + S.art.length
+		return S.pfade.length + S.qual.length
 			+ ((S.von !== null || S.bis !== null) ? 1 : 0);
 	}
 
