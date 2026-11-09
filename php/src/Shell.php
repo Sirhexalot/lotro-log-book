@@ -36,7 +36,12 @@ final class Shell
     /** Tracking snippets, taken from the built index page, never from a visitor. */
     public function tracking(): string
     {
-        $file = $this->webRoot . '/index.html';
+        // A release carries the snippets alone; the old start page stays the
+        // fallback for a local checkout.
+        $file = $this->webRoot . '/tracking.html';
+        if (!is_file($file)) {
+            $file = $this->webRoot . '/index.html';
+        }
         $html = is_file($file) ? (string) file_get_contents($file) : '';
         preg_match_all('/<script\b[^>]*>.*?<\/script>/s', $html, $matches);
         $keep = [];

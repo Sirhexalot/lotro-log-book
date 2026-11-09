@@ -82,8 +82,8 @@
 	window.MQL_ERSETZE = ersetze;
 
 	document.documentElement.lang = sprache;
-	// Start and legal pages keep their own title.
-	if (seiteArt !== 'start' && seiteArt !== 'recht') { document.title = t('titel'); }
+	// The title comes from the page itself (server-rendered since the catalogue
+	// moved to PHP); only views that change content set their own below.
 
 	document.querySelectorAll('[data-t]').forEach(function (element) {
 		element.textContent = t(element.getAttribute('data-t'));

@@ -176,6 +176,35 @@ Deshalb:
   (`LLB_DATA`, `LLB_CACHE`); `vendor/` bleibt im Repo,
 - `Companion-Test` und `MagicQuestLog` bleiben in iCloud und werden nur gelesen.
 
+## Veröffentlichen
+
+Die veröffentlichte Seite ist die PHP-Anwendung; der Dokumentenordner enthält
+Einstiegspunkt, Anwendungsdateien, Daten und Bilder. Gebaut und hochgeladen
+wird in dieser Reihenfolge:
+
+```bash
+python3 tools/build_php_data.py --ziel "$HOME/.cache/llb-php/phpdata"
+python3 tools/build_release.py                    # ~/.cache/llb-release
+python3 upload.py --quelle "$HOME/.cache/llb-release" --workers 8
+python3 tools/umschalten.py --pruefen             # zeigt die neue .htaccess
+python3 tools/umschalten.py                       # sichert die alte, schaltet um
+python3 tools/umschalten.py --test                # Adressen der Live-Seite
+python3 tools/aufraeumen.py --loeschen            # alte HTML-Bestände entfernen
+```
+
+`build_release.py` kopiert `web/`, `webp/` (als `karten/`), `php/`, `vendor/`
+und `phpdata/`, schreibt `index.php`, `tracking.html` und `robots.txt` und lässt
+die alten Anwendungsseiten sowie jedes `fortschritt.js` mit Spielstand weg
+(755 MB, rund 16.800 Dateien).
+
+Umgeschaltet wird **nur** die `.htaccess`: ein markierter Block schickt
+Katalogadressen, alte Anwendungsseiten und Sitemaps an `index.php`, sperrt
+`phpdata/`, `php/`, `vendor/` und `phptmp/` und lässt Bilder, Skripte und Stile
+Dateien bleiben. Die alte Fassung wird vorher unter
+`~/.cache/llb-php/rollback/` gesichert; `--zurueck` lädt sie wieder hoch.
+Die früheren Katalogdateien bleiben zunächst liegen und werden nach der
+Prüfung mit `tools/aufraeumen.py` entfernt.
+
 ## Lokal ausprobieren
 
 ```bash

@@ -33,8 +33,10 @@ final class Router
         if ($path === '/sitemap-seiten.xml') {
             return ['status' => 200, 'sitemap' => $path];
         }
+        // The root was the map application through the host's directory
+        // index; keep that page, now at its language address.
         if ($path === '/') {
-            return ['status' => 404];
+            return ['status' => 301, 'redirect' => '/de/karte/'];
         }
 
         // The item list page is gone: the search page with filters is the way in.

@@ -14,9 +14,12 @@ use Llb\Data;
 use Llb\Page;
 use Llb\Router;
 use Llb\Shell;
+use Llb\Sitemap;
 use Llb\View;
 
-$root = dirname(__DIR__, 2);
+// A release lays the app into the web root; the local checkout keeps it one
+// level above. Both define the root before this file runs.
+$root = getenv('LLB_ROOT') ?: (defined('LLB_ROOT') ? LLB_ROOT : dirname(__DIR__, 2));
 
 // A failing page must never look like a successful one.
 set_exception_handler(static function (Throwable $fehler): void {
@@ -40,7 +43,8 @@ $vendor = getenv('LLB_VENDOR') ?: $root . '/vendor';
 require $vendor . '/autoload.php';
 
 $dataDir = getenv('LLB_DATA') ?: $root . '/phpdata';
-$webRoot = getenv('LLB_WEB') ?: $root . '/web';
+$webRoot = getenv('LLB_WEB')
+    ?: (defined('LLB_WEB_ROOT') ? LLB_WEB_ROOT : $root . '/web');
 $base = getenv('LLB_BASE') ?: 'https://llb.sirhexalot.de';
 $cacheDir = getenv('LLB_CACHE') ?: $root . '/phptmp/twig';
 
