@@ -1,6 +1,8 @@
 # Umbau des Katalogs auf PHP + Twig
 
-Stand: 09.11.2026. Dieser Text beschreibt den Umbau von erzeugten statischen
+Stand: 09.11.2026. **Die Seite ist umgestellt**: seit dem 09.11.2026 liefert
+der PHP-Front-Controller Katalog, Anwendungsseiten und Sitemaps aus; die alten
+HTML-Dateien sind entfernt (siehe „Veröffentlichen“). Dieser Text beschreibt den Umbau von erzeugten statischen
 Katalogseiten zu einer PHP-Anwendung mit gemeinsamen Twig-Vorlagen. Er ist die
 Arbeitsgrundlage für die weiteren Schritte und die Abnahme vor der
 Veröffentlichung.
@@ -134,15 +136,23 @@ Hülle (Titel, Canonical, `hreflang`, Kopfzeile, Fußnote, Skriptliste) steht in
 `menue.js` und `sprache.js` kennen jetzt die neuen Adressen und lesen die
 Sprache aus dem Pfad.
 
-## Noch offen (Reihenfolge der weiteren Arbeit)
+## Erledigt bei der Umschaltung
 
-1. **404 und Rechtstexte** in die Hülle holen (Impressum, Datenschutz, 404).
-2. **Härten**: HEAD-Anfragen, Cache-Kopfzeilen, Datenverzeichnis außerhalb des
-   Webroots, Prüfung von Typ und ID in allen Pfaden.
-3. **Umschaltung**: markierter `.htaccess`-Block für Katalog- und
-   Anwendungsadressen, alter Bestand bleibt als Rückweg liegen.
-4. **Vollständiger Abgleich** aller Seiten und Sitemaps, dann Browserprüfung
-   DE/EN/FR, Desktop und Mobil.
+1. **404 und Rechtstexte** liegen als Dateien im Release; PHP liefert die
+   404-Seite mit echtem Status und `noindex`.
+2. **Härten**: `phpdata/`, `php/`, `vendor/` und `phptmp/` sind per
+   `.htaccess` gesperrt, HTML antwortet mit `Cache-Control: max-age=300`,
+   Sitemaps mit einer Stunde; Typ und ID prüft der Router in jedem Pfad.
+3. **Umschaltung** über `tools/umschalten.py`; die alte `.htaccess` liegt als
+   Sicherung bereit, die alten Katalogdateien wurden danach entfernt.
+4. **Abgleich**: PHP-Adressen, Sitemaps, 301/404 und Browserprüfung DE/EN/FR
+   nach der Umschaltung.
+
+## Noch offen
+
+- **HEAD-Anfragen** und ein eigener Blick auf Fehlerseiten bei kaputten Daten.
+- **Betrieb**: Speicherplatz und Zugriffszeiten der Shards beobachten, Twig-
+  Cache nach Releases leeren (`phptmp/twig`).
 
 ## Abnahme vor der Veröffentlichung
 

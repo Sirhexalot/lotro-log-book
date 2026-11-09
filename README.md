@@ -358,12 +358,17 @@ python3 build_referenz.py                               # reputation/crafting na
 python3 baue_webp.py --sprache de
 python3 baue_webp.py --sprache en
 python3 baue_webp.py --sprache fr
-python3 baue_website.py
+python3 tools/build_php_data.py                         # PHP catalogue data
+python3 tools/build_release.py                          # ~/.cache/llb-release
 ```
 
-Then open `dist-web/` in the browser or upload it. `baue_website.py` tags every
-static script and stylesheet with a hash, so a browser never mixes an old file
-with a new page after an upload.
+**The published site is the PHP application** (since 09.11.2026): one entry
+point, shared Twig templates and prepared data shards instead of ~255,000 HTML
+files. `tools/build_release.py` assembles the release folder, `upload.py`
+uploads it and `tools/umschalten.py` switches the `.htaccess` (or back).
+`python3 baue_website.py` still builds the old static `dist-web/` for
+comparison. The full release and rollback procedure is in
+`docs/php-umbau.md`.
 
 ## Tests
 
