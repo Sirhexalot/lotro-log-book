@@ -37,6 +37,20 @@ final class Router
             return ['status' => 404];
         }
 
+        // The item list page is gone: the search page with filters is the way in.
+        if (preg_match('~^/([a-z]{2})/([a-z]+)/((?:[a-z0-9-]+/)*)$~', $path, $m)
+            && $this->catalogue->isLang($m[1])
+            && $this->catalogue->kindOf($m[1], $m[2]) === 'i') {
+            // A detail page ends in an id ("70043586"), which looks like a word
+            // to the pattern above; only real list paths are redirected.
+            $teile = array_values(array_filter(explode('/', $m[3]), 'strlen'));
+            $letzte = $teile === [] ? '' : end($teile);
+            if (!Catalogue::validId('i', $letzte)) {
+                return ['status' => 301,
+                        'redirect' => $this->catalogue->appRoute($m[1], 'gegenstandssuche')];
+            }
+        }
+
         // Application pages: /de/, /de/karte/, /de/karte/taten/, /de/ruf/ …
         if (preg_match('~^/([a-z]{2})/?$~', $path, $m) && $this->catalogue->isLang($m[1])) {
             return ['status' => 200, 'app' => 'start', 'lang' => $m[1]];

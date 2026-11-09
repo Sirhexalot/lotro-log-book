@@ -149,7 +149,11 @@ final class Shell
             ['text' => $w['familie_' . $family], 'url' => $this->familyTarget($family)],
         ];
         if ($kind !== 'catalog' && $w[$kind . 'list'] !== $w['familie_' . $family]) {
-            $parts[] = ['text' => $w[$kind . 'list'], 'url' => $this->catalogue->route($this->lang, $kind)];
+            // Items have no list page; their breadcrumb leads to the search.
+            $parts[] = ['text' => $w[$kind . 'list'],
+                        'url' => $kind === 'i'
+                            ? $this->catalogue->appRoute($this->lang, 'gegenstandssuche')
+                            : $this->catalogue->route($this->lang, $kind)];
         }
         foreach ($page['crumb_maps'] ?? [] as $map) {
             $parts[] = ['text' => $map['text'], 'url' => $map['url']];

@@ -969,8 +969,9 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
     intro = w['pilot'] if pilot else w['overview']
     pages = {}
 
-    # Plain type indexes, 200 entries per page.
-    for kind in ('q', 'd', 'i', 'area', 'region', 'p', 'recipe', 'title', 'virtue'):
+    # Plain type indexes, 200 entries per page. Items have no list any more:
+    # the search page with its filters is the only way in.
+    for kind in ('q', 'd', 'area', 'region', 'p', 'recipe', 'title', 'virtue'):
         source = {'q': builder.quests, 'd': builder.deeds, 'i': builder.items,
                   'area': data['area'], 'region': data['region'], 'p': data['p'],
                   'recipe': {ident: row for ident, row in data['recipe'].items()},
@@ -999,57 +1000,8 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
             key = w[kind] + '/' + ('' if number == 1 else 'seite/%d/' % number)
             pages[key] = payload
 
-    # Item sub-indexes: category, quality, and both at once.
-    gruppen = []
-    for art in ('ARMOUR', 'WEAPON', 'ITEM', ''):
-        zeilen = [(k, v) for k, v in data['i'].items() if (v.get('kat') or '') == art]
-        if not zeilen or (art == '' and gruppen):
-            continue
-        titel = w.get('kat_' + art.lower()) if art else w['ilist']
-        gruppen.append(({o: route(o, 'i') + katalog.ARTEN[art][o] + '/' for o in ('de', 'en', 'fr')},
-                        titel, zeilen))
-    gueten = {}
-    for k, v in data['i'].items():
-        wert = katalog.GUETE.get(str(v.get('q'))) or int(v.get('q') or 0)
-        if wert:
-            gueten.setdefault(wert, []).append((k, v))
-    for wert in sorted(gueten):
-        gruppen.append(({o: route(o, 'i') + katalog.WORDS[o]['qualityslug'] + '/'
-                         + katalog.GUETE_SLUG[wert][o] + '/' for o in ('de', 'en', 'fr')},
-                        w.get('guete_%d' % wert) or str(wert), gueten[wert]))
-    for art in ('ARMOUR', 'WEAPON', 'ITEM'):
-        for wert in sorted(gueten):
-            zeilen = [(k, v) for k, v in gueten[wert] if (v.get('kat') or '') == art]
-            if not zeilen:
-                continue
-            titel = '%s · %s' % (w.get('kat_' + art.lower()) or art,
-                                 w.get('guete_%d' % wert) or str(wert))
-            gruppen.append(({o: route(o, 'i') + katalog.ARTEN[art][o] + '/'
-                             + katalog.WORDS[o]['qualityslug'] + '/' + katalog.GUETE_SLUG[wert][o] + '/'
-                             for o in ('de', 'en', 'fr')}, titel, zeilen))
-
-    for pfade, titel, zeilen in gruppen:
-        zeilen = _sorted(builder, 'i', zeilen)
-        seiten = max(1, (len(zeilen) + PAGE_SIZE - 1) // PAGE_SIZE)
-        for number in range(1, seiten + 1):
-            teil = zeilen[(number - 1) * PAGE_SIZE:number * PAGE_SIZE]
-            adressen = {o: pfade[o] if number == 1 else pfade[o] + 'seite/%d/' % number
-                        for o in ('de', 'en', 'fr')}
-            key = adressen[lang].lstrip('/').split('/', 1)[1]
-            pages[key] = {
-                'kind': 'i',
-                'page': number,
-                'title': titel,
-                'seo': {'title': titel, 'description': '%s: %s' % (w['ilist'], titel)},
-                'canonical': adressen[lang],
-                'alternates': adressen,
-                'language_urls': {o: route(o, 'i') for o in ('de', 'en', 'fr')},
-                'entries': _entries(builder, 'i', teil),
-                'nav': _nav(w, lang, 'i', number, seiten, pfade) if seiten > 1 else None,
-                'symbol': 'gegenstand',
-                # Item sub-indexes carry no intro: the generator starts with the list.
-                'intro': '',
-            }
+    # Item list pages are gone on purpose: the search page with its filters
+    # is the only way into the item catalogue.
 
     # Craft overview and the catalogue hub.
     pages[w['craft'] + '/'] = {
@@ -1066,7 +1018,8 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
     hub = []
     for kind in ('q', 'd', 'i', 'area', 'region', 'p', 'recipe', 'craft'):
         label = w['craftlist'] if kind == 'craft' else w[kind + 'list']
-        hub.append({'url': route(lang, kind), 'text': label})
+        url = app_url(lang, 'gegenstandssuche') if kind == 'i' else route(lang, kind)
+        hub.append({'url': url, 'text': label})
     pages[w['catalog'] + '/'] = {
         'kind': 'catalog', 'page': 1, 'title': w['cataloglabel'],
         'seo': {'title': w['cataloglabel'], 'description': w['overview']},

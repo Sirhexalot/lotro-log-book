@@ -47,6 +47,7 @@ APP_SEGMENTE = {
            'belohnungen': 'recompenses', 'spielstand': 'progression',
            'companion': 'companion', 'plugin': 'plugin', 'suche': 'recherche'},
 }
+SEARCH_PAGE = {'de': '/de/gegenstandssuche/', 'en': '/en/item-search/', 'fr': '/fr/recherche-objets/'}
 DATEI_ZU_SEITE = {
     'index.html': 'karte', 'gegenstaende.html': 'gegenstandssuche', 'handwerk.html': 'handwerk',
     'reise.html': 'reise', 'ruf.html': 'ruf', 'belohnungen.html': 'belohnungen',
@@ -58,6 +59,8 @@ DATEI_ZU_SEITE = {
 def neue_app_url(url: str) -> str:
     """Rewrite an application URL into its language-path form."""
     from urllib.parse import parse_qsl, urlencode
+    # A fragment like "#map-268437653" belongs to the address, not to a parameter.
+    url, _, marke = url.partition('#')
     pfad, _, abfrage = url.partition('?')
     datei = pfad.rsplit('/', 1)[-1]
     if datei == 'start.html':
@@ -82,7 +85,7 @@ def neue_app_url(url: str) -> str:
     params.pop('art', None)
     ziel = '/' + lang + '/' + APP_SEGMENTE[lang][seite] + '/'
     rest = urlencode(list(params.items()))
-    return ziel + ('?' + rest if rest else '')
+    return ziel + ('?' + rest if rest else '') + ('#' + marke if marke else '')
 
 
 class Canonical(HTMLParser):
@@ -114,6 +117,9 @@ class Canonical(HTMLParser):
             value = '' if value is None else value
             if name in ('href', 'src') and '.html?' in value:
                 value = neue_app_url(value)
+            # The item list page is gone; both sides point at the search now.
+            if name == 'href' and value in ('/de/gegenstand/', '/en/item/', '/fr/objet/'):
+                value = SEARCH_PAGE[value.split('/')[1]]
             if name == 'href' or name == 'src':
                 value = re.sub(r'\?v=[0-9a-f]+', '?v=HASH', value)
             out.append((name, value))

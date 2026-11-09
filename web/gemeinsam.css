@@ -13,6 +13,9 @@ html { font-size: 16px; scrollbar-gutter: stable; }
 body { font-family: var(--schrift); font-size: var(--text-normal); line-height: 1.6; }
 small { font-size: var(--text-bedienung); }
 
+/* Background and line belong to the shell, not to one page's stylesheet:
+   pages without style.css (item search, start) had no header background. */
+.kopf { background: var(--fläche); border-bottom: 1px solid var(--rand); }
 .kopf h1 { margin: 0; font-size: 16px; font-weight: normal; letter-spacing: .04em; }
 .kopf h1 a.logo {
 	display: inline-flex;
