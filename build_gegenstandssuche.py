@@ -18,8 +18,32 @@ DATEN = HIER / 'daten'
 SPRACHEN = ('de', 'en', 'fr')
 
 QUALITY = {'COMMON': 1, 'UNCOMMON': 2, 'RARE': 3, 'INCOMPARABLE': 4, 'LEGENDARY': 5}
-KATEGORIEN = ('ARMOUR', 'WEAPON', 'ITEM')
-EIGENE = {'de': 'Sonstiges', 'en': 'Other', 'fr': 'Divers'}
+# Die Gegenstandsarten des Clients, nicht nur die drei der Ausrüstungsdatei:
+# legendäre Waffen und Gegenstände sowie Essenzen sind eigene Arten.
+KATEGORIEN = ('ARMOUR', 'WEAPON', 'LEGENDARY_WEAPON', 'LEGENDARY_ITEM', 'ESSENCE', 'ITEM')
+KATEGORIE_LABEL = {
+    'de': {'ARMOUR': 'Rüstung', 'WEAPON': 'Waffe', 'LEGENDARY_WEAPON': 'Legendäre Waffe',
+           'LEGENDARY_ITEM': 'Legendärer Gegenstand', 'ESSENCE': 'Essenz', 'ITEM': 'Sonstiges'},
+    'en': {'ARMOUR': 'Armour', 'WEAPON': 'Weapon', 'LEGENDARY_WEAPON': 'Legendary weapon',
+           'LEGENDARY_ITEM': 'Legendary item', 'ESSENCE': 'Essence', 'ITEM': 'Other'},
+    'fr': {'ARMOUR': 'Armure', 'WEAPON': 'Arme', 'LEGENDARY_WEAPON': 'Arme légendaire',
+           'LEGENDARY_ITEM': 'Objet légendaire', 'ESSENCE': 'Essence', 'ITEM': 'Divers'},
+}
+# Zwei Schreibweisen derselben Art (Stufe 100 aufwärts) gehören zusammen.
+KATEGORIE_ALIAS = {'LEGENDARY_WEAPON2': 'LEGENDARY_WEAPON', 'LEGENDARY_ITEM2': 'LEGENDARY_ITEM',
+                   'CARRY_ALL': 'ITEM'}
+
+# Der Client-Export kennt die Art jedes Gegenstands; die Ausrüstungsdatei nur
+# Rüstung, Waffe und den Rest.
+EXPORT_ITEMS = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
+                    '/items-2026-11-08/items.json')
+
+
+def roh_arten() -> dict:
+    if not EXPORT_ITEMS.is_file():
+        return {}
+    daten = json.loads(EXPORT_ITEMS.read_text(encoding='utf-8')).get('items') or {}
+    return {str(ident): (eintrag.get('c') or '') for ident, eintrag in daten.items()}
 
 
 def klare_name(text):
@@ -42,8 +66,8 @@ def qualitaet(wert):
 
 def sprache_datei(sprache, items, typen):
     namen = typen['slot'].get(sprache) or {}
-    kategorien = [typen.get('kind', {}).get(sprache, {}).get(k)
-                  for k in ('a', 'w')] + [EIGENE.get(sprache, 'Sonstiges')]
+    kategorien = [KATEGORIE_LABEL[sprache].get(k, k) for k in KATEGORIEN]
+    arten_roh = roh_arten()
     ruestung = typen['armour'].get(sprache) or {}
     waffen = typen['weapon'].get(sprache) or {}
 
@@ -55,7 +79,8 @@ def sprache_datei(sprache, items, typen):
                           or (item.get('n') or {}).get('en') or '')
         if not name:
             continue
-        kat = (item.get('kat') or '').upper()
+        kat = (arten_roh.get(ident) or item.get('kat') or '').upper()
+        kat = KATEGORIE_ALIAS.get(kat, kat)
         kat = KATEGORIEN.index(kat) if kat in KATEGORIEN else -1
         platz = (item.get('slot') or '').strip()
         platz = ' '.join(platz.split())
@@ -67,7 +92,7 @@ def sprache_datei(sprache, items, typen):
         platz_id = -1
         # Also for plain items: jewellery and the like are only told apart by
         # their slot, and that is what people filter for.
-        if platz and kat in (0, 1, 2):
+        if platz and kat >= 0:
             if platz not in platz_index:
                 platz_index[platz] = len(plaetze)
                 plaetze.append(namen.get(platz) or platz.replace('_', ' ').title())

@@ -197,12 +197,12 @@
 
 	function baumEbenen(katWert) {
 		var schluessel = (daten.katKey || [])[katWert] || '';
-		if (schluessel === 'WEAPON') { return ['platz', 'art']; }
+		if (schluessel === 'WEAPON' || schluessel === 'LEGENDARY_WEAPON') { return ['platz', 'art']; }
 		if (schluessel === 'ARMOUR') { return ['art', 'platz']; }
 		// Plain items are jewellery, trophies and the like: their slot is the
 		// only honest grouping the data offers ("Finger", "Handgelenk", …).
-		if (schluessel === 'ITEM') { return ['platz']; }
-		return ['art'];
+		if (schluessel === 'ITEM' || schluessel === 'LEGENDARY_ITEM') { return ['platz']; }
+		return [];
 	}
 
 	function baumZaehler() {

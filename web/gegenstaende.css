@@ -128,7 +128,8 @@ body { background: var(--grund); color: var(--text); }
 .gs-liste .symbol { width: 26px; height: 26px; vertical-align: -7px; }
 
 /* Kategoriebaum wie im Auktionshaus: Kategorie › Art › Platz. */
-.gs-baum .gs-knoten { display: flex; align-items: center; gap: 2px; }
+.gs-baum .gs-knoten { display: flex; align-items: flex-start; gap: 2px; }
+.gs-baum .gs-option { align-items: flex-start; }
 .gs-baum .gs-option { flex: 1; }
 .gs-pfeil {
 	width: 18px; height: 22px; padding: 0; border: 0; background: none; cursor: pointer;
