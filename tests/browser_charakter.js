@@ -113,8 +113,10 @@ async function main() {
     return neu;
   })()`;
   const importiert = await js(eintrag);
-  // uebernimm meldet { ok, neu, aktualisiert }.
-  pruefe('Charakter übernommen', [importiert.ok, importiert.neu], [true, 1]);
+  // uebernimm meldet { ok, neu, aktualisiert }; je nach vorhandenem Eintrag
+  // ist der Charakter neu oder wird aufgefrischt. Beides ist richtig.
+  pruefe('Charakter übernommen',
+    [importiert.ok, importiert.neu + importiert.aktualisiert], [true, 1]);
 
   // 3. Sicherung herunterladen (das ist der "Download" des Charakters).
   const sicherung = await js('MQL_SPEICHER.sicherung()');
