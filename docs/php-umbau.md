@@ -182,12 +182,18 @@ Deshalb:
 COMPOSER_VENDOR_DIR="$HOME/.cache/llb-php/vendor" composer install
 python3 tools/build_php_labels.py
 python3 tools/build_php_data.py --ziel "$HOME/.cache/llb-php/phpdata"
+python3 tools/vorschau_ordner.py        # Verweise für die Vorschau
 
 LLB_VENDOR="$HOME/.cache/llb-php/vendor" \
 LLB_DATA="$HOME/.cache/llb-php/phpdata" \
 LLB_CACHE="$HOME/.cache/llb-php/twig" \
-php -S 127.0.0.1:8812 -t php/public php/public/router.php
+php -S 127.0.0.1:8812 -t "$HOME/.cache/llb-vorschau" php/public/router.php
 ```
+
+Der Vorschauordner `~/.cache/llb-vorschau` enthält nur Verweise
+(`web/*` und `karten/` → `webp/`). Geht er verloren, baut
+`tools/vorschau_ordner.py` ihn in Sekunden neu; die Daten unter
+`~/.cache/llb-php/phpdata` sind ein eigener Build und bleiben davon unberührt.
 
 Prüfung gegen den bisherigen Stand (Orakel = mit dem alten Generator erzeugte
 Seiten, z. B. unter `/tmp/llb-oracle-full`):

@@ -46,6 +46,7 @@
 			reise_quest_bedingung: 'setzt eine Quest voraus',
 			reise_ruf_bedingung: 'setzt Ruf voraus',
 			reise_stufe_fehlt: 'dein Charakter ist noch zu niedrig',
+			reise_mit_schnell: 'Mit Schnellreise',
 			reise_ohne_schnell: 'Ohne Schnellreise',
 			reise_ohne_schnell_hinweis: 'Wenn eine Schnellreise-Strecke nicht freigeschaltet ist, kommst du so ans Ziel.',
 			reise_port_direkt: 'Direkt mit deiner Reisefertigkeit',
@@ -69,8 +70,6 @@
 			reise_nur_langsam: 'nur Fahrt, keine Schnellreise',
 			reise_auf_karte: 'Auf der Karte zeigen',
 			reise_zurueck: 'Neue Suche',
-			reise_beispiel: 'Beispiel: Michelbinge → Udûn-Brückenkopf',
-			reise_beispiel_knopf: 'Beispiel laden',
 			reise_offen: 'ohne Weg',
 			reise_beschreibung: 'Finde deinen Weg durch Mittelerde: zum nächsten Stallmeister und weiter bis zu deinem Ziel, mit Reisekosten, Mindeststufen und Schnellreise.'
 		},
@@ -115,6 +114,7 @@
 			reise_quest_bedingung: 'needs a quest completed',
 			reise_ruf_bedingung: 'needs reputation',
 			reise_stufe_fehlt: 'your character is below that level',
+			reise_mit_schnell: 'With swift travel',
 			reise_ohne_schnell: 'Without swift travel',
 			reise_ohne_schnell_hinweis: 'If a swift-travel leg is not unlocked, this is the way to your destination.',
 			reise_port_direkt: 'Straight there with your travel skill',
@@ -138,8 +138,6 @@
 			reise_nur_langsam: 'rides only, no swift travel',
 			reise_auf_karte: 'Show on the map',
 			reise_zurueck: 'New search',
-			reise_beispiel: 'Example: Michel Delving → Udûn Foothold',
-			reise_beispiel_knopf: 'Load example',
 			reise_offen: 'no route',
 			reise_beschreibung: 'Find your way across Middle-earth: to the nearest stable-master and onwards to your destination, with fares, level requirements and swift travel.'
 		},
@@ -184,6 +182,7 @@
 			reise_quest_bedingung: 'nécessite une quête',
 			reise_ruf_bedingung: 'nécessite une réputation',
 			reise_stufe_fehlt: 'votre personnage est trop bas en niveau',
+			reise_mit_schnell: 'Avec voyage rapide',
 			reise_ohne_schnell: 'Sans voyage rapide',
 			reise_ohne_schnell_hinweis: 'Si une étape rapide n’est pas débloquée, voici le chemin jusqu’à destination.',
 			reise_port_direkt: 'Directement avec votre compétence de voyage',
@@ -207,8 +206,6 @@
 			reise_nur_langsam: 'trajets lents uniquement',
 			reise_auf_karte: 'Voir sur la carte',
 			reise_zurueck: 'Nouvelle recherche',
-			reise_beispiel: 'Exemple : Michelbinge → Udûn-Brückenkopf',
-			reise_beispiel_knopf: 'Charger l’exemple',
 			reise_offen: 'aucun trajet',
 			reise_beschreibung: 'Trouvez votre chemin en Terre du Milieu : vers le maître d’écurie le plus proche, puis jusqu’à destination, avec les tarifs, niveaux requis et voyages rapides.'
 		}

@@ -397,34 +397,42 @@
 		if (seite) { seite.setAttribute('data-geplant', '1'); }
 	}
 
-	function zeigeWeg(start, ziel) {
-		var vonOrt = start.ort || naechsteStation(start.lat, start.lon);
-		var nachOrt = ziel.ort || naechsteStation(ziel.lat, ziel.lon);
-		if (!vonOrt || !nachOrt) { fehlerText(t('reise_kein_weg')); return; }
+	var routeDaten = null;
 
-		var kette = route(vonOrt.id, nachOrt.id, false);
-		var langsam = route(vonOrt.id, nachOrt.id, true);
-		var charakter = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv ? window.MQL_SPEICHER.aktiv() : null;
-		var meineStufe = charakter && charakter.level ? Number(charakter.level) : 0;
-		ergebnisLeeren();
+	/** Switch between the route as planned and the way without swift travel. */
+	function variantenWahl(daten) {
+		var leiste = eltern('div', null, 'reise-varianten');
+		[['schnell', t('reise_mit_schnell'), daten.schnell.length],
+		 ['langsam', t('reise_ohne_schnell'), daten.langsam.length]].forEach(function (eintrag) {
+			var knopf = eltern('button');
+			knopf.type = 'button';
+			knopf.setAttribute('aria-pressed', String(daten.variante === eintrag[0]));
+			knopf.appendChild(eltern('span', eintrag[1]));
+			knopf.appendChild(eltern('small', schritteText(eintrag[2])));
+			knopf.addEventListener('click', function () {
+				if (daten.variante === eintrag[0]) { return; }
+				daten.variante = eintrag[0];
+				zeichneRoute();
+			});
+			leiste.appendChild(knopf);
+		});
+		return leiste;
+	}
+
+	/** Steps, sum and maps for the chosen variant. */
+	function zeichneRoute() {
+		var daten = routeDaten;
+		if (!daten) { return; }
+		var kette = daten.variante === 'langsam' ? daten.langsam : daten.schnell;
+		ergebnis.textContent = '';
 		ergebnis.appendChild(eltern('h3', t('reise_ergebnis')));
-
-		if (!start.ort) {
-			ergebnis.appendChild(eltern('p', t('reise_naechster') + ': ' + vonOrt.n + ' (' + t('reise_zu_fuss') + ')', 'reise-hinweis'));
+		daten.hinweise.forEach(function (text) {
+			ergebnis.appendChild(eltern('p', text, 'reise-hinweis'));
+		});
+		if (daten.langsam) { ergebnis.appendChild(variantenWahl(daten)); }
+		if (daten.variante === 'langsam') {
+			ergebnis.appendChild(eltern('p', t('reise_ohne_schnell_hinweis'), 'reise-hinweis'));
 		}
-		if (!ziel.ort) {
-			ergebnis.appendChild(eltern('p', t('reise_ziel_station') + ': ' + nachOrt.n, 'reise-hinweis'));
-		}
-
-		if (vonOrt.id === nachOrt.id) {
-			ergebnis.appendChild(eltern('p', t('reise_schon_da') + ' (' + vonOrt.n + ')', 'reise-hinweis'));
-			return;
-		}
-		if (!kette) {
-			ergebnis.appendChild(eltern('p', t('reise_kein_weg'), 'reise-fehler'));
-			return;
-		}
-
 		ergebnis.appendChild(ketteListe(kette));
 
 		var zahlen = summe(kette);
@@ -433,7 +441,7 @@
 		if (zahlen.preis) { fuss.appendChild(eltern('span', t('reise_kosten') + ': ' + silber(zahlen.preis))); }
 		if (zahlen.stufe) {
 			var stufenText = t('reise_stufe') + ' ' + zahlen.stufe;
-			if (meineStufe && meineStufe < zahlen.stufe) {
+			if (daten.meineStufe && daten.meineStufe < zahlen.stufe) {
 				stufenText += ' – ' + t('reise_stufe_fehlt');
 			}
 			fuss.appendChild(eltern('span', stufenText));
@@ -442,29 +450,14 @@
 			: zahlen.schnell ? t('reise_teils_schnell') : t('reise_nur_langsam')));
 		ergebnis.appendChild(fuss);
 
-		if (langsam && langsam.length !== kette.length) {
-			// The way without swift travel, folded away: the planner already
-			// computed it, only the count was shown.
-			var langsamZahlen = summe(langsam);
-			var umweg = eltern('details', null, 'reise-umweg');
-			var griff = eltern('summary');
-			var umwegText = schritteText(langsam.length);
-			if (langsamZahlen.preis) { umwegText += ' · ' + silber(langsamZahlen.preis); }
-			griff.appendChild(document.createTextNode(t('reise_ohne_schnell') + ' (' + umwegText + ')'));
-			umweg.appendChild(griff);
-			umweg.appendChild(eltern('p', t('reise_ohne_schnell_hinweis'), 'reise-hinweis'));
-			umweg.appendChild(ketteListe(langsam));
-			ergebnis.appendChild(umweg);
-		}
-
-		var port = klassenPort(nachOrt.id);
+		var port = klassenPort(daten.nachOrt.id);
 		if (port) {
 			ergebnis.appendChild(eltern('p', t('reise_port_direkt') + ': ' + port.n, 'reise-hinweis'));
 		}
 
 		// Stops in travel order: the departure carries no number, every arrival
 		// carries the step that led to it.
-		var orte = [{ ort: vonOrt, art: 'start', nr: null }];
+		var orte = [{ ort: daten.vonOrt, art: 'start', nr: null }];
 		kette.forEach(function (kante, nummer) {
 			orte.push({
 				ort: nachId[kante.nach],
@@ -473,6 +466,54 @@
 			});
 		});
 		kartenZeigen(orte);
+	}
+
+	function zeigeWeg(start, ziel) {
+		var vonOrt = start.ort || naechsteStation(start.lat, start.lon);
+		var nachOrt = ziel.ort || naechsteStation(ziel.lat, ziel.lon);
+		routeDaten = null;
+		ergebnisLeeren();
+		if (!vonOrt || !nachOrt) { fehlerText(t('reise_kein_weg')); return; }
+
+		var charakter = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv ? window.MQL_SPEICHER.aktiv() : null;
+		var meineStufe = charakter && charakter.level ? Number(charakter.level) : 0;
+		var hinweise = [];
+		if (!start.ort) {
+			hinweise.push(t('reise_naechster') + ': ' + vonOrt.n + ' (' + t('reise_zu_fuss') + ')');
+		}
+		if (!ziel.ort) {
+			hinweise.push(t('reise_ziel_station') + ': ' + nachOrt.n);
+		}
+
+		if (vonOrt.id === nachOrt.id) {
+			ergebnis.appendChild(eltern('h3', t('reise_ergebnis')));
+			hinweise.forEach(function (text) { ergebnis.appendChild(eltern('p', text, 'reise-hinweis')); });
+			ergebnis.appendChild(eltern('p', t('reise_schon_da') + ' (' + vonOrt.n + ')', 'reise-hinweis'));
+			kartenZeigen([{ ort: vonOrt, art: 'ziel', nr: null }]);
+			return;
+		}
+
+		var kette = route(vonOrt.id, nachOrt.id, false);
+		if (!kette) {
+			ergebnis.appendChild(eltern('h3', t('reise_ergebnis')));
+			if (hinweise.length) {
+				hinweise.forEach(function (text) { ergebnis.appendChild(eltern('p', text, 'reise-hinweis')); });
+			}
+			ergebnis.appendChild(eltern('p', t('reise_kein_weg'), 'reise-fehler'));
+			return;
+		}
+		var langsam = route(vonOrt.id, nachOrt.id, true);
+		routeDaten = {
+			vonOrt: vonOrt,
+			nachOrt: nachOrt,
+			schnell: kette,
+			// Only a real alternative is worth a switch; the same chain twice is not.
+			langsam: (langsam && langsam.length !== kette.length) ? langsam : null,
+			variante: 'schnell',
+			hinweise: hinweise,
+			meineStufe: meineStufe
+		};
+		zeichneRoute();
 	}
 
 	/** The class skill that leads straight to this stable, if the class has one. */
@@ -540,19 +581,6 @@
 		zeigeWeg(start, ziel);
 	}
 
-	function beispiel() {
-		var michel = null, udun = null;
-		stationen.forEach(function (ort) {
-			if (!michel && /michel|michelbinge|michel delving/i.test(ort.n)) { michel = ort; }
-			if (!udun && /ud..n.*br..ckenkopf|ud..n foothold/i.test(ort.n)) { udun = ort; }
-		});
-		if (michel && udun) {
-			feldVon.value = michel.n; gewaehlt.von = michel;
-			feldNach.value = udun.n; gewaehlt.nach = udun;
-			auswerten();
-		}
-	}
-
 	function starte(daten) {
 		stationen = daten.knoten.slice();
 		skills = daten.skills || [];
@@ -595,9 +623,6 @@
 				if (a || b) { auswerten(); }
 			});
 		}
-		var knopf = document.getElementById('reise-beispiel');
-		if (knopf) { knopf.title = t('reise_beispiel'); knopf.addEventListener('click', beispiel); }
-
 		// A loaded character suggests its class.
 		var charakter = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv ? window.MQL_SPEICHER.aktiv() : null;
 		if (klassenFeld) {

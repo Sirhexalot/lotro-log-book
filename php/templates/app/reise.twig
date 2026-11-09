@@ -18,7 +18,6 @@
 
 		<form class="reise-formular" id="reise-formular" autocomplete="off">
 			<div class="reise-feld reise-feld-von">
-				<span class="reise-marke" aria-hidden="true"></span>
 				<label for="reise-von" data-t="reise_von">Wo bin ich?</label>
 				<input id="reise-von" type="text" data-t-ph="reise_von_platz"
 					aria-autocomplete="list" aria-controls="reise-von-liste" aria-expanded="false">
@@ -31,7 +30,6 @@
 				</svg>
 			</button>
 			<div class="reise-feld reise-feld-nach">
-				<span class="reise-marke reise-marke-ziel" aria-hidden="true"></span>
 				<label for="reise-nach" data-t="reise_nach">Wohin?</label>
 				<input id="reise-nach" type="text" data-t-ph="reise_nach_platz"
 					aria-autocomplete="list" aria-controls="reise-nach-liste" aria-expanded="false">
@@ -41,10 +39,6 @@
 		</form>
 
 		<p class="reise-hilfe" data-t-html="reise_von_hilfe"></p>
-		<p class="reise-zeile">
-			<button type="button" class="reise-leise" id="reise-beispiel" data-t="reise_beispiel_knopf">Beispiel laden</button>
-		</p>
-
 		<section id="reise-ergebnis" class="reise-ergebnis" aria-live="polite"></section>
 
 		<details class="reise-skills" id="reise-skills">

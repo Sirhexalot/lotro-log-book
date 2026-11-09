@@ -62,19 +62,18 @@ main.reise {
 .reise-feld-von { grid-area: von; }
 .reise-feld-nach { grid-area: nach; }
 
-/* Start dot and destination dot, as on a map. */
-.reise-marke {
-	position: absolute;
-	left: 8px;
-	top: 31px;
-	width: 11px;
-	height: 11px;
-	border-radius: 50%;
-	border: 2px solid var(--gold);
-	background: var(--grund);
-	pointer-events: none;
+/* Start dot and destination dot sit in the field itself: a background image
+ * stays centred whatever the line height does. */
+.reise-feld-von input {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Ccircle cx='7' cy='7' r='5' fill='%2314110e' stroke='%23d6b35a' stroke-width='2'/%3E%3C/svg%3E");
 }
-.reise-marke-ziel { background: var(--gold); box-shadow: 0 0 0 3px rgba(214, 179, 90, .18); }
+.reise-feld-nach input {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Ccircle cx='7' cy='7' r='5' fill='%23d6b35a'/%3E%3C/svg%3E");
+}
+.reise-feld input {
+	background-repeat: no-repeat;
+	background-position: 11px 50%;
+}
 
 .reise-tausch {
 	grid-area: tausch;
@@ -143,18 +142,6 @@ main.reise {
 .reise-vorschlaege button.ist-aktiv { background: var(--fläche-hell); }
 .reise-vorschlaege small { color: var(--schwach); white-space: nowrap; }
 
-.reise-zeile { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0 0; }
-.reise-leise {
-	color: var(--schwach);
-	font-size: var(--text-bedienung);
-	background: none;
-	border: 1px solid var(--rand);
-	border-radius: 4px;
-	padding: 7px 12px;
-	cursor: pointer;
-}
-.reise-leise:hover { color: var(--gold); border-color: var(--gold); }
-
 /* --- Ergebnis in der Leiste -------------------------------------------- */
 
 .reise-ergebnis:empty { display: none; }
@@ -180,6 +167,28 @@ main.reise {
 	font-size: var(--text-bedienung);
 }
 .reise-summe span { white-space: nowrap; }
+
+.reise-varianten {
+	display: flex;
+	margin: 4px 0 12px;
+	border: 1px solid var(--rand);
+	border-radius: 4px;
+	overflow: hidden;
+}
+.reise-varianten button {
+	flex: 1 1 0;
+	padding: 8px 8px;
+	background: var(--fläche);
+	border: 0;
+	border-radius: 0;
+	color: var(--schwach);
+	font-size: var(--text-bedienung);
+	cursor: pointer;
+}
+.reise-varianten button + button { border-left: 1px solid var(--rand); }
+.reise-varianten button:hover { color: var(--text); }
+.reise-varianten button[aria-pressed="true"] { background: var(--fläche-hell); color: var(--gold); }
+.reise-varianten button small { display: block; font-size: .95em; opacity: .8; }
 
 .reise-kette { list-style: none; margin: 0; padding: 0; }
 .reise-schritt {
@@ -293,7 +302,7 @@ main.reise {
 	position: relative;
 	z-index: 2;
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
 	gap: 16px;
 	align-content: start;
 	padding: 18px;
