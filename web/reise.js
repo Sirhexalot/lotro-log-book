@@ -55,6 +55,10 @@
 		return knoten;
 	}
 
+	function schritteText(anzahl) {
+		return anzahl === 1 ? t('reise_schritt_eins') : anzahl + ' ' + t('reise_schritte');
+	}
+
 	function silber(kupfer) {
 		if (kupfer == null) { return null; }
 		var wert = kupfer / 100;
@@ -425,7 +429,7 @@
 
 		var zahlen = summe(kette);
 		var fuss = eltern('p', null, 'reise-summe');
-		fuss.appendChild(eltern('span', kette.length + ' ' + t('reise_schritte')));
+		fuss.appendChild(eltern('span', schritteText(kette.length)));
 		if (zahlen.preis) { fuss.appendChild(eltern('span', t('reise_kosten') + ': ' + silber(zahlen.preis))); }
 		if (zahlen.stufe) {
 			var stufenText = t('reise_stufe') + ' ' + zahlen.stufe;
@@ -444,7 +448,7 @@
 			var langsamZahlen = summe(langsam);
 			var umweg = eltern('details', null, 'reise-umweg');
 			var griff = eltern('summary');
-			var umwegText = langsam.length + ' ' + t('reise_schritte');
+			var umwegText = schritteText(langsam.length);
 			if (langsamZahlen.preis) { umwegText += ' · ' + silber(langsamZahlen.preis); }
 			griff.appendChild(document.createTextNode(t('reise_ohne_schnell') + ' (' + umwegText + ')'));
 			umweg.appendChild(griff);
