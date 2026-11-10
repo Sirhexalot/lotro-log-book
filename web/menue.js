@@ -37,13 +37,16 @@
 	var APP = {
 		de: { start: '', karte: 'karte', taten: 'karte/taten', gegenstandssuche: 'gegenstandssuche',
 			handwerk: 'handwerk/rezepte', reise: 'reise', ruf: 'ruf', belohnungen: 'belohnungen',
-			spielstand: 'spielstand', companion: 'companion', plugin: 'plugin', suche: 'suche' },
+			spielstand: 'spielstand', companion: 'companion', plugin: 'plugin', suche: 'suche',
+			instances: 'instanz' },
 		en: { start: '', karte: 'map', taten: 'map/deeds', gegenstandssuche: 'item-search',
 			handwerk: 'crafting/recipes', reise: 'travel', ruf: 'reputation', belohnungen: 'rewards',
-			spielstand: 'progress', companion: 'companion', plugin: 'plugin', suche: 'search' },
+			spielstand: 'progress', companion: 'companion', plugin: 'plugin', suche: 'search',
+			instances: 'instance' },
 		fr: { start: '', karte: 'carte', taten: 'carte/prouesses', gegenstandssuche: 'recherche-objets',
 			handwerk: 'artisanat/recettes', reise: 'voyage', ruf: 'reputation', belohnungen: 'recompenses',
-			spielstand: 'progression', companion: 'companion', plugin: 'plugin', suche: 'recherche' }
+			spielstand: 'progression', companion: 'companion', plugin: 'plugin', suche: 'recherche',
+			instances: 'instance' }
 	};
 	function app(seite) {
 		var teil = (APP[sprache] || {})[seite];
