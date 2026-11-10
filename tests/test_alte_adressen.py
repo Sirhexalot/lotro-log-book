@@ -105,6 +105,18 @@ class VorlagenTest(unittest.TestCase):
         for alt in ('index.html?lang=', 'belohnungen.html?lang=', 'handwerk.html?lang='):
             self.assertNotIn(alt, text)
 
+    def test_reputation_sources_link_to_the_catalogue(self):
+        # The source rows were built at click time, so the link check above never
+        # saw them: they still led through the old flat "index.html?id=…" form.
+        text = (HIER / 'web' / 'ruf.js').read_text(encoding='utf-8')
+        self.assertNotIn('index.html?', text)
+        self.assertIn("a.href = '/' + sprache + '/' + ART[", text)
+        for sprache in ('de', 'en', 'fr'):
+            for art in ('aufgabe', 'tat', 'quest', 'deed', 'quete', 'prouesse'):
+                if sprache == 'de' and art in ('quest', 'deed', 'quete', 'prouesse'):
+                    continue
+                self.assertIn("'%s'" % art, text)
+
 
 class SeitenmodellTest(unittest.TestCase):
     """The prepared page models must not fall back to old flat addresses."""

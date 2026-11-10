@@ -9,6 +9,10 @@
 	var t = window.MQL_T || function (schluessel) { return schluessel; };
 	var ersetze = window.MQL_ERSETZE || function (muster) { return String(muster); };
 	var sprache = window.MQL_SPRACHE || 'de';
+	// Canonical catalogue segments: the source rows link to the entity pages,
+	// not to the old flat "index.html?id=…" address, which costs a 301 per click.
+	var ART = ({ de: { q: 'aufgabe', d: 'tat' }, en: { q: 'quest', d: 'deed' },
+		fr: { q: 'quete', d: 'prouesse' } })[sprache] || { q: 'aufgabe', d: 'tat' };
 	var referenz = (window.MQL_REFERENZ || {}).fraktionen || {};
 	var aktiv = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv();
 
@@ -100,11 +104,11 @@
 			ziel.appendChild(tr);
 		});
 		// If the filter hides nothing, say so instead of looking broken.
-		if (nur && gezeigt === zeilen.length) {
-			el('anzahl').textContent = ersetze(t('ru_anzahl_alle'), [zeilen.length]);
-		} else {
-			el('anzahl').textContent = ersetze(t('ru_anzahl'), [gezeigt, zeilen.length, oben]);
-		}
+		var alle = nur && gezeigt === zeilen.length;
+		el('anzahl').classList.toggle('alle-begonnen', alle);
+		el('anzahl').textContent = alle
+			? ersetze(t('ru_anzahl_alle'), [zeilen.length])
+			: ersetze(t('ru_anzahl'), [gezeigt, zeilen.length, oben]);
 	}
 
 	// --- Where to get reputation: opens under a faction on click --------
@@ -157,7 +161,7 @@
 				offeneListe.slice(0, 200).forEach(function (q) {
 					var li = document.createElement('li');
 					var a = document.createElement('a');
-					a.href = 'index.html?' + (q[3] === 't' ? 'art=taten&' : '') + 'lang=' + sprache + '&id=' + q[0];
+					a.href = '/' + sprache + '/' + ART[q[3] === 't' ? 'd' : 'q'] + '/' + q[0] + '/';
 					a.textContent = q[1];
 					li.appendChild(a);
 					var info = document.createElement('span');

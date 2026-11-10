@@ -49,6 +49,24 @@ class FraktionenTest(unittest.TestCase):
                     self.assertTrue(quelle.get('name'), '%s %s' % (ident, sprache))
                     self.assertIn(quelle.get('kind'), ('q', 'd', 't'), ident)
 
+    def test_t_is_a_deed_not_a_title(self):
+        """In ruf-quellen-<sprache>.js is `t` a deed. The page labelled it as a
+        title and linked nothing, so this checks the ids against both lists."""
+        titel = json.loads((DATEN / 'titel.json').read_text(encoding='utf-8'))['eintraege']
+        for ident, eintrag in self.fraktionen.items():
+            for quelle in (eintrag.get('sources') or {}).get('de', []):
+                if quelle.get('kind') == 't':
+                    self.assertNotIn(quelle['id'], titel, ident)
+
+    def test_level_and_strength_come_from_the_source(self):
+        # z[2] is the quest level, z[4] the strength 1-6 the old page showed.
+        for ident, eintrag in self.fraktionen.items():
+            for quelle in (eintrag.get('sources') or {}).get('de', []):
+                self.assertIn('level', quelle, ident)
+                self.assertIn('strength', quelle, ident)
+                self.assertGreaterEqual(quelle['strength'], 0, ident)
+                self.assertLessEqual(quelle['strength'], 1000, ident)
+
 
 class LandmarkenTest(unittest.TestCase):
     def setUp(self):

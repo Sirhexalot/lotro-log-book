@@ -543,17 +543,25 @@ def faction_view(builder: ViewBuilder, entry: dict) -> dict:
     gruppen: dict[str, dict] = {}
     for quelle in entry.get('sources') or []:
         art, ident = quelle.get('kind'), quelle.get('id')
-        if art == 'q' and ident in builder.quests:
+        # In ruf-quellen-<sprache>.js is q a quest and t a DEED, not a title.
+        if art in ('q', 't') and ident in builder.quests:
             ziel = route(lang, 'q', ident)
-        elif art == 'd' and ident in builder.deeds:
+        elif art in ('t', 'd') and ident in builder.deeds:
             ziel = route(lang, 'd', ident)
-        elif art == 't' and ident in builder.titles:
-            ziel = route(lang, 'title', ident)
+        elif art == 'i' and ident in builder.items:
+            ziel = route(lang, 'i', ident)
         else:
             ziel = None
-        gruppe = gruppen.setdefault(art or '?', {'kind': art, 'entries': []})
-        gruppe['entries'].append({'url': ziel, 'text': quelle.get('name') or '',
-                                  'extra': quelle.get('place') or ''})
+        gruppe = gruppen.setdefault('q' if art == 'q' else 't', {'kind': art, 'entries': []})
+        stufe = quelle.get('level') or 0
+        staerke = quelle.get('strength') or 0
+        gruppe['entries'].append({
+            'url': ziel, 'text': quelle.get('name') or '',
+            'extra': quelle.get('place') or '',
+            'level': stufe if 0 < stufe < 1000 else None,
+            'strength': staerke if 1 <= staerke <= 6 else None,
+            'bar': '▮' * staerke if 1 <= staerke <= 6 else '',
+        })
 
     return {
         'kind': 'f',
@@ -561,9 +569,11 @@ def faction_view(builder: ViewBuilder, entry: dict) -> dict:
         'name': name,
         'icon': 'fraktion',
         'description': entry.get('desc') or '',
+        'paragraphs': [absatz.strip() for absatz in (entry.get('desc') or '').split('\n\n')
+                       if absatz.strip()],
         'tiers': stufen,
         'start': entry.get('start'),
-        'groups': [gruppen[key] for key in ('q', 'd', 't') if key in gruppen],
+        'groups': [gruppen[key] for key in ('q', 't') if key in gruppen],
         'total': sum(len(gruppe['entries']) for gruppe in gruppen.values()),
         'stand_url': app_url(lang, 'ruf'),
         'seo': {'title': name, 'description': '%s: %s' % (w['flabel'], name)},

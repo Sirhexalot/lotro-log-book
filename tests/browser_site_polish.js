@@ -179,6 +179,41 @@ async page => {
   if (rufAlle.rows !== 10 || rufGefiltert.rows !== 4 || !/von 10/.test(rufGefiltert.label)) {
     throw Error('reputation filter broken: ' + JSON.stringify({ rufAlle, rufGefiltert }));
   }
+  // A character that has begun every faction: the filter cannot hide a row, so
+  // the label must say so instead of leaving the unchanged table looking broken.
+  await page.evaluate(() => {
+    const fraktionen = window.MQL_REFERENZ.fraktionen;
+    const ids = Object.keys(fraktionen).slice(0, 10);
+    const ruf = ids.map((id) => {
+      const f = fraktionen[id];
+      const start = f.start === null || f.start === undefined ? (f.min || 1) : f.start;
+      return [id, Math.min(f.max || start + 1, start + 2), 1000];
+    });
+    localStorage.setItem('mql.charaktere', JSON.stringify({ aktiv: 'T|T|T', liste: {
+      'T|T|T': { key: 'T|T|T', name: 'T', server: 'T', ruf: ruf, quests: [], deeds: [] } } }));
+  });
+  await page.reload();
+  await page.waitForSelector('#zeilen tr', { state: 'visible' });
+  await page.locator('#nur-begonnen').check();
+  await page.waitForTimeout(200);
+  const rufAllesBegonnen = await page.evaluate(() => ({
+    rows: document.querySelectorAll('#zeilen tr').length,
+    label: document.getElementById('anzahl').innerText,
+    betont: document.getElementById('anzahl').classList.contains('alle-begonnen'),
+  }));
+  if (rufAllesBegonnen.rows !== 10 || !/alle 10/.test(rufAllesBegonnen.label) ||
+      !rufAllesBegonnen.betont) {
+    throw Error('reputation "all started" state broken: ' + JSON.stringify(rufAllesBegonnen));
+  }
+  // The source links are built on click, so the static link check never sees
+  // them; they must point at the catalogue, not at the old index.html?id= form.
+  await page.locator('#zeilen tr').first().click();
+  await page.waitForSelector('.quellen', { timeout: 5000 });
+  const quellenLinks = await page.evaluate(() => Array.prototype.map.call(
+    document.querySelectorAll('.quellen a'), a => a.getAttribute('href')));
+  if (quellenLinks.length && !quellenLinks.every(h => /^\/de\/(aufgabe|tat)\/[0-9A-F]{8}\/$/.test(h))) {
+    throw Error('reputation source links not canonical: ' + JSON.stringify(quellenLinks.slice(0, 3)));
+  }
   await page.evaluate(() => localStorage.removeItem('mql.charaktere'));
 
   if (errors.length) throw Error(errors.join('\n'));
