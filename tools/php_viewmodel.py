@@ -739,7 +739,10 @@ def area_view(builder: ViewBuilder, entry: dict, kind: str, members: dict) -> di
         'id': ident,
         'name': entry.get('name') or '',
         'icon': 'region' if kind == 'region' else 'gebiet',
-        'map_url': app_url(lang, 'karte') + '#map-' + ident,
+        # The map of this area at the top of the page, and the button below it
+        # opens the map app with this area preselected.
+        'image': entry.get('bild') or None,
+        'map_url': app_url(lang, 'karte', vorkarte=ident),
         'parent': parent_link,
         'children': [{'url': route(lang, 'area', key), 'text': value.get('name') or ''}
                      for key, value in sorted(body_children, key=lambda row: (row[1].get('name') or '').casefold())],

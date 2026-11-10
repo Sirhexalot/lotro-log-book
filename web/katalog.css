@@ -29,6 +29,9 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 }
 
 /* Quest page: one place gets a map cut with a pin, many places only the count. */
+.katalog-karte-gross { margin: 0 0 14px; max-width: 640px; aspect-ratio: 4 / 3;
+  border: 1px solid var(--rand); border-radius: 4px; overflow: hidden; background: #14110e; }
+.katalog-karte-gross img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .katalog-ort { position: relative; margin: 12px 0; max-width: 320px; aspect-ratio: 4 / 3;
 	border: 1px solid var(--rand); border-radius: 4px; overflow: hidden; background: #14110e; }
 .katalog-ort img { width: 100%; height: 100%; object-fit: cover; display: block; }
