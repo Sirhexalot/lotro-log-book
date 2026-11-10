@@ -64,11 +64,26 @@ def passende_karte(gruppen: dict, region, lat: float, lon: float):
     return max(treffer, key=lambda k: (k.get('tier') or 0, k['north'] - k['south']))
 
 
+def region_von(karte: dict, nach_kennung: dict) -> int:
+    """Walk up to the region map: parents can be areas as well."""
+    aktuell = karte
+    for _ in range(12):
+        if (aktuell.get('tier') or 0) <= 1:
+            break
+        eltern = nach_kennung.get(int(aktuell.get('eltern') or 0))
+        if not eltern:
+            break
+        aktuell = eltern
+    return int(aktuell['idx'])
+
+
 def baue(export: Path) -> dict:
     quellen = export / 'full-dat-en-de-fr-2026-11-03'
     landmarken = json.loads((quellen / 'landmarks.json').read_text(encoding='utf-8'))
     orte = lade_positionen(export / 'did-positions-2026-11-03' / 'positions.jsonl')
-    gruppen = karten_je_region(json.loads((DATEN / 'karten.json').read_text(encoding='utf-8')))
+    karten = json.loads((DATEN / 'karten.json').read_text(encoding='utf-8'))
+    nach_kennung = {int(karte['idx']): karte for karte in karten}
+    gruppen = karten_je_region(karten)
 
     ziele: dict[str, list[str]] = defaultdict(list)
     for eintrag in json.loads((quellen / 'locations.json').read_text(encoding='utf-8')):
@@ -89,13 +104,15 @@ def baue(export: Path) -> dict:
             region = ort.get('region')
             lat, lon = float(ort['latitude']), float(ort['longitude'])
             karte = passende_karte(gruppen, region, lat, lon)
-            seite['lat'], seite['lon'], seite['region'] = lat, lon, region
+            seite['lat'], seite['lon'], seite['game_region'] = lat, lon, region
             if karte:
                 breite = karte['east'] - karte['west']
                 hoehe = karte['north'] - karte['south']
                 seite['map'] = int(karte['idx'])
                 seite['x'] = round((lon - karte['west']) / breite * 100, 2)
                 seite['y'] = round((karte['north'] - lat) / hoehe * 100, 2)
+                seite['region'] = region_von(karte, nach_kennung)
+                seite['area'] = int(karte['idx'])
         else:
             ohne_ort += 1
         seiten[ident] = seite

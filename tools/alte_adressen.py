@@ -30,17 +30,20 @@ APP = {
            'gegenstandssuche': 'gegenstandssuche', 'handwerk': 'handwerk/rezepte',
            'reise': 'reise', 'ruf': 'ruf', 'belohnungen': 'belohnungen',
            'spielstand': 'spielstand', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'suche', 'gegenstand': 'gegenstand', 'auftraggeber': 'auftraggeber'},
+           'suche': 'suche', 'gegenstand': 'gegenstand', 'auftraggeber': 'auftraggeber',
+           'landmarks': 'landmarke'},
     'en': {'start': '', 'karte': 'map', 'taten': 'map/deeds',
            'gegenstandssuche': 'item-search', 'handwerk': 'crafting/recipes',
            'reise': 'travel', 'ruf': 'reputation', 'belohnungen': 'rewards',
            'spielstand': 'progress', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'search', 'gegenstand': 'item', 'auftraggeber': 'quest-giver'},
+           'suche': 'search', 'gegenstand': 'item', 'auftraggeber': 'quest-giver',
+           'landmarks': 'landmark'},
     'fr': {'start': '', 'karte': 'carte', 'taten': 'carte/prouesses',
            'gegenstandssuche': 'recherche-objets', 'handwerk': 'artisanat/recettes',
            'reise': 'voyage', 'ruf': 'reputation', 'belohnungen': 'recompenses',
            'spielstand': 'progression', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'recherche', 'gegenstand': 'objet', 'auftraggeber': 'donneur-de-quete'},
+           'suche': 'recherche', 'gegenstand': 'objet', 'auftraggeber': 'donneur-de-quete',
+           'landmarks': 'site'},
 }
 
 # Legacy file name without ".html" -> application page.

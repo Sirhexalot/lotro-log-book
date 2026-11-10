@@ -1,0 +1,50 @@
+{% extends 'layout.twig' %}
+{# Same filter-browser shell as the quest givers: the classes are the ones
+   sets.css and sets.js already enhance, so checkboxes filter immediately and
+   the tree opens in auftraggeber.js. #}
+{% block inhalt %}
+<div class="sets-browser">
+<h1>{{ lw.title }}</h1><p>{{ lw.intro }}</p>
+<form method="get" action="{{ list_url }}" class="sets-form">
+    <div class="sets-search"><label for="landmark-query">{{ lw.search }}</label><div><input type="search" id="landmark-query" name="q" value="{{ filters.q }}"><button type="submit">{{ lw.search }}</button></div></div>
+    <div class="sets-grid">
+        <details class="sets-filters" open>
+            <summary>{{ lw.filter }}</summary>
+            <p class="schwach">{{ lw.filter_note }}</p>
+            {% if facets.region %}
+            <fieldset class="giver-tree"><legend>{{ lw.wo }}</legend>
+                {% for region in facets.region %}
+                {% set kinder = area_by_region[region.value]|default([]) %}
+                <div class="giver-zweig" data-region="{{ region.value }}">
+                    <div class="giver-region">
+                        {% if kinder %}<button type="button" class="giver-pfeil" aria-expanded="true" aria-label="{{ region.label }}">▾</button>{% else %}<span class="giver-pfeil giver-pfeil-leer"></span>{% endif %}
+                        <label class="sets-option"><input type="checkbox" name="region[]" value="{{ region.value }}"{% if region.checked %} checked{% endif %}><span>{{ region.label }}</span><small>{{ region.count }}</small></label>
+                    </div>
+                    {% if kinder %}<div class="giver-kinder">
+                        {% for option in kinder %}<label class="sets-option giver-kind"><input type="checkbox" name="area[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+                    </div>{% endif %}
+                </div>
+                {% endfor %}
+                {% if area_rest %}<fieldset><legend>{{ lw.area }}</legend>
+                    {% for option in area_rest %}<label class="sets-option"><input type="checkbox" name="area[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+                </fieldset>{% endif %}
+            </fieldset>
+            {% endif %}
+            <fieldset><legend>{{ lw.filter }}</legend>
+                <label class="sets-option"><input type="checkbox" name="mit" value="1"{% if filters.mit == '1' %} checked{% endif %}><span>{{ lw.mit }}</span></label>
+            </fieldset>
+            <div class="sets-filter-actions"><button type="submit">{{ lw.apply }}</button><a href="{{ list_url }}">{{ lw.reset }}</a></div>
+        </details>
+        <section class="sets-results" aria-label="{{ lw.title }}">
+            <p class="sets-count" role="status">{{ (count == 1 ? lw.count_one : lw.count)|replace({'%s': count}) }}</p>
+            <ul class="sets-list">{% for row in landmarks %}<li><a href="{{ row.url }}"><span class="sets-preview"><strong>{{ row.name }}</strong></span><span class="sets-meta">{{ row.meta }}</span></a></li>{% else %}<li>{{ lw.empty }}</li>{% endfor %}</ul>
+            <nav class="sets-pagination" aria-label="{{ lw.title }}">
+                {% if previous_url %}<a href="{{ previous_url }}">‹ {{ lw.previous }}</a>{% endif %}
+                <span>{{ page_label }}</span>
+                {% if next_url %}<a href="{{ next_url }}">{{ lw.next }} ›</a>{% endif %}
+            </nav>
+        </section>
+    </div>
+</form>
+</div>
+{% endblock %}

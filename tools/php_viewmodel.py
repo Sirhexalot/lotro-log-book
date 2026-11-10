@@ -34,17 +34,17 @@ APP_SEGMENTS = {
            'gegenstandssuche': 'gegenstandssuche', 'handwerk': 'handwerk/rezepte',
            'reise': 'reise', 'ruf': 'ruf', 'belohnungen': 'belohnungen',
            'spielstand': 'spielstand', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'suche', 'givers': 'auftraggeber'},
+           'suche': 'suche', 'givers': 'auftraggeber', 'landmarks': 'landmarke'},
     'en': {'start': '', 'karte': 'map', 'taten': 'map/deeds',
            'gegenstandssuche': 'item-search', 'handwerk': 'crafting/recipes',
            'reise': 'travel', 'ruf': 'reputation', 'belohnungen': 'rewards',
            'spielstand': 'progress', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'search', 'givers': 'quest-giver'},
+           'suche': 'search', 'givers': 'quest-giver', 'landmarks': 'landmark'},
     'fr': {'start': '', 'karte': 'carte', 'taten': 'carte/prouesses',
            'gegenstandssuche': 'recherche-objets', 'handwerk': 'artisanat/recettes',
            'reise': 'voyage', 'ruf': 'reputation', 'belohnungen': 'recompenses',
            'spielstand': 'progression', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'recherche', 'givers': 'donneur-de-quete'},
+           'suche': 'recherche', 'givers': 'donneur-de-quete', 'landmarks': 'site'},
 }
 
 
@@ -1083,10 +1083,12 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
     # the search page with its filters is the only way in.
     # 'p' (professions) has no list: every profession address is a 301 to
     # the crafting page, so no page, no navigation and no sitemap entry.
-    for kind in ('q', 'd', 'area', 'region', 'recipe', 'title', 'virtue', 'f', 'l'):
+    # 'l' (landmarks) has its own filter browser as an application page, the
+    # same split as the quest givers.
+    for kind in ('q', 'd', 'area', 'region', 'recipe', 'title', 'virtue', 'f'):
         source = {'q': builder.quests, 'd': builder.deeds, 'i': builder.items,
                   'area': data['area'], 'region': data['region'], 'p': data['p'],
-                  'f': data['f'], 'l': data['l'],
+                  'f': data['f'],
                   'recipe': {ident: row for ident, row in data['recipe'].items()},
                   'title': data['title'], 'virtue': data['virtue']}[kind]
         rows = _sorted(builder, kind, list(source.items()))

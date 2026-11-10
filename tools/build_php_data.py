@@ -189,6 +189,50 @@ def write_list_shards(target: Path, pages: dict) -> int:
     return len(shards)
 
 
+def write_landmark_index(target: Path, lang: str, landmarks: dict, maps: dict) -> None:
+    """The compact index the filter browser reads: one row per landmark.
+
+    Region and area names come from the map table, so a filtered page needs no
+    second lookup. The landmarks without a position keep an empty area and are
+    collected under "no area" in the browser.
+    """
+    labels = {'area': {}, 'region': {}, 'area_region': {}}
+    for idx, entry in maps.items():
+        name = entry.get('name')
+        if not name:
+            continue
+        if entry.get('tier') == 1:
+            labels['region'][str(idx)] = name
+        else:
+            labels['area'][str(idx)] = name
+    for ident, entry in landmarks.items():
+        area = entry.get('area')
+        # A region map is its own area: the region filter already covers it,
+        # so it is no area in the tree and gets no area label.
+        if area is not None and str(area) != str(entry.get('region')):
+            labels['area_region'][str(area)] = str(entry.get('region'))
+    rows = []
+    for ident, entry in landmarks.items():
+        area = entry.get('area')
+        region = entry.get('region')
+        teile = [entry['name']]
+        if area is not None:
+            teile.append(labels['area'].get(str(area), ''))
+        if region is not None:
+            teile.append(labels['region'].get(str(region), ''))
+        rows.append({'id': ident, 'name': entry['name'],
+                     'area': int(area) if area is not None else None,
+                     'region': int(region) if region is not None else None,
+                     'quests': entry.get('quests') or 0,
+                     # lower(), not casefold(): casefold turns ß into ss and the
+                     # PHP side lowercases the query without that change.
+                     'search': ' '.join(teil for teil in teile if teil).lower()})
+    rows.sort(key=lambda row: row['name'].casefold())
+    payload = {'schema': 1, 'lang': lang, 'labels': labels, 'landmarks': rows}
+    (target / lang / 'landmarks-index.json').write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+
+
 def write_pages(target: Path, lang: str, kind: str, pages: dict) -> int:
     """Render-ready view models, one shard per hash bucket.
 
@@ -282,6 +326,8 @@ def language_data(model: dict, lang: str, fraktionen: dict, landmarken: dict) ->
         out['l'][ident] = {
             'id': ident, 'name': name, 'targets': entry.get('targets') or [],
             'map': entry.get('map'), 'lat': entry.get('lat'), 'lon': entry.get('lon'),
+            'area': entry.get('area'), 'region': entry.get('region'),
+            'quests': len(entry.get('targets') or []),
         }
 
     return out
@@ -446,6 +492,7 @@ def main() -> int:
                           for ident, entry in data['l'].items()}
         counts['page-l'] = len(landmark_pages)
         write_pages(target, lang, 'l', landmark_pages)
+        write_landmark_index(target, lang, data['l'], maps)
 
         recipe_pages = {ident: recipe_view(builder, row) for ident, row in data['recipe'].items()}
         counts['page-recipe'] = len(recipe_pages)

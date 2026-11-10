@@ -38,17 +38,20 @@ final class Catalogue
                  'gegenstandssuche' => 'gegenstandssuche', 'handwerk' => 'handwerk/rezepte',
                  'reise' => 'reise', 'ruf' => 'ruf', 'belohnungen' => 'belohnungen',
                  'spielstand' => 'spielstand', 'companion' => 'companion', 'plugin' => 'plugin',
-                  'suche' => 'suche', 'sets' => 'set', 'givers' => 'auftraggeber'],
+                  'suche' => 'suche', 'sets' => 'set', 'givers' => 'auftraggeber',
+                  'landmarks' => 'landmarke'],
         'en' => ['start' => '', 'karte' => 'map', 'taten' => 'map/deeds',
                  'gegenstandssuche' => 'item-search', 'handwerk' => 'crafting/recipes',
                  'reise' => 'travel', 'ruf' => 'reputation', 'belohnungen' => 'rewards',
                  'spielstand' => 'progress', 'companion' => 'companion', 'plugin' => 'plugin',
-                  'suche' => 'search', 'sets' => 'set', 'givers' => 'quest-giver'],
+                  'suche' => 'search', 'sets' => 'set', 'givers' => 'quest-giver',
+                  'landmarks' => 'landmark'],
         'fr' => ['start' => '', 'karte' => 'carte', 'taten' => 'carte/prouesses',
                  'gegenstandssuche' => 'recherche-objets', 'handwerk' => 'artisanat/recettes',
                  'reise' => 'voyage', 'ruf' => 'reputation', 'belohnungen' => 'recompenses',
                  'spielstand' => 'progression', 'companion' => 'companion', 'plugin' => 'plugin',
-                  'suche' => 'recherche', 'sets' => 'ensemble', 'givers' => 'donneur-de-quete'],
+                  'suche' => 'recherche', 'sets' => 'ensemble', 'givers' => 'donneur-de-quete',
+                  'landmarks' => 'site'],
     ];
 
     private array $labels;

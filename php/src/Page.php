@@ -143,6 +143,9 @@ final class Page
         if ($page === 'givers') {
             return (new Givers($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
         }
+        if ($page === 'landmarks') {
+            return (new Landmarks($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
+        }
         // The deeds view is the map with another mode; the crafting browser
         // shares its template with nothing else.
         $template = match ($page) {

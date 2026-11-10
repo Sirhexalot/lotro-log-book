@@ -72,6 +72,11 @@ final class Data
         return $this->read($this->root . '/' . $lang . '/givers-index.json');
     }
 
+    public function landmarkIndex(string $lang): array
+    {
+        return $this->read($this->root . '/' . $lang . '/landmarks-index.json');
+    }
+
     public function has(string $lang, string $kind, string $identifier): bool
     {
         return $this->entity($lang, $kind, $identifier) !== null;
