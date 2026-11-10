@@ -36,7 +36,7 @@ Stand: 08.11.2026. Diese Anleitung gilt für das Repository `lotro-log-book`, **
 - Einträge ohne belegte Position bleiben suchbar und im Katalog, bekommen aber keinen erfundenen Kartenpunkt. Fehlende Zuordnung ist nicht dasselbe wie fehlendes Bild. Unbrauchbare Kartenrahmen bleiben ohne Punkte. Innenkarten wurden erprobt und verworfen; vorhandene technische Unterstützung ist keine Freigabe, namenlose Innenräume wieder einzubauen.
 - Keine Pins aus LOTRO-Wiki oder LOTRO Completionist übernehmen; keine selbstgezeichneten Garan-/MoorMap-Detailbilder. Quellenangabe ist keine Rechtefreigabe. Damien hat die Bibliotheksnutzung erlaubt; das ist **keine** pauschale Freigabe der Spielinhalte durch deren Rechteinhaber.
 - Fehlend im importierten Journal bedeutet weder „nie gespielt“ noch sicher „annehmbar“. Sitzungsspiele und durch erledigte Alternativen ausgeschlossene Aufgaben nicht als machbare offene Aufgaben zählen; ein belegter Abschluss hat Vorrang. Katalogzahlen sind kein Nachweis unabhängig spielbarer Aufgaben.
-- Gemessen an den lokalen Webdaten am 08.11.2026 je Sprache: **15.118 Aufgaben, 5.528 Taten, 6.564 Belohnungsgegenstände, 7.924 Rezepte, 10 Berufe, 220 Gebiete und 6 Regionen**. Zahlen bei Änderungen aus den wirklich gebauten Daten ableiten, nicht aus alten Plugin-/Exportständen übernehmen.
+- Gemessen an den lokalen Webdaten am 08.11.2026 je Sprache: **15.118 Aufgaben, 5.528 Taten, 6.564 Belohnungsgegenstände, 7.924 Rezepte, 10 Berufe, 220 Gebiete und 6 Regionen**; am 10.11.2026 dazu **114 Fraktionen und 2.809 Landmarken**. Zahlen bei Änderungen aus den wirklich gebauten Daten ableiten, nicht aus alten Plugin-/Exportständen übernehmen.
 
 ## Navigation, Karte und Darstellung
 
