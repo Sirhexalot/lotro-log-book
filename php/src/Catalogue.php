@@ -39,19 +39,19 @@ final class Catalogue
                  'reise' => 'reise', 'ruf' => 'ruf', 'belohnungen' => 'belohnungen',
                  'spielstand' => 'spielstand', 'companion' => 'companion', 'plugin' => 'plugin',
                   'suche' => 'suche', 'sets' => 'set', 'givers' => 'auftraggeber',
-                  'landmarks' => 'landmarke'],
+                  'landmarks' => 'landmarke', 'factions' => 'fraktion'],
         'en' => ['start' => '', 'karte' => 'map', 'taten' => 'map/deeds',
                  'gegenstandssuche' => 'item-search', 'handwerk' => 'crafting/recipes',
                  'reise' => 'travel', 'ruf' => 'reputation', 'belohnungen' => 'rewards',
                  'spielstand' => 'progress', 'companion' => 'companion', 'plugin' => 'plugin',
                   'suche' => 'search', 'sets' => 'set', 'givers' => 'quest-giver',
-                  'landmarks' => 'landmark'],
+                  'landmarks' => 'landmark', 'factions' => 'faction'],
         'fr' => ['start' => '', 'karte' => 'carte', 'taten' => 'carte/prouesses',
                  'gegenstandssuche' => 'recherche-objets', 'handwerk' => 'artisanat/recettes',
                  'reise' => 'voyage', 'ruf' => 'reputation', 'belohnungen' => 'recompenses',
                  'spielstand' => 'progression', 'companion' => 'companion', 'plugin' => 'plugin',
                   'suche' => 'recherche', 'sets' => 'ensemble', 'givers' => 'donneur-de-quete',
-                  'landmarks' => 'site'],
+                  'landmarks' => 'site', 'factions' => 'faction'],
     ];
 
     private array $labels;

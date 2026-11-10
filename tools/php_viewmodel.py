@@ -34,17 +34,17 @@ APP_SEGMENTS = {
            'gegenstandssuche': 'gegenstandssuche', 'handwerk': 'handwerk/rezepte',
            'reise': 'reise', 'ruf': 'ruf', 'belohnungen': 'belohnungen',
            'spielstand': 'spielstand', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'suche', 'givers': 'auftraggeber', 'landmarks': 'landmarke'},
+           'suche': 'suche', 'givers': 'auftraggeber', 'landmarks': 'landmarke', 'factions': 'fraktion'},
     'en': {'start': '', 'karte': 'map', 'taten': 'map/deeds',
            'gegenstandssuche': 'item-search', 'handwerk': 'crafting/recipes',
            'reise': 'travel', 'ruf': 'reputation', 'belohnungen': 'rewards',
            'spielstand': 'progress', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'search', 'givers': 'quest-giver', 'landmarks': 'landmark'},
+           'suche': 'search', 'givers': 'quest-giver', 'landmarks': 'landmark', 'factions': 'faction'},
     'fr': {'start': '', 'karte': 'carte', 'taten': 'carte/prouesses',
            'gegenstandssuche': 'recherche-objets', 'handwerk': 'artisanat/recettes',
            'reise': 'voyage', 'ruf': 'reputation', 'belohnungen': 'recompenses',
            'spielstand': 'progression', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'recherche', 'givers': 'donneur-de-quete', 'landmarks': 'site'},
+           'suche': 'recherche', 'givers': 'donneur-de-quete', 'landmarks': 'site', 'factions': 'faction'},
 }
 
 
@@ -617,7 +617,10 @@ def landmark_view(builder: ViewBuilder, entry: dict) -> dict:
         'icon': 'landmarke',
         'place': ort,
         'quests': ziele,
-        'map_link': app_url(lang, 'karte'),
+        # Open the map at this area, not at the overview: `vorkarte` is the
+        # map id the app already understands (it preselects the area).
+        'map_link': app_url(lang, 'karte', vorkarte=entry['map'])
+            if entry.get('map') else app_url(lang, 'karte'),
         'seo': {'title': name, 'description': '%s: %s' % (w['llabel'], name)},
     }
 
@@ -1095,10 +1098,10 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
     # the crafting page, so no page, no navigation and no sitemap entry.
     # 'l' (landmarks) has its own filter browser as an application page, the
     # same split as the quest givers.
-    for kind in ('q', 'd', 'area', 'region', 'recipe', 'title', 'virtue', 'f'):
+    for kind in ('q', 'd', 'area', 'region', 'recipe', 'title', 'virtue'):
         source = {'q': builder.quests, 'd': builder.deeds, 'i': builder.items,
                   'area': data['area'], 'region': data['region'], 'p': data['p'],
-                  'f': data['f'],
+
                   'recipe': {ident: row for ident, row in data['recipe'].items()},
                   'title': data['title'], 'virtue': data['virtue']}[kind]
         rows = _sorted(builder, kind, list(source.items()))

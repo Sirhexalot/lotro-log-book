@@ -233,6 +233,61 @@ def write_landmark_index(target: Path, lang: str, landmarks: dict, maps: dict) -
         json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 
 
+def write_faction_index(target: Path, lang: str, factions: dict,
+                        quests: dict, deeds: dict, maps: dict) -> None:
+    """The filter index for the faction browser.
+
+    A faction has no place of its own, but its reputation sources do: each
+    quest or deed carries the map path (fk) of where it plays. The set of those
+    regions and areas becomes the faction's place list.
+    """
+    labels = {'area': {}, 'region': {}, 'area_region': {}}
+    for idx, entry in maps.items():
+        name = entry.get('name')
+        if not name:
+            continue
+        if entry.get('tier') == 1:
+            labels['region'][str(idx)] = name
+        else:
+            labels['area'][str(idx)] = name
+
+    rows = []
+    for ident, eintrag in factions.items():
+        paare: set[tuple[int, int]] = set()
+        aufgaben = taten = 0
+        for quelle in eintrag.get('sources') or []:
+            art, qid = quelle.get('kind'), quelle.get('id')
+            record = quests.get(qid) if art == 'q' else deeds.get(qid)
+            if not record:
+                continue
+            if art == 'q':
+                aufgaben += 1
+            else:
+                taten += 1
+            fk = record.get('fk') or []
+            if fk:
+                region = int(fk[0])
+                gebiet = int(fk[1]) if len(fk) > 1 else region
+                paare.add((region, gebiet))
+        regionen = {region for region, _ in paare}
+        gebiete = {gebiet for _, gebiet in paare}
+        for region, gebiet in paare:
+            if gebiet != region:
+                labels['area_region'][str(gebiet)] = str(region)
+        teile = [eintrag['name']]
+        for wert in sorted(gebiete):
+            teile.append(labels['area'].get(str(wert))
+                         or labels['region'].get(str(wert)) or '')
+        rows.append({'id': ident, 'name': eintrag['name'],
+                     'regions': sorted(regionen), 'areas': sorted(gebiete),
+                     'quests': aufgaben, 'deeds': taten,
+                     'search': ' '.join(teil for teil in teile if teil).lower()})
+    rows.sort(key=lambda row: row['name'].lower())
+    payload = {'schema': 1, 'lang': lang, 'labels': labels, 'factions': rows}
+    (target / lang / 'factions-index.json').write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+
+
 def write_pages(target: Path, lang: str, kind: str, pages: dict) -> int:
     """Render-ready view models, one shard per hash bucket.
 
@@ -493,6 +548,7 @@ def main() -> int:
         counts['page-l'] = len(landmark_pages)
         write_pages(target, lang, 'l', landmark_pages)
         write_landmark_index(target, lang, data['l'], maps)
+        write_faction_index(target, lang, data['f'], builder.quests, builder.deeds, maps)
 
         recipe_pages = {ident: recipe_view(builder, row) for ident, row in data['recipe'].items()}
         counts['page-recipe'] = len(recipe_pages)
