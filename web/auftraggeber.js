@@ -43,13 +43,22 @@
 	baum();
 
 	// The list remembers its filters, so a detail page can lead back to them.
+	// Givers, factions and landmarks share this script and the same markup, so
+	// the memory key follows the list's language segment. One key for all three
+	// mixed their filters: a landmark area emptied the faction list.
 	var merker = window.MQL_FILTER;
+	var BEREICH = {
+		auftraggeber: 'auftraggeber', 'quest-giver': 'auftraggeber', 'donneur-de-quete': 'auftraggeber',
+		fraktion: 'fraktion', faction: 'fraktion',
+		landmarke: 'landmarke', landmark: 'landmarke', site: 'landmarke'
+	};
 	var baumFeld = document.querySelector('.giver-tree');
 	if (merker && baumFeld) {
 		var sprache = (window.location.pathname.split('/')[1] || 'de');
+		var bereich = BEREICH[window.location.pathname.split('/').filter(Boolean)[1] || ''] || 'auftraggeber';
 		var merken = function () {
 			if (window.location.search) {
-				merker.write('auftraggeber', sprache, window.location.search.slice(1));
+				merker.write(bereich, sprache, window.location.search.slice(1));
 			}
 		};
 		merken();
@@ -60,11 +69,11 @@
 		var zurueck = document.querySelector('.sets-filter-actions a');
 		if (zurueck) {
 			zurueck.addEventListener('click', function () {
-				merker.clear('auftraggeber', sprache);
+				merker.clear(bereich, sprache);
 			});
 		}
 		if (!window.location.search) {
-			var gespeichert = merker.read('auftraggeber', sprache);
+			var gespeichert = merker.read(bereich, sprache);
 			if (gespeichert) {
 				window.location.replace(window.location.pathname + '?' + gespeichert);
 			}

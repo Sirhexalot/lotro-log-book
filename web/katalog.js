@@ -21,6 +21,12 @@
             auftraggeber: 'auftraggeber',
             'quest-giver': 'auftraggeber',
             'donneur-de-quete': 'auftraggeber',
+            // Same script, same markup, own memory key each (see auftraggeber.js).
+            fraktion: 'fraktion',
+            faction: 'fraktion',
+            landmarke: 'landmarke',
+            landmark: 'landmarke',
+            site: 'landmarke',
             handwerk: 'rezepte'
         };
         // Detail pages still link to the old application addresses.
