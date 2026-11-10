@@ -30,7 +30,7 @@
                 </fieldset>{% endif %}
             </fieldset>
             {% endif %}
-            <fieldset><legend>{{ lw.filter }}</legend>
+            <fieldset class="sets-option-group">
                 <label class="sets-option"><input type="checkbox" name="mit" value="1"{% if filters.mit == '1' %} checked{% endif %}><span>{{ lw.mit }}</span></label>
             </fieldset>
             <div class="sets-filter-actions"><button type="submit">{{ lw.apply }}</button><a href="{{ list_url }}">{{ lw.reset }}</a></div>
