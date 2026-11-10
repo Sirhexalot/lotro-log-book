@@ -205,8 +205,9 @@ def verwaiste_dateien(fern, lokal):
 def dateien_sammeln(basis, nur=None, ohne=None):
     """Files to send, ordered so a half-finished run never shows a broken page.
 
-    Order: entity detail files first, then everything else, then the list pages
-    and last the sitemaps — an index must not promise pages that are not there.
+    Order: entity detail files first, then the prepared data, then code and
+    assets, then the list pages and last the sitemaps — an index must not promise
+    pages that are not there, and a template must not meet a missing data file.
     The filters only look at the top-level folder, so --nur de,en,fr and
     --ohne de,en,fr split one release into two runs.
     """
@@ -225,7 +226,11 @@ def dateien_sammeln(basis, nur=None, ohne=None):
             return 2
         if rel.count('/') == 2 and rel.endswith('.html'):
             return 0
-        return 1
+        # Prepared data before code: a new template must never meet a missing
+        # or half-written index file.
+        if rel.startswith('phpdata/'):
+            return 1
+        return 1.5
 
     aus = []
     for pfad in basis.rglob('*'):
