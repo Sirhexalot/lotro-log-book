@@ -84,6 +84,9 @@ body { background: var(--grund); color: var(--text); }
 
 /* --- Results --------------------------------------------------------- */
 .gs-stand { margin: 0 0 10px; color: var(--schwach); font-size: .875rem; }
+.gs-sortierung { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; margin: 0 0 10px; font-size: .875rem; }
+.gs-sortierung select { font: inherit; color: var(--text); background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; padding: .2rem .4rem; }
+.gs-sortierung select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .gs-ergebnis { list-style: none; margin: 0; padding: 0; }
 .gs-ergebnis li { border-bottom: 1px solid var(--rand); }
 .gs-zeile {

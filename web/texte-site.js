@@ -3,6 +3,9 @@
 	'use strict';
 	var texte = {
 		de: {
+			menue_sets: 'Sets', d_sets: 'Zusammengehörige Ausrüstung und ihre Setboni',
+			menue_auftraggeber: 'Auftraggeber', d_auftraggeber: 'Wer welche Aufgaben vergibt',
+			hw_filter: 'Filter', hw_zuruecksetzen: 'Zurücksetzen', hw_kategorie: 'Kategorie', hw_alle_kategorien: 'Alle Kategorien', hw_mehr: 'Weitere Rezepte', hw_weitere_angaben: 'Weitere Angaben', hw_sort: 'Sortierung', hw_sort_name: 'Name', hw_sort_stufe: 'Stufe',
 			nav_menu: 'Menü', nav_sprache: 'Sprache', nav_filter: 'Fortschritt filtern', nav_karten: 'Karten',
 			footer_recht: 'Impressum', footer_datenschutz: 'Datenschutz',
 			ds_titel: 'Datenschutz', ds_verantwortlich: 'Verantwortlicher',
@@ -18,6 +21,9 @@
 			ds_stand: 'Stand: 6. November 2026'
 		},
 		en: {
+			menue_sets: 'Sets', d_sets: 'Matching equipment and its set bonuses',
+			menue_auftraggeber: 'Quest givers', d_auftraggeber: 'Who gives which quests',
+			hw_filter: 'Filters', hw_zuruecksetzen: 'Reset', hw_kategorie: 'Category', hw_alle_kategorien: 'All categories', hw_mehr: 'More recipes', hw_weitere_angaben: 'More details', hw_sort: 'Sort', hw_sort_name: 'Name', hw_sort_stufe: 'Level',
 			nav_menu: 'Menu', nav_sprache: 'Language', nav_filter: 'Filter progress', nav_karten: 'Maps',
 			footer_recht: 'Legal notice', footer_datenschutz: 'Privacy',
 			ds_titel: 'Privacy', ds_verantwortlich: 'Controller',
@@ -33,6 +39,9 @@
 			ds_stand: 'Last updated: 6 November 2026'
 		},
 		fr: {
+			menue_sets: 'Ensembles', d_sets: 'Les pièces assorties et leurs bonus d’ensemble',
+			menue_auftraggeber: 'Donneurs de quête', d_auftraggeber: 'Qui donne quelles quêtes',
+			hw_filter: 'Filtres', hw_zuruecksetzen: 'Réinitialiser', hw_kategorie: 'Catégorie', hw_alle_kategorien: 'Toutes les catégories', hw_mehr: 'Autres recettes', hw_weitere_angaben: 'Autres informations', hw_sort: 'Tri', hw_sort_name: 'Nom', hw_sort_stufe: 'Niveau',
 			nav_menu: 'Menu', nav_sprache: 'Langue', nav_filter: 'Filtrer la progression', nav_karten: 'Cartes',
 			footer_recht: 'Mentions légales', footer_datenschutz: 'Confidentialité',
 			ds_titel: 'Confidentialité', ds_verantwortlich: 'Responsable du traitement',

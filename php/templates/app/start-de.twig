@@ -15,15 +15,14 @@
 	<p class="dach">Der Herr der Ringe Online</p>
 	<h2>Dein Begleiter durch <em>Mittelerde</em>.</h2>
 	<p class="lead">Eine Geschichte weiterspielen, eine offene Tat vollenden oder ein seltenes Rezept finden? Schlag dein Logbuch auf. Hier findest du Aufgaben, Gegenstände und Wege durch die Lande. Mit deinem Spielstand behältst du im Blick, was deine Charaktere schon erlebt haben.</p>
-	<form class="suche-start" action="suche.html" method="get" role="search">
-		<input type="hidden" name="lang" value="de">
+	<form class="suche-start" action="/de/suche/" method="get" role="search">
 		<label class="nur-leser" for="start-suche">Im Logbuch suchen</label>
 		<input id="start-suche" type="search" name="q" placeholder="Aufgabe, Gegenstand, Titel oder Reiseziel" autocomplete="off">
 		<button type="submit" class="knopf">Suchen</button>
 	</form>
 	<p class="einstieg">
-		<a class="knopf" href="index.html?lang=de">Zur Karte</a>
-		<a class="knopf sekundaer" href="spielstand.html?lang=de">Spielstand importieren</a>
+		<a class="knopf" href="/de/karte/">Zur Karte</a>
+		<a class="knopf sekundaer" href="/de/spielstand/">Spielstand importieren</a>
 	</p>
 </section>
 
@@ -41,39 +40,39 @@
 	<h3 id="familien-titel">Was hast du als Nächstes vor?</h3>
 	<div class="familien-karten">
 		<article class="familie-karte">
-			<h4><a href="index.html?lang=de">Welt</a></h4>
+			<h4><a href="/de/karte/">Welt</a></h4>
 			<p>Folge der epischen Geschichte oder schau, was es abseits des Weges noch zu entdecken gibt.</p>
 			<ul>
-				<li><a href="index.html?lang=de">Aufgaben</a>: durch die Landschaften und Buch für Buch</li>
-				<li><a href="index.html?art=taten&amp;lang=de">Taten</a>: was zu tun ist und was dir noch fehlt</li>
-				<li><a href="reise.html?lang=de">Reise</a>: dein Weg von Stallmeister zu Stallmeister</li>
+				<li><a href="/de/karte/">Aufgaben</a>: durch die Landschaften und Buch für Buch</li>
+				<li><a href="/de/karte/taten/">Taten</a>: was zu tun ist und was dir noch fehlt</li>
+				<li><a href="/de/reise/">Reise</a>: dein Weg von Stallmeister zu Stallmeister</li>
 			</ul>
 		</article>
 		<article class="familie-karte">
-			<h4><a href="/de/gegenstand/">Gegenstände</a></h4>
+			<h4><a href="/de/gegenstandssuche/">Gegenstände</a></h4>
 			<p>Ein besserer Bogen, Holz für die Werkbank oder etwas für den Kochtopf? Hier kannst du nachschlagen.</p>
 			<ul>
-				<li><a href="/de/gegenstand/">Gegenstände</a>: Werte vergleichen und Fundorte nachschlagen</li>
-				<li><a href="handwerk.html?lang=de#rezepte">Handwerk</a>: Rezepte, Zutaten und Rohstoffe</li>
-				<li><a href="/de/beruf/">Berufe</a>: von den ersten Versuchen zur Meisterschaft</li>
+				<li><a href="/de/gegenstandssuche/">Gegenstände</a>: Werte vergleichen und Fundorte nachschlagen</li>
+				<li><a href="/de/handwerk/rezepte/">Handwerk</a>: Rezepte, Zutaten und Rohstoffe</li>
+				<li><a href="/de/handwerk/rezepte/">Berufe</a>: von den ersten Versuchen zur Meisterschaft</li>
 			</ul>
 		</article>
 		<article class="familie-karte">
-			<h4><a href="belohnungen.html?lang=de">Erfolge</a></h4>
+			<h4><a href="/de/belohnungen/">Erfolge</a></h4>
 			<p>Ein neuer Titel oder eine stärkere Tugend: Finde ein Ziel, für das sich der Aufbruch lohnt.</p>
 			<ul>
-				<li><a href="belohnungen.html?lang=de">Belohnungen</a>: was deine Aufgaben und Taten einbringen</li>
+				<li><a href="/de/belohnungen/">Belohnungen</a>: was deine Aufgaben und Taten einbringen</li>
 				<li><a href="/de/titel/">Titel</a>: wie du sie dir verdienst</li>
-				<li><a href="/de/tugend/">Tugenden</a> und <a href="ruf.html?lang=de">Ruf</a>: deine nächsten Ziele</li>
+				<li><a href="/de/tugend/">Tugenden</a> und <a href="/de/ruf/">Ruf</a>: deine nächsten Ziele</li>
 			</ul>
 		</article>
 		<article class="familie-karte">
-			<h4><a href="spielstand.html?lang=de">Dein Charakter</a></h4>
+			<h4><a href="/de/spielstand/">Dein Charakter</a></h4>
 			<p>Du bist schon weit gekommen. Behalte deine Abenteuer und dein Handwerk im Blick.</p>
 			<ul>
-				<li><a href="spielstand.html?lang=de">Spielstand importieren</a>: deinen Fortschritt übernehmen</li>
-				<li><a href="/de/beruf/">Meine Berufe</a>: was du kannst und noch lernen möchtest</li>
-				<li><a href="ruf.html?lang=de">Mein Ruf</a>: wo du dir einen Namen gemacht hast</li>
+				<li><a href="/de/spielstand/">Spielstand importieren</a>: deinen Fortschritt übernehmen</li>
+				<li><a href="/de/handwerk/rezepte/">Meine Berufe</a>: was du kannst und noch lernen möchtest</li>
+				<li><a href="/de/ruf/">Mein Ruf</a>: wo du dir einen Namen gemacht hast</li>
 			</ul>
 		</article>
 	</div>
@@ -82,37 +81,37 @@
 <section class="neuigkeiten" aria-labelledby="neu-titel">
 	<h3 id="neu-titel">Neu im Logbuch</h3>
 	<article class="neuigkeit">
-		<p class="datum"><time datetime="2026-11-08">8. November 2026</time></p>
-		<h4>Deiner nächsten Aufgabe auf der Spur</h4>
-		<p>Wo beginnt sie, was musst du vorher erledigen und welche Belohnung wartet auf dich? Schau nach, wie die Aufgaben zusammenhängen und wo die Geschichte weitergeht. <a href="/de/aufgabe/70071D89/">Aufgabe ansehen</a></p>
+		<p class="datum"><time datetime="2026-11-09">9. November 2026</time></p>
+		<h4>Rezepte gezielt finden</h4>
+		<p>Suche nach Ergebnis oder Zutat und grenze die Rezepte nach Beruf, Handwerksstufe und Kategorie ein. Mit importiertem Lernstand kannst du bekannte Rezepte ausblenden. <a href="/de/handwerk/rezepte/">Zum Handwerk</a></p>
 	</article>
 	<article class="neuigkeit">
-		<p class="datum"><time datetime="2026-11-08">8. November 2026</time></p>
-		<h4>Die passende Ausrüstung, der nächste Aufbruch</h4>
-		<p>Suche Gegenstände nach Art und Qualität und schlage ihre Werte nach. Und wenn die Schnellreise noch nicht freigeschaltet ist, hilft dir der Reiseplaner, einen anderen Weg zu finden. <a href="/de/gegenstand/ruestung/qualitaet/legendaer/">Legendäre Rüstung ansehen</a></p>
+		<p class="datum"><time datetime="2026-11-09">9. November 2026</time></p>
+		<h4>Wo finde ich Holz und Erz?</h4>
+		<p>Öffne bei einer Zutat „Wo bekomme ich das?“. Dort findest du belegte Fundgebiete mit Kartenlinks oder die passenden Herstellungsrezepte für Bretter und Barren. <a href="/de/handwerk/rezepte/#rohstoffe">Rohstoffe nachschlagen</a></p>
 	</article>
 	<article class="neuigkeit">
-		<p class="datum"><time datetime="2026-11-06">6. November 2026</time></p>
-		<h4>Belohnungen, Rezepte und Ruf</h4>
-		<p>Welcher Titel fehlt dir noch? Welche Tat stärkt deine Tugenden? Finde die passenden Belohnungen, schlage Zutaten für dein Handwerk nach und entdecke Aufgaben, die deinen Ruf verbessern. <a href="belohnungen.html?lang=de">Belohnungen entdecken</a></p>
+		<p class="datum"><time datetime="2026-11-09">9. November 2026</time></p>
+		<h4>Dein Spielstand, ohne Umwege</h4>
+		<p>Wähle deinen Companion-Ordner und übernimm deine Charaktere. Die Anleitung ist bei Bedarf verlinkt; deine vorhandenen Charaktere erscheinen direkt darunter. <a href="/de/spielstand/">Spielstand importieren</a></p>
 	</article>
 </section>
 
 <figure class="bild">
-	<a href="index.html?lang=de"><img src="bild/start.jpg" alt="Aufgabenkarte von Breeland im LOTRO Log Book" loading="lazy" width="1280" height="860"></a>
+	<a href="/de/karte/"><img src="bild/start.jpg" alt="Aufgabenkarte von Breeland im LOTRO Log Book" loading="lazy" width="1280" height="860"></a>
 	<figcaption>Unterwegs in Breeland: Aufgaben finden und den nächsten Weg planen.</figcaption>
 </figure>
 
 <section class="import" aria-labelledby="import-titel">
 	<h3 id="import-titel">Mit deinem Spielstand</h3>
 	<p>So viele Wege liegen schon hinter dir. Übernimm deinen Spielstand mit LOTRO Companion und sieh nach, welche Aufgaben und Taten du vollendet hast, welche Rezepte du kennst und wie dein Ruf steht. Deine Charakterdaten bleiben auf deinem Rechner.</p>
-	<p><a class="knopf sekundaer" href="spielstand.html?lang=de">Spielstand importieren</a> <a href="companion.html?lang=de">So geht es mit LOTRO Companion</a></p>
+	<p><a class="knopf sekundaer" href="/de/spielstand/">Spielstand importieren</a> <a href="/de/companion/">So geht es mit LOTRO Companion</a></p>
 </section>
 
 <section class="plugin" aria-labelledby="plugin-titel">
 	<h3 id="plugin-titel">Auch im Spiel: Magic Quest Log</h3>
 	<p>Das zugehörige Plugin zeigt Aufgaben, Taten und deinen Fortschritt direkt in LOTRO. Für diese Website brauchst du es nicht.</p>
-	<p><a class="knopf sekundaer" href="plugin.html?lang=de">Plugin fürs Spiel</a></p>
+	<p><a class="knopf sekundaer" href="/de/plugin/">Plugin fürs Spiel</a></p>
 </section>
 
 <section class="feedback">
@@ -122,7 +121,7 @@
 </main>
 {% endblock %}
 
-{% block fuss %}<footer><p>LOTRO Log Book · <a href="impressum.html?lang=de">Impressum</a> · <a href="datenschutz.html?lang=de">Datenschutz</a></p></footer>{% endblock %}
+{% block fuss %}<footer><p>LOTRO Log Book · <a href="/impressum.html?lang=de">Impressum</a> · <a href="/datenschutz.html?lang=de">Datenschutz</a></p></footer>{% endblock %}
 
 {% block skripte %}
 <script src="/texte.js?v={{ asset_stand }}" defer></script>

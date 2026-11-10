@@ -18,7 +18,8 @@ from urllib.parse import urlencode
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from build_katalogseiten import WORDS, old_link, route, escape  # noqa: E402
+from build_katalogseiten import WORDS, route, escape  # noqa: E402
+from giver_viewmodel import giver_url  # noqa: E402
 
 
 def klarer_name(text) -> str:
@@ -33,17 +34,17 @@ APP_SEGMENTS = {
            'gegenstandssuche': 'gegenstandssuche', 'handwerk': 'handwerk/rezepte',
            'reise': 'reise', 'ruf': 'ruf', 'belohnungen': 'belohnungen',
            'spielstand': 'spielstand', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'suche'},
+           'suche': 'suche', 'givers': 'auftraggeber'},
     'en': {'start': '', 'karte': 'map', 'taten': 'map/deeds',
            'gegenstandssuche': 'item-search', 'handwerk': 'crafting/recipes',
            'reise': 'travel', 'ruf': 'reputation', 'belohnungen': 'rewards',
            'spielstand': 'progress', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'search'},
+           'suche': 'search', 'givers': 'quest-giver'},
     'fr': {'start': '', 'karte': 'carte', 'taten': 'carte/prouesses',
            'gegenstandssuche': 'recherche-objets', 'handwerk': 'artisanat/recettes',
            'reise': 'voyage', 'ruf': 'reputation', 'belohnungen': 'recompenses',
            'spielstand': 'progression', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'recherche'},
+           'suche': 'recherche', 'givers': 'donneur-de-quete'},
 }
 
 
@@ -52,6 +53,16 @@ def app_url(lang: str, page: str, **params) -> str:
     segment = APP_SEGMENTS[lang][page]
     url = '/' + lang + '/' + (segment + '/' if segment else '')
     return url + ('?' + urlencode(params) if params else '')
+
+
+def beruf_url(lang: str, key: str | None = None) -> str:
+    """Profession addresses are 301s to the crafting page: link that directly.
+
+    `/de/beruf/COOK/` answers 301 to `/de/handwerk/rezepte/?beruf=COOK`, and
+    the recipe page reads that parameter, so the canonical address is the
+    filtered crafting page.
+    """
+    return app_url(lang, 'handwerk', **({'beruf': key} if key else {}))
 
 
 def sauber(text) -> str:
@@ -301,7 +312,8 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
         'chips': chips,
         'description': quest.get('d') or '',
         'place': place,
-        'giver': ({'url': app_url(lang, 'suche', q=quest['g']),
+        'giver': ({'url': giver_url(lang, quest['gi']) if quest.get('gi')
+                   else app_url(lang, 'suche', q=quest['g']),
                    'text': quest['g']} if quest.get('g') else None),
         'area_trail': area_trail,
         'requirements': requirements,
@@ -456,7 +468,7 @@ def deed_view(builder: ViewBuilder, deed: dict, index: dict, categories: dict) -
         'icon': 'tat',
         'chips': chips,
         'description': deed.get('d') or '',
-        'map_link': old_link(lang, 'd', deed['i']),
+        'map_link': app_url(lang, 'taten', id=deed['i']),
         'place': place,
         'facts': facts,
         'rewards_fixed': fixed,
@@ -495,9 +507,9 @@ def honor_view(builder: ViewBuilder, art: str, entry: dict) -> dict:
         extra = ' · '.join(part for part in (sort, region, zone) if part)
         reference = None
         if kind == 'q':
-            reference = route(lang, 'q', qid) if qid in builder.quests else old_link(lang, 'q', qid)
+            reference = route(lang, 'q', qid) if qid in builder.quests else app_url(lang, 'karte', id=qid)
         elif kind == 'd':
-            reference = route(lang, 'd', qid) if qid in builder.deeds else old_link(lang, 'd', qid)
+            reference = route(lang, 'd', qid) if qid in builder.deeds else app_url(lang, 'taten', id=qid)
         sources.append({'url': reference, 'text': qname, 'extra': extra})
     return {
         'kind': art,
@@ -519,18 +531,21 @@ def recipe_view(builder: ViewBuilder, row: list) -> dict:
     profession_name = ((entry.get('n') or {}).get(lang)
                        or (entry.get('n') or {}).get('en') or profession)
 
-    def part(item_part):
+    def part(item_part, optional=False):
         name = item_part[0]
         amount = item_part[1]
-        icon = item_part[2] if len(item_part) > 2 else None
+        icon_index, id_index = (3, 4) if optional else (2, 3)
+        icon = item_part[icon_index] if len(item_part) > icon_index else None
+        identifier = item_part[id_index] if len(item_part) > id_index else None
         link = builder.item_link(name)
         return {'icon': icon, 'amount': amount, 'text': name,
-                'url': link['url'] if link else None}
+                'url': route(lang, 'i', identifier) if identifier and identifier in builder.items
+                else (link['url'] if link else None)}
 
     ingredients = [part(entry) for entry in row[6]]
     optional = []
     for entry in row[7]:
-        item = part(entry)
+        item = part(entry, optional=True)
         if len(entry) > 2 and entry[2]:
             item['chance'] = round(entry[2] * 100, 2)
         optional.append(item)
@@ -541,7 +556,7 @@ def recipe_view(builder: ViewBuilder, row: list) -> dict:
         'name': row[0],
         'icon': 'rezept',
         'symbol': row[16] if len(row) > 16 else None,
-        'profession': {'url': route(lang, 'p', profession), 'text': profession_name},
+        'profession': {'url': beruf_url(lang, profession), 'text': profession_name},
         'profession_key': profession,
         'tier': row[4],
         'category': row[5],
@@ -553,8 +568,8 @@ def recipe_view(builder: ViewBuilder, row: list) -> dict:
         'chance': row[12] if len(row) > 12 and row[12] else None,
         # The generator prints the stored float as-is ("7.0 s").
         'time': str(row[13]) if len(row) > 13 and row[13] else None,
-        'craft_url': old_link(lang, 'recipe', row[10]),
-        'crumb_profession': {'text': profession_name, 'url': route(lang, 'p', profession)},
+        'craft_url': app_url(lang, 'handwerk'),
+        'crumb_profession': {'text': profession_name, 'url': beruf_url(lang, profession)},
         'seo': {'title': row[0],
                 'description': '%s: %s. %s · %s.' % (w['recipelabel'], row[0], row[3], row[4])},
     }
@@ -648,7 +663,7 @@ def profession_view(builder: ViewBuilder, key: str, entry: dict, recipes: list) 
         'id': key,
         'name': entry.get('name') or key,
         'icon': 'beruf',
-        'craft_url': old_link(lang, 'p', key),
+        'craft_url': beruf_url(lang, key),
         'groups': groups,
         'seo': {'title': entry.get('name') or key, 'description': w['overview']},
     }
@@ -823,9 +838,13 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         kind, qid, qname = row[0], row[1], row[2]
         zone = row[3] if len(row) > 3 else ''
         region = row[4] if len(row) > 4 else ''
-        reference = route(lang, kind, qid) if (
-            (kind == 'q' and qid in builder.quests) or (kind == 'd' and qid in builder.deeds)
-            or (kind == 'i' and qid in builder.items)) else old_link(lang, kind, qid)
+        if (kind == 'q' and qid in builder.quests) or (kind == 'd' and qid in builder.deeds) \
+                or (kind == 'i' and qid in builder.items):
+            reference = route(lang, kind, qid)
+        elif kind == 'd':
+            reference = app_url(lang, 'taten', id=qid)
+        else:
+            reference = app_url(lang, 'karte', id=qid)
         sources.append({'url': reference, 'text': qname,
                         'extra': ' › '.join(part for part in (region, zone) if part)})
 
@@ -935,7 +954,8 @@ _KATALOG = None
 def _entries(builder: ViewBuilder, kind: str, rows: list) -> list:
     out = []
     for ident, value in rows:
-        out.append({'url': route(builder.lang, kind, ident),
+        ziel = beruf_url(builder.lang, ident) if kind == 'p' else route(builder.lang, kind, ident)
+        out.append({'url': ziel,
                     'text': builder.name_of(kind, value),
                     'icon': value.get('ic') if kind == 'i' else None})
     return out
@@ -971,7 +991,9 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
 
     # Plain type indexes, 200 entries per page. Items have no list any more:
     # the search page with its filters is the only way in.
-    for kind in ('q', 'd', 'area', 'region', 'p', 'recipe', 'title', 'virtue'):
+    # 'p' (professions) has no list: every profession address is a 301 to
+    # the crafting page, so no page, no navigation and no sitemap entry.
+    for kind in ('q', 'd', 'area', 'region', 'recipe', 'title', 'virtue'):
         source = {'q': builder.quests, 'd': builder.deeds, 'i': builder.items,
                   'area': data['area'], 'region': data['region'], 'p': data['p'],
                   'recipe': {ident: row for ident, row in data['recipe'].items()},
@@ -1018,7 +1040,8 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
     hub = []
     for kind in ('q', 'd', 'i', 'area', 'region', 'p', 'recipe', 'craft'):
         label = w['craftlist'] if kind == 'craft' else w[kind + 'list']
-        url = app_url(lang, 'gegenstandssuche') if kind == 'i' else route(lang, kind)
+        url = (app_url(lang, 'gegenstandssuche') if kind == 'i'
+               else beruf_url(lang) if kind == 'p' else route(lang, kind))
         hub.append({'url': url, 'text': label})
     pages[w['catalog'] + '/'] = {
         'kind': 'catalog', 'page': 1, 'title': w['cataloglabel'],

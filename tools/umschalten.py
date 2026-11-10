@@ -95,6 +95,14 @@ def pruefen() -> int:
         ('/phpdata/labels.json', {403, 404}),
         ('/de/gibtsnicht/', {404}),
         ('/impressum.html', {200}),
+        # Canonical application addresses; the old flat forms redirect here.
+        ('/de/suche/', {200}),
+        ('/de/spielstand/', {200}),
+        ('/de/handwerk/rezepte/', {200}),
+        ('/de/karte/taten/', {200}),
+        # Every profession address is a 301, so none may appear in a sitemap.
+        ('/de/beruf/', {301}),
+        ('/de/beruf/sitemap.xml', {404}),
     ]
     class OhneWeiterleitung(urllib.request.HTTPRedirectHandler):
         """A 301 is the answer we are checking, not a step to follow."""
@@ -121,6 +129,28 @@ def pruefen() -> int:
         if not ok:
             fehler += 1
         print('%-34s %s %s' % (pfad, code, 'ok' if ok else 'ERWARTET %s' % sorted(erwartet)))
+
+    # One public address: every other name answers 301 to llb, path and query
+    # kept. The rule lives in the document root's .htaccess, not in the panel.
+    for name in ('sirhexalot.de', 'www.sirhexalot.de', 'mm.sirhexalot.de'):
+        pfad = '/de/aufgabe/700005C0.html?x=1'
+        erwartet = 'https://llb.sirhexalot.de' + pfad
+        anfrage = urllib.request.Request('https://' + name + pfad,
+                                         headers={'User-Agent': 'llb-umschaltung/1'})
+        try:
+            with oeffner.open(anfrage, timeout=20) as antwort:
+                code, ziel = antwort.status, antwort.headers.get('Location', '')
+        except urllib.error.HTTPError as fehler_http:
+            code, ziel = fehler_http.code, fehler_http.headers.get('Location', '')
+        except Exception as ausnahme:  # noqa: BLE001
+            print('%-34s FEHLER %s' % (name, ausnahme))
+            fehler += 1
+            continue
+        ok = code == 301 and ziel == erwartet
+        if not ok:
+            fehler += 1
+        print('%-34s %s %s' % (name, code,
+                               'ok' if ok else 'ERWARTET 301 -> %s' % erwartet))
     return 1 if fehler else 0
 
 

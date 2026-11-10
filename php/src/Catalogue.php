@@ -15,13 +15,16 @@ final class Catalogue
     private const SEGMENTS = [
         'de' => ['q' => 'aufgabe', 'd' => 'tat', 'i' => 'gegenstand', 'area' => 'gebiet',
                  'region' => 'region', 'catalog' => 'katalog', 'p' => 'beruf', 'recipe' => 'rezept',
-                 'craft' => 'handwerk', 'title' => 'titel', 'virtue' => 'tugend'],
+                  'craft' => 'handwerk', 'title' => 'titel', 'virtue' => 'tugend', 'set' => 'set',
+                  'giver' => 'auftraggeber'],
         'en' => ['q' => 'quest', 'd' => 'deed', 'i' => 'item', 'area' => 'area',
                  'region' => 'region', 'catalog' => 'catalogue', 'p' => 'profession', 'recipe' => 'recipe',
-                 'craft' => 'crafting', 'title' => 'title', 'virtue' => 'virtue'],
+                  'craft' => 'crafting', 'title' => 'title', 'virtue' => 'virtue', 'set' => 'set',
+                  'giver' => 'quest-giver'],
         'fr' => ['q' => 'quete', 'd' => 'prouesse', 'i' => 'objet', 'area' => 'zone',
                  'region' => 'region', 'catalog' => 'catalogue', 'p' => 'metier', 'recipe' => 'recette',
-                 'craft' => 'artisanat', 'title' => 'titre', 'virtue' => 'vertu'],
+                  'craft' => 'artisanat', 'title' => 'titre', 'virtue' => 'vertu', 'set' => 'ensemble',
+                  'giver' => 'donneur-de-quete'],
     ];
 
     /**
@@ -35,17 +38,17 @@ final class Catalogue
                  'gegenstandssuche' => 'gegenstandssuche', 'handwerk' => 'handwerk/rezepte',
                  'reise' => 'reise', 'ruf' => 'ruf', 'belohnungen' => 'belohnungen',
                  'spielstand' => 'spielstand', 'companion' => 'companion', 'plugin' => 'plugin',
-                 'suche' => 'suche'],
+                  'suche' => 'suche', 'sets' => 'set', 'givers' => 'auftraggeber'],
         'en' => ['start' => '', 'karte' => 'map', 'taten' => 'map/deeds',
                  'gegenstandssuche' => 'item-search', 'handwerk' => 'crafting/recipes',
                  'reise' => 'travel', 'ruf' => 'reputation', 'belohnungen' => 'rewards',
                  'spielstand' => 'progress', 'companion' => 'companion', 'plugin' => 'plugin',
-                 'suche' => 'search'],
+                  'suche' => 'search', 'sets' => 'set', 'givers' => 'quest-giver'],
         'fr' => ['start' => '', 'karte' => 'carte', 'taten' => 'carte/prouesses',
                  'gegenstandssuche' => 'recherche-objets', 'handwerk' => 'artisanat/recettes',
                  'reise' => 'voyage', 'ruf' => 'reputation', 'belohnungen' => 'recompenses',
                  'spielstand' => 'progression', 'companion' => 'companion', 'plugin' => 'plugin',
-                 'suche' => 'recherche'],
+                  'suche' => 'recherche', 'sets' => 'ensemble', 'givers' => 'donneur-de-quete'],
     ];
 
     private array $labels;
@@ -156,6 +159,9 @@ final class Catalogue
 
     public static function validId(string $kind, string $identifier): bool
     {
+        if ($kind === 'set' || $kind === 'giver') {
+            return preg_match('/^[0-9A-Fa-f]{8}$/', $identifier) === 1;
+        }
         $pattern = $kind === 'p' ? '/^[A-Z][A-Z_]*$/' : '/^[0-9A-Fa-f]+$/';
         return preg_match($pattern, $identifier) === 1;
     }

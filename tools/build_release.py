@@ -120,10 +120,17 @@ def pruefen(ziel: Path) -> list[str]:
     for name in ('index.php', 'tracking.html', 'style.css', 'gemeinsam.css',
                  '404.html', 'robots.txt', 'vendor/autoload.php',
                  'php/public/index.php', 'phpdata/labels.json',
-                 'phpdata/manifest.json'):
+                 'phpdata/manifest.json', 'sets.css', 'sets.js', 'php/src/Sets.php',
+                 'php/templates/sets/list.twig', 'php/templates/sets/detail.twig',
+                 'auftraggeber.css', 'auftraggeber.js', 'php/src/Givers.php',
+                 'php/templates/givers/list.twig', 'php/templates/givers/detail.twig'):
         if not (ziel / name).is_file():
             fehler.append('fehlt: ' + name)
     for sprache in SPRACHEN:
+        if not (ziel / 'phpdata' / sprache / 'sets-index.json').is_file():
+            fehler.append('fehlt: phpdata/' + sprache + '/sets-index.json')
+        if not (ziel / 'phpdata' / sprache / 'givers-index.json').is_file():
+            fehler.append('fehlt: phpdata/' + sprache + '/givers-index.json')
         if not (ziel / 'karten' / sprache).is_dir():
             fehler.append('fehlt: karten/' + sprache)
     app_stand = ziel / 'fortschritt.js'

@@ -36,15 +36,6 @@
 	});
 	zeigeSystem(system);
 
-	el('mac-kopieren').addEventListener('click', function () {
-		var text = el('mac-befehl').textContent;
-		if (navigator.clipboard) {
-			navigator.clipboard.writeText(text).then(function () {
-				el('mac-kopieren').textContent = t('sp_kopiert');
-			});
-		}
-	});
-
 	// --- Character table ----------------------------------------------------
 	function zahl(wert) { return Number(wert).toLocaleString(t('locale')); }
 
@@ -87,7 +78,7 @@
 			karte.textContent = t('sp_karte');
 			karte.addEventListener('click', function () {
 				speicher.setzeAktiv(eintrag.key);
-				window.location.href = 'index.html?lang=' + sprache;
+				window.location.href = '/index.html?lang=' + sprache;
 			});
 			var weg = document.createElement('button');
 			weg.type = 'button';
@@ -104,12 +95,14 @@
 			zeilen.appendChild(zeile);
 		});
 		var leer2 = !alle.length;
+		el('charaktere').hidden = leer2;
 		el('import-fertig').hidden = leer2;
+		el('sicherung').hidden = leer2;
 		el('sicherung').disabled = leer2;
 	}
 
 	el('fertig-karte').addEventListener('click', function () {
-		window.location.href = 'index.html?lang=' + sprache;
+		window.location.href = '/index.html?lang=' + sprache;
 	});
 
 	// --- Reading Companion's folder ------------------------------------------

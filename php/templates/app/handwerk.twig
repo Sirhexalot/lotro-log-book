@@ -3,14 +3,15 @@
 {% block koerper_attribute %} data-seite="handwerk" class="seite-text"{% endblock %}
 
 {% block stile %}<link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
-<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">{% endblock %}
+<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/handwerk.css?v={{ asset_stand }}">{% endblock %}
 
 {% block kopf_extra %}{% endblock %}
 
 {% block vor_haupt %}{% endblock %}
 
 {% block haupt %}
-<main class="seite">
+<main class="seite handwerk-seite">
 <h2 data-t="hw_titel">Handwerk</h2>
 	<div class="reiter" role="tablist" id="hw-reiter">
 		<button type="button" data-hw="berufe" aria-pressed="true" data-t="hw_berufe">Berufe</button>
@@ -50,8 +51,10 @@
 <script src="/sprache.js?v={{ asset_stand }}" defer></script>
 <script src="/speicher.js?v={{ asset_stand }}" defer></script>
 <script src="/menue.js?v={{ asset_stand }}" defer></script>
+<script src="/filtergedaechtnis.js?v={{ asset_stand }}" defer></script>
 <script src="/referenz.js?v={{ asset_stand }}" defer></script>
 <script src="/handwerk.js?v={{ asset_stand }}" defer></script>
+<script src="/zutaten.js?v={{ asset_stand }}" defer></script>
 <script src="/rezepte.js?v={{ asset_stand }}" defer></script>
 <script src="/rohstoffe.js?v={{ asset_stand }}" defer></script>
 {% endblock %}

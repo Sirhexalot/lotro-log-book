@@ -88,6 +88,12 @@ def baue(katalog_dir, sprache):
         seen.add(name)
         rows.append(['r', row[10], name, '%s · %s' % (row[3], row[4]), row[2]])
 
+    sets = json.loads((HIER / 'daten' / ('sets-suche-%s.json' % sprache)).read_text(encoding='utf-8'))
+    for entry in sets['sets']:
+        rows.append(['s', entry['id'], entry['name'], '', ''])
+    givers = json.loads((HIER / 'daten' / ('auftraggeber-suche-%s.json' % sprache)).read_text(encoding='utf-8'))
+    for entry in givers['rows']:
+        rows.append(['n', entry[0], entry[1], entry[2] or entry[3], entry[4]])
     rows.sort(key=lambda r: (r[2].lower(), r[0]))
     return rows
 

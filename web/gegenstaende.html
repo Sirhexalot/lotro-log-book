@@ -45,6 +45,13 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 		        aria-expanded="false" aria-controls="gs-filter" data-t="gs_filter">Filter</button>
 		<aside class="gs-filter" id="gs-filter" aria-label="Filter"></aside>
 		<section class="gs-liste" id="gs-liste">
+			<div class="gs-sortierung">
+				<label for="gs-sort" data-t="gs_sort">Sortierung</label>
+				<select id="gs-sort">
+					<option value="name" data-t="gs_sort_name">Name</option>
+					<option value="stufe" data-t="gs_sort_stufe">Stufe</option>
+				</select>
+			</div>
 			<p class="gs-stand" id="gs-stand" role="status" data-t="gs_lade">Lade Gegenstände …</p>
 			<ul class="gs-ergebnis" id="gs-ergebnis"></ul>
 			<p class="gs-mehr-feld"><button type="button" id="gs-mehr" class="knopf sekundaer" hidden></button></p>
@@ -59,6 +66,7 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 <script src="texte-site.js"></script>
 <script src="sprache.js"></script>
 <script src="menue.js"></script>
+<script src="filtergedaechtnis.js"></script>
 <script src="gegenstaende.js"></script>
 </body>
 </html>

@@ -1,8 +1,10 @@
-# mm.sirhexalot.de moved to llb.sirhexalot.de (LOTRO Log Book). Both names serve
-# this folder, so only requests for the old name are sent on, path and query kept.
+# One public address: https://llb.sirhexalot.de. Every other name that reaches
+# this folder - sirhexalot.de, www, mm - goes there in one 301, path and query
+# kept. Plain http is upgraded by the host's HTTPS redirect before this runs,
+# so no %{HTTPS} check here: a TLS-terminating proxy would make it loop.
 RewriteEngine On
-RewriteCond %{HTTP_HOST} ^mm\.sirhexalot\.de$ [NC]
-RewriteRule ^(.*)$ https://llb.sirhexalot.de/$1 [R=301,L]
+RewriteCond %{HTTP_HOST} !^llb\.sirhexalot\.de$ [NC]
+RewriteRule ^ https://llb.sirhexalot.de%{REQUEST_URI} [R=301,L]
 
 # A local error document preserves HTTP 404 and applies to all subdirectories.
 ErrorDocument 404 /404.html

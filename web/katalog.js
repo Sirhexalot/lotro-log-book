@@ -8,6 +8,44 @@
             button.setAttribute('aria-expanded', String(header.classList.toggle('menue-offen')));
         });
     }
+    // Back links to a list carry the filters this browser last used there.
+    // Only links without a query are touched, so shared links keep their state.
+    (function () {
+        var memory = window.MQL_FILTER;
+        if (!memory) { return; }
+        // On a list page nothing is decorated: its own reset and pagination
+        // links must keep working, and the list itself restores its state.
+        if (document.querySelector('.sets-browser')) { return; }
+        var lists = {
+            gegenstandssuche: 'gegenstaende',
+            auftraggeber: 'auftraggeber',
+            'quest-giver': 'auftraggeber',
+            'donneur-de-quete': 'auftraggeber',
+            handwerk: 'rezepte'
+        };
+        // Detail pages still link to the old application addresses.
+        var legacy = { 'handwerk.html': 'rezepte', 'gegenstaende.html': 'gegenstaende' };
+        Array.prototype.forEach.call(document.querySelectorAll('a[href]'), function (link) {
+            var url;
+            try { url = new URL(link.href, window.location.href); } catch (fehler) { return; }
+            if (url.origin !== window.location.origin) { return; }
+            var parts = url.pathname.split('/').filter(Boolean);
+            var area = lists[parts[1]] || legacy[parts[parts.length - 1]];
+            if (!area) { return; }
+            var lang = /^[a-z]{2}$/.test(parts[0] || '') ? parts[0] : (url.searchParams.get('lang') || 'de');
+            // A real query on the link wins; "?lang=de" is not a filter.
+            var own = new URLSearchParams(url.search);
+            own.delete('lang');
+            if (own.toString()) { return; }
+            var query = memory.read(area, lang);
+            if (!query) { return; }
+            if (legacy[parts[parts.length - 1]]) {
+                link.href = url.pathname + '?lang=' + lang + '&' + query + url.hash;
+            } else {
+                link.href = url.pathname + '?' + query + url.hash;
+            }
+        });
+    })();
     var store = window.MQL_SPEICHER;
     if (!store) { return; }
     var texts = JSON.parse(document.body.getAttribute('data-katalog-texte'));

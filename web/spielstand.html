@@ -15,7 +15,6 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 </script>
 </head>
 <body data-seite="spielstand" class="seite-text">
-
 <header class="kopf">
 	<div class="kopf-innen">
 		<h1 data-t="produkt">LOTRO Log Book</h1>
@@ -27,94 +26,62 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 		</nav>
 	</div>
 </header>
-
-<main class="seite">
+<main class="seite import-seite">
 	<h2 data-t="sp_titel">Spielstand importieren</h2>
-	<p data-t-html="sp_einleitung"></p>
-	<p data-t-html="sp_voraussetzungen"></p>
-	<p class="schwach" data-t-html="sp_datenschutz"></p>
-
-	<h2 data-t="sp_schritt1">1. Charakter in LOTRO Companion importieren</h2>
-	<p data-t-html="sp_companion"></p>
-	<p class="schwach" data-t-html="sp_companion_link"></p>
-	<div class="reiter" role="tablist">
-		<button type="button" data-reiter="windows" aria-pressed="true">Windows</button>
-		<button type="button" data-reiter="mac" aria-pressed="false">macOS</button>
-	</div>
-	<div class="kasten reiter-inhalt" data-inhalt="windows">
-		<ol data-t-html="sp_windows"></ol>
-	</div>
-	<div class="kasten reiter-inhalt" data-inhalt="mac" hidden>
-		<ol data-t-html="sp_mac"></ol>
-		<code class="befehl" id="mac-befehl">for A in "$HOME/Applications" "/Applications"; do
-  S="$A/The Lord of the Rings Online.app/Contents/SharedSupport"; [ -d "$S" ] &amp;&amp; break
-done
-for C in "$HOME/Applications/LotRO Companion" "/Applications/LotRO Companion" "$HOME/Applications/"*/"LotRO Companion"; do
-  [ -d "$C/app" ] &amp;&amp; break
-done
-cd "$C/app" &amp;&amp; WINEPREFIX="$S/prefix" WINEMSYNC=1 WINEESYNC=1 WINEDEBUG=-all \
-  DYLD_FALLBACK_LIBRARY_PATH="$S/wine/lib" "$S/wine/bin/wine64" "../LotRO Companion.exe"</code>
-		<div class="zeile-knoepfe"><button type="button" id="mac-kopieren" data-t="sp_kopieren">Befehl kopieren</button></div>
-		<p class="schwach" data-t-html="sp_mac_warnung"></p>
-	</div>
-
-	<h2 data-t="sp_schritt2">2. Companion-Spielstand importieren</h2>
-	<p data-t-html="sp_laden"></p>
-	<div class="kasten">
-		<div class="reiter-inhalt" data-inhalt="windows">
-			<span class="schwach" data-t="sp_ordner_windows">Ordner unter Windows:</span>
-			<code>%USERPROFILE%\.lotrocompanion\data\characters</code>
-		</div>
-		<div class="reiter-inhalt" data-inhalt="mac" hidden>
-			<span class="schwach" data-t="sp_ordner_mac">Klicke auf „Companion-Ordner auswählen“. Drücke im Auswahlfenster ⌘⇧G, füge diese Ordneradresse ein und drücke Return. Bestätige dann die Auswahl:</span>
-			<code>~/Applications/The Lord of the Rings Online.app/Contents/SharedSupport/prefix/drive_c/users/Wineskin/.lotrocompanion/data/characters</code>
-		</div>
-	</div>
+	<p data-t="sp_einleitung"></p>
 	<div class="ablage" id="ablage">
-		<p data-t="sp_ablage">Ordner „characters“ hierher ziehen</p>
 		<input id="ordner" type="file" webkitdirectory directory multiple hidden>
 		<button type="button" class="knopf-gold" id="ordner-waehlen" data-t="sp_ordner_waehlen">Companion-Ordner auswählen</button>
+		<p class="schwach" data-t="sp_ablage">Oder den Ordner „characters“ hierher ziehen</p>
 	</div>
 	<p class="meldung" id="meldung" role="status"></p>
-
-	<h2 data-t="sp_schritt3">3. Deine Charaktere</h2>
-	<div class="tabellen-rahmen"><table class="tabelle" id="tabelle">
-		<thead><tr>
-			<th data-t="sp_spalte_name">Name</th>
-			<th data-t="sp_spalte_server">Server</th>
-			<th data-t="sp_spalte_klasse">Klasse</th>
-			<th class="zahl" data-t="sp_spalte_stufe">Stufe</th>
-			<th class="zahl" data-t="sp_spalte_aufgaben">Aufgaben</th>
-			<th class="zahl" data-t="sp_spalte_taten">Taten</th>
-			<th data-t="sp_spalte_stand">Stand</th>
-			<th></th>
-		</tr></thead>
-		<tbody id="zeilen"></tbody>
-	</table></div>
-	<div class="kasten hinweis-gut" id="import-fertig" hidden>
-		<p data-t="sp_fertig"></p>
-		<button type="button" class="knopf-gold" id="fertig-karte" data-t="sp_zur_karte">Zur Karte</button>
-	</div>
-
-	<h2 data-t="sp_schritt4">Optional: Plugin fürs Spiel</h2>
-	<p data-t-html="sp_plugin_kurz"></p>
-	<div class="zeile-knoepfe">
-		<a class="knopf-gold" data-ziel="plugin.html" href="plugin.html?lang=de" data-t="sp_zum_plugin">Plugin einrichten</a>
-	</div>
-
-	<h2 data-t="sp_schritt5">Sicherung</h2>
-	<p data-t-html="sp_sichern"></p>
-	<div class="zeile-knoepfe">
-		<button type="button" id="sicherung" data-t="sp_sicherung">Sicherung herunterladen</button>
-		<button type="button" id="sicherung-laden" data-t="sp_sicherung_laden">Sicherung laden …</button>
-		<input id="sicherung-datei" type="file" accept=".json,application/json" hidden>
-	</div>
-	<p class="meldung" id="meldung-sicherung" role="status"></p>
-
-	<h2 data-t="sp_fragen">Häufige Fragen</h2>
-	<div id="fragen" data-t-html="sp_faq"></div>
+	<p data-t-html="sp_hilfe_companion"></p>
+	<details class="import-ordnerhilfe">
+		<summary data-t="sp_ordner_hilfe">Wo finde ich den Ordner?</summary>
+		<p data-t="sp_laden"></p>
+		<div class="reiter" role="tablist">
+			<button type="button" data-reiter="windows" aria-pressed="true">Windows</button>
+			<button type="button" data-reiter="mac" aria-pressed="false">macOS</button>
+		</div>
+		<div data-inhalt="windows">
+			<p data-t="sp_ordner_windows"></p>
+			<code>%USERPROFILE%\.lotrocompanion\data\characters</code>
+		</div>
+		<div data-inhalt="mac" hidden>
+			<p data-t="sp_ordner_mac"></p>
+			<code>~/Applications/The Lord of the Rings Online.app/Contents/SharedSupport/prefix/drive_c/users/Wineskin/.lotrocompanion/data/characters</code>
+		</div>
+	</details>
+	<section id="charaktere" hidden>
+		<h2 data-t="sp_schritt3">Deine Charaktere</h2>
+		<div class="tabellen-rahmen"><table class="tabelle" id="tabelle">
+			<thead><tr>
+				<th data-t="sp_spalte_name">Name</th>
+				<th data-t="sp_spalte_server">Server</th>
+				<th data-t="sp_spalte_klasse">Klasse</th>
+				<th class="zahl" data-t="sp_spalte_stufe">Stufe</th>
+				<th class="zahl" data-t="sp_spalte_aufgaben">Aufgaben</th>
+				<th class="zahl" data-t="sp_spalte_taten">Taten</th>
+				<th data-t="sp_spalte_stand">Stand</th>
+				<th></th>
+			</tr></thead>
+			<tbody id="zeilen"></tbody>
+		</table></div>
+		<div id="import-fertig" hidden>
+			<button type="button" id="fertig-karte" data-t="sp_zur_karte">Zur Karte</button>
+		</div>
+	</section>
+	<details class="import-verwaltung">
+		<summary data-t="sp_verwalten">Charaktere verwalten</summary>
+		<p data-t="sp_sichern"></p>
+		<div class="zeile-knoepfe">
+			<button type="button" id="sicherung" data-t="sp_sicherung" hidden>Sicherung herunterladen</button>
+			<button type="button" id="sicherung-laden" data-t="sp_sicherung_laden">Sicherung laden …</button>
+			<input id="sicherung-datei" type="file" accept=".json,application/json" hidden>
+		</div>
+		<p class="meldung" id="meldung-sicherung" role="status"></p>
+	</details>
 </main>
-
 <script src="texte.js"></script>
 <script src="texte-spielstand.js"></script>
 <script src="texte-logbuch.js"></script>

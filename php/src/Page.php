@@ -26,6 +26,12 @@ final class Page
 
     public function render(string $kind, string $identifier): ?string
     {
+        if ($kind === 'set') {
+            return (new Sets($this->catalogue, $this->data, $this->shell, $this->view, $this->lang))->detail($identifier);
+        }
+        if ($kind === 'giver') {
+            return (new Givers($this->catalogue, $this->data, $this->shell, $this->view, $this->lang))->detail($identifier);
+        }
         $page = $this->data->page($this->lang, $kind, $identifier);
         if ($page === null) {
             return null;
@@ -53,6 +59,8 @@ final class Page
             'scripts' => $this->shell->scripts(),
             'menu' => $this->shell->menu($kind),
             'start_page' => $this->shell->startPage(),
+            'suche_pfad' => $this->shell->appRoute('suche'),
+            'spielstand_pfad' => $this->shell->appRoute('spielstand'),
             'katalog_texte' => $this->katalogTexte(),
             'crumbs' => $this->crumbsHtml($kind, $page, $maps),
             'languages' => $this->languagesHtml($kind, $identifier),
@@ -110,6 +118,8 @@ final class Page
             'scripts' => $this->shell->scripts(),
             'menu' => $this->shell->menu($kind),
             'start_page' => $this->shell->startPage(),
+            'suche_pfad' => $this->shell->appRoute('suche'),
+            'spielstand_pfad' => $this->shell->appRoute('spielstand'),
             'katalog_texte' => $this->katalogTexte(),
             'crumbs' => $this->listCrumbs($kind),
             'languages' => $this->listLanguages($page),
@@ -127,6 +137,12 @@ final class Page
      */
     public function renderApp(string $lang, string $page): ?string
     {
+        if ($page === 'sets') {
+            return (new Sets($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
+        }
+        if ($page === 'givers') {
+            return (new Givers($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
+        }
         // The deeds view is the map with another mode; the crafting browser
         // shares its template with nothing else.
         $template = match ($page) {

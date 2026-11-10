@@ -26,6 +26,13 @@
 		        aria-expanded="false" aria-controls="gs-filter" data-t="gs_filter">Filter</button>
 		<aside class="gs-filter" id="gs-filter" aria-label="Filter"></aside>
 		<section class="gs-liste" id="gs-liste">
+			<div class="gs-sortierung">
+				<label for="gs-sort" data-t="gs_sort">Sortierung</label>
+				<select id="gs-sort">
+					<option value="name" data-t="gs_sort_name">Name</option>
+					<option value="stufe" data-t="gs_sort_stufe">Stufe</option>
+				</select>
+			</div>
 			<p class="gs-stand" id="gs-stand" role="status" data-t="gs_lade">Lade Gegenstände …</p>
 			<ul class="gs-ergebnis" id="gs-ergebnis"></ul>
 			<p class="gs-mehr-feld"><button type="button" id="gs-mehr" class="knopf sekundaer" hidden></button></p>
@@ -43,5 +50,6 @@
 <script src="/texte-site.js?v={{ asset_stand }}" defer></script>
 <script src="/sprache.js?v={{ asset_stand }}" defer></script>
 <script src="/menue.js?v={{ asset_stand }}" defer></script>
+<script src="/filtergedaechtnis.js?v={{ asset_stand }}" defer></script>
 <script src="/gegenstaende.js?v={{ asset_stand }}" defer></script>
 {% endblock %}

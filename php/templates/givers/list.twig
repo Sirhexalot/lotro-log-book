@@ -1,0 +1,55 @@
+{% extends 'layout.twig' %}
+{# Shared filter-browser shell: the classes are the ones sets.css and sets.js
+   already enhance, so checkboxes filter immediately in both catalogues. #}
+{% block inhalt %}
+<div class="sets-browser">
+<h1>{{ gw.title }}</h1><p>{{ gw.intro }}</p>
+<form method="get" action="{{ list_url }}" class="sets-form">
+    <div class="sets-search"><label for="giver-query">{{ gw.search }}</label><div><input type="search" id="giver-query" name="q" value="{{ filters.q }}"><button type="submit">{{ gw.search }}</button></div></div>
+    <div class="sets-grid">
+        <details class="sets-filters" open>
+            <summary>{{ gw.filter }}</summary>
+            <p class="schwach">{{ gw.filter_note }}</p>
+            {% if facets.region %}
+            <fieldset class="giver-tree"><legend>{{ gw.wo }}</legend>
+                {% for region in facets.region %}
+                {% set kinder = area_by_region[region.value]|default([]) %}
+                <div class="giver-zweig" data-region="{{ region.value }}">
+                    <div class="giver-region">
+                        {% if kinder %}<button type="button" class="giver-pfeil" aria-expanded="true" aria-label="{{ region.label }}">▾</button>{% else %}<span class="giver-pfeil giver-pfeil-leer"></span>{% endif %}
+                        <label class="sets-option"><input type="checkbox" name="region[]" value="{{ region.value }}"{% if region.checked %} checked{% endif %}><span>{{ region.label }}</span><small>{{ region.count }}</small></label>
+                    </div>
+                    {% if kinder %}<div class="giver-kinder">
+                        {% for option in kinder %}<label class="sets-option giver-kind"><input type="checkbox" name="area[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+                    </div>{% endif %}
+                </div>
+                {% endfor %}
+                {% if area_rest %}<fieldset><legend>{{ gw.area }}</legend>
+                    {% for option in area_rest %}<label class="sets-option"><input type="checkbox" name="area[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+                </fieldset>{% endif %}
+            </fieldset>
+            {% endif %}
+            {% for key, options in facets %}{% if key != 'region' and key != 'area' and options %}
+            <fieldset><legend>{{ attribute(gw, key) }}</legend>
+                {% for option in options %}<label class="sets-option"><input type="checkbox" name="{{ key }}[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+            </fieldset>{% endif %}{% endfor %}
+            <fieldset><legend>{{ gw.level }}</legend><div class="sets-range"><label>{{ gw.from }}<input type="number" name="from" min="0" max="999" value="{{ filters.from }}"></label><label>{{ gw.to }}<input type="number" name="to" min="0" max="999" value="{{ filters.to }}"></label></div></fieldset>
+            <div class="sets-filter-actions"><button type="submit">{{ gw.apply }}</button><a href="{{ list_url }}">{{ gw.reset }}</a></div>
+        </details>
+        <section class="sets-results" aria-label="{{ gw.title }}">
+            <p class="sets-count" role="status">{{ (count == 1 ? gw.count_one : gw.count)|replace({'%s': count}) }}</p>
+            <div class="sets-sort"><span>{{ gw.sort }}</span>
+                <a href="{{ sort_name_url }}"{% if sort_active == '' %} aria-current="true"{% endif %}>{{ gw.sort_name }}</a>
+                <a href="{{ sort_level_url }}"{% if sort_active == 'stufe' %} aria-current="true"{% endif %}>{{ gw.sort_level }}</a>
+            </div>
+            <ul class="sets-list">{% for row in givers %}<li><a href="{{ row.url }}"><span class="sets-preview"><strong>{{ row.name }}</strong></span><span class="sets-meta">{{ row.meta }}</span></a></li>{% else %}<li>{{ gw.empty }}</li>{% endfor %}</ul>
+            <nav class="sets-pagination" aria-label="{{ gw.title }}">
+                {% if previous_url %}<a href="{{ previous_url }}">‹ {{ gw.previous }}</a>{% endif %}
+                <span>{{ page_label }}</span>
+                {% if next_url %}<a href="{{ next_url }}">{{ gw.next }} ›</a>{% endif %}
+            </nav>
+        </section>
+    </div>
+</form>
+</div>
+{% endblock %}

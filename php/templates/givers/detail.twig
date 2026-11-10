@@ -1,0 +1,58 @@
+{% extends 'layout.twig' %}
+{# Quest-giver page: who it is, where it stands, and every quest it gives.
+   Completion comes from the imported character in the browser; the page works
+   without one and then claims nothing about progress. #}
+{% block inhalt %}
+<article class="giver-detail">
+<div class="giver-kopf">
+    <span class="giver-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 3.7-5.4 7-5.4s5.8 1.8 7 5.4"/></svg></span>
+    <div>
+        <h1>{{ giver.name }}</h1>
+        <p class="giver-art">{{ attribute(kind_words, 'kind_' ~ giver.kind) }}{% if giver.title %} · {{ giver.title }}{% endif %}</p>
+    </div>
+</div>
+
+{% if giver.description %}<section class="katalog-abschnitt"><h2>{{ gw.background }}</h2><p class="katalog-text">{{ giver.description }}</p><p class="katalog-hinweis">{{ gw.game_text }}</p></section>{% endif %}
+
+{% if giver.greeting %}<details class="katalog-ziele giver-greeting"><summary>{{ gw.greeting }}</summary><p class="katalog-text">{{ giver.greeting }}</p><p class="katalog-hinweis">{{ gw.greeting_hint }}</p></details>{% endif %}
+
+<section class="katalog-abschnitt"><h2>{{ gw.places }}</h2>
+{% for place in giver.places %}
+    <div class="katalog-ort-flex">
+        {% if place.image %}<a class="katalog-ortlink" href="{{ place.map_url }}"><figure class="katalog-ort"><img src="/karten/{{ lang }}/{{ place.image|replace({'.png': '.webp'}) }}" alt="" width="320" height="240" loading="lazy" decoding="async"><i class="katalog-pin" style="left:{{ place.pin_x|pin }}%;top:{{ place.pin_y|pin }}%"></i></figure></a>{% endif %}
+        <div>
+            {% if place.chain %}<p class="katalog-hinweis giver-weg">{% for part in place.chain %}{% if not loop.first %} › {% endif %}<a href="{{ part.url }}">{{ part.name }}</a>{% endfor %}</p>{% endif %}
+            <p class="katalog-hinweis">{{ place.coords }}{% if not place.map_name %} · {{ gw.no_map }}{% endif %}</p>
+            <p class="katalog-aktionen">{% if place.map_url %}<a href="{{ place.map_url }}" class="katalog-knopf">{{ gw.map }}</a> {% endif %}<a href="{{ place.travel_url }}" class="katalog-link">{{ gw.route }}</a></p>
+        </div>
+    </div>
+{% else %}<p class="katalog-hinweis">{{ gw.no_place }}</p>{% endfor %}
+</section>
+
+<section class="katalog-abschnitt giver-quests"
+         data-done-label="{{ gw.done }}" data-open-label="{{ gw.open }}"
+         data-progress="{{ gw.progress }}" data-unknown="{{ gw.progress_unknown }}"
+         data-hide-label="{{ gw.hide_done }}">
+    <h2>{{ gw.quests_heading }}</h2>
+    <p class="katalog-hinweis giver-total">{{ (giver.total == 1 ? gw.quests_one : gw.quests)|replace({'%s': giver.total}) }}</p>
+    <p class="giver-progress katalog-hinweis" role="status" hidden></p>
+    <label class="giver-hide" hidden><input type="checkbox"> <span>{{ gw.hide_done }}</span></label>
+    <ul class="giver-list" data-nosnippet>
+    {% for quest in giver.quests %}
+        <li data-quest="{{ quest.id }}">
+            <a href="{{ quest.url }}"><span class="giver-state" hidden></span>{{ quest.name }}</a>
+            <span class="giver-meta">{% if quest.level %}{{ gw.level_short }} {{ quest.level }}{% if quest.scaled %} *{% endif %}{% if quest.zone %} · {% endif %}{% endif %}{{ quest.zone }}{% for chip in quest.chips %} · {{ chip }}{% endfor %}</span>
+        </li>
+    {% endfor %}
+    </ul>
+</section>
+
+{% if giver.same_name %}<section class="katalog-abschnitt giver-gleichnamig">
+    <h2>{{ gw.same_name }}</h2>
+    <ul>{% for entry in giver.same_name[:12] %}<li><a href="{{ entry.url }}">{{ entry.place ?: gw.unknown_place }} · {{ (entry.count == 1 ? gw.quests_one : gw.quests)|replace({'%s': entry.count}) }}</a></li>{% endfor %}</ul>
+    {% if giver.same_name|length > 12 %}<p><a href="{{ giver.same_name_url }}">{{ gw.same_name_all }}</a></p>{% endif %}
+</section>{% endif %}
+
+<p><a href="{{ list_url }}">‹ {{ gw.back }}</a></p>
+</article>
+{% endblock %}

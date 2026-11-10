@@ -1,0 +1,30 @@
+{% extends 'layout.twig' %}
+{% block inhalt %}
+<div class="sets-browser">
+<h1>{{ sw.title }}</h1><p>{{ sw.intro }}</p>
+<form method="get" action="{{ list_url }}" class="sets-form">
+    <div class="sets-search"><label for="set-query">{{ sw.search }}</label><div><input type="search" id="set-query" name="q" value="{{ filters.q }}"><button type="submit">{{ sw.search }}</button></div></div>
+    <div class="sets-grid">
+        <details class="sets-filters" open>
+            <summary>{{ sw.filter }}</summary>
+            <p class="schwach">{{ sw.filter_note }}</p>
+            {% for key, options in facets %}{% if options %}
+            <fieldset><legend>{{ attribute(sw, key) }}</legend>
+                {% for option in options %}<label class="sets-option"><input type="checkbox" name="{{ key }}[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+            </fieldset>{% endif %}{% endfor %}
+            <fieldset><legend>{{ sw.level }}</legend><div class="sets-range"><label>{{ sw.from }}<input type="number" name="from" min="0" max="999" value="{{ filters.from }}"></label><label>{{ sw.to }}<input type="number" name="to" min="0" max="999" value="{{ filters.to }}"></label></div></fieldset>
+            <div class="sets-filter-actions"><button type="submit">{{ sw.apply }}</button><a href="{{ list_url }}">{{ sw.reset }}</a></div>
+        </details>
+        <section class="sets-results" aria-label="{{ sw.title }}">
+            <p class="sets-count" role="status">{{ sw.count|replace({'%s': count}) }}</p>
+            <ul class="sets-list">{% for row in sets %}<li><a href="{{ row.url }}"><span class="sets-preview">{% for icon in row.icons|default([]) %}<img src="/bild/items/{{ icon }}.webp" alt="" width="26" height="26" loading="lazy">{% endfor %}<strong>{{ row.name }}</strong></span><span class="sets-meta">{{ sw.parts|replace({'%s': row.parts}) }}{% if row.meta %} · {{ row.meta }}{% endif %}{% if row.available_parts < row.parts %} · {{ sw.incomplete }}{% endif %}</span></a></li>{% else %}<li>{{ sw.empty }}</li>{% endfor %}</ul>
+            <nav class="sets-pagination" aria-label="{{ sw.title }}">
+                {% if previous_url %}<a href="{{ previous_url }}">‹ {{ sw.previous }}</a>{% endif %}
+                <span>{{ page_label }}</span>
+                {% if next_url %}<a href="{{ next_url }}">{{ sw.next }} ›</a>{% endif %}
+            </nav>
+        </section>
+    </div>
+</form>
+</div>
+{% endblock %}

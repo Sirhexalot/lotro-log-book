@@ -27,7 +27,7 @@ final class Router
         if ($path === '/sitemap.xml') {
             return ['status' => 200, 'sitemap' => '/sitemap.xml'];
         }
-        if (preg_match('~^/([a-z]{2})/([a-z]+)/sitemap(?:-[0-9]+)?\.xml$~', $path, $m)) {
+        if (preg_match('~^/([a-z]{2})/([a-z0-9-]+)/sitemap(?:-[0-9]+)?\.xml$~', $path, $m)) {
             return ['status' => 200, 'sitemap' => $path];
         }
         if ($path === '/sitemap-seiten.xml') {
@@ -64,15 +64,15 @@ final class Router
             }
         }
         // /de/aufgabe/700005C0.html → 301 to the canonical directory form.
-        if (preg_match('~^/([a-z]{2})/([a-z]+)/([0-9A-Za-z_]+)\.html$~', $path, $m)) {
+        if (preg_match('~^/([a-z]{2})/([a-z0-9-]+)/([0-9A-Za-z_]+)\.html$~', $path, $m)) {
             return $this->canonical($m[1], $m[2], $m[3], true);
         }
         // /de/aufgabe/700005C0 → 301 with the trailing slash.
-        if (preg_match('~^/([a-z]{2})/([a-z]+)/([0-9A-Za-z_]+)$~', $path, $m)) {
+        if (preg_match('~^/([a-z]{2})/([a-z0-9-]+)/([0-9A-Za-z_]+)$~', $path, $m)) {
             return $this->canonical($m[1], $m[2], $m[3], false);
         }
         // /de/aufgabe/700005C0/ → the page.
-        if (preg_match('~^/([a-z]{2})/([a-z]+)/([0-9A-Za-z_]+)/$~', $path, $m)) {
+        if (preg_match('~^/([a-z]{2})/([a-z0-9-]+)/([0-9A-Za-z_]+)/$~', $path, $m)) {
             return $this->page($m[1], $m[2], $m[3]);
         }
         // Overview pages: /de/aufgabe/, /de/aufgabe/seite/2/, /de/gegenstand/ruestung/.
@@ -149,6 +149,9 @@ final class Router
         if ($this->data->listPage($key) === null) {
             return ['status' => 404];
         }
+        if ($kind === 'p') {
+            return ['status' => 301, 'redirect' => $this->catalogue->appRoute($lang, 'handwerk')];
+        }
         return ['status' => 200, 'list' => $key];
     }
 
@@ -163,11 +166,18 @@ final class Router
             return $this->listPage($lang, $segment . '/' . $identifier . '/');
         }
         $canonical = Catalogue::canonicalId($identifier);
+        if (($kind === 'set' || $kind === 'giver')
+            && !$this->data->has($lang, $kind, $canonical)) {
+            return ['status' => 404];
+        }
         if ($canonical !== $identifier) {
             return ['status' => 301, 'redirect' => $this->catalogue->route($lang, $kind, $canonical)];
         }
         if (!$this->data->has($lang, $kind, $identifier)) {
             return ['status' => 404];
+        }
+        if ($kind === 'p') {
+            return ['status' => 301, 'redirect' => $this->catalogue->appRoute($lang, 'handwerk') . '?beruf=' . rawurlencode($identifier)];
         }
         return ['status' => 200, 'kind' => $kind, 'id' => $identifier];
     }

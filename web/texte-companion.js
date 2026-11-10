@@ -34,14 +34,14 @@
 			cp_pfad_windows: 'Windows: <code>%USERPROFILE%\\.lotrocompanion\\data\\characters</code>',
 			cp_pfad_mac: 'Auf dem Mac: Drücke im Fenster zur Ordnerauswahl <strong>⌘⇧G</strong>, füge diese Adresse ein und drücke Return. Bestätige anschließend die Auswahl: <code>~/Applications/The Lord of the Rings Online.app/Contents/SharedSupport/prefix/drive_c/users/Wineskin/.lotrocompanion/data/characters</code>',
 			cp_schritt5: '5. Zurück zur Importseite',
-			cp_import: 'Auf der <a data-ziel="spielstand.html" href="spielstand.html?lang=de">Importseite</a> den Ordner <code>characters</code> wählen. Dein Fortschritt liegt danach nur in deinem Browser; nichts wird hochgeladen.',
+			cp_import: 'Auf der <a data-ziel="spielstand.html" href="/de/spielstand/">Importseite</a> den Ordner <code>characters</code> wählen. Dein Fortschritt liegt danach nur in deinem Browser; nichts wird hochgeladen.',
 			cp_mehrere: 'Du reist mit mehreren Charakteren durch Mittelerde? Melde dich nacheinander mit jedem im Spiel an und wiederhole Schritt 3. Wähle danach den Ordner auf der Importseite erneut aus. Bekannte Charaktere werden aktualisiert, nicht doppelt angelegt.',
 			cp_wiederholen: 'Neuer Stand: Schritt 3 wiederholen und den Ordner erneut laden. Beim Spielen erkennt das Plugin Abschlüsse zusätzlich selbst.',
 			cp_fragen: 'Wenn es klemmt',
 			cp_faq: '<details><summary>Mein Charakter fehlt in Companion.</summary><p>Melde dich mit diesem Charakter im Spiel an und betrete die Welt. Wiederhole dann Schritt 3 in Companion.</p></details>' +
 				'<details><summary>Start tut nichts.</summary><p>Companion einmal als Administrator starten. Unter Windows: Rechtsklick auf das Programm → <em>Als Administrator ausführen</em>.</p></details>' +
 				'<details><summary>Auf dem Mac reagiert Companion nicht mehr.</summary><p>Dann wurde „Import a character…“ benutzt. Companion im Dock beenden und über den Befehl neu starten.</p></details>' +
-				'<details><summary>Die Zahlen weichen vom Spiel ab.</summary><p>Sitzungsspiele zählt das Spiel nie als erledigt; von zwei Aufgaben, die sich ausschließen, ist nur eine möglich. Beides erklärt die <a data-ziel="spielstand.html" href="spielstand.html?lang=de">Importseite</a> genauer.</p></details>',
+				'<details><summary>Die Zahlen weichen vom Spiel ab.</summary><p>Sitzungsspiele zählt das Spiel nie als erledigt; von zwei Aufgaben, die sich ausschließen, ist nur eine möglich. Beides erklärt die <a data-ziel="spielstand.html" href="/de/spielstand/">Importseite</a> genauer.</p></details>',
 			cp_weiter: 'Zur Importseite'
 		},
 		en: {
@@ -72,14 +72,14 @@
 			cp_pfad_windows: 'Windows: <code>%USERPROFILE%\\.lotrocompanion\\data\\characters</code>',
 			cp_pfad_mac: 'On a Mac: in the folder selection window, press <strong>⌘⇧G</strong>, paste this address and press Return. Then confirm your selection: <code>~/Applications/The Lord of the Rings Online.app/Contents/SharedSupport/prefix/drive_c/users/Wineskin/.lotrocompanion/data/characters</code>',
 			cp_schritt5: '5. Back to the import page',
-			cp_import: 'Choose the <code>characters</code> folder on the <a data-ziel="spielstand.html" href="spielstand.html?lang=en">import page</a>. Your progress then stays in your browser only; nothing is uploaded.',
+			cp_import: 'Choose the <code>characters</code> folder on the <a data-ziel="spielstand.html" href="/en/progress/">import page</a>. Your progress then stays in your browser only; nothing is uploaded.',
 			cp_mehrere: 'Travelling through Middle-earth with more than one character? Log in with each one in turn and repeat step 3. Then select the folder again on the import page. Existing characters are updated, not added twice.',
 			cp_wiederholen: 'New progress: repeat step 3 and load the folder again. While you play, the plugin also notices completions by itself.',
 			cp_fragen: 'If something is stuck',
 			cp_faq: '<details><summary>My character is missing in Companion.</summary><p>Log into the game with that character and enter the world. Then repeat step 3 in Companion.</p></details>' +
 				'<details><summary>Start does nothing.</summary><p>Run Companion as administrator once. On Windows: right-click the program → <em>Run as administrator</em>.</p></details>' +
 				'<details><summary>On a Mac Companion stops responding.</summary><p>That means “Import a character…” was used. Quit Companion from the Dock and start it again with the command.</p></details>' +
-				'<details><summary>The numbers differ from the game.</summary><p>The game never records session plays as completed, and of two mutually exclusive quests only one is possible. The <a data-ziel="spielstand.html" href="spielstand.html?lang=en">import page</a> explains both in more detail.</p></details>',
+				'<details><summary>The numbers differ from the game.</summary><p>The game never records session plays as completed, and of two mutually exclusive quests only one is possible. The <a data-ziel="spielstand.html" href="/en/progress/">import page</a> explains both in more detail.</p></details>',
 			cp_weiter: 'To the import page'
 		},
 		fr: {
@@ -110,14 +110,14 @@
 			cp_pfad_windows: 'Windows : <code>%USERPROFILE%\\.lotrocompanion\\data\\characters</code>',
 			cp_pfad_mac: 'Sur Mac : dans la fenêtre de sélection du dossier, appuyez sur <strong>⌘⇧G</strong>, collez cette adresse et appuyez sur Entrée. Confirmez ensuite votre choix : <code>~/Applications/The Lord of the Rings Online.app/Contents/SharedSupport/prefix/drive_c/users/Wineskin/.lotrocompanion/data/characters</code>',
 			cp_schritt5: '5. Retour à la page d’import',
-			cp_import: 'Choisissez le dossier <code>characters</code> sur la <a data-ziel="spielstand.html" href="spielstand.html?lang=fr">page d’import</a>. Votre progression reste ensuite dans votre navigateur ; rien n’est envoyé.',
+			cp_import: 'Choisissez le dossier <code>characters</code> sur la <a data-ziel="spielstand.html" href="/fr/progression/">page d’import</a>. Votre progression reste ensuite dans votre navigateur ; rien n’est envoyé.',
 			cp_mehrere: 'Vous parcourez la Terre du Milieu avec plusieurs personnages ? Connectez-vous avec chacun à tour de rôle et répétez l’étape 3. Choisissez ensuite à nouveau le dossier sur la page d’import. Les personnages connus sont mis à jour, sans être ajoutés deux fois.',
 			cp_wiederholen: 'Nouvelle progression : répétez l’étape 3 et rechargez le dossier. En jouant, le plugin remarque aussi les accomplissements.',
 			cp_fragen: 'Si cela bloque',
 			cp_faq: '<details><summary>Mon personnage manque dans Companion.</summary><p>Connectez-vous avec ce personnage en jeu et entrez dans le monde. Répétez ensuite l’étape 3 dans Companion.</p></details>' +
 				'<details><summary>Start ne fait rien.</summary><p>Lancez Companion une fois en tant qu’administrateur. Sous Windows : clic droit sur le programme → <em>Exécuter en tant qu’administrateur</em>.</p></details>' +
 				'<details><summary>Sur Mac, Companion ne répond plus.</summary><p>« Import a character… » a été utilisé. Quittez Companion depuis le Dock et relancez-le avec la commande.</p></details>' +
-				'<details><summary>Les chiffres diffèrent du jeu.</summary><p>Le jeu n’enregistre jamais les jeux de session comme terminés, et sur deux quêtes exclusives une seule est possible. La <a data-ziel="spielstand.html" href="spielstand.html?lang=fr">page d’import</a> explique les deux cas.</p></details>',
+				'<details><summary>Les chiffres diffèrent du jeu.</summary><p>Le jeu n’enregistre jamais les jeux de session comme terminés, et sur deux quêtes exclusives une seule est possible. La <a data-ziel="spielstand.html" href="/fr/progression/">page d’import</a> explique les deux cas.</p></details>',
 			cp_weiter: 'Vers la page d’import'
 		}
 	};

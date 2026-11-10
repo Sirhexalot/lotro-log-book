@@ -1,0 +1,32 @@
+{% extends 'layout.twig' %}
+{% block inhalt %}
+<article class="set-detail">
+<h1>{{ set.name }}</h1><p>{{ sw.parts|replace({'%s': set.parts}) }}{% if set.available_parts < set.parts %} · {{ sw.incomplete }}{% endif %}</p>
+<section><h2>{{ sw.pieces }}</h2>
+<div class="set-cards">
+{% for member in set.members %}
+<article class="set-card">
+    <h3>{% if member.card and member.card.symbol %}<img src="/bild/items/{{ member.card.symbol }}.webp" alt="" width="32" height="32" loading="lazy">{% endif %}{% if member.url %}<a class="{{ member.card.head_class }}" href="{{ member.url }}">{{ member.name ?: sw.unnamed }}</a>{% else %}{{ member.name ?: sw.unnamed }}{% endif %}</h3>
+    {% if member.card %}
+        <p class="set-card-meta">{% for chip in member.card.chips %}<span>{{ chip.text }}</span>{% endfor %}</p>
+        {% if member.card.required_class %}<p>{{ sw.class }}: {{ member.card.required_class }}</p>{% endif %}
+        {% if member.card.armour %}<p>{{ w.armour }}: {{ member.card.armour }}</p>{% endif %}
+        {% if member.card.values %}<dl>{% for row in member.card.values %}<dt>{{ row.label }}</dt><dd>{{ row.value }}</dd>{% endfor %}</dl>{% endif %}
+        {% if member.card.bonuses %}<ul class="set-card-stats">{% for row in member.card.bonuses %}<li>{{ row.display }} {{ row.label }}</li>{% endfor %}</ul>{% endif %}
+        {% if member.card.scale %}<p class="schwach">{{ sw.scale }}</p>{% endif %}
+        <a href="{{ member.url }}">{{ sw.item }} →</a>
+    {% else %}<p class="schwach">{{ sw.missing }}</p>{% endif %}
+</article>
+{% endfor %}
+</div></section>
+<section class="set-bonuses"><h2>{{ sw.bonuses }}</h2>
+{% for bonus in set.bonuses %}
+    <h3>{% if bonus.valid %}{{ sw.threshold|replace({'%s': bonus.pieces}) }}{% else %}{{ sw.unclear_threshold }}{% endif %}</h3>
+    <ul>{% for text in bonus.texts %}<li>{{ text }}</li>{% endfor %}
+    {% for pending in bonus.pending %}<li class="schwach">{% if pending.label %}{{ pending.label }}: {% endif %}{{ pending.scaling ? sw.scaling : sw.unresolved }}</li>{% endfor %}</ul>
+    {% if not bonus.texts and not bonus.pending %}<p class="schwach">{{ sw.no_bonuses }}</p>{% endif %}
+{% else %}<p class="schwach">{{ sw.no_bonuses }}</p>{% endfor %}
+</section>
+<p><a href="{{ list_url }}">‹ {{ sw.back }}</a></p>
+</article>
+{% endblock %}

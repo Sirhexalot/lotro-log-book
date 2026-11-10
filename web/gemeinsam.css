@@ -181,6 +181,21 @@ footer .sprachen button { font-size: 12px; padding: 2px 8px; }
 footer p { margin: 0 auto; padding: 14px 20px; color: var(--schwach); }
 body.seite-text { display: flex; flex-direction: column; }
 body.seite-text main { width: 100%; flex: 1; }
+
+/* Import: one primary action; instructions and backups stay out of its way. */
+.import-seite .ablage { max-width: 44rem; margin: 1.5rem 0 1rem; padding: 2rem 1rem; }
+.import-seite .ablage p { margin: .75rem 0 0; font-size: .875rem; }
+.import-seite .meldung:empty { display: none; }
+.import-seite .import-ordnerhilfe code { display: block; overflow-wrap: anywhere; white-space: normal; margin: .75rem 0; }
+.import-seite .import-verwaltung { margin-top: 2rem; }
+.import-seite #import-fertig { margin-top: 1rem; }
+
+.zutat-mit-herkunft { display: inline-block; vertical-align: top; margin: 0 .5rem .5rem 0; }
+.zutaten-herkunft { font-size: .875rem; max-width: 40rem; }
+.zutaten-herkunft summary { color: var(--gold); cursor: pointer; }
+.zutaten-herkunft h4 { font-size: 1rem; margin: .75rem 0 .25rem; }
+.zutaten-herkunft section { margin: .75rem 0; }
+.zutaten-herkunft ul { padding-left: 1.25rem; }
 /* The map stays a fixed-height app; its footer must consume real layout space. */
 body[data-seite="karte"] { grid-template-rows: auto minmax(0, 1fr) auto; }
 body[data-seite="karte"] footer { padding: 4px 16px; }

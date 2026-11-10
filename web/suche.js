@@ -13,10 +13,11 @@
 
 	var ARTEN = [
 		['q', 'su_aufgaben'], ['d', 'su_taten'], ['g', 'su_gegenstaende'],
-		['r', 'su_rezepte'], ['t', 'su_titel_tab'], ['v', 'menue_tugenden']
+		['r', 'su_rezepte'], ['t', 'su_titel_tab'], ['v', 'menue_tugenden'], ['s', 'menue_sets'],
+		['n', 'menue_auftraggeber']
 	];
 	var SYMBOL = { q: 'aufgabe', d: 'tat', g: 'gegenstand',
-		r: 'rezept', t: 'titel', v: 'tugend' };
+		r: 'rezept', t: 'titel', v: 'tugend', s: 'gegenstand', n: 'auftraggeber' };
 	var ART_TEXT = {
 		armour: { de: 'Rüstung', en: 'Armour', fr: 'Armure' },
 		weapon: { de: 'Waffe', en: 'Weapon', fr: 'Arme' },
@@ -40,15 +41,27 @@
 	var GEGENSTAND = { de: 'gegenstand', en: 'item', fr: 'objet' }[sprache] || 'gegenstand';
 	var TITEL = { de: 'titel', en: 'title', fr: 'titre' }[sprache] || 'titel';
 	var TUGEND = { de: 'tugend', en: 'virtue', fr: 'vertu' }[sprache] || 'tugend';
+	// Same language paths as the router; a hit leads straight to the page that
+	// answers it instead of a 301 from an old flat address.
+	var KARTE = { de: 'karte', en: 'map', fr: 'carte' }[sprache] || 'karte';
+	var TATEN = { de: 'karte/taten', en: 'map/deeds', fr: 'carte/prouesses' }[sprache] || 'karte/taten';
+	var BELOHNUNGEN = { de: 'belohnungen', en: 'rewards', fr: 'recompenses' }[sprache] || 'belohnungen';
+	var HANDWERK = { de: 'handwerk/rezepte', en: 'crafting/recipes',
+		fr: 'artisanat/recettes' }[sprache] || 'handwerk/rezepte';
 
 	function zielFuer(art, id, name) {
-		if (art === 'q') { return 'index.html?lang=' + sprache + '&id=' + id; }
-		if (art === 'd') { return 'index.html?art=taten&lang=' + sprache + '&id=' + id; }
+		if (art === 's' && id) { return '/' + sprache + '/' + (sprache === 'fr' ? 'ensemble' : 'set') + '/' + id + '/'; }
+		if (art === 'n' && id) {
+			var giver = { de: 'auftraggeber', en: 'quest-giver', fr: 'donneur-de-quete' }[sprache];
+			return '/' + sprache + '/' + giver + '/' + id + '/';
+		}
+		if (art === 'q') { return '/' + sprache + '/' + KARTE + '/?id=' + id; }
+		if (art === 'd') { return '/' + sprache + '/' + TATEN + '/?id=' + id; }
 		if (art === 'g' && id) { return '/' + sprache + '/' + GEGENSTAND + '/' + id + '/'; }
 		if (art === 't' && id) { return '/' + sprache + '/' + TITEL + '/' + id + '/'; }
 		if (art === 'v' && id) { return '/' + sprache + '/' + TUGEND + '/' + id + '/'; }
-		if (art === 't' || art === 'v') { return 'belohnungen.html?lang=' + sprache + '&tab=t&q=' + encodeURIComponent(name); }
-		return 'handwerk.html?lang=' + sprache + '&q=' + encodeURIComponent(name) + '#rezepte';
+		if (art === 't' || art === 'v') { return '/' + sprache + '/' + BELOHNUNGEN + '/?tab=t&q=' + encodeURIComponent(name); }
+		return '/' + sprache + '/' + HANDWERK + '/?q=' + encodeURIComponent(name) + '#rezepte';
 	}
 
 	function zeichen(art) {

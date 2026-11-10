@@ -72,9 +72,12 @@
 	// Four families, one row. Their tabs sit in a second line below, so the
 	// header never grows when a content type is added (see README, navigation).
 	var SEGMENT = {
-		de: { gegenstand: 'gegenstand', beruf: 'beruf', titel: 'titel', tugend: 'tugend' },
-		en: { gegenstand: 'item', beruf: 'profession', titel: 'title', tugend: 'virtue' },
-		fr: { gegenstand: 'objet', beruf: 'metier', titel: 'titre', tugend: 'vertu' }
+		de: { gegenstand: 'gegenstand', beruf: 'beruf', titel: 'titel', tugend: 'tugend', set: 'set',
+			auftraggeber: 'auftraggeber' },
+		en: { gegenstand: 'item', beruf: 'profession', titel: 'title', tugend: 'virtue', set: 'set',
+			auftraggeber: 'quest-giver' },
+		fr: { gegenstand: 'objet', beruf: 'metier', titel: 'titre', tugend: 'vertu', set: 'ensemble',
+			auftraggeber: 'donneur-de-quete' }
 	}[sprache] || {};
 	function pfad(art) { return '/' + sprache + '/' + (SEGMENT[art] || art) + '/'; }
 	function seiten(url) {
@@ -87,23 +90,26 @@
 		{ key: 'welt', text: t('nav_welt'), href: app('karte'), tab: [
 			{ seite: 'karte', href: app('karte'), text: t('menue_karte'), desc: 'd_karte' },
 			{ seite: 'taten', href: app('taten'), text: t('menue_taten'), desc: 'd_taten' },
-			{ seite: 'reise', href: app('reise'), text: t('menue_reise'), desc: 'd_reise' }] },
+			{ seite: 'reise', href: app('reise'), text: t('menue_reise'), desc: 'd_reise' },
+			{ seite: 'auftraggeber', href: pfad('auftraggeber'), text: t('menue_auftraggeber'), desc: 'd_auftraggeber' }] },
 		{ key: 'gegenstaende', text: t('nav_gegenstaende'), href: app('gegenstandssuche'), tab: [
 			{ seite: 'gegenstand', href: app('gegenstandssuche'), text: t('menue_gegenstaende'), desc: 'd_gegenstand' },
+			{ seite: 'set', href: pfad('set'), text: t('menue_sets'), desc: 'd_sets' },
 			{ seite: 'handwerk', href: app('handwerk'), text: t('menue_handwerk'), desc: 'd_handwerk' },
-			{ seite: 'beruf', href: pfad('beruf'), text: t('menue_berufe'), desc: 'd_beruf' }] },
+			{ seite: 'beruf', href: app('handwerk'), text: t('menue_berufe'), desc: 'd_beruf' }] },
 		{ key: 'erfolge', text: t('nav_erfolge'), href: app('belohnungen'), tab: [
 			{ seite: 'titel', href: pfad('titel'), text: t('menue_titel'), desc: 'd_titel' },
 			{ seite: 'tugend', href: pfad('tugend'), text: t('menue_tugenden'), desc: 'd_tugend' },
 			{ seite: 'ruf', href: app('ruf'), text: t('menue_ruf'), desc: 'd_ruf' }] },
 		{ key: 'charakter', text: t('nav_charakter'), href: app('spielstand'), tab: [
 			{ seite: 'spielstand', href: app('spielstand'), text: t('menue_fortschritt'), desc: 'd_fortschritt' },
-			{ seite: 'beruf', href: pfad('beruf'), text: t('menue_meine_berufe'), desc: 'd_meine_berufe' },
+			{ seite: 'beruf', href: app('handwerk'), text: t('menue_meine_berufe'), desc: 'd_meine_berufe' },
 			{ seite: 'ruf', href: app('ruf'), text: t('menue_mein_ruf'), desc: 'd_mein_ruf' }] }
 	];
 
 	// Which family the current page belongs to.
-	var ZUORDNUNG = { karte: 'welt', taten: 'welt', reise: 'welt', gegenstand: 'gegenstaende',
+	var ZUORDNUNG = { karte: 'welt', taten: 'welt', reise: 'welt', auftraggeber: 'welt',
+		gegenstand: 'gegenstaende',
 		handwerk: 'gegenstaende', beruf: 'gegenstaende', titel: 'erfolge', tugend: 'erfolge',
 		ruf: 'erfolge', belohnungen: 'erfolge', spielstand: 'charakter', plugin: 'charakter' };
 	var familie = ZUORDNUNG[seite] || 'welt';
@@ -147,7 +153,7 @@
 			&& seite !== 'start' && !document.querySelector('.suche-start')) {
 		var suchlink = document.createElement('a');
 		suchlink.className = 'suchen-knopf';
-		suchlink.href = 'suche.html?lang=' + sprache;
+		suchlink.href = app('suche');
 		suchlink.textContent = t('menue_suche_kurz');
 		behaelter.appendChild(suchlink);
 	}
@@ -221,7 +227,7 @@
 		var tage = tageSeit(eintrag.date);
 		var link = document.createElement('a');
 		link.className = 'standsalter' + (tage === null ? ' unbekannt' : ' ' + standsalterFarbe(tage));
-		link.href = 'spielstand.html?lang=' + sprache;
+		link.href = app('spielstand');
 		link.innerHTML = standsalterSvg();
 		if (tage === null) {
 			link.title = t('alter_unbekannt');
@@ -236,7 +242,7 @@
 
 	var importieren = document.createElement('a');
 	importieren.className = 'importieren';
-	importieren.href = 'spielstand.html?lang=' + sprache;
+	importieren.href = app('spielstand');
 	importieren.textContent = t('menue_import_kurz');
 	if (seite === 'spielstand') { importieren.setAttribute('aria-current', 'page'); }
 	charakter.appendChild(importieren);
@@ -258,9 +264,15 @@
 		});
 	}
 
-	// Links written without a language in the page take the current one.
+	// Links written without a language in the page take the current one. The
+	// four pages that have a language path are built from it; the rest (legal
+	// notice, privacy) really are files at the site root.
+	var ZIEL_APP = { 'spielstand.html': 'spielstand', 'companion.html': 'companion',
+		'plugin.html': 'plugin', 'suche.html': 'suche' };
 	Array.prototype.forEach.call(document.querySelectorAll('a[data-ziel]'), function (link) {
-		link.href = link.getAttribute('data-ziel') + '?lang=' + sprache;
+		var ziel = link.getAttribute('data-ziel');
+		link.href = ZIEL_APP[ziel] ? app(ZIEL_APP[ziel])
+			: '/' + ziel.replace(/^\//, '') + '?lang=' + sprache;
 	});
 
 	// One pane at a time on phones: list, map or details.
@@ -285,7 +297,7 @@
 	if (!footer) { footer = document.createElement('footer'); document.body.appendChild(footer); }
 	footer.textContent = '';
 	var recht = document.createElement('p');
-	[['impressum.html', 'footer_recht'], ['datenschutz.html', 'footer_datenschutz']].forEach(function (item, index) {
+	[['/impressum.html', 'footer_recht'], ['/datenschutz.html', 'footer_datenschutz']].forEach(function (item, index) {
 		if (index) { recht.appendChild(document.createTextNode(' · ')); }
 		var link = document.createElement('a'); link.href = item[0] + '?lang=' + sprache;
 		link.textContent = t(item[1]); recht.appendChild(link);

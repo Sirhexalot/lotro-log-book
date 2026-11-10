@@ -14,7 +14,10 @@
 	var suche = '';
 	var stufeGewaehlt = false;
 	var nurFehlende = false;
-	var alleBerufe = false;
+	var alleBerufe = true;
+	var kategorie = '';
+	var sort = '';
+	var kategorieFeld, filter, filterKnopf, sortFeld;
 	var bekannt = {};
 	var meineBerufe = {};
 
@@ -73,6 +76,14 @@
 	function passt(wert) {
 		return !nurFehlende || !istBekannt(wert);
 	}
+	function filterPasst(wert, ohne) {
+		var text = suche.toLocaleLowerCase();
+		return (ohne === 'beruf' || !prof || wert[3] === prof)
+			&& (ohne === 'stufe' || !stufe || wert[4] === stufe)
+			&& (ohne === 'kategorie' || !kategorie || wert[5] === kategorie)
+			&& (alleBerufe || !hatSpielstand() || istMeinBeruf(wert)) && passt(wert)
+			&& (!text || [wert[0], wert[3], wert[4], wert[5], wert[6].map(function (z) { return z[0]; }).join(' ')].join(' ').toLocaleLowerCase().indexOf(text) >= 0);
+	}
 
 	function marker(wert) {
 		if (!hatRezepte()) { return null; }
@@ -118,7 +129,13 @@
 		zeile.className = 'zutaten-zeile';
 		teile.forEach(function (teil, nummer) {
 			if (nummer) { zeile.appendChild(document.createTextNode(', ')); }
-			zeile.appendChild(zutat(teil));
+			var stueck = eltern('span');
+			stueck.className = 'zutat-mit-herkunft';
+			stueck.appendChild(zutat(teil));
+			if (teil[3] && window.MQL_ZUTATEN_HERKUNFT) {
+				stueck.appendChild(window.MQL_ZUTATEN_HERKUNFT(itemUrl(teil[3])));
+			}
+			zeile.appendChild(stueck);
 		});
 		if (zusatz) { zeile.appendChild(document.createTextNode(zusatz)); }
 		return zeile;
@@ -150,6 +167,8 @@
 		var zutaten = eltern('td');
 		zutaten.className = 'rezept-zutaten';
 		zutaten.appendChild(zutatenZeile(wert[6]));
+		var extra = eltern('details');
+		extra.appendChild(eltern('summary', t('hw_weitere_angaben')));
 		if (wert[7] && wert[7].length) {
 			var optional = eltern('div');
 			optional.className = 'schwach';
@@ -164,9 +183,12 @@
 					(teil[2] ? ' (' + Math.round(teil[2] * 100) + ' %)' : ''));
 				if (teil[4]) { optionalLink.href = itemUrl(teil[4]); }
 				stueck.appendChild(optionalLink);
+				if (teil[4] && window.MQL_ZUTATEN_HERKUNFT) {
+					stueck.appendChild(window.MQL_ZUTATEN_HERKUNFT(itemUrl(teil[4])));
+				}
 				optional.appendChild(stueck);
 			});
-			zutaten.appendChild(optional);
+			extra.appendChild(optional);
 		}
 		if (wert[8] && wert[8] !== wert[0]) {
 			var kritisch = eltern('div');
@@ -177,7 +199,7 @@
 			var kritischLink = eltern(wert[19] ? 'a' : 'span', wert[8]);
 			if (wert[19]) { kritischLink.href = itemUrl(wert[19]); }
 			kritisch.appendChild(kritischLink);
-			zutaten.appendChild(kritisch);
+			extra.appendChild(kritisch);
 		}
 		var meta = [];
 		if (wert[12]) { meta.push(t('hw_kritisch_kurz') + ' ' + wert[12] + ' %'); }
@@ -185,13 +207,14 @@
 		if (meta.length) {
 			var angaben = eltern('div', meta.join(' · '));
 			angaben.className = 'schwach rezept-meta';
-			zutaten.appendChild(angaben);
+			extra.appendChild(angaben);
 		}
 		var detail = eltern('div');
 		detail.className = 'rezept-detail';
 		var detailLink = eltern('a', t('hw_rezept_details'));
 		detailLink.href = recipeUrl(wert[10]);
 		detail.appendChild(detailLink);
+		if (extra.children.length > 1) { zutaten.appendChild(extra); }
 		zutaten.appendChild(detail);
 		tr.appendChild(zutaten);
 		return tr;
@@ -273,6 +296,39 @@
 		anzahl.setAttribute('role', 'status');
 		steuerung.appendChild(anzahl);
 		ziel.appendChild(steuerung);
+		var raster = eltern('div');
+		raster.className = 'hw-raster';
+		filter = eltern('aside');
+		filter.className = 'hw-filter';
+		filter.id = 'rezept-filter';
+		filterKnopf = eltern('button', t('hw_filter'));
+		filterKnopf.type = 'button';
+		filterKnopf.className = 'hw-filter-knopf';
+		filterKnopf.setAttribute('aria-expanded', 'false');
+		filterKnopf.setAttribute('aria-controls', 'rezept-filter');
+		filterKnopf.addEventListener('click', function () {
+			var offen = filterKnopf.getAttribute('aria-expanded') !== 'true';
+			filterKnopf.setAttribute('aria-expanded', String(offen));
+			filter.classList.toggle('offen', offen);
+		});
+		ziel.appendChild(filterKnopf);
+		ziel.appendChild(raster);
+		raster.appendChild(filter);
+		var treffer = eltern('div');
+		treffer.className = 'hw-treffer';
+		raster.appendChild(treffer);
+		var reset = eltern('button', t('hw_zuruecksetzen'));
+		reset.type = 'button';
+		reset.addEventListener('click', function () {
+			prof = ''; stufe = ''; kategorie = ''; suche = ''; nurFehlende = false;
+			alleBerufe = true; sort = ''; sucheFeld.value = '';
+			if (sortFeld) { sortFeld.value = 'name'; }
+			if (alleHaken) { alleHaken.checked = true; }
+			if (fehlendHaken) { fehlendHaken.checked = false; }
+			if (window.MQL_FILTER) { window.MQL_FILTER.clear('rezepte', sprache); }
+			grenze = 100; berufsListe(); zeichne();
+		});
+		filter.appendChild(reset);
 
 		var berufKopf = eltern('div');
 		berufKopf.className = 'rezept-zeile-kopf';
@@ -286,12 +342,12 @@
 			alleFeld.appendChild(eltern('span', t('hw_alle_berufe')));
 			berufKopf.appendChild(alleFeld);
 		}
-		ziel.appendChild(berufKopf);
+		filter.appendChild(berufKopf);
 
 		berufZeile = eltern('div');
 		berufZeile.className = 'rezept-berufe';
 		berufZeile.id = 'rezept-berufe';
-		ziel.appendChild(berufZeile);
+		filter.appendChild(berufZeile);
 
 		// Only without known recipes the filter would hide nothing.
 		if (hatRezepte()) {
@@ -307,22 +363,49 @@
 		}
 
 		stufenKopf = ueberschrift(t('hw_stufen'));
-		ziel.appendChild(stufenKopf);
+		filter.appendChild(stufenKopf);
 		stufenZeile = eltern('div');
 		stufenZeile.className = 'rezept-stufen';
 		stufenZeile.id = 'rezept-stufen';
-		ziel.appendChild(stufenZeile);
-		if (fehlendFeld) { ziel.appendChild(fehlendFeld); }
+		filter.appendChild(stufenZeile);
+		filter.appendChild(ueberschrift(t('hw_kategorie')));
+		kategorieFeld = eltern('select');
+		kategorieFeld.setAttribute('aria-label', t('hw_kategorie'));
+		kategorieFeld.id = 'rezept-kategorie';
+		kategorieFeld.addEventListener('change', function () { kategorie = kategorieFeld.value; grenze = 100; zeichne(); });
+		filter.appendChild(kategorieFeld);
+		if (fehlendFeld) { filter.appendChild(fehlendFeld); }
+
+		var sortZeile = eltern('div');
+		sortZeile.className = 'rezept-sortierung';
+		var sortLabel = eltern('label', t('hw_sort'));
+		sortLabel.htmlFor = 'rezept-sort';
+		sortZeile.appendChild(sortLabel);
+		sortFeld = eltern('select');
+		sortFeld.id = 'rezept-sort';
+		[['name', t('hw_sort_name')], ['stufe', t('hw_sort_stufe')]].forEach(function (paar) {
+			var option = eltern('option', paar[1]);
+			option.value = paar[0];
+			sortFeld.appendChild(option);
+		});
+		sortFeld.addEventListener('change', function () {
+			sort = sortFeld.value === 'stufe' ? 'stufe' : '';
+			grenze = 100;
+			zeichne();
+		});
+		sortZeile.appendChild(sortFeld);
+		treffer.appendChild(sortZeile);
 
 		inhalt = eltern('div');
 		inhalt.id = 'rezept-inhalt';
-		ziel.appendChild(inhalt);
-		mehr = eltern('p');
-		mehr.className = 'schwach';
+		treffer.appendChild(inhalt);
+		mehr = eltern('button', t('hw_mehr'));
+		mehr.type = 'button';
+		mehr.addEventListener('click', function () { grenze += 100; zeichne(); });
 		mehr.hidden = true;
-		ziel.appendChild(mehr);
+		treffer.appendChild(mehr);
 
-		sucheFeld.addEventListener('input', function () { suche = sucheFeld.value.trim(); zeichne(); });
+		sucheFeld.addEventListener('input', function () { suche = sucheFeld.value.trim(); grenze = 100; zeichne(); });
 		if (fehlendHaken) {
 			fehlendHaken.addEventListener('change', function () {
 				// Filter only: the chosen profession and tier stay as they are.
@@ -333,7 +416,7 @@
 		if (alleHaken) {
 			alleHaken.addEventListener('change', function () {
 				alleBerufe = alleHaken.checked;
-				if (!istMeinBerufName(prof)) { prof = ''; }
+				if (!alleBerufe && !istMeinBerufName(prof)) { prof = ''; }
 				berufsListe();
 				zeichne();
 			});
@@ -359,7 +442,7 @@
 		daten.forEach(function (wert) {
 			if (!wert[3]) { return; }
 			var eintrag = namen[wert[3]] || (namen[wert[3]] = { n: 0, bekannt: 0, key: art(wert) });
-			eintrag.n += 1;
+			if (filterPasst(wert, 'beruf')) { eintrag.n += 1; }
 			if (istBekannt(wert)) { eintrag.bekannt += 1; }
 		});
 		var liste = Object.keys(namen).sort();
@@ -368,12 +451,12 @@
 			var eigene = liste.filter(function (name) { return meineBerufe[namen[name].key]; });
 			if (eigene.length) { liste = eigene; }
 		}
-		if (!prof || liste.indexOf(prof) < 0) {
-			// Start with the craft the character actually uses most.
-			var sortiert = liste.slice().sort(function (a, b) { return namen[b].bekannt - namen[a].bekannt; });
-			prof = sortiert.length ? sortiert[0] : '';
-		}
 		berufZeile.textContent = '';
+		var alle = eltern('button', t('hw_alle_berufe'));
+		alle.type = 'button';
+		alle.setAttribute('data-prof', '');
+		alle.addEventListener('click', function () { prof = ''; zeichne(); });
+		berufZeile.appendChild(alle);
 		liste.forEach(function (name) {
 			var eintrag = namen[name];
 			var knopf = eltern('button', name + ' (' + eintrag.n + ')');
@@ -383,8 +466,6 @@
 			knopf.setAttribute('data-prof', name);
 			knopf.addEventListener('click', function () {
 				prof = name;
-				stufe = '';
-				stufeGewaehlt = false;
 				markiereBeruf();
 				zeichne();
 			});
@@ -395,17 +476,16 @@
 	function stufenListe() {
 		var namen = {}, gesamt = 0;
 		daten.forEach(function (wert) {
-			if (wert[3] !== prof || !wert[4]) { return; }
+			if (filterPasst(wert, 'stufe')) { gesamt += 1; }
+			if ((prof && wert[3] !== prof) || !wert[4]) { return; }
 			var eintrag = namen[wert[4]] || (namen[wert[4]] = { n: 0, order: 999 });
-			eintrag.n += 1;
+			if (filterPasst(wert, 'stufe')) { eintrag.n += 1; }
 			eintrag.order = Math.min(eintrag.order, wert[11] || 999);
-			gesamt += 1;
 		});
 		var liste = Object.keys(namen).sort(function (a, b) { return namen[a].order - namen[b].order; });
 		if (!liste.length) { stufenZeile.textContent = ''; stufenKopf.hidden = true; return; }
 		stufenKopf.hidden = false;
 		// Start on the first tier; "all tiers" is a choice, not the default.
-		if (!stufeGewaehlt || (stufe && !namen[stufe])) { stufe = liste[0] === undefined ? '' : liste[0]; }
 		stufenZeile.textContent = '';
 		var alle = eltern('button', t('hw_alle_stufen') + ' (' + gesamt + ')');
 		alle.type = 'button';
@@ -507,7 +587,53 @@
 
 	function zeichne() {
 		if (!daten.length) { return; }
-		if (suche) { zeigeSuche(); } else { zeigeBaum(); }
+		berufsListe();
+		markiereBeruf();
+		stufenListe();
+		var text = suche.toLocaleLowerCase();
+		var basis = daten.filter(function (wert) {
+			return (!prof || wert[3] === prof) && (!stufe || wert[4] === stufe)
+				&& (alleBerufe || !hatSpielstand() || istMeinBeruf(wert))
+				&& (!text || [wert[0], wert[3], wert[4], wert[5], wert[6].map(function (z) { return z[0]; }).join(' ')].join(' ').toLocaleLowerCase().indexOf(text) >= 0);
+		});
+		var kategorien = {};
+		basis.forEach(function (wert) { if (wert[5]) { kategorien[wert[5]] = (kategorien[wert[5]] || 0) + 1; } });
+		kategorieFeld.textContent = '';
+		var alle = eltern('option', t('hw_alle_kategorien')); alle.value = ''; kategorieFeld.appendChild(alle);
+		if (kategorie && !kategorien[kategorie]) { kategorien[kategorie] = 0; }
+		Object.keys(kategorien).sort().forEach(function (name) {
+			var option = eltern('option', name + ' (' + kategorien[name] + ')');
+			option.value = name; kategorieFeld.appendChild(option);
+		});
+		kategorieFeld.value = kategorie;
+		basis = basis.filter(function (wert) { return !kategorie || wert[5] === kategorie; });
+		var zeilen = basis.filter(passt);
+		zeilen.sort(function (a, b) {
+			if (sort === 'stufe') {
+				var la = a[2] || 0, lb = b[2] || 0;
+				if (!la && lb) { return 1; }
+				if (la && !lb) { return -1; }
+				if (la !== lb) { return la - lb; }
+			}
+			return String(a[0]).localeCompare(String(b[0]), sprache);
+		});
+		if (sortFeld) { sortFeld.value = sort || 'name'; }
+		inhalt.textContent = '';
+		if (zeilen.length) { inhalt.appendChild(tabelle([{name: '', zeilen: zeilen.slice(0, grenze)}], {mitBeruf: true, mitStufe: true})); }
+		else { inhalt.appendChild(eltern('p', t('hw_keine_rezepte'))); }
+		anzahl.textContent = window.MQL_ERSETZE(t('bl_anzahl'), [zeilen.length]);
+		mehr.hidden = zeilen.length <= grenze;
+		mehr.textContent = t('hw_mehr');
+		var url = new URL(location.href);
+		var beruf = daten.find(function (wert) { return wert[3] === prof; });
+		var tier = daten.find(function (wert) { return wert[4] === stufe; });
+		[['beruf', beruf ? art(beruf) : ''], ['stufe', stufe && tier ? tier[11] : ''], ['kategorie', kategorie], ['q', suche], ['fehlend', nurFehlende ? '1' : ''], ['eigene', !alleBerufe ? '1' : ''], ['sort', sort]].forEach(function (paar) {
+			if (paar[1] !== '') { url.searchParams.set(paar[0], paar[1]); } else { url.searchParams.delete(paar[0]); }
+		});
+		history.replaceState(null, '', url);
+		if (window.MQL_FILTER) {
+			window.MQL_FILTER.write('rezepte', sprache, url.search.replace(/^\?/, ''));
+		}
 	}
 
 	// --- tabs -------------------------------------------------------------
@@ -526,6 +652,7 @@
 		knopf.addEventListener('click', function () {
 			var wahl = knopf.getAttribute('data-hw');
 			reiter(wahl);
+			try { history.replaceState(null, '', '#' + wahl); } catch (fehler) { /* file:// */ }
 			if (wahl === 'rezepte' && location.hash !== '#rezepte') {
 				try { history.replaceState(null, '', '#rezepte'); } catch (fehler) { /* file:// */ }
 			}
@@ -542,7 +669,27 @@
 		if (!window.MQL_REZEPTE || !window.MQL_REZEPTE.r) { return; }
 		daten = window.MQL_REZEPTE.r;
 		charakter();
+		// A bare page returns to the last recipe filters used in this browser.
+		if (window.MQL_FILTER && !location.search) {
+			var gespeichert = window.MQL_FILTER.read('rezepte', sprache);
+			if (gespeichert) {
+				try { history.replaceState(null, '', location.pathname + '?' + gespeichert + location.hash); }
+				catch (fehler) { /* file:// */ }
+			}
+		}
+		var parameter = new URLSearchParams(location.search);
+		var berufWahl = daten.find(function (wert) { return art(wert) === parameter.get('beruf'); });
+		prof = berufWahl ? berufWahl[3] : '';
+		var stufenWahl = daten.find(function (wert) { return String(wert[11]) === parameter.get('stufe'); });
+		stufe = stufenWahl ? stufenWahl[4] : '';
+		kategorie = parameter.get('kategorie') || '';
+		sort = parameter.get('sort') === 'stufe' ? 'stufe' : '';
+		nurFehlende = parameter.get('fehlend') === '1' && hatRezepte();
+		alleBerufe = parameter.has('eigene') ? parameter.get('eigene') !== '1' : (!hatSpielstand() || !!prof);
+		grenze = 100;
 		baueSteuerung();
+		if (alleHaken) { alleHaken.checked = alleBerufe; }
+		if (fehlendHaken) { fehlendHaken.checked = nurFehlende; }
 		berufsListe();
 		// A link from the search page opens the recipe already searched for.
 		var begriff = new URLSearchParams(window.location.search).get('q');
@@ -551,6 +698,7 @@
 			if (sucheFeld) { sucheFeld.value = begriff; }
 		}
 		zeichne();
+		reiter(/rohstoffe/.test(location.hash) ? 'rohstoffe' : /berufe/.test(location.hash) ? 'berufe' : 'rezepte');
 	};
 	if (window.MQL_REZEPTE) { window.MQL_REZEPTE_ZEICHNEN(); }
 })();

@@ -62,6 +62,16 @@ final class Data
         return $this->read($this->root . '/' . $lang . '/maps.json')['maps'] ?? [];
     }
 
+    public function setIndex(string $lang): array
+    {
+        return $this->read($this->root . '/' . $lang . '/sets-index.json');
+    }
+
+    public function giverIndex(string $lang): array
+    {
+        return $this->read($this->root . '/' . $lang . '/givers-index.json');
+    }
+
     public function has(string $lang, string $kind, string $identifier): bool
     {
         return $this->entity($lang, $kind, $identifier) !== null;

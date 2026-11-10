@@ -136,6 +136,37 @@ Hülle (Titel, Canonical, `hreflang`, Kopfzeile, Fußnote, Skriptliste) steht in
 `menue.js` und `sprache.js` kennen jetzt die neuen Adressen und lesen die
 Sprache aus dem Pfad.
 
+## Eine öffentliche Adresse (10.11.2026)
+
+Bis 10.11.2026 dienten `sirhexalot.de`, `www.sirhexalot.de`, `mm.sirhexalot.de`
+und `llb.sirhexalot.de` dieselbe Website aus demselben Ordner; nur die
+Canonicals zeigten auf `llb`. Search Console sah dadurch drei Kopien jeder
+Seite. Seitdem gilt:
+
+- **Alle Namen außer `llb.sirhexalot.de` antworten 301** auf dieselbe Adresse
+  unter `llb`, Pfad und Query unverändert. Die Regel steht oben in
+  `public_html/mm/.htaccess`, also im Dokumentenordner, der allen Namen gemeinsam
+  ist – nicht im Hosting-Panel. Das Panel kennt nur einen globalen Schalter für
+  HTTPS und keine Weiterleitung je Name.
+- **Kein `%{HTTPS}` in der Bedingung.** Manche Hoster beenden TLS vor dem
+  Webserver; dann liest Apache auch bei einer verschlüsselten Anfrage „off“ und
+  die Regel würde endlos auf sich selbst umleiten. Das Protokoll erledigt die
+  HTTPS-Weiterleitung des Hosts, der Name die `.htaccess`. Preis: eine
+  `http://`-Anfrage auf einem alten Namen braucht zwei Sprünge.
+- **Die `.htaccess` liegt nicht im Repository.** Gesicherte Fassungen sammelt
+  `~/.cache/llb-php/rollback/`; `tools/umschalten.py` ersetzt nur den markierten
+  PHP-Block und lässt die Hostregel stehen.
+
+Prüfung (jede Zeile ein Sprung, Ziel 200):
+
+```bash
+for n in sirhexalot.de www.sirhexalot.de mm.sirhexalot.de; do
+  curl -sI "https://$n/de/aufgabe/700005C0.html?x=1" | grep -i '^location:'
+done
+curl -sI https://sirhexalot.de/phpdata/labels.json | head -1   # 403 = gleicher Ordner
+curl -sI https://llb.sirhexalot.de/de/ | head -1               # 200
+```
+
 ## Erledigt bei der Umschaltung
 
 1. **404 und Rechtstexte** liegen als Dateien im Release; PHP liefert die
@@ -151,8 +182,9 @@ Sprache aus dem Pfad.
 ## Noch offen
 
 - **HEAD-Anfragen** und ein eigener Blick auf Fehlerseiten bei kaputten Daten.
-- **Betrieb**: Speicherplatz und Zugriffszeiten der Shards beobachten, Twig-
-  Cache nach Releases leeren (`phptmp/twig`).
+- **Betrieb**: Speicherplatz und Zugriffszeiten der Shards beobachten. Der
+  Twig-Cache gehört nach jedem Release mit Vorlagenänderung geleert; dafür gibt
+  es inzwischen `tools/cache_leeren.py`.
 
 ## Abnahme vor der Veröffentlichung
 
@@ -196,11 +228,18 @@ wird in dieser Reihenfolge:
 python3 tools/build_php_data.py --ziel "$HOME/.cache/llb-php/phpdata"
 python3 tools/build_release.py                    # ~/.cache/llb-release
 python3 upload.py --quelle "$HOME/.cache/llb-release" --workers 8
+python3 tools/cache_leeren.py                     # Twig lädt Vorlagen nicht selbst nach
 python3 tools/umschalten.py --pruefen             # zeigt die neue .htaccess
 python3 tools/umschalten.py                       # sichert die alte, schaltet um
 python3 tools/umschalten.py --test                # Adressen der Live-Seite
 python3 tools/aufraeumen.py --loeschen            # alte HTML-Bestände entfernen
 ```
+
+**Der Cache-Schritt ist Pflicht, sobald eine `.twig`-Vorlage geändert wurde.**
+`deploy/index.php` setzt `LLB_PRODUCTION=1`, und damit steht Twigs
+`auto_reload` auf aus: die kompilierte Fassung bleibt liegen, bis ihr Eintrag
+unter `phptmp/twig` verschwindet. Ohne `tools/cache_leeren.py` sieht eine
+Vorlagenänderung wie ein fehlerhaftes Deployment aus.
 
 `build_release.py` kopiert `web/`, `webp/` (als `karten/`), `php/`, `vendor/`
 und `phpdata/`, schreibt `index.php`, `tracking.html` und `robots.txt` und lässt

@@ -178,30 +178,31 @@ class CatalogueTest(unittest.TestCase):
         self.assertIn('ErrorDocument 404 /404.html', (ROOT / 'redirect-mm' / '.htaccess').read_text())
 
     def test_one_public_address_per_entity(self):
+        """Since the PHP switch the front controller owns the addresses.
+
+        The rules no longer enumerate types: everything under /de|en|fr and every
+        old application page goes to index.php, which answers 200, 301 or 404.
+        One public form per entity is the router's job (php/src/Router.php).
+        """
         rules = (ROOT / 'redirect-mm/.htaccess').read_text()
-        block = rules.split('# BEGIN LLB ENTITY URLS', 1)[1].split('# END LLB ENTITY URLS', 1)[0]
-        redirects = [line for line in block.splitlines() if '[R=301' in line]
-        internal = [line for line in block.splitlines() if '[END' in line]
-        # Three generic rules for every language folder come first (added for the
-        # title and virtue pages), then the per-type rules kept for reference.
-        self.assertEqual(len(redirects), 6)
-        self.assertEqual(len(internal), 4)
-        # The flat file and the slash-less form point at the one public address.
-        for pattern, target in ((r'/seite/([0-9]+)\.html$', '/$1/$2/seite/$3/'),
-                                (r'/([0-9A-Za-z_]+)\.html$', '/$1/$2/$3/'),
-                                (r'/seite/([0-9]+)$', '/$1/$2/seite/$3/'),
-                                (r'/([0-9A-Z_]+)$', '/$1/$2/$3/')):
-            rule = next(line for line in redirects if pattern in line)
-            self.assertIn(target, rule)
-            self.assertNotIn('NC', rule.split(']')[-1])
-        # Lowercase IDs go to the script, uppercase ones straight to the file.
-        lowercase = next(line for line in internal if 'kennung.php' in line)
-        self.assertIn('[0-9A-Z_]*[a-z]', lowercase)
-        self.assertTrue(lowercase.rstrip().endswith('[END]'))
-        mapping = next(line for line in internal if line.rstrip().endswith('[END,NC]'))
-        self.assertIn('/?$', mapping)
+        block = rules.split('# BEGIN LLB PHP URLS', 1)[1].split('# END LLB PHP URLS', 1)[0]
+        self.assertIn('RewriteRule ^(de|en|fr)(/|$) /index.php [END]', block)
+        self.assertIn('RewriteRule ^(phpdata|php|vendor|phptmp)(/|$) - [F]', block)
+        self.assertIn('RewriteRule ^sitemap(-[a-z0-9-]+)?\\.xml$ /index.php [END]', block)
+        # No leftover flat-file rules from the static build.
+        self.assertNotIn('LLB ENTITY URLS', rules)
+        self.assertNotIn('kennung.php', rules)
         self.assertNotIn('CheckSpelling', rules)
         self.assertNotIn('IfModule mod_speling', rules)
+
+    def test_every_foreign_host_name_goes_to_llb(self):
+        """One public host: the folder is reachable under three names."""
+        rules = (ROOT / 'redirect-mm/.htaccess').read_text()
+        block = rules.split('RewriteEngine On', 1)[1]
+        self.assertIn('RewriteCond %{HTTP_HOST} !^llb\\.sirhexalot\\.de$ [NC]', block)
+        self.assertIn('RewriteRule ^ https://llb.sirhexalot.de%{REQUEST_URI} [R=301,L]', block)
+        # A TLS-terminating proxy would report HTTPS=off and loop forever.
+        self.assertNotIn('%{HTTPS}', block.split('# BEGIN')[0])
 
     def test_lowercase_redirector_is_safe(self):
         php = (ROOT / 'web' / 'kennung.php').read_text()

@@ -57,7 +57,7 @@
 	}
 
 	function karteLink(sorte, karte) {
-		return 'index.html?vorkommen=' + encodeURIComponent(sorte) +
+		return '/' + sprache + '/' + ({ de: 'karte', en: 'map', fr: 'carte' }[sprache] || 'map') + '/?vorkommen=' + encodeURIComponent(sorte) +
 			'&vorkarte=' + encodeURIComponent(karte);
 	}
 

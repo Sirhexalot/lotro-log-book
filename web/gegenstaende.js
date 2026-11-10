@@ -19,12 +19,13 @@
 	var liste = document.getElementById('gs-ergebnis');
 	var stand = document.getElementById('gs-stand');
 	var mehr = document.getElementById('gs-mehr');
+	var sortFeld = document.getElementById('gs-sort');
 	if (!formular || !filterFeld || !liste) { return; }
 
 	/* A filter is a path through the tree: every level the user opened adds one
 	 * condition. "Leichte Rüstung › Füße" therefore stays one branch and does
 	 * not also tick feet in medium and heavy armour. */
-	var S = { q: '', pfade: [], qual: [], von: null, bis: null, sichtbar: 50 };
+	var S = { q: '', pfade: [], qual: [], von: null, bis: null, sort: '', sichtbar: 50 };
 	var daten = null;
 
 	var FELD = { kat: 3, qual: 4, platz: 5, art: 6, stufe: 7, klasse: 8, gattung: 9 };
@@ -443,6 +444,9 @@
 		zurueck.className = 'gs-reset';
 		zurueck.addEventListener('click', function () {
 			S.pfade = []; S.qual = []; S.von = null; S.bis = null;
+			S.q = ''; S.sort = '';
+			if (feld) { feld.value = ''; }
+			if (sortFeld) { sortFeld.value = 'name'; }
 			S.sichtbar = 50;
 			zeichnen();
 		});
@@ -462,6 +466,17 @@
 
 	function ergebnisZeichnen() {
 		var treffer = daten.e.filter(function (z) { return passt(z, null); });
+		// Name and level are the two orders people asked for; an item without a
+		// level never pretends to be level 0.
+		treffer.sort(function (a, b) {
+			if (S.sort === 'stufe') {
+				var la = a[FELD.stufe] || 0, lb = b[FELD.stufe] || 0;
+				if (!la && lb) { return 1; }
+				if (la && !lb) { return -1; }
+				if (la !== lb) { return la - lb; }
+			}
+			return a[0].localeCompare(b[0], sprache);
+		});
 		liste.textContent = '';
 		var menge = treffer.length;
 		stand.textContent = menge === 1 ? T('gs_eins')
@@ -571,9 +586,15 @@
 		if (S.qual.length) { parameter.set('qual', S.qual.join(',')); }
 		if (S.von !== null) { parameter.set('von', String(S.von)); }
 		if (S.bis !== null) { parameter.set('bis', String(S.bis)); }
+		if (S.sort === 'stufe') { parameter.set('sort', 'stufe'); }
+		var query = parameter.toString();
 		try {
-			window.history.replaceState(null, '', window.location.pathname + '?' + parameter.toString());
+			window.history.replaceState(null, '', window.location.pathname + (query ? '?' + query : ''));
 		} catch (fehler) { /* a file:// page may refuse */ }
+		// The same state leads a detail page back to this list.
+		if (window.MQL_FILTER) {
+			window.MQL_FILTER.write('gegenstaende', sprache, query);
+		}
 	}
 
 	function adresseLesen() {
@@ -617,6 +638,7 @@
 		var bis = parseInt(parameter.get('bis'), 10);
 		S.von = isNaN(von) ? null : von;
 		S.bis = isNaN(bis) ? null : bis;
+		S.sort = parameter.get('sort') === 'stufe' ? 'stufe' : '';
 		if (S.q) { feld.value = S.q; }
 	}
 
@@ -630,12 +652,36 @@
 			var anzahl = aktiveFilter();
 			filterKnopf.textContent = T('gs_filter') + (anzahl ? ' · ' + anzahl : '');
 		}
+		if (sortFeld) { sortFeld.value = S.sort || 'name'; }
 		filterZeichnen();
 		ergebnisZeichnen();
 		adresseSchreiben();
 	}
 
 	/* --- Start -------------------------------------------------------- */
+
+	if (sortFeld) {
+		sortFeld.addEventListener('change', function () {
+			S.sort = sortFeld.value === 'stufe' ? 'stufe' : '';
+			S.sichtbar = 50;
+			zeichnen();
+		});
+	}
+
+	/** A bare list returns to the filters this browser last used here. */
+	function erinnerungAnwenden() {
+		var merker = window.MQL_FILTER;
+		if (!merker) { return; }
+		var query = merker.read('gegenstaende', sprache);
+		if (!query) { return; }
+		var parameter = new URLSearchParams(window.location.search);
+		var bekannt = ['q', 'k', 'kat', 'art', 'platz', 'klasse', 'gattung', 'qual',
+			'von', 'bis', 'sort'];
+		if (bekannt.some(function (name) { return parameter.has(name); })) { return; }
+		try {
+			window.history.replaceState(null, '', window.location.pathname + '?' + query);
+		} catch (fehler) { /* a file:// page may refuse */ }
+	}
 
 	formular.addEventListener('submit', function (ereignis) {
 		ereignis.preventDefault();
@@ -676,6 +722,7 @@
 			stand.textContent = T('gs_keine');
 			return;
 		}
+		erinnerungAnwenden();
 		adresseLesen();
 		zeichnen();
 	};

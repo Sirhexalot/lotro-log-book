@@ -1,0 +1,32 @@
+/* Same search/sidebar/results pattern as the item browser. */
+.handwerk-seite #hw-rezepte > h2,
+.handwerk-seite #hw-rezepte > p { display: none; }
+.hw-raster { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 28px; align-items: start; }
+.hw-filter { border-right: 1px solid var(--rand); padding-right: 20px; }
+.hw-filter h3 { font-size: .875rem; margin: 1.25rem 0 .5rem; }
+.hw-filter .rezept-berufe, .hw-filter .rezept-stufen { display: flex; flex-direction: column; align-items: stretch; gap: 3px; }
+.hw-filter .rezept-knopf, .hw-filter .rezept-berufe > button { text-align: left; white-space: normal; }
+.hw-filter .rezept-zeile-kopf { display: block; }
+.hw-filter .rezept-haken, .hw-filter .rezept-filter { display: flex; gap: .5rem; margin: .75rem 0; }
+.hw-filter select { max-width: 100%; width: 100%; background: var(--fläche); color: var(--text); border: 1px solid var(--rand); padding: .5rem; font: inherit; font-size: .875rem; }
+.hw-treffer { min-width: 0; }
+.hw-filter-knopf { display: none; }
+.handwerk-seite .rezept-steuerung { margin: 1.5rem 0; }
+.handwerk-seite #rezept-suche { flex: 1; max-width: 44rem; }
+.handwerk-seite .rezept-tabelle { min-width: 0; width: 100%; }
+.handwerk-seite .rezept-tabelle td { overflow-wrap: anywhere; }
+@media (max-width: 900px) {
+ .hw-raster { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+ .hw-filter { display: none; border: 0; padding: 0; }
+ .hw-filter.offen { display: block; }
+ .hw-filter-knopf { display: block; margin-bottom: 1rem; }
+ .handwerk-seite .rezept-tabelle { font-size: .875rem; }
+ .handwerk-seite .rezept-tabelle td, .handwerk-seite .rezept-tabelle th { padding: .5rem .25rem; }
+}
+
+/* Sort control above the recipe results. */
+.rezept-sortierung { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline;
+	margin: 0 0 12px; font-size: .875rem; }
+.rezept-sortierung select { font: inherit; color: var(--text); background: var(--fläche);
+	border: 1px solid var(--rand); border-radius: 3px; padding: .2rem .4rem; }
+.rezept-sortierung select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }

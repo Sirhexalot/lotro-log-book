@@ -73,17 +73,29 @@ final class Shell
             $this->assetTag('style.css'),
             $this->assetTag('gemeinsam.css'),
             $this->assetTag('katalog.css'),
+            $this->assetTag('sets.css'),
+            $this->assetTag('auftraggeber.css'),
         ]);
     }
 
     public function scripts(): string
     {
-        return implode("\n", [$this->scriptTag('speicher.js'), $this->scriptTag('katalog.js')]);
+        return implode("\n", [$this->scriptTag('speicher.js'),
+            $this->scriptTag('filtergedaechtnis.js'), $this->scriptTag('katalog.js'),
+            $this->scriptTag('zutaten.js'), $this->scriptTag('sets.js'),
+            $this->scriptTag('auftraggeber.js')]);
     }
 
+    /** The start page of the language; the old `/start.html` is a 301 to it. */
     public function startPage(): string
     {
-        return '/start' . ($this->lang !== 'de' ? '-' . $this->lang : '') . '.html';
+        return $this->catalogue->appRoute($this->lang, 'start');
+    }
+
+    /** Canonical address of an application page in this language. */
+    public function appRoute(string $page): string
+    {
+        return $this->catalogue->appRoute($this->lang, $page);
     }
 
     /** The four families with their flyout, exactly as menue.js builds it. */
@@ -97,11 +109,13 @@ final class Shell
                 ['q', $app('karte'), $w['menue_karte'], $w['d_karte']],
                 ['d', $app('taten'), $w['menue_taten'], $w['d_taten']],
                 ['reise', $app('reise'), $w['menue_reise'], $w['d_reise']],
+                ['giver', $app('givers'), Givers::words($lang)['title'], Givers::words($lang)['intro']],
             ]],
             ['gegenstaende', $app('gegenstandssuche'), $w['familie_gegenstaende'], [
                 ['i', $app('gegenstandssuche'), $w['menue_gegenstaende'], $w['d_gegenstand']],
+                ['set', $app('sets'), Sets::words($lang)['title'], Sets::words($lang)['intro']],
                 ['craft', $app('handwerk'), $w['menue_handwerk'], $w['d_handwerk']],
-                ['p', $this->catalogue->route($lang, 'p'), $w['menue_berufe'], $w['d_beruf']],
+                ['p', $app('handwerk'), $w['menue_berufe'], $w['d_beruf']],
             ]],
             ['erfolge', $app('belohnungen'), $w['familie_erfolge'], [
                 ['title', $this->catalogue->route($lang, 'title'), $w['menue_titel'], $w['d_titel']],
@@ -110,14 +124,18 @@ final class Shell
             ]],
             ['charakter', $app('spielstand'), $w['familie_charakter'], [
                 ['spielstand', $app('spielstand'), $w['menue_fortschritt'], $w['d_fortschritt']],
-                ['p', $this->catalogue->route($lang, 'p'), $w['menue_meine_berufe'], $w['d_meine_berufe']],
+                ['p', $app('handwerk'), $w['menue_meine_berufe'], $w['d_meine_berufe']],
                 ['ruf', $app('ruf'), $w['menue_mein_ruf'], $w['d_mein_ruf']],
             ]],
         ];
 
         // The generator only marks a family that is really mapped to the type;
         // 'craft' has none, so no family link is current there.
-        $current = $this->catalogue->famille()[$kind] ?? null;
+        $current = match ($kind) {
+            'set' => 'gegenstaende',
+            'giver' => 'welt',
+            default => $this->catalogue->famille()[$kind] ?? null,
+        };
         $out = '';
         foreach ($families as [$key, $target, $text, $tabs]) {
             $flyout = '';
@@ -137,7 +155,8 @@ final class Shell
     public function familyTarget(string $family): string
     {
         return match ($family) {
-            'gegenstaende' => $this->catalogue->route($this->lang, 'i'),
+            // Items have no list page any more; the search page is the way in.
+            'gegenstaende' => $this->catalogue->appRoute($this->lang, 'gegenstandssuche'),
             'erfolge' => $this->catalogue->appRoute($this->lang, 'belohnungen'),
             'charakter' => $this->catalogue->appRoute($this->lang, 'spielstand'),
             default => $this->catalogue->appRoute($this->lang, 'karte'),

@@ -42,6 +42,14 @@ SCHEMA = 1
 # Every kind the catalogue exposes; the shard names are part of the public
 # router contract, so they are fixed here and checked in the tests.
 ARTEN = ('q', 'd', 'i', 'recipe', 'title', 'virtue', 'area', 'region', 'p')
+# Catalogues that get sitemap entries. 'p' (professions) stays out on purpose:
+# every profession address answers 301 to the crafting page, and a sitemap must
+# only list pages that answer 200. The router keeps the redirects for old links.
+SITEMAP_KINDS = ('q', 'd', 'i', 'area', 'region', 'recipe', 'title', 'virtue', 'set', 'giver')
+
+# Quest-giver source, read once in main() and used by every language.
+GIVER_SOURCE: dict | None = None
+QUEST_GIVERS: dict = {}
 
 
 def read_assignment(path: Path, variable: str):
@@ -199,6 +207,10 @@ def language_data(model: dict, lang: str) -> dict:
     for quest in model['quests']:
         record = dict(quest)
         record['rel'] = quest_relations[quest['i']]
+        # The quest page links to the giver's own page when one exists. The
+        # name still comes from the game data; the id only makes it clickable.
+        if QUEST_GIVERS.get(quest['i']):
+            record['gi'] = QUEST_GIVERS[quest['i']]
         out['q'][quest['i']] = record
     for deed in model['deeds']:
         record = dict(deed)
@@ -328,6 +340,17 @@ def main() -> int:
     languages = SPRACHEN if options.sprache == 'alle' else (options.sprache,)
     target = options.ziel
     target.mkdir(parents=True, exist_ok=True)
+    if not (DATEN / 'sets.json').is_file():
+        raise SystemExit('MISSING: daten/sets.json (run python3 build_sets.py first)')
+    set_source = json.loads((DATEN / 'sets.json').read_text(encoding='utf-8'))
+    from set_viewmodel import set_pages, link_items
+
+    global GIVER_SOURCE, QUEST_GIVERS
+    if not (DATEN / 'auftraggeber.json').is_file():
+        raise SystemExit('MISSING: daten/auftraggeber.json (run python3 build_auftraggeber.py first)')
+    GIVER_SOURCE = json.loads((DATEN / 'auftraggeber.json').read_text(encoding='utf-8'))
+    from giver_viewmodel import giver_index, giver_pages, quest_givers
+    QUEST_GIVERS = quest_givers(GIVER_SOURCE)
 
     manifest_path = target / 'manifest.json'
     manifest = {'schema': SCHEMA, 'languages': {}, 'kinds': list(ARTEN)}
@@ -367,9 +390,9 @@ def main() -> int:
         # Render-ready pages, built from the same records and the same rules as
         # the static generator (tools/php_viewmodel.py).
         sys.path.insert(0, str(HIER / 'tools'))
-        from php_viewmodel import (ItemContext, ViewBuilder, area_view, deed_index,
-                                   deed_view, honor_view, item_view, list_pages, members_index,
-                                   profession_view, quest_view, recipe_view)
+        from php_viewmodel import (ItemContext, ViewBuilder, app_url, area_view, coords,
+                                   deed_index, deed_view, honor_view, item_view, list_pages,
+                                   members_index, profession_view, quest_view, recipe_view)
         builder = ViewBuilder(lang, model, maps)
         quest_pages = {ident: quest_view(builder, quest) for ident, quest in data['q'].items()}
         counts['page-q'] = len(quest_pages)
@@ -394,9 +417,31 @@ def main() -> int:
 
         item_ctx = load_item_context(builder, model, lang)
         item_pages = {ident: item_view(builder, item_ctx, ident, item)
-                      for ident, item in data['i'].items()}
+                       for ident, item in data['i'].items()}
+        link_items(item_pages, set_source, lang)
         counts['page-i'] = len(item_pages)
         write_pages(target, lang, 'i', item_pages)
+        sets = set_pages(set_source, lang, item_pages)
+        data['set'] = {sid: {'id': sid, 'name': row['name']} for sid, row in sets.items()}
+        write_shards(target, lang, 'set', data['set'])
+        write_pages(target, lang, 'set', sets)
+        counts['set'] = counts['page-set'] = len(sets)
+        shutil.copy2(DATEN / ('sets-suche-%s.json' % lang), folder / 'sets-index.json')
+
+        # Quest givers: one filter index plus render-ready detail pages. The
+        # index is written here because only this step knows the localized map
+        # names and the quest records of the same language.
+        givers = giver_index(GIVER_SOURCE, lang, data['q'], maps)
+        (folder / 'givers-index.json').write_text(
+            json.dumps(givers, ensure_ascii=False, separators=(',', ':')),
+            encoding='utf-8')
+        data['giver'] = {row['id']: {'id': row['id'], 'name': row['name']}
+                         for row in givers['givers']}
+        write_shards(target, lang, 'giver', data['giver'])
+        giver_detail = giver_pages(GIVER_SOURCE, lang, data['q'], maps,
+                                   app_url, coords, builder.w)
+        write_pages(target, lang, 'giver', giver_detail)
+        counts['giver'] = counts['page-giver'] = len(giver_detail)
 
         members = members_index(builder, model)
         for kind in ('area', 'region'):
@@ -420,12 +465,26 @@ def main() -> int:
         listen.update(lists)
         from php_viewmodel import route as _route
         detail_routes[lang] = {}
-        for kind in ('q', 'd', 'i', 'area', 'region', 'p', 'recipe', 'title', 'virtue'):
+        for kind in SITEMAP_KINDS:
             ids = data[kind].keys()
-            segment = _route(lang, kind).strip('/').split('/')[1]
-            detail_routes[lang][segment] = sorted(_route(lang, kind, ident) for ident in ids)
+            if kind == 'set':
+                from set_viewmodel import SEGMENT
+                segment = SEGMENT[lang]
+                detail_routes[lang][segment] = ['/%s/%s/' % (lang, segment)] + [
+                    '/%s/%s/%s/' % (lang, segment, ident) for ident in sorted(ids)]
+            elif kind == 'giver':
+                from giver_viewmodel import SEGMENT
+                segment = SEGMENT[lang]
+                detail_routes[lang][segment] = ['/%s/%s/' % (lang, segment)] + [
+                    '/%s/%s/%s/' % (lang, segment, ident) for ident in sorted(ids)]
+            else:
+                segment = _route(lang, kind).strip('/').split('/')[1]
+                detail_routes[lang][segment] = sorted(_route(lang, kind, ident) for ident in ids)
 
         manifest['languages'][lang] = counts
+        for kind in ('set', 'giver'):
+            if kind not in manifest['kinds']:
+                manifest['kinds'].append(kind)
         if not options.still:
             print('%s: %s' % (lang, ', '.join('%s %d' % (k, v) for k, v in counts.items())),
                   flush=True)

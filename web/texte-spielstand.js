@@ -21,12 +21,15 @@
 			ohne_spielstand: 'ohne Spielstand',
 			kein_charakter: 'noch keiner geladen',
 			sp_titel: 'Spielstand importieren',
-			sp_einleitung: 'Schon viel erlebt in Mittelerde? Übernimm deinen Spielstand und behalte im Blick, welche Aufgaben und Taten du vollendet hast, welche Rezepte du kennst und wie dein Ruf steht. Zwischen deinen Charakteren wechselst du anschließend oben im Menü.',
+			sp_einleitung: 'Sieh, welche Aufgaben und Taten dein Charakter schon abgeschlossen hat.',
+			sp_hilfe_companion: 'Noch keinen Charakter mit Companion ausgelesen? <a data-ziel="companion.html" href="/de/companion/">So geht’s.</a>',
+			sp_ordner_hilfe: 'Wo finde ich den Ordner?',
+			sp_verwalten: 'Charaktere verwalten',
 			sp_voraussetzungen: 'Du brauchst ' + COMPANION + ' (kostenlos), um deinen Spielstand einzulesen. Das Plugin ' + PLUGIN + ' ist für die Website <strong>nicht erforderlich</strong>.',
-			sp_datenschutz: 'Deine Charakterdaten bleiben auf deinem Rechner und werden nicht hochgeladen. <a href="datenschutz.html?lang=de">Datenschutz</a>',
+			sp_datenschutz: 'Deine Charakterdaten bleiben auf deinem Rechner und werden nicht hochgeladen. <a href="/datenschutz.html?lang=de">Datenschutz</a>',
 			sp_schritt1: '1. Charakter in LOTRO Companion importieren',
 			sp_companion: 'Mit dem kostenlosen ' + COMPANION + ' übernimmst du deinen Fortschritt aus dem laufenden Spiel. Danach kannst du Companion wieder schließen und wie gewohnt weiterspielen.',
-			sp_companion_link: 'Du nutzt Companion zum ersten Mal? Die <a data-ziel="companion.html" href="companion.html?lang=de">ausführliche Anleitung</a> hilft dir beim Einrichten und bei Fragen. Die Kurzfassung findest du hier:',
+			sp_companion_link: 'Du nutzt Companion zum ersten Mal? Die <a data-ziel="companion.html" href="/de/companion/">ausführliche Anleitung</a> hilft dir beim Einrichten und bei Fragen. Die Kurzfassung findest du hier:',
 			sp_windows: '<li>LOTRO starten und mit dem Charakter <strong>die Welt betreten</strong>.</li>' +
 				'<li>LOTRO Companion starten.</li>' +
 				'<li>Oben unter <strong>Sonstiges</strong> das Symbol <strong>„Import from LOTRO…“</strong> anklicken.</li>' +
@@ -43,13 +46,13 @@
 			sp_laden: 'Wähle den Ordner <code>characters</code> von Companion oder ziehe ihn in das Feld. Vorhandene Charaktere werden aktualisiert.',
 			sp_ordner_windows: 'Ordner unter Windows (in die Adresszeile des Auswahlfensters einfügen):',
 			sp_ordner_mac: 'Klicke auf „Companion-Ordner auswählen“. Drücke im Auswahlfenster ⌘⇧G, füge diese Ordneradresse ein und drücke Return. Bestätige dann die Auswahl:',
-			sp_ablage: 'Ordner „characters“ hierher ziehen',
+			sp_ablage: 'Oder den Ordner „characters“ hierher ziehen',
 			sp_ordner_waehlen: 'Companion-Ordner auswählen',
 			sp_lese: 'Lese …',
 			sp_gelesen: '%s Charakter(e) gelesen: %s',
-			sp_nichts: 'Hier wurde kein Companion-Spielstand gefunden. Wähle den Ordner „characters“ aus Schritt 2. Dein Charakter muss vorher in Companion übernommen worden sein.',
+			sp_nichts: 'Kein Companion-Spielstand gefunden. Wähle den Ordner „characters“. Falls du deinen Charakter noch nicht mit Companion ausgelesen hast, hilft dir die Anleitung unter „So geht’s“.',
 			sp_speicher_voll: 'Dein Spielstand konnte nicht gespeichert werden. Versuche es in einem normalen statt einem privaten Browserfenster. Möglicherweise ist auch der Browserspeicher voll.',
-			sp_schritt3: '3. Deine Charaktere',
+			sp_schritt3: 'Deine Charaktere',
 			sp_spalte_name: 'Name', sp_spalte_server: 'Server', sp_spalte_klasse: 'Klasse', sp_spalte_stufe: 'Stufe',
 			sp_spalte_aufgaben: 'Aufgaben', sp_spalte_taten: 'Taten', sp_spalte_stand: 'Stand vom',
 			sp_keine: 'Noch kein Charakter geladen.',
@@ -61,7 +64,7 @@
 			sp_plugin_kurz: 'Du nutzt ' + PLUGIN + ' im Spiel? Dann kannst du deinen importierten Fortschritt auch dorthin übernehmen. Für das Logbuch auf dieser Website brauchst du das Plugin nicht.',
 			sp_zum_plugin: 'Plugin einrichten',
 			sp_schritt5: 'Sicherung',
-			sp_sichern: 'Für den nächsten Rechner oder einen frischen Browser: Sichere deine importierten Charaktere, damit du sie später wieder laden kannst. Das hilft auch, wenn du deine Browserdaten löschst.',
+			sp_sichern: 'Hier kannst du deine Charaktere als Datei sichern oder eine vorhandene Sicherung laden.',
 			sp_sicherung: 'Sicherung herunterladen',
 			sp_sicherung_laden: 'Sicherung laden …',
 			sp_sicherung_fertig: 'Sicherung gespeichert.',
@@ -69,7 +72,7 @@
 			sp_sicherung_falsch: 'Das ist keine Sicherung dieser Seite.',
 			sp_fragen: 'Häufige Fragen',
 			sp_faq: '<details><summary>Mein Charakter fehlt in der Liste.</summary><p>Er muss erst in LOTRO Companion importiert sein. Dann den Ordner hier erneut laden.</p></details>' +
-				'<details><summary>Im Plugin fehlt ein Charakter.</summary><p>Das Plugin zeigt die Charaktere des Kontos und Servers, auf dem du gerade spielst. Charaktere anderer Server erscheinen, wenn du dort spielst. Wie der Stand ins Plugin kommt, steht unter <a data-ziel="plugin.html" href="plugin.html?lang=de">Plugin fürs Spiel</a>.</p></details>' +
+				'<details><summary>Im Plugin fehlt ein Charakter.</summary><p>Das Plugin zeigt die Charaktere des Kontos und Servers, auf dem du gerade spielst. Charaktere anderer Server erscheinen, wenn du dort spielst. Wie der Stand ins Plugin kommt, steht unter <a data-ziel="plugin.html" href="/de/plugin/">Plugin fürs Spiel</a>.</p></details>' +
 				'<details><summary>Die Zahlen weichen vom Spiel ab.</summary><p>Sitzungsspiele zeichnet das Spiel nie als erledigt auf, und von zwei Aufgaben, die sich ausschließen, ist nur eine möglich. Beide zählen hier nicht mit. Wiederholbare Aufträge zählen, sobald sie einmal erledigt sind.</p></details>' +
 				'<details><summary>Wie aktualisiere ich meinen Fortschritt?</summary><p>Importiere den aktuellen Stand erneut in Companion und lade den Ordner hier erneut. Damit ist die Website aktualisiert. Nur wenn du auch Magic Quest Log nutzt, übernimmst du den Stand zusätzlich ins Plugin. Beim Spielen erkennt das Plugin Abschlüsse selbst.</p></details>' +
 				'<details><summary>Ich sammle vor allem Taten.</summary><p>Dafür gibt es ' + DEEDTRACKER + ' von b414213562: ein ausgereiftes Plugin nur für Taten, mit LOTRO-Punkten, Tugend-Erfahrung und gleichnamigen Taten. Magic Quest Log ist vor allem für Aufgaben gedacht; beide vertragen sich.</p></details>'
@@ -87,12 +90,15 @@
 			ohne_spielstand: 'no progress',
 			kein_charakter: 'none loaded yet',
 			sp_titel: 'Import progress',
-			sp_einleitung: 'Many adventures behind you already? Import your progress to keep track of completed quests and deeds, learned recipes and your reputation. Switch between your characters in the menu above.',
+			sp_einleitung: 'See which quests and deeds your character has already completed.',
+			sp_hilfe_companion: 'Haven’t read your character with Companion yet? <a data-ziel="companion.html" href="/en/companion/">Here’s how.</a>',
+			sp_ordner_hilfe: 'Where can I find the folder?',
+			sp_verwalten: 'Manage characters',
 			sp_voraussetzungen: 'You need ' + COMPANION + ' (free) to read your progress from the game. The ' + PLUGIN + ' plugin is <strong>not required</strong> for this website.',
-			sp_datenschutz: 'Your character data stays on your computer and is not uploaded. <a href="datenschutz.html?lang=en">Privacy</a>',
+			sp_datenschutz: 'Your character data stays on your computer and is not uploaded. <a href="/datenschutz.html?lang=en">Privacy</a>',
 			sp_schritt1: '1. Import your character in LOTRO Companion',
 			sp_companion: 'The free ' + COMPANION + ' reads your progress while the game is running. Once that is done, you can close Companion and carry on playing as usual.',
-			sp_companion_link: 'New to Companion? The <a data-ziel="companion.html" href="companion.html?lang=en">full guide</a> helps with setup and common questions. Here are the short steps:',
+			sp_companion_link: 'New to Companion? The <a data-ziel="companion.html" href="/en/companion/">full guide</a> helps with setup and common questions. Here are the short steps:',
 			sp_windows: '<li>Start LOTRO and <strong>enter the world</strong> with your character.</li>' +
 				'<li>Start LOTRO Companion.</li>' +
 				'<li>Under <strong>Misc</strong> at the top, click the <strong>"Import from LOTRO…"</strong> icon.</li>' +
@@ -109,13 +115,13 @@
 			sp_laden: 'Choose Companion’s <code>characters</code> folder or drag it into the area below. Existing characters will be updated.',
 			sp_ordner_windows: 'Folder on Windows (paste it into the address bar of the picker):',
 			sp_ordner_mac: 'Click “Select Companion folder”. In the folder window, press ⌘⇧G, paste this folder address and press Return. Then confirm your selection:',
-			sp_ablage: 'Drop the "characters" folder here',
+			sp_ablage: 'Or drop the “characters” folder here',
 			sp_ordner_waehlen: 'Select Companion folder',
 			sp_lese: 'Reading …',
 			sp_gelesen: '%s character(s) read: %s',
-			sp_nichts: 'No Companion progress was found here. Choose the “characters” folder from step 2. Your character must first have been imported into Companion.',
+			sp_nichts: 'No Companion progress found. Choose the “characters” folder. If you haven’t read your character with Companion yet, follow the “Here’s how” guide.',
 			sp_speicher_voll: 'Your progress could not be saved. Try a regular browser window instead of a private one. Your browser storage may also be full.',
-			sp_schritt3: '3. Your characters',
+			sp_schritt3: 'Your characters',
 			sp_spalte_name: 'Name', sp_spalte_server: 'Server', sp_spalte_klasse: 'Class', sp_spalte_stufe: 'Level',
 			sp_spalte_aufgaben: 'Quests', sp_spalte_taten: 'Deeds', sp_spalte_stand: 'As of',
 			sp_keine: 'No character loaded yet.',
@@ -127,7 +133,7 @@
 			sp_plugin_kurz: 'Using ' + PLUGIN + ' in game? You can send your imported progress there, too. You do not need the plugin to use this website.',
 			sp_zum_plugin: 'Set up the plugin',
 			sp_schritt5: 'Backup',
-			sp_sichern: 'Moving to another computer or a fresh browser? Save a backup of your imported characters so you can load them again later. It also helps if you clear your browser data.',
+			sp_sichern: 'Save your characters to a backup file or load an existing backup here.',
 			sp_sicherung: 'Download backup',
 			sp_sicherung_laden: 'Load backup …',
 			sp_sicherung_fertig: 'Backup saved.',
@@ -135,7 +141,7 @@
 			sp_sicherung_falsch: 'This is not a backup of this page.',
 			sp_fragen: 'Questions',
 			sp_faq: '<details><summary>My character is missing from the list.</summary><p>It has to be imported in LOTRO Companion first. Then load the folder here again.</p></details>' +
-				'<details><summary>A character is missing in the plugin.</summary><p>The plugin shows the characters of the account and server you are playing on. Characters of other servers appear when you play there. How your progress gets into the plugin is described under <a data-ziel="plugin.html" href="plugin.html?lang=en">plugin for the game</a>.</p></details>' +
+				'<details><summary>A character is missing in the plugin.</summary><p>The plugin shows the characters of the account and server you are playing on. Characters of other servers appear when you play there. How your progress gets into the plugin is described under <a data-ziel="plugin.html" href="/en/plugin/">plugin for the game</a>.</p></details>' +
 				'<details><summary>The numbers differ from the game.</summary><p>The game does not record session plays as completed. A quest ruled out by completing an alternative is also excluded from the total. Repeatable quests count after their first completion.</p></details>' +
 				'<details><summary>How do I update my progress?</summary><p>Import the current progress in Companion again, then load the folder here again. That updates the website. Only if you also use Magic Quest Log do you need to export the progress to the plugin as well. While you play, the plugin notices completions by itself.</p></details>' +
 				'<details><summary>I mostly collect deeds.</summary><p>Then have a look at ' + DEEDTRACKER + ' by b414213562: a mature plugin just for deeds, with LOTRO points, virtue experience and identically named deeds. Magic Quest Log is mainly about quests; both work side by side.</p></details>'
@@ -153,12 +159,15 @@
 			ohne_spielstand: 'sans progression',
 			kein_charakter: 'aucun chargé',
 			sp_titel: 'Importer la progression',
-			sp_einleitung: 'Déjà bien des aventures derrière vous ? Importez votre progression pour retrouver vos quêtes et prouesses accomplies, vos recettes apprises et votre réputation. Passez d’un personnage à l’autre dans le menu en haut.',
+			sp_einleitung: 'Retrouvez les quêtes et prouesses que votre personnage a déjà accomplies.',
+			sp_hilfe_companion: 'Vous n’avez pas encore récupéré votre personnage avec Companion ? <a data-ziel="companion.html" href="/fr/companion/">Voici comment faire.</a>',
+			sp_ordner_hilfe: 'Où trouver le dossier ?',
+			sp_verwalten: 'Gérer les personnages',
 			sp_voraussetzungen: 'Vous avez besoin de ' + COMPANION + ' (gratuit) pour lire votre progression dans le jeu. Le plugin ' + PLUGIN + ' <strong>n’est pas nécessaire</strong> pour ce site.',
-			sp_datenschutz: 'Les données de vos personnages restent sur votre ordinateur et ne sont pas envoyées au site. <a href="datenschutz.html?lang=fr">Confidentialité</a>',
+			sp_datenschutz: 'Les données de vos personnages restent sur votre ordinateur et ne sont pas envoyées au site. <a href="/datenschutz.html?lang=fr">Confidentialité</a>',
 			sp_schritt1: '1. Importer le personnage dans LOTRO Companion',
 			sp_companion: 'Le logiciel gratuit ' + COMPANION + ' lit votre progression pendant que le jeu est lancé. Vous pouvez ensuite fermer Companion et continuer à jouer comme d’habitude.',
-			sp_companion_link: 'Vous découvrez Companion ? Le <a data-ziel="companion.html" href="companion.html?lang=fr">guide complet</a> vous accompagne pour l’installation et les questions fréquentes. Voici les étapes en bref :',
+			sp_companion_link: 'Vous découvrez Companion ? Le <a data-ziel="companion.html" href="/fr/companion/">guide complet</a> vous accompagne pour l’installation et les questions fréquentes. Voici les étapes en bref :',
 			sp_windows: '<li>Lancer LOTRO et <strong>entrer dans le monde</strong> avec le personnage.</li>' +
 				'<li>Lancer LOTRO Companion.</li>' +
 				'<li>Sous <strong>Divers</strong>, cliquer sur l\'icône <strong>« Import from LOTRO… »</strong>.</li>' +
@@ -175,13 +184,13 @@
 			sp_laden: 'Choisissez le dossier <code>characters</code> de Companion ou glissez-le dans la zone ci-dessous. Les personnages déjà présents seront mis à jour.',
 			sp_ordner_windows: 'Dossier sous Windows (à coller dans la barre d\'adresse du sélecteur) :',
 			sp_ordner_mac: 'Cliquez sur « Choisir le dossier Companion ». Dans la fenêtre de sélection, appuyez sur ⌘⇧G, collez cette adresse de dossier et appuyez sur Entrée. Confirmez ensuite votre choix :',
-			sp_ablage: 'Glisser le dossier « characters » ici',
+			sp_ablage: 'Ou glissez le dossier « characters » ici',
 			sp_ordner_waehlen: 'Choisir le dossier Companion',
 			sp_lese: 'Lecture …',
 			sp_gelesen: '%s personnage(s) lu(s) : %s',
-			sp_nichts: 'Aucune progression Companion trouvée ici. Choisissez le dossier « characters » de l’étape 2. Votre personnage doit d’abord avoir été importé dans Companion.',
+			sp_nichts: 'Aucune progression Companion trouvée. Choisissez le dossier « characters ». Si vous n’avez pas encore récupéré votre personnage avec Companion, suivez le guide « Voici comment faire ».',
 			sp_speicher_voll: 'Votre progression n’a pas pu être enregistrée. Essayez une fenêtre normale plutôt qu’une fenêtre privée. Le stockage de votre navigateur est peut-être aussi plein.',
-			sp_schritt3: '3. Vos personnages',
+			sp_schritt3: 'Vos personnages',
 			sp_spalte_name: 'Nom', sp_spalte_server: 'Serveur', sp_spalte_klasse: 'Classe', sp_spalte_stufe: 'Niveau',
 			sp_spalte_aufgaben: 'Quêtes', sp_spalte_taten: 'Prouesses', sp_spalte_stand: 'Date',
 			sp_keine: 'Aucun personnage chargé.',
@@ -193,7 +202,7 @@
 			sp_plugin_kurz: 'Vous utilisez ' + PLUGIN + ' en jeu ? Vous pouvez aussi y transmettre votre progression importée. Le plugin n’est pas nécessaire pour utiliser ce site.',
 			sp_zum_plugin: 'Configurer le plugin',
 			sp_schritt5: 'Sauvegarde',
-			sp_sichern: 'Un nouvel ordinateur ou un autre navigateur ? Sauvegardez vos personnages importés pour pouvoir les retrouver plus tard. C’est aussi utile si vous effacez les données du navigateur.',
+			sp_sichern: 'Enregistrez vos personnages dans un fichier de sauvegarde ou chargez une sauvegarde existante ici.',
 			sp_sicherung: 'Télécharger la sauvegarde',
 			sp_sicherung_laden: 'Charger une sauvegarde …',
 			sp_sicherung_fertig: 'Sauvegarde enregistrée.',
@@ -201,7 +210,7 @@
 			sp_sicherung_falsch: 'Ce n\'est pas une sauvegarde de cette page.',
 			sp_fragen: 'Questions fréquentes',
 			sp_faq: '<details><summary>Mon personnage n\'apparaît pas.</summary><p>Il doit d\'abord être importé dans LOTRO Companion. Rechargez ensuite le dossier ici.</p></details>' +
-				'<details><summary>Un personnage manque dans le plugin.</summary><p>Le plugin affiche les personnages du compte et du serveur sur lequel vous jouez. Ceux d\'autres serveurs apparaissent quand vous y jouez. La marche à suivre se trouve sous <a data-ziel="plugin.html" href="plugin.html?lang=fr">Plugin pour le jeu</a>.</p></details>' +
+				'<details><summary>Un personnage manque dans le plugin.</summary><p>Le plugin affiche les personnages du compte et du serveur sur lequel vous jouez. Ceux d\'autres serveurs apparaissent quand vous y jouez. La marche à suivre se trouve sous <a data-ziel="plugin.html" href="/fr/plugin/">Plugin pour le jeu</a>.</p></details>' +
 				'<details><summary>Les chiffres diffèrent du jeu.</summary><p>Les jeux de session ne sont pas enregistrés comme terminés. Une quête exclue par l’accomplissement d’une autre n’entre pas non plus dans le total. Les quêtes répétables comptent après leur premier accomplissement.</p></details>' +
 				'<details><summary>Comment mettre à jour ma progression ?</summary><p>Réimportez la progression actuelle dans Companion, puis rechargez le dossier ici. Le site est alors à jour. Si vous utilisez aussi Magic Quest Log, transmettez également la progression au plugin. En jouant, le plugin remarque lui-même les quêtes terminées.</p></details>' +
 				'<details><summary>Je collectionne surtout les prouesses.</summary><p>Voyez alors ' + DEEDTRACKER + ' de b414213562 : un plugin éprouvé uniquement pour les prouesses, avec points LOTRO, expérience de vertu et prouesses homonymes. Magic Quest Log vise surtout les quêtes ; les deux cohabitent.</p></details>'
