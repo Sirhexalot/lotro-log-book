@@ -37,7 +37,7 @@ def prepare(target):
     config = upload.lies_konfig()
     ftp = upload.verbinde(config)
     ftp.cwd(config['path'])
-    names = set(PAGES) | {'style.css', 'gemeinsam.css', 'speicher.js', 'favicon.svg', 'sitemap.xml', '.htaccess', '404.html', 'kennung.php'}
+    names = set(PAGES) | {'style.css', 'gemeinsam.css', 'speicher.js', 'favicon.svg', 'sitemap.xml', '.htaccess', '404.html'}
     names.update(prefix + lang + '.js' for prefix in ('daten-', 'daten-taten-', 'belohnungen-', 'rezepte-') for lang in LANGS)
     names.add('referenz.js')
     for name in sorted(names):
@@ -89,7 +89,7 @@ def publish(target, workers):
         ftp.cwd(config['path'])
         upload.stelle_sicher(ftp, folder)
     ftp.cwd(config['path'])
-    for name in ('katalog.css', 'katalog.js', 'kennung.php'):
+    for name in ('katalog.css', 'katalog.js'):
         with (target / name).open('rb') as stream:
             ftp.storbinary('STOR ' + name, stream)
     ftp.quit()

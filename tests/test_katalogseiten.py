@@ -204,18 +204,3 @@ class CatalogueTest(unittest.TestCase):
         # A TLS-terminating proxy would report HTTPS=off and loop forever.
         self.assertNotIn('%{HTTPS}', block.split('# BEGIN')[0])
 
-    def test_lowercase_redirector_is_safe(self):
-        php = (ROOT / 'web' / 'kennung.php').read_text()
-        self.assertIn('declare(strict_types=1)', php)
-        self.assertIn("preg_match('~^([0-9A-F]{8}|[A-Z][A-Z_]{1,20})$~'", php)
-        self.assertIn("header('Location: /' . $sprache . '/' . $art . '/' . $gross . '/', true, 301)", php)
-        self.assertIn('http_response_code(404)', php)
-        self.assertIn('X-Robots-Tag: noindex', php)
-        # Only whitelisted type segments per language are accepted.
-        self.assertIn("'de' => ['aufgabe'", php)
-        self.assertIn("'en' => ['quest'", php)
-        self.assertIn("'fr' => ['quete'", php)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -34,7 +34,7 @@ DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'landschaft.css'
            'gegenstaende.html', 'gegenstaende.js', 'gegenstaende.css',
            'suche.js', 'suche.html', 'ruf-quellen-de.js',
            'ruf-quellen-en.js', 'ruf-quellen-fr.js', 'handwerk.js',
-           'stand.js', 'kennung.php', 'rohstoffe.js',
+           'stand.js', 'rohstoffe.js',
             'start.html', 'start-en.html', 'start-fr.html', 'spielstand.html', '404.html',
            'plugin.html', 'companion.html', 'ruf.html', 'handwerk.html', 'belohnungen.html', 'gegenstand.html', 'impressum.html', 'datenschutz.html')
 BILDER = ('bild/start.jpg', 'bild/start-en.jpg', 'bild/start-fr.jpg',

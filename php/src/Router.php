@@ -161,6 +161,9 @@ final class Router
             return ['status' => 404];
         }
         $kind = $this->catalogue->kindOf($lang, $segment);
+        if (($klein = $this->kleinschreibung($lang, $kind, $identifier)) !== null) {
+            return $klein;
+        }
         if ($kind === null || !Catalogue::validId($kind, $identifier)) {
             // Not an id: an item sub-index such as /de/gegenstand/ruestung/.
             return $this->listPage($lang, $segment . '/' . $identifier . '/');
@@ -182,12 +185,40 @@ final class Router
         return ['status' => 200, 'kind' => $kind, 'id' => $identifier];
     }
 
+    /**
+     * A hand-typed lowercase id: one 301 to the stored uppercase address.
+     *
+     * Apache cannot change case and the host does not load mod_speling, so this
+     * used to be a separate script (kennung.php). The router answers it now,
+     * which also covers the profession keys and leaves one place for ids.
+     */
+    private function kleinschreibung(string $lang, ?string $kind, string $identifier): ?array
+    {
+        if ($kind === null) {
+            return null;
+        }
+        $gross = Catalogue::canonicalId($identifier);
+        if ($gross === $identifier || !Catalogue::validId($kind, $gross)
+            || !$this->data->has($lang, $kind, $gross)) {
+            return null;
+        }
+        if ($kind === 'p') {
+            // Professions have no page of their own any more.
+            return ['status' => 301, 'redirect' => $this->catalogue->appRoute($lang, 'handwerk')
+                . '?beruf=' . rawurlencode($gross)];
+        }
+        return ['status' => 301, 'redirect' => $this->catalogue->route($lang, $kind, $gross)];
+    }
+
     private function canonical(string $lang, string $segment, string $identifier, bool $flat): array
     {
         if (!$this->catalogue->isLang($lang)) {
             return ['status' => 404];
         }
         $kind = $this->catalogue->kindOf($lang, $segment);
+        if (($klein = $this->kleinschreibung($lang, $kind, $identifier)) !== null) {
+            return $klein;
+        }
         if ($kind === null || !Catalogue::validId($kind, $identifier)) {
             // Not an id, but maybe an overview page written without its slash
             // ("/de/gegenstand/ruestung") or with index.html.

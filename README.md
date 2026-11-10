@@ -183,13 +183,12 @@ the complete paginated type indexes remain the crawler path to every entity.
 **One public address per entity (08.11.2026):** the trailing-slash form is the only
 one served. The flat `.html` file and the form without the slash answer with
 **301** to it, so search engines never see three addresses for the same record.
-Catalogue IDs are uppercase; a link with a lowercase ID goes to `web/kennung.php`
-(the host does not load `mod_speling`, and Apache cannot change case). That script
-never renders content: it answers **301** to the stored uppercase address, or the
-real **404** page with `noindex`, and accepts only whitelisted language/type
-segments and valid IDs. It is reachable only through the rewrite rule; a direct
-request for `/kennung.php` ends on the error page. Add it to the upload set with
-the other catalogue assets.
+Catalogue IDs are uppercase; a link with a lowercase ID is answered by the router
+(`php/src/Router.php`, `kleinschreibung()`), which **301**s to the stored uppercase
+address or returns the real **404** page. The host does not load `mod_speling`, and
+Apache cannot change case, so this cannot live in a rewrite rule. The separate
+`kennung.php` of the static era is gone: one place for ids, and professions (which
+have no page of their own) keep their redirect to the crafting page.
 
 Content, canonical/hreflang metadata, rewards, requirements, chains, sources and
 ordinary navigation links are HTML. Objectives stay in a closed native
