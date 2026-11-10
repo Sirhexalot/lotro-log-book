@@ -1,0 +1,16 @@
+{% extends 'layout.twig' %}
+
+{# Landmark page: the spot on its map and the quests that lead there.
+   No category and no description: the client export leaves both empty. #}
+{% block inhalt %}
+<article><div class="katalog-kopf"><h1>{{ icon|raw }}{{ page.name }}</h1></div>
+{% if page.place.image %}
+<section class="katalog-abschnitt"><h2>{{ w.place }}</h2>
+<figure class="katalog-ort"><img src="/karten/{{ lang }}/{{ page.place.image|replace({'.png': '.webp'}) }}" alt="" width="320" height="240" loading="lazy" decoding="async"><i class="katalog-pin" style="left:{{ page.place.pin_x|pin }}%;top:{{ page.place.pin_y|pin }}%"></i></figure>
+<p class="katalog-hinweis">{{ page.place.coords }}{% if page.place.map_name %} · <a href="{{ page.place.map_url }}">{{ page.place.map_name }}</a>{% endif %}{% if page.place.region %} · <a href="{{ page.place.region.url }}">{{ page.place.region.text }}</a>{% endif %}</p>
+<p class="katalog-aktionen"><a href="{{ page.map_link }}" class="katalog-knopf">{{ w.map }}</a></p></section>
+{% else %}<p class="katalog-hinweis">{{ w.no_position }}</p>{% endif %}
+<section><h2>{{ w.landmark_here }}</h2>
+{% if page.quests %}<ul class="katalog-liste">{% for goal in page.quests %}<li><a href="{{ goal.url }}">{{ goal.text }}</a></li>{% endfor %}</ul>{% else %}<p class="katalog-hinweis">{{ w.no_landmark_quests }}</p>{% endif %}</section>
+</article>
+{% endblock %}

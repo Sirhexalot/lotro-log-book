@@ -238,6 +238,8 @@ final class Page
             'virtue' => 'virtue',
             'area', 'region' => 'area',
             'p' => 'profession',
+            'f' => 'fraktion',
+            'l' => 'landmarke',
             default => 'catalog',
         };
     }

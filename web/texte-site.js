@@ -5,6 +5,8 @@
 		de: {
 			menue_sets: 'Sets', d_sets: 'Zusammengehörige Ausrüstung und ihre Setboni',
 			menue_auftraggeber: 'Auftraggeber', d_auftraggeber: 'Wer welche Aufgaben vergibt',
+			menue_landmarken: 'Landmarken', d_landmarken: 'Sehenswürdigkeiten mit ihren Aufgaben',
+			menue_fraktionen: 'Fraktionen', d_fraktionen: 'Ruf, Stufen und Quellen',
 			hw_filter: 'Filter', hw_zuruecksetzen: 'Zurücksetzen', hw_kategorie: 'Kategorie', hw_alle_kategorien: 'Alle Kategorien', hw_mehr: 'Weitere Rezepte', hw_weitere_angaben: 'Weitere Angaben', hw_sort: 'Sortierung', hw_sort_name: 'Name', hw_sort_stufe: 'Stufe',
 			nav_menu: 'Menü', nav_sprache: 'Sprache', nav_filter: 'Fortschritt filtern', nav_karten: 'Karten',
 			footer_recht: 'Impressum', footer_datenschutz: 'Datenschutz',
@@ -23,6 +25,8 @@
 		en: {
 			menue_sets: 'Sets', d_sets: 'Matching equipment and its set bonuses',
 			menue_auftraggeber: 'Quest givers', d_auftraggeber: 'Who gives which quests',
+			menue_landmarken: 'Landmarks', d_landmarken: 'Sights and the quests there',
+			menue_fraktionen: 'Factions', d_fraktionen: 'Reputation, tiers and sources',
 			hw_filter: 'Filters', hw_zuruecksetzen: 'Reset', hw_kategorie: 'Category', hw_alle_kategorien: 'All categories', hw_mehr: 'More recipes', hw_weitere_angaben: 'More details', hw_sort: 'Sort', hw_sort_name: 'Name', hw_sort_stufe: 'Level',
 			nav_menu: 'Menu', nav_sprache: 'Language', nav_filter: 'Filter progress', nav_karten: 'Maps',
 			footer_recht: 'Legal notice', footer_datenschutz: 'Privacy',
@@ -41,6 +45,8 @@
 		fr: {
 			menue_sets: 'Ensembles', d_sets: 'Les pièces assorties et leurs bonus d’ensemble',
 			menue_auftraggeber: 'Donneurs de quête', d_auftraggeber: 'Qui donne quelles quêtes',
+			menue_landmarken: 'Sites', d_landmarken: 'Sites et leurs quêtes',
+			menue_fraktionen: 'Factions', d_fraktionen: 'Réputation, paliers et sources',
 			hw_filter: 'Filtres', hw_zuruecksetzen: 'Réinitialiser', hw_kategorie: 'Catégorie', hw_alle_kategorien: 'Toutes les catégories', hw_mehr: 'Autres recettes', hw_weitere_angaben: 'Autres informations', hw_sort: 'Tri', hw_sort_name: 'Nom', hw_sort_stufe: 'Niveau',
 			nav_menu: 'Menu', nav_sprache: 'Langue', nav_filter: 'Filtrer la progression', nav_karten: 'Cartes',
 			footer_recht: 'Mentions légales', footer_datenschutz: 'Confidentialité',

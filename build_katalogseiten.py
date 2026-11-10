@@ -27,8 +27,9 @@ ARTEN = {'ARMOUR': {'de': 'ruestung', 'en': 'armour', 'fr': 'armure'},
          'ITEM': {'de': 'sonstiges', 'en': 'other', 'fr': 'divers'},
          '': {'de': 'ohne-art', 'en': 'no-type', 'fr': 'sans-type'}}
 FAMILIE = {'q': 'welt', 'd': 'welt', 'area': 'welt', 'region': 'welt', 'catalog': 'welt',
+           'l': 'welt',
            'i': 'gegenstaende', 'recipe': 'gegenstaende', 'p': 'gegenstaende',
-           'title': 'erfolge', 'virtue': 'erfolge'}
+           'title': 'erfolge', 'virtue': 'erfolge', 'f': 'erfolge'}
 LANGS = ('de', 'en', 'fr')
 PAGE_SIZE = 200
 WORDS = {
@@ -37,6 +38,10 @@ WORDS = {
         ilist='Gegenstände', arealist='Gebiete', regionlist='Regionen', cataloglabel='Katalog', map='Auf der Karte öffnen',
         area_map='Gebiet auf der Karte öffnen', giver='Auftraggeber', level='Stufe',
         location='Standort', rewards='Belohnungen', choice='Zur Auswahl', title='Titel',
+        f='fraktion', flabel='Fraktion', flist='Fraktionen', tiers='Stufen',
+        rep_sources='Wodurch du Ruf bekommst', no_rep_sources='Rufquellen sind für diese Fraktion nicht bekannt.',
+        no_landmark_quests='Zu dieser Landmarke ist keine Aufgabe belegt.',
+        l='landmarke', llabel='Landmarke', llist='Landmarken', landmark_here='Aufgaben hier',
         virtue='Tugend', trait='Trait / Fertigkeit', emote='Emote', requirements='Voraussetzungen',
         one='Mindestens eine dieser Aufgaben', extra='Prüfe im Spiel, ob du weitere Bedingungen erfüllst, etwa Klasse, Volk oder Ruf.',
         objectives='Ziele und Schritte einblenden', description='Beschreibung', sources='Quellen',
@@ -63,6 +68,10 @@ chain='Aufgabenfolge', previous='Davor', next='Danach', back='Zum Gebiet',
         ilist='Items', arealist='Areas', regionlist='Regions', cataloglabel='Catalogue', map='Open on the map',
         area_map='Open area on the map', giver='Quest giver', level='Level',
         location='Location', rewards='Rewards', choice='Choose one', title='Title',
+        f='faction', flabel='Faction', flist='Factions', tiers='Tiers',
+        rep_sources='How to earn reputation', no_rep_sources='No reputation sources are known for this faction.',
+        no_landmark_quests='No quest is recorded for this landmark.',
+        l='landmark', llabel='Landmark', llist='Landmarks', landmark_here='Quests here',
         virtue='Virtue', trait='Trait / skill', emote='Emote', requirements='Requirements',
         one='At least one of these quests', extra='Check in game for other requirements, such as class, race or reputation.',
         objectives='Show objectives and steps', description='Description', sources='Sources',
@@ -89,6 +98,10 @@ chain='Quest chain', previous='Previous', next='Next', back='Back to area',
         ilist='Objets', arealist='Zones', regionlist='Régions', cataloglabel='Catalogue', map='Voir sur la carte',
         area_map='Voir la zone sur la carte', giver='Donneur de quête', level='Niveau',
         location='Position', rewards='Récompenses', choice='Au choix', title='Titre',
+        f='faction', flabel='Faction', flist='Factions', tiers='Paliers',
+        rep_sources='Comment gagner de la réputation', no_rep_sources='Aucune source de réputation n’est connue pour cette faction.',
+        no_landmark_quests='Aucune quête n’est attestée pour ce site.',
+        l='site', llabel='Site', llist='Sites', landmark_here='Quêtes ici',
         virtue='Vertu', trait='Trait / compétence', emote='Emote', requirements='Conditions',
         one='Au moins une de ces quêtes', extra='Vérifiez en jeu les autres conditions, comme la classe, la race ou la réputation.',
         objectives='Afficher les objectifs et les étapes', description='Description', sources='Sources',
@@ -114,6 +127,7 @@ chain='Suite de quêtes', previous='Précédente', next='Suivante', back='Retour
 
 EXTRA = {
     'de': dict(menue_karte='Aufgaben', menue_taten='Taten', menue_reise='Reise', menue_gegenstaende='Gegenstände', menue_handwerk='Handwerk', menue_berufe='Berufe', menue_titel='Titel', menue_tugenden='Tugenden', menue_ruf='Ruf', menue_fortschritt='Fortschritt', menue_plugin='Plugin fürs Spiel',
+        menue_landmarken='Landmarken', menue_fraktionen='Fraktionen', d_landmarken='Sehenswürdigkeiten mit ihren Aufgaben', d_fraktionen='Ruf, Stufen und Quellen',
         title='titel', virtue='tugend', titlelist='Titel', virtuelist='Tugenden', titlelabel='Titel', virtuelabel='Tugend',
         gendered='Die Form richtet sich nach dem Geschlecht des Charakters.', ranked='Der vollständige Titel enthält Rang und Namen des Charakters.', availability='Der Katalog belegt die Quelle, nicht ob der Titel heute noch erreichbar ist.',
         menue_meine_berufe='Meine Berufe', menue_mein_ruf='Mein Ruf', menue_belohnungen='Belohnungen', familie_welt='Welt', familie_gegenstaende='Gegenstände', familie_erfolge='Erfolge', familie_charakter='Charakter',
@@ -150,6 +164,7 @@ EXTRA = {
         rewards_one='1 Belohnung', maps_count='%s Karten',
         deed_no_position='Für diese Tat ist kein Zielort bekannt.'),
     'en': dict(menue_karte='Quests', menue_taten='Deeds', menue_reise='Travel', menue_gegenstaende='Items', menue_handwerk='Crafting', menue_berufe='Professions', menue_titel='Titles', menue_tugenden='Virtues', menue_ruf='Reputation', menue_fortschritt='Progress', menue_plugin='In-game plugin',
+        menue_landmarken='Landmarks', menue_fraktionen='Factions', d_landmarken='Sights and the quests there', d_fraktionen='Reputation, tiers and sources',
         title='title', virtue='virtue', titlelist='Titles', virtuelist='Virtues', titlelabel='Title', virtuelabel='Virtue',
         gendered='The wording follows the gender of the character.', ranked='The full title also contains the rank and name of the character.', availability='The catalogue records the source, not whether the title is still obtainable today.',
         menue_meine_berufe='My professions', menue_mein_ruf='My reputation', menue_belohnungen='Rewards', familie_welt='World', familie_gegenstaende='Items', familie_erfolge='Rewards', familie_charakter='Character',
@@ -186,6 +201,7 @@ EXTRA = {
         rewards_one='1 reward', maps_count='%s maps',
         deed_no_position='No objective location is known for this deed.'),
     'fr': dict(menue_karte='Quêtes', menue_taten='Prouesses', menue_reise='Voyage', menue_gegenstaende='Objets', menue_handwerk='Artisanat', menue_berufe='Métiers', menue_titel='Titres', menue_tugenden='Vertus', menue_ruf='Réputation', menue_fortschritt='Progression', menue_plugin='Plugin en jeu',
+        menue_landmarken='Sites', menue_fraktionen='Factions', d_landmarken='Sites et leurs quêtes', d_fraktionen='Réputation, paliers et sources',
         title='titre', virtue='vertu', titlelist='Titres', virtuelist='Vertus', titlelabel='Titre', virtuelabel='Vertu',
         gendered='La forme dépend du genre du personnage.', ranked='Le titre complet contient aussi le rang et le nom du personnage.', availability='Le catalogue atteste la source, pas si le titre est encore obtenable aujourd’hui.',
         menue_meine_berufe='Mes métiers', menue_mein_ruf='Ma réputation', menue_belohnungen='Récompenses', familie_welt='Monde', familie_gegenstaende='Objets', familie_erfolge='Récompenses', familie_charakter='Personnage',
@@ -407,6 +423,8 @@ class Renderer:
         'titel': '<path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/>',
         'tugend': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
         'vorkommen': '<path d="M17 3a2 2 0 0 1 1.6.8l3 4a2 2 0 0 1 .013 2.382l-7.99 10.986a2 2 0 0 1-3.247 0l-7.99-10.986A2 2 0 0 1 2.4 7.8l2.998-3.997A2 2 0 0 1 7 3z"/><path d="M2 9h20"/><path d="M10.5 3 8 9l4 13 4-13-2.5-6"/>',
+        'fraktion': '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/>',
+        'landmarke': '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
     }
 
     def entitaetssymbol(self, art):

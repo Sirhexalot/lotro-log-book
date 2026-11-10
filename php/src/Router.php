@@ -145,12 +145,15 @@ final class Router
         if ($kind === null) {
             return ['status' => 404];
         }
+        // Professions have no list and no pages any more: every address under
+        // /de/beruf/ is a 301 to the crafting page, whether or not the data
+        // carries a list there.
+        if ($kind === 'p') {
+            return ['status' => 301, 'redirect' => $this->catalogue->appRoute($lang, 'handwerk')];
+        }
         $key = $lang . '/' . $rest;
         if ($this->data->listPage($key) === null) {
             return ['status' => 404];
-        }
-        if ($kind === 'p') {
-            return ['status' => 301, 'redirect' => $this->catalogue->appRoute($lang, 'handwerk')];
         }
         return ['status' => 200, 'list' => $key];
     }

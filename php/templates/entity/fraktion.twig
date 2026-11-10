@@ -1,0 +1,13 @@
+{% extends 'layout.twig' %}
+
+{# Faction page: description, tier ladder and what earns reputation.
+   The character's own standing stays in the browser; the page is static. #}
+{% block inhalt %}
+<article><div class="katalog-kopf"><h1>{{ icon|raw }}{{ page.name }}</h1></div>
+{% if page.description %}<p class="katalog-text">{{ page.description }}</p>{% endif %}
+{% if page.tiers %}<section><h2>{{ w.tiers }}</h2><ol class="katalog-stufen">{% for tier in page.tiers %}<li><b>{{ tier.nr }}</b> {{ tier.name }}</li>{% endfor %}</ol></section>{% endif %}
+<section><h2>{{ w.rep_sources }}</h2>
+{% if page.groups %}{% for group in page.groups %}<h3>{% if group.kind == 'q' %}{{ w.qlist }}{% elseif group.kind == 'd' %}{{ w.dlist }}{% else %}{{ w.title }}{% endif %}</h3><ul class="katalog-liste">{% for entry in group.entries %}<li>{% if entry.url %}<a href="{{ entry.url }}">{{ entry.text }}</a>{% else %}{{ entry.text }}{% endif %}{% if entry.extra %} · {{ entry.extra }}{% endif %}</li>{% endfor %}</ul>{% endfor %}{% else %}<p class="katalog-hinweis">{{ w.no_rep_sources }}</p>{% endif %}
+<p class="katalog-aktionen"><a href="{{ page.stand_url }}" class="katalog-link">{{ w.reputation }}</a></p></section>
+</article>
+{% endblock %}

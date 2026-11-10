@@ -14,10 +14,11 @@
 	var ARTEN = [
 		['q', 'su_aufgaben'], ['d', 'su_taten'], ['g', 'su_gegenstaende'],
 		['r', 'su_rezepte'], ['t', 'su_titel_tab'], ['v', 'menue_tugenden'], ['s', 'menue_sets'],
-		['n', 'menue_auftraggeber']
+		['n', 'menue_auftraggeber'], ['l', 'menue_landmarken'], ['f', 'menue_fraktionen']
 	];
 	var SYMBOL = { q: 'aufgabe', d: 'tat', g: 'gegenstand',
-		r: 'rezept', t: 'titel', v: 'tugend', s: 'gegenstand', n: 'auftraggeber' };
+		r: 'rezept', t: 'titel', v: 'tugend', s: 'gegenstand', n: 'auftraggeber',
+		l: 'landmarke', f: 'fraktion' };
 	var ART_TEXT = {
 		armour: { de: 'Rüstung', en: 'Armour', fr: 'Armure' },
 		weapon: { de: 'Waffe', en: 'Weapon', fr: 'Arme' },
@@ -49,12 +50,21 @@
 	var HANDWERK = { de: 'handwerk/rezepte', en: 'crafting/recipes',
 		fr: 'artisanat/recettes' }[sprache] || 'handwerk/rezepte';
 
+	function pfadFuer(art, id) {
+		var SEGMENT = { de: { landmarke: 'landmarke', fraktion: 'fraktion' },
+			en: { landmarke: 'landmark', fraktion: 'faction' },
+			fr: { landmarke: 'site', fraktion: 'faction' } }[sprache] || {};
+		return '/' + sprache + '/' + (SEGMENT[art] || art) + '/' + id + '/';
+	}
+
 	function zielFuer(art, id, name) {
 		if (art === 's' && id) { return '/' + sprache + '/' + (sprache === 'fr' ? 'ensemble' : 'set') + '/' + id + '/'; }
 		if (art === 'n' && id) {
 			var giver = { de: 'auftraggeber', en: 'quest-giver', fr: 'donneur-de-quete' }[sprache];
 			return '/' + sprache + '/' + giver + '/' + id + '/';
 		}
+		if (art === 'l' && id) { return pfadFuer('landmarke', id); }
+		if (art === 'f' && id) { return pfadFuer('fraktion', id); }
 		if (art === 'q') { return '/' + sprache + '/' + KARTE + '/?id=' + id; }
 		if (art === 'd') { return '/' + sprache + '/' + TATEN + '/?id=' + id; }
 		if (art === 'g' && id) { return '/' + sprache + '/' + GEGENSTAND + '/' + id + '/'; }

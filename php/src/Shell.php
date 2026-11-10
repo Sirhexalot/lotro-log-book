@@ -110,6 +110,7 @@ final class Shell
                 ['d', $app('taten'), $w['menue_taten'], $w['d_taten']],
                 ['reise', $app('reise'), $w['menue_reise'], $w['d_reise']],
                 ['giver', $app('givers'), Givers::words($lang)['title'], Givers::words($lang)['intro']],
+                ['l', $this->catalogue->route($lang, 'l'), $w['menue_landmarken'], $w['d_landmarken']],
             ]],
             ['gegenstaende', $app('gegenstandssuche'), $w['familie_gegenstaende'], [
                 ['i', $app('gegenstandssuche'), $w['menue_gegenstaende'], $w['d_gegenstand']],
@@ -121,6 +122,7 @@ final class Shell
                 ['title', $this->catalogue->route($lang, 'title'), $w['menue_titel'], $w['d_titel']],
                 ['virtue', $this->catalogue->route($lang, 'virtue'), $w['menue_tugenden'], $w['d_tugend']],
                 ['ruf', $app('ruf'), $w['menue_ruf'], $w['d_ruf']],
+                ['f', $this->catalogue->route($lang, 'f'), $w['menue_fraktionen'], $w['d_fraktionen']],
             ]],
             ['charakter', $app('spielstand'), $w['familie_charakter'], [
                 ['spielstand', $app('spielstand'), $w['menue_fortschritt'], $w['d_fortschritt']],

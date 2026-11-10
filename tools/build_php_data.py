@@ -41,11 +41,12 @@ SCHEMA = 1
 
 # Every kind the catalogue exposes; the shard names are part of the public
 # router contract, so they are fixed here and checked in the tests.
-ARTEN = ('q', 'd', 'i', 'recipe', 'title', 'virtue', 'area', 'region', 'p')
+ARTEN = ('q', 'd', 'i', 'recipe', 'title', 'virtue', 'area', 'region', 'p', 'f', 'l')
 # Catalogues that get sitemap entries. 'p' (professions) stays out on purpose:
 # every profession address answers 301 to the crafting page, and a sitemap must
 # only list pages that answer 200. The router keeps the redirects for old links.
-SITEMAP_KINDS = ('q', 'd', 'i', 'area', 'region', 'recipe', 'title', 'virtue', 'set', 'giver')
+SITEMAP_KINDS = ('q', 'd', 'i', 'area', 'region', 'recipe', 'title', 'virtue', 'set', 'giver',
+                  'f', 'l')
 
 # Quest-giver source, read once in main() and used by every language.
 GIVER_SOURCE: dict | None = None
@@ -197,7 +198,7 @@ def write_pages(target: Path, lang: str, kind: str, pages: dict) -> int:
     return write_shards(target, lang, 'page-' + kind, pages)
 
 
-def language_data(model: dict, lang: str) -> dict:
+def language_data(model: dict, lang: str, fraktionen: dict, landmarken: dict) -> dict:
     maps = {str(m['idx']): m for m in model['maps']}
     out: dict[str, dict] = {kind: {} for kind in ARTEN}
 
@@ -260,6 +261,28 @@ def language_data(model: dict, lang: str) -> dict:
         record = dict(entry)
         record['name'] = entry.get('name') or ''
         out[map_kind(entry)][ident] = record
+
+    # Factions and landmarks come from their own build steps; the names are
+    # already localized there, this picks the language of the page.
+    for ident, entry in fraktionen.items():
+        name = (entry.get('name') or {}).get(lang) or (entry.get('name') or {}).get('en') or ''
+        if not name:
+            continue
+        out['f'][ident] = {
+            'id': ident, 'name': name,
+            'desc': (entry.get('desc') or {}).get(lang) or '',
+            'min': entry.get('min'), 'max': entry.get('max'), 'start': entry.get('start'),
+            'tiers': entry.get('tiers') or {},
+            'sources': (entry.get('sources') or {}).get(lang) or [],
+        }
+    for ident, entry in landmarken.items():
+        name = (entry.get('name') or {}).get(lang) or (entry.get('name') or {}).get('en') or ''
+        if not name:
+            continue
+        out['l'][ident] = {
+            'id': ident, 'name': name, 'targets': entry.get('targets') or [],
+            'map': entry.get('map'), 'lat': entry.get('lat'), 'lon': entry.get('lon'),
+        }
 
     return out
 
@@ -343,6 +366,8 @@ def main() -> int:
     if not (DATEN / 'sets.json').is_file():
         raise SystemExit('MISSING: daten/sets.json (run python3 build_sets.py first)')
     set_source = json.loads((DATEN / 'sets.json').read_text(encoding='utf-8'))
+    fraktion_source = json.loads((DATEN / 'fraktionen.json').read_text(encoding='utf-8'))['fraktionen']
+    landmark_source = json.loads((DATEN / 'landmarken.json').read_text(encoding='utf-8'))['landmarken']
     from set_viewmodel import set_pages, link_items
 
     global GIVER_SOURCE, QUEST_GIVERS
@@ -368,7 +393,7 @@ def main() -> int:
     detail_routes: dict = {}
     for lang in languages:
         model = load_language(lang)
-        data = language_data(model, lang)
+        data = language_data(model, lang, fraktion_source, landmark_source)
         maps = {str(m['idx']): m for m in model['maps']}
         folder = target / lang
         folder.mkdir(parents=True, exist_ok=True)
@@ -391,8 +416,9 @@ def main() -> int:
         # the static generator (tools/php_viewmodel.py).
         sys.path.insert(0, str(HIER / 'tools'))
         from php_viewmodel import (ItemContext, ViewBuilder, app_url, area_view, coords,
-                                   deed_index, deed_view, honor_view, item_view, list_pages,
-                                   members_index, profession_view, quest_view, recipe_view)
+                                   deed_index, deed_view, faction_view, honor_view, item_view,
+                                   landmark_view, list_pages, members_index, profession_view,
+                                   quest_view, recipe_view)
         builder = ViewBuilder(lang, model, maps)
         quest_pages = {ident: quest_view(builder, quest) for ident, quest in data['q'].items()}
         counts['page-q'] = len(quest_pages)
@@ -410,6 +436,16 @@ def main() -> int:
                      for ident, entry in data[art].items()}
             counts['page-' + art] = len(pages)
             write_pages(target, lang, art, pages)
+
+        faction_pages = {ident: faction_view(builder, entry)
+                         for ident, entry in data['f'].items()}
+        counts['page-f'] = len(faction_pages)
+        write_pages(target, lang, 'f', faction_pages)
+
+        landmark_pages = {ident: landmark_view(builder, entry)
+                          for ident, entry in data['l'].items()}
+        counts['page-l'] = len(landmark_pages)
+        write_pages(target, lang, 'l', landmark_pages)
 
         recipe_pages = {ident: recipe_view(builder, row) for ident, row in data['recipe'].items()}
         counts['page-recipe'] = len(recipe_pages)

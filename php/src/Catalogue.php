@@ -16,15 +16,15 @@ final class Catalogue
         'de' => ['q' => 'aufgabe', 'd' => 'tat', 'i' => 'gegenstand', 'area' => 'gebiet',
                  'region' => 'region', 'catalog' => 'katalog', 'p' => 'beruf', 'recipe' => 'rezept',
                   'craft' => 'handwerk', 'title' => 'titel', 'virtue' => 'tugend', 'set' => 'set',
-                  'giver' => 'auftraggeber'],
+                  'giver' => 'auftraggeber', 'f' => 'fraktion', 'l' => 'landmarke'],
         'en' => ['q' => 'quest', 'd' => 'deed', 'i' => 'item', 'area' => 'area',
                  'region' => 'region', 'catalog' => 'catalogue', 'p' => 'profession', 'recipe' => 'recipe',
                   'craft' => 'crafting', 'title' => 'title', 'virtue' => 'virtue', 'set' => 'set',
-                  'giver' => 'quest-giver'],
+                  'giver' => 'quest-giver', 'f' => 'faction', 'l' => 'landmark'],
         'fr' => ['q' => 'quete', 'd' => 'prouesse', 'i' => 'objet', 'area' => 'zone',
                  'region' => 'region', 'catalog' => 'catalogue', 'p' => 'metier', 'recipe' => 'recette',
                   'craft' => 'artisanat', 'title' => 'titre', 'virtue' => 'vertu', 'set' => 'ensemble',
-                  'giver' => 'donneur-de-quete'],
+                  'giver' => 'donneur-de-quete', 'f' => 'faction', 'l' => 'site'],
     ];
 
     /**

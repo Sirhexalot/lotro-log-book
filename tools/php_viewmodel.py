@@ -115,7 +115,7 @@ class ViewBuilder:
         if kind == 'p':
             return ((value.get('n') or {}).get(self.lang)
                     or (value.get('n') or {}).get('en') or value.get('id') or '')
-        if kind in ('area', 'region'):
+        if kind in ('area', 'region', 'f', 'l'):
             return value.get('name') or ''
         return value.get('n') or ''
 
@@ -519,6 +519,96 @@ def honor_view(builder: ViewBuilder, art: str, entry: dict) -> dict:
         'sources': sources,
         'ranked': bool(re.search(r'\bRANK\b|\bNAME\b|\bSURNAME\b', name)),
         'seo': {'title': name, 'description': '%s: %s' % (w[art + 'label'], name)},
+    }
+
+
+# --- Fraktionen und Landmarken -----------------------------------------
+
+def faction_view(builder: ViewBuilder, entry: dict) -> dict:
+    """Faction page: description, tier ladder and what earns reputation.
+
+    The import already knows each character's standing; the page itself stays
+    static and names only the sources, so it reads the same with and without a
+    game state.
+    """
+    w, lang = builder.w, builder.lang
+    name = entry.get('name') or ''
+    unten = int(entry.get('min') or 1)
+    oben = int(entry.get('max') or unten)
+    stufen = []
+    for nummer in range(unten, oben + 1):
+        label = ((entry.get('tiers') or {}).get(str(nummer)) or {}).get(lang) or ''
+        stufen.append({'nr': nummer, 'name': label})
+
+    gruppen: dict[str, dict] = {}
+    for quelle in entry.get('sources') or []:
+        art, ident = quelle.get('kind'), quelle.get('id')
+        if art == 'q' and ident in builder.quests:
+            ziel = route(lang, 'q', ident)
+        elif art == 'd' and ident in builder.deeds:
+            ziel = route(lang, 'd', ident)
+        elif art == 't' and ident in builder.titles:
+            ziel = route(lang, 'title', ident)
+        else:
+            ziel = None
+        gruppe = gruppen.setdefault(art or '?', {'kind': art, 'entries': []})
+        gruppe['entries'].append({'url': ziel, 'text': quelle.get('name') or '',
+                                  'extra': quelle.get('place') or ''})
+
+    return {
+        'kind': 'f',
+        'id': entry.get('id') or '',
+        'name': name,
+        'icon': 'fraktion',
+        'description': entry.get('desc') or '',
+        'tiers': stufen,
+        'start': entry.get('start'),
+        'groups': [gruppen[key] for key in ('q', 'd', 't') if key in gruppen],
+        'total': sum(len(gruppe['entries']) for gruppe in gruppen.values()),
+        'stand_url': app_url(lang, 'ruf'),
+        'seo': {'title': name, 'description': '%s: %s' % (w['flabel'], name)},
+    }
+
+
+def landmark_view(builder: ViewBuilder, entry: dict) -> dict:
+    """Landmark page: the spot on its map and the quests that lead there."""
+    w, lang = builder.w, builder.lang
+    name = entry.get('name') or ''
+    karte = builder.maps.get(str(entry.get('map')))
+    ort = {'image': None, 'pin_x': None, 'pin_y': None,
+           'map_name': None, 'map_url': None, 'region': None, 'coords': None}
+    if karte:
+        ort['map_name'] = karte.get('name')
+        ort['image'] = karte.get('bild')
+        ort['map_url'] = route(lang, 'area', str(entry.get('map')))
+        eltern = builder.maps.get(str(karte.get('eltern')))
+        if eltern:
+            ort['region'] = {'url': route(lang, 'region', str(eltern.get('idx'))),
+                             'text': eltern.get('name')}
+        if entry.get('lat') is not None and entry.get('lon') is not None:
+            breite = karte['east'] - karte['west']
+            hoehe = karte['north'] - karte['south']
+            if breite > 0 and hoehe > 0:
+                ort['pin_x'] = round(min(100.0, max(0.0, (entry['lon'] - karte['west']) / breite * 100)), 1)
+                ort['pin_y'] = round(min(100.0, max(0.0, (karte['north'] - entry['lat']) / hoehe * 100)), 1)
+                ort['coords'] = coords(entry['lat'], entry['lon'])
+
+    ziele = []
+    for ident in entry.get('targets') or []:
+        if ident in builder.quests:
+            ziele.append({'url': route(lang, 'q', ident), 'text': builder.quests[ident]['n'], 'art': 'q'})
+        elif ident in builder.deeds:
+            ziele.append({'url': route(lang, 'd', ident), 'text': builder.deeds[ident]['n'], 'art': 'd'})
+
+    return {
+        'kind': 'l',
+        'id': entry.get('id') or '',
+        'name': name,
+        'icon': 'landmarke',
+        'place': ort,
+        'quests': ziele,
+        'map_link': app_url(lang, 'karte'),
+        'seo': {'title': name, 'description': '%s: %s' % (w['llabel'], name)},
     }
 
 
@@ -993,9 +1083,10 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
     # the search page with its filters is the only way in.
     # 'p' (professions) has no list: every profession address is a 301 to
     # the crafting page, so no page, no navigation and no sitemap entry.
-    for kind in ('q', 'd', 'area', 'region', 'recipe', 'title', 'virtue'):
+    for kind in ('q', 'd', 'area', 'region', 'recipe', 'title', 'virtue', 'f', 'l'):
         source = {'q': builder.quests, 'd': builder.deeds, 'i': builder.items,
                   'area': data['area'], 'region': data['region'], 'p': data['p'],
+                  'f': data['f'], 'l': data['l'],
                   'recipe': {ident: row for ident, row in data['recipe'].items()},
                   'title': data['title'], 'virtue': data['virtue']}[kind]
         rows = _sorted(builder, kind, list(source.items()))
@@ -1038,7 +1129,7 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
         'links': [], 'foot_link': {'url': route(lang, 'recipe'), 'text': w['recipelist']},
     }
     hub = []
-    for kind in ('q', 'd', 'i', 'area', 'region', 'p', 'recipe', 'craft'):
+    for kind in ('q', 'd', 'i', 'area', 'region', 'p', 'recipe', 'craft', 'f', 'l'):
         label = w['craftlist'] if kind == 'craft' else w[kind + 'list']
         url = (app_url(lang, 'gegenstandssuche') if kind == 'i'
                else beruf_url(lang) if kind == 'p' else route(lang, kind))

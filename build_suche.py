@@ -94,6 +94,18 @@ def baue(katalog_dir, sprache):
     givers = json.loads((HIER / 'daten' / ('auftraggeber-suche-%s.json' % sprache)).read_text(encoding='utf-8'))
     for entry in givers['rows']:
         rows.append(['n', entry[0], entry[1], entry[2] or entry[3], entry[4]])
+
+    # Factions and landmarks: the name, the region as context, no level.
+    fraktionen = json.loads((HIER / 'daten' / 'fraktionen.json').read_text(encoding='utf-8'))['fraktionen']
+    for ident, eintrag in fraktionen.items():
+        name = (eintrag.get('name') or {}).get(sprache) or (eintrag.get('name') or {}).get('en') or ''
+        if name.strip():
+            rows.append(['f', ident, name.strip(), '', ''])
+    landmarken = json.loads((HIER / 'daten' / 'landmarken.json').read_text(encoding='utf-8'))['landmarken']
+    for ident, eintrag in landmarken.items():
+        name = (eintrag.get('name') or {}).get(sprache) or (eintrag.get('name') or {}).get('en') or ''
+        if name.strip():
+            rows.append(['l', ident, name.strip(), '', ''])
     rows.sort(key=lambda r: (r[2].lower(), r[0]))
     return rows
 

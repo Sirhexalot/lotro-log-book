@@ -91,7 +91,8 @@
 			{ seite: 'karte', href: app('karte'), text: t('menue_karte'), desc: 'd_karte' },
 			{ seite: 'taten', href: app('taten'), text: t('menue_taten'), desc: 'd_taten' },
 			{ seite: 'reise', href: app('reise'), text: t('menue_reise'), desc: 'd_reise' },
-			{ seite: 'auftraggeber', href: pfad('auftraggeber'), text: t('menue_auftraggeber'), desc: 'd_auftraggeber' }] },
+			{ seite: 'auftraggeber', href: pfad('auftraggeber'), text: t('menue_auftraggeber'), desc: 'd_auftraggeber' },
+		{ seite: 'landmarke', href: pfad('landmarke'), text: t('menue_landmarken'), desc: 'd_landmarken' }] },
 		{ key: 'gegenstaende', text: t('nav_gegenstaende'), href: app('gegenstandssuche'), tab: [
 			{ seite: 'gegenstand', href: app('gegenstandssuche'), text: t('menue_gegenstaende'), desc: 'd_gegenstand' },
 			{ seite: 'set', href: pfad('set'), text: t('menue_sets'), desc: 'd_sets' },
@@ -100,7 +101,8 @@
 		{ key: 'erfolge', text: t('nav_erfolge'), href: app('belohnungen'), tab: [
 			{ seite: 'titel', href: pfad('titel'), text: t('menue_titel'), desc: 'd_titel' },
 			{ seite: 'tugend', href: pfad('tugend'), text: t('menue_tugenden'), desc: 'd_tugend' },
-			{ seite: 'ruf', href: app('ruf'), text: t('menue_ruf'), desc: 'd_ruf' }] },
+			{ seite: 'ruf', href: app('ruf'), text: t('menue_ruf'), desc: 'd_ruf' },
+			{ seite: 'fraktion', href: pfad('fraktion'), text: t('menue_fraktionen'), desc: 'd_fraktionen' }] },
 		{ key: 'charakter', text: t('nav_charakter'), href: app('spielstand'), tab: [
 			{ seite: 'spielstand', href: app('spielstand'), text: t('menue_fortschritt'), desc: 'd_fortschritt' },
 			{ seite: 'beruf', href: app('handwerk'), text: t('menue_meine_berufe'), desc: 'd_meine_berufe' },
@@ -109,6 +111,7 @@
 
 	// Which family the current page belongs to.
 	var ZUORDNUNG = { karte: 'welt', taten: 'welt', reise: 'welt', auftraggeber: 'welt',
+		landmarke: 'welt', fraktion: 'erfolge',
 		gegenstand: 'gegenstaende',
 		handwerk: 'gegenstaende', beruf: 'gegenstaende', titel: 'erfolge', tugend: 'erfolge',
 		ruf: 'erfolge', belohnungen: 'erfolge', spielstand: 'charakter', plugin: 'charakter' };
