@@ -136,7 +136,9 @@ final class Instances
     {
         $out = ['q' => is_string($input['q'] ?? '') ? mb_substr(trim($input['q'] ?? ''), 0, 200) : ''];
         foreach (['region', 'area'] as $key) {
-            $allowed = array_map('intval', array_keys($labels[$key]));
+            // Only values that really occur: a stale link with an id no row
+            // carries must not turn the page into an empty dead end.
+            $allowed = array_values(array_unique(array_filter(array_column($rows, $key))));
             $values = $input[$key] ?? [];
             $values = is_array($values) ? $values : [$values];
             $werte = array_map('intval', array_map('strval', $values));

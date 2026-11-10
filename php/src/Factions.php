@@ -104,7 +104,14 @@ final class Factions
     {
         $out = ['q' => is_string($input['q'] ?? '') ? mb_substr(trim($input['q'] ?? ''), 0, 200) : ''];
         foreach (['region', 'area'] as $key) {
-            $allowed = array_map('intval', array_keys($labels[$key]));
+            // Values from the rows only: a stale link must not dead-end.
+            $erlaubt = [];
+            foreach ($rows as $row) {
+                foreach ($row[$key === 'region' ? 'regions' : 'areas'] as $wert) {
+                    $erlaubt[$wert] = true;
+                }
+            }
+            $allowed = array_map('intval', array_keys($erlaubt));
             $values = $input[$key] ?? [];
             $values = is_array($values) ? $values : [$values];
             $werte = array_map('intval', array_map('strval', $values));

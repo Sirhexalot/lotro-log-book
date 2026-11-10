@@ -123,5 +123,7 @@ if ($html === null) {
 }
 
 header('Content-Type: text/html; charset=utf-8');
-header('Cache-Control: public, max-age=300');
+// Revalidate on every navigation: a page cached for minutes kept showing
+// a half-written upload long after the data was there.
+header('Cache-Control: public, max-age=0, must-revalidate');
 echo $html;

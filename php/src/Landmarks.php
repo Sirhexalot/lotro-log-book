@@ -103,11 +103,12 @@ final class Landmarks
         return $rows;
     }
 
-    private function query(array $input, array $labels): array
+    private function query(array $input, array $labels, array $rows): array
     {
         $out = ['q' => is_string($input['q'] ?? '') ? mb_substr(trim($input['q'] ?? ''), 0, 200) : ''];
         foreach (['region', 'area'] as $key) {
-            $allowed = array_map('intval', array_keys($labels[$key]));
+            // Only values a row really carries: a stale link must not dead-end.
+            $allowed = array_values(array_unique(array_filter(array_column($rows, $key))));
             $values = $input[$key] ?? [];
             $values = is_array($values) ? $values : [$values];
             $werte = array_map('intval', array_map('strval', $values));
@@ -168,7 +169,7 @@ final class Landmarks
         $words = self::words($this->lang);
         $labels = $index['labels'];
         $rows = $index['landmarks'];
-        $filters = $this->query($input, $labels);
+        $filters = $this->query($input, $labels, $rows);
         $selected = array_values(array_filter($rows, fn ($row) => self::matches($row, $filters)));
         $selected = self::sorted($selected);
         $pages = max(1, (int) ceil(count($selected) / self::PAGE_SIZE));
