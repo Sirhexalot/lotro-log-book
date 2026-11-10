@@ -82,6 +82,11 @@ final class Data
         return $this->read($this->root . '/' . $lang . '/factions-index.json');
     }
 
+    public function instanceIndex(string $lang): array
+    {
+        return $this->read($this->root . '/' . $lang . '/instances-index.json');
+    }
+
     public function has(string $lang, string $kind, string $identifier): bool
     {
         return $this->entity($lang, $kind, $identifier) !== null;

@@ -111,6 +111,7 @@ final class Shell
                 ['reise', $app('reise'), $w['menue_reise'], $w['d_reise']],
                 ['giver', $app('givers'), Givers::words($lang)['title'], Givers::words($lang)['intro']],
                 ['l', $this->catalogue->route($lang, 'l'), $w['menue_landmarken'], $w['d_landmarken']],
+                ['instances', $app('instances'), $w['menue_instanzen'], $w['d_instanzen']],
             ]],
             ['gegenstaende', $app('gegenstandssuche'), $w['familie_gegenstaende'], [
                 ['i', $app('gegenstandssuche'), $w['menue_gegenstaende'], $w['d_gegenstand']],

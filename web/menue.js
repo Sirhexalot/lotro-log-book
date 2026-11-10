@@ -92,7 +92,8 @@
 			{ seite: 'taten', href: app('taten'), text: t('menue_taten'), desc: 'd_taten' },
 			{ seite: 'reise', href: app('reise'), text: t('menue_reise'), desc: 'd_reise' },
 			{ seite: 'auftraggeber', href: pfad('auftraggeber'), text: t('menue_auftraggeber'), desc: 'd_auftraggeber' },
-		{ seite: 'landmarke', href: pfad('landmarke'), text: t('menue_landmarken'), desc: 'd_landmarken' }] },
+		{ seite: 'landmarke', href: pfad('landmarke'), text: t('menue_landmarken'), desc: 'd_landmarken' },
+		{ seite: 'instanzen', href: app('instances'), text: t('menue_instanzen'), desc: 'd_instanzen' }] },
 		{ key: 'gegenstaende', text: t('nav_gegenstaende'), href: app('gegenstandssuche'), tab: [
 			{ seite: 'gegenstand', href: app('gegenstandssuche'), text: t('menue_gegenstaende'), desc: 'd_gegenstand' },
 			{ seite: 'set', href: pfad('set'), text: t('menue_sets'), desc: 'd_sets' },
@@ -111,6 +112,7 @@
 
 	// Which family the current page belongs to.
 	var ZUORDNUNG = { karte: 'welt', taten: 'welt', reise: 'welt', auftraggeber: 'welt',
+		instanzen: 'welt',
 		landmarke: 'welt', fraktion: 'erfolge',
 		gegenstand: 'gegenstaende',
 		handwerk: 'gegenstaende', beruf: 'gegenstaende', titel: 'erfolge', tugend: 'erfolge',

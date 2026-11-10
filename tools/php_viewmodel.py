@@ -34,17 +34,17 @@ APP_SEGMENTS = {
            'gegenstandssuche': 'gegenstandssuche', 'handwerk': 'handwerk/rezepte',
            'reise': 'reise', 'ruf': 'ruf', 'belohnungen': 'belohnungen',
            'spielstand': 'spielstand', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'suche', 'givers': 'auftraggeber', 'landmarks': 'landmarke', 'factions': 'fraktion'},
+           'suche': 'suche', 'givers': 'auftraggeber', 'landmarks': 'landmarke', 'factions': 'fraktion', 'instances': 'instanz'},
     'en': {'start': '', 'karte': 'map', 'taten': 'map/deeds',
            'gegenstandssuche': 'item-search', 'handwerk': 'crafting/recipes',
            'reise': 'travel', 'ruf': 'reputation', 'belohnungen': 'rewards',
            'spielstand': 'progress', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'search', 'givers': 'quest-giver', 'landmarks': 'landmark', 'factions': 'faction'},
+           'suche': 'search', 'givers': 'quest-giver', 'landmarks': 'landmark', 'factions': 'faction', 'instances': 'instance'},
     'fr': {'start': '', 'karte': 'carte', 'taten': 'carte/prouesses',
            'gegenstandssuche': 'recherche-objets', 'handwerk': 'artisanat/recettes',
            'reise': 'voyage', 'ruf': 'reputation', 'belohnungen': 'recompenses',
            'spielstand': 'progression', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'recherche', 'givers': 'donneur-de-quete', 'landmarks': 'site', 'factions': 'faction'},
+           'suche': 'recherche', 'givers': 'donneur-de-quete', 'landmarks': 'site', 'factions': 'faction', 'instances': 'instance'},
 }
 
 

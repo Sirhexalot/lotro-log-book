@@ -149,6 +149,9 @@ final class Page
         if ($page === 'factions') {
             return (new Factions($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
         }
+        if ($page === 'instances') {
+            return (new Instances($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
+        }
         // The deeds view is the map with another mode; the crafting browser
         // shares its template with nothing else.
         $template = match ($page) {

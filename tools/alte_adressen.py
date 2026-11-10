@@ -31,19 +31,19 @@ APP = {
            'reise': 'reise', 'ruf': 'ruf', 'belohnungen': 'belohnungen',
            'spielstand': 'spielstand', 'companion': 'companion', 'plugin': 'plugin',
            'suche': 'suche', 'gegenstand': 'gegenstand', 'auftraggeber': 'auftraggeber',
-           'landmarks': 'landmarke', 'factions': 'fraktion'},
+           'landmarks': 'landmarke', 'factions': 'fraktion', 'instances': 'instanz'},
     'en': {'start': '', 'karte': 'map', 'taten': 'map/deeds',
            'gegenstandssuche': 'item-search', 'handwerk': 'crafting/recipes',
            'reise': 'travel', 'ruf': 'reputation', 'belohnungen': 'rewards',
            'spielstand': 'progress', 'companion': 'companion', 'plugin': 'plugin',
            'suche': 'search', 'gegenstand': 'item', 'auftraggeber': 'quest-giver',
-           'landmarks': 'landmark', 'factions': 'faction'},
+           'landmarks': 'landmark', 'factions': 'faction', 'instances': 'instance'},
     'fr': {'start': '', 'karte': 'carte', 'taten': 'carte/prouesses',
            'gegenstandssuche': 'recherche-objets', 'handwerk': 'artisanat/recettes',
            'reise': 'voyage', 'ruf': 'reputation', 'belohnungen': 'recompenses',
            'spielstand': 'progression', 'companion': 'companion', 'plugin': 'plugin',
            'suche': 'recherche', 'gegenstand': 'objet', 'auftraggeber': 'donneur-de-quete',
-           'landmarks': 'site', 'factions': 'faction'},
+           'landmarks': 'site', 'factions': 'faction', 'instances': 'instance'},
 }
 
 # Legacy file name without ".html" -> application page.

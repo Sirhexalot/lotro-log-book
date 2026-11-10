@@ -288,6 +288,47 @@ def write_faction_index(target: Path, lang: str, factions: dict,
         json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 
 
+def write_instance_index(target: Path, lang: str, instanzen: dict, maps: dict) -> None:
+    """The compact index for the instance browser.
+
+    One row per instance template with the name in this language, the level and
+    the place from its opening quest, and how many players may enter.
+    """
+    labels = {'area': {}, 'region': {}, 'area_region': {}}
+    for idx, entry in maps.items():
+        name = entry.get('name')
+        if not name:
+            continue
+        if entry.get('tier') == 1:
+            labels['region'][str(idx)] = name
+        else:
+            labels['area'][str(idx)] = name
+    rows = []
+    for ident, eintrag in instanzen.items():
+        name = (eintrag.get('name') or {}).get(lang) or (eintrag.get('name') or {}).get('en') or ''
+        if not name:
+            continue
+        area = eintrag.get('area')
+        region = eintrag.get('region')
+        if area is not None and region is not None and area != region:
+            labels['area_region'][str(area)] = str(region)
+        teile = [name]
+        if area is not None:
+            teile.append(labels['area'].get(str(area))
+                         or labels['region'].get(str(area)) or '')
+        rows.append({'id': ident, 'name': name,
+                     'level': eintrag.get('level'),
+                     'region': region, 'area': area,
+                     'players': eintrag.get('players'),
+                     'type': eintrag.get('type') or 'sonst',
+                     'quest': eintrag.get('quest'),
+                     'search': ' '.join(teil for teil in teile if teil).lower()})
+    rows.sort(key=lambda row: row['name'].lower())
+    payload = {'schema': 1, 'lang': lang, 'labels': labels, 'instances': rows}
+    (target / lang / 'instances-index.json').write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+
+
 def write_pages(target: Path, lang: str, kind: str, pages: dict) -> int:
     """Render-ready view models, one shard per hash bucket.
 
@@ -469,6 +510,7 @@ def main() -> int:
     set_source = json.loads((DATEN / 'sets.json').read_text(encoding='utf-8'))
     fraktion_source = json.loads((DATEN / 'fraktionen.json').read_text(encoding='utf-8'))['fraktionen']
     landmark_source = json.loads((DATEN / 'landmarken.json').read_text(encoding='utf-8'))['landmarken']
+    instanz_source = json.loads((DATEN / 'instanzen.json').read_text(encoding='utf-8'))['instanzen']
     from set_viewmodel import set_pages, link_items
 
     global GIVER_SOURCE, QUEST_GIVERS
@@ -549,6 +591,7 @@ def main() -> int:
         write_pages(target, lang, 'l', landmark_pages)
         write_landmark_index(target, lang, data['l'], maps)
         write_faction_index(target, lang, data['f'], builder.quests, builder.deeds, maps)
+        write_instance_index(target, lang, instanz_source, maps)
 
         recipe_pages = {ident: recipe_view(builder, row) for ident, row in data['recipe'].items()}
         counts['page-recipe'] = len(recipe_pages)

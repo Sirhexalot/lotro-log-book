@@ -1,0 +1,57 @@
+{% extends 'layout.twig' %}
+{# Same filter-browser shell as the other catalogues: sets.js filters the form,
+   auftraggeber.js opens the region tree. #}
+{% block inhalt %}
+<div class="sets-browser">
+<h1>{{ iw.title }}</h1><p>{{ iw.intro }}</p>
+<form method="get" action="{{ list_url }}" class="sets-form">
+    <div class="sets-search"><label for="instance-query">{{ iw.search }}</label><div><input type="search" id="instance-query" name="q" value="{{ filters.q }}"><button type="submit">{{ iw.search }}</button></div></div>
+    <div class="sets-grid">
+        <details class="sets-filters" open>
+            <summary>{{ iw.filter }}</summary>
+            <p class="schwach">{{ iw.filter_note }}</p>
+            {% if facets.region %}
+            <fieldset class="giver-tree"><legend>{{ iw.wo }}</legend>
+                {% for region in facets.region %}
+                {% set kinder = area_by_region[region.value]|default([]) %}
+                <div class="giver-zweig" data-region="{{ region.value }}">
+                    <div class="giver-region">
+                        {% if kinder %}<button type="button" class="giver-pfeil" aria-expanded="true" aria-label="{{ region.label }}">▾</button>{% else %}<span class="giver-pfeil giver-pfeil-leer"></span>{% endif %}
+                        <label class="sets-option"><input type="checkbox" name="region[]" value="{{ region.value }}"{% if region.checked %} checked{% endif %}><span>{{ region.label }}</span><small>{{ region.count }}</small></label>
+                    </div>
+                    {% if kinder %}<div class="giver-kinder">
+                        {% for option in kinder %}<label class="sets-option giver-kind"><input type="checkbox" name="area[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+                    </div>{% endif %}
+                </div>
+                {% endfor %}
+                {% if area_rest %}<fieldset><legend>{{ iw.area }}</legend>
+                    {% for option in area_rest %}<label class="sets-option"><input type="checkbox" name="area[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+                </fieldset>{% endif %}
+            </fieldset>
+            {% endif %}
+            {% if facets.art %}
+            <fieldset><legend>{{ iw.art }}</legend>
+                {% for option in facets.art %}<label class="sets-option"><input type="checkbox" name="art[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+            </fieldset>
+            {% endif %}
+            <fieldset><legend>{{ iw.level }}</legend><div class="sets-range"><label>{{ iw.from }}<input type="number" name="von" min="0" max="999" value="{{ filters.von }}"></label><label>{{ iw.to }}<input type="number" name="bis" min="0" max="999" value="{{ filters.bis }}"></label></div></fieldset>
+            {% if facets.spieler %}
+            <fieldset><legend>{{ iw.players }}</legend>
+                {% for option in facets.spieler %}<label class="sets-option"><input type="checkbox" name="spieler[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+            </fieldset>
+            {% endif %}
+            <div class="sets-filter-actions"><button type="submit">{{ iw.apply }}</button><a href="{{ list_url }}">{{ iw.reset }}</a></div>
+        </details>
+        <section class="sets-results" aria-label="{{ iw.title }}">
+            <p class="sets-count" role="status">{{ (count == 1 ? iw.count_one : iw.count)|replace({'%s': count}) }}</p>
+            <ul class="sets-list">{% for row in instances %}<li>{% if row.url %}<a href="{{ row.url }}"><span class="sets-preview"><strong>{{ row.name }}</strong></span><span class="sets-meta">{{ row.meta }}</span></a>{% else %}<span class="sets-preview"><strong>{{ row.name }}</strong></span><span class="sets-meta">{{ row.meta }}</span>{% endif %}</li>{% else %}<li>{{ iw.empty }}</li>{% endfor %}</ul>
+            <nav class="sets-pagination" aria-label="{{ iw.title }}">
+                {% if previous_url %}<a href="{{ previous_url }}">‹ {{ iw.previous }}</a>{% endif %}
+                <span>{{ page_label }}</span>
+                {% if next_url %}<a href="{{ next_url }}">{{ iw.next }} ›</a>{% endif %}
+            </nav>
+        </section>
+    </div>
+</form>
+</div>
+{% endblock %}

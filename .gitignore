@@ -4,6 +4,7 @@ Karten_en/
 Karten_fr/
 webp/
 daten/*.json
+daten/*.jsonl
 daten/vorkommen/
 web/daten-*.js
 web/belohnungen-*.js
