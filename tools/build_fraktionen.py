@@ -7,7 +7,8 @@ Three sources, each for the part it knows best:
   descriptions the game shows,
 * `web/referenz.js` for the tier names and the starting tier (it is built from
   the same export, but resolves the progression tables),
-* `web/ruf-quellen-<language>.js` for the quests and titles that award reputation.
+* `web/ruf-quellen-<language>.js` for the quests and deeds that award reputation
+  (`t` in that file is a deed, not a title).
 
 Output is `daten/fraktionen.json`; `tools/build_php_data.py` turns it into shards
 and page models. Nothing is estimated: a faction without sources keeps an empty
@@ -19,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -29,6 +31,11 @@ EXPORT = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exp
 SPRACHEN = ('de', 'en', 'fr')
 FRAKTION = 1889
 
+sys.path.insert(0, str(HIER))
+# One implementation for the game's gender choice: "${PLAYERNAME:Feind[m]|Feindin[f]}"
+# becomes "Feind / Feindin". The same function builds the factions of referenz.js.
+from build_referenz import aufloesen  # noqa: E402
+
 
 def js_datei(pfad: Path, name: str) -> dict:
     text = pfad.read_text(encoding='utf-8')
@@ -37,12 +44,29 @@ def js_datei(pfad: Path, name: str) -> dict:
     return json.JSONDecoder().raw_decode(text[start:])[0]
 
 
-def texte(wert) -> dict:
+def sauber_text(text: str) -> str:
+    """Running text: keep paragraph breaks, tidy spaces and blank lines.
+
+    The export writes the paragraph breaks as literal `\\n` sequences, so they
+    are turned into real line breaks before the text is tidied."""
+    text = (text or '').replace('\\n', '\n').replace('\r\n', '\n').replace('\r', '\n')
+    text = re.sub(r'[ \t]+', ' ', text)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return '\n'.join(zeile.strip() for zeile in text.split('\n')).strip()
+
+
+def sauber_ort(text: str) -> str:
+    """The game's place labels carry internal keys ("@other") as segments."""
+    teile = [re.sub(r'\s+', ' ', teil).strip() for teil in str(text or '').split(' · ')]
+    return ' · '.join(teil for teil in teile if teil and not teil.startswith('@'))
+
+
+def texte(wert, umwandeln=sauber_text) -> dict:
     """Localized property as {de, en, fr}, empty strings where it is missing."""
     if not isinstance(wert, dict):
         return {sprache: '' for sprache in SPRACHEN}
     texts = wert.get('texts') or {}
-    return {sprache: str(texts.get(sprache) or '') for sprache in SPRACHEN}
+    return {sprache: umwandeln(str(texts.get(sprache) or '')) for sprache in SPRACHEN}
 
 
 def baue(export: Path) -> dict:
@@ -53,7 +77,7 @@ def baue(export: Path) -> dict:
             if eintrag.get('class_index') != FRAKTION:
                 continue
             properties = eintrag.get('properties') or {}
-            name = texte(properties.get('Reputation_Faction_Name'))
+            name = texte(properties.get('Reputation_Faction_Name'), aufloesen)
             if not name['de'] and not name['en']:
                 continue
             fraktionen[eintrag['id']] = {
@@ -86,7 +110,13 @@ def baue(export: Path) -> dict:
             if eintrag is None:
                 continue
             eintrag['sources'][sprache] = [
-                {'id': z[0], 'name': z[1], 'kind': z[3], 'place': z[5] if len(z) > 5 else ''}
+                {'id': z[0], 'name': sauber_ort(z[1]),
+                 'kind': z[3],
+                 # z[2] is the quest level, z[4] the strength 1-6 the old page
+                 # drew as bars. There is no reputation amount in the data.
+                 'level': z[2] if len(z) > 2 else None,
+                 'strength': z[4] if len(z) > 4 else None,
+                 'place': sauber_ort(z[5]) if len(z) > 5 else ''}
                 for z in zeilen]
 
     return {'schema': 1, 'fraktionen': fraktionen}
