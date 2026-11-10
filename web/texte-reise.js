@@ -8,7 +8,7 @@
 		de: {
 			reise_titel: 'Reise',
 			reise_welt_hinweis: 'Gib Start und Ziel ein – dann siehst du deinen Weg auf der Karte.',
-			reise_karte: 'Karte',
+			reise_karte: 'Karte', reise_karte_oeffnen: 'Im Katalog öffnen:',
 			reise_karte_start: 'Start',
 			reise_karte_ziel: 'Ziel',
 			reise_karte_umstieg: 'Umstieg',
@@ -76,7 +76,7 @@
 		en: {
 			reise_titel: 'Travel',
 			reise_welt_hinweis: 'Enter where you are and where you want to go – then you see your route on the map.',
-			reise_karte: 'Map',
+			reise_karte: 'Map', reise_karte_oeffnen: 'Open in the catalogue:',
 			reise_karte_start: 'Start',
 			reise_karte_ziel: 'Destination',
 			reise_karte_umstieg: 'Change',
@@ -144,7 +144,7 @@
 		fr: {
 			reise_titel: 'Voyage',
 			reise_welt_hinweis: 'Indiquez votre départ et votre destination – vous verrez ensuite votre trajet sur la carte.',
-			reise_karte: 'Carte',
+			reise_karte: 'Carte', reise_karte_oeffnen: 'Ouvrir dans le catalogue :',
 			reise_karte_start: 'Départ',
 			reise_karte_ziel: 'Arrivée',
 			reise_karte_umstieg: 'Correspondance',

@@ -334,17 +334,34 @@
 		return Math.max(0, Math.min(100, (wert - von) / (bis - von) * 100));
 	}
 
+	// One catalogue address per map: a region map leads to the region, every
+	// other map to its area. Same segments as the router.
+	var KATALOG = {
+		de: { region: 'region', gebiet: 'gebiet' },
+		en: { region: 'region', gebiet: 'area' },
+		fr: { region: 'region', gebiet: 'zone' }
+	}[sprache] || { region: 'region', gebiet: 'gebiet' };
+
+	function katalogLink(karte) {
+		var art = (karte.t || 0) <= 1 ? KATALOG.region : KATALOG.gebiet;
+		return '/' + sprache + '/' + art + '/' + karte.i + '/';
+	}
+
 	/** One map card with a marker for every stop that lies on it. */
 	function karteKnoten(gruppe) {
 		var karte = gruppe.karte;
 		var bild = eltern('figure', null, 'reise-karte');
-		var rahmen = eltern('div', null, 'reise-karte-bild');
+		var rahmen = eltern('a', null, 'reise-karte-link');
+		rahmen.href = katalogLink(karte);
+		rahmen.title = t('reise_karte_oeffnen') + ' ' + (karte.nm || '');
+		rahmen.setAttribute('aria-label', t('reise_karte_oeffnen') + ' ' + (karte.nm || ''));
+		var feld = eltern('div', null, 'reise-karte-bild');
 		var bildFeld = eltern('img');
 		bildFeld.loading = 'lazy';
 		bildFeld.decoding = 'async';
 		bildFeld.alt = '';
 		bildFeld.src = BILDPFAD + karte.bild;
-		rahmen.appendChild(bildFeld);
+		feld.appendChild(bildFeld);
 
 		gruppe.orte.forEach(function (eintrag) {
 			var marker = eltern('span', eintrag.nr == null ? '' : String(eintrag.nr), 'reise-marker');
@@ -353,8 +370,9 @@
 			// CSS counts from the top, the map's frame from the south.
 			marker.style.setProperty('--y', (100 - prozent(eintrag.ort.lat, karte.s, karte.no)).toFixed(2) + '%');
 			marker.title = eintrag.ort.n + ' – ' + rolleText(eintrag.art);
-			rahmen.appendChild(marker);
+			feld.appendChild(marker);
 		});
+		rahmen.appendChild(feld);
 		bild.appendChild(rahmen);
 
 		var fuss = eltern('figcaption');

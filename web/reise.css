@@ -329,6 +329,9 @@ main.reise {
 	border-radius: 6px;
 	overflow: hidden;
 }
+.reise-karte-link { display: block; color: inherit; text-decoration: none; }
+.reise-karte-link:hover .reise-karte-bild,
+.reise-karte-link:focus-visible .reise-karte-bild { outline: 2px solid var(--gold); outline-offset: -2px; }
 .reise-karte-bild { position: relative; aspect-ratio: 4 / 3; background: #000; }
 .reise-karte-bild img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .reise-karte figcaption { padding: 8px 10px 10px; font-size: var(--text-bedienung); color: var(--schwach); }
