@@ -135,6 +135,22 @@ def level_range(levels):
     return quantile(levels, 0.1), quantile(levels, 0.9)
 
 
+def pack_name(pack, lang, names):
+    """Localized name of an adventure.
+
+    Expansions carry editorial names in all three languages; a quest pack or a
+    free update is named after its landscape map, which is the name the client
+    itself shows.
+    """
+    if pack.get('name'):
+        return pack['name'][lang]
+    if pack.get('name_map'):
+        label = (names.get(int(pack['name_map'])) or '').strip()
+        if label:
+            return label
+    raise ValueError('%s: neither name nor a named name_map' % pack['id'])
+
+
 def name_for(area, tree, names):
     """Named map of an area; walk up when a sub-map carries no name."""
     cursor, seen = area, set()
@@ -154,7 +170,6 @@ def build(lang, packs, tree, quests, names):
     assignment = map_assignment(packs, tree)
     excluded = excluded_subtrees(packs, tree)
     by_pack = {pack['id']: pack for pack in packs}
-
     area_quests, rows = {}, []
     for quest in quests:
         if not one_time(quest):
@@ -205,8 +220,8 @@ def build(lang, packs, tree, quests, names):
             'order': pack['order'],
             'type': pack['type'],
             'release': pack['release'],
-            'name': pack['name'][lang],
-            'summary': pack['summary'][lang],
+            'name': pack_name(pack, lang, names),
+            'summary': (pack.get('summary') or {}).get(lang, ''),
             'level_min': low,
             'level_max': high,
             'level_source': 'editorial',

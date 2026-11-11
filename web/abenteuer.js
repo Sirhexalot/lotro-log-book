@@ -238,8 +238,6 @@
 				var value = button.getAttribute('data-alle');
 				var changed = [];
 				Array.prototype.forEach.call(document.querySelectorAll('[data-inhalt]'), function (select) {
-					// The base game is free; "not owned" would be untrue for it.
-					if (value === 'missing' && select.hasAttribute('data-frei')) { return; }
 					select.value = value;
 					changed.push(select.getAttribute('data-inhalt'));
 				});

@@ -15,12 +15,13 @@ Menü: **Welt → Abenteuerüberblick**.
 1. **Kopf** mit gewähltem Charakter und Stufe (aus dem vorhandenen Charakterspeicher).
 2. **Zwei Hinweise**: „Altes zu Ende bringen“ und „Passt zu deiner Stufe“. Ohne
    belastbaren Vorschlag steht dort ein Hinweis, keine erfundene Empfehlung.
-3. **Meine Inhalte** (ganz oben, standardmäßig zugeklappt): Zugang je Abenteuer
-   (vorhanden / nicht vorhanden / unbekannt), lokal pro Konto gespeichert
-   (`mql.abenteuer.inhalte.v1`). Jede Zeile zeigt den Fortschritt des Abenteuers;
-   zwei Knöpfe setzen alle Erweiterungen auf einmal. Eine Änderung färbt Zeile und
-   Karte kurz ein, damit die Wirkung sichtbar ist. Das Grundspiel ist frei und wird
-   von „Alles nicht vorhanden“ ausgelassen.
+3. **Meine Inhalte** (ganz oben, standardmäßig zugeklappt): Zugang nur für
+   **kaufbare** Inhalte – Erweiterungen und Aufgabenpakete –, lokal pro Konto
+   gespeichert (`mql.abenteuer.inhalte.v1`). Grundspiel und kostenlose Updates
+   stehen nicht in der Liste, weil sie immer verfügbar sind. Eine einzige Liste,
+   sortiert nach Einstiegsstufe wie die Karten, mit der Art hinter dem Namen;
+   zwei Knöpfe setzen alle Käufe auf einmal. Eine Änderung färbt Zeile und Karte
+   kurz ein, damit die Wirkung sichtbar ist.
 4. **Abenteuerkarten**: Name, Art, redaktioneller Stufenbereich, Kurztext,
    Fortschritt und ein aufklappbarer Gebietsausschnitt. Auch 0 % wird angezeigt;
    ein fehlender Balken hieße sonst „unbekannt“ statt „nichts geschafft“.
@@ -38,6 +39,10 @@ Stufe und Gebieten. Fortschritt, Hinweise und Zugang entstehen im Browser.
   Wurzeln, ausdrückliche Ausschlüsse und der Prüfumfang (`review: landscape`).
   Englische Namen sind die offiziellen Produktnamen; deutsche und französische
   Titel sind redaktionelle Übersetzungen mit den Landschaftsnamen des Clients.
+  Aufgabenpakete und kostenlose Updates tragen statt `name` ein `name_map` und
+  heißen damit in jeder Sprache so, wie der Client die Landschaft nennt.
+  `free: true` markiert immer verfügbare Inhalte (Grundspiel, Updates); alle
+  anderen sind kaufbar und erscheinen in „Meine Inhalte“.
 - `tools/build_abenteuer.py` erzeugt daraus je Sprache `abenteuer.json` für die
   Seite und `web/abenteuer-<sprache>.js` für den Browser. Beides ist identisch.
 - Aufgabe→Abenteuer: die tiefste Karte im `fk`-Pfad, die zu genau einem Abenteuer
@@ -57,7 +62,7 @@ Stufe und Gebieten. Fortschritt, Hinweise und Zugang entstehen im Browser.
   innerhalb einer alten Landschaft sind nicht ausgeschlossen; das steht als
   Einschränkung in den erzeugten Daten.
 
-Lokaler Bestand am 11.11.2026: 15 Abenteuer, 105 Gebiete, 5.493 einmalige Aufgaben.
+Lokaler Bestand am 11.11.2026: 32 Abenteuer (15 Erweiterungen einschließlich Grundspiel, 12 Aufgabenpakete, 5 kostenlose Updates), 158 Gebiete, 7.821 einmalige Aufgaben.
 
 ## Logik
 
@@ -76,7 +81,8 @@ Lokaler Bestand am 11.11.2026: 15 Abenteuer, 105 Gebiete, 5.493 einmalige Aufgab
   Abenteuer zuerst; nie dasselbe Abenteuer wie der erste Hinweis.
 - Nächster Schritt im Abenteuer: frühestes Gebiet mit einer Aufgabe, deren bekannte
   Voraussetzungen erfüllt sind. Das ist keine Zusicherung aktueller Annehmbarkeit.
-- Zugang: Grundspiel frei; sonst gespeicherte Angabe. VIP und kostenlose Regeln
+- Zugang: kaufbare Inhalte aus der gespeicherten Angabe; Grundspiel und kostenlose
+  Updates sind immer verfügbar. VIP-Regeln
   werden nur mit ausdrücklich geprüften Feldern berücksichtigt. „Unbekannt“ heißt
   nicht „nicht gekauft“; nur ausdrücklich fehlender Zugang nimmt ein Abenteuer aus
   den Hinweisen, nicht aus der Liste.

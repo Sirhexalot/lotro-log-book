@@ -32,18 +32,22 @@ TREE = {1: {'eltern': None, 'name': 'Eriador'},
 class ReferenceTests(unittest.TestCase):
     def test_reference_lists_every_expansion_in_order(self):
         packs = REFERENCE['packs']
-        self.assertEqual([p['order'] for p in packs], list(range(15)))
-        self.assertEqual(len({p['id'] for p in packs}), 15)
+        self.assertEqual([p['order'] for p in packs], list(range(len(packs))))
+        self.assertEqual(len({p['id'] for p in packs}), len(packs))
         self.assertEqual([p['release'] for p in packs], sorted(p['release'] for p in packs))
-        self.assertTrue(packs[0]['free'])
-        self.assertTrue(all('free' not in p for p in packs[1:]))
+        free = {p['id'] for p in packs if p.get('free')}
+        self.assertEqual(free, {'base', 'yondershire', 'wildwood', 'angle-mitheithel', 'hatokali'})
+        self.assertEqual({p['type'] for p in packs},
+                         {'base', 'expansion', 'mini-expansion', 'quest-pack', 'update'})
         self.assertEqual(REFERENCE['artwork']['status'], 'pending')
 
     def test_every_pack_carries_three_names_and_a_plausible_level_band(self):
         for pack in REFERENCE['packs']:
-            for lang in ('de', 'en', 'fr'):
-                self.assertTrue(pack['name'][lang].strip(), (pack['id'], lang))
-                self.assertTrue(pack['summary'][lang].strip(), (pack['id'], lang))
+            if pack.get('name_map'):
+                self.assertFalse(pack.get('name'), pack['id'])
+            else:
+                for lang in ('de', 'en', 'fr'):
+                    self.assertTrue(pack['name'][lang].strip(), (pack['id'], lang))
             low, high = pack['levels']
             self.assertLessEqual(low, high, pack['id'])
             self.assertGreater(low, 0)
@@ -178,7 +182,7 @@ class BuiltCatalogueTests(unittest.TestCase):
 
     def test_every_adventure_has_content_and_a_clean_denominator(self):
         for lang, data in self.files.items():
-            self.assertEqual(len(data['packs']), 15, lang)
+            self.assertEqual(len(data['packs']), len(REFERENCE['packs']), lang)
             self.assertTrue(all(pack['reviewed'] for pack in data['packs']), lang)
             self.assertTrue(all(pack['quests'] > 0 for pack in data['packs']), lang)
             ids = {area['id'] for area in data['areas']}

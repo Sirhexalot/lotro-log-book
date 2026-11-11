@@ -1,8 +1,15 @@
 {
   "schema": 2,
   "reviewed": true,
-  "scope": "Adventure overview: the large content blocks a player can work through. Names, level bands and map roots are maintained here; quests come from the built catalogue. Not an entitlement catalogue: ownership rules for shop and VIP still need separate review.",
-  "names_note": "English names are the official product names. German and French titles are editorial translations of those names; they use the landscape names the game client shows.",
+  "scope": "Adventure overview: the large content blocks a player can work through. Two kinds exist for access: purchasable (expansions and quest packs) and always available (base game and free updates). Names, level bands and map roots are maintained here; quests come from the built catalogue. Not an entitlement catalogue: ownership rules for shop and VIP still need separate review.",
+  "types": {
+    "base": "Grundspiel, immer verfügbar",
+    "expansion": "Erweiterung, kaufbar",
+    "mini-expansion": "kleine Erweiterung, kaufbar",
+    "quest-pack": "Aufgabenpaket, kaufbar",
+    "update": "kostenloses Update, immer verfügbar"
+  },
+  "names_note": "Expansion names are editorial translations of the official product names. Quest packs and updates take their name from the localized landscape map (name_map), because that is the name the client shows.",
   "levels_note": "Level bands are editorial: typical play range from the expansion's level cap and the landscapes it introduced. They are not measured in the client.",
   "packs": [
     {
@@ -11,254 +18,732 @@
       "type": "base",
       "release": "2007-04-24",
       "free": true,
-      "name": {"en": "Shadows of Angmar", "de": "Die Schatten von Angmar", "fr": "Les Ombres d’Angmar"},
+      "name": {
+        "en": "Shadows of Angmar",
+        "de": "Die Schatten von Angmar",
+        "fr": "Les Ombres d’Angmar"
+      },
       "summary": {
         "en": "The beginning in Eriador: the Shire, Bree-land, the Lone-lands, the North Downs, the Trollshaws, Ered Luin, the Misty Mountains and Angmar.",
         "de": "Die Anfänge in Eriador: Auenland, Breeland, Einsame Lande, Nordhöhen, Trollhöhen, Ered Luin, Nebelgebirge und Angmar.",
         "fr": "Les débuts en Eriador : la Comté, le Pays de Bree, les Terres Solitaires, les Hauts du Nord, les Hauts des Galgals, Ered Luin, les Monts Brumeux et l’Angmar."
       },
-      "levels": [1, 50],
-      "candidate_map_roots": [268437576, 268437592, 268437603, 268437615, 268437634, 268437653, 268437678, 268437691, 268437700],
-      "excluded_map_roots": [268453543, 268453878, 268454115, 268455133, 268440591, 268440603, 268440610, 268440613, 268445611],
+      "levels": [
+        1,
+        50
+      ],
+      "candidate_map_roots": [
+        268437576,
+        268437592,
+        268437603,
+        268437615,
+        268437634,
+        268437653,
+        268437678,
+        268437691,
+        268437700
+      ],
+      "excluded_map_roots": [
+        268453543,
+        268453878,
+        268454115,
+        268455133,
+        268440591,
+        268440603,
+        268440610,
+        268440613,
+        268445611
+      ],
       "excluded_note": "Später erschienene Inhalte innerhalb Eriadors (Wildwald, Winkel am Mitheithel, Carn Dûm danach), Wohngebiete und das Fest Frostbluff sind eigene Inhalte und keine Aufgaben des Grundspiels.",
       "review": "landscape"
     },
     {
-      "id": "moria",
+      "id": "evendim",
       "order": 1,
+      "type": "quest-pack",
+      "release": "2007-06-13",
+      "name_map": 268439511,
+      "levels": [
+        25,
+        50
+      ],
+      "candidate_map_roots": [
+        268439511
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "forochel",
+      "order": 2,
+      "type": "quest-pack",
+      "release": "2007-11-13",
+      "name_map": 268441431,
+      "levels": [
+        40,
+        50
+      ],
+      "candidate_map_roots": [
+        268441431
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "moria",
+      "order": 3,
       "type": "expansion",
       "release": "2008-11-18",
-      "name": {"en": "Mines of Moria", "de": "Die Minen von Moria", "fr": "Les Mines de la Moria"},
+      "name": {
+        "en": "Mines of Moria",
+        "de": "Die Minen von Moria",
+        "fr": "Les Mines de la Moria"
+      },
       "summary": {
         "en": "The way under the Misty Mountains: Eregion, the mines of Moria and Lothlórien.",
         "de": "Der Weg unter das Nebelgebirge: Eregion, die Minen von Moria und Lothlórien.",
         "fr": "Le chemin sous les Monts Brumeux : l’Eregion, les mines de la Moria et la Lórien."
       },
-      "levels": [49, 60],
-      "candidate_map_roots": [268442268, 268442355, 268442330],
+      "levels": [
+        49,
+        60
+      ],
+      "candidate_map_roots": [
+        268442268,
+        268442355,
+        268442330
+      ],
       "excluded_map_roots": [],
       "note": "Lothlórien grew after the launch; it stays with Moria as content grouping, not as a claim about the launch date.",
       "review": "landscape"
     },
     {
       "id": "mirkwood",
-      "order": 2,
+      "order": 4,
       "type": "expansion",
       "release": "2009-12-01",
       "release_eu": "2009-12-03",
-      "name": {"en": "Siege of Mirkwood", "de": "Die Belagerung des Düsterwalds", "fr": "Le Siège de la Forêt Noire"},
+      "name": {
+        "en": "Siege of Mirkwood",
+        "de": "Die Belagerung des Düsterwalds",
+        "fr": "Le Siège de la Forêt Noire"
+      },
       "summary": {
         "en": "Mirkwood and the fortress of Dol Guldur.",
         "de": "Der Düsterwald und die Festung Dol Guldur.",
         "fr": "La Forêt Noire et la forteresse de Dol Guldur."
       },
-      "levels": [60, 65],
-      "candidate_map_roots": [268443855],
+      "levels": [
+        60,
+        65
+      ],
+      "candidate_map_roots": [
+        268443855
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "enedwaith",
+      "order": 5,
+      "type": "quest-pack",
+      "release": "2010-09-10",
+      "name_map": 268444443,
+      "levels": [
+        60,
+        65
+      ],
+      "candidate_map_roots": [
+        268444443
+      ],
       "excluded_map_roots": [],
       "review": "landscape"
     },
     {
       "id": "isengard",
-      "order": 3,
+      "order": 6,
       "type": "expansion",
       "release": "2011-09-27",
-      "name": {"en": "Rise of Isengard", "de": "Der Aufstieg Isengarts", "fr": "L’Ascension de l’Isengard"},
+      "name": {
+        "en": "Rise of Isengard",
+        "de": "Der Aufstieg Isengarts",
+        "fr": "L’Ascension de l’Isengard"
+      },
       "summary": {
         "en": "Dunland, the Gap of Rohan and Saruman's valley.",
         "de": "Dunland, die Pforte von Rohan und Sarumans Tal.",
         "fr": "Le Dunland, la Trouée du Rohan et la vallée de Saroumane."
       },
-      "levels": [65, 75],
-      "candidate_map_roots": [268447030, 268447045, 268447051],
+      "levels": [
+        65,
+        75
+      ],
+      "candidate_map_roots": [
+        268447030,
+        268447045,
+        268447051
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "great-river",
+      "order": 7,
+      "type": "quest-pack",
+      "release": "2012-03-12",
+      "name_map": 268447390,
+      "levels": [
+        70,
+        75
+      ],
+      "candidate_map_roots": [
+        268447390
+      ],
       "excluded_map_roots": [],
       "review": "landscape"
     },
     {
       "id": "rohan",
-      "order": 4,
+      "order": 8,
       "type": "expansion",
       "release": "2012-10-15",
-      "name": {"en": "Riders of Rohan", "de": "Die Reiter von Rohan", "fr": "Les Cavaliers du Rohan"},
+      "name": {
+        "en": "Riders of Rohan",
+        "de": "Die Reiter von Rohan",
+        "fr": "Les Cavaliers du Rohan"
+      },
       "summary": {
         "en": "The wide plains of East Rohan with their rider villages.",
         "de": "Die weite Steppe Ostromahans mit ihren Reiterdörfern.",
         "fr": "Les vastes plaines du Rohan de l’Est et leurs villages de cavaliers."
       },
-      "levels": [75, 85],
-      "candidate_map_roots": [268448407, 268448410, 268448413, 268448416, 268448419, 268448422],
+      "levels": [
+        75,
+        85
+      ],
+      "candidate_map_roots": [
+        268448407,
+        268448410,
+        268448413,
+        268448416,
+        268448419,
+        268448422
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "wildermore",
+      "order": 9,
+      "type": "quest-pack",
+      "release": "2013-05-15",
+      "name_map": 268449335,
+      "levels": [
+        85,
+        85
+      ],
+      "candidate_map_roots": [
+        268449335
+      ],
       "excluded_map_roots": [],
       "review": "landscape"
     },
     {
       "id": "helms-deep",
-      "order": 5,
+      "order": 10,
       "type": "expansion",
       "release": "2013-11-20",
-      "name": {"en": "Helm's Deep", "de": "Helms Klamm", "fr": "Le Gouffre de Helm"},
+      "name": {
+        "en": "Helm's Deep",
+        "de": "Helms Klamm",
+        "fr": "Le Gouffre de Helm"
+      },
       "summary": {
         "en": "West Rohan, Edoras and the battle at Helm's Deep.",
         "de": "Westrohan, Edoras und die Schlacht an Helms Klamm.",
         "fr": "Le Rohan de l’Ouest, Edoras et la bataille du Gouffre de Helm."
       },
-      "levels": [85, 95],
-      "candidate_map_roots": [268449746, 268449749, 268449752, 268449755, 268449758, 268449767],
+      "levels": [
+        85,
+        95
+      ],
+      "candidate_map_roots": [
+        268449746,
+        268449749,
+        268449752,
+        268449755,
+        268449758,
+        268449767
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "gondor",
+      "order": 11,
+      "type": "quest-pack",
+      "release": "2014-11-05",
+      "name_map": 268450901,
+      "levels": [
+        96,
+        105
+      ],
+      "candidate_map_roots": [
+        268450720,
+        268450882,
+        268450932,
+        268451272,
+        268451115
+      ],
+      "excluded_map_roots": [],
+      "note": "West-, Zentral- und Ostgondor, Fern-Anórien und Alt-Anórien. Die späteren Königreich-Gondor-Karten gehören zu Umbar.",
+      "review": "landscape"
+    },
+    {
+      "id": "march-of-the-king",
+      "order": 12,
+      "type": "quest-pack",
+      "release": "2016-04-07",
+      "name_map": 268451796,
+      "levels": [
+        105,
+        105
+      ],
+      "candidate_map_roots": [
+        268451796
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "the-wastes",
+      "order": 13,
+      "type": "quest-pack",
+      "release": "2017-03-22",
+      "name_map": 268451973,
+      "levels": [
+        105,
+        105
+      ],
+      "candidate_map_roots": [
+        268451973
+      ],
       "excluded_map_roots": [],
       "review": "landscape"
     },
     {
       "id": "mordor",
-      "order": 6,
+      "order": 14,
       "type": "expansion",
       "release": "2017-08-02",
-      "name": {"en": "Mordor", "de": "Mordor", "fr": "Le Mordor"},
+      "name": {
+        "en": "Mordor",
+        "de": "Mordor",
+        "fr": "Le Mordor"
+      },
       "summary": {
         "en": "Mordor with Gorgoroth, Udûn and the plains before the Black Gate.",
         "de": "Mordor mit Gorgoroth, Udûn und den Ebenen vor dem Schwarzen Tor.",
         "fr": "Le Mordor avec le Gorgoroth, l’Udûn et les plaines devant la Porte Noire."
       },
-      "levels": [105, 115],
-      "candidate_map_roots": [268452166],
-      "excluded_map_roots": [268453364, 268453374],
+      "levels": [
+        105,
+        115
+      ],
+      "candidate_map_roots": [
+        268452166
+      ],
+      "excluded_map_roots": [
+        268453364,
+        268453374
+      ],
       "note": "The Gorgoroth map also parents Morgul Vale. That later expansion is not Mordor content.",
       "review": "landscape"
     },
     {
+      "id": "northern-mirkwood",
+      "order": 15,
+      "type": "quest-pack",
+      "release": "2018-03-07",
+      "name_map": 268452526,
+      "levels": [
+        115,
+        115
+      ],
+      "candidate_map_roots": [
+        268452526
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "ered-mithrin",
+      "order": 16,
+      "type": "quest-pack",
+      "release": "2018-10-09",
+      "name_map": 268452631,
+      "levels": [
+        116,
+        120
+      ],
+      "candidate_map_roots": [
+        268452631
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "iron-hills",
+      "order": 17,
+      "type": "quest-pack",
+      "release": "2018-10-09",
+      "name_map": 268452634,
+      "levels": [
+        116,
+        120
+      ],
+      "candidate_map_roots": [
+        268452634
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "vales-anduin",
+      "order": 18,
+      "type": "quest-pack",
+      "release": "2019-06-06",
+      "name_map": 268453023,
+      "levels": [
+        120,
+        130
+      ],
+      "candidate_map_roots": [
+        268453023
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
       "id": "minas-morgul",
-      "order": 7,
+      "order": 19,
       "type": "expansion",
       "release": "2019-11-05",
-      "name": {"en": "Minas Morgul", "de": "Minas Morgul", "fr": "Minas Morgul"},
+      "name": {
+        "en": "Minas Morgul",
+        "de": "Minas Morgul",
+        "fr": "Minas Morgul"
+      },
       "summary": {
         "en": "The Morgul Vale, the city of Minas Morgul and besieged Mordor.",
         "de": "Das Morgultal, die Stadt Minas Morgul und das belagerte Mordor.",
         "fr": "Le Val de Morgul, la cité de Minas Morgul et le Mordor assiégé."
       },
-      "levels": [120, 130],
-      "candidate_map_roots": [268453364, 268453374],
+      "levels": [
+        120,
+        130
+      ],
+      "candidate_map_roots": [
+        268453364,
+        268453374
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "wells-langflood",
+      "order": 20,
+      "type": "quest-pack",
+      "release": "2020-05-27",
+      "name_map": 268453454,
+      "levels": [
+        120,
+        130
+      ],
+      "candidate_map_roots": [
+        268453454
+      ],
       "excluded_map_roots": [],
       "review": "landscape"
     },
     {
       "id": "three-peaks",
-      "order": 8,
+      "order": 21,
       "type": "mini-expansion",
       "release": "2020-10-20",
-      "name": {"en": "War of Three Peaks", "de": "Der Krieg der Drei Gipfel", "fr": "La Guerre des Trois Pics"},
+      "name": {
+        "en": "War of Three Peaks",
+        "de": "Der Krieg der Drei Gipfel",
+        "fr": "La Guerre des Trois Pics"
+      },
       "summary": {
         "en": "Elderslade and the war of the three peaks.",
         "de": "Elderslade und der Krieg der Drei Gipfel.",
         "fr": "Les Pics des Anciens et la guerre des Trois Pics."
       },
-      "levels": [130, 130],
-      "candidate_map_roots": [268453516, 268453519],
+      "levels": [
+        130,
+        130
+      ],
+      "candidate_map_roots": [
+        268453516,
+        268453519
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "wildwood",
+      "order": 22,
+      "type": "update",
+      "release": "2021-06-30",
+      "free": true,
+      "name_map": 268453543,
+      "levels": [
+        45,
+        50
+      ],
+      "candidate_map_roots": [
+        268453543
+      ],
       "excluded_map_roots": [],
       "review": "landscape"
     },
     {
       "id": "gundabad",
-      "order": 9,
+      "order": 23,
       "type": "expansion",
       "release": "2021-11-10",
-      "name": {"en": "Fate of Gundabad", "de": "Das Schicksal Gundabads", "fr": "Le Destin de Gundabad"},
+      "name": {
+        "en": "Fate of Gundabad",
+        "de": "Das Schicksal Gundabads",
+        "fr": "Le Destin de Gundabad"
+      },
       "summary": {
         "en": "The dwarven realm of Gundabad and its valleys.",
         "de": "Das Zwergenreich Gundabad und seine Täler.",
         "fr": "Le royaume nain de Gundabad et ses vallées."
       },
-      "levels": [130, 140],
-      "candidate_map_roots": [268453653, 268453645, 268453649],
-      "excluded_map_roots": [268453516, 268453519],
+      "levels": [
+        130,
+        140
+      ],
+      "candidate_map_roots": [
+        268453653,
+        268453645,
+        268453649
+      ],
+      "excluded_map_roots": [
+        268453516,
+        268453519
+      ],
       "note": "Never take the full Gundabad overview subtree: it includes the earlier Elderslade content.",
       "review": "landscape"
     },
     {
+      "id": "yondershire",
+      "order": 24,
+      "type": "update",
+      "release": "2022-04-20",
+      "free": true,
+      "name_map": 268453922,
+      "levels": [
+        7,
+        31
+      ],
+      "candidate_map_roots": [
+        268453922
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
+      "id": "angle-mitheithel",
+      "order": 25,
+      "type": "update",
+      "release": "2022-06-22",
+      "free": true,
+      "name_map": 268453878,
+      "levels": [
+        45,
+        50
+      ],
+      "candidate_map_roots": [
+        268453878
+      ],
+      "excluded_map_roots": [],
+      "review": "landscape"
+    },
+    {
       "id": "before-shadow",
-      "order": 10,
+      "order": 26,
       "type": "mini-expansion",
       "release": "2022-11-15",
-      "name": {"en": "Before the Shadow", "de": "Vor dem Schatten", "fr": "Avant l’Ombre"},
+      "name": {
+        "en": "Before the Shadow",
+        "de": "Vor dem Schatten",
+        "fr": "Avant l’Ombre"
+      },
       "summary": {
         "en": "A different beginning: Swanfleet, Cardolan and Mossward.",
         "de": "Ein anderer Anfang: Schwanenfleet, Cardolan und Mossward.",
         "fr": "Un autre début : le Marais aux Cygnes, le Cardolan et Mossward."
       },
-      "levels": [1, 32],
-      "candidate_map_roots": [268453997, 268454004],
+      "levels": [
+        1,
+        32
+      ],
+      "candidate_map_roots": [
+        268453997,
+        268454004
+      ],
       "excluded_map_roots": [],
       "review": "landscape"
     },
     {
       "id": "umbar",
-      "order": 11,
+      "order": 27,
       "type": "expansion",
       "release": "2023-11-08",
-      "name": {"en": "Corsairs of Umbar", "de": "Die Korsaren von Umbar", "fr": "Les Corsaires d’Umbar"},
+      "name": {
+        "en": "Corsairs of Umbar",
+        "de": "Die Korsaren von Umbar",
+        "fr": "Les Corsaires d’Umbar"
+      },
       "summary": {
         "en": "The coasts of Umbar and western King's Gondor.",
         "de": "Die Küsten Umbar und das westliche Königreich Gondor.",
         "fr": "Les côtes d’Umbar et l’ouest du Royaume du Gondor."
       },
-      "levels": [140, 150],
-      "candidate_map_roots": [268454233, 268454237, 268454239, 268454241, 268454242, 268454323, 268454306, 268454363],
+      "levels": [
+        140,
+        150
+      ],
+      "candidate_map_roots": [
+        268454233,
+        268454237,
+        268454239,
+        268454241,
+        268454242,
+        268454323,
+        268454306,
+        268454363
+      ],
       "excluded_map_roots": [],
       "note": "Only western King's Gondor; eastern King's Gondor needs a separate Gondor Renewed record. Umbar city and later depths need explicit review.",
-      "sources": ["https://www.lotro.com/update-notes/lotro-update-38-release-notes-en"],
+      "sources": [
+        "https://www.lotro.com/update-notes/lotro-update-38-release-notes-en"
+      ],
       "review": "landscape"
     },
     {
       "id": "morgoth",
-      "order": 12,
+      "order": 28,
       "type": "expansion",
       "release": "2024-11-06",
-      "name": {"en": "Legacy of Morgoth", "de": "Das Erbe Morgoths", "fr": "L’Héritage de Morgoth"},
+      "name": {
+        "en": "Legacy of Morgoth",
+        "de": "Das Erbe Morgoths",
+        "fr": "L’Héritage de Morgoth"
+      },
       "summary": {
         "en": "The lands of Imhûlar, Ambarûl and Khûd Zagin.",
         "de": "Die Länder Imhûlar, Ambarûl und Khûd Zagin.",
         "fr": "Les terres d’Imhûlar, d’Ambarûl et de Khûd Zagin."
       },
-      "levels": [150, 151],
-      "candidate_map_roots": [268454617],
+      "levels": [
+        150,
+        151
+      ],
+      "candidate_map_roots": [
+        268454617
+      ],
       "excluded_map_roots": [],
-      "sources": ["https://www.lotro.com/update-notes/lotro-update-42-release-notes-en"],
+      "sources": [
+        "https://www.lotro.com/update-notes/lotro-update-42-release-notes-en"
+      ],
       "review": "landscape"
     },
     {
       "id": "harad",
-      "order": 13,
+      "order": 29,
       "type": "expansion",
       "release": "2025-12-03",
-      "name": {"en": "Kingdoms of Harad", "de": "Die Königreiche Harad", "fr": "Les Royaumes du Harad"},
+      "name": {
+        "en": "Kingdoms of Harad",
+        "de": "Die Königreiche Harad",
+        "fr": "Les Royaumes du Harad"
+      },
       "summary": {
         "en": "The kingdoms of Harad with Mûr Ghala, Adagím and Idagâl.",
         "de": "Die Königreiche Harad mit Mûr Ghala, Adagím und Idagâl.",
         "fr": "Les royaumes du Harad avec Mûr Ghala, Adagím et Idagâl."
       },
-      "levels": [150, 160],
-      "candidate_map_roots": [268454914],
-      "excluded_map_roots": [268455152],
+      "levels": [
+        150,
+        160
+      ],
+      "candidate_map_roots": [
+        268454914
+      ],
+      "excluded_map_roots": [
+        268455152
+      ],
       "note": "Hatokáli Hills is a later content release and must not silently inherit expansion membership.",
-      "sources": ["https://www.lotro.com/kingdoms-of-harad?nav=true"],
+      "sources": [
+        "https://www.lotro.com/kingdoms-of-harad?nav=true"
+      ],
+      "review": "landscape"
+    },
+    {
+      "id": "hatokali",
+      "order": 30,
+      "type": "update",
+      "release": "2026-04-15",
+      "free": true,
+      "name_map": 268455152,
+      "levels": [
+        160,
+        160
+      ],
+      "candidate_map_roots": [
+        268455152
+      ],
+      "excluded_map_roots": [],
       "review": "landscape"
     },
     {
       "id": "wolves",
-      "order": 14,
+      "order": 31,
       "type": "expansion",
       "release": "2026-10-28",
-      "name": {"en": "The Wolves of Mordor", "de": "Die Wölfe von Mordor", "fr": "Les Loups du Mordor"},
+      "name": {
+        "en": "The Wolves of Mordor",
+        "de": "Die Wölfe von Mordor",
+        "fr": "Les Loups du Mordor"
+      },
       "summary": {
         "en": "Parth Rhavas, Nan Ogol and the wolves of Mordor.",
         "de": "Parth Rhavas, Nan Ogol und die Wölfe von Mordor.",
         "fr": "Parth Rhavas, Nan Ogol et les loups du Mordor."
       },
-      "levels": [160, 160],
-      "candidate_map_roots": [268455271],
+      "levels": [
+        160,
+        160
+      ],
+      "candidate_map_roots": [
+        268455271
+      ],
       "excluded_map_roots": [],
-      "sources": ["https://www.lotro.com/update-notes/lotro-update-50-release-notes-en"],
+      "sources": [
+        "https://www.lotro.com/update-notes/lotro-update-50-release-notes-en"
+      ],
       "review": "landscape"
     }
   ],
-  "historical_sources": ["https://lotro-wiki.com/wiki/Expansion"],
+  "historical_sources": [
+    "https://lotro-wiki.com/wiki/Expansion"
+  ],
   "artwork": {
     "source": "https://www.lotro.com/expansions",
     "status": "pending",

@@ -32,17 +32,17 @@
 			<span class="inhalte-status" data-status role="status"></span>
 		</div>
 		<ul class="inhalte-liste">
-			{% for pack in packs %}
+			{% for pack in packs %}{% if not pack.free|default(false) %}
 			<li data-inhalt-zeile="{{ pack.id }}">
-				<label class="inhalt-name" for="inhalt-{{ pack.id }}">{{ pack.name }}</label>
+				<label class="inhalt-name" for="inhalt-{{ pack.id }}">{{ pack.name }} · {{ pack.type_label }}</label>
 				<span class="inhalt-stand" data-inhalt-stand="{{ pack.id }}"></span>
-				<select id="inhalt-{{ pack.id }}" data-inhalt="{{ pack.id }}"{% if pack.free|default(false) %} data-frei="1"{% endif %}>
+				<select id="inhalt-{{ pack.id }}" data-inhalt="{{ pack.id }}">
 					<option value="unknown" selected>{{ lw.unknown }}</option>
 					<option value="owned">{{ lw.owned }}</option>
 					<option value="missing">{{ lw.missing }}</option>
 				</select>
 			</li>
-			{% endfor %}
+			{% endif %}{% endfor %}
 		</ul>
 	</details>
 
@@ -76,7 +76,7 @@
 					<p class="karte-art">{{ pack.type_label }} · {{ pack.level_label }}</p>
 				</div>
 			</div>
-			<p class="karte-text">{{ pack.summary }}</p>
+			{% if pack.summary %}<p class="karte-text">{{ pack.summary }}</p>{% endif %}
 			<p class="karte-stand" data-stand><span data-stand-wort></span></p>
 			<div class="karte-balken" data-balken hidden><span></span></div>
 			<p class="karte-detail" data-detail hidden></p>

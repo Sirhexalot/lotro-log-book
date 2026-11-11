@@ -44,9 +44,11 @@ class AdventurePageTest(unittest.TestCase):
     def test_german_page_lists_every_adventure(self):
         html = self.render('/de/abenteuer/')
         self.assertIn('<title>Dein Abenteuerüberblick', html)
-        self.assertEqual(html.count('class="abenteuer-karte"'), 15)
+        self.assertEqual(html.count('class="abenteuer-karte"'), 32)
         self.assertIn('Die Schatten von Angmar', html)
         self.assertIn('Grundspiel · Stufe 1–50', html)
+        self.assertIn('Aufgabenpaket · Stufe 25–50', html)
+        self.assertIn('Kostenloses Update · Stufe 7–31', html)
         self.assertIn('Altes zu Ende bringen', html)
         self.assertIn('Meine Inhalte', html)
         # Areas are already in the markup, so the page is usable without JS.
@@ -54,6 +56,10 @@ class AdventurePageTest(unittest.TestCase):
         self.assertIn('Breeland', html)
         # Personal values stay out of the server response.
         self.assertNotIn('MQL_CHARAKTER', html)
+        # Only purchasable content carries an ownership setting.
+        self.assertEqual(html.count('data-inhalt="'), 27)
+        self.assertNotIn('data-inhalt="yondershire"', html)
+        self.assertNotIn('data-inhalt="base"', html)
 
     def test_every_language_has_its_own_page_and_names(self):
         english = self.render('/en/adventure/')
@@ -63,7 +69,9 @@ class AdventurePageTest(unittest.TestCase):
         self.assertIn('Mines of Moria', english)
         self.assertIn('Les Mines de la Moria', french)
         self.assertIn('Base game · Level 1–50', english)
+        self.assertIn('Quest pack · Level 25–50', english)
         self.assertIn('Jeu de base · Niveau 1–50', french)
+        self.assertIn('Pack de quêtes · Niveau 25–50', french)
         self.assertIn('hreflang="de"', english)
         self.assertIn('/fr/aventure/', english)
 
