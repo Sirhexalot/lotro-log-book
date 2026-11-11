@@ -38,15 +38,15 @@
 		de: { start: '', karte: 'karte', taten: 'karte/taten', gegenstandssuche: 'gegenstandssuche',
 			handwerk: 'handwerk/rezepte', reise: 'reise', ruf: 'ruf', belohnungen: 'belohnungen',
 			spielstand: 'spielstand', companion: 'companion', plugin: 'plugin', suche: 'suche',
-			instances: 'instanz' },
+			instances: 'instanz', adventures: 'abenteuer' },
 		en: { start: '', karte: 'map', taten: 'map/deeds', gegenstandssuche: 'item-search',
 			handwerk: 'crafting/recipes', reise: 'travel', ruf: 'reputation', belohnungen: 'rewards',
 			spielstand: 'progress', companion: 'companion', plugin: 'plugin', suche: 'search',
-			instances: 'instance' },
+			instances: 'instance', adventures: 'adventure' },
 		fr: { start: '', karte: 'carte', taten: 'carte/prouesses', gegenstandssuche: 'recherche-objets',
 			handwerk: 'artisanat/recettes', reise: 'voyage', ruf: 'reputation', belohnungen: 'recompenses',
 			spielstand: 'progression', companion: 'companion', plugin: 'plugin', suche: 'recherche',
-			instances: 'instance' }
+			instances: 'instance', adventures: 'aventure' }
 	};
 	function app(seite) {
 		var teil = (APP[sprache] || {})[seite];
@@ -93,6 +93,7 @@
 		{ key: 'welt', text: t('nav_welt'), href: app('karte'), tab: [
 			{ seite: 'karte', href: app('karte'), text: t('menue_karte'), desc: 'd_karte' },
 			{ seite: 'taten', href: app('taten'), text: t('menue_taten'), desc: 'd_taten' },
+			{ seite: 'abenteuer', href: app('adventures'), text: t('menue_abenteuer'), desc: 'd_abenteuer' },
 			{ seite: 'reise', href: app('reise'), text: t('menue_reise'), desc: 'd_reise' },
 			{ seite: 'auftraggeber', href: pfad('auftraggeber'), text: t('menue_auftraggeber'), desc: 'd_auftraggeber' },
 		{ seite: 'landmarke', href: pfad('landmarke'), text: t('menue_landmarken'), desc: 'd_landmarken' },
@@ -112,7 +113,7 @@
 
 	// Which family the current page belongs to.
 	var ZUORDNUNG = { karte: 'welt', taten: 'welt', reise: 'welt', auftraggeber: 'welt',
-		instanzen: 'welt',
+		instanzen: 'welt', abenteuer: 'welt',
 		landmarke: 'welt', fraktion: 'erfolge',
 		gegenstand: 'gegenstaende',
 		handwerk: 'gegenstaende', beruf: 'gegenstaende', titel: 'erfolge', tugend: 'erfolge',

@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "note": "Explicitly reviewed map-to-package assignments. A map inherits the nearest assigned ancestor, so a later region inside an old parent must be listed separately. Only maps listed here count as reviewed.",
+  "assignments": [
+    {"map": 268437576, "pack": "base", "reviewed": true, "reason": "Ered Luin gehoert zum Grundspiel."},
+    {"map": 268437592, "pack": "base", "reviewed": true, "reason": "Die Trollhoehen gehoeren zum Grundspiel."},
+    {"map": 268437603, "pack": "base", "reviewed": true, "reason": "Die Einsamen Lande gehoeren zum Grundspiel."},
+    {"map": 268437615, "pack": "base", "reviewed": true, "reason": "Angmar gehoert zum Grundspiel."},
+    {"map": 268437634, "pack": "base", "reviewed": true, "reason": "Die Nordhoehen gehoeren zum Grundspiel."},
+    {"map": 268437653, "pack": "base", "reviewed": true, "reason": "Breeland gehoert zum Grundspiel."},
+    {"map": 268437678, "pack": "base", "reviewed": true, "reason": "Das Auenland gehoert zum Grundspiel."},
+    {"map": 268437691, "pack": "base", "reviewed": true, "reason": "Das Nebelgebirge gehoert zum Grundspiel."},
+    {"map": 268437700, "pack": "base", "reviewed": true, "reason": "Die Ettenoeden gehoeren zum Grundspiel."},
+    {"map": 268442268, "pack": "moria", "reviewed": true, "reason": "Eregion wurde mit Mines of Moria eingefuehrt."},
+    {"map": 268442355, "pack": "moria", "reviewed": true, "reason": "Moria ist der Kern der Erweiterung; die Untergebiete erben diese Zuordnung."},
+    {"map": 268442330, "pack": "moria", "reviewed": true, "reason": "Lothlorien gehoert inhaltlich zu Mines of Moria, auch wenn Teile spaeter erschienen."}
+  ]
+}

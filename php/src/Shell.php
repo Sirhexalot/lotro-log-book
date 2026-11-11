@@ -86,6 +86,19 @@ final class Shell
             $this->scriptTag('auftraggeber.js')]);
     }
 
+    /** Stamp for every app script and stylesheet, so a change reaches browsers. */
+    public function assetStand(): string
+    {
+        $teile = [];
+        foreach (['*.js', '*.css'] as $muster) {
+            foreach (glob($this->webRoot . '/' . $muster) ?: [] as $datei) {
+                $teile[] = basename($datei) . ':' . filemtime($datei);
+            }
+        }
+        sort($teile);
+        return substr(md5(implode('|', $teile)), 0, 10);
+    }
+
     /** The start page of the language; the old `/start.html` is a 301 to it. */
     public function startPage(): string
     {
@@ -108,6 +121,7 @@ final class Shell
             ['welt', $app('karte'), $w['familie_welt'], [
                 ['q', $app('karte'), $w['menue_karte'], $w['d_karte']],
                 ['d', $app('taten'), $w['menue_taten'], $w['d_taten']],
+                ['adventures', $app('adventures'), $w['menue_abenteuer'], $w['d_abenteuer']],
                 ['reise', $app('reise'), $w['menue_reise'], $w['d_reise']],
                 ['giver', $app('givers'), Givers::words($lang)['title'], Givers::words($lang)['intro']],
                 ['l', $this->catalogue->route($lang, 'l'), $w['menue_landmarken'], $w['d_landmarken']],

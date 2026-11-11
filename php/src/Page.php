@@ -152,6 +152,9 @@ final class Page
         if ($page === 'instances') {
             return (new Instances($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
         }
+        if ($page === 'adventures') {
+            return (new Adventures($this->catalogue, $this->data, $this->shell, $this->view, $lang))->page();
+        }
         // The deeds view is the map with another mode; the crafting browser
         // shares its template with nothing else.
         $template = match ($page) {
@@ -192,28 +195,15 @@ final class Page
                 'fr' => 'Carte du Pays de Bree avec repères de quêtes',
             ][$lang],
             'tracking' => $this->shell->tracking(),
-            'asset_stand' => $this->assetStand(),
+            'asset_stand' => $this->shell->assetStand(),
         ];
         return $this->view->render('app/' . $template . '.twig', $context);
     }
 
-    /** Stamp for every app script and stylesheet.
-     *
-     * The URL has to change when any of them changes, not only the two base
-     * stylesheets: otherwise a browser keeps an old texte-reise.js or
-     * reise.css and the page shows a key name instead of its text.
-     */
+    /** Kept for callers that asked the page for the stamp. */
     private function assetStand(): string
     {
-        $root = $this->shell->webRoot();
-        $teile = [];
-        foreach (['*.js', '*.css'] as $muster) {
-            foreach (glob($root . '/' . $muster) ?: [] as $datei) {
-                $teile[] = basename($datei) . ':' . filemtime($datei);
-            }
-        }
-        sort($teile);
-        return substr(md5(implode('|', $teile)), 0, 10);
+        return $this->shell->assetStand();
     }
 
     private function listCrumbs(string $kind): string

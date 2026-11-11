@@ -1,0 +1,327 @@
+/* Adventure overview: the large content blocks as cards, one column on a
+   phone and two on a wide screen. Colours and spacing follow style.css. */
+.seite.abenteuer {
+	max-width: 980px;
+}
+
+.abenteuer-kopf {
+	max-width: 62ch;
+}
+
+.abenteuer-kopf .dach {
+	margin: 0 0 4px;
+	color: var(--schwach);
+	font-size: 12px;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+}
+
+.abenteuer-kopf h2 {
+	margin: 0 0 10px;
+}
+
+.abenteuer-intro {
+	margin: 0 0 12px;
+	color: var(--text);
+}
+
+.abenteuer-charakter {
+	display: inline-block;
+	margin: 0;
+	padding: 5px 10px;
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	background: var(--fläche-hell);
+	color: var(--text);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.abenteuer-charakter a {
+	color: var(--gold);
+}
+
+.abenteuer-hinweise {
+	display: grid;
+	gap: 10px;
+	margin: 20px 0 26px;
+}
+
+.hinweis {
+	padding: 14px 16px;
+	border: 1px solid var(--rand);
+	border-left: 3px solid var(--gold);
+	border-radius: 4px;
+	background: var(--fläche);
+}
+
+.hinweis-art {
+	margin: 0 0 4px;
+	color: var(--gold);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.hinweis h3 {
+	margin: 0 0 6px;
+	color: var(--text);
+	font-size: var(--text-abschnitt, 1.25rem);
+	font-weight: normal;
+}
+
+.hinweis-text {
+	margin: 0 0 10px;
+	color: var(--schwach);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.hinweis-link {
+	padding: 6px 12px;
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	background: var(--fläche-hell);
+	color: var(--text);
+	font: inherit;
+	font-size: var(--text-bedienung, .875rem);
+	cursor: pointer;
+}
+
+.hinweis-link:hover {
+	border-color: var(--gold);
+	color: var(--gold);
+}
+
+.hinweis-leer {
+	margin: 0;
+	color: var(--schwach);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.abenteuer-liste-kopf h3 {
+	margin: 0 0 2px;
+	color: var(--text);
+	font-size: var(--text-abschnitt, 1.25rem);
+	font-weight: normal;
+}
+
+.abenteuer-liste-kopf p {
+	margin: 0 0 12px;
+	color: var(--schwach);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.abenteuer-inhalte {
+	margin: 0 0 18px;
+	padding: 10px 14px;
+	border: 1px solid var(--rand);
+	border-radius: 4px;
+	background: var(--fläche);
+}
+
+.abenteuer-inhalte summary {
+	cursor: pointer;
+	color: var(--text);
+}
+
+.abenteuer-inhalte .schwach {
+	color: var(--schwach);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.inhalte-liste {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 8px 24px;
+	margin: 10px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.inhalte-liste li {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	justify-content: space-between;
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.inhalte-liste select {
+	min-width: 9.5em;
+	padding: 3px 5px;
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	background: var(--fläche-hell);
+	color: var(--text);
+	font: inherit;
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.inhalte-status {
+	min-height: 1.4em;
+	margin: 8px 0 0;
+	color: var(--fertig);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.abenteuer-raster {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 12px;
+}
+
+@media (min-width: 760px) {
+	.abenteuer-raster {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.abenteuer-hinweise {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+.abenteuer-karte {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	padding: 16px;
+	border: 1px solid var(--rand);
+	border-radius: 4px;
+	background: var(--fläche);
+	transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.abenteuer-karte.hervorgehoben {
+	border-color: var(--gold);
+	box-shadow: 0 0 0 2px rgba(214, 179, 90, .25);
+}
+
+.karte-oben h3 {
+	margin: 0 0 4px;
+	color: var(--text);
+	font-size: var(--text-normal, 1rem);
+	font-weight: normal;
+	line-height: 1.4;
+}
+
+.karte-art {
+	margin: 0;
+	color: var(--schwach);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.karte-text {
+	margin: 10px 0 0;
+	color: var(--schwach);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.karte-stand {
+	margin: 12px 0 8px;
+	color: var(--text);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.karte-balken {
+	height: 6px;
+	margin: 0 0 8px;
+	border-radius: 4px;
+	background: var(--rand);
+	overflow: hidden;
+}
+
+.karte-balken span {
+	display: block;
+	height: 100%;
+	border-radius: 4px;
+	background: var(--fertig);
+}
+
+.karte-detail {
+	margin: 0 0 4px;
+	color: var(--text);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.karte-zugang {
+	margin: 0 0 4px;
+	color: var(--schwach);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.karte-mehr {
+	align-self: flex-start;
+	margin-top: auto;
+	padding: 6px 0 0;
+	border: 0;
+	border-bottom: 1px solid transparent;
+	background: none;
+	color: var(--gold);
+	font: inherit;
+	font-size: var(--text-bedienung, .875rem);
+	cursor: pointer;
+}
+
+.karte-mehr:hover {
+	border-bottom-color: var(--gold);
+}
+
+.karte-gebiete {
+	margin-top: 12px;
+	padding-top: 10px;
+	border-top: 1px solid var(--rand);
+}
+
+.karte-gebiete h4 {
+	margin: 0 0 6px;
+	color: var(--schwach);
+	font-size: var(--text-bedienung, .875rem);
+	font-weight: normal;
+	letter-spacing: .04em;
+	text-transform: uppercase;
+}
+
+.karte-gebiete ul {
+	margin: 0;
+	padding: 0;
+	max-height: 280px;
+	overflow-y: auto;
+	list-style: none;
+}
+
+.karte-gebiete li {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 10px;
+	align-items: baseline;
+	padding: 3px 0;
+	border-bottom: 1px solid rgba(58, 51, 43, .6);
+	font-size: var(--text-bedienung, .875rem);
+}
+
+.karte-gebiete li:last-child {
+	border-bottom: 0;
+}
+
+.karte-gebiete li.gebiet-hervorgehoben {
+	background: rgba(214, 179, 90, .12);
+	outline: 1px solid rgba(214, 179, 90, .45);
+}
+
+.karte-gebiete li span {
+	flex: 1 1 55%;
+	min-width: 8ch;
+	color: var(--text);
+}
+
+.karte-gebiete li small {
+	color: var(--schwach);
+}
+
+.karte-gebiete li em {
+	color: var(--schwach);
+	font-style: normal;
+}
+
+.abenteuer-fussnote {
+	margin: 16px 0 0;
+	color: var(--schwach);
+	font-size: var(--text-bedienung, .875rem);
+}

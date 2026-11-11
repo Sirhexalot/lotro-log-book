@@ -710,6 +710,22 @@ def main() -> int:
         if not options.still:
             print('page-list gesamt: %d Seiten' % len(listen), flush=True)
 
+    # Adventure overview: one catalogue per language, also used by the page.
+    sys.path.insert(0, str(HIER / 'tools'))
+    from build_abenteuer import catalogues
+    for lang, data in catalogues().items():
+        folder = target / lang
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / 'abenteuer.json').write_text(
+            json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+        # Same catalogue for the browser; progress and ownership stay local.
+        (HIER / 'web' / ('abenteuer-%s.js' % lang)).write_text(
+            'window.MQL_ABENTEUER_KATALOG = %s;\n'
+            % json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+        if not options.still:
+            print('%s: %d Abenteuer, %d Gebiete, %d Aufgaben'
+                  % (lang, len(data['packs']), len(data['areas']), len(data['quests'])), flush=True)
+
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=1, sort_keys=True),
                              encoding='utf-8')
     if not options.still:

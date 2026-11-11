@@ -11,6 +11,9 @@ web/belohnungen-*.js
 web/rezepte-*.js
 web/notizen-*.js
 web/notizen/
+web/abenteuer-de.js
+web/abenteuer-en.js
+web/abenteuer-fr.js
 web/vorkommen-*.js
 web/vorkommen/
 web/fortschritt.js

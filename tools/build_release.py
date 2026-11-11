@@ -123,7 +123,9 @@ def pruefen(ziel: Path) -> list[str]:
                  'phpdata/manifest.json', 'sets.css', 'sets.js', 'php/src/Sets.php',
                  'php/templates/sets/list.twig', 'php/templates/sets/detail.twig',
                  'auftraggeber.css', 'auftraggeber.js', 'php/src/Givers.php',
-                 'php/templates/givers/list.twig', 'php/templates/givers/detail.twig'):
+                 'php/templates/givers/list.twig', 'php/templates/givers/detail.twig',
+                 'abenteuer.css', 'abenteuer.js', 'abenteuer-logik.js', 'texte-abenteuer.js',
+                 'php/src/Adventures.php', 'php/templates/app/abenteuer.twig'):
         if not (ziel / name).is_file():
             fehler.append('fehlt: ' + name)
     for sprache in SPRACHEN:
@@ -131,6 +133,10 @@ def pruefen(ziel: Path) -> list[str]:
             fehler.append('fehlt: phpdata/' + sprache + '/sets-index.json')
         if not (ziel / 'phpdata' / sprache / 'givers-index.json').is_file():
             fehler.append('fehlt: phpdata/' + sprache + '/givers-index.json')
+        if not (ziel / 'phpdata' / sprache / 'abenteuer.json').is_file():
+            fehler.append('fehlt: phpdata/' + sprache + '/abenteuer.json')
+        if not (ziel / ('abenteuer-%s.js' % sprache)).is_file():
+            fehler.append('fehlt: abenteuer-%s.js' % sprache)
         if not (ziel / 'karten' / sprache).is_dir():
             fehler.append('fehlt: karten/' + sprache)
     app_stand = ziel / 'fortschritt.js'
