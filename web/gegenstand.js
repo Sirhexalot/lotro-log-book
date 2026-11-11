@@ -49,9 +49,7 @@
 							var tr = eltern('tr');
 							var name = eltern('td');
 							var link = eltern('a', q[2]);
-							link.href = q[0] === 'd'
-								? 'index.html?art=taten&lang=' + sprache + '&id=' + q[1]
-								: 'index.html?lang=' + sprache + '&id=' + q[1];
+							link.href = window.MQL_KARTE_LINK(q[0], q[1]);
 							name.appendChild(link);
 							tr.appendChild(name);
 							var stufe = eltern('td', q[6] ? t('stufe') + ' ' + q[6] : '');

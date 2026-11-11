@@ -2414,8 +2414,7 @@
 	}
 
 	function zielFuer(art, id, name) {
-		if (art === 'q') { return 'index.html?lang=' + sprache + '&id=' + id; }
-		if (art === 'd') { return 'index.html?art=taten&lang=' + sprache + '&id=' + id; }
+		if (art === 'q' || art === 'd') { return window.MQL_KARTE_LINK(art, id); }
 		if (art === 'g' && id) { return '/' + sprache + '/' + SEGMENT.gegenstand[sprache] + '/' + id + '/'; }
 		if (art === 't' && id) { return '/' + sprache + '/' + SEGMENT.titel[sprache] + '/' + id + '/'; }
 		if (art === 'v' && id) { return '/' + sprache + '/' + SEGMENT.tugend[sprache] + '/' + id + '/'; }

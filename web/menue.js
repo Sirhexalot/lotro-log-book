@@ -83,11 +83,6 @@
 			auftraggeber: 'donneur-de-quete' }
 	}[sprache] || {};
 	function pfad(art) { return '/' + sprache + '/' + (SEGMENT[art] || art) + '/'; }
-	function seiten(url) {
-		var adresse = String(url || '');
-		return adresse.indexOf('index.html') >= 0 ? (adresse.indexOf('art=taten') >= 0 ? 'taten' : 'karte')
-			: adresse.replace(/[^a-z]/g, '').slice(0, 12);
-	}
 
 	var FAMILIEN = [
 		{ key: 'welt', text: t('nav_welt'), href: app('karte'), tab: [

@@ -170,6 +170,19 @@ final class Page
             default => $page . '.html',
         };
         $seo = $this->catalogue->appSeo($datei) ?? ['title' => 'LOTRO Log Book', 'description' => ''];
+        // Quests and deeds share template and file name, but not their title:
+        // the static build described the map once, so the deed page brings its
+        // own head. The client sets the same title in its deed mode.
+        if ($page === 'taten') {
+            $seo = [
+                'title' => ['de' => 'Taten', 'en' => 'Deeds', 'fr' => 'Prouesses'][$lang],
+                'description' => [
+                    'de' => 'Sieh Taten in LOTRO nach Region und Gebiet und auf der Karte, wo sie zu finden sind. Mit importiertem Spielstand zeigt dir das Logbuch, was dir noch fehlt.',
+                    'en' => 'Browse LOTRO deeds by region and area and see on the map where to find them. With your imported progress the log book shows what is still missing.',
+                    'fr' => 'Parcourez les prouesses de LOTRO par région et pays et voyez sur la carte où les trouver. Avec votre progression importée, le journal montre ce qu’il vous reste à faire.',
+                ][$lang],
+            ];
+        }
         $sprachen = [];
         foreach (Catalogue::LANGS as $other) {
             $sprachen[] = [

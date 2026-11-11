@@ -56,13 +56,31 @@
 		}
 	}
 
-	// The map shows quests, or deeds with ?art=taten. Texts that differ for deeds
-	// carry the suffix _taten and win in that mode.
+	// The map shows quests at /de/karte/, deeds at /de/karte/taten/. Older links
+	// still say ?art=taten, so both count. Texts that differ for deeds carry the
+	// suffix _taten and win in that mode.
+	var TATEN = ['taten', 'deeds', 'prouesses'];
 	var art = 'aufgaben';
 	try {
-		art = new URLSearchParams(window.location.search).get('art') === 'taten' ? 'taten' : 'aufgaben';
+		var pfad = String(window.location.pathname || '').replace(/\/+$/, '').split('/');
+		var letzter = pfad[pfad.length - 1] || '';
+		if (TATEN.indexOf(letzter) >= 0
+				|| new URLSearchParams(window.location.search).get('art') === 'taten') {
+			art = 'taten';
+		}
 	} catch (fehler) { art = 'aufgaben'; }
 	window.MQL_ART = art;
+
+	// Canonical link into the map app, with one record preselected. Both link
+	// lists below the map and every catalogue page use this, so the deed mode
+	// stays a path instead of the old "?art=taten".
+	var KARTEN_SEGMENT = { de: 'karte', en: 'map', fr: 'carte' };
+	var TATEN_SEGMENT = { de: 'taten', en: 'deeds', fr: 'prouesses' };
+	window.MQL_KARTE_LINK = function (art, id) {
+		var pfad = '/' + sprache + '/' + (KARTEN_SEGMENT[sprache] || 'karte') + '/';
+		if (art === 'd') { pfad += (TATEN_SEGMENT[sprache] || 'taten') + '/'; }
+		return id ? pfad + '?id=' + encodeURIComponent(id) : pfad;
+	};
 
 	function t(schluessel) {
 		var wert = art === 'taten' && texte[schluessel + '_taten'] !== undefined
