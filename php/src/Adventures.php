@@ -129,13 +129,6 @@ final class Adventures
             : sprintf($words['level_band'], $low, $high);
     }
 
-    /** Emblem of one adventure, only when the built image is really there. */
-    private function emblem(string $pack): string
-    {
-        $relative = '/bild/abenteuer/' . $pack . '.webp';
-        return is_file($this->shell->webRoot() . $relative) ? $relative : '';
-    }
-
     private function context(array $words, array $alternates, string $canonical): array
     {
         $base = $this->catalogue->appRoute($this->lang, 'adventures');
@@ -179,7 +172,6 @@ final class Adventures
         foreach ($packs as &$pack) {
             $pack['level_label'] = self::levelLabel($pack, $words);
             $pack['type_label'] = $words['types'][$pack['type']] ?? $pack['type'];
-            $pack['emblem'] = $this->emblem($pack['id']);
             $pack['areas_list'] = array_values(array_filter(
                 $index['areas'],
                 static fn (array $area): bool => $area['pack'] === $pack['id'] && ($area['name'] ?? '') !== ''

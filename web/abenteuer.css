@@ -173,7 +173,7 @@
 
 .inhalte-liste li {
 	display: grid;
-	grid-template-columns: 26px minmax(0, 1fr) 3.6em auto;
+	grid-template-columns: minmax(0, 1fr) 3.6em auto;
 	gap: 8px;
 	align-items: center;
 	padding: 4px 6px;
@@ -184,15 +184,6 @@
 
 .inhalte-liste li.frisch-gewaehlt {
 	background: rgba(214, 179, 90, .13);
-}
-
-.inhalt-sigel {
-	width: 26px;
-	height: 26px;
-	border: 1px solid var(--rand);
-	border-radius: 4px;
-	object-fit: cover;
-	background: var(--fläche-hell);
 }
 
 .inhalt-name {
@@ -221,14 +212,13 @@
    into a column of four characters. */
 @media (max-width: 520px) {
 	.inhalte-liste li {
-		grid-template-columns: 26px minmax(0, 1fr) 3.6em;
+		grid-template-columns: minmax(0, 1fr) 3.6em;
 		grid-template-areas:
-			"sigel name stand"
-			". select select";
+			"name stand"
+			"select select";
 		row-gap: 4px;
 	}
 
-	.inhalt-sigel { grid-area: sigel; }
 	.inhalt-name { grid-area: name; }
 	.inhalt-stand { grid-area: stand; }
 	.inhalte-liste select { grid-area: select; justify-self: start; }
@@ -272,26 +262,6 @@
 .abenteuer-karte.frisch-gewaehlt {
 	border-color: var(--gold);
 	box-shadow: 0 0 0 2px rgba(214, 179, 90, .25);
-}
-
-.karte-oben {
-	display: flex;
-	gap: 12px;
-	align-items: flex-start;
-}
-
-.karte-sigel {
-	flex: none;
-	width: 56px;
-	height: 56px;
-	border: 1px solid var(--rand);
-	border-radius: 5px;
-	object-fit: cover;
-	background: var(--fläche-hell);
-}
-
-.karte-titel {
-	min-width: 0;
 }
 
 .karte-oben h3 {

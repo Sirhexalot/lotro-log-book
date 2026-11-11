@@ -15,13 +15,13 @@ Menü: **Welt → Abenteuerüberblick**.
 1. **Kopf** mit gewähltem Charakter und Stufe (aus dem vorhandenen Charakterspeicher).
 2. **Zwei Hinweise**: „Altes zu Ende bringen“ und „Passt zu deiner Stufe“. Ohne
    belastbaren Vorschlag steht dort ein Hinweis, keine erfundene Empfehlung.
-3. **Meine Inhalte**: Zugang je Abenteuer (vorhanden / nicht vorhanden / unbekannt),
-   lokal pro Konto gespeichert (`mql.abenteuer.inhalte.v1`). Jede Zeile zeigt das
-   Sigel und den Fortschritt des Abenteuers; zwei Knöpfe setzen alle Erweiterungen
-   auf einmal. Eine Änderung färbt Zeile und Karte kurz ein, damit die Wirkung
-   sichtbar ist. Das Grundspiel ist frei und wird von „Alles nicht vorhanden“
-   ausgelassen.
-4. **Abenteuerkarten**: Sigel, Name, Art, redaktioneller Stufenbereich, Kurztext,
+3. **Meine Inhalte** (ganz oben, standardmäßig zugeklappt): Zugang je Abenteuer
+   (vorhanden / nicht vorhanden / unbekannt), lokal pro Konto gespeichert
+   (`mql.abenteuer.inhalte.v1`). Jede Zeile zeigt den Fortschritt des Abenteuers;
+   zwei Knöpfe setzen alle Erweiterungen auf einmal. Eine Änderung färbt Zeile und
+   Karte kurz ein, damit die Wirkung sichtbar ist. Das Grundspiel ist frei und wird
+   von „Alles nicht vorhanden“ ausgelassen.
+4. **Abenteuerkarten**: Name, Art, redaktioneller Stufenbereich, Kurztext,
    Fortschritt und ein aufklappbarer Gebietsausschnitt. Auch 0 % wird angezeigt;
    ein fehlender Balken hieße sonst „unbekannt“ statt „nichts geschafft“.
 5. **Fußnote**: Prozentwerte zählen einmalige Landschaftsaufgaben; ein fehlender
@@ -29,21 +29,6 @@ Menü: **Welt → Abenteuerüberblick**.
 
 Die Seite ist ohne JavaScript lesbar: Der Server rendert alle Abenteuer mit Namen,
 Stufe und Gebieten. Fortschritt, Hinweise und Zugang entstehen im Browser.
-
-## Sigel
-
-`tools/hole_abenteuer_bilder.py` legt je Abenteuer ein quadratisches Bild in
-`web/bild/abenteuer/<id>.webp` ab (160 px, nicht im Git wie die übrigen
-gebauten Bilder). Zwei Herkünfte stehen in `web/bild/abenteuer/quellen.json`:
-
-- `official`: Titelbild der offiziellen Shop-Seite https://www.lotro.com/expansions
-  (Standard-Edition), ohne Editionsbalken zugeschnitten. Das sind Werbemotive von
-  Standing Stone Games/Daybreak; eine Rechtefreigabe leiten wir daraus nicht ab.
-- `map`: Ausschnitt unserer eigenen Spielkarte, wo es auf der Shop-Seite kein
-  offizielles Motiv mehr gibt (Grundspiel und die älteren Erweiterungen).
-
-Die Seite bindet ein Sigel nur ein, wenn die Datei existiert; fehlt sie, bleibt
-die Karte ohne Bild. Ersetzen lässt sich jedes Motiv durch eine gleichnamige Datei.
 
 ## Daten
 
@@ -102,8 +87,9 @@ Lokaler Bestand am 11.11.2026: 15 Abenteuer, 105 Gebiete, 5.493 einmalige Aufgab
   Hauptansicht. Geometrie und Weltkartenprojektion bleiben unberührt.
 - Keine Kaufberatung: der Katalog belegt Aufgaben, keine Zugangsrechte. Freigaben
   für VIP und kostenlose Inhalte sind noch nicht geprüft.
-- Offizielle Motive liegen nur für die noch im Shop gelisteten Erweiterungen vor;
-  ältere Abenteuer zeigen einen Kartenausschnitt statt eines Logos.
+- Keine Erweiterungsbilder: eigene Kartenausschnitte waren als Sigel zu klein und
+  unruhig, offizielle Motive fehlen für die älteren Erweiterungen. Die Karten
+  tragen nur Text.
 - Zugangseinstellungen sind noch nicht in der Sicherung des Charakterspeichers
   enthalten; sie liegen nur lokal unter ihrem eigenen Schlüssel.
 - Die Reihenfolge innerhalb eines Abenteuers ist aus Gebietsstufen abgeleitet, nicht
