@@ -113,7 +113,8 @@
 	font-size: var(--text-bedienung, .875rem);
 }
 
-.abenteuer-inhalte {
+.seite details.abenteuer-inhalte {
+	max-width: none;
 	margin: 0 0 18px;
 	padding: 10px 14px;
 	border: 1px solid var(--rand);
@@ -172,7 +173,7 @@
 
 .inhalte-liste li {
 	display: grid;
-	grid-template-columns: auto minmax(0, 1fr) auto auto;
+	grid-template-columns: 26px minmax(0, 1fr) 3.6em auto;
 	gap: 8px;
 	align-items: center;
 	padding: 4px 6px;
@@ -202,6 +203,7 @@
 .inhalt-stand {
 	color: var(--fertig);
 	font-variant-numeric: tabular-nums;
+	text-align: right;
 }
 
 .inhalte-liste select {
@@ -213,6 +215,23 @@
 	color: var(--text);
 	font: inherit;
 	font-size: var(--text-bedienung, .875rem);
+}
+
+/* On a phone the select needs its own line; otherwise the name is squeezed
+   into a column of four characters. */
+@media (max-width: 520px) {
+	.inhalte-liste li {
+		grid-template-columns: 26px minmax(0, 1fr) 3.6em;
+		grid-template-areas:
+			"sigel name stand"
+			". select select";
+		row-gap: 4px;
+	}
+
+	.inhalt-sigel { grid-area: sigel; }
+	.inhalt-name { grid-area: name; }
+	.inhalt-stand { grid-area: stand; }
+	.inhalte-liste select { grid-area: select; justify-self: start; }
 }
 
 .inhalte-status {
