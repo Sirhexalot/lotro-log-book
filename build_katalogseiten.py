@@ -128,7 +128,7 @@ chain='Suite de quêtes', previous='Précédente', next='Suivante', back='Retour
 EXTRA = {
     'de': dict(menue_karte='Aufgaben', menue_taten='Taten', menue_reise='Reise', menue_gegenstaende='Gegenstände', menue_handwerk='Handwerk', menue_berufe='Berufe', menue_titel='Titel', menue_tugenden='Tugenden', menue_ruf='Ruf', menue_fortschritt='Fortschritt', menue_plugin='Plugin fürs Spiel',
         menue_landmarken='Landmarken', menue_fraktionen='Fraktionen', menue_instanzen='Instanzen',
-        d_landmarken='Sehenswürdigkeiten mit ihren Aufgaben', d_fraktionen='Ruf, Stufen und Quellen', d_instanzen='Instanzen, Schlachtzüge und Missionen',
+        d_landmarken='Sehenswürdigkeiten mit ihren Aufgaben', d_fraktionen='Ruf, Stufen und Quellen', d_instanzen='Cluster, Gruppengrößen und Stufen',
         title='titel', virtue='tugend', titlelist='Titel', virtuelist='Tugenden', titlelabel='Titel', virtuelabel='Tugend',
         gendered='Die Form richtet sich nach dem Geschlecht des Charakters.', ranked='Der vollständige Titel enthält Rang und Namen des Charakters.', availability='Der Katalog belegt die Quelle, nicht ob der Titel heute noch erreichbar ist.',
         menue_meine_berufe='Meine Berufe', menue_mein_ruf='Mein Ruf', menue_belohnungen='Belohnungen', familie_welt='Welt', familie_gegenstaende='Gegenstände', familie_erfolge='Erfolge', familie_charakter='Charakter',
@@ -166,7 +166,7 @@ EXTRA = {
         deed_no_position='Für diese Tat ist kein Zielort bekannt.'),
     'en': dict(menue_karte='Quests', menue_taten='Deeds', menue_reise='Travel', menue_gegenstaende='Items', menue_handwerk='Crafting', menue_berufe='Professions', menue_titel='Titles', menue_tugenden='Virtues', menue_ruf='Reputation', menue_fortschritt='Progress', menue_plugin='In-game plugin',
         menue_landmarken='Landmarks', menue_fraktionen='Factions', menue_instanzen='Instances',
-        d_landmarken='Sights and the quests there', d_fraktionen='Reputation, tiers and sources', d_instanzen='Instances, raids and missions',
+        d_landmarken='Sights and the quests there', d_fraktionen='Reputation, tiers and sources', d_instanzen='Clusters, group sizes and levels',
         title='title', virtue='virtue', titlelist='Titles', virtuelist='Virtues', titlelabel='Title', virtuelabel='Virtue',
         gendered='The wording follows the gender of the character.', ranked='The full title also contains the rank and name of the character.', availability='The catalogue records the source, not whether the title is still obtainable today.',
         menue_meine_berufe='My professions', menue_mein_ruf='My reputation', menue_belohnungen='Rewards', familie_welt='World', familie_gegenstaende='Items', familie_erfolge='Rewards', familie_charakter='Character',
@@ -204,7 +204,7 @@ EXTRA = {
         deed_no_position='No objective location is known for this deed.'),
     'fr': dict(menue_karte='Quêtes', menue_taten='Prouesses', menue_reise='Voyage', menue_gegenstaende='Objets', menue_handwerk='Artisanat', menue_berufe='Métiers', menue_titel='Titres', menue_tugenden='Vertus', menue_ruf='Réputation', menue_fortschritt='Progression', menue_plugin='Plugin en jeu',
         menue_landmarken='Sites', menue_fraktionen='Factions', menue_instanzen='Instances',
-        d_landmarken='Sites et leurs quêtes', d_fraktionen='Réputation, paliers et sources', d_instanzen='Instances, raids et missions',
+        d_landmarken='Sites et leurs quêtes', d_fraktionen='Réputation, paliers et sources', d_instanzen='Groupes, joueurs et niveaux',
         title='titre', virtue='vertu', titlelist='Titres', virtuelist='Vertus', titlelabel='Titre', virtuelabel='Vertu',
         gendered='La forme dépend du genre du personnage.', ranked='Le titre complet contient aussi le rang et le nom du personnage.', availability='Le catalogue atteste la source, pas si le titre est encore obtenable aujourd’hui.',
         menue_meine_berufe='Mes métiers', menue_mein_ruf='Ma réputation', menue_belohnungen='Récompenses', familie_welt='Monde', familie_gegenstaende='Objets', familie_erfolge='Récompenses', familie_charakter='Personnage',
@@ -382,14 +382,11 @@ class Renderer:
                       ('d', '/index.html?art=taten&lang=' + lang, w['menue_taten']),
                       ('reise', '/reise.html?lang=' + lang, w['menue_reise'])]),
             ('gegenstaende', [('i', route(lang, 'i'), w['menue_gegenstaende']),
-                              ('craft', '/handwerk.html?lang=' + lang, w['menue_handwerk']),
-                              ('p', route(lang, 'p'), w['menue_berufe'])]),
+                              ('craft', '/handwerk.html?lang=' + lang, w['menue_handwerk'])]),
             ('erfolge', [('title', route(lang, 'title'), w['menue_titel']),
                          ('virtue', route(lang, 'virtue'), w['menue_tugenden']),
                          ('ruf', '/ruf.html?lang=' + lang, w['menue_ruf'])]),
-            ('charakter', [('spielstand', '/spielstand.html?lang=' + lang, w['menue_fortschritt']),
-                           ('p', route(lang, 'p'), w['menue_meine_berufe']),
-                           ('ruf', '/ruf.html?lang=' + lang, w['menue_mein_ruf'])]),
+            ('charakter', [('spielstand', '/spielstand.html?lang=' + lang, w['menue_fortschritt'])]),
         ]
         for name, punkte in reiter:
             if name != familie:
@@ -527,16 +524,13 @@ class Renderer:
               ('reise', '/reise.html?lang=' + lang, w['menue_reise'], w['d_reise'])]),
             ('gegenstaende', '/gegenstaende.html?lang=' + lang, w['familie_gegenstaende'],
              [('i', '/gegenstaende.html?lang=' + lang, w['menue_gegenstaende'], w['d_gegenstand']),
-              ('craft', '/handwerk.html?lang=' + lang, w['menue_handwerk'], w['d_handwerk']),
-              ('p', route(lang, 'p'), w['menue_berufe'], w['d_beruf'])]),
+              ('craft', '/handwerk.html?lang=' + lang, w['menue_handwerk'], w['d_handwerk'])]),
             ('erfolge', '/belohnungen.html?lang=' + lang, w['familie_erfolge'],
              [('title', route(lang, 'title'), w['menue_titel'], w['d_titel']),
               ('virtue', route(lang, 'virtue'), w['menue_tugenden'], w['d_tugend']),
               ('ruf', '/ruf.html?lang=' + lang, w['menue_ruf'], w['d_ruf'])]),
             ('charakter', '/spielstand.html?lang=' + lang, w['familie_charakter'],
-             [('spielstand', '/spielstand.html?lang=' + lang, w['menue_fortschritt'], w['d_fortschritt']),
-              ('p', route(lang, 'p'), w['menue_meine_berufe'], w['d_meine_berufe']),
-              ('ruf', '/ruf.html?lang=' + lang, w['menue_mein_ruf'], w['d_mein_ruf'])]),
+             [('spielstand', '/spielstand.html?lang=' + lang, w['menue_fortschritt'], w['d_fortschritt'])]),
         ]
         nav = []
         for schluessel, ziel, text, reiter in fam:

@@ -291,10 +291,10 @@ def write_faction_index(target: Path, lang: str, factions: dict,
 def write_instance_index(target: Path, lang: str, instanzen: dict, maps: dict) -> None:
     """The compact index for the instance browser.
 
-    One row per instance template with the name in this language, the level and
-    the place from its opening quest, and how many players may enter.
+    One row per client finder selection with translated name/cluster and the
+    client's explicit level ranges, group sizes and difficulty tiers.
     """
-    labels = {'area': {}, 'region': {}, 'area_region': {}}
+    labels = {'area': {}, 'region': {}, 'area_region': {}, 'cluster': {}}
     for idx, entry in maps.items():
         name = entry.get('name')
         if not name:
@@ -312,19 +312,29 @@ def write_instance_index(target: Path, lang: str, instanzen: dict, maps: dict) -
         region = eintrag.get('region')
         if area is not None and region is not None and area != region:
             labels['area_region'][str(area)] = str(region)
-        teile = [name]
+        cluster_id = eintrag.get('cluster_id') or 0
+        cluster = (eintrag.get('cluster') or {}).get(lang) or ''
+        if cluster:
+            labels['cluster'][str(cluster_id)] = cluster
+        teile = [name, cluster, (eintrag.get('group') or {}).get(lang) or '']
         if area is not None:
             teile.append(labels['area'].get(str(area))
                          or labels['region'].get(str(area)) or '')
         rows.append({'id': ident, 'name': name,
-                     'level': eintrag.get('level'),
+                      'level': eintrag.get('level'),
+                      'level_max': eintrag.get('level_max'),
+                      'cluster_id': cluster_id, 'cluster': cluster,
+                      'group': (eintrag.get('group') or {}).get(lang) or '',
+                      'group_sizes': eintrag.get('group_sizes') or [],
+                      'difficulties': eintrag.get('difficulties') or [],
                      'region': region, 'area': area,
                      'players': eintrag.get('players'),
                      'type': eintrag.get('type') or 'sonst',
-                     'quest': eintrag.get('quest'),
+                      # Never link a quest absent from the published catalogue.
+                      'quest': None,
                      'search': ' '.join(teil for teil in teile if teil).lower()})
     rows.sort(key=lambda row: row['name'].lower())
-    payload = {'schema': 1, 'lang': lang, 'labels': labels, 'instances': rows}
+    payload = {'schema': 2, 'lang': lang, 'labels': labels, 'instances': rows}
     (target / lang / 'instances-index.json').write_text(
         json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 

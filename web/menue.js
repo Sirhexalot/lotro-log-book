@@ -100,17 +100,14 @@
 		{ key: 'gegenstaende', text: t('nav_gegenstaende'), href: app('gegenstandssuche'), tab: [
 			{ seite: 'gegenstand', href: app('gegenstandssuche'), text: t('menue_gegenstaende'), desc: 'd_gegenstand' },
 			{ seite: 'set', href: pfad('set'), text: t('menue_sets'), desc: 'd_sets' },
-			{ seite: 'handwerk', href: app('handwerk'), text: t('menue_handwerk'), desc: 'd_handwerk' },
-			{ seite: 'beruf', href: app('handwerk'), text: t('menue_berufe'), desc: 'd_beruf' }] },
+			{ seite: 'handwerk', href: app('handwerk'), text: t('menue_handwerk'), desc: 'd_handwerk' }] },
 		{ key: 'erfolge', text: t('nav_erfolge'), href: app('belohnungen'), tab: [
 			{ seite: 'titel', href: pfad('titel'), text: t('menue_titel'), desc: 'd_titel' },
 			{ seite: 'tugend', href: pfad('tugend'), text: t('menue_tugenden'), desc: 'd_tugend' },
 			{ seite: 'ruf', href: app('ruf'), text: t('menue_ruf'), desc: 'd_ruf' },
 			{ seite: 'fraktion', href: pfad('fraktion'), text: t('menue_fraktionen'), desc: 'd_fraktionen' }] },
 		{ key: 'charakter', text: t('nav_charakter'), href: app('spielstand'), tab: [
-			{ seite: 'spielstand', href: app('spielstand'), text: t('menue_fortschritt'), desc: 'd_fortschritt' },
-			{ seite: 'beruf', href: app('handwerk'), text: t('menue_meine_berufe'), desc: 'd_meine_berufe' },
-			{ seite: 'ruf', href: app('ruf'), text: t('menue_mein_ruf'), desc: 'd_mein_ruf' }] }
+			{ seite: 'spielstand', href: app('spielstand'), text: t('menue_fortschritt'), desc: 'd_fortschritt' }] }
 	];
 
 	// Which family the current page belongs to.

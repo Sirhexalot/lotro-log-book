@@ -117,7 +117,6 @@ final class Shell
                 ['i', $app('gegenstandssuche'), $w['menue_gegenstaende'], $w['d_gegenstand']],
                 ['set', $app('sets'), Sets::words($lang)['title'], Sets::words($lang)['intro']],
                 ['craft', $app('handwerk'), $w['menue_handwerk'], $w['d_handwerk']],
-                ['p', $app('handwerk'), $w['menue_berufe'], $w['d_beruf']],
             ]],
             ['erfolge', $app('belohnungen'), $w['familie_erfolge'], [
                 ['title', $this->catalogue->route($lang, 'title'), $w['menue_titel'], $w['d_titel']],
@@ -127,8 +126,6 @@ final class Shell
             ]],
             ['charakter', $app('spielstand'), $w['familie_charakter'], [
                 ['spielstand', $app('spielstand'), $w['menue_fortschritt'], $w['d_fortschritt']],
-                ['p', $app('handwerk'), $w['menue_meine_berufe'], $w['d_meine_berufe']],
-                ['ruf', $app('ruf'), $w['menue_mein_ruf'], $w['d_mein_ruf']],
             ]],
         ];
 
@@ -136,7 +133,7 @@ final class Shell
         // 'craft' has none, so no family link is current there.
         $current = match ($kind) {
             'set' => 'gegenstaende',
-            'giver' => 'welt',
+            'giver', 'instances' => 'welt',
             default => $this->catalogue->famille()[$kind] ?? null,
         };
         $out = '';

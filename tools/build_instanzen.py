@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Instance templates from the client DAT, joined with our quest catalogue.
+"""Instance finder entries selected explicitly by the client DAT.
 
 The instance definitions are the client's private encounter templates (DAT
 classes 1368 and 2651). They carry the name in three languages, how many
-players may enter and the quest that opens them; level and place come from that
-quest in our own catalogue.
+players may enter. Selection, clusters, levels and group sizes come from the
+direct finder audit (tools/export_instance_finder.py). Quest geography remains
+optional ancillary data, never the source of the playable level range.
 
 The DAT step is separate and read-only. Its JSONL is kept in
 `daten/instanzen-roh.jsonl`:
@@ -76,39 +77,57 @@ def lade_katalog() -> dict:
     return {eintrag['i']: eintrag for eintrag in (daten.get('quests') or daten)}
 
 
-def baue(quelle: Path) -> dict:
+def baue(quelle: Path, finder: Path | None = None) -> dict:
     katalog = lade_katalog()
+    finder = finder or DATEN / 'instanzen-finder.json'
+    if not finder.is_file():
+        raise SystemExit('MISSING: %s (tools/export_instance_finder.py)' % finder)
+    auswahl = json.loads(finder.read_text(encoding='utf-8'))['instances']
+    auswahl = {row['id']: row for row in auswahl}
     seiten = {}
     for zeile in quelle.open(encoding='utf-8'):
         eintrag = json.loads(zeile)
+        if eintrag['id'] not in auswahl:
+            continue
+        definition = auswahl[eintrag['id']]
         eigenschaften = eintrag.get('properties') or {}
         voll = texte(eigenschaften.get('PrivateEncounterTemplate_Name'))
         if not voll['de'] and not voll['en']:
             continue
         # The German name decides the kind; the other languages only lose their
         # own prefix.
-        art, _ = zerlege(voll['de'] or voll['en'], 'de')
+        art = ('schlacht' if definition['picker'] == 'epic_battle' else
+               {3: 'scharmuetzel', 4: 'instanz', 6: 'team'}.get(definition['type'], 'sonst'))
+        if art == 'instanz' and definition['group_sizes'] and min(definition['group_sizes']) >= 12:
+            art = 'schlachtzug'
         namen = {}
         for sprache in SPRACHEN:
-            _, kurz = zerlege(voll[sprache] or voll['en'], sprache)
-            namen[sprache] = sauberer_name(kurz or voll[sprache], sprache)
+            namen[sprache] = sauberer_name(definition['name'][sprache], sprache)
         quest = hex_id(eigenschaften.get('PrivateEncounterTemplate_InstanceQuest'))
         record = katalog.get(quest) if quest else None
         fk = (record or {}).get('fk') or []
-        stufe = (record or {}).get('l') or ''
         seiten[eintrag['id']] = {
             'id': eintrag['id'],
             'name': namen,
             'type': art,
-            'players': eigenschaften.get('PrivateEncounterTemplate_MaxPlayers') or None,
+            'players': definition['max_players'],
+            'group_sizes': definition['group_sizes'],
+            'difficulties': definition['difficulties'],
+            'cluster_id': definition['category'],
+            'cluster': definition['cluster'],
+            'group_id': definition['group'],
+            'group': definition['group_label'],
             'quest': quest,
-            'level': int(stufe) if str(stufe).isdigit() else None,
+            'level': definition['level_min'],
+            'level_max': definition['level_max'],
             'region': int(fk[0]) if fk else None,
             'area': int(fk[1]) if len(fk) > 1 else (int(fk[0]) if fk else None),
             'path': [str(teil) for teil in (record or {}).get('f') or []],
             'description': texte(eigenschaften.get('PrivateEncounterTemplate_Description')),
         }
-    return {'schema': 1, 'instanzen': seiten,
+    if set(seiten) != set(auswahl):
+        raise ValueError('Missing selected templates: %s' % sorted(set(auswahl) - set(seiten)))
+    return {'schema': 2, 'instanzen': seiten,
             'zaehler': {'gesamt': len(seiten),
                         'mit_stufe': sum(1 for s in seiten.values() if s['level']),
                         'mit_gebiet': sum(1 for s in seiten.values() if s['area']),

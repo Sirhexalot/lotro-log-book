@@ -5,16 +5,12 @@ declare(strict_types=1);
 namespace Llb;
 
 /**
- * Instance browser: the client's instance templates with level, place and
- * group size.
- *
- * The templates carry the name and how many players may enter; level and place
- * come from the quest that opens them, joined at build time. Filtering happens
- * in memory over one index file per language.
+ * Instance finder: explicit client picker membership, clusters and settings.
+ * Character unlocks and current server availability are not inferred.
  */
 final class Instances
 {
-    private const PAGE_SIZE = 30;
+    private const PAGE_SIZE = 200;
 
     public function __construct(
         private Catalogue $catalogue,
@@ -29,7 +25,10 @@ final class Instances
     {
         return [
             'de' => [
-                'title' => 'Instanzen', 'intro' => 'Instanzen, Schlachtzüge, Missionen und öffentliche Instanzen – mit Stufe, Landschaft und der Zahl der Spieler, die hineinpassen.',
+                'title' => 'Instanzenfinder', 'intro' => 'Finde Instanzen, Schlachtzüge, Scharmützel und epische Schlachten – nach den Clustern des Instanzenfinders im Spiel.',
+                'cluster' => 'Instanzcluster', 'no_cluster' => 'Ohne Cluster',
+                'difficulty' => 'Schwierigkeit', 'tier' => 'T%s',
+                'type_scharmuetzel' => 'Scharmützel', 'type_schlacht' => 'Epische Schlacht', 'type_team' => 'Team',
                 'search' => 'Instanz suchen', 'filter' => 'Filter', 'apply' => 'Anwenden',
                 'reset' => 'Zurücksetzen', 'region' => 'Region', 'area' => 'Landschaft',
                 'wo' => 'Region und Landschaft',
@@ -39,7 +38,7 @@ final class Instances
                 'level' => 'Stufe', 'from' => 'Von', 'to' => 'Bis',
                 'players' => 'Spieler', 'players_n' => '%s Spieler', 'players_one' => '1 Spieler',
                 'art' => 'Art', 'mit_level' => 'Nur mit belegter Stufe',
-                'filter_note' => 'Stufe und Ort stammen aus der Aufgabe, die die Instanz öffnet.',
+                'filter_note' => 'Gruppengrößen und Stufenspannen stammen aus dem Spielclient. Serverregeln können abweichen; dein Zugang wird hier nicht geprüft.',
                 'no_level' => 'Stufe nicht belegt', 'no_place' => 'Ort nicht belegt',
                 'type_instanz' => 'Instanz', 'type_mission' => 'Mission',
                 'type_oeffentlich' => 'Öffentliche Instanz', 'type_offen' => 'Offene Instanz',
@@ -48,7 +47,10 @@ final class Instances
                 'type_sonst' => 'Ohne Artangabe',
             ],
             'en' => [
-                'title' => 'Instances', 'intro' => 'Instances, raids, missions and public instances – with level, landscape and how many players fit in.',
+                'title' => 'Instance Finder', 'intro' => 'Find instances, raids, skirmishes and epic battles, grouped by the clusters in the in-game Instance Finder.',
+                'cluster' => 'Instance cluster', 'no_cluster' => 'No cluster',
+                'difficulty' => 'Difficulty', 'tier' => 'T%s',
+                'type_scharmuetzel' => 'Skirmish', 'type_schlacht' => 'Epic battle', 'type_team' => 'Team',
                 'search' => 'Search for an instance', 'filter' => 'Filters', 'apply' => 'Apply',
                 'reset' => 'Reset', 'region' => 'Region', 'area' => 'Landscape',
                 'wo' => 'Region and landscape',
@@ -58,7 +60,7 @@ final class Instances
                 'level' => 'Level', 'from' => 'From', 'to' => 'To',
                 'players' => 'Players', 'players_n' => '%s players', 'players_one' => '1 player',
                 'art' => 'Type', 'mit_level' => 'Only with a recorded level',
-                'filter_note' => 'Level and place come from the quest that opens the instance.',
+                'filter_note' => 'Group sizes and level ranges come from the game client. Server rules may differ; your access is not checked here.',
                 'no_level' => 'Level not recorded', 'no_place' => 'Place not recorded',
                 'type_instanz' => 'Instance', 'type_mission' => 'Mission',
                 'type_oeffentlich' => 'Public instance', 'type_offen' => 'Open instance',
@@ -67,7 +69,10 @@ final class Instances
                 'type_sonst' => 'Type not recorded',
             ],
             'fr' => [
-                'title' => 'Instances', 'intro' => 'Instances, raids, missions et instances publiques – avec niveau, pays et nombre de joueurs admis.',
+                'title' => 'Recherche d’instances', 'intro' => 'Trouvez des instances, raids, escarmouches et batailles épiques, regroupés comme dans la recherche d’instances du jeu.',
+                'cluster' => 'Groupe d’instances', 'no_cluster' => 'Sans groupe',
+                'difficulty' => 'Difficulté', 'tier' => 'T%s',
+                'type_scharmuetzel' => 'Escarmouche', 'type_schlacht' => 'Bataille épique', 'type_team' => 'Équipe',
                 'search' => 'Chercher une instance', 'filter' => 'Filtres', 'apply' => 'Appliquer',
                 'reset' => 'Réinitialiser', 'region' => 'Région', 'area' => 'Pays',
                 'wo' => 'Région et pays',
@@ -77,7 +82,7 @@ final class Instances
                 'level' => 'Niveau', 'from' => 'De', 'to' => 'À',
                 'players' => 'Joueurs', 'players_n' => '%s joueurs', 'players_one' => '1 joueur',
                 'art' => 'Type', 'mit_level' => 'Uniquement avec niveau attesté',
-                'filter_note' => 'Le niveau et le lieu viennent de la quête qui ouvre l’instance.',
+                'filter_note' => 'Les tailles de groupe et niveaux viennent du client du jeu. Les règles du serveur peuvent différer ; votre accès n’est pas vérifié ici.',
                 'no_level' => 'Niveau non attesté', 'no_place' => 'Lieu non attesté',
                 'type_instanz' => 'Instance', 'type_mission' => 'Mission',
                 'type_oeffentlich' => 'Instance publique', 'type_offen' => 'Instance ouverte',
@@ -101,10 +106,16 @@ final class Instances
         if (($f['area'] ?? []) && !in_array($row['area'], $f['area'], true)) {
             return false;
         }
+        if (($f['cluster'] ?? []) && !in_array($row['cluster_id'], $f['cluster'], true)) {
+            return false;
+        }
         if (($f['art'] ?? []) && !in_array($row['type'], $f['art'], true)) {
             return false;
         }
-        if (($f['spieler'] ?? []) && !in_array($row['players'], $f['spieler'], true)) {
+        if (($f['spieler'] ?? []) && !array_intersect($row['group_sizes'], $f['spieler'])) {
+            return false;
+        }
+        if (($f['tier'] ?? []) && !array_intersect($row['difficulties'], $f['tier'])) {
             return false;
         }
         $von = ($f['von'] ?? '') === '' ? null : (int) $f['von'];
@@ -115,7 +126,8 @@ final class Instances
         if ($row['level'] === null) {
             return false;
         }
-        if ($von !== null && $row['level'] < $von) {
+        // Match overlapping playable ranges, not only the minimum level.
+        if ($von !== null && ($row['level_max'] ?? $row['level']) < $von) {
             return false;
         }
         if ($bis !== null && $row['level'] > $bis) {
@@ -128,38 +140,50 @@ final class Instances
     public static function sorted(array $rows): array
     {
         usort($rows, static fn (array $a, array $b): int =>
-            strnatcasecmp($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
+            (($a['cluster_id'] === 0) <=> ($b['cluster_id'] === 0))
+            ?: strnatcasecmp($a['cluster'] ?? '', $b['cluster'] ?? '')
+            ?: strnatcasecmp($a['group'] ?: $a['name'], $b['group'] ?: $b['name'])
+            ?: strnatcasecmp($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
         return $rows;
     }
 
     private function query(array $input, array $labels, array $rows): array
     {
         $out = ['q' => is_string($input['q'] ?? '') ? mb_substr(trim($input['q'] ?? ''), 0, 200) : ''];
-        foreach (['region', 'area'] as $key) {
+        foreach (['cluster'] as $key) {
             // Only values that really occur: a stale link with an id no row
             // carries must not turn the page into an empty dead end.
-            $allowed = array_values(array_unique(array_filter(array_column($rows, $key))));
+            $allowed = array_values(array_unique(array_column($rows, $key === 'cluster' ? 'cluster_id' : $key)));
+            $allowed = array_values(array_filter($allowed, static fn ($v) => $v !== null));
             $values = $input[$key] ?? [];
             $values = is_array($values) ? $values : [$values];
-            $werte = array_map('intval', array_map('strval', $values));
+            $werte = array_map('intval', array_filter($values, 'is_scalar'));
             $out[$key] = array_values(array_filter($allowed, static fn ($v) => in_array($v, $werte, true)));
         }
         $arten = array_values(array_unique(array_column($rows, 'type')));
         $werte = $input['art'] ?? [];
         $werte = is_array($werte) ? $werte : [$werte];
         $out['art'] = array_values(array_filter($arten, static fn ($v) => in_array($v, $werte, true)));
-        $spieler = array_values(array_unique(array_filter(array_column($rows, 'players'))));
-        sort($spieler);
-        $werte = $input['spieler'] ?? [];
-        $werte = is_array($werte) ? $werte : [$werte];
-        $werte = array_map('intval', array_map('strval', $werte));
-        $out['spieler'] = array_values(array_filter($spieler, static fn ($v) => in_array($v, $werte, true)));
+        foreach (['spieler' => 'group_sizes', 'tier' => 'difficulties'] as $key => $column) {
+            $allowed = self::arrayValues($rows, $column);
+            $values = $input[$key] ?? [];
+            $values = is_array($values) ? $values : [$values];
+            $values = array_map('intval', array_filter($values, 'is_scalar'));
+            $out[$key] = array_values(array_intersect($allowed, $values));
+        }
         foreach (['von', 'bis'] as $key) {
             $wert = $input[$key] ?? '';
             $out[$key] = is_scalar($wert) && preg_match('/^\d{1,3}$/', (string) $wert)
                 ? (string) (int) $wert : '';
         }
         return $out;
+    }
+
+    private static function arrayValues(array $rows, string $column): array
+    {
+        $values = array_values(array_unique(array_merge([], ...array_column($rows, $column))));
+        sort($values);
+        return $values;
     }
 
     private function params(array $f, int $page = 1): array
@@ -191,7 +215,7 @@ final class Instances
             'og_locale' => ['de' => 'de_DE', 'en' => 'en_US', 'fr' => 'fr_FR'][$this->lang],
             'og_image_alt' => 'LOTRO Log Book', 'tracking' => $this->shell->tracking(),
             'styles' => $this->shell->styles(), 'scripts' => $this->shell->scripts(),
-            'menu' => $this->shell->menu(''), 'start_page' => $this->catalogue->appRoute($this->lang, 'start'),
+            'menu' => $this->shell->menu('instances'), 'start_page' => $this->catalogue->appRoute($this->lang, 'start'),
             'suche_pfad' => $this->shell->appRoute('suche'),
             'spielstand_pfad' => $this->shell->appRoute('spielstand'),
             'katalog_texte' => json_encode(['none' => $this->shell->words()['none']], JSON_UNESCAPED_UNICODE),
@@ -223,22 +247,24 @@ final class Instances
         }
 
         $facets = [];
-        foreach (['region', 'area', 'art', 'spieler'] as $key) {
+        foreach (['cluster', 'art', 'spieler', 'tier'] as $key) {
             $options = [];
             $werte = match ($key) {
-                'region', 'area' => array_keys($labels[$key]),
+                'cluster' => array_values(array_unique(array_column($rows, 'cluster_id'))),
                 'art' => array_values(array_unique(array_column($rows, 'type'))),
-                default => array_values(array_unique(array_filter(array_column($rows, 'players')))),
+                'tier' => self::arrayValues($rows, 'difficulties'),
+                default => self::arrayValues($rows, 'group_sizes'),
             };
             foreach ($werte as $value) {
                 $candidate = $filters;
-                $candidate[$key] = [$key === 'region' || $key === 'area' || $key === 'spieler'
+                $candidate[$key] = [$key !== 'art'
                     ? (int) $value : (string) $value];
                 $count = count(array_filter($rows, fn ($row) => self::matches($row, $candidate)));
                 $checked = in_array($candidate[$key][0], $filters[$key], true);
                 if ($count || $checked) {
                     $label = match ($key) {
-                        'region', 'area' => $labels[$key][$value] ?? (string) $value,
+                        'cluster' => $labels['cluster'][$value] ?? $words['no_cluster'],
+                        'tier' => str_replace('%s', (string) $value, $words['tier']),
                         'art' => $words['type_' . $value] ?? $value,
                         default => $value === 1 ? $words['players_one']
                             : str_replace('%s', (string) $value, $words['players_n']),
@@ -247,46 +273,39 @@ final class Instances
                                   'count' => $count, 'checked' => $checked];
                 }
             }
-            if ($key === 'region' || $key === 'area' || $key === 'art') {
+            if ($key === 'cluster' || $key === 'art') {
                 usort($options, static fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
             }
             $facets[$key] = $options;
         }
-        $area_by_region = [];
-        $area_rest = [];
-        foreach ($facets['area'] as $option) {
-            $region = $labels['area_region'][(string) $option['value']] ?? null;
-            if ($region === null || $region === '') {
-                $area_rest[] = $option;
-            } else {
-                $area_by_region[(string) $region][] = $option;
-            }
-        }
-
         $page_rows = array_slice($selected, ($page - 1) * self::PAGE_SIZE, self::PAGE_SIZE);
         foreach ($page_rows as &$row) {
             $row['url'] = $row['quest']
                 ? $this->catalogue->route($this->lang, 'q', $row['quest']) : null;
             $teile = [$words['type_' . $row['type']] ?? $row['type']];
-            $teile[] = $row['level'] !== null ? $words['level'] . ' ' . $row['level'] : $words['no_level'];
-            if ($row['players'] !== null) {
-                $teile[] = $row['players'] === 1 ? $words['players_one']
-                    : str_replace('%s', (string) $row['players'], $words['players_n']);
+            $range = (string) $row['level'];
+            if ($row['level_max'] !== null && $row['level_max'] !== $row['level']) {
+                $range .= '–' . $row['level_max'];
             }
-            $namen = [];
-            foreach ([$row['area'], $row['region']] as $wert) {
-                if ($wert === null) {
-                    continue;
-                }
-                $name = $labels['area'][(string) $wert] ?? $labels['region'][(string) $wert] ?? '';
-                if ($name !== '' && !in_array($name, $namen, true)) {
-                    $namen[] = $name;
-                }
+            $teile[] = $row['level'] !== null ? $words['level'] . ' ' . $range : $words['no_level'];
+            if ($row['group_sizes']) {
+                $teile[] = str_replace('%s', implode(' / ', $row['group_sizes']), $words['players_n']);
             }
-            $teile[] = $namen ? implode(' · ', $namen) : $words['no_place'];
+            if ($row['difficulties']) {
+                $teile[] = implode(' / ', array_map(
+                    static fn ($tier) => str_replace('%s', (string) $tier, $words['tier']), $row['difficulties']));
+            }
             $row['meta'] = implode(' · ', $teile);
         }
         unset($row);
+        $groups = [];
+        foreach ($page_rows as $row) {
+            $cluster = $row['cluster_id'];
+            if (!isset($groups[$cluster])) {
+                $groups[$cluster] = ['name' => $row['cluster'] ?: $words['no_cluster'], 'rows' => []];
+            }
+            $groups[$cluster]['rows'][] = $row;
+        }
 
         $alternates = array_map(
             fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang)],
@@ -296,7 +315,7 @@ final class Instances
             (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
         ) + [
             'filters' => $filters, 'facets' => $facets, 'instances' => $page_rows,
-            'area_by_region' => $area_by_region, 'area_rest' => $area_rest,
+            'instance_groups' => array_values($groups),
             'count' => count($selected), 'page_label' => sprintf($words['page'], $page, $pages),
             'previous_url' => $page > 1 ? $this->url($filters, $page - 1) : null,
             'next_url' => $page < $pages ? $this->url($filters, $page + 1) : null,

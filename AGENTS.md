@@ -80,6 +80,19 @@ Stand: 08.11.2026. Diese Anleitung gilt für das Repository `lotro-log-book`, **
 
 ## Statischer Katalog, URLs und SEO
 
+**Instanzenfinder seit 11.11.2026 (ersetzt den Rohvorlagenstand vom 10.11. oben):**
+Die Website zeigt nur die explizite Auswahl aus `WorldJoinControl` (Klasse 2606,
+`7001B7CE`): derzeit 153 reguläre Einträge plus 14 epische Schlachtvarianten.
+`tools/InstanceFinderEnums.java` liest Cluster-Namen direkt aus den DATs;
+`tools/export_instance_finder.py` verbindet sie mit Auswahl und Vorlagen zu
+`daten/instanzen-finder.json`. Danach `tools/build_instanzen.py` ausführen.
+Stufenspannen, Gruppengrößen und Schwierigkeiten stammen aus den expliziten
+`Skirmish_Template_*`-Feldern, nicht aus Aufgabenstufen oder Namenspräfixen.
+`Instances.php`/`instances/list.twig` zeigen Cluster mit Suche und Filtern
+(Cluster, Art, Stufenüberschneidung, Gruppengröße, Schwierigkeit). Keine
+automatischen Links auf öffnende Aufgaben. Quellen und Grenzen:
+`docs/instanzenfinder-dat.md`. Keine fremden Website-Listen übernehmen.
+
 - `build_katalogseiten.py` erzeugt vollständige statische Detailseiten und Verzeichnisse aus den Webkatalogen; `katalog.css/js` ergänzen Darstellung und optionalen lokalen Fortschritt. Texte, Voraussetzungen, Belohnungen, Quellen, Ketten und Links müssen ohne JS erreichbar bleiben; kein Vollkatalog-Download für eine einzelne Detailseite.
 - Öffentliche Identität: **Sprache / Entität / stabile ID /**, z. B. `/de/aufgabe/700005C0/`, `/en/quest/700005C0/`, `/fr/quete/700005C0/`, `/de/tat/<ID>/`, `/de/gebiet/<Spielkarten-ID>/`, `/de/beruf/WOODWORKER/`, `/de/rezept/<ID>/`. Keine übersetzten Namen oder Navigationshierarchie als Identität. Bestehende Query-/Hashlinks zur Anwendung erhalten.
 - Physische Dateien flach (`de/aufgabe/700005C0.html`), nicht ein Ordner pro Datensatz. **Nur die Schrägstrich-URL öffentlich bedienen**; `.html` und ohne Slash per **301** dorthin. Seitenweise Indizes mit 200 Einträgen; Seite 1 ist der Typindex, nicht `/seite/1/`.
