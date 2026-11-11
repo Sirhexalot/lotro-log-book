@@ -181,6 +181,7 @@
 			ziel.appendChild(eltern('p', t('hw_roh_keine')));
 			return;
 		}
+		if (beruf === 'COOK') { kochZutaten(); return; }
 
 		// Group by tier, ascending; within a tier alphabetical by name.
 		var stufen = {};
@@ -210,8 +211,7 @@
 				return summe + anzahlVon(eintrag);
 			}, 0);
 		});
-		// Nothing recorded: the kinds exist, they just do not stand in the
-		// landscape (the cook's field crops, four scholar plants).
+		// No placements recorded for these resource kinds.
 		if (!gesamt) {
 			nummern.forEach(function (stufe) {
 				ziel.appendChild(stufenTitel(stufe));
@@ -222,7 +222,7 @@
 					.map(function (eintrag) { return eintrag[1]; }).join(' · ');
 				ziel.appendChild(liste);
 			});
-			var ohne = eltern('p', t(beruf === 'COOK' ? 'hw_roh_anbau' : 'hw_roh_keine'));
+			var ohne = eltern('p', t('hw_roh_keine'));
 			ohne.className = 'schwach';
 			ziel.appendChild(ohne);
 			return;
@@ -235,11 +235,66 @@
 		});
 	}
 
+	/** Recipe ingredients, not the incomplete gathering-node list. A tier means
+	 * first use in a cooking recipe, never an invented gathering tier. */
+	function kochZutaten() {
+		var texte = {
+			de: ['Zutaten nach ihrer ersten Verwendung in Kochrezepten. Auch Zwischenprodukte und Sonderzutaten sind enthalten.', 'Herstellbar: ', 'Keine Herkunft in den vorhandenen Daten belegt.'],
+			en: ['Ingredients by their first use in cooking recipes. Includes intermediate products and special ingredients.', 'Crafted by: ', 'No sources recorded in the available data.'],
+			fr: ['Ingrédients classés selon leur première utilisation en cuisine. Produits intermédiaires et ingrédients spéciaux inclus.', 'Fabrication : ', 'Aucune source attestée dans les données disponibles.']
+		}[sprache];
+		var rezepte = (window.MQL_REZEPTE || {}).r || [];
+		var zutaten = {}, herstellung = {};
+		rezepte.forEach(function (r) {
+			[r[18], r[19]].filter(Boolean).forEach(function (id) {
+				if (!herstellung[id]) { herstellung[id] = []; }
+				if (!herstellung[id].some(function (alt) { return alt[10] === r[10]; })) { herstellung[id].push(r); }
+			});
+			if (r[9] !== 'COOK') { return; }
+			(r[6] || []).forEach(function (z) {
+				if (!z[3]) { return; }
+				var alt = zutaten[z[3]];
+				if (!alt || r[11] < alt.stufe) { zutaten[z[3]] = { id: z[3], name: z[0], stufe: r[11] }; }
+			});
+		});
+		var hinweis = eltern('p', texte[0]);
+		hinweis.className = 'schwach'; ziel.appendChild(hinweis);
+		var stufe = null, liste;
+		Object.keys(zutaten).map(function (id) { return zutaten[id]; }).sort(function (a, b) {
+			return a.stufe - b.stufe || a.name.localeCompare(b.name, t('locale'));
+		}).forEach(function (z) {
+			if (stufe !== z.stufe) {
+				stufe = z.stufe;
+				var titel = eltern('h3', ersetze(t('hw_roh_stufe'), [stufe]) + ' · ' + stufenName('COOK', stufe));
+				titel.className = 'rezept-ueberschrift'; ziel.appendChild(titel);
+				liste = eltern('ul'); liste.className = 'koch-zutaten'; ziel.appendChild(liste);
+			}
+			var li = eltern('li'); li.dataset.zutat = z.id;
+			var url = '/' + sprache + '/' + ({ de: 'gegenstand', en: 'item', fr: 'objet' }[sprache]) + '/' + z.id + '/';
+			var link = eltern('a', z.name); link.href = url; li.appendChild(link);
+			var quellen = herstellung[z.id] || [];
+			if (quellen.length) {
+				var quelle = eltern('div', texte[1]); quelle.className = 'schwach';
+				quellen.forEach(function (r, i) {
+					if (i) { quelle.appendChild(document.createTextNode(', ')); }
+					var a = eltern('a', r[3] + ' · ' + r[0]);
+					a.href = '/' + sprache + '/' + ({ de: 'rezept', en: 'recipe', fr: 'recette' }[sprache]) + '/' + r[10] + '/';
+					quelle.appendChild(a);
+				});
+				li.appendChild(quelle);
+			}
+			if (window.MQL_ZUTATEN_HERKUNFT) { li.appendChild(window.MQL_ZUTATEN_HERKUNFT(url)); }
+			else if (!quellen.length) { li.appendChild(eltern('div', texte[2])); }
+			liste.appendChild(li);
+		});
+	}
+
 	/** A link from the map names one kind: show its profession and mark the row. */
 	function zeigeSorte(kennung) {
 		var treffer = (daten.k || []).filter(function (eintrag) { return eintrag[0] === kennung; })[0];
 		if (!treffer) { return; }
 		beruf = treffer[2];
+		if (eigene.indexOf(beruf) < 0) { alle = true; }
 		zeichne();
 		var zeilen = ziel.querySelectorAll('.roh-tabelle tbody tr');
 		for (var i = 0; i < zeilen.length; i += 1) {

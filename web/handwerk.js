@@ -2,8 +2,7 @@
  * LOTRO Companion's crafting.xml. Profession names, tier titles and the
  * experience each tier needs come from our own DAT export (referenz.js).
  *
- * The character's own professions come first; "Alle Berufe" shows the full
- * list, with the not-learned ones marked instead of hidden.
+ * Only professions with imported progress belong in this personal overview.
  */
 (function () {
 	'use strict';
@@ -25,14 +24,16 @@
 	if (!ziel) { return; }
 	var hinweis = el('hinweis');
 	var handwerk = (aktiv && aktiv.handwerk) || {};
-	var eigene = Object.keys(handwerk);
-	// Without an import there is nothing to narrow down: show every profession.
-	var alle = !eigene.length;
+	var eigene = Object.keys(handwerk).filter(function (beruf) {
+		return Array.isArray(handwerk[beruf]) && handwerk[beruf].length > 0;
+	});
 
 	if (!aktiv) {
 		hinweis.innerHTML = t('ohne_charakter');
+		return;
 	} else if (!eigene.length) {
 		hinweis.textContent = t('hw_keine_daten');
+		return;
 	}
 
 	function block(beruf) {
@@ -46,13 +47,6 @@
 		teil.appendChild(titel);
 
 		var zeilen = handwerk[beruf];
-		if (!zeilen) {
-			var offen = document.createElement('p');
-			offen.className = 'naechste schwach';
-			offen.textContent = t(aktiv ? 'hw_nicht_gelernt' : 'hw_ohne_fortschritt');
-			teil.appendChild(offen);
-			return teil;
-		}
 
 		// The first tier (0 is the untrained start) whose proficiency or mastery is
 		// not finished is what comes next.
@@ -150,25 +144,9 @@
 		ueberschrift.className = 'rezept-ueberschrift';
 		ueberschrift.textContent = t('hw_berufe');
 		kopf.appendChild(ueberschrift);
-		if (eigene.length) {
-			var feld = document.createElement('label');
-			feld.className = 'rezept-haken';
-			var haken = document.createElement('input');
-			haken.type = 'checkbox';
-			haken.checked = alle;
-			haken.addEventListener('change', function () {
-				alle = haken.checked;
-				zeichne();
-			});
-			feld.appendChild(haken);
-			var beschriftung = document.createElement('span');
-			beschriftung.textContent = t('hw_alle_berufe');
-			feld.appendChild(beschriftung);
-			kopf.appendChild(feld);
-		}
 		ziel.appendChild(kopf);
 
-		var schluessel = (alle ? Object.keys(berufe) : eigene).slice().sort(nachName);
+		var schluessel = eigene.slice().sort(nachName);
 		schluessel.forEach(function (beruf) { ziel.appendChild(block(beruf)); });
 	}
 
