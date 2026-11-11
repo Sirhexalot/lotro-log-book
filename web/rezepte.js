@@ -653,13 +653,10 @@
 		knopf.addEventListener('click', function () {
 			var wahl = knopf.getAttribute('data-hw');
 			reiter(wahl);
-			try { history.replaceState(null, '', '#' + wahl); } catch (fehler) { /* file:// */ }
-			if (wahl === 'rezepte' && location.hash !== '#rezepte') {
-				try { history.replaceState(null, '', '#rezepte'); } catch (fehler) { /* file:// */ }
-			}
-			if (wahl === 'rohstoffe' && location.hash !== '#rohstoffe') {
-				try { history.replaceState(null, '', '#rohstoffe'); } catch (fehler) { /* file:// */ }
-			}
+			// A bare hash resolves against <base href="/">, losing the page path.
+			var adresse = new URL(location.href);
+			adresse.hash = wahl;
+			try { history.replaceState(null, '', adresse); } catch (fehler) { /* file:// */ }
 		});
 	});
 	if (/rezepte/.test(location.hash) || /reiter=rezepte/.test(location.search)) { reiter('rezepte'); }
