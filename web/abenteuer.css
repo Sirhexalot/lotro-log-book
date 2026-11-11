@@ -115,7 +115,7 @@
 
 .seite details.abenteuer-inhalte {
 	max-width: none;
-	margin: 0 0 18px;
+	margin: 14px 0 18px;
 	padding: 10px 14px;
 	border: 1px solid var(--rand);
 	border-radius: 4px;
