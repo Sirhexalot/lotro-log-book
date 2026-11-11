@@ -80,21 +80,21 @@
 		var bar = card.querySelector('[data-balken]');
 		var detail = card.querySelector('[data-detail]');
 		if (bar) {
-			var has = row.coverage !== null && row.coverage !== undefined && row.completed > 0;
+			var has = row.coverage !== null && row.coverage !== undefined && row.total > 0;
 			bar.hidden = !has;
 			var fillEl = bar.firstElementChild;
-			if (has && fillEl) { fillEl.style.width = Math.round(row.coverage * 100) + '%'; }
+			if (has && fillEl) {
+				fillEl.style.width = Math.round(row.coverage * 100) + '%';
+				fillEl.className = row.completed > 0 ? '' : 'leer';
+			}
 		}
 		if (detail) {
-			detail.hidden = false;
-			if (row.coverage === null || row.coverage === undefined) {
-				detail.textContent = '';
-				detail.hidden = true;
-			} else if (row.completed === 0) {
-				detail.textContent = fill(text('ab_zaehler_offen'), [row.total]);
-			} else {
-				detail.textContent = fill(text('ab_zaehler'), [row.completed, row.total]) + ' · '
-					+ fill(text('ab_prozent'), [Math.round(row.coverage * 100)]);
+			detail.hidden = row.coverage === null || row.coverage === undefined;
+			if (!detail.hidden) {
+				detail.textContent = (row.completed === 0
+					? fill(text('ab_zaehler_offen'), [row.total])
+					: fill(text('ab_zaehler'), [row.completed, row.total]))
+					+ ' · ' + fill(text('ab_prozent'), [Math.round(row.coverage * 100)]);
 			}
 		}
 		var zugang = card.querySelector('[data-zugang]');
@@ -191,17 +191,59 @@
 		});
 	}
 
+	function paintContents(result) {
+		result.packs.forEach(function (pack) {
+			var slot = document.querySelector('[data-inhalt-stand="' + pack.id + '"]');
+			if (!slot) { return; }
+			slot.textContent = pack.coverage === null || pack.coverage === undefined
+				? '' : Math.round(pack.coverage * 100) + ' %';
+		});
+	}
+
+	/** Short visual answer to a choice: the row and its card light up. */
+	function flash(ids) {
+		(Array.isArray(ids) ? ids : [ids]).forEach(function (id) {
+			var row = document.querySelector('[data-inhalt-zeile="' + id + '"]');
+			var card = cards[id];
+			[row, card].forEach(function (element) {
+				if (!element) { return; }
+				element.classList.add('frisch-gewaehlt');
+				window.setTimeout(function () { element.classList.remove('frisch-gewaehlt'); }, 1500);
+			});
+		});
+	}
+
+	function gespeichert(ids) {
+		var settingsNow = { packs: {}, vip: settings().vip };
+		Array.prototype.forEach.call(document.querySelectorAll('[data-inhalt]'), function (other) {
+			if (other.value !== 'unknown') {
+				settingsNow.packs[other.getAttribute('data-inhalt')] = other.value;
+			}
+		});
+		var ok = core.write(accountKey(), settingsNow, Object.keys(cards));
+		var status = document.querySelector('.inhalte-status');
+		if (status) { status.textContent = text(ok ? 'ab_gespeichert' : 'ab_nicht_gespeichert'); }
+		if (ids) { flash(ids); }
+		render();
+	}
+
 	function wireSettings() {
 		Array.prototype.forEach.call(document.querySelectorAll('[data-inhalt]'), function (select) {
 			select.addEventListener('change', function () {
-				var packs = {};
-				Array.prototype.forEach.call(document.querySelectorAll('[data-inhalt]'), function (other) {
-					if (other.value !== 'unknown') { packs[other.getAttribute('data-inhalt')] = other.value; }
+				gespeichert(select.getAttribute('data-inhalt'));
+			});
+		});
+		Array.prototype.forEach.call(document.querySelectorAll('[data-alle]'), function (button) {
+			button.addEventListener('click', function () {
+				var value = button.getAttribute('data-alle');
+				var changed = [];
+				Array.prototype.forEach.call(document.querySelectorAll('[data-inhalt]'), function (select) {
+					// The base game is free; "not owned" would be untrue for it.
+					if (value === 'missing' && select.hasAttribute('data-frei')) { return; }
+					select.value = value;
+					changed.push(select.getAttribute('data-inhalt'));
 				});
-				var ok = core.write(accountKey(), { packs: packs, vip: settings().vip }, Object.keys(cards));
-				var status = document.querySelector('.inhalte-status');
-				if (status) { status.textContent = text(ok ? 'ab_gespeichert' : 'ab_nicht_gespeichert'); }
-				render();
+				gespeichert(changed);
 			});
 		});
 	}
@@ -212,6 +254,7 @@
 			? { quests: questsOf(character) || [], level: character.level } : null, settings());
 		paintCharacter(result);
 		result.packs.forEach(paintCard);
+		paintContents(result);
 		paintHint('finish', result.hints.finish);
 		paintHint('level', result.hints.level);
 		var empty = document.getElementById('hinweis-leer');

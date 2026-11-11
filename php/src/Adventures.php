@@ -38,6 +38,8 @@ final class Adventures
                 'import_link' => 'Spielstand importieren',
                 'content_link' => 'Meine Inhalte',
                 'content_hint' => 'Was du besitzt, bleibt in diesem Browser gespeichert. Unbekannt ist kein „nicht gekauft“.',
+                'all_owned' => 'Alles vorhanden',
+                'all_missing' => 'Alles nicht vorhanden',
                 'owned' => 'vorhanden',
                 'missing' => 'nicht vorhanden',
                 'unknown' => 'unbekannt',
@@ -65,6 +67,8 @@ final class Adventures
                 'import_link' => 'Import progress',
                 'content_link' => 'My content',
                 'content_hint' => 'What you own stays in this browser. Unknown does not mean “not bought”.',
+                'all_owned' => 'All owned',
+                'all_missing' => 'None owned',
                 'owned' => 'owned',
                 'missing' => 'not owned',
                 'unknown' => 'unknown',
@@ -92,6 +96,8 @@ final class Adventures
                 'import_link' => 'Importer la progression',
                 'content_link' => 'Mes contenus',
                 'content_hint' => 'Ce que vous possédez reste dans ce navigateur. Inconnu ne signifie pas « non acheté ».',
+                'all_owned' => 'Tout possédé',
+                'all_missing' => 'Rien possédé',
                 'owned' => 'possédé',
                 'missing' => 'non possédé',
                 'unknown' => 'inconnu',
@@ -121,6 +127,13 @@ final class Adventures
         return $low === $high
             ? sprintf($words['level_single'], $low)
             : sprintf($words['level_band'], $low, $high);
+    }
+
+    /** Emblem of one adventure, only when the built image is really there. */
+    private function emblem(string $pack): string
+    {
+        $relative = '/bild/abenteuer/' . $pack . '.webp';
+        return is_file($this->shell->webRoot() . $relative) ? $relative : '';
     }
 
     private function context(array $words, array $alternates, string $canonical): array
@@ -166,6 +179,7 @@ final class Adventures
         foreach ($packs as &$pack) {
             $pack['level_label'] = self::levelLabel($pack, $words);
             $pack['type_label'] = $words['types'][$pack['type']] ?? $pack['type'];
+            $pack['emblem'] = $this->emblem($pack['id']);
             $pack['areas_list'] = array_values(array_filter(
                 $index['areas'],
                 static fn (array $area): bool => $area['pack'] === $pack['id'] && ($area['name'] ?? '') !== ''

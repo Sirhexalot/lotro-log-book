@@ -47,10 +47,18 @@
 	<details class="abenteuer-inhalte" id="inhalte">
 		<summary>{{ lw.content_link }}</summary>
 		<p class="schwach">{{ lw.content_hint }}</p>
+		<div class="inhalte-aktionen">
+			<button type="button" data-alle="owned">{{ lw.all_owned }}</button>
+			<button type="button" data-alle="missing">{{ lw.all_missing }}</button>
+			<span class="inhalte-status" data-status role="status"></span>
+		</div>
 		<ul class="inhalte-liste">
 			{% for pack in packs %}
-			<li><label for="inhalt-{{ pack.id }}">{{ pack.name }}</label>
-				<select id="inhalt-{{ pack.id }}" data-inhalt="{{ pack.id }}">
+			<li data-inhalt-zeile="{{ pack.id }}">
+				{% if pack.emblem %}<img class="inhalt-sigel" src="{{ pack.emblem }}" alt="" width="26" height="26" loading="lazy">{% endif %}
+				<label class="inhalt-name" for="inhalt-{{ pack.id }}">{{ pack.name }}</label>
+				<span class="inhalt-stand" data-inhalt-stand="{{ pack.id }}"></span>
+				<select id="inhalt-{{ pack.id }}" data-inhalt="{{ pack.id }}"{% if pack.free|default(false) %} data-frei="1"{% endif %}>
 					<option value="unknown" selected>{{ lw.unknown }}</option>
 					<option value="owned">{{ lw.owned }}</option>
 					<option value="missing">{{ lw.missing }}</option>
@@ -58,15 +66,17 @@
 			</li>
 			{% endfor %}
 		</ul>
-		<p class="inhalte-status" data-status role="status"></p>
 	</details>
 
 	<div class="abenteuer-raster" id="abenteuer-raster">
 		{% for pack in packs %}
 		<article class="abenteuer-karte" data-pack="{{ pack.id }}" data-stufe-min="{{ pack.level_min }}" data-stufe-max="{{ pack.level_max }}">
 			<div class="karte-oben">
-				<h3>{{ pack.name }}</h3>
-				<p class="karte-art">{{ pack.type_label }} · {{ pack.level_label }}</p>
+				{% if pack.emblem %}<img class="karte-sigel" src="{{ pack.emblem }}" alt="" width="56" height="56" loading="lazy">{% endif %}
+				<div class="karte-titel">
+					<h3>{{ pack.name }}</h3>
+					<p class="karte-art">{{ pack.type_label }} · {{ pack.level_label }}</p>
+				</div>
 			</div>
 			<p class="karte-text">{{ pack.summary }}</p>
 			<p class="karte-stand" data-stand><span data-stand-wort></span></p>
