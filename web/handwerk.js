@@ -1,6 +1,9 @@
 /* Crafting page: per profession every tier with proficiency and mastery, from
  * LOTRO Companion's crafting.xml. Profession names, tier titles and the
  * experience each tier needs come from our own DAT export (referenz.js).
+ *
+ * The character's own professions come first; "Alle Berufe" shows the full
+ * list, with the not-learned ones marked instead of hidden.
  */
 (function () {
 	'use strict';
@@ -14,32 +17,47 @@
 	function el(id) { return document.getElementById(id); }
 	function text(wert) { return wert ? (wert[sprache] || wert.en || '') : ''; }
 	function zahl(wert) { return Number(wert).toLocaleString(t('locale')); }
-
-	var hinweis = el('hinweis');
-	if (!aktiv) { hinweis.innerHTML = t('ohne_charakter'); return; }
-	var handwerk = aktiv.handwerk || {};
-	var schluessel = Object.keys(handwerk);
-	if (!schluessel.length) { hinweis.textContent = t('hw_keine_daten'); return; }
-
-	schluessel.sort(function (a, b) {
+	function nachName(a, b) {
 		return text((berufe[a] || {}).n || { en: a }).localeCompare(text((berufe[b] || {}).n || { en: b }), t('locale'));
-	});
+	}
 
 	var ziel = el('berufe');
-	schluessel.forEach(function (beruf) {
+	if (!ziel) { return; }
+	var hinweis = el('hinweis');
+	var handwerk = (aktiv && aktiv.handwerk) || {};
+	var eigene = Object.keys(handwerk);
+	// Without an import there is nothing to narrow down: show every profession.
+	var alle = !eigene.length;
+
+	if (!aktiv) {
+		hinweis.innerHTML = t('ohne_charakter');
+	} else if (!eigene.length) {
+		hinweis.textContent = t('hw_keine_daten');
+	}
+
+	function block(beruf) {
 		var info = berufe[beruf] || { n: { en: beruf }, s: [] };
 		var stufenInfo = {};
 		(info.s || []).forEach(function (stufe) { stufenInfo[stufe.t] = stufe; });
-		var block = document.createElement('section');
-		block.className = 'beruf';
+		var teil = document.createElement('section');
+		teil.className = 'beruf';
 		var titel = document.createElement('h3');
 		titel.textContent = text(info.n) || beruf;
-		block.appendChild(titel);
+		teil.appendChild(titel);
+
+		var zeilen = handwerk[beruf];
+		if (!zeilen) {
+			var offen = document.createElement('p');
+			offen.className = 'naechste schwach';
+			offen.textContent = t(aktiv ? 'hw_nicht_gelernt' : 'hw_ohne_fortschritt');
+			teil.appendChild(offen);
+			return teil;
+		}
 
 		// The first tier (0 is the untrained start) whose proficiency or mastery is
 		// not finished is what comes next.
 		var naechste = null;
-		handwerk[beruf].forEach(function (zeile) {
+		zeilen.forEach(function (zeile) {
 			if (naechste || zeile[0] < 1) { return; }
 			if (!zeile[2]) { naechste = { stufe: zeile[0], teil: 'k' }; }
 			else if (!zeile[4]) { naechste = { stufe: zeile[0], teil: 'm' }; }
@@ -54,7 +72,7 @@
 		} else {
 			hinweisZeile.textContent = t('hw_fertig');
 		}
-		block.appendChild(hinweisZeile);
+		teil.appendChild(hinweisZeile);
 
 		var rahmen = document.createElement('div');
 		rahmen.className = 'tabellen-rahmen';
@@ -106,7 +124,7 @@
 			return [haken, inhalt];
 		}
 
-		handwerk[beruf].forEach(function (zeile) {
+		zeilen.forEach(function (zeile) {
 			if (zeile[0] < 1) { return; }
 			var inf = stufenInfo[zeile[0]] || {};
 			var tr = document.createElement('tr');
@@ -120,7 +138,39 @@
 		});
 		tabelle.appendChild(tbody);
 		rahmen.appendChild(tabelle);
-		block.appendChild(rahmen);
-		ziel.appendChild(block);
-	});
+		teil.appendChild(rahmen);
+		return teil;
+	}
+
+	function zeichne() {
+		ziel.textContent = '';
+		var kopf = document.createElement('div');
+		kopf.className = 'rezept-zeile-kopf';
+		var ueberschrift = document.createElement('h3');
+		ueberschrift.className = 'rezept-ueberschrift';
+		ueberschrift.textContent = t('hw_berufe');
+		kopf.appendChild(ueberschrift);
+		if (eigene.length) {
+			var feld = document.createElement('label');
+			feld.className = 'rezept-haken';
+			var haken = document.createElement('input');
+			haken.type = 'checkbox';
+			haken.checked = alle;
+			haken.addEventListener('change', function () {
+				alle = haken.checked;
+				zeichne();
+			});
+			feld.appendChild(haken);
+			var beschriftung = document.createElement('span');
+			beschriftung.textContent = t('hw_alle_berufe');
+			feld.appendChild(beschriftung);
+			kopf.appendChild(feld);
+		}
+		ziel.appendChild(kopf);
+
+		var schluessel = (alle ? Object.keys(berufe) : eigene).slice().sort(nachName);
+		schluessel.forEach(function (beruf) { ziel.appendChild(block(beruf)); });
+	}
+
+	zeichne();
 })();

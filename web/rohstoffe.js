@@ -16,6 +16,10 @@
 	var berufe = (window.MQL_REFERENZ || {}).berufe || {};
 	var daten = null;
 	var beruf = '';
+	// Default to the character's own professions; the checkbox opens the rest.
+	var aktiv = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv ? window.MQL_SPEICHER.aktiv() : null;
+	var eigene = aktiv && aktiv.handwerk ? Object.keys(aktiv.handwerk) : [];
+	var alle = !eigene.length;
 	var kartenName = {};
 	var orte = {};
 
@@ -53,7 +57,13 @@
 	function vorhandeneBerufe() {
 		var da = {};
 		(daten.k || []).forEach(function (eintrag) { da[eintrag[2]] = true; });
-		return REIHE.filter(function (schluessel) { return da[schluessel]; });
+		var reihe = REIHE.filter(function (schluessel) { return da[schluessel]; });
+		if (!alle && eigene.length) {
+			var meine = reihe.filter(function (schluessel) { return eigene.indexOf(schluessel) >= 0; });
+			// Professions that gather nothing would leave the tab empty.
+			if (meine.length) { return meine; }
+		}
+		return reihe;
 	}
 
 	function karteLink(sorte, karte) {
@@ -126,6 +136,28 @@
 		if (!daten) { return; }
 		var reihe = vorhandeneBerufe();
 		if (!beruf || reihe.indexOf(beruf) < 0) { beruf = reihe[0] || ''; }
+
+		if (eigene.length) {
+			var kopf = eltern('div', null);
+			kopf.className = 'rezept-zeile-kopf';
+			var ueberschrift = eltern('h3', t('hw_berufe'));
+			ueberschrift.className = 'rezept-ueberschrift';
+			kopf.appendChild(ueberschrift);
+			var feld = eltern('label', null);
+			feld.className = 'rezept-haken';
+			var haken = eltern('input', null);
+			haken.type = 'checkbox';
+			haken.checked = alle;
+			haken.addEventListener('change', function () {
+				alle = haken.checked;
+				beruf = '';
+				zeichne();
+			});
+			feld.appendChild(haken);
+			feld.appendChild(eltern('span', t('hw_alle_berufe')));
+			kopf.appendChild(feld);
+			ziel.appendChild(kopf);
+		}
 
 		var leiste = eltern('div', null);
 		leiste.className = 'rezept-berufe';

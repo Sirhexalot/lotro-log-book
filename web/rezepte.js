@@ -323,7 +323,7 @@
 			prof = ''; stufe = ''; kategorie = ''; suche = ''; nurFehlende = false;
 			alleBerufe = true; sort = ''; sucheFeld.value = '';
 			if (sortFeld) { sortFeld.value = 'name'; }
-			if (alleHaken) { alleHaken.checked = true; }
+			if (alleHaken) { alleHaken.checked = alleBerufe; }
 			if (fehlendHaken) { fehlendHaken.checked = false; }
 			if (window.MQL_FILTER) { window.MQL_FILTER.clear('rezepte', sprache); }
 			grenze = 100; berufsListe(); zeichne();
@@ -338,6 +338,7 @@
 			alleFeld.className = 'rezept-haken';
 			alleHaken = eltern('input');
 			alleHaken.type = 'checkbox';
+			alleHaken.checked = alleBerufe;
 			alleFeld.appendChild(alleHaken);
 			alleFeld.appendChild(eltern('span', t('hw_alle_berufe')));
 			berufKopf.appendChild(alleFeld);
