@@ -21,6 +21,13 @@ class AdventurePageTest(unittest.TestCase):
         subprocess.run(['python3', 'tools/build_abenteuer.py', '--ziel', str(cls.tmp),
                         '--web', str(cls.tmp / 'web')],
                        cwd=ROOT, check=True, capture_output=True)
+        # One area page, so the area link can be checked without a full build.
+        import hashlib
+        shard = hashlib.md5(b'268437653').hexdigest()[:2]
+        folder = cls.tmp / 'de' / 'area'
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / (shard + '.json')).write_text(
+            '{"entities":{"268437653":{"id":"268437653","name":"Breeland"}}}', encoding='utf-8')
 
     @classmethod
     def tearDownClass(cls):
@@ -54,7 +61,7 @@ class AdventurePageTest(unittest.TestCase):
         # Areas are already in the markup, so the page is usable without JS.
         self.assertIn('Enthaltene Gebiete', html)
         self.assertIn('Breeland', html)
-        # Every area row leads to its catalogue page.
+        # An area row leads to its catalogue page when that page exists.
         self.assertIn('href="/de/gebiet/268437653/"', html)
         # Personal values stay out of the server response.
         self.assertNotIn('MQL_CHARAKTER', html)
