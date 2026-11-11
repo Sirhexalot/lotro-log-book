@@ -30,7 +30,6 @@ final class Adventures
                 'title' => 'Dein Abenteuerüberblick',
                 'intro' => 'Deine bisherigen Abenteuer, offene Geschichten und neue Gegenden – auch das, was du längst überlevelt hast.',
                 'adventures' => 'Deine Abenteuer im Überblick',
-                'adventures_hint' => 'Ein Eintrag pro großem Inhalt. Gebiete und einzelne Aufgaben erst beim Öffnen.',
                 'finish' => 'Altes zu Ende bringen',
                 'level' => 'Passt zu deiner Stufe',
                 'no_character' => 'Noch kein Charakter gewählt.',
@@ -51,7 +50,6 @@ final class Adventures
                 'types' => ['base' => 'Grundspiel', 'expansion' => 'Erweiterung',
                             'mini-expansion' => 'kleine Erweiterung', 'quest-pack' => 'Aufgabenpaket',
                             'update' => 'Kostenloses Update'],
-                'footnote' => 'Prozentwerte zählen einmalige Landschaftsaufgaben. Fehlender Abschluss im Import heißt nicht, dass du nie dort warst.',
                 'open' => 'Abenteuer ansehen',
                 'close' => 'Schließen',
                 'quests' => '%s Aufgaben',
@@ -61,7 +59,6 @@ final class Adventures
                 'title' => 'Your adventure overview',
                 'intro' => 'Your adventures so far, open stories and new lands – including what you have long outgrown.',
                 'adventures' => 'Your adventures at a glance',
-                'adventures_hint' => 'One entry per large content block. Areas and single quests only when you open it.',
                 'finish' => 'Finish what you started',
                 'level' => 'Fits your level',
                 'no_character' => 'No character selected yet.',
@@ -82,7 +79,6 @@ final class Adventures
                 'types' => ['base' => 'Base game', 'expansion' => 'Expansion',
                             'mini-expansion' => 'Mini expansion', 'quest-pack' => 'Quest pack',
                             'update' => 'Free update'],
-                'footnote' => 'Percentages count one-time landscape quests. A missing completion in the import does not mean you were never there.',
                 'open' => 'Show adventure',
                 'close' => 'Close',
                 'quests' => '%s quests',
@@ -92,7 +88,6 @@ final class Adventures
                 'title' => 'Votre aperçu des aventures',
                 'intro' => 'Vos aventures passées, les histoires ouvertes et les nouvelles contrées – même ce que vous avez depuis longtemps dépassé.',
                 'adventures' => 'Vos aventures en un coup d’œil',
-                'adventures_hint' => 'Une entrée par grand contenu. Les pays et les quêtes seulement à l’ouverture.',
                 'finish' => 'Terminer ce qui est commencé',
                 'level' => 'Correspond à votre niveau',
                 'no_character' => 'Aucun personnage sélectionné.',
@@ -113,7 +108,6 @@ final class Adventures
                 'types' => ['base' => 'Jeu de base', 'expansion' => 'Extension',
                             'mini-expansion' => 'Petite extension', 'quest-pack' => 'Pack de quêtes',
                             'update' => 'Mise à jour gratuite'],
-                'footnote' => 'Les pourcentages comptent les quêtes de pays uniques. Une absence dans l’import ne signifie pas que vous n’y êtes jamais allé.',
                 'open' => 'Voir l’aventure',
                 'close' => 'Fermer',
                 'quests' => '%s quêtes',
@@ -178,9 +172,17 @@ final class Adventures
         foreach ($packs as &$pack) {
             $pack['level_label'] = self::levelLabel($pack, $words);
             $pack['type_label'] = $words['types'][$pack['type']] ?? $pack['type'];
-            $pack['areas_list'] = array_values(array_filter(
-                $index['areas'],
-                static fn (array $area): bool => $area['pack'] === $pack['id'] && ($area['name'] ?? '') !== ''
+            $pack['areas_list'] = array_values(array_map(
+                function (array $area): array {
+                    // Link only where a catalogue page really exists.
+                    $area['url'] = $this->data->has($this->lang, 'area', (string) $area['id'])
+                        ? $this->catalogue->route($this->lang, 'area', (string) $area['id']) : '';
+                    return $area;
+                },
+                array_filter(
+                    $index['areas'],
+                    static fn (array $area): bool => $area['pack'] === $pack['id'] && ($area['name'] ?? '') !== ''
+                )
             ));
         }
         unset($pack);

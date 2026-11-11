@@ -64,7 +64,6 @@
 
 	<div class="abenteuer-liste-kopf">
 		<h3>{{ lw.adventures }}</h3>
-		<p>{{ lw.adventures_hint }}</p>
 	</div>
 
 	<div class="abenteuer-raster" id="abenteuer-raster">
@@ -87,7 +86,7 @@
 				{% if pack.areas_list %}
 				<ul>
 					{% for area in pack.areas_list %}{% if area.name %}
-					<li data-gebiet="{{ area.id }}" data-aufgaben="{{ area.quests }}"><span>{{ area.name }}</span><small>{{ (area.quests == 1 ? lw.quests_one : lw.quests)|replace({'%s': area.quests}) }}</small><em data-gebiet-stand></em></li>
+					<li data-gebiet="{{ area.id }}" data-aufgaben="{{ area.quests }}">{% if area.url %}<a href="{{ area.url }}"><span>{{ area.name }}</span><small>{{ (area.quests == 1 ? lw.quests_one : lw.quests)|replace({'%s': area.quests}) }}</small><em data-gebiet-stand></em></a>{% else %}<span>{{ area.name }}</span><small>{{ (area.quests == 1 ? lw.quests_one : lw.quests)|replace({'%s': area.quests}) }}</small><em data-gebiet-stand></em>{% endif %}</li>
 					{% endif %}{% endfor %}
 				</ul>
 				{% else %}<p class="schwach">{{ lw.no_areas }}</p>{% endif %}
@@ -95,9 +94,6 @@
 		</article>
 		{% endfor %}
 	</div>
-
-	<p class="abenteuer-fussnote">{{ lw.footnote }}</p>
-	<p class="abenteuer-fussnote">{{ lw.content_hint }}</p>
 </main>
 {% endblock %}
 

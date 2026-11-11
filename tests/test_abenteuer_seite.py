@@ -54,6 +54,8 @@ class AdventurePageTest(unittest.TestCase):
         # Areas are already in the markup, so the page is usable without JS.
         self.assertIn('Enthaltene Gebiete', html)
         self.assertIn('Breeland', html)
+        # Every area row leads to its catalogue page.
+        self.assertIn('href="/de/gebiet/268437653/"', html)
         # Personal values stay out of the server response.
         self.assertNotIn('MQL_CHARAKTER', html)
         # Only purchasable content carries an ownership setting.
