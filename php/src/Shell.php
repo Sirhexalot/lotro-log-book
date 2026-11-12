@@ -80,7 +80,7 @@ final class Shell
 
     public function scripts(): string
     {
-        return implode("\n", [$this->scriptTag('speicher.js'),
+        return implode("\n", [$this->scriptTag('familienmenue.js'), $this->scriptTag('speicher.js'),
             $this->scriptTag('filtergedaechtnis.js'), $this->scriptTag('katalog.js'),
             $this->scriptTag('zutaten.js'), $this->scriptTag('sets.js'),
             $this->scriptTag('auftraggeber.js')]);
@@ -111,14 +111,18 @@ final class Shell
         return $this->catalogue->appRoute($this->lang, $page);
     }
 
-    /** The four families with their flyout, exactly as menue.js builds it. */
-    public function menu(string $kind): string
+    /**
+     * The four families with their tabs. A family is a group, not a page: the
+     * button opens the list, every destination inside it is an explicit link.
+     * `menue.js` builds the same structure for the application pages.
+     */
+    public function menuData(): array
     {
         $w = $this->words;
         $lang = $this->lang;
         $app = fn (string $page): string => $this->catalogue->appRoute($lang, $page);
-        $families = [
-            ['welt', $app('karte'), $w['familie_welt'], [
+        return [
+            ['key' => 'welt', 'text' => $w['familie_welt'], 'tabs' => [
                 ['q', $app('karte'), $w['menue_karte'], $w['d_karte']],
                 ['d', $app('taten'), $w['menue_taten'], $w['d_taten']],
                 ['adventures', $app('adventures'), $w['menue_abenteuer'], $w['d_abenteuer']],
@@ -127,41 +131,55 @@ final class Shell
                 ['l', $this->catalogue->route($lang, 'l'), $w['menue_landmarken'], $w['d_landmarken']],
                 ['instances', $app('instances'), $w['menue_instanzen'], $w['d_instanzen']],
             ]],
-            ['gegenstaende', $app('gegenstandssuche'), $w['familie_gegenstaende'], [
-                ['i', $app('gegenstandssuche'), $w['menue_gegenstaende'], $w['d_gegenstand']],
+            ['key' => 'gegenstaende', 'text' => $w['familie_gegenstaende'], 'tabs' => [
+                ['i', $app('gegenstandssuche'), $w['menue_gegenstandssuche'], $w['d_gegenstand']],
                 ['set', $app('sets'), Sets::words($lang)['title'], Sets::words($lang)['intro']],
                 ['craft', $app('handwerk'), $w['menue_handwerk'], $w['d_handwerk']],
             ]],
-            ['erfolge', $app('belohnungen'), $w['familie_erfolge'], [
+            ['key' => 'erfolge', 'text' => $w['familie_erfolge'], 'tabs' => [
+                ['belohnungen', $app('belohnungen'), $w['menue_belohnungen'], $w['d_belohnungen']],
                 ['title', $this->catalogue->route($lang, 'title'), $w['menue_titel'], $w['d_titel']],
                 ['virtue', $this->catalogue->route($lang, 'virtue'), $w['menue_tugenden'], $w['d_tugend']],
                 ['ruf', $app('ruf'), $w['menue_ruf'], $w['d_ruf']],
                 ['f', $this->catalogue->route($lang, 'f'), $w['menue_fraktionen'], $w['d_fraktionen']],
             ]],
-            ['charakter', $app('spielstand'), $w['familie_charakter'], [
+            ['key' => 'charakter', 'text' => $w['familie_charakter'], 'tabs' => [
                 ['spielstand', $app('spielstand'), $w['menue_fortschritt'], $w['d_fortschritt']],
             ]],
         ];
+    }
 
-        // The generator only marks a family that is really mapped to the type;
-        // 'craft' has none, so no family link is current there.
-        $current = match ($kind) {
+    /** Family that owns a page, for the breadcrumb and the menu mark. */
+    public function familyOf(string $kind): ?string
+    {
+        return match ($kind) {
             'set' => 'gegenstaende',
             'giver', 'instances' => 'welt',
             default => $this->catalogue->famille()[$kind] ?? null,
         };
+    }
+
+    /** The four families with their flyout, exactly as menue.js builds it. */
+    public function menu(string $kind): string
+    {
+        // The generator only marks a family that is really mapped to the type;
+        // 'craft' has none, so no family button is current there.
+        $current = $this->familyOf($kind);
         $out = '';
-        foreach ($families as [$key, $target, $text, $tabs]) {
+        foreach ($this->menuData() as $family) {
+            $key = $family['key'];
             $flyout = '';
-            foreach ($tabs as [$tabKind, $href, $title, $description]) {
+            foreach ($family['tabs'] as [$tabKind, $href, $title, $description]) {
                 $flyout .= '<a href="' . esc($href) . '"'
-                    . ($href === $target ? ' class="selbst"' : '')
                     . ($tabKind === $kind ? ' aria-current="page"' : '')
                     . '><strong>' . esc($title) . '</strong><span>' . esc($description) . '</span></a>';
             }
-            $out .= '<span class="familie-feld"><a href="' . esc($target) . '"'
-                . ($current === $key ? ' aria-current="page"' : '') . '>' . esc($text) . '</a>'
-                . '<span class="familie-flieger">' . $flyout . '</span></span>';
+            $out .= '<span class="familie-feld' . ($current === $key ? ' aktiv' : '') . '">'
+                . '<button type="button" class="familie-knopf" aria-expanded="false"'
+                . ' aria-controls="familie-' . esc($key) . '"'
+                . ($current === $key ? ' aria-current="true"' : '') . '>'
+                . esc($family['text']) . '<span class="familie-pfeil" aria-hidden="true">▾</span></button>'
+                . '<span class="familie-flieger" id="familie-' . esc($key) . '">' . $flyout . '</span></span>';
         }
         return $out;
     }
@@ -181,10 +199,11 @@ final class Shell
     public function crumbs(string $kind, ?array $page = null): array
     {
         $w = $this->words;
-        $family = $this->catalogue->famille()[$kind] ?? 'welt';
+        $family = $this->familyOf($kind) ?? 'welt';
         $parts = [
             ['text' => $w['home'], 'url' => $this->startPage()],
-            ['text' => $w['familie_' . $family], 'url' => $this->familyTarget($family)],
+            // A family is a group without its own page, so it stays plain text.
+            ['text' => $w['familie_' . $family], 'url' => null],
         ];
         if ($kind !== 'catalog' && $w[$kind . 'list'] !== $w['familie_' . $family]) {
             // Items have no list page; their breadcrumb leads to the search.
@@ -200,6 +219,65 @@ final class Shell
             $parts[] = $page['crumb_profession'];
         }
         return $parts;
+    }
+
+    /** Start › family › page, with the open page as plain text. */
+    public function crumbHtml(array $crumbs): string
+    {
+        $parts = [];
+        foreach ($crumbs as $crumb) {
+            $parts[] = $crumb['url'] === null
+                ? esc($crumb['text'])
+                : link_tag($crumb['url'], $crumb['text']);
+        }
+        return implode(' › ', $parts);
+    }
+
+    /**
+     * Breadcrumb of an application page. The last part is the open page and
+     * therefore plain text; the family above it is a group, not a link.
+     */
+    public function appCrumbs(string $page): array
+    {
+        $w = $this->words;
+        $lang = $this->lang;
+        $zuordnung = [
+            'karte' => ['welt', $w['menue_karte']],
+            'taten' => ['welt', $w['menue_taten']],
+            'reise' => ['welt', $w['menue_reise']],
+            'adventures' => ['welt', $w['menue_abenteuer']],
+            'givers' => ['welt', Givers::words($lang)['title']],
+            'landmarks' => ['welt', $w['menue_landmarken']],
+            'factions' => ['erfolge', Factions::words($lang)['title']],
+            'instances' => ['welt', $w['menue_instanzen']],
+            'gegenstandssuche' => ['gegenstaende', $w['menue_gegenstandssuche']],
+            'sets' => ['gegenstaende', Sets::words($lang)['title']],
+            'handwerk' => ['gegenstaende', $w['menue_handwerk']],
+            'belohnungen' => ['erfolge', $w['menue_belohnungen']],
+            'ruf' => ['erfolge', $w['menue_ruf']],
+            'spielstand' => ['charakter', $w['menue_fortschritt']],
+            'companion' => ['charakter', null],
+            'plugin' => ['charakter', null],
+        ];
+        if ($page === 'start') {
+            return [];
+        }
+        // Titles that have no menu word come from the page's own SEO entry.
+        $datei = ['karte' => 'index.html', 'taten' => 'index.html',
+                  'gegenstandssuche' => 'gegenstaende.html'][$page] ?? $page . '.html';
+        $seo = $this->catalogue->appSeo($datei) ?? [];
+        $teile = [['text' => $w['home'], 'url' => $this->startPage()]];
+        if ($page === 'suche') {
+            $teile[] = ['text' => $seo['title'] ?? '', 'url' => null];
+            return $teile;
+        }
+        if (!isset($zuordnung[$page])) {
+            return $teile;
+        }
+        [$family, $titel] = $zuordnung[$page];
+        $teile[] = ['text' => $w['familie_' . $family], 'url' => null];
+        $teile[] = ['text' => $titel ?? ($seo['title'] ?? ''), 'url' => null];
+        return $teile;
     }
 
     /** Language switch: only languages that really have this entity. */

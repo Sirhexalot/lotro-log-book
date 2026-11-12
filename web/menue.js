@@ -85,7 +85,7 @@
 	function pfad(art) { return '/' + sprache + '/' + (SEGMENT[art] || art) + '/'; }
 
 	var FAMILIEN = [
-		{ key: 'welt', text: t('nav_welt'), href: app('karte'), tab: [
+		{ key: 'welt', text: t('nav_welt'), tab: [
 			{ seite: 'karte', href: app('karte'), text: t('menue_karte'), desc: 'd_karte' },
 			{ seite: 'taten', href: app('taten'), text: t('menue_taten'), desc: 'd_taten' },
 			{ seite: 'abenteuer', href: app('adventures'), text: t('menue_abenteuer'), desc: 'd_abenteuer' },
@@ -93,16 +93,17 @@
 			{ seite: 'auftraggeber', href: pfad('auftraggeber'), text: t('menue_auftraggeber'), desc: 'd_auftraggeber' },
 		{ seite: 'landmarke', href: pfad('landmarke'), text: t('menue_landmarken'), desc: 'd_landmarken' },
 		{ seite: 'instanzen', href: app('instances'), text: t('menue_instanzen'), desc: 'd_instanzen' }] },
-		{ key: 'gegenstaende', text: t('nav_gegenstaende'), href: app('gegenstandssuche'), tab: [
-			{ seite: 'gegenstand', href: app('gegenstandssuche'), text: t('menue_gegenstaende'), desc: 'd_gegenstand' },
+		{ key: 'gegenstaende', text: t('nav_gegenstaende'), tab: [
+			{ seite: 'gegenstand', href: app('gegenstandssuche'), text: t('menue_gegenstandssuche'), desc: 'd_gegenstand' },
 			{ seite: 'set', href: pfad('set'), text: t('menue_sets'), desc: 'd_sets' },
 			{ seite: 'handwerk', href: app('handwerk'), text: t('menue_handwerk'), desc: 'd_handwerk' }] },
-		{ key: 'erfolge', text: t('nav_erfolge'), href: app('belohnungen'), tab: [
+		{ key: 'erfolge', text: t('nav_erfolge'), tab: [
+			{ seite: 'belohnungen', href: app('belohnungen'), text: t('menue_belohnungen'), desc: 'd_belohnungen' },
 			{ seite: 'titel', href: pfad('titel'), text: t('menue_titel'), desc: 'd_titel' },
 			{ seite: 'tugend', href: pfad('tugend'), text: t('menue_tugenden'), desc: 'd_tugend' },
 			{ seite: 'ruf', href: app('ruf'), text: t('menue_ruf'), desc: 'd_ruf' },
 			{ seite: 'fraktion', href: pfad('fraktion'), text: t('menue_fraktionen'), desc: 'd_fraktionen' }] },
-		{ key: 'charakter', text: t('nav_charakter'), href: app('spielstand'), tab: [
+		{ key: 'charakter', text: t('nav_charakter'), tab: [
 			{ seite: 'spielstand', href: app('spielstand'), text: t('menue_fortschritt'), desc: 'd_fortschritt' }] }
 	];
 
@@ -116,18 +117,28 @@
 	var familie = ZUORDNUNG[seite] || 'welt';
 
 	FAMILIEN.forEach(function (gruppe) {
-		// Each family carries its own tabs as a flyout, so the second level is
-		// one hover away without pushing the header taller.
+		// A family is a group, not a page: the button opens its list and every
+		// destination inside it is an explicit link. Nobody has to guess that
+		// the family name hides one of its own tabs.
 		var feld = document.createElement('span');
-		feld.className = 'familie-feld';
-		var link = document.createElement('a');
-		link.href = gruppe.href;
-		link.textContent = gruppe.text;
-		if (gruppe.key === familie) { link.setAttribute('aria-current', 'page'); }
-		feld.appendChild(link);
+		feld.className = 'familie-feld' + (gruppe.key === familie ? ' aktiv' : '');
+		var knopf = document.createElement('button');
+		knopf.type = 'button';
+		knopf.className = 'familie-knopf';
+		knopf.setAttribute('aria-expanded', 'false');
+		knopf.setAttribute('aria-controls', 'familie-' + gruppe.key);
+		if (gruppe.key === familie) { knopf.setAttribute('aria-current', 'true'); }
+		knopf.appendChild(document.createTextNode(gruppe.text));
+		var pfeil = document.createElement('span');
+		pfeil.className = 'familie-pfeil';
+		pfeil.setAttribute('aria-hidden', 'true');
+		pfeil.textContent = '▾';
+		knopf.appendChild(pfeil);
+		feld.appendChild(knopf);
 		if (gruppe.tab.length > 1) {
 			var flieger = document.createElement('span');
 			flieger.className = 'familie-flieger';
+			flieger.id = 'familie-' + gruppe.key;
 			gruppe.tab.forEach(function (punkt) {
 				var a = document.createElement('a');
 				a.href = punkt.href;
@@ -137,7 +148,6 @@
 				beschreibung.textContent = t(punkt.desc || 'd_karte');
 				a.appendChild(name);
 				a.appendChild(beschreibung);
-				if (punkt.href === gruppe.href) { a.className = 'selbst'; }
 				if (punkt.seite === seite) { a.setAttribute('aria-current', 'page'); }
 				flieger.appendChild(a);
 			});
@@ -145,6 +155,12 @@
 		}
 		ziel.appendChild(feld);
 	});
+
+	// Open/close behaviour lives in familienmenue.js, which catalogue pages use
+	// too. It is loaded right after this file.
+	function familieMenue() {
+		return window.MQL_FAMILIENMENUE || { setze: function () {}, schliesseAlle: function () {} };
+	}
 
 	// Search: the map page has its own field with results, every other page gets
 	// the way there. The search page itself needs neither.
@@ -259,9 +275,22 @@
 		knopf.setAttribute('aria-label', t('menue_oeffnen'));
 		knopf.textContent = '\u2630';
 		ziel.parentNode.insertBefore(knopf, ziel);
+		document.addEventListener('keydown', function (ereignis) {
+			if (ereignis.key !== 'Escape' || !kopf.classList.contains('menue-offen')) { return; }
+			kopf.classList.remove('menue-offen');
+			knopf.setAttribute('aria-expanded', 'false');
+			knopf.focus();
+		});
 		knopf.addEventListener('click', function () {
 			var offen = kopf.classList.toggle('menue-offen');
 			knopf.setAttribute('aria-expanded', String(offen));
+			var menue = familieMenue();
+			if (offen) {
+				var eigene = ziel.querySelector('.familie-feld.aktiv');
+				menue.setze(eigene, true);
+			} else {
+				menue.schliesseAlle(null);
+			}
 		});
 	}
 

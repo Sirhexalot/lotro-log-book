@@ -209,6 +209,7 @@ final class Page
             ][$lang],
             'tracking' => $this->shell->tracking(),
             'asset_stand' => $this->shell->assetStand(),
+            'crumbs' => $this->shell->crumbHtml($this->shell->appCrumbs($page)),
         ];
         return $this->view->render('app/' . $template . '.twig', $context);
     }
@@ -221,13 +222,7 @@ final class Page
 
     private function listCrumbs(string $kind): string
     {
-        $parts = [];
-        foreach ($this->shell->crumbs($kind) as $crumb) {
-            $parts[] = $crumb['url'] === null
-                ? esc($crumb['text'])
-                : link_tag($crumb['url'], $crumb['text']);
-        }
-        return implode(' › ', $parts);
+        return $this->shell->crumbHtml($this->shell->crumbs($kind));
     }
 
     private function listLanguages(array $page): string
@@ -280,13 +275,7 @@ final class Page
 
     private function crumbsHtml(string $kind, array $page, array $maps): string
     {
-        $parts = [];
-        foreach ($this->shell->crumbs($kind, ['crumb_maps' => $maps] + $page) as $crumb) {
-            $parts[] = $crumb['url'] === null
-                ? esc($crumb['text'])
-                : link_tag($crumb['url'], $crumb['text']);
-        }
-        return implode(' › ', $parts);
+        return $this->shell->crumbHtml($this->shell->crumbs($kind, ['crumb_maps' => $maps] + $page));
     }
 
     private function languagesHtml(string $kind, string $identifier): string

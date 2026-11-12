@@ -45,10 +45,10 @@
 
 {% block vor_haupt %}{% endblock %}
 
+{% block pfad %}{% if crumbs|default('') %}<div class="huelle-pfad"><nav class="katalog-pfad" aria-label="Breadcrumb">{{ crumbs|raw }}</nav></div>{% endif %}{% endblock %}
 {% block haupt %}{% endblock %}
 
 {% block fuss %}{% endblock %}
-
 {# The build used to set this inline; the map reads it for its images. #}
 <script>window.MQL_BILD_PFAD = 'karten/{{ lang }}/';</script>
 {% block skripte %}{% endblock %}

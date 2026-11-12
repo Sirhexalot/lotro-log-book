@@ -17,6 +17,10 @@
 	<button type="button" data-pane="details" aria-pressed="false" data-t="mobil_details">Details</button>
 </nav>{% endblock %}
 
+{# The map is a full-height three-pane app with its own way back; a breadcrumb
+   row above it would add a grid row and shrink the map. #}
+{% block pfad %}{% endblock %}
+
 {% block haupt %}
 <main>
 <section id="landschaften" class="landschaften" hidden></section>
@@ -122,4 +126,5 @@
 <script src="/sprache.js?v={{ asset_stand }}" defer></script>
 <script src="/speicher.js?v={{ asset_stand }}" defer></script>
 <script src="/menue.js?v={{ asset_stand }}" defer></script>
+<script src="/familienmenue.js?v={{ asset_stand }}" defer></script>
 {% endblock %}

@@ -152,7 +152,7 @@ final class Adventures
             'suche_pfad' => $this->shell->appRoute('suche'),
             'spielstand_pfad' => $this->shell->appRoute('spielstand'),
             'katalog_texte' => json_encode(['none' => $this->shell->words()['none']], JSON_UNESCAPED_UNICODE),
-            'crumbs' => link_tag($base, $words['title']),
+            'crumbs' => $this->shell->crumbHtml($this->shell->appCrumbs('adventures')),
             'languages' => implode(' · ', array_map(
                 static fn ($row) => link_tag($row['url'], strtoupper($row['lang'])), $alternates)),
             'legal' => link_tag('/impressum.html?lang=' . $this->lang, $this->shell->words()['legal']),

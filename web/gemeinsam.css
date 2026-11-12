@@ -97,15 +97,23 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 button:disabled:hover { background: var(--fläche-hell); }
 
 .menue { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.menue a {
+.menue a, .menue .familie-knopf {
 	color: var(--schwach);
 	font-size: 13px;
 	text-decoration: none;
 	padding: 2px 0;
 	border-bottom: 2px solid transparent;
 }
-.menue a:hover { color: var(--gold); }
+.menue a:hover, .menue .familie-knopf:hover { color: var(--gold); }
 .menue a[aria-current="page"] { color: var(--text); border-bottom-color: var(--gold); }
+.menue .familie-knopf {
+	display: inline-flex; align-items: center; gap: 5px;
+	background: none; border: 0; border-bottom: 2px solid transparent;
+	cursor: pointer; border-radius: 0;
+}
+.menue .familie-knopf[aria-current="true"] { color: var(--text); border-bottom-color: var(--gold); }
+.menue .familie-pfeil { font-size: 10px; line-height: 1; transition: transform .15s ease; }
+.menue .familie-feld.offen .familie-pfeil { transform: rotate(180deg); }
 .charakterwahl { display: flex; align-items: center; gap: 6px; margin-left: 6px; }
 .charakterwahl span { color: var(--schwach); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
 .charakterwahl select {
@@ -151,8 +159,7 @@ main h3, .seite h2, .seite h3 { font-size: var(--text-abschnitt); line-height: 1
 .intro .dach, .bild figcaption, footer p, .datum,
 .tabelle, .tabelle th, .kopf-zeile label, .stufe-klein,
 .stand, .hinweis, .koordinate { font-size: var(--text-bedienung); line-height: 1.5; letter-spacing: normal; text-transform: none; }
-.seite code, .seite kbd, code, .befehl { font-family: var(--mono); font-size: var(--text-bedienung); line-height: 1.6; }
-.detail h2 { font-size: var(--text-abschnitt); line-height: 1.4; }
+.seite code, .seite kbd, code, .befehl { font-family: var(--mono); font-size: var(--text-bedienung); line-height: 1.6; }.detail h2 { font-size: var(--text-abschnitt); line-height: 1.4; }
 .detail { font-size: var(--text-normal); }
 body[data-recht] main > h2 { font-size: var(--text-titel); }
 .detail h3, .bedingungen h3 { font-size: var(--text-normal); text-transform: none; letter-spacing: normal; }
@@ -167,6 +174,16 @@ body[data-recht] main > h2 { font-size: var(--text-titel); }
 }
 .seite .tabelle th { font-size: var(--text-bedienung); text-transform: none; letter-spacing: normal; }
 .zahl, .legende, .kartenleiste, .pfadkopf .zum-baum { font-size: var(--text-bedienung); line-height: 1.5; }
+/* Breadcrumb row of an application page: same container as the header. */
+.huelle-pfad { width: 100%; max-width: var(--huelle); margin: 0 auto; padding: 10px 16px 0; }
+.huelle-pfad .katalog-pfad {
+	color: var(--schwach); font-size: var(--text-bedienung); line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+.huelle-pfad .katalog-pfad a { color: var(--schwach); text-decoration: none; }
+.huelle-pfad .katalog-pfad a:hover, .huelle-pfad .katalog-pfad a:focus-visible {
+	color: var(--gold); text-decoration: underline;
+}
 /* Footer: legal links left, language right, readable colours. */
 footer {
 	border-top: 1px solid var(--rand); background: var(--fläche);
@@ -317,19 +334,20 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
    as two levels instead of one dense block. */
 .familie-reiter { border-top: 1px solid var(--rand); padding-top: 9px; margin-top: 2px; }
 
-/* Family flyout: the tabs of a family open under its name on hover/focus. */
+/* Family flyout: the destinations of a family open under its button on hover,
+ * focus, click or tap. The button itself never navigates. */
 .familie-feld { position: relative; display: inline-block; }
 .familie-flieger {
-	/* No gap: a dead zone between the link and the panel closes it mid-move. */
+	/* No gap: a dead zone between the button and the panel closes it mid-move. */
 	position: absolute; top: 100%; left: -10px; z-index: 40;
-	display: none; min-width: 200px; padding: 10px 6px 6px;
+	display: none; min-width: 240px; padding: 10px 6px 6px;
 	background: rgba(20, 17, 14, .98); border: 1px solid var(--rand); border-radius: 4px;
 	box-shadow: 0 8px 20px rgba(0, 0, 0, .55);
 }
 .familie-flieger a { display: block; padding: 6px 9px; border-radius: 3px; white-space: nowrap; }
-.familie-flieger a:hover { background: var(--fläche-hell); }
+.familie-flieger a:hover, .familie-flieger a:focus-visible { background: var(--fläche-hell); }
 .familie-feld:hover .familie-flieger,
-.familie-feld:focus-within .familie-flieger { display: block; }
+.familie-feld.offen .familie-flieger { display: block; }
 
 /* Flyout entries: name above, one line of what waits behind it. */
 .familie-flieger a { text-decoration: none; }
@@ -337,17 +355,21 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 .familie-flieger a span { display: block; margin-top: 2px; color: var(--schwach); font-size: .72rem; }
 .familie-flieger a[aria-current="page"] strong { color: var(--gold); }
 
-/* Phones have no hover: inside the burger menu the family's tabs stand under it
- * as a short sub-list. The entry that would only repeat the family link stays
- * out; the family link itself goes to that page. */
+/* Phones have no hover: inside the burger menu every family is an accordion.
+ * All its pages stay visible; nothing is hidden because it shares a name. */
 @media (max-width: 1000px) {
 	.kopf .familie-feld { display: block; width: 100%; }
-	.kopf.menue-offen .familie-flieger {
-		position: static; display: block; min-width: 0;
-		padding: 0 0 6px 12px; border: 0; border-radius: 0;
+	.kopf .familie-knopf {
+		display: flex; width: 100%; justify-content: space-between;
+		padding: 10px 2px; border-bottom: 0; text-align: left;
+	}
+	.kopf.menue-offen .familie-flieger,
+	.kopf .familie-feld.offen .familie-flieger {
+		position: static; display: none; min-width: 0;
+		padding: 0 0 8px 12px; border: 0; border-radius: 0;
 		background: transparent; box-shadow: none;
 	}
-	.kopf .menue .familie-flieger a { padding: 7px 2px; border-bottom: 0; }
+	.kopf.menue-offen .familie-feld.offen .familie-flieger { display: block; }
+	.kopf .menue .familie-flieger a { padding: 9px 2px; border-bottom: 0; white-space: normal; }
 	.kopf .menue .familie-flieger a strong { font-weight: 400; }
-	.kopf .familie-flieger a.selbst { display: none; }
 }
