@@ -204,8 +204,9 @@ body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 .gebiet-werkzeug { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 10px; }
 .gebiet-suche { flex: 1 1 260px; min-width: 0; padding: 9px 10px; font: inherit;
 	color: var(--text); background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; }
-.gebiet-haken { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; font-size: var(--text-bedienung); color: var(--schwach); }
-.gebiet-haken input { width: 16px; height: 16px; accent-color: var(--gold); margin: 0; }
+.gebiet-filter { display: inline-flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; min-height: 32px; font-size: var(--text-bedienung); color: var(--schwach); }
+.gebiet-filter label { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; }
+.gebiet-filter input { width: 16px; height: 16px; accent-color: var(--gold); margin: 0; }
 .gebiet-anzahl { margin: 0 0 8px; font-size: var(--text-bedienung); color: var(--schwach); font-variant-numeric: tabular-nums; }
 .gebiet-liste { list-style: none; margin: 0; padding: 0; }
 .gebiet-zeile {
@@ -222,7 +223,7 @@ body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 	.gebiet-reiter { gap: 4px; }
 	.gebiet-tab { font-size: .8rem; padding: 9px 8px; gap: 5px; }
 	.gebiet-zahl { font-size: .72rem; padding: 1px 5px; }
-	.gebiet-haken { min-height: 44px; }
+	.gebiet-filter label { min-height: 44px; }
 	.gebiet-zeile { padding: 12px 0; }
 }
 
@@ -241,12 +242,16 @@ body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 }
 
 /* Source lists: a fixed mark column keeps the text edge stable. */
-.quellen-liste { list-style: none; padding-left: 0; }
-.quellen-zeile { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; padding: 6px 0; }
-.quellen-marke { text-align: center; color: var(--schwach); }
+.quellen-liste { list-style: none; padding-left: 0; columns: auto; }
+/* The entries are inline text ("Name · Art · Stufe 130 · Region"), so the mark
+ * sits beside the text instead of turning every text node into a grid cell. */
+.quellen-zeile { display: block; position: relative; padding: 6px 0 6px 24px; }
+.quellen-marke { position: absolute; left: 0; top: 6px; width: 16px; text-align: center; color: var(--schwach); }
 .quellen-marke.fertig { color: #a8c788; }
 .quellen-suche { width: 100%; margin: 0 0 10px; padding: 9px 10px; font: inherit;
 	color: var(--text); background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; }
 .quellen-stand { margin: 0 0 8px; font-size: var(--text-bedienung); color: var(--schwach); font-variant-numeric: tabular-nums; }
 .katalog-art { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; color: var(--gold); font-size: var(--text-bedienung); }
 .katalog-art .symbol { width: 20px; height: 20px; }
+.gebiet-hinweis { margin: 0 0 10px; padding: 9px 12px; background: var(--fläche);
+	border-left: 2px solid var(--rand); color: var(--schwach); font-size: var(--text-bedienung); }

@@ -32,8 +32,9 @@
 
 	var suche = document.getElementById('gebiet-suche');
 	var hakenFeld = document.getElementById('gebiet-haken');
-	var haken = document.getElementById('gebiet-nur-offen');
+	var staende = Array.prototype.slice.call(document.querySelectorAll('input[name="gebiet-stand"]'));
 	var anzahl = document.getElementById('gebiet-anzahl');
+	var hinweis = document.getElementById('gebiet-hinweis');
 	var liste = document.getElementById('gebiet-liste');
 	var mehr = document.getElementById('gebiet-mehr');
 	var leer = document.getElementById('gebiet-leer');
@@ -44,7 +45,7 @@
 	var speicher = window.MQL_SPEICHER;
 	var charakter = speicher && speicher.aktiv ? speicher.aktiv() : null;
 
-	var zustand = { tab: reiter[0].getAttribute('data-gebiet-tab'), suche: '', nurOffen: false, sichtbar: GRENZE };
+	var zustand = { tab: reiter[0].getAttribute('data-gebiet-tab'), suche: '', stand: 'all', sichtbar: GRENZE };
 	// Each tab keeps its own search, so switching does not hide the other list.
 	var suchen = {};
 
@@ -77,6 +78,19 @@
 		});
 		var kennt = zustand.tab !== 'i' && bekannt(zustand.tab);
 		hakenFeld.hidden = !kennt;
+		if (hinweis) {
+			hinweis.hidden = kennt || (zustand.tab !== 'i' && !!charakter && !bekannt(zustand.tab)) === false;
+			if (zustand.tab === 'i') {
+				hinweis.textContent = buehne.getAttribute('data-keine-auswahl') || '';
+				hinweis.hidden = false;
+			} else if (zustand.tab !== 'i' && !kennt) {
+				hinweis.textContent = buehne.getAttribute('data-no-data') || '';
+				hinweis.hidden = false;
+			} else {
+				hinweis.textContent = '';
+				hinweis.hidden = true;
+			}
+		}
 		stand.textContent = charakter
 			? charakter.name + (charakter.server ? ' · ' + charakter.server : '')
 				+ (zustand.tab !== 'i' && !kennt ? ' · ' + (buehne.getAttribute('data-import-hint') || '') : '')
@@ -92,7 +106,8 @@
 		var sichtbar = eintraege.filter(function (eintrag) {
 			var id = String(eintrag[0]).toUpperCase();
 			if (begriff && falten(eintrag[1]).indexOf(begriff) < 0) { return false; }
-			if (zustand.nurOffen && kennt && fertig[id]) { return false; }
+			if (kennt && zustand.stand === 'done' && !fertig[id]) { return false; }
+			if (kennt && zustand.stand === 'open' && fertig[id]) { return false; }
 			return true;
 		});
 		var erledigt = 0;
@@ -154,6 +169,8 @@
 	function reiterWaehlen(kind, still) {
 		suchen[zustand.tab] = zustand.suche;
 		zustand.tab = kind;
+		zustand.stand = 'all';
+		staende.forEach(function (feld) { feld.checked = feld.value === 'all'; });
 		zustand.suche = suchen[kind] || '';
 		suche.value = zustand.suche;
 		zustand.sichtbar = GRENZE;
@@ -184,10 +201,13 @@
 		zustand.sichtbar = GRENZE;
 		zeichne();
 	});
-	haken.addEventListener('change', function () {
-		zustand.nurOffen = haken.checked;
-		zustand.sichtbar = GRENZE;
-		zeichne();
+	staende.forEach(function (feld) {
+		feld.addEventListener('change', function () {
+			if (!feld.checked) { return; }
+			zustand.stand = feld.value;
+			zustand.sichtbar = GRENZE;
+			zeichne();
+		});
 	});
 	mehr.addEventListener('click', function () {
 		zustand.sichtbar += GRENZE;

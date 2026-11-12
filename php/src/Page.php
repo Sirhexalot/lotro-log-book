@@ -216,6 +216,17 @@ final class Page
             'asset_stand' => $this->shell->assetStand(),
             'crumbs' => $this->shell->crumbHtml($this->shell->appCrumbs($page)),
         ];
+        if ($page === 'handwerk') {
+            $geography = [];
+            foreach ($this->data->maps($lang) as $id => $map) {
+                $geography[(string) $id] = [
+                    'name' => $map['name'] ?? '', 'parent' => $map['eltern'] ?? null,
+                    'tier' => $map['tier'] ?? null,
+                ];
+            }
+            $context['craft_geography_json'] = json_encode($geography,
+                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
+        }
         return $this->view->render('app/' . $template . '.twig', $context);
     }
 
@@ -266,7 +277,7 @@ final class Page
     {
         $order = ['status_done', 'status_unknown', 'status_running', 'none', 'known',
                   'foreign', 'recipe_unknown', 'recipe_missing',
-                  'area_all', 'area_more', 'area_count', 'area_empty', 'area_search_ph', 'area_import_hint'];
+                  'area_all', 'area_more', 'area_count', 'area_empty', 'area_no_data', 'area_items_hint', 'area_search_ph', 'area_import_hint'];
         $parts = [];
         foreach ($order as $key) {
             $parts[] = json_encode($key) . ': ' . json_encode($this->w[$key], JSON_UNESCAPED_UNICODE);

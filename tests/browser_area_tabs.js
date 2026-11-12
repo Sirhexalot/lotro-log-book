@@ -71,10 +71,13 @@ const seiten = ['/de/gebiet/268437634/', '/en/area/268437634/', '/fr/zone/268437
 		assert.match(stand.anzahl, /1 Erledigt/);
 		assert.equal(stand.haken, true);
 		assert.deepEqual(stand.marken, ['✓', '○']);
-		await page.check('#gebiet-nur-offen');
+		await page.check('input[name="gebiet-stand"][value="open"]');
 		const offen = await page.$$eval('#gebiet-liste a', (as) => as.map((a) => a.textContent));
 		assert.ok(!offen.includes('Abstumpfen des Speers'), 'erledigter Eintrag bleibt im Offen-Filter');
 		assert.ok(offen.length > 0);
+		await page.check('input[name="gebiet-stand"][value="done"]');
+		const erledigt = await page.$$eval('#gebiet-liste a', (as) => as.map((a) => a.textContent));
+		assert.deepEqual(erledigt, ['Abstumpfen des Speers']);
 		await page.close();
 	} finally {
 		await browser.close();

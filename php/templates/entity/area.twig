@@ -16,15 +16,17 @@
 	{% for section in page.sections %}<button type="button" class="gebiet-tab" role="tab" id="tab-{{ section.kind }}" aria-controls="panel-{{ section.kind }}" data-gebiet-tab="{{ section.kind }}">{{ section.title }} <span class="gebiet-zahl">{{ section.count }}</span></button>{% endfor %}
 </div>
 
-<div class="gebiet-buehne" id="gebiet-buehne" data-import-hint="{{ w.area_import_hint }}" data-anzahl="{{ w.area_count }}">
+<div class="gebiet-buehne" id="gebiet-buehne" data-import-hint="{{ w.area_import_hint }}" data-anzahl="{{ w.area_count }}" data-no-data="{{ w.area_no_data }}" data-keine-auswahl="{{ w.area_items_hint }}">
 	<p class="gebiet-stand" id="gebiet-stand" role="status"></p>
 	<div class="gebiet-werkzeug">
 		<input type="search" class="gebiet-suche" id="gebiet-suche" placeholder="{{ w.area_search_ph }}" aria-label="{{ w.area_search_ph }}" autocomplete="off">
-		<label class="gebiet-haken" id="gebiet-haken" hidden>
-			<input type="checkbox" id="gebiet-nur-offen">
-			<span>{{ w.status_unknown }}</span>
-		</label>
+		<div class="gebiet-filter" id="gebiet-haken" role="group" aria-label="{{ w.filterlabel }}" hidden>
+			<label><input type="radio" name="gebiet-stand" value="all" checked><span>{{ w.area_all }}</span></label>
+			<label><input type="radio" name="gebiet-stand" value="done"><span>{{ w.status_done }}</span></label>
+			<label><input type="radio" name="gebiet-stand" value="open"><span>{{ w.status_unknown }}</span></label>
+		</div>
 	</div>
+	<p class="gebiet-hinweis" id="gebiet-hinweis" hidden></p>
 	<p class="gebiet-anzahl" id="gebiet-anzahl" role="status"></p>
 	<ol class="gebiet-liste" id="gebiet-liste"></ol>
 	<button type="button" class="gebiet-mehr katalog-knopf" id="gebiet-mehr" data-mehr="{{ w.area_more }}" hidden>{{ w.area_more }}</button>
