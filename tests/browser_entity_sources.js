@@ -34,10 +34,10 @@ async function bereit(page, area) {
 		// Landmark: its quests as a real list with the quest filters.
 		await page.goto(basis + '/de/landmarke/70047384/', { waitUntil: 'networkidle' });
 		await bereit(page, 'related-q');
-		// All eight quests share category, region and area, so only the completion
-		// filter separates anything; the list itself stays searchable.
-		assert.equal(await page.locator('.filter-group-multi, .filter-group-range').count(), 0, 'sinnloser Filter in der Landmarke');
-		assert.equal(await page.locator('.filter-group-single').count(), 1, 'Abschlussfilter in der Landmarke');
+		// All eight quests share region and area, so those groups are gone; what
+		// separates them is the quest property, never the mixed quest category.
+		assert.deepEqual(await page.$$eval('.filter-group', (gs) => gs.map((g) => g.dataset.key)), ['flag', 'status']);
+		assert.equal(await page.locator('.filter-group-multi').count(), 1, 'Merkmalsfilter in der Landmarke');
 		assert.equal(await page.locator('.filter-ui input[type=search]').count(), 1, 'Suche in der Landmarke');
 		assert.ok(await page.locator('.related-symbol.fertig').count() > 0, 'Landmarke ohne erledigten Nachweis');
 		assert.equal(await page.locator('.related-results').evaluate((n) => n.classList.contains('related-results')), true);

@@ -2,7 +2,7 @@
 import re
 
 
-def task_rows(records, pages):
+def task_rows(records, pages, other_deed=()):
     """One row per quest or deed: what a list needs, nothing localised twice."""
     def belegt(value):
         # "other" is the client's placeholder for "no recorded area", not a name.
@@ -13,9 +13,14 @@ def task_rows(records, pages):
     for ident, row in records.items():
         facts = pages[ident].get('facts') or []
         level = re.search(r'\d+', str(row.get('l') or ''))
+        kind = facts[0]['text'] if facts else ''
         result[ident] = {
-            'id': ident, 'name': row['n'], 'category': belegt(row.get('a')),
-            'type': facts[0]['text'] if facts else '',
+            'id': ident, 'name': row['n'],
+            # The client's quest category mixes areas, classes and story kinds.
+            # It is recorded for the page text, but it is no usable filter.
+            # An unrecorded deed kind stays empty instead of "Weitere Tat".
+            'type': '' if kind in other_deed else kind,
+            'flags': [key for key in ('dy', 'rp', 'gr', 'ix', 'ls') if row.get(key)],
             'region': belegt(row.get('r')), 'area': belegt(row.get('z')),
             'level': int(level.group()) if level else None,
             'rewards': sorted({r[0] for r in row.get('rw') or []}),

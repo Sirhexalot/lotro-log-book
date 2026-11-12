@@ -38,8 +38,21 @@ in die Seite ist entfallen.
 - Der Reiter steht im Hash (`#q`, `#d`, `#i`, `#recipe`) und überlebt Neuladen.
 - Ein Reiter ohne unterscheidungskräftige Filter (weniger als zwei Werte, keine
   zwei Stufen, kein Abschlussbeleg) zeigt die Liste ohne leere Filterspalte.
+- Nur was in der Beziehung unterscheidet, wird angeboten und in der
+  Ergebniszeile genannt: Region und Gebiet erscheinen als Filter und als
+  Zusatz, sobald sie mehrere Werte haben; im Gebiet selbst entfallen sie.
 - Ohne JavaScript bleibt die serverseitige Liste vollständig: Gegenstand 95
   Rezeptlinks, Gebiet 266 + 23 + 198 Einträge.
+
+## Welche Filter eine Aufgabe hat
+
+Die Quest-Kategorie des Clients (`Auenland`, `Hauptmann`, `Ruf`, `Barde`)
+mischt Landschaften, Klassen und Erzählarten. Sie steht im Seitentext, taugt
+aber nicht als Filter. Was Aufgaben wirklich trennt, sind ihre belegten
+Merkmale: **täglich, wiederholbar, Gruppe, Instanz, skaliert mit Stufe**.
+Taten haben zusätzlich ihre **Art** (Entdecker, Bezwinger, Kunde …) und ihre
+**Belohnung** (LOTRO-Punkte, Tugend, Titel, Gegenstand). Eine Tat ohne belegte
+Art bleibt ohne Art statt „Weitere Tat" zu behaupten.
 
 ## Abschlussstatus
 

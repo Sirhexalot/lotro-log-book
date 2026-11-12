@@ -587,8 +587,10 @@ def main() -> int:
         # Reuse the public list schemas for embedded lists; PHP reads only the
         # requested relation IDs from these shards, not a browser-wide index.
         from related_filter_data import task_rows
-        quest_rows = task_rows(data['q'], quest_pages)
-        deed_rows = task_rows(data['d'], deed_pages)
+        from php_viewmodel import OTHER_DEED
+        other_deed = set(OTHER_DEED.values())
+        quest_rows = task_rows(data['q'], quest_pages, other_deed)
+        deed_rows = task_rows(data['d'], deed_pages, other_deed)
         write_shards(target, lang, 'filter-q', quest_rows)
         write_shards(target, lang, 'filter-d', deed_rows)
         item_filter = read_assignment(WEB / ('gegenstaende-%s.js' % lang), 'MQL_GEGENSTAENDE')
