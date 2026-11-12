@@ -258,6 +258,7 @@ final class Givers
             'og_locale' => ['de' => 'de_DE', 'en' => 'en_US', 'fr' => 'fr_FR'][$this->lang],
             'og_image_alt' => 'LOTRO Log Book', 'tracking' => $this->shell->tracking(),
             'styles' => $this->shell->styles(), 'scripts' => $this->shell->scripts(),
+            'asset_stand' => $this->shell->assetStand(),
             'menu' => $this->shell->menu('giver'), 'start_page' => $this->catalogue->appRoute($this->lang, 'start'),
             'suche_pfad' => $this->shell->appRoute('suche'),
             'spielstand_pfad' => $this->shell->appRoute('spielstand'),
@@ -400,6 +401,10 @@ final class Givers
             [['text' => $giver['name'], 'url' => null]]
         ));
         $context['icon'] = $this->shell->icon('auftraggeber');
+        $related = (new RelatedLists($this->data, $this->lang))->forPage('giver', $giver);
+        $context['related_lists'] = $related;
+        $context['related_json'] = json_encode($related, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
+        $context['related_icons_json'] = json_encode(['q' => $this->shell->icon('aufgabe')], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         return $this->view->render('givers/detail.twig', $context + ['giver' => $giver, 'kind_words' => $words]);
     }
 }

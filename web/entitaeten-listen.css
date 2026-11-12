@@ -1,0 +1,10 @@
+/* Embedded lists use the shared filter raster, not the prose column width. */
+.katalog-inhalt:has(.related-list) { max-width: var(--huelle); }
+.related-list { margin-top: 16px; min-width: 0; }
+.related-results { list-style: none; padding: 0; margin: 0; columns: auto; }
+.related-results > li { break-inside: avoid; }
+.related-result { display: grid; grid-template-columns: 32px minmax(0,1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--rand); text-decoration: none; }
+.related-result small { display: block; color: var(--schwach); font-size: var(--text-bedienung); margin-top: 4px; }
+.related-symbol { width: 32px; text-align: center; color: var(--gold); }
+.related-results .tabellen-rahmen { overflow-x: auto; }
+.related-results .rezept-tabelle { width: 100%; }

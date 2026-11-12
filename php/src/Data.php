@@ -98,6 +98,30 @@ final class Data
         return $this->entity($lang, $kind, $identifier) !== null;
     }
 
+    /** Read each required bucket once, preserving the fixed relation set. */
+    public function relationRows(string $lang, string $kind, array $ids): array
+    {
+        $buckets = [];
+        foreach (array_unique($ids) as $id) {
+            $buckets[self::shard((string) $id)][] = (string) $id;
+        }
+        $rows = [];
+        foreach ($buckets as $shard => $members) {
+            $entries = $this->read($this->root . '/' . $lang . '/' . $kind . '/' . $shard . '.json')['entities'] ?? [];
+            foreach ($members as $id) {
+                if (isset($entries[$id])) {
+                    $rows[] = $entries[$id];
+                }
+            }
+        }
+        return $rows;
+    }
+
+    public function itemFilterLabels(string $lang): array
+    {
+        return $this->read($this->root . '/' . $lang . '/filter-items.json');
+    }
+
     private function read(string $file): array
     {
         if (!is_file($file)) {

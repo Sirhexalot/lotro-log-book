@@ -1,8 +1,9 @@
 'use strict';
 /* Area and region pages: Aufgaben, Taten and Gegenstände are real tabs.
  *
- * Each tab searches and filters the complete member list of the area, not just
- * the rendered first page. Completion comes from a synthetic character.
+ * The tabs reuse the public list adapters with the area as their fixed
+ * context, so search and filters cover the whole member list of the area, not
+ * just the rendered first page. Completion comes from a synthetic character.
  *
  * Usage: node tests/browser_area_tabs.js [http://127.0.0.1:8813]
  */
@@ -11,6 +12,12 @@ const { chromium } = require('playwright');
 
 const basis = (process.argv[2] || 'http://127.0.0.1:8813').replace(/\/$/, '');
 const seiten = ['/de/gebiet/268437634/', '/en/area/268437634/', '/fr/zone/268437634/'];
+
+async function bereit(page, type) {
+	await page.waitForFunction((art) => window.MQL_RELATED_FILTER
+		&& (!art || window.MQL_RELATED_FILTER.config.area.startsWith('related-' + art))
+		&& document.querySelector('.filter-result-toolbar [role=status]')?.textContent.match(/\d/), type);
+}
 
 (async () => {
 	const browser = await chromium.launch({ channel: 'chrome' });
@@ -21,12 +28,13 @@ const seiten = ['/de/gebiet/268437634/', '/en/area/268437634/', '/fr/zone/268437
 			page.on('pageerror', (e) => errors.push(e.message));
 			for (const pfad of seiten) {
 				await page.goto(basis + pfad, { waitUntil: 'networkidle' });
+				await bereit(page, 'q');
 				const stand = await page.evaluate(() => ({
-					reiter: [...document.querySelectorAll('[data-gebiet-tab]')]
-						.map((b) => b.getAttribute('data-gebiet-tab')),
-					gewaehlt: document.querySelector('[aria-selected="true"]')?.getAttribute('data-gebiet-tab'),
-					zeilen: document.querySelectorAll('#gebiet-liste li').length,
-					mehr: !document.querySelector('#gebiet-mehr')?.hidden,
+					reiter: [...document.querySelectorAll('[data-related-type]')]
+						.map((b) => b.getAttribute('data-related-type')),
+					gewaehlt: document.querySelector('[aria-selected="true"]')?.getAttribute('data-related-type'),
+					zeilen: document.querySelectorAll('.related-results > li').length,
+					mehr: !document.querySelector('.filter-results-home > button')?.hidden,
 					ueberlauf: document.documentElement.scrollWidth > innerWidth
 				}));
 				assert.deepEqual(stand.reiter, ['q', 'd', 'i'], 'Reiter in ' + pfad);
@@ -36,15 +44,21 @@ const seiten = ['/de/gebiet/268437634/', '/en/area/268437634/', '/fr/zone/268437
 				assert.equal(stand.ueberlauf, false, 'Überbreite in ' + pfad);
 
 				// A name beyond the rendered first fifty must still be found.
-				await page.fill('#gebiet-suche', 'Olnathron');
-				const treffer = await page.$$eval('#gebiet-liste a', (as) => as.map((a) => a.textContent));
-				assert.ok(treffer.some((t) => t.includes('Olnathron')), 'Suche im ganzen Gebiet: ' + pfad);
+				const spaet = await page.evaluate(() => JSON.parse(document.getElementById('related-lists').textContent).q.rows[55].name);
+				await page.fill('.filter-ui input[type=search]', spaet);
+				await page.waitForFunction((name) => window.MQL_RELATED_FILTER.getState().q === name, spaet);
+				await page.waitForFunction(() => document.querySelectorAll('.related-results a').length > 0);
+				const treffer = await page.$$eval('.related-results a', (as) => as.map((a) => a.textContent));
+				assert.ok(treffer.some((t) => t.includes(spaet)), 'Suche im ganzen Gebiet: ' + pfad);
 
 				// The tab survives a reload through the hash.
-				await page.click('[data-gebiet-tab="d"]');
+				await page.click('[data-related-type="d"]');
+				await bereit(page, 'd');
 				assert.equal(await page.evaluate(() => location.hash), '#d');
+				assert.equal(await page.evaluate(() => window.MQL_RELATED_FILTER.getState().q), '', 'Suchtext bleibt im Reiter');
 				await page.reload({ waitUntil: 'networkidle' });
-				assert.equal(await page.evaluate(() => document.querySelector('[aria-selected="true"]')?.getAttribute('data-gebiet-tab')), 'd');
+				await bereit(page, 'd');
+				assert.equal(await page.evaluate(() => document.querySelector('[aria-selected="true"]')?.getAttribute('data-related-type')), 'd');
 			}
 			assert.deepEqual(errors, []);
 			console.log(breite + 'px: Reiter, Suche über den Auszug hinaus und Hash ok');
@@ -61,23 +75,26 @@ const seiten = ['/de/gebiet/268437634/', '/en/area/268437634/', '/fr/zone/268437
 			}));
 		});
 		await page.goto(basis + '/de/gebiet/268437634/', { waitUntil: 'networkidle' });
+		await bereit(page, 'q');
 		const stand = await page.evaluate(() => ({
-			stand: document.querySelector('#gebiet-stand')?.textContent,
-			anzahl: document.querySelector('#gebiet-anzahl')?.textContent,
-			haken: !document.querySelector('#gebiet-haken')?.hidden,
-			marken: [...document.querySelectorAll('.gebiet-marke')].slice(0, 2).map((e) => e.textContent)
+			anzahl: document.querySelector('.filter-result-toolbar [role=status]')?.textContent,
+			filter: document.querySelectorAll('.filter-group-single').length,
+			marken: [...document.querySelectorAll('.related-symbol')].slice(0, 1).map((e) => e.textContent.trim())
 		}));
-		assert.match(stand.stand, /Audit/);
-		assert.match(stand.anzahl, /1 Erledigt/);
-		assert.equal(stand.haken, true);
-		assert.deepEqual(stand.marken, ['✓', '○']);
-		await page.check('input[name="gebiet-stand"][value="open"]');
-		const offen = await page.$$eval('#gebiet-liste a', (as) => as.map((a) => a.textContent));
+		assert.match(stand.anzahl, /266/);
+		assert.equal(stand.filter, 1, 'Abschlussfilter fehlt');
+		assert.deepEqual(stand.marken, ['✓']);
+
+		await page.locator('.filter-group-single label', { hasText: /Nicht als erledigt importiert/ }).first().click();
+		await page.waitForFunction(() => window.MQL_RELATED_FILTER.getState().filters.status === 'rest');
+		const offen = await page.$$eval('.related-results a', (as) => as.map((a) => a.textContent));
 		assert.ok(!offen.includes('Abstumpfen des Speers'), 'erledigter Eintrag bleibt im Offen-Filter');
 		assert.ok(offen.length > 0);
-		await page.check('input[name="gebiet-stand"][value="done"]');
-		const erledigt = await page.$$eval('#gebiet-liste a', (as) => as.map((a) => a.textContent));
-		assert.deepEqual(erledigt, ['Abstumpfen des Speers']);
+
+		await page.locator('.filter-group-single label', { hasText: /^Erledigt/ }).first().click();
+		await page.waitForFunction(() => window.MQL_RELATED_FILTER.getState().filters.status === 'done');
+		const erledigt = await page.$$eval('.related-results a', (as) => as.map((a) => a.textContent));
+		assert.ok(erledigt.length === 1 && erledigt[0].includes('Abstumpfen des Speers'), 'Erledigt-Filter: ' + erledigt.join(' | '));
 		await page.close();
 	} finally {
 		await browser.close();

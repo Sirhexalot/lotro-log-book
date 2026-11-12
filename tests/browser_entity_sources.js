@@ -1,5 +1,9 @@
 'use strict';
-/* Remaining entity details: source lists, item type, recipe critical result.
+/* Entity detail lists reuse the public list adapters with a fixed context.
+ *
+ * A landmark, title, virtue, faction or item page must offer the same list,
+ * filter and search as the standalone catalogue, only restricted to the entity
+ * in question. Marks appear only when that data type was imported.
  *
  * Usage: node tests/browser_entity_sources.js [http://127.0.0.1:8813]
  */
@@ -7,6 +11,12 @@ const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
 const basis = (process.argv[2] || 'http://127.0.0.1:8813').replace(/\/$/, '');
+
+async function bereit(page, area) {
+	await page.waitForFunction((teil) => window.MQL_RELATED_FILTER
+		&& (!teil || window.MQL_RELATED_FILTER.config.area.startsWith(teil))
+		&& document.querySelector('.filter-result-toolbar [role=status]')?.textContent.match(/\d/), area);
+}
 
 (async () => {
 	const browser = await chromium.launch({ channel: 'chrome' });
@@ -21,38 +31,46 @@ const basis = (process.argv[2] || 'http://127.0.0.1:8813').replace(/\/$/, '');
 				importMeta: { quests: true, deeds: false, crafting: false, recipes: false, reputation: true } } }
 		})));
 
-		// Landmark: complete quest list with search and marks.
+		// Landmark: its quests as a real list with the quest filters.
 		await page.goto(basis + '/de/landmarke/70047384/', { waitUntil: 'networkidle' });
-		const landmark = await page.evaluate(() => ({
-			marken: document.querySelectorAll('.quellen-marke').length,
-			fertig: document.querySelectorAll('.quellen-marke.fertig').length,
-			suche: !!document.querySelector('[data-quellen-suche]')
-		}));
-		assert.ok(landmark.marken > 0, 'Landmarke ohne Marken');
-		assert.ok(landmark.fertig >= 1, 'Landmarke ohne erledigten Nachweis');
-		assert.ok(landmark.suche, 'Landmarke ohne Suche');
+		await bereit(page, 'related-q');
+		// All eight quests share category, region and area, so only the completion
+		// filter separates anything; the list itself stays searchable.
+		assert.equal(await page.locator('.filter-group-multi, .filter-group-range').count(), 0, 'sinnloser Filter in der Landmarke');
+		assert.equal(await page.locator('.filter-group-single').count(), 1, 'Abschlussfilter in der Landmarke');
+		assert.equal(await page.locator('.filter-ui input[type=search]').count(), 1, 'Suche in der Landmarke');
+		assert.ok(await page.locator('.related-symbol.fertig').count() > 0, 'Landmarke ohne erledigten Nachweis');
+		assert.equal(await page.locator('.related-results').evaluate((n) => n.classList.contains('related-results')), true);
 
-		// Title: short list, still marked, no search clutter.
+		// Title: the awarding quests, complete with search.
 		await page.goto(basis + '/de/titel/70006369/', { waitUntil: 'networkidle' });
-		assert.ok(await page.locator('.quellen-marke').count() > 0, 'Titel ohne Marken');
+		await bereit(page);
+		assert.ok(await page.locator('.related-results > li').count() > 0, 'Titel ohne Quellen');
 
-		// Virtue: deed sources stay neutral because deeds were not imported.
+		// Virtue: deed sources stay unmarked because deeds were not imported.
 		await page.goto(basis + '/de/tugend/268440448/', { waitUntil: 'networkidle' });
-		assert.equal(await page.locator('.quellen-marke.fertig').count(), 0, 'Tatmarke ohne Tatdaten');
+		await bereit(page, 'related-d');
+		assert.ok(await page.locator('.related-results > li').count() > 0, 'Tugend ohne Quellen');
+		assert.equal(await page.locator('.related-symbol.fertig').count(), 0, 'Tatmarke ohne Tatdaten');
 
-		// Faction: marks and own standing, both from the imported types.
+		// Faction: two source tabs (quests, deeds) and the own standing.
 		await page.goto(basis + '/de/fraktion/70057CC8/', { waitUntil: 'networkidle' });
-		assert.ok(await page.locator('.quellen-marke').count() > 0, 'Fraktion ohne Marken');
+		await bereit(page);
+		assert.deepEqual(await page.$$eval('[data-related-type]', (bs) => bs.map((b) => b.dataset.relatedType)), ['q', 'd']);
 		assert.match(await page.locator('#fraktion-ruf').innerText(), /Audit/);
 
-		// Item: type line and search over the usage list.
+		// Item: type line, whole usage list in the recipe adapter, no ownership.
 		await page.goto(basis + '/de/gegenstand/70001B7E/', { waitUntil: 'networkidle' });
+		await bereit(page, 'related-recipe');
 		assert.equal(await page.locator('.katalog-art .symbol').count(), 1, 'Gegenstandsart ohne Icon');
-		assert.equal(await page.locator('[data-quellen-suche]').count(), 1, 'Verwendungsliste ohne Suche');
+		assert.match(await page.locator('.filter-result-toolbar').innerText(), /95/);
+		assert.equal(await page.locator('.related-results tbody tr').count(), 50);
+		assert.equal(await page.locator('.related-symbol').count(), 0, 'Besitzstatus auf der Gegenstandsseite');
 
 		// Recipe: critical result links to its own item page.
 		await page.goto(basis + '/de/rezept/70005795/', { waitUntil: 'networkidle' });
 		assert.equal(await page.locator('a[href="/de/gegenstand/70005797/"]').count(), 1, 'Kritischer Erfolg ohne Itemlink');
+		assert.equal(await page.locator('.filter-ui').count(), 0, 'Rezept ohne eingebettete Liste');
 
 		// Set: both jumps exist and reach their sections.
 		await page.goto(basis + '/de/set/7000FAE9/', { waitUntil: 'networkidle' });
@@ -62,7 +80,7 @@ const basis = (process.argv[2] || 'http://127.0.0.1:8813').replace(/\/$/, '');
 		assert.equal(await page.locator('#setboni').count(), 1);
 
 		assert.deepEqual(errors, []);
-		console.log('Quellenlisten, Gegenstandsart, kritischer Erfolg und Set-Sprünge ok');
+		console.log('Quellenlisten als gemeinsame Filter, Gegenstandsart, kritischer Erfolg und Set-Sprünge ok');
 		await page.close();
 	} finally {
 		await browser.close();

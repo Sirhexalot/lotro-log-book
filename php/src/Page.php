@@ -38,6 +38,7 @@ final class Page
         }
         $template = 'entity/' . self::templateFor($kind) . '.twig';
         $maps = $page['crumb_maps'] ?? $this->crumbMaps($page, $identifier);
+        $related = (new RelatedLists($this->data, $this->lang))->forPage($kind, $page);
 
         $context = [
             'lang' => $this->lang,
@@ -69,9 +70,11 @@ final class Page
             'privacy' => link_tag('/datenschutz.html?lang=' . $this->lang, $this->w['privacy']),
             'icon' => $this->shell->icon($page['icon'] ?? ($kind === 'i' ? 'gegenstand' : '')),
             'entity_id' => $identifier,
-            // Complete member list of an area/region, HTML-safe for the tabs.
-            'members_json' => json_encode($page['members'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP
-                | JSON_HEX_APOS | JSON_HEX_QUOT),
+            'related_lists' => $related,
+            'related_icons_json' => json_encode(['q' => $this->shell->icon('aufgabe'), 'd' => $this->shell->icon('tat')], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
+            'related_json' => json_encode($related, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR),
+            // Only the related IDs travel to the browser; the rows come from
+            // the list shards of their own type, never as a full catalogue.
             // Recipes and items show the client's own symbol next to the name.
             'symbol_gross' => !empty($page['symbol'])
                 ? '<img class="symbol symbol-gross" src="/bild/items/' . esc((string) $page['symbol'])

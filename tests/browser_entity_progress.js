@@ -29,12 +29,14 @@ function char(meta, extra = {}) {
 		await page.addInitScript((c) => localStorage.setItem('mql.charaktere', JSON.stringify(c)),
 			char({ quests: true, deeds: true, crafting: true, recipes: true, reputation: true }));
 		await page.goto(basis + '/de/auftraggeber/70047262/', { waitUntil: 'networkidle' });
-		assert.equal(await page.locator('.giver-hide').isHidden(), false, 'Filter fehlt bei leerem Import');
-		assert.match(await page.locator('.giver-progress').innerText(), /0 von 26/);
+		await page.waitForFunction(() => window.MQL_RELATED_FILTER && document.querySelector('.filter-result-toolbar [role=status]')?.textContent.match(/\d/));
+		assert.equal(await page.locator('.filter-group-single').count(), 1, 'Filter fehlt bei leerem Import');
+		assert.match(await page.locator('.filter-result-toolbar [role=status]').innerText(), /26/);
 
 		// Search over the complete quest list of this giver.
-		await page.fill('#giver-suche', 'Vertrauen');
-		const sichtbar = await page.$$eval('.giver-list li', (ls) => ls.filter((l) => !l.hidden).length);
+		await page.fill('.filter-ui input[type=search]', 'Vertrauen');
+		await page.waitForFunction(() => window.MQL_RELATED_FILTER.getState().q === 'Vertrauen');
+		const sichtbar = await page.locator('.related-results > li').count();
 		assert.ok(sichtbar > 0 && sichtbar < 26, 'Suche filtert nicht: ' + sichtbar);
 		await page.close();
 
@@ -43,8 +45,9 @@ function char(meta, extra = {}) {
 		await page.addInitScript((c) => localStorage.setItem('mql.charaktere', JSON.stringify(c)),
 			char(undefined, { ruf: [['70057CC8', 4, 1234]] }));
 		await page.goto(basis + '/de/auftraggeber/70047262/', { waitUntil: 'networkidle' });
-		assert.equal(await page.locator('.giver-hide').isHidden(), true, 'Filter ohne Questdaten sichtbar');
-		assert.equal(await page.locator('.giver-progress').isHidden(), true, '0 von n ohne Questdaten');
+		await page.waitForFunction(() => window.MQL_RELATED_FILTER && document.querySelector('.filter-result-toolbar [role=status]')?.textContent.match(/\d/));
+		assert.equal(await page.locator('.filter-group-single').count(), 0, 'Filter ohne Questdaten sichtbar');
+		assert.equal(await page.locator('.related-symbol.fertig').count(), 0, 'Abschlussmarke ohne Questdaten');
 
 		// Faction: own standing appears, because ruf is imported.
 		await page.goto(basis + '/de/fraktion/70057CC8/', { waitUntil: 'networkidle' });
@@ -59,9 +62,11 @@ function char(meta, extra = {}) {
 			char({ quests: true, deeds: false, crafting: false, recipes: false, reputation: false },
 				{ quests: ['70001857'] }));
 		await page.goto(basis + '/de/gebiet/268437634/', { waitUntil: 'networkidle' });
-		assert.equal(await page.locator('#gebiet-haken').isHidden(), false, 'Aufgabenfilter fehlt');
-		await page.click('[data-gebiet-tab="d"]');
-		assert.equal(await page.locator('#gebiet-haken').isHidden(), true, 'Tatenfilter ohne Tatendaten');
+		await page.waitForFunction(() => window.MQL_RELATED_FILTER && document.querySelector('.filter-result-toolbar [role=status]')?.textContent.match(/\d/));
+		assert.equal(await page.locator('.filter-group-single').count(), 1, 'Aufgabenfilter fehlt');
+		await page.click('[data-related-type="d"]');
+		await page.waitForFunction(() => window.MQL_RELATED_FILTER.config.area.startsWith('related-d'));
+		assert.equal(await page.locator('.filter-group-single').count(), 0, 'Tatenfilter ohne Tatendaten');
 		await page.close();
 		console.log('Entitäten-Fortschritt: Datenart, Suche und Rufstand ok');
 	} finally {

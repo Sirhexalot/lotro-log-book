@@ -5,7 +5,6 @@
 	var t = window.MQL_T || function (key) { return key; };
 	var sprache = window.MQL_SPRACHE || 'de';
 	var ziel = document.getElementById('rezepte-liste');
-	if (!ziel) { return; }
 
 	var grenze = 250;
 	var daten = [];
@@ -86,6 +85,7 @@
 	}
 
 	function marker(wert) {
+		if (window.MQL_RECIPE_FILTER && !istBekannt(wert)) { return null; }
 		if (!hatRezepte()) { return null; }
 		var zeichen = eltern('span', istBekannt(wert) ? '✓' : (istMeinBeruf(wert) ? '○' : '–'));
 		zeichen.className = 'rezept-stand ' + (istBekannt(wert) ? 'bekannt' : (istMeinBeruf(wert) ? 'fehlt' : 'fremd'));
@@ -637,6 +637,20 @@
 		}
 	}
 
+	window.MQL_RECIPE_RESULTS = function(rows) {
+		bekannt = {}; meineBerufe = {}; charakter();
+		return tabelle([{name:'',zeilen:rows}],{mitBeruf:true,mitStufe:true});
+	};
+	if (!ziel) { return; }
+	if (window.MQL_HANDWERK_FILTER) {
+		window.MQL_REZEPTE_ZEICHNEN = function () {
+			if (!window.MQL_REZEPTE) { return; }
+			bekannt = {}; meineBerufe = {}; charakter();
+			window.MQL_HANDWERK_FILTER.recipes(window.MQL_REZEPTE.r, window.MQL_RECIPE_RESULTS);
+		};
+		if (window.MQL_REZEPTE) { window.MQL_REZEPTE_ZEICHNEN(); }
+		return;
+	}
 	// --- tabs -------------------------------------------------------------
 	function reiter(wahl) {
 		document.querySelectorAll('[data-hw]').forEach(function (knopf) {
