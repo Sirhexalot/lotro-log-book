@@ -219,7 +219,9 @@ body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 .gebiet-mehr { margin-top: 14px; min-height: 44px; }
 .gebiet-leer { color: var(--schwach); }
 @media (max-width: 640px) {
-	.gebiet-tab { font-size: .875rem; padding: 10px; }
+	.gebiet-reiter { gap: 4px; }
+	.gebiet-tab { font-size: .8rem; padding: 9px 8px; gap: 5px; }
+	.gebiet-zahl { font-size: .72rem; padding: 1px 5px; }
 	.gebiet-haken { min-height: 44px; }
 	.gebiet-zeile { padding: 12px 0; }
 }
