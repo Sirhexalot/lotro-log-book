@@ -99,7 +99,7 @@ button:disabled:hover { background: var(--fläche-hell); }
 .menue { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .menue a, .menue .familie-knopf {
 	color: var(--schwach);
-	font-size: 13px;
+	font-size: var(--text-normal);
 	text-decoration: none;
 	padding: 2px 0;
 	border-bottom: 2px solid transparent;
@@ -151,6 +151,9 @@ body[data-seite] button, body[data-seite] input, body[data-seite] select,
 	letter-spacing: normal; text-transform: none;
 }
 .kopf h1 { font-size: var(--text-normal); letter-spacing: normal; }
+/* Navigation is orientation, not fine print: it reads at body size like the
+ * name and the character switch beside it. */
+.menue a, .menue .familie-knopf { font-size: var(--text-normal); }
 .charakterwahl span { text-transform: none; letter-spacing: normal; }
 .intro h2, .seite > h2:first-child { font-size: var(--text-titel); line-height: 1.3; letter-spacing: normal; }
 main h3, .seite h2, .seite h3 { font-size: var(--text-abschnitt); line-height: 1.4; font-weight: normal; letter-spacing: normal; text-transform: none; }

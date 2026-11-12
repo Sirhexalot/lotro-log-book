@@ -44,6 +44,13 @@ class GruppenTest(unittest.TestCase):
         self.assertIn('.familie-feld.offen .familie-flieger', CSS)
 
 
+class SchriftTest(unittest.TestCase):
+    def test_navigation_reads_at_body_size(self):
+        # 13px made the menu look like fine print next to the character switch.
+        self.assertNotIn('font-size: 13px', CSS.split('.menue a', 1)[1].split('}', 1)[0])
+        self.assertIn('.menue a, .menue .familie-knopf { font-size: var(--text-normal); }', CSS)
+
+
 class PfadTest(unittest.TestCase):
     def test_open_page_and_family_are_not_links(self):
         # appCrumbs gives the family and the open page url => null.

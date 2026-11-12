@@ -31,7 +31,7 @@ for (const file of fs.readdirSync(root).filter(f => f.endsWith('.html'))) {
 }
 for (const [lang, file] of [['de', 'start.html'], ['en', 'start-en.html'], ['fr', 'start-fr.html']]) {
   const html = fs.readFileSync(path.join(root, file), 'utf8');
-  assert.equal((html.match(/datetime="2026-11-09"/g) || []).length, 3, 'current dated news: ' + lang);
+  assert.equal((html.match(/datetime="2026-11-12"/g) || []).length, 3, 'current dated news: ' + lang);
   const twig = fs.readFileSync(path.join(root, '../php/templates/app/start-' + lang + '.twig'), 'utf8');
   assert.equal(html.match(/<section class="neuigkeiten"[\s\S]*?<\/section>/)[0],
     twig.match(/<section class="neuigkeiten"[\s\S]*?<\/section>/)[0], 'PHP/static news parity: ' + lang);
