@@ -225,3 +225,17 @@ body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 	.gebiet-haken { min-height: 44px; }
 	.gebiet-zeile { padding: 12px 0; }
 }
+
+/* --- Quest-giver and faction details (12.11.2026): the lists are complete,
+ * so they can be searched; the own reputation only appears when imported. */
+.giver-suche {
+	width: 100%; margin: 0 0 10px; padding: 9px 10px; font: inherit;
+	color: var(--text); background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px;
+}
+.fraktion-ruf {
+	margin: 12px 0; padding: 12px; background: var(--fläche);
+	border-left: 2px solid var(--gold); font-size: var(--text-bedienung);
+}
+@media (max-width: 640px) {
+	.giver-suche { font-size: 1rem; }
+}

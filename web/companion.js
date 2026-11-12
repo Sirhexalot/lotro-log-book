@@ -214,6 +214,13 @@
 		return {
 			key: [who.account, who.server, who.name].join('|'),
 			name: who.name, server: who.server, account: who.account,
+			// Which files this import really covered. A missing file is not the
+			// same as a file that was read and held no completions.
+			importMeta: {
+				quests: !!files.quests, deeds: !!files.deeds,
+				crafting: !!files.crafting, recipes: !!files.crafting,
+				reputation: !!files.reputation
+			},
 			klasse: who.klasse, race: who.race, level: who.level,
 			date: isoDate(who.importDate),
 			quests: quests.ids, deeds: deeds.ids,

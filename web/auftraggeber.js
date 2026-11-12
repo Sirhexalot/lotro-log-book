@@ -7,6 +7,7 @@
  */
 (function () {
 	'use strict';
+	if (document.querySelector('[data-filter-schema="1"]')) { return; }
 
 	var offen = {};
 
@@ -95,6 +96,8 @@
 	function render() {
 		var store = window.MQL_SPEICHER;
 		var aktiv = store && store.aktiv ? store.aktiv() : null;
+		// A character without an imported quest file must not read as "0 of n".
+		var bekannt = aktiv && store.kennt ? store.kennt('quests') === true : !!aktiv;
 		var done = {};
 		if (aktiv && aktiv.quests) {
 			aktiv.quests.forEach(function (id) { done[String(id).toUpperCase()] = true; });
@@ -106,22 +109,21 @@
 			row.setAttribute('data-state', finished ? 'done' : 'open');
 			var state = row.querySelector('.giver-state');
 			if (state) {
+				state.hidden = !bekannt;
 				// Without an imported character there is no state to show; a
 				// column of dots would only pretend otherwise.
 				state.textContent = finished ? '✓' : '·';
 				state.title = finished ? box.getAttribute('data-done-label') : box.getAttribute('data-open-label');
-				state.hidden = !aktiv;
 			}
 		});
 		if (progress) {
-			progress.textContent = aktiv
-				? fill(box.getAttribute('data-progress'), count, rows.length)
-				: (box.getAttribute('data-unknown') || '');
-			progress.hidden = false;
+			progress.textContent = bekannt
+				? fill(box.getAttribute('data-progress'), count, rows.length) : '';
+			progress.hidden = !bekannt;
 		}
 		if (toggle) {
-			toggle.hidden = !aktiv;
-			if (!aktiv) {
+			toggle.hidden = !bekannt;
+			if (!bekannt) {
 				var input = toggle.querySelector('input');
 				if (input) { input.checked = false; }
 				box.classList.remove('giver-hide-done');
@@ -132,6 +134,17 @@
 	if (toggle) {
 		toggle.addEventListener('change', function (event) {
 			box.classList.toggle('giver-hide-done', event.target.checked);
+		});
+	}
+
+	// Search over this giver's quests; the list is complete, so it filters all.
+	var suche = document.getElementById('giver-suche');
+	if (suche) {
+		suche.addEventListener('input', function () {
+			var begriff = suche.value.trim().toLocaleLowerCase(document.documentElement.lang || 'de');
+			rows.forEach(function (row) {
+				row.hidden = begriff !== '' && row.textContent.toLocaleLowerCase().indexOf(begriff) < 0;
+			});
 		});
 	}
 	document.addEventListener('change', function (event) {

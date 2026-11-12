@@ -54,6 +54,22 @@
     })();
     var store = window.MQL_SPEICHER;
     if (!store) { return; }
+    // Faction page: the character's own standing, only when ruf was imported.
+    (function () {
+        var feld = document.getElementById('fraktion-ruf');
+        if (!feld) { return; }
+        var aktiv = store.aktiv();
+        if (!aktiv || store.kennt('reputation') !== true) { return; }
+        var id = feld.getAttribute('data-fraktion');
+        var eintrag = (aktiv.ruf || []).filter(function (zeile) { return String(zeile[0]).toUpperCase() === id.toUpperCase(); })[0];
+        if (!eintrag) { return; }
+        var stufe = feld.getAttribute('data-stufe') || 'Stufe';
+        var ruf = feld.getAttribute('data-ruf') || 'Ruf';
+        var punkte = eintrag[2] === null || eintrag[2] === undefined
+            ? '–' : Number(eintrag[2]).toLocaleString(document.documentElement.lang || 'de');
+        feld.textContent = aktiv.name + ' · ' + stufe + ' ' + eintrag[1] + ' · ' + punkte + ' ' + ruf;
+        feld.hidden = false;
+    })();
     var texts = JSON.parse(document.body.getAttribute('data-katalog-texte'));
     var select = document.getElementById('katalog-charakter');
     var status = document.getElementById('katalog-status');
@@ -61,9 +77,13 @@
     function render() {
         if (!status) { return; }
         var active = store.aktiv();
-        status.hidden = !active;
-        if (!active) { return; }
+        if (!active) { status.hidden = true; return; }
         var id = status.getAttribute('data-id');
+        var art = status.getAttribute('data-kind') === 'recipe' ? 'recipes'
+            : (status.getAttribute('data-kind') === 'd' ? 'deeds' : 'quests');
+        // Unknown data is not the same as "not completed".
+        if (store.kennt && store.kennt(art) !== true) { status.hidden = true; return; }
+        status.hidden = false;
         if (status.getAttribute('data-kind') === 'recipe') {
             var known = (active.rezepte || []).indexOf(id) !== -1;
             var profession = status.getAttribute('data-profession');

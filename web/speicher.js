@@ -64,13 +64,21 @@
 			});
 			return aus;
 		}
+		function importMeta(quelle) {
+			if (!quelle || typeof quelle !== 'object') { return null; }
+			var aus = {};
+			['quests', 'deeds', 'crafting', 'recipes', 'reputation'].forEach(function (art) {
+				if (typeof quelle[art] === 'boolean') { aus[art] = quelle[art]; }
+			});
+			return Object.keys(aus).length ? aus : null;
+		}
 		if (!eintrag || typeof eintrag.name !== 'string' || !eintrag.name) { return null; }
 		return {
 			key: String(eintrag.key || [eintrag.account || '', eintrag.server || '', eintrag.name].join('|')),
 			name: eintrag.name, server: String(eintrag.server || ''), account: String(eintrag.account || ''),
 			klasse: String(eintrag.klasse || ''), race: String(eintrag.race || ''), level: String(eintrag.level || ''),
 			date: String(eintrag.date || ''), quests: ids(eintrag.quests), deeds: ids(eintrag.deeds),
-			rezepte: ids(eintrag.rezepte),
+			rezepte: ids(eintrag.rezepte), importMeta: importMeta(eintrag.importMeta),
 			laufend: laufend(eintrag.laufend), ruf: ruf(eintrag.ruf), handwerk: handwerk(eintrag.handwerk)
 		};
 	}
@@ -96,6 +104,21 @@
 			var liste = lies().liste;
 			return Object.keys(liste).map(function (key) { return liste[key]; })
 				.sort(function (a, b) { return (a.server + '|' + a.name).localeCompare(b.server + '|' + b.name); });
+		},
+		/**
+		 * Was this kind of data part of the import? true = file read (an empty
+		 * list is then a real empty state), null = unknown, false = no character.
+		 * Old backups carry no flags; there a positive list is still evidence.
+		 */
+		kennt: function (art) {
+			var eintrag = api.aktiv();
+			if (!eintrag) { return false; }
+			if (eintrag.importMeta && typeof eintrag.importMeta[art] === 'boolean') {
+				return eintrag.importMeta[art];
+			}
+			if (art === 'crafting') { return Object.keys(eintrag.handwerk || {}).length ? true : null; }
+			var liste = art === 'reputation' ? eintrag.ruf : eintrag[art];
+			return Array.isArray(liste) && liste.length ? true : null;
 		},
 		aktiv: function () {
 			var daten = lies();

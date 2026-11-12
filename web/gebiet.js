@@ -48,6 +48,14 @@
 	// Each tab keeps its own search, so switching does not hide the other list.
 	var suchen = {};
 
+	// Was this data type part of the import? Without that evidence the list
+	// must not claim "not completed" for every entry.
+	function bekannt(kind) {
+		if (!charakter) { return false; }
+		if (speicher.kennt) { return speicher.kennt(kind === 'd' ? 'deeds' : 'quests') === true; }
+		return true;
+	}
+
 	function ids(kind) {
 		if (!charakter) { return {}; }
 		var quelle = kind === 'd' ? charakter.deeds : charakter.quests;
@@ -67,30 +75,33 @@
 			knopf.setAttribute('aria-selected', String(aktiv));
 			knopf.tabIndex = aktiv ? 0 : -1;
 		});
-		hakenFeld.hidden = !charakter || zustand.tab === 'i';
+		var kennt = zustand.tab !== 'i' && bekannt(zustand.tab);
+		hakenFeld.hidden = !kennt;
 		stand.textContent = charakter
 			? charakter.name + (charakter.server ? ' · ' + charakter.server : '')
+				+ (zustand.tab !== 'i' && !kennt ? ' · ' + (buehne.getAttribute('data-import-hint') || '') : '')
 			: buehne.getAttribute('data-import-hint') || '';
 	}
 
 	function zeichne() {
 		zeigeReiter();
 		var eintraege = daten[zustand.tab] || [];
+		var kennt = zustand.tab !== 'i' && bekannt(zustand.tab);
 		var fertig = ids(zustand.tab);
 		var begriff = falten(zustand.suche);
 		var sichtbar = eintraege.filter(function (eintrag) {
 			var id = String(eintrag[0]).toUpperCase();
 			if (begriff && falten(eintrag[1]).indexOf(begriff) < 0) { return false; }
-			if (zustand.nurOffen && charakter && zustand.tab !== 'i' && fertig[id]) { return false; }
+			if (zustand.nurOffen && kennt && fertig[id]) { return false; }
 			return true;
 		});
 		var erledigt = 0;
-		if (charakter && zustand.tab !== 'i') {
+		if (kennt) {
 			eintraege.forEach(function (eintrag) {
 				if (fertig[String(eintrag[0]).toUpperCase()]) { erledigt += 1; }
 			});
 		}
-		if (charakter && zustand.tab !== 'i') {
+		if (kennt) {
 			anzahl.textContent = erledigt + ' ' + (texte.status_done || '') + ' · ' +
 				(eintraege.length - erledigt) + ' ' + (texte.status_unknown || '');
 		} else {
@@ -109,7 +120,7 @@
 			marke.setAttribute('aria-hidden', 'true');
 			var bildFeld = document.createElement('span');
 			bildFeld.className = 'gebiet-bild';
-			if (charakter && zustand.tab !== 'i') {
+			if (kennt) {
 				var getan = !!fertig[id.toUpperCase()];
 				marke.textContent = getan ? '✓' : '○';
 				li.className += getan ? ' fertig' : ' offen';

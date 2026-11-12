@@ -37,6 +37,7 @@
     <p class="katalog-hinweis giver-total">{{ (giver.total == 1 ? gw.quests_one : gw.quests)|replace({'%s': giver.total}) }}</p>
     <p class="giver-progress katalog-hinweis" role="status" hidden></p>
     <label class="giver-hide" hidden><input type="checkbox"> <span>{{ gw.hide_done }}</span></label>
+    <input type="search" class="giver-suche" id="giver-suche" placeholder="{{ gw.search }}" aria-label="{{ gw.search }}" autocomplete="off">
     <ul class="giver-list" data-nosnippet>
     {% for quest in giver.quests %}
         <li data-quest="{{ quest.id }}">
