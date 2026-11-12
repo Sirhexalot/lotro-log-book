@@ -205,8 +205,10 @@ def build(lang, packs, tree, quests, names):
             'level_source': 'quests_p10_p90',
         })
 
-    # Fixed order: adventure order, then derived level, then the map id.
-    areas.sort(key=lambda row: (by_pack[row['pack']]['order'], row['level_min'] or 999,
+    # Fixed order: adventure order, then fewest quests first, then name and map
+    # id. The count is the catalogue size, so the order does not move when a
+    # character with progress is imported.
+    areas.sort(key=lambda row: (by_pack[row['pack']]['order'], row['quests'],
                                 row['name'], int(row['id'])))
     for index, row in enumerate(areas, 1):
         row['order'] = index

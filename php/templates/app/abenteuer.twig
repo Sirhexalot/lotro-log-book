@@ -86,7 +86,7 @@
 				{% if pack.areas_list %}
 				<ul>
 					{% for area in pack.areas_list %}{% if area.name %}
-					<li data-gebiet="{{ area.id }}" data-aufgaben="{{ area.quests }}">{% if area.url %}<a href="{{ area.url }}"><span>{{ area.name }}</span><small>{{ (area.quests == 1 ? lw.quests_one : lw.quests)|replace({'%s': area.quests}) }}</small><em data-gebiet-stand></em></a>{% else %}<span>{{ area.name }}</span><small>{{ (area.quests == 1 ? lw.quests_one : lw.quests)|replace({'%s': area.quests}) }}</small><em data-gebiet-stand></em>{% endif %}</li>
+					<li data-gebiet="{{ area.id }}" data-aufgaben="{{ area.quests }}">{% if area.url %}<a href="{{ area.url }}"><span class="gebiet-name">{{ area.name }}</span><small>{{ (area.quests == 1 ? lw.quests_one : lw.quests)|replace({'%s': area.quests}) }}</small><em data-gebiet-stand></em></a>{% else %}<span class="gebiet-name">{{ area.name }}</span><small>{{ (area.quests == 1 ? lw.quests_one : lw.quests)|replace({'%s': area.quests}) }}</small><em data-gebiet-stand></em>{% endif %}</li>
 					{% endif %}{% endfor %}
 				</ul>
 				{% else %}<p class="schwach">{{ lw.no_areas }}</p>{% endif %}

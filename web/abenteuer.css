@@ -398,17 +398,25 @@
 	outline: 1px solid rgba(214, 179, 90, .45);
 }
 
-.karte-gebiete li span {
-	flex: 1 1 55%;
+.karte-gebiete li .gebiet-name {
+	flex: 0 1 auto;
 	min-width: 8ch;
 	color: var(--text);
 }
 
+/* The dot belongs to the count: when a long name wraps, it moves with the
+ * number instead of ending the first line alone. */
 .karte-gebiete li small {
 	color: var(--schwach);
+	white-space: nowrap;
+}
+.karte-gebiete li small::before {
+	content: '·';
+	margin-right: 8px;
 }
 
 .karte-gebiete li em {
+	margin-left: auto;
 	color: var(--schwach);
 	font-style: normal;
 }

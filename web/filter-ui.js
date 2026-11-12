@@ -59,7 +59,11 @@
 		var panel = node('div'); panel.className = 'filter-panel';
 		var groups = node('div');
 		var reset = node('button',text('reset')); reset.type = 'button';
-		panel.append(groups,reset); home.appendChild(panel);
+		panel.append(groups,reset);
+		// The panel heading is the desktop counterpart of the mobile "Filters"
+		// button; the dialog brings its own heading.
+		var panelHead = node('strong',text('filter')); panelHead.className = 'filter-panel-head';
+		home.append(panelHead,panel);
 		var resultsHome = node('div'); resultsHome.className = 'filter-results-home';
 		var originalParent = target.parentNode, originalNext = target.nextSibling;
 		resultsHome.appendChild(target);

@@ -36,7 +36,9 @@
 .filter-result-toolbar select { max-width:100%; min-width:0; }
 .filter-chips { display:flex; flex-wrap:wrap; gap:8px; }
 .filter-chips:not(:empty) { margin-top:12px; }
-.filter-panel .filter-group { margin:0 0 12px; padding:12px; background:var(--fläche,#202c3c); border:1px solid var(--rand,#526078); border-radius:.4rem; }
+/* Quiet groups: a gold heading over a hairline, no card around every group.
+ * That is the look the older list filters had, now for every migrated page. */
+.filter-panel .filter-group { margin:0; padding:0; background:none; border:0; border-top:1px solid var(--rand,#526078); border-radius:0; }
 .filter-panel summary { cursor:pointer; list-style:none; }
 .filter-panel summary::-webkit-details-marker { display:none; }
 .filter-panel .filter-group-heading,.filter-panel .filter-branch>summary,.filter-panel .filter-option {
@@ -47,13 +49,14 @@
  * three-line label put the checkbox in the middle of the text. */
 .filter-panel .filter-option,.filter-panel .filter-branch>summary { align-items:start; }
 .filter-panel .filter-group-heading {
-	font-weight:600; margin:-12px -12px 8px; padding:10px 12px;
-	background:var(--fläche-hell,#2a3545); border-bottom:1px solid transparent;
-	border-radius:.35rem .35rem 0 0;
+	font-weight:400; font-size:.875rem; color:var(--gold,#d9b96f);
+	margin:0; padding:12px 0 6px; background:none; border:0; border-radius:0;
 }
-.filter-panel .filter-group[open]>.filter-group-heading { border-bottom-color:var(--rand,#526078); }
-.filter-panel .filter-group:not([open]) { padding-bottom:4px; }
-.filter-panel .filter-group:not([open])>.filter-group-heading { margin-bottom:-4px; border-radius:.35rem; }
+.filter-panel .filter-group[open]>.filter-group-heading { border:0; }
+.filter-panel .filter-group[open]>.filter-group-heading { padding-bottom:8px; }
+.filter-panel .filter-group:not([open]) { padding-bottom:6px; }
+.filter-panel .filter-group:not([open])>.filter-group-heading { margin:0; border:0; border-radius:0; }
+.filter-panel .filter-arrow { color:var(--gold,#d9b96f); }
 .filter-group-heading>span { grid-column:2 / 5; }
 .filter-arrow { grid-column:1; width:16px; height:16px; display:block; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 details[open]>.filter-group-heading>.filter-arrow,details[open]>summary>.filter-arrow { transform:rotate(90deg); }
@@ -75,6 +78,14 @@ details[open]>.filter-group-heading>.filter-arrow,details[open]>summary>.filter-
 .filter-range { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px; }
 .filter-range label { display:block; min-width:0; font-size:.875rem; }
 .filter-range input { display:block; width:100%; }
+.filter-panel-head {
+	display:block; margin:0 0 10px; font-size:1.25rem; font-weight:400; color:var(--gold,#d9b96f);
+}
+.filter-panel>.filter-actions { margin:12px 0 0; }
+.filter-ui .filter-panel>button {
+	margin:12px 0 0; padding:0; min-height:0; background:none; border:0;
+	color:var(--gold,#d9b96f); text-decoration:underline; cursor:pointer;
+}
 .filter-open { display:none; }
 .filter-error { margin-top:12px; padding:12px; border-left:3px solid #d98169; }
 .filter-error>* { margin-right:8px; }

@@ -180,6 +180,19 @@ class BuiltCatalogueTests(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.tmp, ignore_errors=True)
 
+    def test_areas_ascend_by_quest_count_within_each_adventure(self):
+        # Fewest quests first, then the area name; the catalogue count keeps the
+        # order stable no matter what a character has already completed.
+        for lang, data in self.files.items():
+            grouped = {}
+            for area in data['areas']:
+                grouped.setdefault(area['pack'], []).append(area)
+            for pack, rows in grouped.items():
+                self.assertEqual(
+                    rows,
+                    sorted(rows, key=lambda row: (row['quests'], row['name'], int(row['id']))),
+                    (lang, pack))
+
     def test_every_adventure_has_content_and_a_clean_denominator(self):
         for lang, data in self.files.items():
             self.assertEqual(len(data['packs']), len(REFERENCE['packs']), lang)
