@@ -2,7 +2,7 @@
 
 {# Area or region page: map entry point, parent, sub-areas and what lies here. #}
 {% block inhalt %}
-<article><div class="katalog-kopf"><h1>{{ page.name }}</h1></div>
+<article><div class="katalog-kopf"><h1>{{ icon|raw }}{{ page.name }}</h1></div>
 {% if page.image %}<figure class="katalog-karte-gross"><img src="/karten/{{ lang }}/{{ page.image|replace({'.png': '.webp'}) }}" alt="" width="640" height="480" loading="lazy" decoding="async"></figure>{% endif %}
 <p class="katalog-aktionen"><a class="katalog-knopf" href="{{ page.map_url }}">{{ w.area_map }}</a></p>
 {% if page.parent %}<p></p><a href="{{ page.parent.url }}">{{ page.parent.text }}</a>{% endif %}

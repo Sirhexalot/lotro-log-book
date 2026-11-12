@@ -391,9 +391,15 @@ final class Givers
                 $alternates[] = ['lang' => $lang, 'url' => $this->catalogue->route($lang, 'giver', $id)];
             }
         }
-        return $this->view->render('givers/detail.twig', $this->context(
+        $context = $this->context(
             $giver['name'], sprintf($words['seo_detail'], $giver['name']),
             $this->catalogue->route($this->lang, 'giver', $id), $alternates
-        ) + ['giver' => $giver, 'kind_words' => $words]);
+        );
+        $context['crumbs'] = $this->shell->crumbHtml(array_merge(
+            $this->shell->appCrumbs('givers'),
+            [['text' => $giver['name'], 'url' => null]]
+        ));
+        $context['icon'] = $this->shell->icon('auftraggeber');
+        return $this->view->render('givers/detail.twig', $context + ['giver' => $giver, 'kind_words' => $words]);
     }
 }

@@ -5,7 +5,7 @@
 {% block inhalt %}
 <article class="giver-detail">
 <div class="giver-kopf">
-    <span class="giver-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 3.7-5.4 7-5.4s5.8 1.8 7 5.4"/></svg></span>
+    <span class="giver-symbol" aria-hidden="true">{{ icon|raw }}</span>
     <div>
         <h1>{{ giver.name }}</h1>
         <p class="giver-art">{{ attribute(kind_words, 'kind_' ~ giver.kind) }}{% if giver.title %} · {{ giver.title }}{% endif %}</p>

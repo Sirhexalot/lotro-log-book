@@ -30,6 +30,19 @@ if (preg_match($alt, $path)) {
     return true;
 }
 
+// A release copies the map images to karten/<lang>/. A local checkout keeps
+// only webp/<lang>/, so the preview would show an empty frame. Serve the same
+// URL from webp/ here; the host needs no such rule.
+if (preg_match('~^/karten/([a-z]{2})/([A-Za-z0-9._-]+)$~', $path, $karte)) {
+    $bild = $root . '/webp/' . $karte[1] . '/' . $karte[2];
+    if (is_file($bild)) {
+        header('Content-Type: image/webp');
+        header('Content-Length: ' . filesize($bild));
+        readfile($bild);
+        return true;
+    }
+}
+
 // The preview folder carries symlinks into the repository (and to the maps),
 // so the resolved path is not inside the root. A path without ".." is enough
 // here: this router only ever runs on the developer machine.

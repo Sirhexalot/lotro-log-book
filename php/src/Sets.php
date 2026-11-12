@@ -207,6 +207,12 @@ final class Sets
         $set = $this->data->page($this->lang, 'set', $id);
         if (!$set) { return null; }
         $alternates = array_map(fn ($lang) => ['lang' => $lang, 'url' => $this->catalogue->route($lang, 'set', $id)], Catalogue::LANGS);
-        return $this->view->render('sets/detail.twig', $this->context($set['name'], $this->catalogue->route($this->lang, 'set', $id), $alternates) + ['set' => $set]);
+        $context = $this->context($set['name'], $this->catalogue->route($this->lang, 'set', $id), $alternates);
+        $context['crumbs'] = $this->shell->crumbHtml(array_merge(
+            $this->shell->appCrumbs('sets'),
+            [['text' => $set['name'], 'url' => null]]
+        ));
+        $context['icon'] = $this->shell->icon('set');
+        return $this->view->render('sets/detail.twig', $context + ['set' => $set]);
     }
 }

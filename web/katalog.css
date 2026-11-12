@@ -67,9 +67,10 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-kopf .katalog-aktionen { margin: 0; display: flex; gap: 8px; align-items: center; white-space: nowrap; }
 .katalog-kopf .katalog-aktionen .katalog-link { color: var(--gold); }
 .katalog-abschnitt { margin-top: 26px; }
+/* Section headings read as sections on every entity page, not as fine print. */
 .katalog-abschnitt > h2 {
-	font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; font-weight: 500;
-	color: var(--schwach); margin: 0 0 8px;
+	font-size: var(--text-abschnitt); letter-spacing: normal; text-transform: none;
+	font-weight: normal; color: var(--text); margin: 0 0 10px;
 }
 .katalog-abschnitt h3 { font-size: var(--text-bedienung); color: var(--gold); margin: 12px 0 4px; font-weight: 500; }
 .katalog-abschnitt ul { margin: 0; padding-left: 20px; }

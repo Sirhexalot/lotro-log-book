@@ -205,18 +205,26 @@ final class Shell
             // A family is a group without its own page, so it stays plain text.
             ['text' => $w['familie_' . $family], 'url' => null],
         ];
-        if ($kind !== 'catalog' && $w[$kind . 'list'] !== $w['familie_' . $family]) {
-            // Items have no list page; their breadcrumb leads to the search.
+        if ($kind === 'i') {
+            // Items have no list of their own any more: the search is the way in.
+            $parts[] = ['text' => $w['menue_gegenstandssuche'],
+                        'url' => $this->catalogue->appRoute($this->lang, 'gegenstandssuche')];
+        } elseif ($kind !== 'catalog' && $w[$kind . 'list'] !== $w['familie_' . $family]) {
             $parts[] = ['text' => $w[$kind . 'list'],
-                        'url' => $kind === 'i'
-                            ? $this->catalogue->appRoute($this->lang, 'gegenstandssuche')
-                            : $this->catalogue->route($this->lang, $kind)];
+                        'url' => $this->catalogue->route($this->lang, $kind)];
         }
         foreach ($page['crumb_maps'] ?? [] as $map) {
             $parts[] = ['text' => $map['text'], 'url' => $map['url']];
         }
         if (!empty($page['crumb_profession'])) {
             $parts[] = $page['crumb_profession'];
+        }
+        if (!empty($page['parent']['text'])) {
+            $parts[] = ['text' => $page['parent']['text'], 'url' => $page['parent']['url'] ?? null];
+        }
+        // The open entity ends the path and is never a link to itself.
+        if (!empty($page['name'])) {
+            $parts[] = ['text' => $page['name'], 'url' => null];
         }
         return $parts;
     }

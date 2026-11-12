@@ -1,7 +1,7 @@
 {% extends 'layout.twig' %}
 {% block inhalt %}
 <article class="set-detail">
-<h1>{{ set.name }}</h1><p>{{ sw.parts|replace({'%s': set.parts}) }}{% if set.available_parts < set.parts %} · {{ sw.incomplete }}{% endif %}</p>
+<h1>{{ icon|raw }}{{ set.name }}</h1><p>{{ sw.parts|replace({'%s': set.parts}) }}{% if set.available_parts < set.parts %} · {{ sw.incomplete }}{% endif %}</p>
 <section><h2>{{ sw.pieces }}</h2>
 <div class="set-cards">
 {% for member in set.members %}
