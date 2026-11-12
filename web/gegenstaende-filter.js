@@ -31,7 +31,7 @@
 			en:['Close','Show %s results','Results not updated.','Try again','Open page','Invalid level range','Item level'],
 			fr:['Fermer','Afficher %s résultats','Résultats non actualisés.','Réessayer','Ouvrir la page','Plage de niveaux incorrecte','Niveau d’objet']
 		}[lang];
-		var labels={search:T('gs_suchen'),filter:T('gs_filter'),close:extra[0],sort:T('gs_sort'),reset:T('gs_reset'),more:T('gs_mehr'),count:T('gs_viele'),show:extra[1],loading:T('gs_lade'),error:extra[2],retry:extra[3],fallback:extra[4],invalidRange:extra[5],min:T('gs_von'),max:T('gs_bis')};
+		var labels={search:T('gs_suchen'),filter:T('gs_filter'),close:extra[0],sort:T('gs_sort'),reset:T('gs_reset'),more:T('gs_mehr'),count:T('gs_viele'),show:extra[1],loading:T('gs_lade'),error:extra[2],retry:extra[3],fallback:extra[4],invalidRange:extra[5],min:T('gs_von'),max:T('gs_bis'),placeholder:T('gs_platzhalter')};
 		var config={area:settings.area||'gegenstaende',lang:lang,rootUrl:location.origin+location.pathname,labels:labels,search:{submit:'debounce',debounceMs:200},
 			groups:[{id:'tree',kind:'tree',label:T('gs_kategorie'),options:nodes,validatePath:function (p) { return paths.has(JSON.stringify(p,Object.keys(p).sort())); },pathLabel:function (p) { return ['kat','art','platz','klasse','gattung'].filter(function (k) { return p[k]!==undefined; }).map(function (k) { return label(k,p[k]); }).join(' › '); }},
 				{id:'quality',kind:'multi',label:T('gs_qualitaet'),options:[0,1,2,3,4,5].map(function (v) { return {value:v,label:T('gs_qual_'+v)}; })},

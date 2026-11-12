@@ -40,6 +40,7 @@
 		var toolbar = node('div'); toolbar.className = 'filter-toolbar';
 		var search = node('input'); search.type = 'search'; search.maxLength = 400; search.value = state.q;
 		search.setAttribute('aria-label',text('search'));
+		if (config.labels.placeholder) { search.placeholder = config.labels.placeholder; }
 		var searchButton = node('button',text('search')); searchButton.type = 'button';
 		var open = node('button',text('filter')); open.type = 'button'; open.className = 'filter-open';
 		var count = node('span'); count.setAttribute('role','status'); count.setAttribute('aria-live','polite');
