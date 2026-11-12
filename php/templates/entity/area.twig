@@ -1,12 +1,47 @@
 {% extends 'layout.twig' %}
 
-{# Area or region page: map entry point, parent, sub-areas and what lies here. #}
+{# Area or region page: map entry point, parent, sub-areas and what lies here.
+   The three content groups are real tabs. The page carries the complete member
+   list once; the browser filters it, so a tab never searches only the rendered
+   excerpt. Without JavaScript the server-rendered links below stay usable. #}
 {% block inhalt %}
-<article><div class="katalog-kopf"><h1>{{ icon|raw }}{{ page.name }}</h1></div>
-{% if page.image %}<figure class="katalog-karte-gross"><img src="/karten/{{ lang }}/{{ page.image|replace({'.png': '.webp'}) }}" alt="" width="640" height="480" loading="lazy" decoding="async"></figure>{% endif %}
+<article class="gebiet"><div class="katalog-kopf"><h1>{{ icon|raw }}{{ page.name }}</h1></div>
+{% if page.image %}<figure class="katalog-karte-gross"><img src="/karten/{{ lang }}/{{ page.image|replace({'.png': '.webp'}) }}" alt="{{ page.name }}" width="640" height="480" loading="lazy" decoding="async"></figure>{% endif %}
 <p class="katalog-aktionen"><a class="katalog-knopf" href="{{ page.map_url }}">{{ w.area_map }}</a></p>
-{% if page.parent %}<p></p><a href="{{ page.parent.url }}">{{ page.parent.text }}</a>{% endif %}
+{% if page.parent %}<p><a href="{{ page.parent.url }}">{{ page.parent.text }}</a></p>{% endif %}
 {% if page.children %}<section><h2>{{ page.children_title }}</h2><ul class="katalog-liste">{% for child in page.children %}<li><a href="{{ child.url }}">{{ child.text }}</a></li>{% endfor %}</ul></section>{% endif %}
-{% for section in page.sections %}<section><h2>{{ section.title }}</h2><ul class="katalog-liste">{% for entry in section.entries %}<li>{% if entry.icon %}<img class="symbol" src="/bild/items/{{ entry.icon }}.webp" alt="" width="22" height="22" decoding="async">{% endif %}<a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul></section>{% if section.excerpt %}<p class="katalog-hinweis">{{ w.excerpt }}</p>{% endif %}{% endfor %}
+
+{% if page.sections %}
+<div class="gebiet-reiter" role="tablist" aria-label="{{ page.name }}">
+	{% for section in page.sections %}<button type="button" class="gebiet-tab" role="tab" id="tab-{{ section.kind }}" aria-controls="panel-{{ section.kind }}" data-gebiet-tab="{{ section.kind }}">{{ section.title }} <span class="gebiet-zahl">{{ section.count }}</span></button>{% endfor %}
+</div>
+
+<div class="gebiet-buehne" id="gebiet-buehne" data-import-hint="{{ w.area_import_hint }}" data-anzahl="{{ w.area_count }}">
+	<p class="gebiet-stand" id="gebiet-stand" role="status"></p>
+	<div class="gebiet-werkzeug">
+		<input type="search" class="gebiet-suche" id="gebiet-suche" placeholder="{{ w.area_search_ph }}" aria-label="{{ w.area_search_ph }}" autocomplete="off">
+		<label class="gebiet-haken" id="gebiet-haken" hidden>
+			<input type="checkbox" id="gebiet-nur-offen">
+			<span>{{ w.status_unknown }}</span>
+		</label>
+	</div>
+	<p class="gebiet-anzahl" id="gebiet-anzahl" role="status"></p>
+	<ol class="gebiet-liste" id="gebiet-liste"></ol>
+	<button type="button" class="gebiet-mehr katalog-knopf" id="gebiet-mehr" data-mehr="{{ w.area_more }}" hidden>{{ w.area_more }}</button>
+	<p class="gebiet-leer" id="gebiet-leer" hidden>{{ w.area_empty }}</p>
+</div>
+
+<noscript>
+	{% for section in page.sections %}
+	<section><h2>{{ section.title }} ({{ section.count }})</h2>
+		<ul class="katalog-liste">{% for entry in section.entries %}<li>{% if entry.icon %}<img class="symbol" src="/bild/items/{{ entry.icon }}.webp" alt="" width="22" height="22" decoding="async">{% endif %}<a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul>
+		{% if section.excerpt %}<p class="katalog-hinweis">{{ w.more_in_list|replace({'%s': section.count - section.entries|length}) }}</p>{% endif %}
+	</section>
+	{% endfor %}
+</noscript>
+
+<script type="application/json" id="gebiet-daten">{{ members_json|raw }}</script>
+<script src="/gebiet.js?v={{ asset_stand }}" defer></script>
+{% endif %}
 </article>
 {% endblock %}

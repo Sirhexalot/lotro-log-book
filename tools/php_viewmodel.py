@@ -719,13 +719,21 @@ def area_view(builder: ViewBuilder, entry: dict, kind: str, members: dict) -> di
                        'text': parent.get('name') or ''}
 
     sections = []
+    # Full member lists for the interactive tabs; the page carries them once so
+    # the browser filters the whole area, not only the rendered excerpt.
+    komplett = {}
     for member_kind in ('q', 'd', 'i'):
         rows = members[member_kind].get(entry.get('idx')) or members[member_kind].get(ident) or []
+        rows = sorted(rows, key=lambda row: builder.name_of(member_kind, row[1]).casefold())
+        komplett[member_kind] = [[str(row[0]), builder.name_of(member_kind, row[1]),
+                                  row[1].get('ic') if member_kind == 'i' else None]
+                                 for row in rows]
         if not rows:
             continue
-        rows = sorted(rows, key=lambda row: builder.name_of(member_kind, row[1]).casefold())
         sections.append({
-            'title': '%s (%d)' % (w[member_kind + 'list'], len(rows)),
+            'kind': member_kind,
+            'title': w[member_kind + 'list'],
+            'count': len(rows),
             'entries': [{'url': route(lang, member_kind, row[0]),
                          'text': builder.name_of(member_kind, row[1]),
                          # Item rows carry the client symbol, like every list.
@@ -748,6 +756,7 @@ def area_view(builder: ViewBuilder, entry: dict, kind: str, members: dict) -> di
                      for key, value in sorted(body_children, key=lambda row: (row[1].get('name') or '').casefold())],
         'children_title': w['arealist'],
         'sections': sections,
+        'members': komplett,
         'seo': {'title': entry.get('name') or '',
                 'description': '%s: %s – LOTRO Log Book.' % (w['cataloglabel'], entry.get('name') or '')},
     }

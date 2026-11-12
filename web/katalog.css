@@ -177,3 +177,49 @@ body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 	body[data-art="i"] .katalog-kopf .symbol-gross { width: 54px; height: 54px; }
 	.katalog-grundwert b { font-size: 1.4rem; }
 }
+
+/* --- Area/region tabs (12.11.2026): one content group at a time.
+ * The three groups were stacked lists; long areas buried everything after the
+ * first section. The tabs read as real tabs, the list below holds search,
+ * completion filter and the complete member index. */
+.gebiet-reiter {
+	display: flex; gap: 6px; margin: 24px 0 0; padding: 0 0 10px;
+	border-bottom: 2px solid var(--rand); overflow-x: auto; white-space: nowrap;
+}
+.gebiet-tab {
+	flex: 0 0 auto; min-height: 44px; display: inline-flex; align-items: center; gap: 8px;
+	padding: 10px 14px; font-size: 1rem; color: var(--schwach);
+	background: var(--fläche); border: 1px solid var(--rand); border-radius: 4px;
+}
+.gebiet-tab:hover, .gebiet-tab:focus-visible { color: var(--gold); border-color: var(--gold); }
+.gebiet-tab[aria-selected="true"] {
+	color: #19150f; background: var(--gold); border-color: var(--gold);
+	font-weight: bold; box-shadow: inset 0 -3px 0 #fff0b9;
+}
+.gebiet-zahl { font-size: .8rem; font-variant-numeric: tabular-nums; padding: 1px 6px; border-radius: 10px; background: rgba(255, 255, 255, .08); }
+.gebiet-tab[aria-selected="true"] .gebiet-zahl { background: rgba(25, 21, 15, .16); }
+
+.gebiet-buehne { padding-top: 18px; }
+.gebiet-stand { margin: 0 0 10px; font-size: var(--text-bedienung); color: var(--schwach); }
+.gebiet-werkzeug { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 10px; }
+.gebiet-suche { flex: 1 1 260px; min-width: 0; padding: 9px 10px; font: inherit;
+	color: var(--text); background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; }
+.gebiet-haken { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; font-size: var(--text-bedienung); color: var(--schwach); }
+.gebiet-haken input { width: 16px; height: 16px; accent-color: var(--gold); margin: 0; }
+.gebiet-anzahl { margin: 0 0 8px; font-size: var(--text-bedienung); color: var(--schwach); font-variant-numeric: tabular-nums; }
+.gebiet-liste { list-style: none; margin: 0; padding: 0; }
+.gebiet-zeile {
+	display: grid; grid-template-columns: 16px 22px minmax(0, 1fr); gap: 8px;
+	align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rand);
+}
+.gebiet-zeile a { color: var(--gold); text-decoration: none; overflow-wrap: anywhere; }
+.gebiet-zeile a:hover, .gebiet-zeile a:focus-visible { text-decoration: underline; }
+.gebiet-marke { text-align: center; font-size: .875rem; color: var(--schwach); }
+.gebiet-zeile.fertig .gebiet-marke { color: #a8c788; }
+.gebiet-mehr { margin-top: 14px; min-height: 44px; }
+.gebiet-leer { color: var(--schwach); }
+@media (max-width: 640px) {
+	.gebiet-tab { font-size: .875rem; padding: 10px; }
+	.gebiet-haken { min-height: 44px; }
+	.gebiet-zeile { padding: 12px 0; }
+}

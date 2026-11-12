@@ -57,6 +57,7 @@ final class Page
             'tracking' => $this->shell->tracking(),
             'styles' => $this->shell->styles(),
             'scripts' => $this->shell->scripts(),
+            'asset_stand' => $this->shell->assetStand(),
             'menu' => $this->shell->menu($kind),
             'start_page' => $this->shell->startPage(),
             'suche_pfad' => $this->shell->appRoute('suche'),
@@ -67,6 +68,9 @@ final class Page
             'legal' => link_tag('/impressum.html?lang=' . $this->lang, $this->w['legal']),
             'privacy' => link_tag('/datenschutz.html?lang=' . $this->lang, $this->w['privacy']),
             'icon' => $this->shell->icon($page['icon'] ?? ''),
+            // Complete member list of an area/region, HTML-safe for the tabs.
+            'members_json' => json_encode($page['members'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP
+                | JSON_HEX_APOS | JSON_HEX_QUOT),
             // Recipes and items show the client's own symbol next to the name.
             'symbol_gross' => !empty($page['symbol'])
                 ? '<img class="symbol symbol-gross" src="/bild/items/' . esc((string) $page['symbol'])
@@ -260,7 +264,8 @@ final class Page
     private function katalogTexte(): string
     {
         $order = ['status_done', 'status_unknown', 'status_running', 'none', 'known',
-                  'foreign', 'recipe_unknown', 'recipe_missing'];
+                  'foreign', 'recipe_unknown', 'recipe_missing',
+                  'area_all', 'area_more', 'area_count', 'area_empty', 'area_search_ph', 'area_import_hint'];
         $parts = [];
         foreach ($order as $key) {
             $parts[] = json_encode($key) . ': ' . json_encode($this->w[$key], JSON_UNESCAPED_UNICODE);
