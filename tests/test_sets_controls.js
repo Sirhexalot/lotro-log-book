@@ -24,7 +24,7 @@ for (const lang of ['de', 'en', 'fr']) {
   vm.runInNewContext(code, {
     window, location, URL, AbortController,
     FormData: class { constructor(f) { this.f = f; } forEach(fn) { this.f.values.forEach(([name, value]) => fn(value, name)); } },
-    document: {querySelector: selector => selector === '.sets-filters' ? filters : form},
+    document: {querySelector: selector => selector === '[data-filter-schema="1"]' ? null : selector === '.sets-filters' ? filters : form},
     fetch: (url, options) => { requests.push({url: new URL(url), signal: options.signal}); return new Promise(() => {}); }
   });
   assert.equal(apply.hidden, true, 'No Apply button with enhanced filtering');
@@ -46,4 +46,7 @@ for (const lang of ['de', 'en', 'fr']) {
   windowEvents.popstate();
   assert.equal(requests[2].url.search, '', 'Back navigation restores URL filters');
 }
+let queried=[];
+vm.runInNewContext(code,{document:{querySelector:s=>{queried.push(s);return {};}}});
+assert.deepEqual(queried,['[data-filter-schema="1"]'],'Migrated lists must not bind a competing legacy controller');
 console.log('PASS: immediate set filters (DE/EN/FR, no Apply, abort stale results, reset pagination, back navigation)');

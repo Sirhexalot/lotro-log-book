@@ -2,9 +2,9 @@
 {# Shared filter-browser shell: the classes are the ones sets.css and sets.js
    already enhance, so checkboxes filter immediately in both catalogues. #}
 {% block inhalt %}
-<div class="sets-browser">
+<div class="sets-browser" data-filter-schema="1" data-filter-area="auftraggeber" data-filter-total="{{ count }}" data-filter-count-label="{{ gw.count }}">
 <h1>{{ gw.title }}</h1><p>{{ gw.intro }}</p>
-<form method="get" action="{{ list_url }}" class="sets-form">
+<form method="get" action="{{ list_url }}" class="sets-form" data-filter-fallback>
     <div class="sets-search"><label for="giver-query">{{ gw.search }}</label><div><input type="search" id="giver-query" name="q" value="{{ filters.q }}"><button type="submit">{{ gw.search }}</button></div></div>
     <div class="sets-grid">
         <details class="sets-filters" open>
@@ -36,7 +36,7 @@
             <fieldset><legend>{{ gw.level }}</legend><div class="sets-range"><label>{{ gw.from }}<input type="number" name="from" min="0" max="999" value="{{ filters.from }}"></label><label>{{ gw.to }}<input type="number" name="to" min="0" max="999" value="{{ filters.to }}"></label></div></fieldset>
             <div class="sets-filter-actions"><button type="submit">{{ gw.apply }}</button><a href="{{ list_url }}">{{ gw.reset }}</a></div>
         </details>
-        <section class="sets-results" aria-label="{{ gw.title }}">
+        <section class="sets-results" data-filter-results aria-label="{{ gw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? gw.count_one : gw.count)|replace({'%s': count}) }}</p>
             <div class="sets-sort"><span>{{ gw.sort }}</span>
                 <a href="{{ sort_name_url }}"{% if sort_active == '' %} aria-current="true"{% endif %}>{{ gw.sort_name }}</a>

@@ -21,6 +21,25 @@ class ZahlenTest(unittest.TestCase):
         # The figures are not centred; they use the same left edge as the text.
         self.assertNotIn('body.landing .zahlen { justify-content: center', CSS)
 
+    def test_both_rules_belong_to_the_row_and_space_is_equal(self):
+        # The hero spans the full main width, its content does not: a rule
+        # borrowed from the hero was longer than the row's own rule below.
+        row = CSS.split('.zahlen {', 1)[1].split('}', 1)[0]
+        hero = CSS.split('body.landing .hero {', 1)[1].split('}', 1)[0]
+        self.assertIn('border-top: 1px solid var(--rand)', row)
+        self.assertIn('border-bottom: 1px solid var(--rand)', row)
+        self.assertIn('padding: 22px 0', row)
+        self.assertNotIn('border-bottom', hero)
+
+    def test_every_figure_links_to_its_page(self):
+        for lang in ('de', 'en', 'fr'):
+            with self.subTest(lang=lang):
+                seite = (ROOT / 'php' / 'templates' / 'app' / ('start-%s.twig' % lang)).read_text()
+                zeilen = [line for line in seite.splitlines() if 'data-katalogzahl=' in line]
+                self.assertEqual(len(zeilen), 7)
+                for line in zeilen:
+                    self.assertRegex(line, r'^\s*<li><a href="/%s/[^"]*"' % lang)
+
 
 class HeroTest(unittest.TestCase):
     def test_each_language_points_at_its_own_map(self):

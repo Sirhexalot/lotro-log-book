@@ -4,7 +4,8 @@
 
 {% block stile %}<link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
-<link rel="stylesheet" href="/handwerk.css?v={{ asset_stand }}">{% endblock %}
+<link rel="stylesheet" href="/handwerk.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">{% endblock %}
 
 {% block kopf_extra %}{% endblock %}
 
@@ -44,6 +45,7 @@
 {% block fuss %}{% endblock %}
 
 {% block skripte %}
+<script type="application/json" id="craft-geography">{{ craft_geography_json|raw }}</script>
 <script src="/texte.js?v={{ asset_stand }}" defer></script>
 <script src="/texte-spielstand.js?v={{ asset_stand }}" defer></script>
 <script src="/texte-logbuch.js?v={{ asset_stand }}" defer></script>
@@ -54,6 +56,10 @@
 <script src="/familienmenue.js?v={{ asset_stand }}" defer></script>
 <script src="/filtergedaechtnis.js?v={{ asset_stand }}" defer></script>
 <script src="/referenz.js?v={{ asset_stand }}" defer></script>
+<script src="/filterzustand.js?v={{ asset_stand }}" defer></script>
+<script src="/filteradapter.js?v={{ asset_stand }}" defer></script>
+<script src="/filter-ui.js?v={{ asset_stand }}" defer></script>
+<script src="/handwerk-filter.js?v={{ asset_stand }}" defer></script>
 <script src="/handwerk.js?v={{ asset_stand }}" defer></script>
 <script src="/zutaten.js?v={{ asset_stand }}" defer></script>
 <script src="/rezepte.js?v={{ asset_stand }}" defer></script>

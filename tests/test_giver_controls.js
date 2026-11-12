@@ -57,6 +57,7 @@ vm.runInNewContext(code, {
   window: {MQL_SPEICHER: store, addEventListener: (name, fn) => { windowEvents[name] = fn; }},
   document: {
     querySelector: selector => (selector === '.giver-quests' ? page.box : null),
+    getElementById: () => null,
     addEventListener: (name, fn) => { documentEvents[name] = fn; }
   }
 });
@@ -64,7 +65,8 @@ vm.runInNewContext(code, {
 // No character: rows stay open, nothing is claimed, no dot column.
 assert.equal(page.rows[0].attrs['data-state'], 'open');
 assert.equal(page.rows[0].state.hidden, true);
-assert.equal(page.progress.textContent, page.box.attrs['data-unknown']);
+assert.equal(page.progress.textContent, '');
+assert.equal(page.progress.hidden, true, 'Public mode has no personal progress counter');
 assert.equal(page.toggle.hidden, true);
 
 // A character with one finished quest: one mark, the counter, the toggle.
@@ -86,7 +88,8 @@ assert.equal(page.box.classList.contains('giver-hide-done'), true);
 active = null;
 documentEvents.change({target: {id: 'katalog-charakter'}});
 assert.equal(page.rows[0].attrs['data-state'], 'open');
-assert.equal(page.progress.textContent, page.box.attrs['data-unknown']);
+assert.equal(page.progress.textContent, '');
+assert.equal(page.progress.hidden, true);
 assert.equal(page.toggle.hidden, true);
 assert.equal(page.box.classList.contains('giver-hide-done'), false);
 assert.equal(page.input.checked, false);
@@ -96,5 +99,13 @@ active = {quests: ['70000004']};
 windowEvents.storage({key: 'mql.charaktere'});
 assert.equal(page.rows[1].attrs['data-state'], 'done');
 assert.equal(page.progress.textContent, '1 von 2 als erledigt importiert');
+
+store.kennt = () => false;
+documentEvents.change({target: {id:'katalog-charakter'}});
+assert.equal(page.progress.hidden, true, 'Character without quest import must not show a zero-progress counter');
+assert.equal(page.toggle.hidden, true);
+store.kennt = () => true;
+documentEvents.change({target: {id:'katalog-charakter'}});
+assert.equal(page.progress.hidden, false);
 
 console.log('PASS: giver progress (marks, counter, hide toggle, character switch, storage)');

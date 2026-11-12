@@ -238,7 +238,6 @@ body.landing .hero {
 	margin: 0 -20px;
 	padding: 44px 20px 34px;
 	background: radial-gradient(120% 140% at 50% -20%, rgba(214, 179, 90, .10), transparent 60%);
-	border-bottom: 1px solid var(--rand);
 }
 body.landing .hero h2 {
 	margin-top: 0;
@@ -343,21 +342,35 @@ body.landing .einstieg .knopf { margin: 0 4px; }
 }
 .knopf.sekundaer:hover { background: var(--fläche-hell); }
 
-/* Size of the catalogue: one row of numbers, not a marketing grid. */
+/* Size of the catalogue: one row of numbers, not a marketing grid.
+ * Both rules belong to the row itself: the hero is wider than its content,
+ * so a line borrowed from the hero ended at a different place than the one
+ * below. Equal padding keeps the figures as far from the top line as from
+ * the bottom one. */
 .zahlen {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 10px 26px;
 	margin: 0 0 8px;
-	padding: 0 0 22px;
+	padding: 22px 0;
 	list-style: none;
+	border-top: 1px solid var(--rand);
 	border-bottom: 1px solid var(--rand);
 }
 /* A margin, not only flex `gap`: old Safari ignored gap in flex rows and the
  * number ran straight into its label. */
-.zahlen li { display: flex; align-items: baseline; }
+.zahlen li { display: flex; }
+.zahlen a {
+	display: flex;
+	align-items: baseline;
+	color: var(--schwach);
+	text-decoration: none;
+}
+.zahlen a:hover small,
+.zahlen a:focus-visible small { color: var(--text); text-decoration: underline; }
+.zahlen a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .zahlen span { font-size: 20px; color: var(--gold); margin-right: 7px; }
-.zahlen small { font-size: 13px; color: var(--schwach); }
+.zahlen small { font-size: 15px; color: var(--schwach); }
 
 .familien-karten {
 	display: grid;
@@ -401,5 +414,6 @@ body.landing section { margin-top: 34px; }
 	.suche-start .knopf { flex: 1 1 100%; text-align: center; }
 	.zahlen { gap: 8px 18px; }
 	.zahlen span { font-size: 17px; }
+	.zahlen small { font-size: 14px; }
 	body.landing main { padding: 0 16px 44px; }
 }

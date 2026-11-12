@@ -27,7 +27,7 @@
 	function write(area, lang, query) {
 		try {
 			if (query) {
-				window.localStorage.setItem(key(area, lang), JSON.stringify({ q: query }));
+				window.localStorage.setItem(key(area, lang), JSON.stringify({ v: 2, q: query }));
 			} else {
 				window.localStorage.removeItem(key(area, lang));
 			}
@@ -38,5 +38,15 @@
 		write(area, lang, '');
 	}
 
-	window.MQL_FILTER = { read: read, write: write, clear: clear, key: key };
+	function readState(area, lang) {
+		if (!area) { throw new Error('Filter area required'); }
+		try {
+			var raw = window.localStorage.getItem(key(area, lang));
+			if (!raw) { return null; }
+			var data = JSON.parse(raw);
+			if (!data || typeof data.q !== 'string' || (data.v !== undefined && data.v !== 2)) { return null; }
+			return {version: data.v || 1, query: data.q};
+		} catch (error) { return null; }
+	}
+	window.MQL_FILTER = { read: read, write: write, clear: clear, key: key, readState: readState };
 })();

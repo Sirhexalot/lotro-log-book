@@ -1,6 +1,7 @@
 /* Progressive enhancement only: the GET form also works without JavaScript. */
 (function () {
 	'use strict';
+	if (document.querySelector('[data-filter-schema="1"]')) { return; }
 	var filters = document.querySelector('.sets-filters');
 	if (!filters) { return; }
 	var mobile = window.matchMedia('(max-width: 900px)');

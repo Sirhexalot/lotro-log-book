@@ -28,7 +28,7 @@ assert.equal(memory.read('gegenstaende', 'en'), '', 'languages stay apart');
 assert.equal(memory.read('auftraggeber', 'de'), '', 'lists stay apart');
 
 // The stored value is a JSON object, not a raw string.
-assert.match(local.data.get('mql.filter.gegenstaende.de'), /^\{"q":/);
+assert.deepEqual(JSON.parse(local.data.get('mql.filter.gegenstaende.de')), {v:2,q:'q=Schwert&sort=stufe'});
 
 memory.clear('gegenstaende', 'de');
 assert.equal(memory.read('gegenstaende', 'de'), '');

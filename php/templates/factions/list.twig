@@ -3,9 +3,9 @@
    sets.css and sets.js already enhance, so checkboxes filter immediately and
    the tree opens in auftraggeber.js. #}
 {% block inhalt %}
-<div class="sets-browser">
+<div class="sets-browser" data-filter-schema="1" data-filter-area="fraktion" data-filter-total="{{ count }}" data-filter-count-label="{{ fw.count }}">
 <h1>{{ fw.title }}</h1><p>{{ fw.intro }}</p>
-<form method="get" action="{{ list_url }}" class="sets-form">
+<form method="get" action="{{ list_url }}" class="sets-form" data-filter-fallback>
     <div class="sets-search"><label for="faction-query">{{ fw.search }}</label><div><input type="search" id="faction-query" name="q" value="{{ filters.q }}"><button type="submit">{{ fw.search }}</button></div></div>
     <div class="sets-grid">
         <details class="sets-filters" open>
@@ -35,7 +35,7 @@
             </fieldset>
             <div class="sets-filter-actions"><button type="submit">{{ fw.apply }}</button><a href="{{ list_url }}">{{ fw.reset }}</a></div>
         </details>
-        <section class="sets-results" aria-label="{{ fw.title }}">
+        <section class="sets-results" data-filter-results aria-label="{{ fw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? fw.count_one : fw.count)|replace({'%s': count}) }}</p>
             <ul class="sets-list">{% for row in factions %}<li><a href="{{ row.url }}"><span class="sets-preview"><strong>{{ row.name }}</strong></span><span class="sets-meta">{{ row.meta }}</span></a></li>{% else %}<li>{{ fw.empty }}</li>{% endfor %}</ul>
             <nav class="sets-pagination" aria-label="{{ fw.title }}">

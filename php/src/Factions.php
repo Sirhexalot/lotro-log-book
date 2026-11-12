@@ -100,7 +100,7 @@ final class Factions
         return $rows;
     }
 
-    private function query(array $input, array $labels): array
+    private function query(array $input, array $labels, array $rows): array
     {
         $out = ['q' => is_string($input['q'] ?? '') ? mb_substr(trim($input['q'] ?? ''), 0, 200) : ''];
         foreach (['region', 'area'] as $key) {
@@ -172,7 +172,7 @@ final class Factions
         $words = self::words($this->lang);
         $labels = $index['labels'];
         $rows = $index['factions'];
-        $filters = $this->query($input, $labels);
+        $filters = $this->query($input, $labels, $rows);
         $selected = array_values(array_filter($rows, fn ($row) => self::matches($row, $filters)));
         $selected = self::sorted($selected);
         $pages = max(1, (int) ceil(count($selected) / self::PAGE_SIZE));

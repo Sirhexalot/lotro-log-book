@@ -6,6 +6,7 @@
  */
 (function () {
 	'use strict';
+	if (window.MQL_HANDWERK_FILTER) { return; }
 
 	var t = window.MQL_T || function (schluessel) { return schluessel; };
 	var ersetze = window.MQL_ERSETZE || function (muster) { return String(muster); };

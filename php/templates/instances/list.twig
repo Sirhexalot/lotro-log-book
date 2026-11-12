@@ -2,9 +2,9 @@
 {# Same filter-browser shell as the other catalogues: sets.js filters the form,
    auftraggeber.js opens the region tree. #}
 {% block inhalt %}
-<div class="sets-browser">
+<div class="sets-browser" data-filter-schema="1" data-filter-area="instanzen" data-filter-total="{{ count }}" data-filter-count-label="{{ iw.count }}">
 <h1>{{ iw.title }}</h1><p>{{ iw.intro }}</p>
-<form method="get" action="{{ list_url }}" class="sets-form">
+<form method="get" action="{{ list_url }}" class="sets-form" data-filter-fallback>
     <div class="sets-search"><label for="instance-query">{{ iw.search }}</label><div><input type="search" id="instance-query" name="q" value="{{ filters.q }}"><button type="submit">{{ iw.search }}</button></div></div>
     <div class="sets-grid">
         <details class="sets-filters" open>
@@ -31,7 +31,7 @@
             {% endif %}
             <div class="sets-filter-actions"><button type="submit">{{ iw.apply }}</button><a href="{{ list_url }}">{{ iw.reset }}</a></div>
         </details>
-        <section class="sets-results" aria-label="{{ iw.title }}">
+        <section class="sets-results" data-filter-results aria-label="{{ iw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? iw.count_one : iw.count)|replace({'%s': count}) }}</p>
             {% for group in instance_groups %}
             <section><h2>{{ group.name }}</h2>

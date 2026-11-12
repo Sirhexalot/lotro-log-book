@@ -74,6 +74,7 @@ final class Shell
             $this->assetTag('gemeinsam.css'),
             $this->assetTag('katalog.css'),
             $this->assetTag('sets.css'),
+            $this->assetTag('filter-ui.css'),
             $this->assetTag('auftraggeber.css'),
         ]);
     }
@@ -82,6 +83,8 @@ final class Shell
     {
         return implode("\n", [$this->scriptTag('familienmenue.js'), $this->scriptTag('speicher.js'),
             $this->scriptTag('filtergedaechtnis.js'), $this->scriptTag('katalog.js'),
+            $this->scriptTag('filterzustand.js'), $this->scriptTag('filteradapter.js'),
+            $this->scriptTag('filter-ui.js'), $this->scriptTag('filter-server.js'),
             $this->scriptTag('zutaten.js'), $this->scriptTag('sets.js'),
             $this->scriptTag('auftraggeber.js')]);
     }

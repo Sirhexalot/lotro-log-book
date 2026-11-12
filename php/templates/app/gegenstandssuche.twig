@@ -3,7 +3,8 @@
 {% block koerper_attribute %} class="seite-text gs-seite" data-seite="gegenstaende"{% endblock %}
 
 {% block stile %}<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
-<link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}">{% endblock %}
+<link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">{% endblock %}
 
 {% block kopf_extra %}{% endblock %}
 
@@ -52,5 +53,8 @@
 <script src="/menue.js?v={{ asset_stand }}" defer></script>
 <script src="/familienmenue.js?v={{ asset_stand }}" defer></script>
 <script src="/filtergedaechtnis.js?v={{ asset_stand }}" defer></script>
-<script src="/gegenstaende.js?v={{ asset_stand }}" defer></script>
+<script src="/filterzustand.js?v={{ asset_stand }}" defer></script>
+<script src="/filteradapter.js?v={{ asset_stand }}" defer></script>
+<script src="/filter-ui.js?v={{ asset_stand }}" defer></script>
+<script src="/gegenstaende-filter.js?v={{ asset_stand }}" defer></script>
 {% endblock %}

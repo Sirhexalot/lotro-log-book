@@ -3,9 +3,9 @@
    sets.css and sets.js already enhance, so checkboxes filter immediately and
    the tree opens in auftraggeber.js. #}
 {% block inhalt %}
-<div class="sets-browser">
+<div class="sets-browser" data-filter-schema="1" data-filter-area="landmarke" data-filter-total="{{ count }}" data-filter-count-label="{{ lw.count }}">
 <h1>{{ lw.title }}</h1><p>{{ lw.intro }}</p>
-<form method="get" action="{{ list_url }}" class="sets-form">
+<form method="get" action="{{ list_url }}" class="sets-form" data-filter-fallback>
     <div class="sets-search"><label for="landmark-query">{{ lw.search }}</label><div><input type="search" id="landmark-query" name="q" value="{{ filters.q }}"><button type="submit">{{ lw.search }}</button></div></div>
     <div class="sets-grid">
         <details class="sets-filters" open>
@@ -35,7 +35,7 @@
             </fieldset>
             <div class="sets-filter-actions"><button type="submit">{{ lw.apply }}</button><a href="{{ list_url }}">{{ lw.reset }}</a></div>
         </details>
-        <section class="sets-results" aria-label="{{ lw.title }}">
+        <section class="sets-results" data-filter-results aria-label="{{ lw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? lw.count_one : lw.count)|replace({'%s': count}) }}</p>
             <ul class="sets-list">{% for row in landmarks %}<li><a href="{{ row.url }}"><span class="sets-preview"><strong>{{ row.name }}</strong></span><span class="sets-meta">{{ row.meta }}</span></a></li>{% else %}<li>{{ lw.empty }}</li>{% endfor %}</ul>
             <nav class="sets-pagination" aria-label="{{ lw.title }}">
