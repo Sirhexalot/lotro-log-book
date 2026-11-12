@@ -200,58 +200,20 @@ body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 .gebiet-tab[aria-selected="true"] .gebiet-zahl { background: rgba(25, 21, 15, .16); }
 
 .gebiet-buehne { padding-top: 18px; }
-.gebiet-stand { margin: 0 0 10px; font-size: var(--text-bedienung); color: var(--schwach); }
-.gebiet-werkzeug { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 10px; }
-.gebiet-suche { flex: 1 1 260px; min-width: 0; padding: 9px 10px; font: inherit;
-	color: var(--text); background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; }
-.gebiet-filter { display: inline-flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; min-height: 32px; font-size: var(--text-bedienung); color: var(--schwach); }
-.gebiet-filter label { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; }
-.gebiet-filter input { width: 16px; height: 16px; accent-color: var(--gold); margin: 0; }
-.gebiet-anzahl { margin: 0 0 8px; font-size: var(--text-bedienung); color: var(--schwach); font-variant-numeric: tabular-nums; }
-.gebiet-liste { list-style: none; margin: 0; padding: 0; }
-.gebiet-zeile {
-	display: grid; grid-template-columns: 16px 22px minmax(0, 1fr); gap: 8px;
-	align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rand);
-}
-.gebiet-zeile a { color: var(--gold); text-decoration: none; overflow-wrap: anywhere; }
-.gebiet-zeile a:hover, .gebiet-zeile a:focus-visible { text-decoration: underline; }
-.gebiet-marke { text-align: center; font-size: .875rem; color: var(--schwach); }
-.gebiet-zeile.fertig .gebiet-marke { color: #a8c788; }
-.gebiet-mehr { margin-top: 14px; min-height: 44px; }
-.gebiet-leer { color: var(--schwach); }
 @media (max-width: 640px) {
 	.gebiet-reiter { gap: 4px; }
 	.gebiet-tab { font-size: .8rem; padding: 9px 8px; gap: 5px; }
-	.gebiet-zahl { font-size: .72rem; padding: 1px 5px; }
-	.gebiet-filter label { min-height: 44px; }
-	.gebiet-zeile { padding: 12px 0; }
 }
 
 /* --- Quest-giver and faction details (12.11.2026): the lists are complete,
  * so they can be searched; the own reputation only appears when imported. */
-.giver-suche {
-	width: 100%; margin: 0 0 10px; padding: 9px 10px; font: inherit;
-	color: var(--text); background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px;
-}
 .fraktion-ruf {
 	margin: 12px 0; padding: 12px; background: var(--fläche);
 	border-left: 2px solid var(--gold); font-size: var(--text-bedienung);
 }
-@media (max-width: 640px) {
-	.giver-suche { font-size: 1rem; }
-}
-
 /* Source lists: a fixed mark column keeps the text edge stable. */
 .quellen-liste { list-style: none; padding-left: 0; columns: auto; }
 /* The entries are inline text ("Name · Art · Stufe 130 · Region"), so the mark
  * sits beside the text instead of turning every text node into a grid cell. */
-.quellen-zeile { display: block; position: relative; padding: 6px 0 6px 24px; }
-.quellen-marke { position: absolute; left: 0; top: 6px; width: 16px; text-align: center; color: var(--schwach); }
-.quellen-marke.fertig { color: #a8c788; }
-.quellen-suche { width: 100%; margin: 0 0 10px; padding: 9px 10px; font: inherit;
-	color: var(--text); background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; }
-.quellen-stand { margin: 0 0 8px; font-size: var(--text-bedienung); color: var(--schwach); font-variant-numeric: tabular-nums; }
 .katalog-art { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; color: var(--gold); font-size: var(--text-bedienung); }
 .katalog-art .symbol { width: 20px; height: 20px; }
-.gebiet-hinweis { margin: 0 0 10px; padding: 9px 12px; background: var(--fläche);
-	border-left: 2px solid var(--rand); color: var(--schwach); font-size: var(--text-bedienung); }

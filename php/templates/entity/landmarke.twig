@@ -12,8 +12,6 @@
 {% else %}<p class="katalog-hinweis">{{ w.no_position }}</p>{% endif %}
 <section><h2>{{ w.landmark_here }}</h2>
 {% if page.quests %}
-<p class="quellen-stand" data-quellen-stand role="status"></p>
-<input type="search" class="quellen-suche" data-quellen-suche placeholder="{{ w.search }}" aria-label="{{ w.search }}" autocomplete="off">
 <ul class="katalog-liste quellen-liste" data-quellen-liste>{% for goal in page.quests %}<li data-kind="{{ goal.art }}" data-url="{{ goal.url }}"><a href="{{ goal.url }}">{{ goal.text }}</a></li>{% endfor %}</ul>
 {% else %}<p class="katalog-hinweis">{{ w.no_landmark_quests }}</p>{% endif %}</section>
 </article>
