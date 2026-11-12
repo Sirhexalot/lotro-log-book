@@ -2,7 +2,8 @@
 {% block inhalt %}
 <article class="set-detail">
 <h1>{{ icon|raw }}{{ set.name }}</h1><p>{{ sw.parts|replace({'%s': set.parts}) }}{% if set.available_parts < set.parts %} · {{ sw.incomplete }}{% endif %}</p>
-<section><h2>{{ sw.pieces }}</h2>
+<p class="katalog-aktionen"><a class="katalog-knopf" href="#setteile">{{ sw.pieces }}</a> <a class="katalog-knopf" href="#setboni">{{ sw.bonuses }}</a></p>
+<section id="setteile"><h2>{{ sw.pieces }}</h2>
 <div class="set-cards">
 {% for member in set.members %}
 <article class="set-card">
@@ -19,7 +20,7 @@
 </article>
 {% endfor %}
 </div></section>
-<section class="set-bonuses"><h2>{{ sw.bonuses }}</h2>
+<section class="set-bonuses" id="setboni"><h2>{{ sw.bonuses }}</h2>
 {% for bonus in set.bonuses %}
     <h3>{% if bonus.valid %}{{ sw.threshold|replace({'%s': bonus.pieces}) }}{% else %}{{ sw.unclear_threshold }}{% endif %}</h3>
     <ul>{% for text in bonus.texts %}<li>{{ text }}</li>{% endfor %}

@@ -239,3 +239,14 @@ body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 @media (max-width: 640px) {
 	.giver-suche { font-size: 1rem; }
 }
+
+/* Source lists: a fixed mark column keeps the text edge stable. */
+.quellen-liste { list-style: none; padding-left: 0; }
+.quellen-zeile { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; padding: 6px 0; }
+.quellen-marke { text-align: center; color: var(--schwach); }
+.quellen-marke.fertig { color: #a8c788; }
+.quellen-suche { width: 100%; margin: 0 0 10px; padding: 9px 10px; font: inherit;
+	color: var(--text); background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; }
+.quellen-stand { margin: 0 0 8px; font-size: var(--text-bedienung); color: var(--schwach); font-variant-numeric: tabular-nums; }
+.katalog-art { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; color: var(--gold); font-size: var(--text-bedienung); }
+.katalog-art .symbol { width: 20px; height: 20px; }

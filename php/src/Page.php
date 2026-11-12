@@ -67,7 +67,7 @@ final class Page
             'languages' => $this->languagesHtml($kind, $identifier),
             'legal' => link_tag('/impressum.html?lang=' . $this->lang, $this->w['legal']),
             'privacy' => link_tag('/datenschutz.html?lang=' . $this->lang, $this->w['privacy']),
-            'icon' => $this->shell->icon($page['icon'] ?? ''),
+            'icon' => $this->shell->icon($page['icon'] ?? ($kind === 'i' ? 'gegenstand' : '')),
             'entity_id' => $identifier,
             // Complete member list of an area/region, HTML-safe for the tabs.
             'members_json' => json_encode($page['members'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP

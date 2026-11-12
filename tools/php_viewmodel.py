@@ -667,6 +667,7 @@ def recipe_view(builder: ViewBuilder, row: list) -> dict:
         'ingredients': ingredients,
         'optional': optional,
         'critical': row[8] or '',
+        'critical_id': row[19] if len(row) > 19 and row[19] else None,
         'critical_symbol': row[17] if len(row) > 17 else None,
         'chance': row[12] if len(row) > 12 and row[12] else None,
         # The generator prints the stored float as-is ("7.0 s").
