@@ -36,9 +36,68 @@
 		recipeRows.forEach(function(r){[r[18],r[19]].filter(Boolean).forEach(function(id){if(!producers.has(id)){producers.set(id,[]);}producers.get(id).push(r);});
 			[r[6]||[],r[7]||[]].forEach(function(list,optional){list.forEach(function(z){if(!z[3]){return;}if(!items.has(z[3])){items.set(z[3],{id:z[3],name:z[0],uses:[],kind:'item'});}items.get(z[3]).uses.push({profession:r[9],tier:String(r[11]),optional:!!optional});});});});
 		var rows=Array.from(items.values());rows.forEach(function(r){r.producers=producers.get(r.id)||[];r.source=r.producers.length?'crafted':'unknown';r.areas=[];});
+		/* Gathering nodes are keyed by their own resource id, the ingredients by
+		   item id. The only shared handle is the name, exactly as the item pages
+		   connect both. Keying by list index found nothing and read as "source
+		   unknown" even though the item page shows the areas. */
 		var locations=new Map();
-		if(resources){(resources.m||[]).forEach(function(map){map[1].forEach(function(pair){if(!locations.has(pair[0])){locations.set(pair[0],[]);}var area=(resources.g||[]).find(function(g){return String(g[0])===String(map[0]);});if(area){locations.get(pair[0]).push({id:String(area[0]),name:area[1],map:area[2],count:pair[1]});}});});
-			resources.k.forEach(function(k,i){var areas=locations.get(i)||[];if(!areas.length){return;}rows.push({id:'resource:'+k[0],resource:k[0],name:k[1],uses:[{profession:k[2],tier:String(k[3]),optional:false}],kind:'resource',source:'gather',areas:areas,producers:[]});});}
+		if(resources){
+			var nameOf=new Map();
+			(resources.k||[]).forEach(function(k){nameOf.set(String(k[0]),k[1]);});
+			var areasById=new Map();
+			(resources.g||[]).forEach(function(g){areasById.set(String(g[0]),g);});
+			(resources.m||[]).forEach(function(map){
+				var area=areasById.get(String(map[0]));
+				if(!area){return;}
+				map[1].forEach(function(pair){
+					var name=nameOf.get(String(pair[0]));
+					if(!name){return;}
+					if(!locations.has(name)){locations.set(name,[]);}
+					var known=locations.get(name).find(function(a){return a.id===String(area[0]);});
+					if(known){known.count+=pair[1];return;}
+					locations.get(name).push({id:String(area[0]),name:area[1],map:area[2],count:pair[1],resource:String(pair[0])});
+				});
+			});
+			/* The recorded item -> gathering family link wins; the name is no
+			   evidence and never produces a place. */
+			var families=resources.zu||{};
+			// The place table keys its pairs by the position in 'k', zero-based.
+			var positionOf=new Map();
+			(resources.k||[]).forEach(function(k,i){positionOf.set(String(k[0]),i);});
+			function familiesFor(list){
+				var out=[];
+				(list||[]).forEach(function(spalte){
+					var artId=String(spalte[0]), position=positionOf.get(artId);
+					if(position===undefined){return;}
+					var areas=[];
+					(resources.m||[]).forEach(function(map){
+						var area=(resources.g||[]).find(function(g){return String(g[0])===String(map[0]);});
+						if(!area){return;}
+						map[1].forEach(function(pair){
+							if(Number(pair[0])!==position){return;}
+							var known=areas.find(function(a){return a.id===String(area[0]);});
+							if(known){known.count+=pair[1];return;}
+							areas.push({id:String(area[0]),name:area[1],map:area[2],count:pair[1],resource:artId});
+						});
+					});
+					areas.sort(function(a,b){return b.count-a.count;});
+					out.push({name:String(spalte[1]||''), profession:String(spalte[2]||''), tier:spalte[3], areas:areas});
+				});
+				return out;
+			}
+			rows.forEach(function(r){
+				r.families=familiesFor(families[String(r.id)]).filter(function(f){return f.areas.length;});
+				r.areas=[];
+				r.families.forEach(function(f){r.areas=r.areas.concat(f.areas);});
+				if(r.areas.length){r.source='gather';}
+			});
+			(resources.k||[]).forEach(function(k){
+				if(rows.some(function(r){return r.name===k[1];})){return;}
+				var areas=locations.get(k[1])||[];
+				if(!areas.length){return;}
+				rows.push({id:'resource:'+k[0],resource:k[0],name:k[1],uses:[{profession:k[2],tier:String(k[3]),optional:false}],kind:'resource',source:'gather',areas:areas,producers:[]});
+			});
+		}
 		return rows;
 	}
 	function make(tab,settings){
@@ -93,14 +152,21 @@
 			facets:function(all,s){var out={};groups.forEach(function(g){if(g.kind==='multi'||g.kind==='single'){out[g.id]=g.options.map(function(o){var candidate=JSON.parse(JSON.stringify(s));candidate.filters[g.id]=g.kind==='multi'?[o.value]:o.value;return {value:o.value,count:all.filter(function(r){return matches(r,candidate);}).length};});}});return out;},
 			renderResults:function(result,target){target.replaceChildren();
 				if(isRecipe&&recipeRenderer){target.appendChild(recipeRenderer(result.payload.map(function(r){return r.raw;})));return;}
-				result.payload.forEach(function(r){var section=document.createElement('section');section.className='filter-craft-row';var title=text('h3',r.name);section.appendChild(title);
+				result.payload.forEach(function(r){var section=document.createElement('section');section.className='filter-craft-row';
+					var title=document.createElement('h3');
+					if(r.kind!=='resource'&&r.id){var titelLink=text('a',r.name);titelLink.href=url('item',r.id);title.appendChild(titelLink);}else{title.appendChild(text('span',r.name));}
+					section.appendChild(title);
 					if(tab==='berufe'){
 						var info=refs[r.id],progress=c&&c.handwerk&&c.handwerk[r.id];
 						(info.s||[]).forEach(function(tier){var line=text('p',String(tier.t)+' · '+name(tier.k)+' / '+name(tier.m));var row=progress&&progress.find(function(p){return p[0]===tier.t;});if(row){line.appendChild(text('span',' · '+row[1]+' / '+row[3]+' XP'));}section.appendChild(line);});
 					}else if(r.kind==='resource'){
 						r.areas.forEach(function(a){var link=text('a',a.name+' ('+a.count.toLocaleString(lang)+')');link.href='/'+lang+'/'+({de:'karte',en:'map',fr:'carte'})[lang]+'/?vorkommen='+encodeURIComponent(r.resource)+'&vorkarte='+a.map;section.appendChild(link);section.appendChild(document.createTextNode(' · '));});
-					}else{var link=text('a',words[30]);link.href=url('item',r.id);section.appendChild(link);section.appendChild(text('p',r.uses.filter(function(u){return result.state.filters.optional||!u.optional;}).map(function(u){return profession(u.profession)+' · '+u.tier;}).filter(function(v,i,a){return a.indexOf(v)===i;}).join(' / ')));
-						r.producers.forEach(function(p){var a=text('a',p[0]+' · '+p[3]);a.href=url('recipe',p[10]);section.appendChild(a);section.appendChild(document.createTextNode(' · '));});if(!r.producers.length){section.appendChild(text('p',words[31]));}}
+					}else{section.appendChild(text('p',r.uses.filter(function(u){return result.state.filters.optional||!u.optional;}).map(function(u){return profession(u.profession)+' · '+u.tier;}).filter(function(v,i,a){return a.indexOf(v)===i;}).join(' / ')));
+						(r.families||[]).forEach(function(f){
+							var fund=text('p',(f.name?f.name+' · ':'')+words[28]+': ');
+							f.areas.slice(0,3).forEach(function(a,i){if(i){fund.appendChild(document.createTextNode(' · '));}var alink=text('a',a.name+' ('+a.count.toLocaleString(lang)+')');alink.href='/'+lang+'/'+({de:'karte',en:'map',fr:'carte'})[lang]+'/?vorkommen='+encodeURIComponent(a.resource)+'&vorkarte='+a.map;fund.appendChild(alink);});section.appendChild(fund);
+						});
+						r.producers.forEach(function(p){var a=text('a',p[0]+' · '+p[3]);a.href=url('recipe',p[10]);section.appendChild(a);section.appendChild(document.createTextNode(' · '));});if(!r.producers.length&&!(r.areas&&r.areas.length)){section.appendChild(text('p',words[31]));}}
 					target.appendChild(section);
 				});if(!result.total){target.appendChild(text('p',T('hw_keine_rezepte')));}
 			}});

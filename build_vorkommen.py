@@ -37,6 +37,8 @@ from game_maps import GameMaps  # noqa: E402
 from build_daten import STANDARD_KARTEN  # noqa: E402
 
 SPRACHEN = ('de', 'en', 'fr')
+# Item id -> gathering family, taken from the same export the item pages use.
+ITEMS = HIER / 'daten' / 'items.json'
 # Which map filter the spot belongs to: the profession that gathers it.
 BERUFE = {'PROSPECTOR': 'erz', 'FORESTER': 'holz', 'SCHOLAR': 'gelehrte', 'COOK': 'anbau'}
 MARKE = re.compile(r'\[[a-z]{1,3}\]')
@@ -210,9 +212,18 @@ def main():
             haupt = max(zone_karte[zone].items(), key=lambda paar: paar[1])[0]
             gebiete.append([zone, name, haupt])
         gebiete.sort(key=lambda eintrag: eintrag[1].lower())
+        # The item export records which gathering family an item belongs to
+        # (`vor`). Sharing it here keeps the crafting list from guessing by
+        # name, exactly like the item pages.
+        zuordnung = {}
+        if ITEMS.is_file():
+            for iid, eintrag in json.loads(ITEMS.read_text(encoding='utf-8')).get('items', {}).items():
+                if eintrag.get('vor'):
+                    zuordnung[str(iid)] = [list(spalte) for spalte in eintrag['vor']]
         inhalt = {'k': kopf,
                   'g': gebiete,
-                  'm': [[zone, sorted(pro_zone[zone].items())] for zone, _n, _k in gebiete]}
+                  'm': [[zone, sorted(pro_zone[zone].items())] for zone, _n, _k in gebiete],
+                  'zu': zuordnung}
         text = json.dumps(inhalt, separators=(',', ':'), ensure_ascii=False)
         # Ready-to-merge rows for the central search index (build_suche.py):
         # kind, id, name, context, level.

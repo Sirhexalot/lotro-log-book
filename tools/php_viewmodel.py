@@ -825,7 +825,9 @@ class ItemContext:
                     continue
                 places.setdefault(str(pair[0]), []).append(
                     [area[1], area[2], pair[1] if len(pair) > 1 else 0])
-        index = {str(row[0]): number for number, row in enumerate(self.vorkommen.get('k') or [], 1)}
+        # The place table keys its pairs by the position in 'k', zero-based.
+        # Numbering from one shifted every item's places to the next family.
+        index = {str(row[0]): number for number, row in enumerate(self.vorkommen.get('k') or [])}
         names = {str(row[0]): row[1] for row in self.vorkommen.get('k') or []}
         return places, index, names
 
