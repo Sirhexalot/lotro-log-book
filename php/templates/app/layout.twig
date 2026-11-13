@@ -51,6 +51,7 @@
 {% block fuss %}{% endblock %}
 {# The build used to set this inline; the map reads it for its images. #}
 <script>window.MQL_BILD_PFAD = 'karten/{{ lang }}/';</script>
+<script src="/sprachwahl.js?v={{ asset_stand }}" defer></script>
 {% block skripte %}{% endblock %}
 </body>
 </html>

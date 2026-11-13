@@ -81,7 +81,8 @@ final class Shell
 
     public function scripts(): string
     {
-        return implode("\n", [$this->scriptTag('familienmenue.js'), $this->scriptTag('speicher.js'),
+        return implode("\n", [$this->scriptTag('sprachwahl.js'), $this->scriptTag('familienmenue.js'),
+            $this->scriptTag('speicher.js'),
             $this->scriptTag('filtergedaechtnis.js'), $this->scriptTag('katalog.js'),
             $this->scriptTag('filterzustand.js'), $this->scriptTag('filteradapter.js'),
             $this->scriptTag('filter-ui.js'), $this->scriptTag('filter-server.js'),

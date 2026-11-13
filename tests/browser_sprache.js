@@ -45,7 +45,30 @@ async function start(browser, locale) {
 		assert.equal(new URL(wahl.page.url()).pathname, '/de/', 'gewählte Sprache schlägt den Browser');
 		await wahl.context.close();
 
-		console.log('Spracherkennung: Browserliste, Sprachpfad und gewählte Sprache ok');
+		// The catalogue and the application pages carry their language links in
+		// different places; both must remember the choice.
+		const katalog = await start(browser, 'de-DE');
+		await katalog.page.goto(basis + '/de/aufgabe/70075D00/', { waitUntil: 'networkidle' });
+		await katalog.page.locator('footer a[hreflang="en"]').first().click();
+		await katalog.page.waitForLoadState('networkidle');
+		assert.equal(new URL(katalog.page.url()).pathname, '/en/quest/70075D00/');
+		const katalogCookie = (await katalog.context.cookies()).find((c) => c.name === 'llb_sprache');
+		assert.ok(katalogCookie && katalogCookie.value === 'en', 'Katalogseite merkt die Sprache nicht');
+		await katalog.page.goto(basis + '/start.html', { waitUntil: 'networkidle' });
+		assert.equal(new URL(katalog.page.url()).pathname, '/en/', 'Wahl der Katalogseite wirkt nicht');
+		await katalog.context.close();
+
+		const app = await start(browser, 'de-DE');
+		await app.page.goto(basis + '/de/karte/', { waitUntil: 'networkidle' });
+		await app.page.waitForTimeout(600);
+		await app.page.locator('a[hreflang="fr"]').first().click();
+		await app.page.waitForLoadState('networkidle');
+		assert.equal(new URL(app.page.url()).pathname, '/fr/carte/');
+		const appCookie = (await app.context.cookies()).find((c) => c.name === 'llb_sprache');
+		assert.ok(appCookie && appCookie.value === 'fr', 'Kartenseite merkt die Sprache nicht');
+		await app.context.close();
+
+		console.log('Spracherkennung: Browserliste, Sprachpfad, gewählte Sprache und beide Footer-Orte ok');
 	} finally {
 		await browser.close();
 	}
