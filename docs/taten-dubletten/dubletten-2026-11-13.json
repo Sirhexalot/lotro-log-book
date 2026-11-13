@@ -1,0 +1,2857 @@
+{
+  "source": "/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/deeds.json",
+  "generated": "2026-11-13",
+  "rule": "Exact duplicate signature (name, category, tab, description, objectives). Keep the higher ID; mark the lower as replaced.",
+  "groups": [
+    {
+      "name_en": "Reactive Block",
+      "name_de": "Aktives Blocken",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E6C",
+        "70038484"
+      ],
+      "chosen": "70038484",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E6C",
+          "name_de": "Aktives Blocken",
+          "name_en": "Reactive Block",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Aktives Blocken",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70038484",
+          "name_de": "Aktives Blocken",
+          "name_en": "Reactive Block",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Aktives Blocken",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Adherent of Elendil",
+      "name_de": "Anhänger Elendils",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "700161FB",
+        "70037F52"
+      ],
+      "chosen": "70037F52",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "700161FB",
+          "name_de": "Anhänger Elendils",
+          "name_en": "Adherent of Elendil",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Anhänger Elendils",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F52",
+          "name_de": "Anhänger Elendils",
+          "name_en": "Adherent of Elendil",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Anhänger Elendils",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Graceful Demeanour",
+      "name_de": "Anmutiges Verhalten",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000EA8",
+        "70037F1C"
+      ],
+      "chosen": "70037F1C",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000EA8",
+          "name_de": "Anmutiges Verhalten",
+          "name_en": "Graceful Demeanour",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Anmutiges Verhalten",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F1C",
+          "name_de": "Anmutiges Verhalten",
+          "name_en": "Graceful Demeanour",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Anmutiges Verhalten",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Athletic",
+      "name_de": "Athletische Statur",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "700161EA",
+        "70037F34"
+      ],
+      "chosen": "70037F34",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "700161EA",
+          "name_de": "Athletische Statur",
+          "name_en": "Athletic",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Athletische Statur",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F34",
+          "name_de": "Athletische Statur",
+          "name_en": "Athletic",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Athletische Statur",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Tracking an Old Goat",
+      "name_de": "Auf der Spur einer alten Ziege",
+      "category": "",
+      "tab": 37,
+      "ids": [
+        "7002A5F5",
+        "7002D4C1"
+      ],
+      "chosen": "7002D4C1",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "7002A5F5",
+          "name_de": "Auf der Spur einer alten Ziege",
+          "name_en": "Tracking an Old Goat",
+          "in_progress": false,
+          "quest_requirement": true,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Auf der Spur einer alten Ziege",
+          "region": "Eriador",
+          "zone": "Dunland",
+          "category": ""
+        },
+        {
+          "id": "7002D4C1",
+          "name_de": "Auf der Spur einer alten Ziege",
+          "name_en": "Tracking an Old Goat",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": true,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Auf der Spur einer alten Ziege",
+          "region": "Eriador",
+          "zone": "Dunland",
+          "category": ""
+        }
+      ]
+    },
+    {
+      "name_en": "Perseverance",
+      "name_de": "Beharrlichkeit",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016306",
+        "70037EFE"
+      ],
+      "chosen": "70037EFE",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016306",
+          "name_de": "Beharrlichkeit",
+          "name_en": "Perseverance",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Beharrlichkeit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EFE",
+          "name_de": "Beharrlichkeit",
+          "name_en": "Perseverance",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Beharrlichkeit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "The Secret of Tar",
+      "name_de": "Das Geheimnis des Teerkochens",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "7001621A",
+        "70037EE6"
+      ],
+      "chosen": "70037EE6",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "7001621A",
+          "name_de": "Das Geheimnis des Teerkochens",
+          "name_en": "The Secret of Tar",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Das Geheimnis des Teerkochens",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EE6",
+          "name_de": "Das Geheimnis des Teerkochens",
+          "name_en": "The Secret of Tar",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Das Geheimnis des Teerkochens",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Enduring Morale",
+      "name_de": "Dauerhafte Moral",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016208",
+        "70037F21"
+      ],
+      "chosen": "70037F21",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016208",
+          "name_de": "Dauerhafte Moral",
+          "name_en": "Enduring Morale",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Dauerhafte Moral",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F21",
+          "name_de": "Dauerhafte Moral",
+          "name_en": "Enduring Morale",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Dauerhafte Moral",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Enmity of the Orcs",
+      "name_de": "Die Verfeindung der Orks",
+      "category": "Volk & Soziales",
+      "tab": 10,
+      "ids": [
+        "70006310",
+        "70048CE9"
+      ],
+      "chosen": "70048CE9",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70006310",
+          "name_de": "Die Verfeindung der Orks",
+          "name_en": "Enmity of the Orcs",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Die Verfeindung der Orks",
+          "region": "",
+          "zone": "",
+          "category": "Volk & Soziales"
+        },
+        {
+          "id": "70048CE9",
+          "name_de": "Die Verfeindung der Orks",
+          "name_en": "Enmity of the Orcs",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Die Verfeindung der Orks",
+          "region": "",
+          "zone": "",
+          "category": "Volk & Soziales"
+        }
+      ]
+    },
+    {
+      "name_en": "A Keen Response",
+      "name_de": "Eine kühne Erwiderung",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016302",
+        "70037F0E"
+      ],
+      "chosen": "70037F0E",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016302",
+          "name_de": "Eine kühne Erwiderung",
+          "name_en": "A Keen Response",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Eine kühne Erwiderung",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F0E",
+          "name_de": "Eine kühne Erwiderung",
+          "name_en": "A Keen Response",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Eine kühne Erwiderung",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Conflagration of Runes",
+      "name_de": "Feuersbrunst der Runen",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "7001635A",
+        "7003856F"
+      ],
+      "chosen": "7003856F",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "7001635A",
+          "name_de": "Feuersbrunst der Runen",
+          "name_en": "Conflagration of Runes",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Feuersbrunst der Runen",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "7003856F",
+          "name_de": "Feuersbrunst der Runen",
+          "name_en": "Conflagration of Runes",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Feuersbrunst der Runen",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Swift and Subtle",
+      "name_de": "Flink und raffiniert",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E33",
+        "70037F76"
+      ],
+      "chosen": "70037F76",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E33",
+          "name_de": "Flink und raffiniert",
+          "name_en": "Swift and Subtle",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Flink und raffiniert",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F76",
+          "name_de": "Flink und raffiniert",
+          "name_en": "Swift and Subtle",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Flink und raffiniert",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Side-step",
+      "name_de": "Flinker Schritt",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E39",
+        "70037F77"
+      ],
+      "chosen": "70037F77",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E39",
+          "name_de": "Flinker Schritt",
+          "name_en": "Side-step",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Flinker Schritt",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F77",
+          "name_de": "Flinker Schritt",
+          "name_en": "Side-step",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Flinker Schritt",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Footpad",
+      "name_de": "Fußpolster",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E3E",
+        "70037F6C"
+      ],
+      "chosen": "70037F6C",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E3E",
+          "name_de": "Fußpolster",
+          "name_en": "Footpad",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Fußpolster",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F6C",
+          "name_de": "Fußpolster",
+          "name_en": "Footpad",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Fußpolster",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Tale of Rage",
+      "name_de": "Geschichte der Wut",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016359",
+        "70038558"
+      ],
+      "chosen": "70038558",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016359",
+          "name_de": "Geschichte der Wut",
+          "name_en": "Tale of Rage",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Geschichte der Wut",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70038558",
+          "name_de": "Geschichte der Wut",
+          "name_en": "Tale of Rage",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Geschichte der Wut",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Skill and Power",
+      "name_de": "Geschicklichkeit und Kraft",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016303",
+        "70037F0A"
+      ],
+      "chosen": "70037F0A",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016303",
+          "name_de": "Geschicklichkeit und Kraft",
+          "name_en": "Skill and Power",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Geschicklichkeit und Kraft",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F0A",
+          "name_de": "Geschicklichkeit und Kraft",
+          "name_en": "Skill and Power",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Geschicklichkeit und Kraft",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Expert Hurler",
+      "name_de": "Geschickter Werfer",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "700162FC",
+        "70037EFD"
+      ],
+      "chosen": "70037EFD",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "700162FC",
+          "name_de": "Geschickter Werfer",
+          "name_en": "Expert Hurler",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Geschickter Werfer",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EFD",
+          "name_de": "Geschickter Werfer",
+          "name_en": "Expert Hurler",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Geschickter Werfer",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Skilful Blocking",
+      "name_de": "Geschicktes Blocken",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "7001630C",
+        "70037F0C"
+      ],
+      "chosen": "70037F0C",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "7001630C",
+          "name_de": "Geschicktes Blocken",
+          "name_en": "Skilful Blocking",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Geschicktes Blocken",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F0C",
+          "name_de": "Geschicktes Blocken",
+          "name_en": "Skilful Blocking",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Geschicktes Blocken",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Heightened Senses",
+      "name_de": "Geschärfte Sinne",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E82",
+        "70037ECE"
+      ],
+      "chosen": "70037ECE",
+      "progress_ids": [
+        "70037ECE"
+      ],
+      "records": [
+        {
+          "id": "70000E82",
+          "name_de": "Geschärfte Sinne",
+          "name_en": "Heightened Senses",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Geschärfte Sinne",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037ECE",
+          "name_de": "Geschärfte Sinne",
+          "name_en": "Heightened Senses",
+          "in_progress": true,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Geschärfte Sinne",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Cruel Odds",
+      "name_de": "Grausame Chancen",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016238",
+        "70037F7B"
+      ],
+      "chosen": "70037F7B",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016238",
+          "name_de": "Grausame Chancen",
+          "name_en": "Cruel Odds",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Grausame Chancen",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F7B",
+          "name_de": "Grausame Chancen",
+          "name_en": "Cruel Odds",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Grausame Chancen",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Bountiful Mercy",
+      "name_de": "Großzügige Milde",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "700161EB",
+        "70037F38"
+      ],
+      "chosen": "70037F38",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "700161EB",
+          "name_de": "Großzügige Milde",
+          "name_en": "Bountiful Mercy",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Großzügige Milde",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F38",
+          "name_de": "Großzügige Milde",
+          "name_en": "Bountiful Mercy",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Großzügige Milde",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Harmonious Melody",
+      "name_de": "Harmonische Melodie",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E9E",
+        "70037F1A"
+      ],
+      "chosen": "70037F1A",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E9E",
+          "name_de": "Harmonische Melodie",
+          "name_en": "Harmonious Melody",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Harmonische Melodie",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F1A",
+          "name_de": "Harmonische Melodie",
+          "name_en": "Harmonious Melody",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Harmonische Melodie",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Healer",
+      "name_de": "Heiler",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E93",
+        "70037EDB"
+      ],
+      "chosen": "70037EDB",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E93",
+          "name_de": "Heiler",
+          "name_en": "Healer",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Heiler",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EDB",
+          "name_de": "Heiler",
+          "name_en": "Healer",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Heiler",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Harmony with Nature",
+      "name_de": "In Einklang mit der Natur",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E97",
+        "70037EE7"
+      ],
+      "chosen": "70037EE7",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E97",
+          "name_de": "In Einklang mit der Natur",
+          "name_en": "Harmony with Nature",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "In Einklang mit der Natur",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EE7",
+          "name_de": "In Einklang mit der Natur",
+          "name_en": "Harmony with Nature",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "In Einklang mit der Natur",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Know Your Enemy",
+      "name_de": "Kennt Euren Feind",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016309",
+        "70037F06"
+      ],
+      "chosen": "70037F06",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016309",
+          "name_de": "Kennt Euren Feind",
+          "name_en": "Know Your Enemy",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Kennt Euren Feind",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F06",
+          "name_de": "Kennt Euren Feind",
+          "name_en": "Know Your Enemy",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Kennt Euren Feind",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Power of Song",
+      "name_de": "Kraft des Gesangs",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "7001620F",
+        "70037F22"
+      ],
+      "chosen": "70037F22",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "7001620F",
+          "name_de": "Kraft des Gesangs",
+          "name_en": "Power of Song",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Kraft des Gesangs",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F22",
+          "name_de": "Kraft des Gesangs",
+          "name_en": "Power of Song",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Kraft des Gesangs",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Strong Voice",
+      "name_de": "Kräftige Stimme",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E4C",
+        "70037F65"
+      ],
+      "chosen": "70037F65",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E4C",
+          "name_de": "Kräftige Stimme",
+          "name_en": "Strong Voice",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Kräftige Stimme",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F65",
+          "name_de": "Kräftige Stimme",
+          "name_en": "Strong Voice",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Kräftige Stimme",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Deep Lore",
+      "name_de": "Kunde der Tiefen",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E92",
+        "70037EDD"
+      ],
+      "chosen": "70037EDD",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E92",
+          "name_de": "Kunde der Tiefen",
+          "name_en": "Deep Lore",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Kunde der Tiefen",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EDD",
+          "name_de": "Kunde der Tiefen",
+          "name_en": "Deep Lore",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Kunde der Tiefen",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Awareness of Body",
+      "name_de": "Körperbewusstheit",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E98",
+        "70037EDA"
+      ],
+      "chosen": "70037EDA",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E98",
+          "name_de": "Körperbewusstheit",
+          "name_en": "Awareness of Body",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Körperbewusstheit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EDA",
+          "name_de": "Körperbewusstheit",
+          "name_en": "Awareness of Body",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Körperbewusstheit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Life-singer",
+      "name_de": "Lebenssänger",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000EA3",
+        "70037F25"
+      ],
+      "chosen": "70037F25",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000EA3",
+          "name_de": "Lebenssänger",
+          "name_en": "Life-singer",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Lebenssänger",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F25",
+          "name_de": "Lebenssänger",
+          "name_en": "Life-singer",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Lebenssänger",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Power and Wisdom",
+      "name_de": "Macht und Weisheit",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E8E",
+        "70037EE2"
+      ],
+      "chosen": "70037EE2",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E8E",
+          "name_de": "Macht und Weisheit",
+          "name_en": "Power and Wisdom",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Macht und Weisheit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EE2",
+          "name_de": "Macht und Weisheit",
+          "name_en": "Power and Wisdom",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Macht und Weisheit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Master of Allusion",
+      "name_de": "Meister der Anspielung",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016362",
+        "7003855A"
+      ],
+      "chosen": "7003855A",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016362",
+          "name_de": "Meister der Anspielung",
+          "name_en": "Master of Allusion",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister der Anspielung",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "7003855A",
+          "name_de": "Meister der Anspielung",
+          "name_en": "Master of Allusion",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister der Anspielung",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Master of the Fist",
+      "name_de": "Meister der Faust",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "700162FF",
+        "70037F03"
+      ],
+      "chosen": "70037F03",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "700162FF",
+          "name_de": "Meister der Faust",
+          "name_en": "Master of the Fist",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister der Faust",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F03",
+          "name_de": "Meister der Faust",
+          "name_en": "Master of the Fist",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister der Faust",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Master of Tragedy",
+      "name_de": "Meister der Tragödie",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016353",
+        "7003857D"
+      ],
+      "chosen": "7003857D",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016353",
+          "name_de": "Meister der Tragödie",
+          "name_en": "Master of Tragedy",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister der Tragödie",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "7003857D",
+          "name_de": "Meister der Tragödie",
+          "name_en": "Master of Tragedy",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister der Tragödie",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Master of the Shield",
+      "name_de": "Meister des Schildes",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "7001630A",
+        "70037F05"
+      ],
+      "chosen": "70037F05",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "7001630A",
+          "name_de": "Meister des Schildes",
+          "name_en": "Master of the Shield",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister des Schildes",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F05",
+          "name_de": "Meister des Schildes",
+          "name_en": "Master of the Shield",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister des Schildes",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Master of the Spear",
+      "name_de": "Meister des Speers",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016300",
+        "70037F00"
+      ],
+      "chosen": "70037F00",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016300",
+          "name_de": "Meister des Speers",
+          "name_en": "Master of the Spear",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister des Speers",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F00",
+          "name_de": "Meister des Speers",
+          "name_en": "Master of the Spear",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister des Speers",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Master of the Staff",
+      "name_de": "Meister des Stabes",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E8D",
+        "70037ECF"
+      ],
+      "chosen": "70037ECF",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E8D",
+          "name_de": "Meister des Stabes",
+          "name_en": "Master of the Staff",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister des Stabes",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037ECF",
+          "name_de": "Meister des Stabes",
+          "name_en": "Master of the Staff",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Meister des Stabes",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Powerful Voice",
+      "name_de": "Mächtige Stimme",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000EA1",
+        "70037F1F"
+      ],
+      "chosen": "70037F1F",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000EA1",
+          "name_de": "Mächtige Stimme",
+          "name_en": "Powerful Voice",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Mächtige Stimme",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F1F",
+          "name_de": "Mächtige Stimme",
+          "name_en": "Powerful Voice",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Mächtige Stimme",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "To the Rescue",
+      "name_de": "Rettung",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E72",
+        "700384E8"
+      ],
+      "chosen": "700384E8",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E72",
+          "name_de": "Rettung",
+          "name_en": "To the Rescue",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Rettung",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "700384E8",
+          "name_de": "Rettung",
+          "name_en": "To the Rescue",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Rettung",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Call of the Wild",
+      "name_de": "Ruf der Wildnis",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E60",
+        "70037F2D"
+      ],
+      "chosen": "70037F2D",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E60",
+          "name_de": "Ruf der Wildnis",
+          "name_en": "Call of the Wild",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Ruf der Wildnis",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F2D",
+          "name_de": "Ruf der Wildnis",
+          "name_en": "Call of the Wild",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Ruf der Wildnis",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Battle-hymn",
+      "name_de": "Schlachthymne",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000EAC",
+        "70037F26"
+      ],
+      "chosen": "70037F26",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000EAC",
+          "name_de": "Schlachthymne",
+          "name_en": "Battle-hymn",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Schlachthymne",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F26",
+          "name_de": "Schlachthymne",
+          "name_en": "Battle-hymn",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Schlachthymne",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Quickness",
+      "name_de": "Schnelligkeit",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E74",
+        "700384E5"
+      ],
+      "chosen": "700384E5",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E74",
+          "name_de": "Schnelligkeit",
+          "name_en": "Quickness",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Schnelligkeit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "700384E5",
+          "name_de": "Schnelligkeit",
+          "name_en": "Quickness",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Schnelligkeit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Terrible Visage",
+      "name_de": "Schreckliches Antlitz",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016304",
+        "70037EFF"
+      ],
+      "chosen": "70037EFF",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016304",
+          "name_de": "Schreckliches Antlitz",
+          "name_en": "Terrible Visage",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Schreckliches Antlitz",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EFF",
+          "name_de": "Schreckliches Antlitz",
+          "name_en": "Terrible Visage",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Schreckliches Antlitz",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Silver Tongue",
+      "name_de": "Silberne Zunge",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000EA9",
+        "70037F19"
+      ],
+      "chosen": "70037F19",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000EA9",
+          "name_de": "Silberne Zunge",
+          "name_en": "Silver Tongue",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Silberne Zunge",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F19",
+          "name_de": "Silberne Zunge",
+          "name_en": "Silver Tongue",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Silberne Zunge",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Strong Draw",
+      "name_de": "Starke Sehne",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E81",
+        "70037ECD"
+      ],
+      "chosen": "70037ECD",
+      "progress_ids": [
+        "70037ECD"
+      ],
+      "records": [
+        {
+          "id": "70000E81",
+          "name_de": "Starke Sehne",
+          "name_en": "Strong Draw",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Starke Sehne",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037ECD",
+          "name_de": "Starke Sehne",
+          "name_en": "Strong Draw",
+          "in_progress": true,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Starke Sehne",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Stinging Blow",
+      "name_de": "Stechender Stoß",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E6B",
+        "70038485"
+      ],
+      "chosen": "70038485",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E6B",
+          "name_de": "Stechender Stoß",
+          "name_en": "Stinging Blow",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Stechender Stoß",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70038485",
+          "name_de": "Stechender Stoß",
+          "name_en": "Stinging Blow",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Stechender Stoß",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Force of Personality",
+      "name_de": "Stärke der Persönlichkeit",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "700162FE",
+        "70037F04"
+      ],
+      "chosen": "70037F04",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "700162FE",
+          "name_de": "Stärke der Persönlichkeit",
+          "name_en": "Force of Personality",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Stärke der Persönlichkeit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F04",
+          "name_de": "Stärke der Persönlichkeit",
+          "name_en": "Force of Personality",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Stärke der Persönlichkeit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Confounding Principles",
+      "name_de": "Störende Prinzipien",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016356",
+        "70038570"
+      ],
+      "chosen": "70038570",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016356",
+          "name_de": "Störende Prinzipien",
+          "name_en": "Confounding Principles",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Störende Prinzipien",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70038570",
+          "name_de": "Störende Prinzipien",
+          "name_en": "Confounding Principles",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Störende Prinzipien",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Tactical Prowess",
+      "name_de": "Taktische Tüchtigkeit",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "700161F8",
+        "70037F66"
+      ],
+      "chosen": "70037F66",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "700161F8",
+          "name_de": "Taktische Tüchtigkeit",
+          "name_en": "Tactical Prowess",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Taktische Tüchtigkeit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F66",
+          "name_de": "Taktische Tüchtigkeit",
+          "name_en": "Tactical Prowess",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Taktische Tüchtigkeit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Brave Heart",
+      "name_de": "Tapferes Herz",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E79",
+        "700384E4"
+      ],
+      "chosen": "700384E4",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E79",
+          "name_de": "Tapferes Herz",
+          "name_en": "Brave Heart",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Tapferes Herz",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "700384E4",
+          "name_de": "Tapferes Herz",
+          "name_en": "Brave Heart",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Tapferes Herz",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Never Say Die",
+      "name_de": "Tod ist kein Thema",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016305",
+        "70037F10"
+      ],
+      "chosen": "70037F10",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016305",
+          "name_de": "Tod ist kein Thema",
+          "name_en": "Never Say Die",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Tod ist kein Thema",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F10",
+          "name_de": "Tod ist kein Thema",
+          "name_en": "Never Say Die",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Tod ist kein Thema",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Hit Where It Hurts",
+      "name_de": "Treffen, wo es schmerzt",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016229",
+        "700384E6"
+      ],
+      "chosen": "700384E6",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016229",
+          "name_de": "Treffen, wo es schmerzt",
+          "name_en": "Hit Where It Hurts",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Treffen, wo es schmerzt",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "700384E6",
+          "name_de": "Treffen, wo es schmerzt",
+          "name_en": "Hit Where It Hurts",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Treffen, wo es schmerzt",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Cunning Wound",
+      "name_de": "Täuschende Wunde",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E32",
+        "70037F79"
+      ],
+      "chosen": "70037F79",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E32",
+          "name_de": "Täuschende Wunde",
+          "name_en": "Cunning Wound",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Täuschende Wunde",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F79",
+          "name_de": "Täuschende Wunde",
+          "name_en": "Cunning Wound",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Täuschende Wunde",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Deadly Precision",
+      "name_de": "Tödliche Präzision",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E87",
+        "70037EEE"
+      ],
+      "chosen": "70037EEE",
+      "progress_ids": [
+        "70037EEE"
+      ],
+      "records": [
+        {
+          "id": "70000E87",
+          "name_de": "Tödliche Präzision",
+          "name_en": "Deadly Precision",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Tödliche Präzision",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EEE",
+          "name_de": "Tödliche Präzision",
+          "name_en": "Deadly Precision",
+          "in_progress": true,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Tödliche Präzision",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Deadly Strikes",
+      "name_de": "Tödliche Schläge",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E5A",
+        "70037F2B"
+      ],
+      "chosen": "70037F2B",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E5A",
+          "name_de": "Tödliche Schläge",
+          "name_en": "Deadly Strikes",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Tödliche Schläge",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F2B",
+          "name_de": "Tödliche Schläge",
+          "name_en": "Deadly Strikes",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Tödliche Schläge",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Subtlety of Wisdom",
+      "name_de": "Unauffällige Weisheit",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E99",
+        "70037EE3"
+      ],
+      "chosen": "70037EE3",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E99",
+          "name_de": "Unauffällige Weisheit",
+          "name_en": "Subtlety of Wisdom",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Unauffällige Weisheit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EE3",
+          "name_de": "Unauffällige Weisheit",
+          "name_en": "Subtlety of Wisdom",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Unauffällige Weisheit",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Unrelenting",
+      "name_de": "Unerbittlich",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000EA4",
+        "70037F24"
+      ],
+      "chosen": "70037F24",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000EA4",
+          "name_de": "Unerbittlich",
+          "name_en": "Unrelenting",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Unerbittlich",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F24",
+          "name_de": "Unerbittlich",
+          "name_en": "Unrelenting",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Unerbittlich",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Improved Inner Flame",
+      "name_de": "Verbesserte Innere Flamme",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "7001621F",
+        "70037EE5"
+      ],
+      "chosen": "70037EE5",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "7001621F",
+          "name_de": "Verbesserte Innere Flamme",
+          "name_en": "Improved Inner Flame",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Verbesserte Innere Flamme",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037EE5",
+          "name_de": "Verbesserte Innere Flamme",
+          "name_en": "Improved Inner Flame",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Verbesserte Innere Flamme",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Improved Raise the Spirit",
+      "name_de": "Verbesserung: Auferstehung der Seele",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "7001620D",
+        "70037F16"
+      ],
+      "chosen": "70037F16",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "7001620D",
+          "name_de": "Verbesserung: Auferstehung der Seele",
+          "name_en": "Improved Raise the Spirit",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Verbesserung: Auferstehung der Seele",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F16",
+          "name_de": "Verbesserung: Auferstehung der Seele",
+          "name_en": "Improved Raise the Spirit",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Verbesserung: Auferstehung der Seele",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Improved Echoes of Battle",
+      "name_de": "Verbesserung: Widerhall des Kampfes",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "7001620C",
+        "70037F23"
+      ],
+      "chosen": "70037F23",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "7001620C",
+          "name_de": "Verbesserung: Widerhall des Kampfes",
+          "name_en": "Improved Echoes of Battle",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Verbesserung: Widerhall des Kampfes",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F23",
+          "name_de": "Verbesserung: Widerhall des Kampfes",
+          "name_en": "Improved Echoes of Battle",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Verbesserung: Widerhall des Kampfes",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Perplexing Riddle",
+      "name_de": "Verblüffendes Rätsel",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E34",
+        "70037F73"
+      ],
+      "chosen": "70037F73",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E34",
+          "name_de": "Verblüffendes Rätsel",
+          "name_en": "Perplexing Riddle",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Verblüffendes Rätsel",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F73",
+          "name_de": "Verblüffendes Rätsel",
+          "name_en": "Perplexing Riddle",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Verblüffendes Rätsel",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Hidden Dagger",
+      "name_de": "Verborgener Dolch",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E35",
+        "70037F74"
+      ],
+      "chosen": "70037F74",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E35",
+          "name_de": "Verborgener Dolch",
+          "name_en": "Hidden Dagger",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Verborgener Dolch",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F74",
+          "name_de": "Verborgener Dolch",
+          "name_en": "Hidden Dagger",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Verborgener Dolch",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Slaughter them All -- Tier 1",
+      "name_de": "Vernichtet sie alle! Stufe 1",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "7000B1AA",
+        "70019EC0",
+        "70019EC8",
+        "70019ED0"
+      ],
+      "chosen": "70019ED0",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "7000B1AA",
+          "name_de": "Vernichtet sie alle! Stufe 1",
+          "name_en": "Slaughter them All -- Tier 1",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Vernichtet sie alle! Stufe 1",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70019EC0",
+          "name_de": "Vernichtet sie alle! Stufe 1",
+          "name_en": "Slaughter them All -- Tier 1",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Vernichtet sie alle! Stufe 1",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70019EC8",
+          "name_de": "Vernichtet sie alle! Stufe 1",
+          "name_en": "Slaughter them All -- Tier 1",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Vernichtet sie alle! Stufe 1",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70019ED0",
+          "name_de": "Vernichtet sie alle! Stufe 1",
+          "name_en": "Slaughter them All -- Tier 1",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Vernichtet sie alle! Stufe 1",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Wary Blocks",
+      "name_de": "Wachsames Blocken",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "7001630D",
+        "70037F08"
+      ],
+      "chosen": "70037F08",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "7001630D",
+          "name_de": "Wachsames Blocken",
+          "name_en": "Wary Blocks",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Wachsames Blocken",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F08",
+          "name_de": "Wachsames Blocken",
+          "name_en": "Wary Blocks",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Wachsames Blocken",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Leaf-walker",
+      "name_de": "Windschritt",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E42",
+        "70037F71"
+      ],
+      "chosen": "70037F71",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E42",
+          "name_de": "Windschritt",
+          "name_en": "Leaf-walker",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Windschritt",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70037F71",
+          "name_de": "Windschritt",
+          "name_en": "Leaf-walker",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Windschritt",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Thunderous Words",
+      "name_de": "Worte wie Donnerhall",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70016365",
+        "70038559"
+      ],
+      "chosen": "70038559",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70016365",
+          "name_de": "Worte wie Donnerhall",
+          "name_en": "Thunderous Words",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Worte wie Donnerhall",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70038559",
+          "name_de": "Worte wie Donnerhall",
+          "name_en": "Thunderous Words",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Worte wie Donnerhall",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    },
+    {
+      "name_en": "Guardian's Ward",
+      "name_de": "Wächterschild",
+      "category": "Klasse",
+      "tab": 9,
+      "ids": [
+        "70000E6D",
+        "70038486"
+      ],
+      "chosen": "70038486",
+      "progress_ids": [],
+      "records": [
+        {
+          "id": "70000E6D",
+          "name_de": "Wächterschild",
+          "name_en": "Guardian's Ward",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Wächterschild",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        },
+        {
+          "id": "70038486",
+          "name_de": "Wächterschild",
+          "name_en": "Guardian's Ward",
+          "in_progress": false,
+          "quest_requirement": false,
+          "reputation_reward": false,
+          "hidden": null,
+          "monster_play": null,
+          "name": "Wächterschild",
+          "region": "",
+          "zone": "",
+          "category": "Klasse"
+        }
+      ]
+    }
+  ]
+}
