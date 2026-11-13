@@ -33,6 +33,12 @@ def sauber(text):
     return re.sub(r'\s+', ' ', text).strip()
 
 
+# The export spells the tier 13 "Minis Ithil" in German; the city is Minas
+# Ithil, and the English and French exports say so. One correction, in the
+# place the name is read, so every recipe and every page carries it.
+STUFEN_KORREKTUR = {'de': {'Minis Ithil': 'Minas Ithil'}}
+
+
 def name(record, sprache):
     if not record:
         return ''
@@ -79,7 +85,7 @@ def baue(quelle, sprache):
             int(result.get('q') or 0),
             int(result.get('l') or 0),
             profession.get(sprache) or profession.get('en') or '',
-            tier.get(sprache) or tier.get('en') or '',
+            STUFEN_KORREKTUR.get(sprache, {}).get(tier.get(sprache) or '', tier.get(sprache) or tier.get('en') or ''),
             category.get(sprache) or category.get('en') or '',
             zutaten,
             optional,
