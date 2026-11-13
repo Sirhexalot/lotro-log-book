@@ -98,6 +98,10 @@ details[open]>.filter-group-heading>.filter-arrow,details[open]>summary>.filter-
 .filter-dialog footer { padding-bottom:max(16px,env(safe-area-inset-bottom)); }
 .filter-dialog-body { overflow-y:auto; padding:0 16px 16px; overscroll-behavior:contain; }
 .filter-dialog button { min-height:44px; }
+/* Lucide symbols for gathering nodes: no client art exists, so the
+   established icon fills the same slot as the item image. */
+.symbol-svg { display:inline-flex; align-items:center; justify-content:center; }
+.symbol-svg svg { width:16px; height:16px; }
 .filter-ui [hidden] { display:none !important; }
 @media(min-width:901px) { .filter-ui { --filter-row:32px; } }
 @media(min-width:1200px) { .filter-grid { grid-template-columns:340px minmax(0,1fr); } }

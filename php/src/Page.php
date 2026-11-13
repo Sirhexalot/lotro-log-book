@@ -232,6 +232,12 @@ final class Page
             }
             $context['craft_geography_json'] = json_encode($geography,
                 JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
+            // Pure gathering nodes have no item image; the page supplies the
+            // established Lucide symbol for them instead of leaving a gap.
+            $context['craft_icons_json'] = json_encode([
+                'vorkommen' => $this->shell->icon('vorkommen'),
+                'beruf' => $this->shell->icon('beruf'),
+            ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
         }
         return $this->view->render('app/' . $template . '.twig', $context);
     }

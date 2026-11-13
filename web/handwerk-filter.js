@@ -6,6 +6,10 @@
 	var refs=(window.MQL_REFERENZ || {}).berufe || {}, activeTab='', queue=Promise.resolve(), tabStates={};
 	var geographyNode=document.getElementById('craft-geography');
 	var geography=geographyNode?JSON.parse(geographyNode.textContent):{};
+	// Pure gathering nodes carry no item image; the page hands over the
+	// established Lucide symbol for them.
+	var symbolsNode=document.getElementById('craft-symbols');
+	var symbols=symbolsNode?JSON.parse(symbolsNode.textContent):{};
 	var params=['q','beruf','stufe','kategorie','sort','eigene','lernstand','fehlend','quelle','optional','gebiet','region','landschaft','rohstoff'];
 	function parents(mapId){
 		var id=String(mapId),seen=new Set(),region=null,landscape=null;
@@ -166,6 +170,7 @@
 				result.payload.forEach(function(r){var section=document.createElement('section');section.className='filter-craft-row';
 					var title=document.createElement('h3');
 					if(r.symbol){var bildchen=document.createElement('img');bildchen.className='symbol';bildchen.src='/bild/items/'+r.symbol+'.webp';bildchen.alt='';bildchen.width=22;bildchen.height=22;bildchen.loading='lazy';bildchen.decoding='async';title.appendChild(bildchen);}
+					else if(r.kind==='resource'&&symbols.vorkommen){var marke=document.createElement('span');marke.className='symbol symbol-svg';marke.innerHTML=symbols.vorkommen;title.appendChild(marke);}
 					if(r.kind!=='resource'&&r.id){var titelLink=text('a',r.name);titelLink.href=url('item',r.id);title.appendChild(titelLink);}else{title.appendChild(text('span',r.name));}
 					section.appendChild(title);
 					if(tab==='berufe'){

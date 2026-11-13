@@ -15,7 +15,9 @@ const base = process.argv[2] || 'http://127.0.0.1:8813';
 				await page.click('[data-hw="' + tab + '"]');
 				let url = new URL(page.url());
 				assert.equal(url.pathname, route);
-				assert.equal(url.searchParams.get('beruf'), 'COOK');
+				// The shared filter writes array parameters as beruf[]=COOK;
+				// the old single-value form is accepted on input but not echoed.
+				assert.equal(url.searchParams.get('beruf[]'), 'COOK');
 				assert.equal(url.hash, '#' + tab);
 				await page.reload({waitUntil: 'networkidle'});
 				url = new URL(page.url());
