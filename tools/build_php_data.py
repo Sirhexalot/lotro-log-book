@@ -81,13 +81,17 @@ def klarer_name(text) -> str:
 def load_language(lang: str) -> dict:
     quests = read_assignment(WEB / ('daten-%s.js' % lang), 'MQL_QUESTS')
     deeds = read_assignment(WEB / ('daten-taten-%s.js' % lang), 'MQL_QUESTS')
+    try:
+        replaced = read_assignment(WEB / ('daten-taten-%s.js' % lang), 'MQL_REPLACED')
+    except SystemExit:
+        replaced = {}
     maps = read_assignment(WEB / ('daten-%s.js' % lang), 'MQL_KARTEN')
     recipes = read_assignment(WEB / ('rezepte-%s.js' % lang), 'MQL_REZEPTE')['r']
     referenz = read_assignment(WEB / 'referenz.js', 'MQL_REFERENZ')
     items = json.loads((DATEN / 'items.json').read_text(encoding='utf-8'))['items']
     titles = json.loads((DATEN / 'titel.json').read_text(encoding='utf-8'))['eintraege']
     virtues = json.loads((DATEN / 'tugenden.json').read_text(encoding='utf-8'))['eintraege']
-    return dict(quests=quests, deeds=deeds, maps=maps, recipes=recipes,
+    return dict(quests=quests, deeds=deeds, replaced=replaced, maps=maps, recipes=recipes,
                 professions=referenz.get('berufe') or {}, items=items,
                 titles=titles, virtues=virtues)
 
@@ -285,6 +289,84 @@ def write_faction_index(target: Path, lang: str, factions: dict,
     rows.sort(key=lambda row: row['name'].lower())
     payload = {'schema': 1, 'lang': lang, 'labels': labels, 'factions': rows}
     (target / lang / 'factions-index.json').write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+
+
+def write_title_index(target: Path, lang: str, titles: dict,
+                      quests: dict, deeds: dict, maps: dict) -> None:
+    """The filter index for the title browser.
+
+    A title has no place of its own; its sources do. Each source carries the map
+    path (fk) where it plays, and deeds carry their kind. Both become filters:
+    origin (deed or quest), kind and the region/area tree.
+    """
+    labels = {'area': {}, 'region': {}, 'area_region': {}}
+    for idx, entry in maps.items():
+        name = entry.get('name')
+        if not name:
+            continue
+        if entry.get('tier') == 1:
+            labels['region'][str(idx)] = name
+        else:
+            labels['area'][str(idx)] = name
+
+    # The deed kind in the title export is not always localised; the deed
+    # categories from the page models are, and they match the deed pages.
+    from php_viewmodel import DEED_TYPES, OTHER_DEED
+    kategorien = deed_categories()
+    fremd = set(OTHER_DEED.values())
+
+    def tat_art(ident: str) -> str:
+        name = DEED_TYPES.get(kategorien.get(str(ident).upper()), OTHER_DEED)[lang]
+        return '' if name in fremd else name
+
+    rows = []
+    for ident, eintrag in titles.items():
+        quellen = ((eintrag.get('q') or {}).get(lang)
+                   or (eintrag.get('q') or {}).get('en') or [])
+        paare: set[tuple[int, int]] = set()
+        aufgaben = taten = 0
+        arten: set[str] = set()
+        for quelle in quellen:
+            art, qid = quelle[0], quelle[1]
+            record = quests.get(qid) if art == 'q' else deeds.get(qid)
+            if not record:
+                continue
+            if art == 'q':
+                aufgaben += 1
+            else:
+                taten += 1
+                # "Weitere Tat" is the fallback for an unrecorded kind, not a kind.
+                kind = tat_art(qid)
+                if kind:
+                    arten.add(kind)
+            fk = record.get('fk') or []
+            if fk:
+                region = int(fk[0])
+                gebiet = int(fk[1]) if len(fk) > 1 else region
+                paare.add((region, gebiet))
+        regionen = {region for region, _ in paare}
+        gebiete = {gebiet for _, gebiet in paare}
+        for region, gebiet in paare:
+            if gebiet != region:
+                labels['area_region'][str(gebiet)] = str(region)
+        teile = [eintrag['name']]
+        for quelle in quellen:
+            teile.append(quelle[2])
+        for wert in sorted(gebiete):
+            teile.append(labels['area'].get(str(wert))
+                         or labels['region'].get(str(wert)) or '')
+        teile.extend(sorted(arten))
+        rows.append({'id': ident, 'name': eintrag['name'],
+                     'regions': sorted(regionen), 'areas': sorted(gebiete),
+                     'quests': aufgaben, 'deeds': taten, 'arten': sorted(arten),
+                     'search': ' '.join(teil for teil in teile if teil).lower()})
+    rows.sort(key=lambda row: row['name'].lower())
+    # Deed kinds arrive already localised from the page models; they are their
+    # own labels.
+    labels['art'] = {art: art for row in rows for art in row['arten']}
+    payload = {'schema': 1, 'lang': lang, 'labels': labels, 'titles': rows}
+    (target / lang / 'titles-index.json').write_text(
         json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 
 
@@ -553,6 +635,10 @@ def main() -> int:
         (folder / 'maps.json').write_text(
             json.dumps({'maps': maps}, ensure_ascii=False, separators=(',', ':')),
             encoding='utf-8')
+        (folder / 'deed-redirects.json').write_text(
+            json.dumps({'redirects': model.get('replaced') or {}},
+                       ensure_ascii=False, separators=(',', ':')),
+            encoding='utf-8')
         counts = {}
         for kind in ARTEN:
             if kind in ('area', 'region'):
@@ -615,6 +701,7 @@ def main() -> int:
         counts['page-l'] = len(landmark_pages)
         write_pages(target, lang, 'l', landmark_pages)
         write_landmark_index(target, lang, data['l'], maps)
+        write_title_index(target, lang, data['title'], builder.quests, builder.deeds, maps)
         write_faction_index(target, lang, data['f'], builder.quests, builder.deeds, maps)
         write_instance_index(target, lang, instanz_source, maps)
 

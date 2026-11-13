@@ -1111,7 +1111,9 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
     # the crafting page, so no page, no navigation and no sitemap entry.
     # 'l' (landmarks) has its own filter browser as an application page, the
     # same split as the quest givers.
-    for kind in ('q', 'd', 'area', 'region', 'recipe', 'title', 'virtue'):
+    # 'title' has its own filter browser under the same segment; its pages
+    # would shadow it, so only the detail pages stay catalogue pages.
+    for kind in ('q', 'd', 'area', 'region', 'recipe', 'virtue'):
         source = {'q': builder.quests, 'd': builder.deeds, 'i': builder.items,
                   'area': data['area'], 'region': data['region'], 'p': data['p'],
 

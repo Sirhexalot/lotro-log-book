@@ -56,6 +56,14 @@ final class Router
             }
         }
 
+        // The title list became a filter browser; its old page numbers have no
+        // successor, so they lead to the browser instead of a 404.
+        if (preg_match('~^/([a-z]{2})/([a-z0-9-]+)/seite/([0-9]+)/$~', $path, $m)
+            && $this->catalogue->kindOf($m[1], $m[2]) === 'title') {
+            return ['status' => 301,
+                    'redirect' => '/' . $m[1] . '/' . $m[2] . '/'];
+        }
+
         // Application pages: /de/, /de/karte/, /de/karte/taten/, /de/ruf/ …
         if (preg_match('~^/([a-z]{2})/?$~', $path, $m) && $this->catalogue->isLang($m[1])) {
             return ['status' => 200, 'app' => 'start', 'lang' => $m[1]];
@@ -180,6 +188,10 @@ final class Router
             return $this->listPage($lang, $segment . '/' . $identifier . '/');
         }
         $canonical = Catalogue::canonicalId($identifier);
+        if ($kind === 'd' && ($neu = $this->data->deedRedirect($lang, $canonical)) !== null
+            && $neu !== $canonical) {
+            return ['status' => 301, 'redirect' => $this->catalogue->route($lang, 'd', $neu)];
+        }
         if (($kind === 'set' || $kind === 'giver')
             && !$this->data->has($lang, $kind, $canonical)) {
             return ['status' => 404];
@@ -243,6 +255,10 @@ final class Router
             return ['status' => 404];
         }
         $canonical = Catalogue::canonicalId($identifier);
+        if ($kind === 'd' && ($neu = $this->data->deedRedirect($lang, $canonical)) !== null
+            && $neu !== $canonical) {
+            return ['status' => 301, 'redirect' => $this->catalogue->route($lang, 'd', $neu)];
+        }
         if (!$this->data->has($lang, $kind, $canonical)) {
             return ['status' => 404];
         }

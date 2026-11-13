@@ -157,6 +157,9 @@ final class Page
         if ($page === 'factions') {
             return (new Factions($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
         }
+        if ($page === 'titles') {
+            return (new Titles($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
+        }
         if ($page === 'instances') {
             return (new Instances($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
         }

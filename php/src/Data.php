@@ -82,6 +82,11 @@ final class Data
         return $this->read($this->root . '/' . $lang . '/factions-index.json');
     }
 
+    public function titleIndex(string $lang): array
+    {
+        return $this->read($this->root . '/' . $lang . '/titles-index.json');
+    }
+
     public function instanceIndex(string $lang): array
     {
         return $this->read($this->root . '/' . $lang . '/instances-index.json');
@@ -96,6 +101,13 @@ final class Data
     public function has(string $lang, string $kind, string $identifier): bool
     {
         return $this->entity($lang, $kind, $identifier) !== null;
+    }
+
+    /** Old deed id -> current id, or null when it is not a replaced duplicate. */
+    public function deedRedirect(string $lang, string $identifier): ?string
+    {
+        $map = $this->read($this->root . '/' . $lang . '/deed-redirects.json')['redirects'] ?? [];
+        return $map[$identifier] ?? null;
     }
 
     /** Read each required bucket once, preserving the fixed relation set. */

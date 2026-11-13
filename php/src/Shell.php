@@ -83,6 +83,7 @@ final class Shell
     {
         return implode("\n", [$this->scriptTag('sprachwahl.js'), $this->scriptTag('familienmenue.js'),
             $this->scriptTag('speicher.js'),
+            $this->scriptTag('ersetzt-' . $this->lang . '.js'),
             $this->scriptTag('filtergedaechtnis.js'), $this->scriptTag('katalog.js'),
             $this->scriptTag('filterzustand.js'), $this->scriptTag('filteradapter.js'),
             $this->scriptTag('filter-ui.js'), $this->scriptTag('filter-server.js'),
@@ -261,6 +262,7 @@ final class Shell
             'givers' => ['welt', Givers::words($lang)['title']],
             'landmarks' => ['welt', $w['menue_landmarken']],
             'factions' => ['erfolge', Factions::words($lang)['title']],
+            'titles' => ['erfolge', Titles::words($lang)['title']],
             'instances' => ['welt', $w['menue_instanzen']],
             'gegenstandssuche' => ['gegenstaende', $w['menue_gegenstandssuche']],
             'sets' => ['gegenstaende', Sets::words($lang)['title']],
