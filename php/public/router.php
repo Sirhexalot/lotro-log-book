@@ -12,6 +12,19 @@ $root = dirname(__DIR__, 2);
 $webRoot = getenv('LLB_WEB') ?: $root . '/web';
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 
+// Generated terrain stays outside the checkout during local development.
+// A release carries the same files under its public gelaende/ directory.
+if (preg_match('~^/gelaende/(manifest\.json|[a-f0-9]{12}/r[0-9]+/[0-8]/[0-9]+_[0-9]+\.webp|[a-f0-9]{12}/thumb/[0-9]+\.webp)$~', $path, $terrain)) {
+    $terrainRoot = getenv('LLB_TERRAIN') ?: (getenv('HOME') . '/.cache/llb-terrain/public');
+    $file = $terrainRoot . '/' . $terrain[1];
+    if (is_file($file)) {
+        header('Content-Type: ' . (str_ends_with($file, '.json') ? 'application/json' : 'image/webp'));
+        header('Cache-Control: ' . (str_ends_with($file, '.json') ? 'no-cache' : 'public, max-age=31536000, immutable'));
+        readfile($file);
+        return true;
+    }
+}
+
 // Apache serves the map application at "/" through its directory index.
 if ($path === '/') {
     $index = $webRoot . '/index.html';

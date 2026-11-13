@@ -249,11 +249,15 @@
 		lade('daten-' + (art === 'taten' ? 'taten-' : '') + sprache + '.js' + stempel(), function () {
 			if (stil) { stil.href = stil.getAttribute('href').split('?')[0] + stempel(); }
 			ladeText.textContent = t('lade_karte');
+			// The shared landscape list lets both catalogues show the same
+			// navigation; a missing file leaves the tree as the entries built it.
+			lade('gebiete-' + sprache + '.js' + stempel(), function () {
 			lade('fortschritt.js' + stempel(), function () {
 				lade('app.js' + stempel(), function () {
 					// The app draws in the same task; one frame later the page stands.
 					requestAnimationFrame(function () { requestAnimationFrame(fertig); });
 				});
+			});
 			});
 		});
 	});

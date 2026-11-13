@@ -98,6 +98,22 @@ def kopiere_karten(ziel: Path) -> None:
         shutil.copytree(quelle, ziel / 'karten' / sprache)
 
 
+def kopiere_gelaende(ziel: Path, quelle: Path) -> None:
+    """Only ship the manifest's current client version, never research assets."""
+    import json
+    manifest = quelle / 'manifest.json'
+    if not manifest.is_file():
+        print('Hinweis: kein Gelände-Bau vorhanden; Spielkarten bleiben verfügbar.')
+        return
+    data = json.loads(manifest.read_text())
+    version = data['version']
+    if not re.fullmatch(r'[a-f0-9]{12}', version) or not (quelle / version).is_dir():
+        raise SystemExit('Ungültiger Gelände-Bau: ' + str(quelle))
+    (ziel / 'gelaende').mkdir()
+    shutil.copy2(manifest, ziel / 'gelaende/manifest.json')
+    shutil.copytree(quelle / version, ziel / 'gelaende' / version)
+
+
 def kopiere_app(ziel: Path, daten: Path) -> None:
     if not (daten / 'labels.json').is_file():
         raise SystemExit('MISSING: %s/labels.json (run tools/build_php_data.py)' % daten)
@@ -165,6 +181,8 @@ def main() -> int:
                         default=Path.home() / '.cache' / 'llb-release')
     parser.add_argument('--daten', type=Path,
                         default=Path.home() / '.cache' / 'llb-php' / 'phpdata')
+    parser.add_argument('--gelaende', type=Path,
+                        default=Path.home() / '.cache' / 'llb-terrain' / 'public')
     optionen = parser.parse_args()
     ziel = optionen.ziel
     if ziel.exists():
@@ -179,6 +197,7 @@ def main() -> int:
         encoding='utf-8')
     seo_dateien(ziel)
     kopiere_karten(ziel)
+    kopiere_gelaende(ziel, optionen.gelaende)
     kopiere_app(ziel, optionen.daten)
 
     fehler = pruefen(ziel)

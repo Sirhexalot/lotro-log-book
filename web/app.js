@@ -40,6 +40,7 @@
 	var welt = document.getElementById('welt');
 	var bild = document.getElementById('bild');
 	var marker = document.getElementById('marker');
+	var gelaende = null;
 	var hinweis = document.getElementById('hinweis');
 	var legende = document.getElementById('legende');
 	var legendeMehr = document.getElementById('legende-mehr');
@@ -221,6 +222,61 @@
 	});
 	sortiere(WURZEL);
 
+	// --- One landscape navigation for quests and deeds ------------------
+	// The two catalogues file their entries at different depths: quests reach
+	// down to Bree and Archet, most deeds stop at the landscape. Building the
+	// tree only from the loaded entries made the deed overview shorter than the
+	// quest overview (28 landscapes were missing) and gave some landscapes a
+	// different set of map tabs (Adrian, 13.11.2026). The shared list comes from
+	// tools/build_gebiete.py out of both catalogues; missing landscapes and map
+	// tabs are added here with no entries, so a landscape without deeds stays
+	// visible and simply counts zero.
+	(function gleicheGebieteAn() {
+		var liste = window.MQL_GEBIETE;
+		if (!liste || !liste.regionen) { return; }
+		function mitKarte(knoten, kennung, tief) {
+			if (knoten.karte != null && Number(knoten.karte) === Number(kennung)) { return knoten; }
+			if (!tief) { return null; }
+			for (var i = 0; i < knoten.reihenfolge.length; i += 1) {
+				var treffer = mitKarte(knoten.reihenfolge[i], kennung, true);
+				if (treffer) { return treffer; }
+			}
+			return null;
+		}
+		function mitName(knoten, name) {
+			for (var i = 0; i < knoten.reihenfolge.length; i += 1) {
+				if (knoten.reihenfolge[i].name === name) { return knoten.reihenfolge[i]; }
+			}
+			return null;
+		}
+		function neu(elternKnoten, name, karte) {
+			var schluessel = elternKnoten.schluessel + '|' + name;
+			var kind = { schluessel: schluessel, name: name, tiefe: elternKnoten.tiefe + 1,
+				quests: [], eigene: [], kinder: {}, reihenfolge: [], karte: karte == null ? null : karte };
+			elternKnoten.kinder[schluessel] = kind;
+			elternKnoten.reihenfolge.push(kind);
+			return kind;
+		}
+		liste.regionen.forEach(function (region) {
+			var regionKnoten = mitName(WURZEL, region.name) || neu(WURZEL, region.name, null);
+			(region.gebiete || []).forEach(function (gebiet) {
+				var knoten = (gebiet.karte != null ? mitKarte(regionKnoten, gebiet.karte, true) : null) ||
+					mitName(regionKnoten, gebiet.name) || neu(regionKnoten, gebiet.name, gebiet.karte);
+				if (knoten.karte == null && gebiet.karte != null) { knoten.karte = gebiet.karte; }
+				(gebiet.unter || []).forEach(function (unter) {
+					if (mitKarte(knoten, unter[0], false)) { return; }
+					var vorhanden = mitName(knoten, unter[1]);
+					if (vorhanden) {
+						if (vorhanden.karte == null) { vorhanden.karte = unter[0]; }
+						return;
+					}
+					neu(knoten, unter[1], unter[0]);
+				});
+			});
+		});
+		sortiere(WURZEL);
+	})();
+
 	function zaehle(eintraege) {
 		// Only what a character can still do is counted (see zustandVon).
 		var erledigt = 0, gesamt = 0;
@@ -297,7 +353,9 @@
 	}
 
 	// --- Projection ----------------------------------------------------
+	function ansichtsKarte(karte) { return gelaende ? gelaende.frame(karte) : karte; }
 	function anteil(karte, lat, lon) {
+		karte = ansichtsKarte(karte);
 		var breite = karte.east - karte.west;
 		var hoehe = karte.north - karte.south;
 		if (!(breite > 0) || !(hoehe > 0)) { return null; }
@@ -316,6 +374,7 @@
 	 * (not pinned to the edge). So Breeland also shows what lies in Bree or Archet.
 	 */
 	function zeigtOrt(karte, ziel) {
+		karte = ansichtsKarte(karte);
 		if (ziel[0] === karte.idx) { return anteil(karte, ziel[1], ziel[2]); }
 		// An overview whose frame does not fit its sub-maps shows only its own dots.
 		if (karte.eigen) { return null; }
@@ -330,6 +389,7 @@
 
 	/** First objective of a quest on this map, or null. */
 	function zielAuf(quest, karte) {
+		karte = ansichtsKarte(karte);
 		if (!karte || karte.rahmen === 'unklar') { return null; }
 		var eigene = orte(quest);
 		for (var i = 0; i < eigene.length; i += 1) {
@@ -577,6 +637,7 @@
 			zeigeKarte(index);
 		} else {
 			zustand.karte = null;
+			if (gelaende) { gelaende.clear(); }
 			marker.textContent = '';
 			buehne.classList.add('keinbild');
 			hinweis.textContent = t('keine_karte');
@@ -606,10 +667,11 @@
 				bild.src = png;
 				return;
 			}
-			buehne.classList.add('keinbild');
+			if (!gelaende || !gelaende.active()) { buehne.classList.add('keinbild'); }
 		};
 		bild.src = webp;
-		if (karte.rahmen === 'unklar') {
+		if (gelaende) { gelaende.setMap(karte); }
+		if (karte.rahmen === 'unklar' && (!gelaende || !gelaende.active())) {
 			hinweis.textContent = t('rahmen_unklar');
 		}
 		zeichneMarker();
@@ -646,7 +708,7 @@
 	function zeichneMarker() {
 		marker.textContent = '';
 		if (!zustand.karte) { return; }
-		var karte = zustand.karte;
+		var karte = ansichtsKarte(zustand.karte);
 
 		// Several quests at the same place used to be laid on top of each other: only
 		// the topmost could be clicked and the count never matched the list
@@ -654,8 +716,8 @@
 		// Quests on the same spot (within a few pixels) become one marker with a
 		// count. Markers that would still overlap are nudged a little apart, so each
 		// one stays clickable instead of hiding under the other (07.11.2026).
-		var breite = marker.getBoundingClientRect().width || 720;
-		var hoehe = marker.getBoundingClientRect().height || 480;
+		var breite = marker.clientWidth || 720;
+		var hoehe = marker.clientHeight || 480;
 		var stellen = [];
 		zustand.treffer.forEach(function (quest) {
 			var treffer = zielAuf(quest, karte);
@@ -901,7 +963,7 @@
 	}
 	function zeichneNotizen() {
 		notizenEbene.textContent = '';
-		var karte = zustand.karte;
+		var karte = ansichtsKarte(zustand.karte);
 		if (!notizen || !karte || karte.rahmen === 'unklar') { return; }
 		// Things at one spot share one icon place; the tooltip names them all.
 		var stellen = {};
@@ -985,21 +1047,25 @@
 	var vorkKnopf = document.getElementById('vorkommen-knopf');
 	var vorkFeld = document.getElementById('vorkommen-feld');
 	var vorkListe = document.getElementById('vorkommen-liste');
-	try {
-		var vorkGespeichert = JSON.parse(window.localStorage.getItem('mql.vorkommen') || '{}') || {};
-		vorkWahl = vorkGespeichert.wahl || {};
-		// Older browsers stored on/off per trade; carry that over.
-		if (vorkGespeichert.an) {
-			Object.keys(vorkGespeichert.an).forEach(function (beruf) {
-				if (vorkGespeichert.an[beruf] && !vorkWahl[beruf]) { vorkWahl[beruf] = '*'; }
-			});
-		}
-		// First use: the layer is useful straight away, all trades on. A saved
-		// choice — including "nothing" — wins from then on.
-		if (!vorkGespeichert.an) {
-			Object.keys(VORK_FARBE).forEach(function (beruf) { vorkWahl[beruf] = '*'; });
-		}
-	} catch (fehler) { vorkWahl = {}; }
+	// Whether anything was saved decides the start, not what it contains: a
+	// stored choice of "nothing" must stay off after a reload (13.11.2026).
+	// Only a browser without any stored choice gets all trades on.
+	var vorkGespeichert = null;
+	try { vorkGespeichert = window.localStorage.getItem('mql.vorkommen'); } catch (fehler) { vorkGespeichert = null; }
+	if (vorkGespeichert === null) {
+		Object.keys(VORK_FARBE).forEach(function (beruf) { vorkWahl[beruf] = '*'; });
+	} else {
+		try {
+			var vorkAlt = JSON.parse(vorkGespeichert) || {};
+			vorkWahl = vorkAlt.wahl || {};
+			// Older browsers kept on/off per trade; carry that over.
+			if (vorkAlt.an) {
+				Object.keys(vorkAlt.an).forEach(function (beruf) {
+					if (vorkAlt.an[beruf] && !vorkWahl[beruf]) { vorkWahl[beruf] = '*'; }
+				});
+			}
+		} catch (fehler) { vorkWahl = {}; }
+	}
 
 	function vorkMerken() {
 		try {
@@ -1045,6 +1111,10 @@
 
 	/** Points of one map; a missing file simply means "no spots here". */
 	function ladeVorkKarte(kennung, fertig) {
+		if (gelaende && gelaende.hasResources(kennung) === undefined) {
+			gelaende.ready.then(function () { ladeVorkKarte(kennung, fertig); }); return;
+		}
+		if (gelaende && gelaende.hasResources(kennung) === false) { vorkKarten[kennung] = []; fertig(); return; }
 		if (vorkKarten[kennung] || vorkLaeuft[kennung]) {
 			if (vorkKarten[kennung]) { fertig(); }
 			return;
@@ -1132,7 +1202,8 @@
 
 	function vorkNaechster(ereignis) {
 		var rahmen = vorkBild.getBoundingClientRect();
-		var x = ereignis.clientX - rahmen.left, y = ereignis.clientY - rahmen.top;
+		var faktor = gelaende ? gelaende.scale() : 1;
+		var x = (ereignis.clientX - rahmen.left) / faktor, y = (ereignis.clientY - rahmen.top) / faktor;
 		var beste = null, abstand = 100;
 		vorkStellen.forEach(function (stelle) {
 			var d = (stelle.x - x) * (stelle.x - x) + (stelle.y - y) * (stelle.y - y);
@@ -1211,9 +1282,14 @@
 
 	function zeichneVorkommen() {
 		var bild = vorkEbeneBauen();
-		var breite = marker.getBoundingClientRect().width;
-		var hoehe = marker.getBoundingClientRect().height;
-		var dpr = window.devicePixelRatio || 1;
+		var karte = zustand.karte;
+		var aktiv = vorkommen && karte && vorkAnzahl();
+		bild.style.pointerEvents = aktiv ? 'auto' : 'none';
+		if (!aktiv) { bild.width = 1; bild.height = 1; vorkStellen = []; vorkSchliesseTip(); vorkLegendeSetzen(null); return; }
+		var breite = marker.clientWidth;
+		var hoehe = marker.clientHeight;
+		var zoom = gelaende ? gelaende.scale() : 1;
+		var dpr = Math.min((window.devicePixelRatio || 1) * zoom, Math.sqrt(12000000 / Math.max(1, breite * hoehe)));
 		bild.width = Math.max(1, Math.round(breite * dpr));
 		bild.height = Math.max(1, Math.round(hoehe * dpr));
 		var strich = bild.getContext('2d');
@@ -1221,13 +1297,6 @@
 		strich.clearRect(0, 0, breite, hoehe);
 		vorkStellen = [];
 		vorkSchliesseTip();
-		var karte = zustand.karte;
-		var aktiv = vorkommen && karte && vorkAnzahl();
-		bild.style.pointerEvents = aktiv ? 'auto' : 'none';
-		if (!aktiv) {
-			vorkLegendeSetzen(null);
-			return;
-		}
 		if (!vorkKarten[karte.idx]) {
 			ladeVorkKarte(karte.idx, function () { zeichneVorkommen(); });
 			return;
@@ -1247,9 +1316,9 @@
 			var beruf = (vorkTypen()[typen[0]] || [])[2];
 			// A dark rim keeps a dot readable on parchment and under quest dots.
 			strich.fillStyle = '#1b1206';
-			strich.fillRect(Math.round(x) - 3, Math.round(y) - 3, 6, 6);
+			strich.fillRect(x - 3/zoom, y - 3/zoom, 6/zoom, 6/zoom);
 			strich.fillStyle = vorkFarbe(beruf);
-			strich.fillRect(Math.round(x) - 2, Math.round(y) - 2, 4, 4);
+			strich.fillRect(x - 2/zoom, y - 2/zoom, 4/zoom, 4/zoom);
 			vorkStellen.push({ x: x, y: y, lat: punkt[0], lon: punkt[1], typen: typen });
 			gezeichnet += 1;
 		});
@@ -1317,7 +1386,7 @@
 	var koordinate = document.getElementById('koordinate');
 	if (koordinate) {
 		welt.addEventListener('mousemove', function (ereignis) {
-			var karte = zustand.karte;
+			var karte = ansichtsKarte(zustand.karte);
 			if (!karte || karte.rahmen === 'unklar') { koordinate.textContent = ''; return; }
 			var rahmen = welt.getBoundingClientRect();
 			var nx = (ereignis.clientX - rahmen.left) / rahmen.width;
@@ -2336,16 +2405,20 @@
 		var breite = rahmen.width;
 		var hoehe = rahmen.height;
 		if (!breite || !hoehe) { return; }
-		var bildBreite = Math.min(breite, hoehe * BILD_SEITE);
-		var bildHoehe = bildBreite / BILD_SEITE;
+		var ansicht = ansichtsKarte(zustand.karte);
+		var seite = gelaende && gelaende.active() && ansicht ? (ansicht.east-ansicht.west)/(ansicht.north-ansicht.south) : BILD_SEITE;
+		var bildBreite = Math.min(breite, hoehe * seite);
+		var bildHoehe = bildBreite / seite;
 		welt.style.width = bildBreite + 'px';
 		welt.style.height = bildHoehe + 'px';
 		welt.style.left = ((breite - bildBreite) / 2) + 'px';
 		welt.style.top = ((hoehe - bildHoehe) / 2) + 'px';
+		if (gelaende) { gelaende.layout(); }
 	}
 
-	// The map stands still: no zoom and no dragging (Adrian, 03.11.).
+	// Parchment stays still. Only the client-derived terrain view can move/zoom.
 	function setzeAnsicht() {
+		if (gelaende && gelaende.active()) { gelaende.layout(); return; }
 		zustand.skala = 1; zustand.x = 0; zustand.y = 0;
 		welt.style.transform = 'none';
 	}
@@ -2781,6 +2854,15 @@
 		url.hash = eintrag ? landschaftSlug(eintrag) + (ort != null && ort !== eintrag.karte ? '/' + ort : '') : '';
 		window.history[ersetzen ? 'replaceState' : 'pushState']({ landschaft: true }, '', url);
 	}
+	function aktualisiereKartenVorschauen() {
+		if (!gelaende) { return; }
+		document.querySelectorAll('.landschaft-kachel[data-karte] img').forEach(function (img) {
+			var karte = karteNachIndex[img.closest('[data-karte]').dataset.karte];
+			if (!karte) { return; }
+			var quelle = gelaende.thumbnail(karte) || webpOrdner + karte.bild.replace(/\.png$/i, '.webp');
+			if (img.getAttribute('src') !== quelle) { delete img.dataset.spielVersucht; delete img.dataset.pngVersucht; img.src = quelle; }
+		});
+	}
 	function landschaftUebersicht(ohneVerlauf) {
 		landschaftBereich = null;
 		haupt.classList.add('landschaft-start'); landschaftStart.hidden = false;
@@ -2812,9 +2894,11 @@
 				}
 				var knopf = eltern('button'); knopf.className = 'landschaft-kachel'; knopf.dataset.landschaft = landschaftSlug(e);
 				var karte = karteNachIndex[e.karte];
-				if (karte) { var img = eltern('img'); img.loading = 'lazy'; img.alt = ''; img.src = webpOrdner + karte.bild.replace(/\.png$/i, '.webp'); img.onerror = function () { this.onerror = null; this.src = bildOrdner + karte.bild; }; knopf.appendChild(img); }
+				if (karte) { knopf.dataset.karte = karte.idx; }
+				var platzhalter = eltern('span'); platzhalter.className = 'landschaft-bild-leer'; platzhalter.setAttribute('aria-hidden', 'true');
+				if (karte) { var img = eltern('img'); img.loading = 'lazy'; img.alt = ''; var spielBild = webpOrdner + karte.bild.replace(/\.png$/i, '.webp'); img.src = (gelaende && gelaende.thumbnail(karte)) || spielBild; img.onerror = function () { if (this.getAttribute('src') !== spielBild && !this.dataset.spielVersucht) { this.dataset.spielVersucht = '1'; this.src = spielBild; } else if (!this.dataset.pngVersucht) { this.dataset.pngVersucht = '1'; this.src = bildOrdner + karte.bild; } else { this.replaceWith(platzhalter); } }; knopf.appendChild(img); }
+				else { knopf.appendChild(platzhalter); }
 				var inhalt = eltern('span'); inhalt.className = 'inhalt'; inhalt.appendChild(eltern('strong', e.knoten.name));
-				if (!karte && e.region !== ltexte[7]) { inhalt.appendChild(eltern('small', t('keine_karte'))); }
 				inhalt.appendChild(eltern('small', stufenSpanne(e.knoten.quests)));
 				var z = zaehle(e.knoten.quests);
 				inhalt.appendChild(eltern('small', zahl(z.erledigt, z.gesamt) + ' ' + t('aufgaben')));
@@ -2947,6 +3031,17 @@
 	var altZurueck = document.getElementById('zum-baum');
 	var neuZurueck = altZurueck.cloneNode(true); altZurueck.replaceWith(neuZurueck);
 	neuZurueck.textContent = '‹ ' + ltexte[3]; neuZurueck.onclick = function () { landschaftUebersicht(); };
+	if (window.MQL_GELAENDE) {
+		gelaende = window.MQL_GELAENDE.create({ world:welt, stage:buehne, image:bild, language:sprache,
+			onChange:function () {
+				if (gelaende && gelaende.active()) { hinweis.textContent = ''; }
+				else if (zustand.karte && zustand.karte.rahmen === 'unklar') { hinweis.textContent = t('rahmen_unklar'); }
+				passeAn(); zeichneMarker();
+				aktualisiereKartenVorschauen();
+			},
+			onView:function () { schliesseHaufen(); if (zustand.karte) { zeichneVorkommen(); } }
+		});
+	}
 	if (!karten.length || !quests.length) {
 		hinweis.textContent = t('keine_daten');
 		detail.textContent = '';
