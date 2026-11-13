@@ -74,6 +74,24 @@ class RouterTest(unittest.TestCase):
         self.assertEqual(antworten['/de/beruf/'],
                          [301, '/de/handwerk/rezepte/'])
 
+    def test_replaced_deed_ids_redirect_to_the_current_page(self):
+        datei = DATEN / 'de' / 'deed-redirects.json'
+        if not datei.is_file():
+            self.skipTest('no deed redirects in this data set')
+        redirects = json.loads(datei.read_text(encoding='utf-8')).get('redirects') or {}
+        if not redirects:
+            self.skipTest('no duplicate deeds in this data set')
+        alt, neu = next(iter(redirects.items()))
+        ziel = '/de/tat/%s/' % neu
+        antworten = self.aufloesen(['/de/tat/%s/' % alt,
+                                    '/de/tat/%s' % alt,
+                                    '/de/tat/%s.html' % alt,
+                                    ziel])
+        self.assertEqual(antworten['/de/tat/%s/' % alt], [301, ziel])
+        self.assertEqual(antworten['/de/tat/%s' % alt], [301, ziel])
+        self.assertEqual(antworten['/de/tat/%s.html' % alt], [301, ziel])
+        self.assertEqual(antworten[ziel][0], 200)
+
     def test_unknown_paths_stay_404(self):
         antworten = self.aufloesen(['/de/gibtsnicht/', '/de/aufgabe/70000000/'])
         self.assertEqual(antworten['/de/gibtsnicht/'][0], 404)

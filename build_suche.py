@@ -35,6 +35,8 @@ def katalog(katalog_dir, sprache, art):
     out = []
     for index in range(1, len(records) + 1):
         record = records[index]
+        if art == 'taten' and record['replaced_by'] is not None:
+            continue
         zone = ''
         for part in liste(record['p'] if 'p' in record else None):
             if str(part['k']).startswith('zone:'):
@@ -50,10 +52,23 @@ def js_datei(pfad, name):
     return json.JSONDecoder().raw_decode(text[text.index(marker) + len(marker):])[0]
 
 
+def taten_json(sprache):
+    """The already filtered deed rows; no second read of the Lua source."""
+    path = HIER / 'daten' / ('taten-%s.json' % sprache)
+    if not path.is_file():
+        return None
+    data = json.loads(path.read_text(encoding='utf-8'))
+    return [[row['i'], row.get('n', ''), row.get('z') or row.get('u') or '',
+             str(row.get('l') or '')] for row in data.get('quests', [])]
+
+
 def baue(katalog_dir, sprache):
     rows = []
     for kind, art in (('q', 'aufgaben'), ('d', 'taten')):
-        for ident, name, zone, level in katalog(katalog_dir, sprache, art):
+        quelle = taten_json(sprache) if kind == 'd' else None
+        if quelle is None:
+            quelle = katalog(katalog_dir, sprache, art)
+        for ident, name, zone, level in quelle:
             rows.append([kind, ident, name, zone, level])
 
     belohnungen = js_datei(HIER / 'web' / ('belohnungen-%s.js' % sprache), 'MQL_BELOHNUNGEN')

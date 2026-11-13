@@ -28,6 +28,9 @@
 	if (!fortschritt.ids.length && !(speicher && speicher.aktiv()) && (eingebaut.ids || []).length) {
 		fortschritt = { ids: eingebaut.ids };
 	}
+	// Old duplicate deed ids count for their replacement.
+	var ersetzt = window.MQL_REPLACED || {};
+	fortschritt.ids = fortschritt.ids.map(function (id) { return ersetzt[id] || id; });
 
 	var suche = document.getElementById('suche');
 	var baum = document.getElementById('baum');

@@ -46,5 +46,25 @@ class FilterbereicheTest(unittest.TestCase):
             self.assertIsNotNone(treffer, '%s fehlt in der lists-Tabelle' % segment)
 
 
+class TaskRowsTest(unittest.TestCase):
+    def test_fellowship_sizes_and_task_board_are_separate_flags(self):
+        import sys
+        sys.path.insert(0, str(ROOT / 'tools'))
+        from related_filter_data import task_rows
+
+        records = {
+            'A': {'n': 'A', 'l': '10', 'gr': 1, 'a': 'Auftrag'},
+            'B': {'n': 'B', 'l': '20', 'gr': 2, 'a': 'Task'},
+            'C': {'n': 'C', 'l': '30', 'a': 'Tâche'},
+            'D': {'n': 'D', 'l': '40'},
+        }
+        rows = task_rows(records, {key: {'facts': []} for key in records})
+        self.assertEqual(rows['A']['flags'], ['gr1', 'tb'])
+        self.assertEqual(rows['B']['flags'], ['gr2', 'tb'])
+        self.assertEqual(rows['C']['flags'], ['tb'])
+        self.assertEqual(rows['D']['flags'], [])
+        self.assertNotIn('gr', rows['A']['flags'])
+
+
 if __name__ == '__main__':
     unittest.main()

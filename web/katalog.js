@@ -54,6 +54,7 @@
     })();
     var store = window.MQL_SPEICHER;
     if (!store) { return; }
+    var ersetzt = window.MQL_REPLACED || {};
     // Faction page: the character's own standing, only when ruf was imported.
     (function () {
         var feld = document.getElementById('fraktion-ruf');
@@ -94,7 +95,7 @@
             return;
         }
         var ids = status.getAttribute('data-kind') === 'd' ? active.deeds : active.quests;
-        var done = (ids || []).indexOf(id) !== -1;
+        var done = (ids || []).some(function (other) { return (ersetzt[other] || other) === id; });
         var running = active.laufend && Object.prototype.hasOwnProperty.call(active.laufend, id);
         status.setAttribute('data-done', String(done));
         status.textContent = (done ? '✓ ' + texts.status_done : '○ ' + (running ? texts.status_running : texts.status_unknown)) + ' · ' + active.name;

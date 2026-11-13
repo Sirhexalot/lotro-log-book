@@ -7,6 +7,7 @@ daten/*.json
 daten/*.jsonl
 daten/vorkommen/
 web/daten-*.js
+web/ersetzt-*.js
 web/belohnungen-*.js
 web/rezepte-*.js
 web/notizen-*.js

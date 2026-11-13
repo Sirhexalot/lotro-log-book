@@ -49,7 +49,11 @@ in die Seite ist entfallen.
 Die Quest-Kategorie des Clients (`Auenland`, `Hauptmann`, `Ruf`, `Barde`)
 mischt Landschaften, Klassen und Erzählarten. Sie steht im Seitentext, taugt
 aber nicht als Filter. Was Aufgaben wirklich trennt, sind ihre belegten
-Merkmale: **täglich, wiederholbar, Gruppe, Instanz, skaliert mit Stufe**.
+Merkmale: **täglich, wiederholbar, kleine Gemeinschaft, Gemeinschaft,
+Aufgabenbrett, Instanz, skaliert mit Stufe**. Kleine und große Gemeinschaft
+sind Alternativen (beide gewählt = jede Gemeinschaft); die übrigen Merkmale
+gelten gemeinsam. Aufgabenbrett wird an der Client-Kategorie `Auftrag` /
+`Task` / `Tâche` erkannt, nicht am Gebernamen.
 Taten haben zusätzlich ihre **Art** (Entdecker, Bezwinger, Kunde …) und ihre
 **Belohnung** (LOTRO-Punkte, Tugend, Titel, Gegenstand). Eine Tat ohne belegte
 Art bleibt ohne Art statt „Weitere Tat" zu behaupten.

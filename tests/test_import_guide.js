@@ -44,7 +44,7 @@ function page(language, characters) {
 for (const language of ['de', 'en', 'fr']) {
   const copy = texts.window.MQL_TEXTE[language];
   for (const key of ['sp_voraussetzungen', 'sp_fertig', 'sp_zur_karte', 'sp_zum_plugin',
-    'menue_plugin', 'menue_import_kurz', 'menue_suche_kurz']) {
+    'sp_plugin_zeile', 'menue_plugin', 'menue_import_kurz', 'menue_suche_kurz']) {
     assert.ok(copy[key], language + ': missing ' + key);
   }
   for (const key of ['pl_titel', 'pl_install', 'pl_fortschritt', 'pl_schreiben', 'pl_zip',
@@ -70,8 +70,10 @@ for (const language of ['de', 'en', 'fr']) {
   assert.equal(loaded.window.dataLayer, undefined, 'Viewing the guide must not count as an import');
 }
 
-// The plugin is available in navigation, not promoted in the import content.
-assert.ok(!html.includes('data-ziel="plugin.html"'), 'Import page still promotes the plugin');
+// The plugin is a quiet line, not a numbered step that competes with the import.
+assert.ok(!html.includes('data-ziel="plugin.html"'), 'Import page still uses the old plugin target');
+assert.ok(html.includes('class="import-plugin"'), 'Import page has no quiet plugin link');
+assert.ok(html.includes('data-t="sp_plugin_zeile"'), 'Import page has no plugin line');
 assert.ok(html.includes('data-t-html="sp_hilfe_companion"'), 'Companion help is missing');
 for (const language of ['de', 'en', 'fr']) {
   assert.ok(texts.window.MQL_TEXTE[language].sp_hilfe_companion.includes('data-ziel="companion.html"'));
@@ -80,8 +82,9 @@ for (const binding of ['sp_voraussetzungen', 'sp_datenschutz', 'sp_faq', 'sp_win
   assert.ok(!html.includes('="' + binding + '"'), 'Import page still renders ' + binding);
 }
 const twig = fs.readFileSync(path.join(__dirname, '../php/templates/app/spielstand.twig'), 'utf8');
-assert.equal(html.match(/<main[\s\S]*?<\/main>/)[0].replace(/\s+/g, ' '),
-  twig.match(/<main[\s\S]*?<\/main>/)[0].replace(/\s+/g, ' '), 'Static and PHP import markup differ');
+const normalize = text => text.replace(/\s+/g, ' ').replace(/\{\{ lang \}\}/g, 'de');
+assert.equal(normalize(html.match(/<main[\s\S]*?<\/main>/)[0]),
+  normalize(twig.match(/<main[\s\S]*?<\/main>/)[0]), 'Static and PHP import markup differ');
 for (const id of ['schreiben', 'zip', 'meldung-plugin', 'schreiben-hinweis']) {
   assert.ok(!html.includes('id="' + id + '"'), 'Import page still carries the plugin control: ' + id);
   assert.ok(pluginHtml.includes('id="' + id + '"'), 'Plugin page lacks: ' + id);

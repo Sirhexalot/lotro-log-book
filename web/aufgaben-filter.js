@@ -18,7 +18,7 @@
 			all: 'Alle', done: 'Erledigt', rest: 'Nicht als erledigt importiert',
 			name: 'Name', kind: 'Art', reward: 'Belohnung', points: 'LOTRO-Punkte', virtue: 'Tugend', title: 'Titel',
 			item: 'Gegenstand', doneMark: 'Erledigt',
-			dy: 'täglich', rp: 'wiederholbar', gr: 'Gruppe', ix: 'Instanz', ls: 'skaliert mit Stufe'
+			dy: 'täglich', rp: 'wiederholbar', gr: 'Gruppe', gr1: 'kleine Gemeinschaft', gr2: 'große Gemeinschaft', tb: 'Aufgabenbrett', ix: 'Instanz', ls: 'skaliert mit Stufe'
 		},
 		en: {
 			search: 'Search', filter: 'Filters', close: 'Close', sort: 'Sort', reset: 'Reset',
@@ -29,7 +29,7 @@
 			all: 'All', done: 'Completed', rest: 'Not imported as completed',
 			name: 'Name', kind: 'Type', reward: 'Reward', points: 'LOTRO Points', virtue: 'Virtue', title: 'Title',
 			item: 'Item', doneMark: 'Completed',
-			dy: 'daily', rp: 'repeatable', gr: 'group', ix: 'instance', ls: 'scales with level'
+			dy: 'daily', rp: 'repeatable', gr: 'group', gr1: 'small fellowship', gr2: 'fellowship', tb: 'task board', ix: 'instance', ls: 'scales with level'
 		},
 		fr: {
 			search: 'Chercher', filter: 'Filtres', close: 'Fermer', sort: 'Tri', reset: 'Réinitialiser',
@@ -40,7 +40,7 @@
 			all: 'Tous', done: 'Terminé', rest: 'Non importé comme terminé',
 			name: 'Nom', kind: 'Type', reward: 'Récompense', points: 'Points LOTRO', virtue: 'Vertu', title: 'Titre',
 			item: 'Objet', doneMark: 'Terminé',
-			dy: 'quotidienne', rp: 'répétable', gr: 'groupe', ix: 'instance', ls: 'évolue avec le niveau'
+			dy: 'quotidienne', rp: 'répétable', gr: 'groupe', gr1: 'petite communauté', gr2: 'communauté', tb: 'tableau des tâches', ix: 'instance', ls: 'évolue avec le niveau'
 		}
 	};
 	var SEGMENT = {
@@ -158,8 +158,19 @@
 					});
 				}
 				if (g.id === 'flag') {
-					// Every chosen property must hold: "täglich" and "Gruppe" together.
-					return !value.length || value.every(function (key) { return row.flags.includes(key); });
+					// Other properties must all hold. The two fellowship sizes are
+					// alternatives: choosing both means "any fellowship", choosing
+					// one means only that size.
+					var sizes = value.filter(function (key) {
+						return key === 'gr1' || key === 'gr2';
+					});
+					var rest = value.filter(function (key) {
+						return key !== 'gr1' && key !== 'gr2';
+					});
+					if (sizes.length && !sizes.some(function (key) {
+						return row.flags.includes(key);
+					})) { return false; }
+					return rest.every(function (key) { return row.flags.includes(key); });
 				}
 				return !value.length || value.includes(row[g.id]);
 			});
