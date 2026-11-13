@@ -19,9 +19,9 @@
 		return {region:region||{id:'unknown',name:unknown},landscape:landscape||{id:String(mapId),name:geography[String(mapId)]&&geography[String(mapId)].name||unknown}};
 	}
 	var words={
-		de:['Suchen','Filter','Schließen','Sortierung','Zurücksetzen','Weitere anzeigen','%s Einträge','%s Treffer anzeigen','Lade …','Ergebnisse nicht aktualisiert.','Erneut versuchen','Als Seite öffnen','Ungültiger Bereich','Von','Bis','Beruf','Handwerksstufe','Kategorie','Nur eigene Berufe','Lernstand','Alle','Gelernt','Nicht gelernt','Quelle','Sammelvorkommen','Herstellbar','Unbekannt','Optionale Zutaten einschließen','Fundgebiet','Name','Materialien und Zutaten','Herkunft unbekannt – kein Fundort aus Namensähnlichkeit abgeleitet.','Persönlicher Lernstand: Ohne vollständigen Rezeptnachweis sind nur gelernte Rezepte sicher erkennbar.','Stufe nicht belegt'],
-		en:['Search','Filters','Close','Sort','Reset','Show more','%s entries','Show %s results','Loading …','Results not updated.','Try again','Open page','Invalid range','From','To','Profession','Crafting tier','Category','Only my professions','Learning status','All','Learned','Not learned','Source','Gathering nodes','Craftable','Unknown','Include optional ingredients','Gathering area','Name','Materials and ingredients','Source unknown – no location inferred from similar names.','Personal learning status: Without complete recipe evidence, only learned recipes are certain.','Tier not recorded'],
-		fr:['Chercher','Filtres','Fermer','Tri','Réinitialiser','Afficher davantage','%s entrées','Afficher %s résultats','Chargement …','Résultats non actualisés.','Réessayer','Ouvrir la page','Plage incorrecte','De','À','Métier','Niveau d’artisanat','Catégorie','Mes métiers uniquement','Apprentissage','Tous','Appris','Non appris','Source','Gisements','Fabrication','Inconnue','Inclure les ingrédients facultatifs','Zone de récolte','Nom','Matériaux et ingrédients','Source inconnue – aucun emplacement déduit de noms similaires.','Apprentissage : sans preuve complète des recettes, seules les recettes apprises sont certaines.','Palier non attesté']
+		de:['Suchen','Filter','Schließen','Sortierung','Zurücksetzen','Weitere anzeigen','%s Einträge','%s Treffer anzeigen','Lade …','Ergebnisse nicht aktualisiert.','Erneut versuchen','Als Seite öffnen','Ungültiger Bereich','Von','Bis','Beruf','Handwerksstufe','Kategorie','Nur eigene Berufe','Lernstand','Alle','Gelernt','Nicht gelernt','Quelle','Sammelvorkommen','Herstellbar','Unbekannt','Optionale Zutaten einschließen','Fundgebiet','Name','Materialien und Zutaten','Persönlicher Lernstand: Ohne vollständigen Rezeptnachweis sind nur gelernte Rezepte sicher erkennbar.','Stufe nicht belegt'],
+		en:['Search','Filters','Close','Sort','Reset','Show more','%s entries','Show %s results','Loading …','Results not updated.','Try again','Open page','Invalid range','From','To','Profession','Crafting tier','Category','Only my professions','Learning status','All','Learned','Not learned','Source','Gathering nodes','Craftable','Unknown','Include optional ingredients','Gathering area','Name','Materials and ingredients','Personal learning status: Without complete recipe evidence, only learned recipes are certain.','Tier not recorded'],
+		fr:['Chercher','Filtres','Fermer','Tri','Réinitialiser','Afficher davantage','%s entrées','Afficher %s résultats','Chargement …','Résultats non actualisés.','Réessayer','Ouvrir la page','Plage incorrecte','De','À','Métier','Niveau d’artisanat','Catégorie','Mes métiers uniquement','Apprentissage','Tous','Appris','Non appris','Source','Gisements','Fabrication','Inconnue','Inclure les ingrédients facultatifs','Zone de récolte','Nom','Matériaux et ingrédients','Apprentissage : sans preuve complète des recettes, seules les recettes apprises sont certaines.','Palier non attesté']
 	}[lang];
 	function name(o){return o && (o[lang]||o.en)||'';}
 	function profession(key){return name((refs[key]||{}).n)||key;}
@@ -37,14 +37,14 @@
 		(rows||[]).forEach(function(r){var nr=String(r[11]);if(nr&&r[4]&&!tierNames.has(nr)){tierNames.set(nr,r[4]);}});
 	}
 	// In the filter an unrecorded tier needs a word; in a row it stays silent.
-	function tierLabel(tier){var key=String(tier);if(key===''||key==='0'){return words[33];}return tierNames.get(key)||key;}
+	function tierLabel(tier){var key=String(tier);if(key===''||key==='0'){return words[32];}return tierNames.get(key)||key;}
 	function tierText(tier){var key=String(tier);if(key===''||key==='0'){return '';}return tierNames.get(key)||key;}
 	function multi(id,label,values){return {id:id,kind:'multi',label:label,options:Array.from(new Set(values.filter(function(v){return v!=='';}))).sort(function(a,b){return String(a).localeCompare(String(b),lang,{numeric:true});}).map(function(v){return {value:String(v),label:id==='beruf'?profession(v):id==='stufe'?tierLabel(v):String(v)};})};}
 	function materialRows(){
 		var items=new Map(),producers=new Map();
 		merkeStufen(recipeRows);
 		recipeRows.forEach(function(r){[r[18],r[19]].filter(Boolean).forEach(function(id){if(!producers.has(id)){producers.set(id,[]);}producers.get(id).push(r);});
-			[r[6]||[],r[7]||[]].forEach(function(list,optional){list.forEach(function(z){if(!z[3]){return;}if(!items.has(z[3])){items.set(z[3],{id:z[3],name:z[0],uses:[],kind:'item'});}items.get(z[3]).uses.push({profession:r[9],tier:String(r[11]),optional:!!optional});});});});
+			[r[6]||[],r[7]||[]].forEach(function(list,optional){list.forEach(function(z){if(!z[3]){return;}if(!items.has(z[3])){items.set(z[3],{id:z[3],name:z[0],symbol:z[2],uses:[],kind:'item'});}items.get(z[3]).uses.push({profession:r[9],tier:String(r[11]),optional:!!optional});});});});
 		var rows=Array.from(items.values());rows.forEach(function(r){r.producers=producers.get(r.id)||[];r.source=r.producers.length?'crafted':'unknown';r.areas=[];});
 		/* Gathering nodes are keyed by their own resource id, the ingredients by
 		   item id. The only shared handle is the name, exactly as the item pages
@@ -165,6 +165,7 @@
 				if(isRecipe&&recipeRenderer){target.appendChild(recipeRenderer(result.payload.map(function(r){return r.raw;})));return;}
 				result.payload.forEach(function(r){var section=document.createElement('section');section.className='filter-craft-row';
 					var title=document.createElement('h3');
+					if(r.symbol){var bildchen=document.createElement('img');bildchen.className='symbol';bildchen.src='/bild/items/'+r.symbol+'.webp';bildchen.alt='';bildchen.width=22;bildchen.height=22;bildchen.loading='lazy';bildchen.decoding='async';title.appendChild(bildchen);}
 					if(r.kind!=='resource'&&r.id){var titelLink=text('a',r.name);titelLink.href=url('item',r.id);title.appendChild(titelLink);}else{title.appendChild(text('span',r.name));}
 					section.appendChild(title);
 					if(tab==='berufe'){
@@ -177,7 +178,14 @@
 							var fund=text('p',(f.name?f.name+' · ':'')+words[28]+': ');
 							f.areas.slice(0,3).forEach(function(a,i){if(i){fund.appendChild(document.createTextNode(' · '));}var alink=text('a',a.name+' ('+a.count.toLocaleString(lang)+')');alink.href='/'+lang+'/'+({de:'karte',en:'map',fr:'carte'})[lang]+'/?vorkommen='+encodeURIComponent(a.resource)+'&vorkarte='+a.map;fund.appendChild(alink);});section.appendChild(fund);
 						});
-						r.producers.forEach(function(p){var a=text('a',p[0]+' · '+p[3]);a.href=url('recipe',p[10]);section.appendChild(a);section.appendChild(document.createTextNode(' · '));});if(!r.producers.length&&!(r.areas&&r.areas.length)){section.appendChild(text('p',words[31]));}}
+						if(r.producers.length){
+							var gruppen=new Map();
+							r.producers.forEach(function(p){if(!gruppen.has(p[0])){gruppen.set(p[0],{url:url('recipe',p[10]),berufe:[]});}var e=gruppen.get(p[0]);if(p[3]&&e.berufe.indexOf(p[3])<0){e.berufe.push(p[3]);}});
+							var zeile=text('p',words[25]+': ');
+							var erst=true;
+							gruppen.forEach(function(e,name){if(!erst){zeile.appendChild(document.createTextNode(' · '));}erst=false;var a=text('a',name+(e.berufe.length?' ('+e.berufe.join(', ')+')':''));a.href=e.url;zeile.appendChild(a);});
+							section.appendChild(zeile);
+						}}
 					target.appendChild(section);
 				});if(!result.total){target.appendChild(text('p',T('hw_keine_rezepte')));}
 			}});
@@ -195,7 +203,7 @@
 			['berufe','rezepte','rohstoffe'].forEach(function(key){document.getElementById('hw-'+key).hidden=key!==tab;});
 			var host=document.getElementById(tab==='berufe'?'berufe':tab==='rezepte'?'rezepte-liste':'rohstoffe-liste');host.replaceChildren();
 			if(tab==='rezepte'&&!recipeRows.length||tab==='rohstoffe'&&!resources){host.appendChild(text('p',words[8]));return;}
-			if(tab==='rezepte'){host.appendChild(text('p',words[32]));}
+			if(tab==='rezepte'){host.appendChild(text('p',words[31]));}
 			var target=document.createElement('div');target.dataset.filterResults='';host.appendChild(target);
 			var setup=make(tab,{rows:recipeRows,renderer:recipeRenderer});controller=window.MQL_FILTER_UI.mount(host,setup);window.MQL_CRAFT_FILTER=controller;await controller.ready;
 		});return queue;
