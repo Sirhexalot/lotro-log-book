@@ -138,11 +138,20 @@
 		var element = document.querySelector(a[0]);
 		if (element) { element.setAttribute(a[1], t(a[2])); }
 	});
+	// A deliberate language choice must survive the next visit to "/", where
+	// the server would otherwise follow the browser again. It is a functional
+	// cookie, not tracking.
+	function merkeSprache(ziel) {
+		try {
+			document.cookie = 'llb_sprache=' + encodeURIComponent(ziel) + ';path=/;max-age=31536000;samesite=lax';
+		} catch (fehler) { /* cookies blocked */ }
+		try { window.localStorage.setItem('mql.sprache', ziel); } catch (fehler) {}
+	}
 	document.querySelectorAll('[data-lang]').forEach(function (knopf) {
 		knopf.setAttribute('aria-pressed', String(knopf.getAttribute('data-lang') === sprache));
 		knopf.addEventListener('click', function () {
 			var ziel = knopf.getAttribute('data-lang');
-			try { window.localStorage.setItem('mql.sprache', ziel); } catch (fehler) {}
+			merkeSprache(ziel);
 			if (seiteArt === 'start') {
 				window.location.href = ziel === 'en' ? 'start-en.html' : (ziel === 'fr' ? 'start-fr.html' : 'start.html');
 				return;
@@ -151,6 +160,15 @@
 			adresse.searchParams.set('lang', ziel);
 			window.location.href = adresse.toString();
 		});
+	});
+	// The footer's language links are plain /de|en|fr/ addresses; a click on one
+	// is a deliberate choice as well. Delegated, because a filter response may
+	// replace the footer.
+	document.addEventListener('click', function (ereignis) {
+		var link = ereignis.target && ereignis.target.closest ? ereignis.target.closest('a[hreflang]') : null;
+		if (!link) { return; }
+		var ziel = String(link.getAttribute('hreflang') || '').toLowerCase();
+		if (['de', 'en', 'fr'].indexOf(ziel) >= 0) { merkeSprache(ziel); }
 	});
 
 

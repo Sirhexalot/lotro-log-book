@@ -20,7 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DATEN = Path(os.environ.get('LLB_DATA') or Path.home() / '.cache' / 'llb-php' / 'phpdata')
 
-QUELLE = '''require 'php/src/Catalogue.php'; require 'php/src/Data.php'; require 'php/src/Router.php';
+QUELLE = '''require 'php/src/Catalogue.php'; require 'php/src/Data.php'; require 'php/src/Sprache.php'; require 'php/src/Router.php';
 $dir = getenv('LLB_DATA');
 $c = new \\Llb\\Catalogue($dir . '/labels.json', 'https://llb.sirhexalot.de');
 $r = new \\Llb\\Router($c, new \\Llb\\Data($dir));

@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 @unittest.skipUnless(shutil.which('php'), 'PHP required')
 class SetsPHPTest(unittest.TestCase):
     def php(self, code):
-        source = "require 'php/src/Sets.php'; require 'php/src/Catalogue.php'; require 'php/src/Data.php'; require 'php/src/Router.php';\n"
+        source = "require 'php/src/Sets.php'; require 'php/src/Catalogue.php'; require 'php/src/Data.php'; require 'php/src/Sprache.php'; require 'php/src/Router.php';\n"
         result = subprocess.run(['php', '-r', source + code], cwd=ROOT,
                                 check=True, text=True, capture_output=True)
         return json.loads(result.stdout)

@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 use Llb\Catalogue;
 use Llb\Data;
+use Llb\Sprache;
 use Llb\Page;
 use Llb\Router;
 use Llb\Shell;
@@ -54,7 +55,11 @@ if (!is_dir($cacheDir)) {
 
 $catalogue = new Catalogue($dataDir . '/labels.json', $base);
 $data = new Data($dataDir);
-$router = new Router($catalogue, $data);
+// Addresses without a language (root, old flat files) follow the visitor:
+// chosen language, then the browser's list, then English.
+$sprache = Sprache::ausRequest($_COOKIE, (string) ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? ''));
+header('Vary: Accept-Language');
+$router = new Router($catalogue, $data, $sprache);
 $view = new View($root . '/php/templates', is_writable($cacheDir) ? $cacheDir : null);
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
@@ -63,15 +68,19 @@ $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 if (preg_match('~^/(start(-(en|fr))?|index|gegenstaende|handwerk|reise|ruf|belohnungen|spielstand|companion|plugin|suche|gegenstand)\.html$~', $path)) {
     $ziel = $router->legacyTarget($path, $_GET);
     if ($ziel !== null) {
-        header('Location: ' . $ziel, true, 301);
+        // An explicit ?lang= is permanent; a detected language is not, because
+        // the same address answers differently for another browser.
+        $code = isset($_GET['lang']) ? 301 : 302;
+        header('Location: ' . $ziel, true, $code);
         header('X-Robots-Tag: noindex');
         return;
     }
 }
 $result = $router->resolve($path);
 
-if ($result['status'] === 301) {
-    header('Location: ' . $result['redirect'], true, 301);
+if ($result['status'] === 301 || $result['status'] === 302) {
+    $code = $result['status'] === 301 ? 301 : 302;
+    header('Location: ' . $result['redirect'], true, $code);
     header('X-Robots-Tag: noindex');
     return;
 }

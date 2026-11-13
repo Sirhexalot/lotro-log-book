@@ -16,6 +16,8 @@ final class Router
     public function __construct(
         private Catalogue $catalogue,
         private Data $data,
+        /** Language for addresses that name none (root, old flat files). */
+        private string $sprache = Sprache::VORGABE,
     ) {
     }
 
@@ -33,10 +35,11 @@ final class Router
         if ($path === '/sitemap-seiten.xml') {
             return ['status' => 200, 'sitemap' => $path];
         }
-        // The root was the map application through the host's directory
-        // index; keep that page, now at its language address.
+        // The root keeps the map application, but in the visitor's language:
+        // a 302, because the target depends on the browser and must not be
+        // cached as the one canonical answer.
         if ($path === '/') {
-            return ['status' => 301, 'redirect' => '/de/karte/'];
+            return ['status' => 302, 'redirect' => '/' . $this->sprache . '/karte/'];
         }
 
         // The item list page is gone: the search page with filters is the way in.
@@ -101,16 +104,21 @@ final class Router
      */
     public function legacyTarget(string $path, array $query): ?string
     {
-        $fest = ['/start.html' => 'de', '/start-en.html' => 'en', '/start-fr.html' => 'fr'];
+        // Only the start files that name a language keep it; plain start.html
+        // is the generic entry and follows the visitor like the root.
+        $fest = ['/start-en.html' => 'en', '/start-fr.html' => 'fr'];
         $seiten = [
+            '/start.html' => 'start',
             '/index.html' => 'karte', '/gegenstaende.html' => 'gegenstandssuche',
             '/handwerk.html' => 'handwerk', '/reise.html' => 'reise', '/ruf.html' => 'ruf',
             '/belohnungen.html' => 'belohnungen', '/spielstand.html' => 'spielstand',
             '/companion.html' => 'companion', '/plugin.html' => 'plugin', '/suche.html' => 'suche',
         ];
-        $lang = $query['lang'] ?? ($fest[$path] ?? 'de');
+        // An explicit ?lang= in the link is a deliberate choice and wins; the
+        // start files name their language; everything else uses the detected one.
+        $lang = $query['lang'] ?? ($fest[$path] ?? $this->sprache);
         if (!$this->catalogue->isLang($lang)) {
-            $lang = 'de';
+            $lang = $this->sprache;
         }
         if (isset($fest[$path])) {
             return $this->catalogue->appRoute($fest[$path], 'start');

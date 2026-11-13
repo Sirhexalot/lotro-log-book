@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRE = ("require 'php/src/Catalogue.php'; require 'php/src/Data.php'; "
-           "require 'php/src/Router.php'; require 'php/src/Givers.php';\n")
+           "require 'php/src/Sprache.php'; require 'php/src/Router.php'; require 'php/src/Givers.php';\n")
 
 
 @unittest.skipUnless(shutil.which('php'), 'PHP required')
