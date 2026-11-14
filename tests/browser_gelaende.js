@@ -110,6 +110,23 @@ async function mode(page){return page.locator('#welt').getAttribute('data-karten
     await p.reload({waitUntil:'networkidle'});await ready(p);
     assert.equal(await p.evaluate(()=>document.querySelector('.vorkommen-ebene').style.pointerEvents),'auto');
     results.push('resource layer choice (all off and back on) survives reload');
+    // Legend: the "?" only appears when an entry was really cut off.
+    const legend = await browser.newContext({viewport: {width: 1900, height: 1000}});
+    const lp = await legend.newPage();
+    await open(lp, 'de', 'karte', 268437653);
+    assert.equal(await lp.evaluate(() => getComputedStyle(document.querySelector('#legende-mehr')).visibility), 'hidden');
+    await lp.setViewportSize({width: 1200, height: 1000});
+    await lp.waitForTimeout(500);
+    const cut = await lp.evaluate(() => ({
+      visible: getComputedStyle(document.querySelector('#legende-mehr')).visibility !== 'hidden',
+      shown: [...document.querySelectorAll('#legende > *')].filter(e => !e.hidden && !e.classList.contains('zu-breit')).length,
+      total: [...document.querySelectorAll('#legende > *')].filter(e => !e.hidden).length,
+    }));
+    assert.ok(cut.visible && cut.shown < cut.total, JSON.stringify(cut));
+    await lp.locator('#legende-mehr').click();
+    assert.ok(await lp.locator('#legende-voll > *').count() > cut.shown);
+    await legend.close();
+    results.push('legend "?" hidden when everything fits and complete when shown');
     await context.close();
     // Simulate an image failure: use the game map without changing preference.
     const failure=await browser.newContext(),fp=await failure.newPage();

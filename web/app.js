@@ -1484,8 +1484,22 @@
 			schliesseLegendeVoll();
 			return;
 		}
+		// Measure against the row, not against the legend itself: the legend is a
+		// shrinking flex item, so its own width follows what is left after entries
+		// were hidden. That made the "?" appear although nothing was cut off
+		// (14.11.2026).
+		var zeile = legende.parentElement;
 		var platz = legende.clientWidth;
-		var luecke = 16;
+		if (zeile) {
+			var stil = window.getComputedStyle(zeile);
+			var luecke = parseFloat(stil.columnGap) || parseFloat(stil.gap) || 6;
+			platz = zeile.clientWidth;
+			Array.prototype.forEach.call(zeile.children, function (kind) {
+				if (kind === legende || kind.hidden) { return; }
+				platz -= kind.getBoundingClientRect().width + luecke;
+			});
+			platz -= luecke;
+		}
 		var genutzt = 0;
 		var ueber = false;
 		kinder.forEach(function (kind) {
@@ -1500,6 +1514,18 @@
 		});
 		if (legendeMehr) { legendeMehr.classList.toggle('aus', !ueber); }
 		if (!ueber) { schliesseLegendeVoll(); }
+	}
+
+	// First paint measures before the three columns have their final width; a
+	// single late look and a watcher on the row keep the "?" honest.
+	var legendeWartet = false;
+	function legendeNeuMessen() {
+		if (legendeWartet) { return; }
+		legendeWartet = true;
+		window.requestAnimationFrame(function () { legendeWartet = false; pruefeLegendenbreite(); });
+	}
+	if (legende && legende.parentElement && window.ResizeObserver) {
+		new ResizeObserver(legendeNeuMessen).observe(legende.parentElement);
 	}
 
 	function schliesseLegendeVoll() {
@@ -1551,7 +1577,7 @@
 			eintrag.hidden = !hatFortschritt;
 		});
 		legende.hidden = !mitPunkten && !mitRingen && !mitJagd && !mitHinweis;
-		pruefeLegendenbreite();
+		legendeNeuMessen();
 	}
 
 	// --- List ----------------------------------------------------------
@@ -2426,7 +2452,7 @@
 	window.addEventListener('resize', function () {
 		passeAn();
 		setzeAnsicht(zustand.skala, zustand.x, zustand.y);
-		pruefeLegendenbreite();
+		legendeNeuMessen();
 	});
 	// Navigation and legends can change the available height without a window
 	// resize. Keep the image and all marker layers inside the actual map stage.
