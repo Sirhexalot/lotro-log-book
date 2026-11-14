@@ -23,7 +23,7 @@
 {% block pfad %}{% endblock %}
 
 {% block haupt %}
-<main>
+<main class="karte-laedt">
 <section id="landschaften" class="landschaften" hidden></section>
 	<section class="spalte nav" id="nav">
 		<div class="nav-baum">
@@ -70,6 +70,18 @@
 				<div class="marker" id="marker"></div>
 			</div>
 			<p class="kartenhinweis" id="hinweis" role="status"></p>
+			<div class="kartenkopf">
+				<div class="kartenkopf-links"><span id="karte-stufe" class="karte-stufe" hidden></span></div>
+				<div class="kartenkopf-rechts">
+					<div class="kartenansicht" id="kartenansicht" role="group" aria-label="Kartenansicht" hidden>
+						<button type="button" data-kartenansicht="gelaende" aria-pressed="false">Gelände</button>
+						<button type="button" data-kartenansicht="karte" aria-pressed="true">Spielkarte</button>
+					</div>
+					<div class="gelaende-zoom" id="gelaende-zoom" hidden>
+						<button type="button" data-zoom="in">+</button><button type="button" data-zoom="out">−</button><button type="button" data-zoom="fit">⌖</button>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="kartenleiste">
 			<div class="legende-zeile">
@@ -89,13 +101,6 @@
 				<div class="legende-voll" id="legende-voll" hidden></div>
 			</div>
 			<div class="leiste-aktionen">
-				<div class="kartenansicht" id="kartenansicht" role="group" aria-label="Kartenansicht" hidden>
-					<button type="button" data-kartenansicht="gelaende" aria-pressed="false">Gelände</button>
-					<button type="button" data-kartenansicht="karte" aria-pressed="true">Spielkarte</button>
-				</div>
-				<div class="gelaende-zoom" id="gelaende-zoom" hidden>
-					<button type="button" data-zoom="in">+</button><button type="button" data-zoom="out">−</button><button type="button" data-zoom="fit">⌖</button>
-				</div>
 				<div class="notizen" id="notizen">
 					<button type="button" id="notizen-knopf" aria-expanded="false" data-t="notizen">Filter</button>
 					<div class="notizen-feld" id="notizen-feld" hidden>
@@ -112,7 +117,7 @@
 				</div>
 				<label class="geber-schalter"><input type="checkbox" id="geber-schalter" checked> <span data-t="aufgabenfuehrer">Questgeber anzeigen</span></label>
 				<button type="button" id="gebietskarte" class="gebietskarte" hidden></button>
-				<span class="leiste-rechts"><span id="koordinate" class="koordinate"></span><span id="karte-stufe" class="karte-stufe" hidden></span></span>
+				<span class="leiste-rechts"><span id="koordinate" class="koordinate"></span></span>
 				<span class="gelaende-status" id="gelaende-status" role="status"></span>
 			</div>
 		</div>

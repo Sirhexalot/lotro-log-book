@@ -9,6 +9,8 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 
+import seo
+
 SEGMENT = {'de': 'auftraggeber', 'en': 'quest-giver', 'fr': 'donneur-de-quete'}
 QUEST = {'de': 'aufgabe', 'en': 'quest', 'fr': 'quete'}
 KINDS = ('person', 'creature', 'object')
@@ -232,6 +234,8 @@ def giver_pages(source: dict, lang: str, quests: dict, maps: dict,
                                    row['name'].casefold()))
         places = [_place_view(spot, lang, maps, app_url, coords)
                   for spot in giver['places']]
+        levels = _levels([[row['id'], int(row['level']) if str(row['level']).isdigit() else 0]
+                          for row in rows])
         pages[entity] = {
             'id': entity,
             'name': giver['name'][lang],
@@ -243,6 +247,11 @@ def giver_pages(source: dict, lang: str, quests: dict, maps: dict,
             'places': places,
             'quests': rows,
             'total': len(rows),
+            # Typ, Ort und Stufenspanne sind der Text der Seite; die Fakten
+            # stehen schon hier, PHP muss sie nicht noch einmal zusammensetzen.
+            'seo': seo.giver(lang, name=giver['name'][lang],
+                             place=place_label(maps, giver), quests=len(rows),
+                             low=levels[0], high=levels[1]),
             'same_name': sorted((
                 {'id': other, 'url': giver_url(lang, other),
                  'place': place_label(maps, source['givers'][other]),

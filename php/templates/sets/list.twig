@@ -7,7 +7,6 @@
     <div class="sets-grid">
         <details class="sets-filters" open>
             <summary>{{ sw.filter }}</summary>
-            <p class="schwach">{{ sw.filter_note }}</p>
             {% for key, options in facets %}{% if options %}
             <fieldset><legend>{{ attribute(sw, key) }}</legend>
                 {% for option in options %}<label class="sets-option"><input type="checkbox" name="{{ key }}[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
@@ -17,7 +16,7 @@
         </details>
         <section class="sets-results" data-filter-results aria-label="{{ sw.title }}">
             <p class="sets-count" role="status">{{ sw.count|replace({'%s': count}) }}</p>
-            <ul class="sets-list">{% for row in sets %}<li><a href="{{ row.url }}"><span class="sets-preview">{% for icon in row.icons|default([]) %}<img src="/bild/items/{{ icon }}.webp" alt="" width="26" height="26" loading="lazy">{% endfor %}<strong>{{ row.name }}</strong></span><span class="sets-meta">{{ sw.parts|replace({'%s': row.parts}) }}{% if row.meta %} · {{ row.meta }}{% endif %}{% if row.available_parts < row.parts %} · {{ sw.incomplete }}{% endif %}</span></a></li>{% else %}<li>{{ sw.empty }}</li>{% endfor %}</ul>
+            <ul class="sets-list">{% for row in sets %}<li><a href="{{ row.url }}"><span class="sets-preview">{% for icon in row.icons|default([]) %}<img src="/bild/items/{{ icon }}.webp" alt="" width="26" height="26" loading="lazy">{% endfor %}<strong>{{ row.name }}</strong></span><span class="sets-meta">{{ sw.parts|replace({'%s': row.parts}) }}{% if row.meta %} · {{ row.meta }}{% endif %}</span></a></li>{% else %}<li>{{ sw.empty }}</li>{% endfor %}</ul>
             <nav class="sets-pagination" aria-label="{{ sw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ sw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>

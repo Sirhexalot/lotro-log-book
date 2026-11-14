@@ -5,9 +5,9 @@
 	'use strict';
 	var lang = document.documentElement.lang || 'de';
 	var texte = {
-		de: ['Wo bekomme ich das?', 'Lade Herkunft …', 'Keine Herkunft in den vorhandenen Daten belegt.', 'Herkunft konnte nicht geladen werden. Schließe und öffne den Hinweis, um es erneut zu versuchen.', 'Fundstellen sind mögliche Vorkommen, keine Garantie, dass dort gerade Rohstoffe stehen.'],
-		en: ['Where can I get this?', 'Loading sources …', 'No sources recorded in the available data.', 'Could not load sources. Close and reopen to try again.', 'These are possible gathering spots, not a guarantee that resources are currently present.'],
-		fr: ['Où en trouver ?', 'Chargement des sources…', 'Aucune source attestée dans les données disponibles.', 'Impossible de charger les sources. Fermez et rouvrez pour réessayer.', 'Il s’agit de points de récolte possibles, sans garantie de présence actuelle.']
+		de: ['Wo bekomme ich das?', 'Lade Herkunft …', '', 'Herkunft konnte nicht geladen werden. Schließe und öffne den Hinweis, um es erneut zu versuchen.', 'Die Rohstoffe an diesen Stellen wechseln.'],
+		en: ['Where can I get this?', 'Loading sources …', '', 'Could not load sources. Close and reopen to try again.', 'The resources at these spots change.'],
+		fr: ['Où en trouver ?', 'Chargement des sources…', '', 'Impossible de charger les sources. Fermez et rouvrez pour réessayer.', 'Les ressources à ces endroits changent.']
 	};
 	var t = texte[lang] || texte.en;
 	var cache = new Map();

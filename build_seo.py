@@ -7,7 +7,7 @@ from build_sitemaps import write as write_sitemap
 BASE = 'https://llb.sirhexalot.de'
 PAGES = {
     'index.html': ('Aufgaben und Karten', 'Finde Aufgaben und Taten in LOTRO nach Landschaft und Gebiet. Sieh Auftraggeber auf der Karte und blende Ziele nur auf Wunsch ein.'),
-    'start.html': ('Dein Begleiter durch Mittelerde', 'Finde deine nächste Aufgabe, vollende offene Taten und entdecke Ausrüstung und Rezepte für deine Abenteuer in Der Herr der Ringe Online. Mit deinem Spielstand.'),
+    'start.html': ('Dein Begleiter durch Mittelerde', 'Finde deine nächste Aufgabe, vollende Taten und entdecke Ausrüstung und Rezepte für deine Abenteuer in Der Herr der Ringe Online. Mit deinem Spielstand.'),
     'start-en.html': ('Your companion through Middle-earth', 'Find your next quest, finish deeds and discover gear and recipes for your adventures in The Lord of the Rings Online. Keep track with your own progress.'),
     'start-fr.html': ('Votre compagnon en Terre du Milieu', 'Trouvez votre prochaine quête, accomplissez des prouesses et découvrez équipements et recettes pour vos aventures dans LOTRO. Suivez votre progression.'),
     'spielstand.html': ('Spielstand importieren', 'Importiere deinen LOTRO-Companion-Spielstand und finde fehlende Aufgaben, Taten und Rezepte. Deine Charakterdaten bleiben in deinem Browser.'),

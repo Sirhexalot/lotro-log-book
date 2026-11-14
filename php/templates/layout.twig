@@ -1,15 +1,18 @@
 {# Shared page shell for every catalogue page.
    The markup mirrors what the static generator wrote, so the switch from
    files to PHP does not change a single visible detail. #}
+{# Die Marke steht einmal im Titel, auch wenn ein Text sie schon enthält;
+   leere Titel fallen auf den Seitennamen zurück. #}
+{%- set seo_title = page_seo.title|default('') %}{% if seo_title is empty %}{% set seo_title = 'LOTRO Log Book' %}{% elseif 'LOTRO Log Book' not in seo_title %}{% set seo_title = seo_title ~ ' – LOTRO Log Book' %}{% endif -%}
 <!doctype html>
 <html lang="{{ lang }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ page_seo.title }} – LOTRO Log Book</title><meta name="description" content="{{ page_seo.description }}">
+<title>{{ seo_title }}</title><meta name="description" content="{{ page_seo.description }}">
 {% if noindex|default(false) %}<meta name="robots" content="noindex,follow">{% endif %}
 <link rel="canonical" href="{{ base }}{{ canonical_url }}">
 {% for alt in alternates %}<link rel="alternate" hreflang="{{ alt.lang }}" href="{{ base }}{{ alt.url }}">
 {% endfor %}<meta property="og:type" content="website">
 <meta property="og:site_name" content="LOTRO Log Book">
-<meta property="og:title" content="{{ page_seo.title }} – LOTRO Log Book">
+<meta property="og:title" content="{{ seo_title }}">
 <meta property="og:description" content="{{ page_seo.description }}">
 <meta property="og:url" content="{{ base }}{{ canonical_url }}">
 <meta property="og:locale" content="{{ og_locale }}">

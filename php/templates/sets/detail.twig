@@ -1,7 +1,7 @@
 {% extends 'layout.twig' %}
 {% block inhalt %}
 <article class="set-detail">
-<h1>{{ icon|raw }}{{ set.name }}</h1><p>{{ sw.parts|replace({'%s': set.parts}) }}{% if set.available_parts < set.parts %} · {{ sw.incomplete }}{% endif %}</p>
+<h1>{{ icon|raw }}{{ set.name }}</h1><p>{{ sw.parts|replace({'%s': set.parts}) }}</p>
 <p class="katalog-aktionen"><a class="katalog-knopf" href="#setteile">{{ sw.pieces }}</a> <a class="katalog-knopf" href="#setboni">{{ sw.bonuses }}</a></p>
 <section id="setteile"><h2>{{ sw.pieces }}</h2>
 <div class="set-cards">
@@ -14,9 +14,8 @@
         {% if member.card.armour %}<p>{{ w.armour }}: {{ member.card.armour }}</p>{% endif %}
         {% if member.card.values %}<dl>{% for row in member.card.values %}<dt>{{ row.label }}</dt><dd>{{ row.value }}</dd>{% endfor %}</dl>{% endif %}
         {% if member.card.bonuses %}<ul class="set-card-stats">{% for row in member.card.bonuses %}<li>{{ row.display }} {{ row.label }}</li>{% endfor %}</ul>{% endif %}
-        {% if member.card.scale %}<p class="schwach">{{ sw.scale }}</p>{% endif %}
         <a href="{{ member.url }}">{{ sw.item }} →</a>
-    {% else %}<p class="schwach">{{ sw.missing }}</p>{% endif %}
+    {% endif %}
 </article>
 {% endfor %}
 </div></section>
@@ -24,9 +23,8 @@
 {% for bonus in set.bonuses %}
     <h3>{% if bonus.valid %}{{ sw.threshold|replace({'%s': bonus.pieces}) }}{% else %}{{ sw.unclear_threshold }}{% endif %}</h3>
     <ul>{% for text in bonus.texts %}<li>{{ text }}</li>{% endfor %}
-    {% for pending in bonus.pending %}<li class="schwach">{% if pending.label %}{{ pending.label }}: {% endif %}{{ pending.scaling ? sw.scaling : sw.unresolved }}</li>{% endfor %}</ul>
-    {% if not bonus.texts and not bonus.pending %}<p class="schwach">{{ sw.no_bonuses }}</p>{% endif %}
-{% else %}<p class="schwach">{{ sw.no_bonuses }}</p>{% endfor %}
+    {% for pending in bonus.pending %}{% if pending.label %}<li>{{ pending.label }}{% if pending.scaling %}: {{ sw.scaling }}{% endif %}</li>{% endif %}{% endfor %}</ul>
+{% endfor %}
 </section>
 <p><a href="{{ list_url }}">‹ {{ sw.back }}</a></p>
 </article>

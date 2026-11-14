@@ -10,7 +10,6 @@
     <div class="sets-grid">
         <details class="sets-filters" open>
             <summary>{{ tw.filter }}</summary>
-            <p class="schwach">{{ tw.filter_note }}</p>
             {% if facets.kind %}
             <fieldset class="sets-option-group"><legend>{{ tw.kind }}</legend>
                 {% for option in facets.kind %}<label class="sets-option"><input type="checkbox" name="kind[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}

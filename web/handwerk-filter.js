@@ -41,7 +41,7 @@
 		(rows||[]).forEach(function(r){var nr=String(r[11]);if(nr&&r[4]&&!tierNames.has(nr)){tierNames.set(nr,r[4]);}});
 	}
 	// In the filter an unrecorded tier needs a word; in a row it stays silent.
-	function tierLabel(tier){var key=String(tier);if(key===''||key==='0'){return words[32];}return tierNames.get(key)||key;}
+	function tierLabel(tier){var key=String(tier);if(key===''||key==='0'){return ({de:'Ohne Stufenangabe',en:'Without a crafting tier',fr:'Sans palier'})[lang];}return tierNames.get(key)||key;}
 	function tierText(tier){var key=String(tier);if(key===''||key==='0'){return '';}return tierNames.get(key)||key;}
 	function multi(id,label,values){return {id:id,kind:'multi',label:label,options:Array.from(new Set(values.filter(function(v){return v!=='';}))).sort(function(a,b){return String(a).localeCompare(String(b),lang,{numeric:true});}).map(function(v){return {value:String(v),label:id==='beruf'?profession(v):id==='stufe'?tierLabel(v):String(v)};})};}
 	function materialRows(){
@@ -208,7 +208,7 @@
 			['berufe','rezepte','rohstoffe'].forEach(function(key){document.getElementById('hw-'+key).hidden=key!==tab;});
 			var host=document.getElementById(tab==='berufe'?'berufe':tab==='rezepte'?'rezepte-liste':'rohstoffe-liste');host.replaceChildren();
 			if(tab==='rezepte'&&!recipeRows.length||tab==='rohstoffe'&&!resources){host.appendChild(text('p',words[8]));return;}
-			if(tab==='rezepte'){host.appendChild(text('p',words[31]));}
+            // Recipe knowledge is explained only when importing needs attention.
 			var target=document.createElement('div');target.dataset.filterResults='';host.appendChild(target);
 			var setup=make(tab,{rows:recipeRows,renderer:recipeRenderer});controller=window.MQL_FILTER_UI.mount(host,setup);window.MQL_CRAFT_FILTER=controller;await controller.ready;
 		});return queue;

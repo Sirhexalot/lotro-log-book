@@ -8,7 +8,7 @@
     <span class="giver-symbol" aria-hidden="true">{{ icon|raw }}</span>
     <div>
         <h1>{{ giver.name }}</h1>
-        <p class="giver-art">{{ attribute(kind_words, 'kind_' ~ giver.kind) }}{% if giver.title %} · {{ giver.title }}{% endif %}</p>
+        {% if giver.kind != 'unknown' or giver.title %}<p class="giver-art">{% if giver.kind != 'unknown' %}{{ attribute(kind_words, 'kind_' ~ giver.kind) }}{% endif %}{% if giver.title %}{% if giver.kind != 'unknown' %} · {% endif %}{{ giver.title }}{% endif %}</p>{% endif %}
     </div>
 </div>
 
@@ -16,18 +16,18 @@
 
 {% if giver.greeting %}<details class="katalog-ziele giver-greeting"><summary>{{ gw.greeting }}</summary><p class="katalog-text">{{ giver.greeting }}</p><p class="katalog-hinweis">{{ gw.greeting_hint }}</p></details>{% endif %}
 
-<section class="katalog-abschnitt"><h2>{{ gw.places }}</h2>
+{% if giver.places %}<section class="katalog-abschnitt"><h2>{{ gw.places }}</h2>
 {% for place in giver.places %}
     <div class="katalog-ort-flex">
         {% if place.image %}<a class="katalog-ortlink" href="{{ place.map_url }}"><figure class="katalog-ort"><img src="/karten/{{ lang }}/{{ place.image|replace({'.png': '.webp'}) }}" alt="" width="320" height="240" loading="lazy" decoding="async"><i class="katalog-pin" style="left:{{ place.pin_x|pin }}%;top:{{ place.pin_y|pin }}%"></i></figure></a>{% endif %}
         <div>
             {% if place.chain %}<p class="katalog-hinweis giver-weg">{% for part in place.chain %}{% if not loop.first %} › {% endif %}<a href="{{ part.url }}">{{ part.name }}</a>{% endfor %}</p>{% endif %}
-            <p class="katalog-hinweis">{{ place.coords }}{% if not place.map_name %} · {{ gw.no_map }}{% endif %}</p>
+            {% if place.coords %}<p class="katalog-hinweis">{{ place.coords }}</p>{% endif %}
             <p class="katalog-aktionen">{% if place.map_url %}<a href="{{ place.map_url }}" class="katalog-knopf">{{ gw.map }}</a> {% endif %}<a href="{{ place.travel_url }}" class="katalog-link">{{ gw.route }}</a></p>
         </div>
     </div>
-{% else %}<p class="katalog-hinweis">{{ gw.no_place }}</p>{% endfor %}
-</section>
+{% endfor %}
+</section>{% endif %}
 
 <section class="katalog-abschnitt giver-quests"
          data-done-label="{{ gw.done }}" data-open-label="{{ gw.open }}"
@@ -50,7 +50,7 @@
 
 {% if giver.same_name %}<section class="katalog-abschnitt giver-gleichnamig">
     <h2>{{ gw.same_name }}</h2>
-    <ul>{% for entry in giver.same_name[:12] %}<li><a href="{{ entry.url }}">{{ entry.place ?: gw.unknown_place }} · {{ (entry.count == 1 ? gw.quests_one : gw.quests)|replace({'%s': entry.count}) }}</a></li>{% endfor %}</ul>
+    <ul>{% for entry in giver.same_name[:12] %}<li><a href="{{ entry.url }}">{% if entry.place %}{{ entry.place }} · {% endif %}{{ (entry.count == 1 ? gw.quests_one : gw.quests)|replace({'%s': entry.count}) }}</a></li>{% endfor %}</ul>
     {% if giver.same_name|length > 12 %}<p><a href="{{ giver.same_name_url }}">{{ gw.same_name_all }}</a></p>{% endif %}
 </section>{% endif %}
 

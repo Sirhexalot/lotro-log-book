@@ -246,13 +246,14 @@ final class Givers
     }
 
     private function context(string $name, string $description, string $canonical,
-                             array $alternates, bool $noindex = false): array
+                             array $alternates, bool $noindex = false,
+                             ?array $seo = null): array
     {
         $words = self::words($this->lang);
         $base = $this->catalogue->appRoute($this->lang, 'givers');
         return [
             'lang' => $this->lang, 'kind' => 'giver', 'w' => $this->shell->words(), 'gw' => $words,
-            'page_seo' => ['title' => $name, 'description' => $description],
+            'page_seo' => $seo ?? ['title' => $name, 'description' => $description],
             'base' => $this->catalogue->base, 'canonical_url' => $canonical,
             'alternates' => $alternates,
             'og_locale' => ['de' => 'de_DE', 'en' => 'en_US', 'fr' => 'fr_FR'][$this->lang],
@@ -337,7 +338,8 @@ final class Givers
             }
             $row['places_text'] = implode(' · ', array_slice($names, 0, 3))
                 . (count($names) > 3 ? ' …' : '');
-            $parts = [$row['kind_text'] = self::label($words, $row['kind'])];
+            $row['kind_text'] = $row['kind'] === 'unknown' ? '' : self::label($words, $row['kind']);
+            $parts = $row['kind_text'] !== '' ? [$row['kind_text']] : [];
             if ($row['title']) {
                 $parts[] = $row['title'];
             }
@@ -357,7 +359,10 @@ final class Givers
             fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang)],
             Catalogue::LANGS);
         return $this->view->render('givers/list.twig', $this->context(
-            $words['title'], $words['intro'], $this->url($filters, $page), $alternates,
+            // Folgeseiten nennen ihre Seite, sonst tragen sie den Text der ersten.
+            $page > 1 ? $words['title'] . ' – ' . sprintf($words['page'], $page, $pages) : $words['title'],
+            $page > 1 ? $words['intro'] . ' ' . sprintf($words['page'], $page, $pages) . '.' : $words['intro'],
+            $this->url($filters, $page), $alternates,
             (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
         ) + [
             'filters' => $filters, 'facets' => $facets, 'givers' => $page_rows,
@@ -394,7 +399,8 @@ final class Givers
         }
         $context = $this->context(
             $giver['name'], sprintf($words['seo_detail'], $giver['name']),
-            $this->catalogue->route($this->lang, 'giver', $id), $alternates
+            $this->catalogue->route($this->lang, 'giver', $id), $alternates, false,
+            $giver['seo'] ?? null
         );
         $context['crumbs'] = $this->shell->crumbHtml(array_merge(
             $this->shell->appCrumbs('givers'),

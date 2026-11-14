@@ -31,7 +31,7 @@ final class Sets
                 'page' => 'Seite %s von %s', 'pieces' => 'Setteile', 'bonuses' => 'Setboni',
                 'threshold' => '%s Teile', 'unclear_threshold' => 'Bonuszuordnung unklar',
                 'unresolved' => 'Wert oder Wirkung nicht vollständig auswertbar.',
-                'scaling' => 'Stufenabhängig; ein verlässlicher Zahlenwert liegt nicht vor.',
+                'scaling' => 'abhängig von der Stufe',
                 'no_bonuses' => 'Keine Bonusangaben in den vorhandenen Daten.',
                 'missing' => 'Zu diesem Teil fehlen Gegenstandsdaten.', 'unnamed' => 'Name nicht belegt',
                 'item' => 'Gegenstand ansehen', 'back' => 'Alle Sets', 'unknown' => 'Unbekannt',
@@ -49,7 +49,7 @@ final class Sets
                 'page' => 'Page %s of %s', 'pieces' => 'Set pieces', 'bonuses' => 'Set bonuses',
                 'threshold' => '%s pieces', 'unclear_threshold' => 'Unclear bonus requirement',
                 'unresolved' => 'The value or effect cannot be fully resolved.',
-                'scaling' => 'Level-dependent; no reliable numeric value is available.',
+                'scaling' => 'varies with level',
                 'no_bonuses' => 'No bonus information in the available data.',
                 'missing' => 'Item data is missing for this piece.', 'unnamed' => 'Name not recorded',
                 'item' => 'View item', 'back' => 'All sets', 'unknown' => 'Unknown',
@@ -67,7 +67,7 @@ final class Sets
                 'page' => 'Page %s sur %s', 'pieces' => 'Pièces de l’ensemble', 'bonuses' => 'Bonus d’ensemble',
                 'threshold' => '%s pièces', 'unclear_threshold' => 'Condition du bonus incertaine',
                 'unresolved' => 'La valeur ou l’effet ne peut pas être entièrement déterminé.',
-                'scaling' => 'Dépend du niveau ; aucune valeur numérique fiable n’est disponible.',
+                'scaling' => 'varie selon le niveau',
                 'no_bonuses' => 'Aucune information sur les bonus dans les données disponibles.',
                 'missing' => 'Les données de cette pièce sont manquantes.', 'unnamed' => 'Nom non attesté',
                 'item' => 'Voir l’objet', 'back' => 'Tous les ensembles', 'unknown' => 'Inconnu',
@@ -126,13 +126,14 @@ final class Sets
             . ($params ? '?' . http_build_query($params) : '');
     }
 
-    private function context(string $name, string $canonical, array $alternates): array
+    private function context(string $name, string $canonical, array $alternates,
+                             ?array $seo = null): array
     {
         $words = self::words($this->lang);
         $base = $this->catalogue->appRoute($this->lang, 'sets');
         return [
             'lang' => $this->lang, 'kind' => 'set', 'w' => $this->shell->words(), 'sw' => $words,
-            'page_seo' => ['title' => $name, 'description' => $words['details_description']],
+            'page_seo' => $seo ?? ['title' => $name, 'description' => $words['details_description']],
             'base' => $this->catalogue->base, 'canonical_url' => $canonical,
             'alternates' => $alternates, 'og_locale' => ['de' => 'de_DE', 'en' => 'en_US', 'fr' => 'fr_FR'][$this->lang],
             'og_image_alt' => 'LOTRO Log Book', 'tracking' => $this->shell->tracking(),
@@ -193,7 +194,13 @@ final class Sets
             $row['meta'] = implode(' · ', array_merge(array_values($classes), array_values($armour)));
         }
         unset($row);
-        return $this->view->render('sets/list.twig', $this->context(self::words($this->lang)['title'], $this->url($filters, $page), $alternates) + [
+        // Auch die Set-Liste nennt auf Folgeseiten ihre Seite.
+        $listWords = self::words($this->lang);
+        $listSeo = $page > 1
+            ? ['title' => $listWords['title'] . ' – ' . sprintf($listWords['page'], $page, $pages),
+               'description' => $listWords['intro'] . ' ' . sprintf($listWords['page'], $page, $pages) . '.']
+            : ['title' => $listWords['title'], 'description' => $listWords['intro']];
+        return $this->view->render('sets/list.twig', $this->context($listWords['title'], $this->url($filters, $page), $alternates, $listSeo) + [
             'filters' => $filters, 'facets' => $facets, 'sets' => $rows, 'count' => count($selected),
             'page_label' => sprintf(self::words($this->lang)['page'], $page, $pages),
             'noindex' => (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== []),
@@ -207,7 +214,8 @@ final class Sets
         $set = $this->data->page($this->lang, 'set', $id);
         if (!$set) { return null; }
         $alternates = array_map(fn ($lang) => ['lang' => $lang, 'url' => $this->catalogue->route($lang, 'set', $id)], Catalogue::LANGS);
-        $context = $this->context($set['name'], $this->catalogue->route($this->lang, 'set', $id), $alternates);
+        $context = $this->context($set['name'], $this->catalogue->route($this->lang, 'set', $id), $alternates,
+            $set['seo'] ?? null);
         $context['crumbs'] = $this->shell->crumbHtml(array_merge(
             $this->shell->appCrumbs('sets'),
             [['text' => $set['name'], 'url' => null]]

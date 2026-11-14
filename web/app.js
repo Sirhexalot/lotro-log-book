@@ -124,6 +124,9 @@
 
 	function gezaehlt(quest) {
 		var zustand = zustandVon(quest);
+		// An instance row of the epic story is a part of its chapter, not a task of
+		// its own: the chapter decides whether the step is done.
+		if (quest.z === 'story' && quest.ie) { return false; }
 		return zustand !== 'sitzung' && zustand !== 'ausgeschlossen' && zustand !== 'monster';
 	}
 
@@ -146,6 +149,39 @@
 	karten.forEach(function (karte) { karteNachIndex[karte.idx] = karte; });
 	var questNachId = {};
 	quests.forEach(function (quest) { questNachId[quest.i] = quest; });
+	// Chapter id → the instance rows that belong to it (built when first needed).
+	var instanzenJeKapitel = null;
+	function instanzenVon(kapitelId) {
+		if (!instanzenJeKapitel) {
+			instanzenJeKapitel = {};
+			quests.forEach(function (quest) {
+				if (!quest.ie) { return; }
+				(instanzenJeKapitel[quest.ie] || (instanzenJeKapitel[quest.ie] = [])).push(quest);
+			});
+		}
+		return instanzenJeKapitel[kapitelId] || [];
+	}
+	// A session play that only retells a story step which has its own quest row
+	// (the interludes): the step is already there, so the replay is no second row.
+	var sitzungsdubletten = null;
+	function sitzungsdublette(quest) {
+		if (quest.x !== 1 || quest.z !== 'story') { return false; }
+		if (!sitzungsdubletten) {
+			sitzungsdubletten = {};
+			quests.forEach(function (anderer) {
+				if (anderer.x === 1 || anderer.z !== 'story') { return; }
+				sitzungsdubletten[(anderer.a || '') + '|' + storyKern(anderer.n)] = true;
+			});
+		}
+		return sitzungsdubletten[(quest.a || '') + '|' + storyKern(quest.n)] === true;
+	}
+	function storyKern(name) {
+		return String(name || '')
+			.replace(/^\s*\d+\.\s*/, '')
+			.replace(/^\s*(?:Zwischenspiel|Interlude|Interlude\s*:)\s*:?\s*/i, '')
+			.trim()
+			.toLowerCase();
+	}
 
 	// --- Text ----------------------------------------------------------
 	var FALTEN = [
@@ -671,9 +707,6 @@
 		};
 		bild.src = webp;
 		if (gelaende) { gelaende.setMap(karte); }
-		if (karte.rahmen === 'unklar' && (!gelaende || !gelaende.active())) {
-			hinweis.textContent = t('rahmen_unklar');
-		}
 		zeichneMarker();
 		zeichneDetail();
 		kartenStufe();
@@ -779,8 +812,7 @@
 					(zustandVon(stelle.quests[0]) === 'sitzung' ? ' – ' + t('sitzungsspiel') :
 					 zustandVon(stelle.quests[0]) === 'monster' ? ' – ' + t('monsterspiel') :
 						(zustandVon(stelle.quests[0]) === 'ausgeschlossen' ? ' – ' + t('nicht_moeglich') :
-							(fertig[stelle.quests[0].i] ? t('erledigt_suffix') : ''))) +
-					(!stelle.quests[0].gt ? ' – ' + t('zielort_hinweis') : '');
+							(fertig[stelle.quests[0].i] ? t('erledigt_suffix') : '')));
 			stelle.quests.forEach(function (quest) { markerVon[quest.i] = dot; });
 			dot.addEventListener('mouseenter', function () { hebeZeilen(stelle.quests, true); });
 			dot.addEventListener('mouseleave', function () { hebeZeilen(stelle.quests, false); });
@@ -1630,6 +1662,9 @@
 			var ax = x.a || '', ay = y.a || '';
 			if (ax === ay) {
 				if (inhaltsAuswahl && x.z === 'story' && y.z === 'story') {
+					// Numbered interludes ("4. Zwischenspiel …") follow that number.
+					var nx = /^\s*(\d+)\./.exec(x.n), ny = /^\s*(\d+)\./.exec(y.n);
+					if (nx && ny && nx[1] !== ny[1]) { return Number(nx[1]) - Number(ny[1]); }
 					var muster = /(?:Kapitel|Chapter|Chapitre)\s+(\d+(?:\.\d+)*)/i;
 					var kx = x.n.match(muster), ky = y.n.match(muster);
 					function rang(q, k) { return /prolog|vorwort|foreword|avant-propos/i.test(q.n) ? -1 : k ? 0 : /epilog|nachwort|afterword|épilogue/i.test(q.n) ? 2 : 1; }
@@ -1667,6 +1702,15 @@
 				ort.addEventListener('click', function () { waehleKnoten(kind, true); });
 				liste.appendChild(ort);
 			});
+		}
+		// A prologue chain is the introduction to a book, not a part of its progress.
+		// Saying so keeps the rows honest; the entries themselves stay reachable.
+		if (zustand.knoten &&
+			/prolog|vorwort|introduction|prologue/i.test(zustand.knoten.name || '')) {
+			var hinweis = eltern('li', null);
+			hinweis.className = 'listen-hinweis schwach';
+			hinweis.textContent = t('prolog_hinweis');
+			liste.appendChild(hinweis);
 		}
 		var letzter = null;
 		nachAbschnitt.slice(0, zustand.sichtbar).forEach(function (quest) {
@@ -1710,6 +1754,19 @@
 				questName.appendChild(geber);
 			}
 			zeile.appendChild(questName);
+			if (quest.z === 'story' && !quest.ie) {
+				var instanzen = instanzenVon(quest.i);
+				if (instanzen.length) {
+					var teile = instanzen.map(function (eintrag) {
+						var name = eintrag.n.replace(/^(?:Instanz|Instance)\s*:\s*/i, '');
+						// Same title as the chapter: the word alone says it.
+						return quest.n.toLowerCase().indexOf(name.toLowerCase()) >= 0 ? '' : name;
+					}).filter(Boolean);
+					var teil = eltern('span', t('mit_instanz') + (teile.length ? ': ' + teile.join(' · ') : ''));
+					teil.className = 'vermerk instanz-teil';
+					questName.appendChild(teil);
+				}
+			}
 			if (lage === 'sitzung' || lage === 'ausgeschlossen' || lage === 'monster') {
 				var vermerk = eltern('span', lage === 'sitzung' ? t('sitzungsspiel')
 					: lage === 'monster' ? t('monsterspiel') : t('nicht_moeglich'));
@@ -1778,6 +1835,10 @@
 
 	/** Progress filter over a quest list. */
 	function gefiltert(eintraege) {
+		// An epic instance row belongs to its chapter; the chapter stands for it.
+		eintraege = eintraege.filter(function (quest) {
+			return !(quest.z === 'story' && quest.ie) && !sitzungsdublette(quest);
+		});
 		if (window.MQL_ART === 'taten' && zustand.belohnung !== 'alle') {
 			eintraege = eintraege.filter(belohnungPasst);
 		}
@@ -1819,13 +1880,10 @@
 		if (zustand.belohnung !== 'alle') {
 			zusatz += ' · ' + t('belohnung') + ': ' + t('belohnung_' + zustand.belohnung);
 		}
-		var gezaehlt = listeGefiltert.filter(function (quest) {
-			var lage = zustandVon(quest);
-			return lage !== 'sitzung' && lage !== 'ausgeschlossen' && lage !== 'monster';
-		}).length;
+		var anzahl = listeGefiltert.filter(gezaehlt).length;
 		// The rows no longer carry a level; the range belongs to the whole area.
 		var spanne = stufenSpanne(quelle);
-		zeigeListe(titel + ' · ' + gezaehlt + (spanne ? ' · ' + spanne : '') + zusatz, listeGefiltert);
+		zeigeListe(titel + ' · ' + anzahl + (spanne ? ' · ' + spanne : '') + zusatz, listeGefiltert);
 		zeichneMarker();
 	}
 
@@ -2861,8 +2919,9 @@
 		e.rest = e.knoten.name === ABSCHNITTE.other;
 		if (e.rest) { e.knoten.name = restName; }
 	});
-	var regionSortierung = [ltexte[7], 'Eriador', 'Rhovanion', 'Rohan', 'Gondor', 'Mordor', 'Haradwaith', 'Rhûn'];
+	var regionSortierung = ['Eriador', 'Rhovanion', 'Rohan', 'Gondor', 'Mordor', 'Haradwaith', 'Rhûn'];
 	landschaften.sort(function (a,b) {
+		if ((a.region === ltexte[7]) !== (b.region === ltexte[7])) { return a.region === ltexte[7] ? 1 : -1; }
 		var ra = regionSortierung.indexOf(a.region), rb = regionSortierung.indexOf(b.region);
 		return (ra < 0 ? 99 : ra) - (rb < 0 ? 99 : rb) || a.region.localeCompare(b.region, sprache) || a.knoten.name.localeCompare(b.knoten.name, sprache);
 	});
@@ -3061,7 +3120,6 @@
 		gelaende = window.MQL_GELAENDE.create({ world:welt, stage:buehne, image:bild, language:sprache,
 			onChange:function () {
 				if (gelaende && gelaende.active()) { hinweis.textContent = ''; }
-				else if (zustand.karte && zustand.karte.rahmen === 'unklar') { hinweis.textContent = t('rahmen_unklar'); }
 				passeAn(); zeichneMarker();
 				aktualisiereKartenVorschauen();
 			},
@@ -3069,6 +3127,7 @@
 		});
 	}
 	if (!karten.length || !quests.length) {
+		haupt.classList.remove('karte-laedt');
 		hinweis.textContent = t('keine_daten');
 		detail.textContent = '';
 		var fehlt = eltern('p', t('fehlt'));
@@ -3157,4 +3216,5 @@
 	}
 	if (window.location.hash && !gewuenscht) { landschaftAusAdresse(); }
 	else if (!mitAdresse && !vorgabeSuche) { landschaftUebersicht(true); }
+	haupt.classList.remove('karte-laedt');
 })();

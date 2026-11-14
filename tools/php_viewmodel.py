@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from build_katalogseiten import WORDS, route, escape  # noqa: E402
 from giver_viewmodel import giver_url  # noqa: E402
+import seo  # noqa: E402
 
 
 def klarer_name(text) -> str:
@@ -290,8 +291,12 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
         steps.append({'paragraphs': [str(par) for par in step[1]],
                       'objectives': [str(goal[0]) for goal in step[2]]})
 
-    description = '%s: %s. %s. %s.' % (w['qlabel'], quest['n'],
-                                        ' › '.join(quest.get('f', [])), w['map'])
+    # Ein Text für alle Seiten dieser Art, gebaut aus den Werten, die die
+    # Seite ohnehin zeigt (tools/seo.py).
+    seo_block = seo.quest(
+        lang, name=quest['n'], area=' › '.join(quest.get('f') or []),
+        level=quest.get('l') or '', giver=quest.get('g') or '',
+        steps=len(quest.get('s') or []), rewards=len(quest.get('rw') or []))
 
     crumb_maps = []
     for map_id in fk:
@@ -322,7 +327,7 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
         'context_columns': context_columns,
         'steps': steps,
         'crumb_maps': crumb_maps,
-        'seo': {'title': quest['n'], 'description': description},
+        'seo': seo_block,
     }
 
 
@@ -449,7 +454,10 @@ def deed_view(builder: ViewBuilder, deed: dict, index: dict, categories: dict) -
               'objectives': [str(goal[0]) for goal in step[2]]}
              for step in deed.get('s') or []]
 
-    description = '%s: %s. %s. %s.' % (w['dlabel'], deed['n'], ' › '.join(area), w['map'])
+    # Dieselbe Regel wie bei den Aufgaben: Name, Fakten, Nutzen.
+    seo_block = seo.deed(
+        lang, name=deed['n'], area=' › '.join(area), kind=kind,
+        level=deed.get('l') or '', steps=len(deed.get('s') or []))
 
     crumb_maps = []
     for map_id in deed.get('fk') or []:
@@ -487,7 +495,7 @@ def deed_view(builder: ViewBuilder, deed: dict, index: dict, categories: dict) -
         } if more_kind else None,
         'steps': steps,
         'crumb_maps': crumb_maps,
-        'seo': {'title': deed['n'], 'description': description},
+        'seo': seo_block,
     }
 
 
@@ -518,7 +526,7 @@ def honor_view(builder: ViewBuilder, art: str, entry: dict) -> dict:
         'icon': 'titel' if art == 'title' else 'tugend',
         'sources': sources,
         'ranked': bool(re.search(r'\bRANK\b|\bNAME\b|\bSURNAME\b', name)),
-        'seo': {'title': name, 'description': '%s: %s' % (w[art + 'label'], name)},
+        'seo': seo.honor(lang, name=name, art=art, sources=sources),
     }
 
 
@@ -576,7 +584,8 @@ def faction_view(builder: ViewBuilder, entry: dict) -> dict:
         'groups': [gruppen[key] for key in ('q', 't') if key in gruppen],
         'total': sum(len(gruppe['entries']) for gruppe in gruppen.values()),
         'stand_url': app_url(lang, 'ruf'),
-        'seo': {'title': name, 'description': '%s: %s' % (w['flabel'], name)},
+        'seo': seo.faction(lang, name=name, tiers=len(stufen),
+                           sources=sum(len(gruppe['entries']) for gruppe in gruppen.values())),
     }
 
 
@@ -621,7 +630,9 @@ def landmark_view(builder: ViewBuilder, entry: dict) -> dict:
         # map id the app already understands (it preselects the area).
         'map_link': app_url(lang, 'karte', vorkarte=entry['map'])
             if entry.get('map') else app_url(lang, 'karte'),
-        'seo': {'title': name, 'description': '%s: %s' % (w['llabel'], name)},
+        'seo': seo.landmark(lang, name=name, area=ort.get('map_name') or '',
+                            region=(ort.get('region') or {}).get('text') or '',
+                            quests=len(ziele)),
     }
 
 
@@ -674,8 +685,9 @@ def recipe_view(builder: ViewBuilder, row: list) -> dict:
         'time': str(row[13]) if len(row) > 13 and row[13] else None,
         'craft_url': app_url(lang, 'handwerk'),
         'crumb_profession': {'text': profession_name, 'url': beruf_url(lang, profession)},
-        'seo': {'title': row[0],
-                'description': '%s: %s. %s · %s.' % (w['recipelabel'], row[0], row[3], row[4])},
+        'seo': seo.recipe(lang, name=row[0], profession=profession_name,
+                          tier=row[4] or '', level=row[2] or '',
+                          ingredients=len(ingredients)),
     }
 
 
@@ -743,6 +755,25 @@ def area_view(builder: ViewBuilder, entry: dict, kind: str, members: dict) -> di
             'excerpt': len(rows) > PAGE_SIZE,
         })
 
+    counts = {row['kind']: row['count'] for row in sections}
+    if kind == 'region':
+        # Eine Region trägt keine eigenen Listen; die Gebiete darunter tun es.
+        for member_kind in ('q', 'd', 'i'):
+            if member_kind in counts:
+                continue
+            counts[member_kind] = sum(
+                len(members[member_kind].get(child.get('idx'))
+                    or members[member_kind].get(str(child.get('idx'))) or [])
+                for _child_id, child in body_children)
+    seo_block = (seo.region(lang, name=entry.get('name') or '',
+                            areas=len(body_children), quests=counts.get('q', 0),
+                            deeds=counts.get('d', 0))
+                 if kind == 'region' else
+                 seo.area(lang, name=entry.get('name') or '',
+                          parent=(parent_link or {}).get('text') or '',
+                          quests=counts.get('q', 0), deeds=counts.get('d', 0),
+                          items=counts.get('i', 0)))
+
     return {
         'kind': kind,
         'id': ident,
@@ -758,8 +789,7 @@ def area_view(builder: ViewBuilder, entry: dict, kind: str, members: dict) -> di
         'children_title': w['arealist'],
         'sections': sections,
         'members': komplett,
-        'seo': {'title': entry.get('name') or '',
-                'description': '%s: %s – LOTRO Log Book.' % (w['cataloglabel'], entry.get('name') or '')},
+        'seo': seo_block,
     }
 
 
@@ -774,6 +804,10 @@ def profession_view(builder: ViewBuilder, key: str, entry: dict, recipes: list) 
             'entries': [{'url': route(lang, 'recipe', ident), 'text': row[0]}
                         for ident, row in sorted(group, key=lambda row: row[1][0].casefold())],
         })
+    levels = [row[2] for _ident, row in recipes if row[2]]
+    seo_block = seo.profession(lang, name=entry.get('name') or key, recipes=len(recipes),
+                               low=min(levels) if levels else '',
+                               high=max(levels) if levels else '')
     return {
         'kind': 'p',
         'id': key,
@@ -781,7 +815,7 @@ def profession_view(builder: ViewBuilder, key: str, entry: dict, recipes: list) 
         'icon': 'beruf',
         'craft_url': beruf_url(lang, key),
         'groups': groups,
-        'seo': {'title': entry.get('name') or key, 'description': w['overview']},
+        'seo': seo_block,
     }
 
 
@@ -1018,6 +1052,14 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         browse = {'url': app_url(lang, 'gegenstandssuche', kat=category, platz=slot),
                   'text': w['browse_link'], 'note': w['browse_text']}
 
+    quality_text = ctx.label('quality', quality) if quality else ''
+    seo_block = seo.item(
+        lang, name=name, quality=quality_text, category=eyebrow,
+        level=min_level or item.get('l') or '',
+        source=('%s, %s' % (sources[0]['text'], sources[0]['extra'])
+                if sources and sources[0].get('extra') else
+                (sources[0]['text'] if sources else '')))
+
     return {
         'kind': 'i',
         'id': ident,
@@ -1043,7 +1085,7 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         'set': set_block,
         'required_class': (details or {}).get('requiredClass'),
         'browse': browse,
-        'seo': {'title': name, 'description': '%s: %s. %s' % (w['ilabel'], name, w['item_intro'])},
+        'seo': seo_block,
     }
 
 
@@ -1132,7 +1174,8 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
                 'title': titel,
                 'canonical': page_route(lang, kind, number),
                 'intro': intro,
-                'seo': {'title': titel, 'description': w['overview']},
+                'seo': seo.listpage(lang, label=w[kind + 'list'], page=number,
+                                    pages=seiten, entries=len(teil), kind=kind),
                 'alternates': {o: page_route(o, kind, number) for o in ('de', 'en', 'fr')},
                 'language_urls': {o: page_route(o, kind, number) for o in ('de', 'en', 'fr')},
                 'entries': _entries(builder, kind, teil),
@@ -1151,7 +1194,8 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
     # Craft overview and the catalogue hub.
     pages[w['craft'] + '/'] = {
         'kind': 'craft', 'page': 1, 'title': w['craftlist'],
-        'seo': {'title': w['craftlist'], 'description': w['overview']},
+        'seo': seo.listpage(lang, label=w['craftlist'], page=1, pages=1,
+                            entries=0, kind='craft'),
         'canonical': route(lang, 'craft'),
         'alternates': {o: route(o, 'craft') for o in ('de', 'en', 'fr')},
         'language_urls': {o: route(o, 'craft') for o in ('de', 'en', 'fr')},
@@ -1168,7 +1212,8 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
         hub.append({'url': url, 'text': label})
     pages[w['catalog'] + '/'] = {
         'kind': 'catalog', 'page': 1, 'title': w['cataloglabel'],
-        'seo': {'title': w['cataloglabel'], 'description': w['overview']},
+        'seo': seo.listpage(lang, label=w['cataloglabel'], page=1, pages=1,
+                            entries=len(hub), kind='catalog'),
         'canonical': route(lang, 'catalog'),
         'alternates': {o: route(o, 'catalog') for o in ('de', 'en', 'fr')},
         'language_urls': {o: route(o, 'catalog') for o in ('de', 'en', 'fr')},

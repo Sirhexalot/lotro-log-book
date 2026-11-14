@@ -36,7 +36,7 @@ final class Factions
                 'count' => '%s Fraktionen', 'count_one' => '1 Fraktion',
                 'empty' => 'Keine passende Fraktion gefunden.', 'previous' => 'Zurück', 'next' => 'Weiter',
                 'page' => 'Seite %s von %s',
-                'mit' => 'Nur mit belegten Rufquellen',
+                'mit' => 'Mit Rufquellen',
                 'filter_note' => 'Die Orte stammen aus den Aufgaben und Taten, die Ruf bei dieser Fraktion geben.',
                 'quests' => '%s Aufgaben', 'quests_one' => '1 Aufgabe',
                 'deeds' => '%s Taten', 'deeds_one' => '1 Tat',
@@ -50,7 +50,7 @@ final class Factions
                 'count' => '%s factions', 'count_one' => '1 faction',
                 'empty' => 'No matching faction found.', 'previous' => 'Previous', 'next' => 'Next',
                 'page' => 'Page %s of %s',
-                'mit' => 'Only with recorded reputation sources',
+                'mit' => 'With reputation sources',
                 'filter_note' => 'Places come from the quests and deeds that give reputation with this faction.',
                 'quests' => '%s quests', 'quests_one' => '1 quest',
                 'deeds' => '%s deeds', 'deeds_one' => '1 deed',
@@ -64,7 +64,7 @@ final class Factions
                 'count' => '%s factions', 'count_one' => '1 faction',
                 'empty' => 'Aucune faction correspondante.', 'previous' => 'Précédent', 'next' => 'Suivant',
                 'page' => 'Page %s sur %s',
-                'mit' => 'Uniquement avec sources de réputation attestées',
+                'mit' => 'Avec des sources de réputation',
                 'filter_note' => 'Les lieux viennent des quêtes et prouesses qui donnent de la réputation auprès de cette faction.',
                 'quests' => '%s quêtes', 'quests_one' => '1 quête',
                 'deeds' => '%s prouesses', 'deeds_one' => '1 prouesse',
@@ -218,7 +218,7 @@ final class Factions
                     $namen[] = $name;
                 }
             }
-            $teile = $namen ? [implode(' · ', $namen)] : [$words['nowhere']];
+            $teile = $namen ? [implode(' · ', $namen)] : [];
             if ($row['quests'] > 0) {
                 $teile[] = str_replace('%s', (string) $row['quests'],
                     $row['quests'] === 1 ? $words['quests_one'] : $words['quests']);
@@ -228,7 +228,7 @@ final class Factions
                     $row['deeds'] === 1 ? $words['deeds_one'] : $words['deeds']);
             }
             if ($row['quests'] + $row['deeds'] === 0) {
-                $teile[] = $words['none'];
+                // No source to list.
             }
             $row['meta'] = implode(' · ', $teile);
         }
@@ -238,7 +238,10 @@ final class Factions
             fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang)],
             Catalogue::LANGS);
         return $this->view->render('factions/list.twig', $this->context(
-            $words['title'], $words['intro'], $this->url($filters, $page), $alternates,
+            // Folgeseiten nennen ihre Seite, sonst tragen sie den Text der ersten.
+            $page > 1 ? $words['title'] . ' – ' . sprintf($words['page'], $page, $pages) : $words['title'],
+            $page > 1 ? $words['intro'] . ' ' . sprintf($words['page'], $page, $pages) . '.' : $words['intro'],
+            $this->url($filters, $page), $alternates,
             (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
         ) + [
             'filters' => $filters, 'facets' => $facets, 'factions' => $page_rows,

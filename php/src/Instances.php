@@ -287,7 +287,7 @@ final class Instances
             if ($row['level_max'] !== null && $row['level_max'] !== $row['level']) {
                 $range .= '–' . $row['level_max'];
             }
-            $teile[] = $row['level'] !== null ? $words['level'] . ' ' . $range : $words['no_level'];
+            if ($row['level'] !== null) { $teile[] = $words['level'] . ' ' . $range; }
             if ($row['group_sizes']) {
                 $teile[] = str_replace('%s', implode(' / ', $row['group_sizes']), $words['players_n']);
             }
@@ -311,7 +311,10 @@ final class Instances
             fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang)],
             Catalogue::LANGS);
         return $this->view->render('instances/list.twig', $this->context(
-            $words['title'], $words['intro'], $this->url($filters, $page), $alternates,
+            // Folgeseiten nennen ihre Seite, sonst tragen sie den Text der ersten.
+            $page > 1 ? $words['title'] . ' – ' . sprintf($words['page'], $page, $pages) : $words['title'],
+            $page > 1 ? $words['intro'] . ' ' . sprintf($words['page'], $page, $pages) . '.' : $words['intro'],
+            $this->url($filters, $page), $alternates,
             (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
         ) + [
             'filters' => $filters, 'facets' => $facets, 'instances' => $page_rows,

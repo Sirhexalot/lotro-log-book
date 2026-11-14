@@ -240,9 +240,9 @@
 	 * first use in a cooking recipe, never an invented gathering tier. */
 	function kochZutaten() {
 		var texte = {
-			de: ['Zutaten nach ihrer ersten Verwendung in Kochrezepten. Auch Zwischenprodukte und Sonderzutaten sind enthalten.', 'Herstellbar: ', 'Keine Herkunft in den vorhandenen Daten belegt.'],
-			en: ['Ingredients by their first use in cooking recipes. Includes intermediate products and special ingredients.', 'Crafted by: ', 'No sources recorded in the available data.'],
-			fr: ['Ingrédients classés selon leur première utilisation en cuisine. Produits intermédiaires et ingrédients spéciaux inclus.', 'Fabrication : ', 'Aucune source attestée dans les données disponibles.']
+			de: ['Zutaten nach ihrer ersten Verwendung in Kochrezepten. Auch Zwischenprodukte und Sonderzutaten sind enthalten.', 'Herstellbar: ', ''],
+			en: ['Ingredients by their first use in cooking recipes. Includes intermediate products and special ingredients.', 'Crafted by: ', ''],
+			fr: ['Ingrédients classés selon leur première utilisation en cuisine. Produits intermédiaires et ingrédients spéciaux inclus.', 'Fabrication : ', '']
 		}[sprache];
 		var rezepte = (window.MQL_REZEPTE || {}).r || [];
 		var zutaten = {}, herstellung = {};

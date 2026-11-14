@@ -1,4 +1,6 @@
 """Render-ready set records. Reuse item models; never calculate stats twice."""
+import seo
+
 SEGMENT = {'de': 'set', 'en': 'set', 'fr': 'ensemble'}
 ITEM = {'de': 'gegenstand', 'en': 'item', 'fr': 'objet'}
 
@@ -36,6 +38,8 @@ def set_pages(source, lang, item_pages):
                             'texts': texts, 'pending': pending})
         pages[sid] = {'id': sid, 'name': entry['name'][lang], 'members': members,
                       'bonuses': bonuses, 'parts': len(members),
+                      'seo': seo.set_(lang, name=entry['name'][lang], parts=len(members),
+                                      first=members[0]['name'] if members else ''),
                       'available_parts': sum(bool(m['card']) for m in members)}
     return pages
 

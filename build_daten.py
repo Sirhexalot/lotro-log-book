@@ -419,8 +419,26 @@ def ortsgruppen(karten_datei):
     return {str(code) for code in inhalt.get('codes', {})}
 
 
+MERKMALE = None
+
+
+def questmerkmale():
+    """Which instance row belongs to which chapter, and which completion rules a
+    quest out (see tools/build_questmerkmale.py). Without the file both stay empty:
+    then nothing is folded and nothing is ruled out."""
+    global MERKMALE
+    if MERKMALE is None:
+        datei = HIER / 'daten' / 'questmerkmale.json'
+        inhalt = json.loads(datei.read_text(encoding='utf-8')) if datei.is_file() else {}
+        MERKMALE = ({str(k).upper(): str(v).upper() for k, v in (inhalt.get('instanzen') or {}).items()},
+                    {str(k).upper(): [str(x).upper() for x in v]
+                     for k, v in (inhalt.get('ausgeschlossen') or {}).items()})
+    return MERKMALE
+
+
 def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
     orte = orte or set()
+    instanz_kapitel, ausgeschlossen = questmerkmale()
     bekannt = {karte['idx'] for karte in json.loads(Path(karten_datei).read_text(encoding='utf-8'))}
     umgelegt = verloren = 0
     try:
@@ -597,8 +615,18 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
             # mp: monster play. Creep-side content a normal character never has
             # in its journal; visible, but never counted as attainable.
             **({'mp': 1} if field(record, 'mp', 0) == 1 else {}),
-            **({'e': [str(mate) for mate in step_list(field(record, 'ex'))]}
-               if field(record, 'ex') else {}),
+            # e: quests that rule this one out. The catalogue already carries
+            # mutually exclusive pairs; the client's own "must not be completed"
+            # requirements add the one-sided cases (an alternative version of the
+            # same step becomes impossible once the other was played).
+            **({'e': sorted({str(mate) for mate in step_list(field(record, 'ex'))} |
+                            set(ausgeschlossen.get(str(record['id']).upper(), [])))}
+               if (field(record, 'ex') or str(record['id']).upper() in ausgeschlossen) else {}),
+            # ie: the chapter this instance row belongs to, from the client's own
+            # "contains instance" flag plus the shared title. Shown under the
+            # chapter instead of as a row of its own; the chapter keeps its state.
+            **({'ie': instanz_kapitel[str(record['id']).upper()]}
+               if str(record['id']).upper() in instanz_kapitel else {}),
             **({'replaced_by': str(record['replaced_by'])}
                if art == 'taten' and 'replaced_by' in record else {}),
         })

@@ -1,4 +1,6 @@
 /* Landscape-first navigation. */
+/* Show only the resolved start view, not the empty map panes before data loads. */
+main.karte-laedt { visibility: hidden; }
 .landschaft-rest { margin-top: 30px; }
 .landschaft-rest .landschaft-kacheln { grid-template-columns: minmax(0, 1fr); }
 .landschaft-rest .landschaft-untergebiete { gap: 10px 20px; padding-bottom: 18px; }

@@ -9,7 +9,6 @@
     <div class="sets-grid">
         <details class="sets-filters" open>
             <summary>{{ iw.filter }}</summary>
-            <p class="schwach">{{ iw.filter_note }}</p>
             <fieldset><legend>{{ iw.cluster }}</legend>
                 {% for option in facets.cluster %}<label class="sets-option"><input type="checkbox" name="cluster[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
             </fieldset>

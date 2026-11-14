@@ -310,6 +310,11 @@ main {
 #liste li .qname { flex: 1 1 auto; min-width: 0; }
 #liste li .stufe { color: var(--schwach); font-size: 11px; margin-left: auto; padding-left: 8px; white-space: nowrap; flex: 0 0 auto; }
 #liste li .vermerk, #liste li .laufstand { flex: 0 0 auto; }
+/* The instance that belongs to a chapter: a quiet note under the name, not a row
+   of its own (folded in from the client's "contains instance" flag). */
+#liste li .vermerk.instanz-teil { display: block; margin: 1px 0 0; flex: 1 1 100%; }
+/* A one-line explanation above a list, e.g. that a prologue is no book progress. */
+#liste li.listen-hinweis { font-size: 12px; line-height: 1.35; padding: 6px 2px 8px; border-bottom: 1px solid var(--rand); }
 /* Level range of a region, on its own small line under the name. */
 .zweig .name .bereich { display: block; color: var(--schwach); font-size: 11px; line-height: 1.3; }
 
@@ -941,6 +946,16 @@ td.haken-zelle.teil { color: var(--laufend); }
 	font-size: 12px;
 	color: var(--schwach);
 }
+/* Map controls sit on the map: level top left, view and zoom top right. They
+   are not part of the legend and do not change the bar height. */
+.kartenkopf {
+	position: absolute; top: 8px; left: 8px; right: 8px; z-index: 8;
+	display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+	pointer-events: none;
+}
+.kartenkopf-links, .kartenkopf-rechts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.kartenkopf-rechts { justify-content: flex-end; }
+.kartenkopf .karte-stufe, .kartenkopf .kartenansicht, .kartenkopf .gelaende-zoom { pointer-events: auto; }
 .legende-zeile { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .kartenleiste .legende {
 	position: static; flex: 1 1 auto; min-width: 0;
@@ -952,7 +967,9 @@ td.haken-zelle.teil { color: var(--laufend); }
    do not fit are dropped whole – a cut word looks like a defect. */
 .kartenleiste .legende > * { flex: 0 0 auto; white-space: nowrap; }
 .kartenleiste .legende > .zu-breit { display: none; }
-.legende-mehr { flex: 0 0 auto; padding: 1px 7px; font-size: 11px; line-height: 1.4; }
+.legende-mehr { flex: 0 0 auto; margin-left: auto; padding: 1px 7px; font-size: 11px; line-height: 1.4; }
+/* Without a visible legend there is nothing to expand: no lone question mark. */
+.legende[hidden] + .legende-mehr { display: none; }
 /* The button keeps its space whether it is needed or not, so the legend's own
    width never changes while it is being measured. */
 .legende-mehr.aus { visibility: hidden; }
@@ -965,7 +982,8 @@ td.haken-zelle.teil { color: var(--laufend); }
 }
 .leiste-aktionen { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; min-width: 0; }
 .leiste-rechts { margin-left: auto; display: inline-flex; align-items: center; gap: 12px; }
-.karte-stufe { min-width: 9em; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.karte-stufe { min-width: 0; text-align: left; padding: 2px 7px; border: 1px solid rgba(214, 179, 90, .45); border-radius: 3px; background: rgba(13, 11, 9, .82); white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 12px; }
+.kartenkopf .kartenansicht, .kartenkopf .gelaende-zoom { background: rgba(13, 11, 9, .82); border-radius: 3px; }
 .kartenleiste .koordinate { text-align: right; }
 
 /* List: notes and counters sit under the name, the level stays right. */
@@ -1195,7 +1213,9 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 	.kartenspalte { overflow: visible; }
 	.leiste-aktionen { flex-wrap: wrap; gap: 4px 12px; padding: 1px 0 2px; }
 	.kartenleiste .koordinate { display: none; }
-	.karte-stufe { min-width: 0; }
+	.karte-stufe { min-width: 0; font-size: 11px; padding: 1px 5px; }
+	.kartenkopf { top: 6px; left: 6px; right: 6px; }
+	.kartenkopf-rechts { gap: 4px; }
 	/* The sheet resolves against the bar, not the small button: full width and
 	   always above the bar, however many rows the actions need. */
 	.leiste-aktionen .notizen { position: static; }

@@ -40,7 +40,7 @@ final class Landmarks
                 'quests' => '%s Aufgaben', 'quests_one' => '1 Aufgabe',
                 'empty' => 'Keine passende Landmarke gefunden.', 'previous' => 'Zurück', 'next' => 'Weiter',
                 'page' => 'Seite %s von %s',
-                'mit' => 'Nur mit belegten Aufgaben', 'no_area' => 'Ohne Landschaft',
+                'mit' => 'Mit Aufgaben', 'no_area' => 'Ohne Landschaft',
                 'filter_note' => 'Die Filter beziehen sich auf die belegten Standorte und Aufgaben.',
                 'no_quests' => 'Keine Aufgabe belegt', 'back' => 'Alle Landmarken',
                 'seo_detail' => 'Lage, Karte und Aufgaben zu %s.',
@@ -54,7 +54,7 @@ final class Landmarks
                 'quests' => '%s quests', 'quests_one' => '1 quest',
                 'empty' => 'No matching landmark found.', 'previous' => 'Previous', 'next' => 'Next',
                 'page' => 'Page %s of %s',
-                'mit' => 'Only with recorded quests', 'no_area' => 'No landscape',
+                'mit' => 'With quests', 'no_area' => 'No landscape',
                 'filter_note' => 'Filters use the recorded locations and quests.',
                 'no_quests' => 'No quest recorded', 'back' => 'All landmarks',
                 'seo_detail' => 'Location, map and quests for %s.',
@@ -68,7 +68,7 @@ final class Landmarks
                 'quests' => '%s quêtes', 'quests_one' => '1 quête',
                 'empty' => 'Aucun site correspondant.', 'previous' => 'Précédent', 'next' => 'Suivant',
                 'page' => 'Page %s sur %s',
-                'mit' => 'Uniquement avec quêtes attestées', 'no_area' => 'Sans pays',
+                'mit' => 'Avec des quêtes', 'no_area' => 'Sans pays',
                 'filter_note' => 'Les filtres reposent sur les lieux et quêtes attestés.',
                 'no_quests' => 'Aucune quête attestée', 'back' => 'Tous les sites',
                 'seo_detail' => 'Emplacement, carte et quêtes pour %s.',
@@ -220,13 +220,10 @@ final class Landmarks
                 $teile[] = $labels['region'][(string) $row['region']] ?? '';
             }
             $teile = array_values(array_filter($teile));
-            if (!$teile) {
-                $teile[] = $words['no_area'];
+            if ($row['quests'] > 0) {
+                $teile[] = str_replace('%s', (string) $row['quests'],
+                    $row['quests'] === 1 ? $words['quests_one'] : $words['quests']);
             }
-            $teile[] = $row['quests'] > 0
-                ? str_replace('%s', (string) $row['quests'],
-                    $row['quests'] === 1 ? $words['quests_one'] : $words['quests'])
-                : $words['no_quests'];
             $row['meta'] = implode(' · ', $teile);
         }
         unset($row);
@@ -235,7 +232,10 @@ final class Landmarks
             fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang)],
             Catalogue::LANGS);
         return $this->view->render('landmarks/list.twig', $this->context(
-            $words['title'], $words['intro'], $this->url($filters, $page), $alternates,
+            // Folgeseiten nennen ihre Seite, sonst tragen sie den Text der ersten.
+            $page > 1 ? $words['title'] . ' – ' . sprintf($words['page'], $page, $pages) : $words['title'],
+            $page > 1 ? $words['intro'] . ' ' . sprintf($words['page'], $page, $pages) . '.' : $words['intro'],
+            $this->url($filters, $page), $alternates,
             (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
         ) + [
             'filters' => $filters, 'facets' => $facets, 'landmarks' => $page_rows,

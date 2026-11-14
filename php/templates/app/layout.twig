@@ -3,6 +3,7 @@
    Head, header and footer come from one file; each page supplies its title,
    body attributes, main markup and script list. Assets are absolute because
    the pages now live at /de/karte/ instead of /index.html. #}
+{%- set seo_title = page_seo.title|default('') %}{% if seo_title is empty %}{% set seo_title = 'LOTRO Log Book' %}{% elseif 'LOTRO Log Book' not in seo_title %}{% set seo_title = seo_title ~ ' – LOTRO Log Book' %}{% endif -%}
 <html lang="{{ lang }}" data-sprache="{{ lang }}">
 <head>
 <meta charset="utf-8">
@@ -10,13 +11,13 @@
    They used to sit at the site root; the base keeps them there. #}
 <base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block seite_titel %}{{ page_seo.title }} – LOTRO Log Book{% endblock %}</title>
+<title>{% block seite_titel %}{{ seo_title }}{% endblock %}</title>
 <meta name="description" content="{{ page_seo.description }}">
 <link rel="canonical" href="{{ base }}{{ canonical_url }}">
 {% for alt in alternates %}<link rel="alternate" hreflang="{{ alt.lang }}" href="{{ base }}{{ alt.url }}">
 {% endfor %}<meta property="og:type" content="website">
 <meta property="og:site_name" content="LOTRO Log Book">
-<meta property="og:title" content="{{ page_seo.title }}">
+<meta property="og:title" content="{{ seo_title }}">
 <meta property="og:description" content="{{ page_seo.description }}">
 <meta property="og:url" content="{{ base }}{{ canonical_url }}">
 <meta property="og:locale" content="{{ og_locale }}">

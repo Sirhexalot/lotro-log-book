@@ -427,6 +427,10 @@ def write_pages(target: Path, lang: str, kind: str, pages: dict) -> int:
     These are what PHP hands to Twig. Keeping them apart from the raw records
     means a request reads only what it prints.
     """
+    import seo
+    # Zwei Einträge mit gleichem Namen und gleichen Fakten bekommen einen
+    # unterscheidenden Zusatz, bevor sie geschrieben werden (tools/seo.py).
+    seo.dedupe(lang, kind, pages)
     return write_shards(target, lang, 'page-' + kind, pages)
 
 

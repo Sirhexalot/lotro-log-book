@@ -278,7 +278,7 @@ final class Titles
                 $teile[] = implode(' · ', $namen);
             }
             if ($row['deeds'] + $row['quests'] === 0) {
-                $teile[] = $words['unknown_origin'];
+                // No origin to list.
             }
             $row['meta'] = implode(' · ', $teile);
         }
@@ -288,7 +288,10 @@ final class Titles
             fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang)],
             Catalogue::LANGS);
         return $this->view->render('titles/list.twig', $this->context(
-            $words['title'], $words['intro'], $this->url($filters, $page), $alternates,
+            // Folgeseiten nennen ihre Seite, sonst tragen sie den Text der ersten.
+            $page > 1 ? $words['title'] . ' – ' . sprintf($words['page'], $page, $pages) : $words['title'],
+            $page > 1 ? $words['intro'] . ' ' . sprintf($words['page'], $page, $pages) . '.' : $words['intro'],
+            $this->url($filters, $page), $alternates,
             (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
         ) + [
             'filters' => $filters, 'facets' => $facets, 'titles' => $page_rows,
