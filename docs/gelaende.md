@@ -61,6 +61,15 @@ Pixel. X läuft nach Osten, Y nach Norden; Bildzeilen werden entsprechend
 umgekehrt zusammengesetzt. Die Spielregion bleibt Bestandteil jedes Schlüssels.
 Gleiche Koordinaten verschiedener Regionen sind niemals dieselbe Kachel.
 
+Für die fünf gezeichneten Übersichtsrahmen wird die Fläche ihrer direkten
+Unterkarten mit angefragt. Ohne diesen zweiten Durchgang blieben dort
+rechteckige Lücken, die kein Unterkarten-Rahmen angefordert hatte
+(14.11.2026, 13.761 zusätzliche Blöcke). Der Client hat den Großteil davon
+nicht: 11.977 blieben ohne Bild, nur 1.784 kamen hinzu. Die verbleibenden
+Lücken sind also echte, nicht gebaute Flächen im Client und keine fehlenden
+Exporte. Abdeckung der Übersichten danach: Rohan 77 %, Mordor 75 %,
+Rhovanion 65 %, Gondor 57 %, Haradwaith 47 %.
+
 Die Anwendung lädt nur Kacheln des sichtbaren Ausschnitts in geeigneter LOD.
 Einzelne Kacheln werden von verschiedenen Gebietskarten gemeinsam benutzt.
 Es wird kein riesiges Gesamtbild je Karte geladen. Nicht vorhandene Teilflächen
@@ -82,8 +91,8 @@ Geländeansicht. Unveränderte, belegte Rohstoffdateien werden weiterbenutzt;
 
 ## Geprüfter Stand am 13.11.2026
 
-- 226 Karten, 82.590 angefragte eindeutige Blöcke.
-- 51.190 Bilder exportiert, 31.400 Blöcke ohne Bild.
+- 226 Karten, 96.351 angefragte eindeutige Blöcke.
+- 52.974 Bilder exportiert, 43.377 Blöcke ohne Bild.
 - Regionen 1, 2, 3, 4, 5, 6 und 14 enthalten Bilder.
 - 224 Karten haben Gelände, einschließlich der fünf neuen Geländeübersichten
   Gondor, Rhovanion, Mordor, Rohan und Haradwaith.

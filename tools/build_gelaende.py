@@ -40,13 +40,19 @@ def block_range(area):
         return None
     return x0, y0, x1, y1
 
-def requested(areas):
+def requested(areas, frames=()):
     result = set()
     for area in areas:
         bounds = block_range(area)
         if bounds:
             x0,y0,x1,y1 = bounds
             result.update((area['mr'],x,y) for x in range(x0,x1) for y in range(y0,y1))
+    for region, frame in frames:
+        x0,x1 = math.floor((frame[0]+146.8)/.8), math.ceil((frame[2]+146.8)/.8)
+        y0,y1 = math.floor((frame[3]+124.4)/.8), math.ceil((frame[1]+124.4)/.8)
+        if min(x0,y0) < 0 or max(x1,y1) > 256:
+            continue
+        result.update((region,x,y) for x in range(x0,x1) for y in range(y0,y1))
     return sorted(result)
 
 def read_tiles(path):
@@ -59,7 +65,7 @@ def read_tiles(path):
         result[row['key']] = row
     return list(result.values())
 
-def overview_entry(area, areas, base):
+def overview_entry(area, areas, base=None):
     """Terrain frame from actual child coverage, never from parchment pixels."""
     # Only named direct landscape children. Deep descendants may be detached
     # dungeons or battle versions stored elsewhere in the same coordinate grid.
@@ -84,14 +90,17 @@ def overview_entry(area, areas, base):
     wanted=set()
     for child in children:
         x0,y0,x1,y1=block_range(child)
-        wanted.update((x,y) for x in range(x0,x1) for y in range(y0,y1) if (area['mr'],x,y) in base)
+        wanted.update((area['mr'],x,y) for x in range(x0,x1) for y in range(y0,y1))
     if not wanted:return None
-    x0,y0=min(x for x,y in wanted),min(y for x,y in wanted)
-    x1,y1=max(x for x,y in wanted)+1,max(y for x,y in wanted)+1
+    x0,y0=min(x for _,x,y in wanted),min(y for _,x,y in wanted)
+    x1,y1=max(x for _,x,y in wanted)+1,max(y for _,x,y in wanted)+1
+    # Coverage is only known after the export; without it the frame still names
+    # the whole area of its children, and those blocks are exported as well.
+    treffer=len(wanted & base) if base is not None else len(wanted)
     return dict(region=area['mr'],frame=[-146.8+x0*.8,-124.4+y1*.8,-146.8+x1*.8,-124.4+y0*.8],
                 overview=True,derivedFrom=[a['idx'] for a in children],
                 separateMaps=[a['idx'] for a in candidates if a not in children],
-                tiles=len(wanted),total=(x1-x0)*(y1-y0))
+                tiles=treffer,total=(x1-x0)*(y1-y0))
 
 def pyramid(raw, public, version, rows):
     levels = defaultdict(dict)
@@ -167,7 +176,15 @@ def main():
     if not stamps:raise SystemExit('No client DAT files found')
     version=hashlib.sha256(json.dumps([2,stamps]).encode()).hexdigest()[:12]
     work=args.cache/version;raw=work/'raw';raw.mkdir(parents=True,exist_ok=True)
-    requests=requested(areas);tsv=work/'requests.tsv'
+    # Overview frames are known before the export (from their children's frames),
+    # so their blocks are exported too; otherwise the region overviews showed
+    # rectangular gaps that no child frame had asked for (14.11.2026).
+    uebersichten={}
+    for area in areas:
+        if area.get('rahmen')=='unklar':
+            info=overview_entry(area,areas)
+            if info:uebersichten[str(area['idx'])]=info
+    requests=requested(areas,[(info['region'],info['frame']) for info in uebersichten.values()]);tsv=work/'requests.tsv'
     tsv.write_text(''.join(f'{r}\t{x}\t{y}\n' for r,x,y in requests))
     print('Maps:',len(areas),'requested blocks:',len(requests),'version:',version,flush=True)
     (work/'source.json').write_text(json.dumps(dict(client=str(args.client),files=stamps,version=version),indent=2))
@@ -185,8 +202,16 @@ def main():
     for area in areas:
         bounds=block_range(area)
         if not bounds:
-            info=overview_entry(area,areas,base) if area.get('rahmen')=='unklar' else None
+            info=dict(uebersichten[str(area['idx'])]) if str(area['idx']) in uebersichten else None
             if info:
+                region=info['region']
+                x0,x1=math.floor((info['frame'][0]+146.8)/.8),math.ceil((info['frame'][2]+146.8)/.8)
+                y0,y1=math.floor((info['frame'][3]+124.4)/.8),math.ceil((info['frame'][1]+124.4)/.8)
+                if min(x0,y0) < 0 or max(x1,y1) > 256:
+                    info=None
+                else:
+                    info['tiles']=sum((region,x,y) in base for x in range(x0,x1) for y in range(y0,y1))
+            if info and info['tiles']:
                 coverage[str(area['idx'])]=info
                 summary.append(dict(id=area['idx'],name=area['name'],available=True,**info))
             else:
