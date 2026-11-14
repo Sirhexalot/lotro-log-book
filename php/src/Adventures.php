@@ -14,6 +14,16 @@ namespace Llb;
  */
 final class Adventures
 {
+    /** The six drawn regions, in the order the world map presents them. */
+    private const REGIONS = [
+        '268437557', // Eriador
+        '268453619', // Rhovanion
+        '268453621', // Rohan
+        '268450901', // Gondor
+        '268453620', // Mordor
+        '268454369', // Haradwaith
+    ];
+
     public function __construct(
         private Catalogue $catalogue,
         private Data $data,
@@ -36,7 +46,7 @@ final class Adventures
                 'import_hint' => 'Lade deinen Spielstand, dann siehst du hier deinen Fortschritt.',
                 'import_link' => 'Spielstand importieren',
                 'content_link' => 'Meine Inhalte',
-                'content_hint' => 'Was du besitzt, bleibt in diesem Browser gespeichert. Unbekannt ist kein „nicht gekauft“.',
+                'content_hint' => '',
                 'all_owned' => 'Alles vorhanden',
                 'all_missing' => 'Alles nicht vorhanden',
                 'owned' => 'vorhanden',
@@ -54,6 +64,18 @@ final class Adventures
                 'close' => 'Schließen',
                 'quests' => '%s Aufgaben',
                 'quests_one' => '1 Aufgabe',
+                'view_label' => 'Ansicht', 'view_map' => 'Karte', 'view_list' => 'Liste',
+                'map_title' => 'Mittelerde', 'map_regions' => 'Alle Regionen',
+                'map_areas_list' => 'Gebiete als Liste',
+                'map_hint' => 'Region wählen, dann ein Gebiet.',
+                'map_show' => 'Auf der Karte zeigen',
+                'map_open' => 'Auf der Karte öffnen',
+                'map_area' => 'Gebiet ansehen',
+                'map_legend' => 'Ring = Katalogfortschritt · Zahl = Gebiete mit nächster Aufgabe · Rand = Stufenpassung',
+                'map_region_legend' => 'Prozent = Fortschritt im Gebiet · Rand = Stufenpassung · Zahl = Gebiete einer Unterkarte',
+                'map_tip' => 'Tipp: „Auf der Karte öffnen“ zeigt Auftraggeber und Ziele.',
+                'map_no_import' => '',
+                'map_preview' => 'Geländevorschau',
             ],
             'en' => [
                 'title' => 'Your adventure overview',
@@ -65,7 +87,7 @@ final class Adventures
                 'import_hint' => 'Import your progress to see your own state here.',
                 'import_link' => 'Import progress',
                 'content_link' => 'My content',
-                'content_hint' => 'What you own stays in this browser. Unknown does not mean “not bought”.',
+                'content_hint' => '',
                 'all_owned' => 'All owned',
                 'all_missing' => 'None owned',
                 'owned' => 'owned',
@@ -83,6 +105,18 @@ final class Adventures
                 'close' => 'Close',
                 'quests' => '%s quests',
                 'quests_one' => '1 quest',
+                'view_label' => 'View', 'view_map' => 'Map', 'view_list' => 'List',
+                'map_title' => 'Middle-earth', 'map_regions' => 'All regions',
+                'map_areas_list' => 'Areas as a list',
+                'map_hint' => 'Choose a region, then an area.',
+                'map_show' => 'Show on map',
+                'map_open' => 'Open on the map',
+                'map_area' => 'View area',
+                'map_legend' => 'Ring = catalogue progress · number = areas with a next quest · edge = level fit',
+                'map_region_legend' => 'Percentage = progress in the area · border = level fit · number = areas in a sub-map',
+                'map_tip' => 'Tip: “Open on the map” shows quest givers and objectives.',
+                'map_no_import' => '',
+                'map_preview' => 'Terrain preview',
             ],
             'fr' => [
                 'title' => 'Votre aperçu des aventures',
@@ -94,7 +128,7 @@ final class Adventures
                 'import_hint' => 'Importez votre progression pour voir votre état ici.',
                 'import_link' => 'Importer la progression',
                 'content_link' => 'Mes contenus',
-                'content_hint' => 'Ce que vous possédez reste dans ce navigateur. Inconnu ne signifie pas « non acheté ».',
+                'content_hint' => '',
                 'all_owned' => 'Tout possédé',
                 'all_missing' => 'Rien possédé',
                 'owned' => 'possédé',
@@ -112,6 +146,18 @@ final class Adventures
                 'close' => 'Fermer',
                 'quests' => '%s quêtes',
                 'quests_one' => '1 quête',
+                'view_label' => 'Affichage', 'view_map' => 'Carte', 'view_list' => 'Liste',
+                'map_title' => 'Terre du Milieu', 'map_regions' => 'Toutes les régions',
+                'map_areas_list' => 'Pays sous forme de liste',
+                'map_hint' => 'Choisissez une région, puis un pays.',
+                'map_show' => 'Afficher sur la carte',
+                'map_open' => 'Ouvrir sur la carte',
+                'map_area' => 'Voir le pays',
+                'map_legend' => 'Anneau = progression du catalogue · nombre = pays avec une prochaine quête · bord = niveau',
+                'map_region_legend' => 'Pourcentage = progression dans le pays · bordure = niveau · nombre = pays d’une sous-carte',
+                'map_tip' => 'Astuce : « Ouvrir sur la carte » montre les donneurs et les objectifs.',
+                'map_no_import' => '',
+                'map_preview' => 'Aperçu du terrain',
             ],
         ][$lang];
     }
@@ -187,6 +233,38 @@ final class Adventures
         }
         unset($pack);
 
+        // Map: six named regions and the area pages that really exist. The
+        // percentages and progress stay in the browser; only names and links
+        // come from the server.
+        $maps = $this->data->maps($this->lang);
+        $world = $index['positions']['world'] ?? [];
+        $regions = [];
+        foreach (self::REGIONS as $id) {
+            $name = $maps[$id]['name'] ?? '';
+            $point = $world[$id] ?? null;
+            if ($name !== '' && is_array($point)) {
+                $regions[] = ['id' => $id, 'name' => $name, 'x' => $point[0], 'y' => $point[1]];
+            }
+        }
+        $areaPages = [];
+        foreach ($index['areas'] as $area) {
+            $id = (string) $area['id'];
+            if ($this->data->has($this->lang, 'area', $id)) {
+                $areaPages[$id] = $this->catalogue->route($this->lang, 'area', $id);
+            }
+        }
+
+        // Names of the sub-maps that carry a marker on a region drawing. A
+        // nested area has no own spot; its name then comes from the linked map.
+        $mapNames = [];
+        foreach ($index['positions']['maps'] ?? [] as $points) {
+            foreach (array_keys($points) as $id) {
+                $id = (string) $id;
+                $name = $maps[$id]['name'] ?? '';
+                if ($name !== '') { $mapNames[$id] = $name; }
+            }
+        }
+
         $alternates = [];
         foreach (Catalogue::LANGS as $other) {
             $alternates[] = ['lang' => $other, 'url' => $this->catalogue->appRoute($other, 'adventures')];
@@ -207,6 +285,11 @@ final class Adventures
             'packs' => $packs,
             'sprachen' => $sprachen,
             'catalogue_url' => '/abenteuer-' . $this->lang . '.js',
+            'regions' => $regions,
+            'area_pages' => $areaPages,
+            'map_names' => $mapNames,
+            'weltkarte' => '/karten/' . $this->lang . '/268437554.webp',
+            'karte_pfad' => $this->catalogue->appRoute($this->lang, 'karte'),
         ]);
     }
 }

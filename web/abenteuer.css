@@ -420,3 +420,277 @@
 	color: var(--schwach);
 	font-style: normal;
 }
+
+/* --- Abenteuerkarte -------------------------------------------------- */
+.abenteuer-ansicht {
+	display: inline-flex;
+	align-items: center;
+	gap: 0;
+	margin: 10px 0 0;
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	background: var(--fläche-hell);
+	overflow: hidden;
+}
+.abenteuer-ansicht button {
+	padding: 5px 12px;
+	border: 0;
+	border-left: 1px solid var(--rand);
+	background: transparent;
+	color: var(--schwach);
+	font: inherit;
+	font-size: var(--text-bedienung, .875rem);
+	cursor: pointer;
+}
+.abenteuer-ansicht button[aria-pressed="true"] {
+	background: var(--gold);
+	color: #14110e;
+}
+.abenteuer-ansicht button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+
+.abenteuer-welt {
+	scroll-margin-top: 120px;
+	margin: 22px 0 26px;
+}
+.welt-kopf h3 { margin: 0 0 2px; font-size: var(--text-abschnitt, 1.25rem); }
+.welt-kopf p { margin: 0 0 10px; }
+
+.welt-raster {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 300px;
+	gap: 16px;
+	align-items: start;
+}
+.weltkarte {
+	position: relative;
+	margin: 0;
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	overflow: hidden;
+	background: #0d0b09;
+}
+.weltkarte img { display: block; width: 100%; height: auto; }
+.welt-marken { position: absolute; inset: 0; }
+.welt-marke {
+	position: absolute;
+	transform: translate(-50%, -50%);
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	max-width: 46%;
+	padding: 3px 8px 3px 3px;
+	border: 1px solid var(--rand);
+	border-radius: 20px;
+	background: rgba(20, 17, 14, .86);
+	color: var(--text);
+	font: inherit;
+	line-height: 1.15;
+	text-align: left;
+	cursor: pointer;
+	box-shadow: 0 1px 6px rgba(0, 0, 0, .45);
+}
+.welt-marke:hover { background: rgba(42, 37, 31, .95); }
+.welt-marke[aria-pressed="true"] { background: var(--fläche-hell); box-shadow: 0 0 0 1px var(--gold), 0 2px 10px rgba(0,0,0,.55); }
+.welt-marke.passt { border-color: var(--gold); color: var(--gold); }
+.welt-marke.drunter { border-color: #5b5348; }
+.welt-marke.drueber { border-color: var(--offen); color: var(--offen); }
+.welt-marke.unklar { border-color: var(--rand); }
+.welt-ring { flex: 0 0 26px; width: 26px; height: 26px; }
+.welt-text { min-width: 0; }
+.welt-text strong { display: block; font-weight: normal; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.welt-text small { display: block; color: var(--schwach); font-size: .68rem; white-space: nowrap; }
+
+.welt-seite {
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	background: var(--fläche);
+	padding: 10px;
+}
+.welt-seite h3 { margin: 0; font-size: 1.1rem; }
+.welt-seite [data-seite-summe] { margin: 2px 0 10px; font-size: .8rem; }
+.welt-gebiete { list-style: none; margin: 0; padding: 0; max-height: 430px; overflow: auto; }
+.welt-gebiete li { border-top: 1px solid var(--rand); }
+.welt-gebiete li:first-child { border-top: 0; }
+.welt-gebiet {
+	display: block;
+	width: 100%;
+	padding: 7px 0;
+	border: 0;
+	background: transparent;
+	color: var(--text);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+.welt-gebiet:hover { background: var(--fläche-hell); }
+.welt-gebiet[aria-pressed="true"] { border-left: 2px solid var(--gold); padding-left: 6px; }
+.wg-kopf { display: flex; gap: 8px; align-items: baseline; }
+.wg-name { flex: 1; min-width: 0; font-size: .9rem; overflow-wrap: anywhere; }
+.wg-prozent { color: var(--gold); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.wg-balken { display: block; height: 3px; margin: 4px 0 3px; background: var(--rand); border-radius: 2px; overflow: hidden; }
+.wg-balken i { display: block; height: 100%; background: var(--gold); }
+.wg-meta { display: block; color: var(--schwach); font-size: .72rem; }
+
+.welt-vorschau {
+	display: grid;
+	grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+	gap: 16px;
+	align-items: start;
+	margin-top: 16px;
+	padding: 10px;
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	background: var(--fläche);
+}
+.welt-bild { position: relative; margin: 0; border: 1px solid var(--rand); border-radius: 2px; overflow: hidden; background: #0d0b09; }
+.welt-bild img { display: block; width: 100%; height: auto; }
+.welt-bild figcaption { padding: 3px 7px; color: var(--schwach); font-size: .72rem; }
+.welt-detail h3 { margin: 0; font-size: 1.15rem; }
+.welt-detail [data-vorschau-meta] { margin: 2px 0 8px; }
+.welt-detail p { font-size: .9rem; }
+.welt-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.welt-knopf {
+	display: inline-block;
+	padding: 6px 12px;
+	border: 1px solid var(--gold);
+	border-radius: 3px;
+	background: var(--gold);
+	color: #14110e;
+	font-size: var(--text-bedienung, .875rem);
+	text-decoration: none;
+}
+.welt-knopf.zweit { background: transparent; color: var(--gold); border-color: var(--rand); }
+.welt-knopf:hover { text-decoration: none; }
+.welt-legende { margin: 8px 0 0; font-size: .74rem; }
+
+@media (max-width: 900px) {
+	.welt-raster { grid-template-columns: minmax(0, 1fr); }
+	.welt-vorschau { grid-template-columns: minmax(0, 1fr); }
+	.welt-gebiete { max-height: none; }
+	.welt-marke { font-size: .9em; }
+}
+
+/* On a phone the drawn labels are too close for floating badges: the map stays
+   a picture and the six regions become a chip row underneath it. */
+@media (max-width: 600px) {
+	.welt-marken {
+		position: static;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		padding: 8px;
+		background: var(--fläche);
+		border-top: 1px solid var(--rand);
+	}
+	.welt-marke {
+		position: static;
+		transform: none;
+		flex: 1 1 auto;
+		max-width: none;
+		padding: 4px 8px 4px 4px;
+	}
+	.welt-text strong { white-space: normal; }
+}
+
+/* --- Regionskarte --------------------------------------------------- */
+.welt-welt .weltkarte { max-width: 980px; margin: 0 auto; }
+.welt-welt .welt-legende { max-width: 980px; margin: 8px auto 0; }
+.region-zurueck { margin: 0 0 6px; }
+.region-zurueck-knopf {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--gold);
+	font: inherit;
+	font-size: var(--text-bedienung, .875rem);
+	cursor: pointer;
+}
+.region-zurueck-knopf:hover { text-decoration: underline; }
+.region-kopf h3 { margin: 0; font-size: var(--text-abschnitt, 1.25rem); }
+.region-kopf p { margin: 2px 0 10px; }
+.region-raster { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 18px; align-items: start; }
+.region-karte {
+	position: relative;
+	aspect-ratio: 4 / 3;
+	max-width: 1024px;
+	width: 100%;
+	margin: 0 auto;
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	overflow: hidden;
+	background: #0d0b09;
+}
+.region-karte img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.region-marken { position: absolute; inset: 0; }
+.region-punkt {
+	position: absolute;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	transform: translate(-50%, -50%);
+	border: 2px solid #8b8174;
+	border-radius: 50%;
+	background: #494640;
+	color: #fff;
+	font-size: .75rem;
+	font-weight: 600;
+	box-shadow: 0 1px 4px #14110e;
+	cursor: pointer;
+}
+.region-punkt.passt { border-color: var(--gold); }
+.region-punkt.drueber { border-color: var(--offen); }
+/* Several areas under one linked sub-map: the number opens their list. */
+.region-punkt.sammel {
+	border-color: #8bb6ce;
+	background: #304f63;
+	color: #fff;
+	font-size: .82rem;
+	font-variant-numeric: tabular-nums;
+}
+.region-punkt.sammel[aria-pressed="true"] { background: #416c85; }
+.region-punkt:hover { transform: translate(-50%, -50%) scale(1.15); }
+.region-punkt[aria-pressed="true"] {
+	transform: translate(-50%, -50%) scale(1.25);
+	filter: drop-shadow(0 0 2px #14110e) drop-shadow(0 0 4px var(--gold));
+	z-index: 2;
+}
+.region-punkt:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+@media (max-width: 900px) {
+	/* A finger needs a bigger target than the drawn dot. */
+	.region-punkt { width: 34px; height: 34px; }
+}
+.region-liste { min-width: 0; }
+.region-liste h4 { margin: 0; color: var(--gold); font-size: var(--text-bedienung, .875rem); }
+.cluster-kopf {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	text-align: left;
+	gap: 4px;
+	margin: 0 0 8px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--rand);
+}
+.cluster-zeile { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+.cluster-titel { color: var(--gold); font-size: 1rem; }
+.cluster-meta { font-size: var(--text-bedienung, .875rem); }
+.gebiet-sortierung { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+.gebiet-sortierung button { padding: 6px 9px; border: 1px solid var(--rand); border-radius: 3px; background: var(--fläche); color: var(--text); font: inherit; font-size: var(--text-bedienung, .875rem); cursor: pointer; }
+.gebiet-sortierung button[aria-pressed="true"] { background: var(--fläche-hell); border-color: var(--gold); color: var(--gold); }
+.gebiet-sortierung button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.region-liste ul { list-style: none; margin: 6px 0 0; padding: 0; max-height: 540px; overflow: auto; }
+.region-liste .welt-gebiet { width: 100%; }
+@media (max-width: 900px) {
+	.region-raster { grid-template-columns: minmax(0, 1fr); }
+	.gebiet-sortierung button { min-height: 44px; }
+	.region-liste ul { max-height: none; }
+	.welt-welt .weltkarte { max-width: none; }
+	.region-karte { max-width: none; }
+}
+.region-liste li { border-top: 1px solid var(--rand); }
+.region-liste li:first-child { border-top: 0; }
+/* A link inside the detail panel must not take the page's gold link colour. */
+.abenteuer-welt a.welt-knopf { color: #14110e; }
+.abenteuer-welt a.welt-knopf.zweit { color: var(--gold); }
+.abenteuer-welt a.welt-knopf:hover { color: #14110e; }
+.abenteuer-welt a.welt-knopf.zweit:hover { color: var(--gold); }

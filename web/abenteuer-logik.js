@@ -142,6 +142,87 @@
 					: (finish || due) ? 'ready' : 'no_hint'
 		};
 	}
+	/* Region totals for the map: areas grouped by their tier-1 map. Progress is
+	 * only summed where the areas were reviewed; otherwise it stays unknown.
+	 * The level band comes from the editorial adventure ranges of the packs
+	 * that own areas in the region, not from single quest outliers. */
+	function regions(areas, packs, characterLevel) {
+		var out = {};
+		var packById = {};
+		(Array.isArray(packs) ? packs : []).forEach(function (pack) {
+			if (pack && pack.id) { packById[pack.id] = pack; }
+		});
+		(Array.isArray(areas) ? areas : []).forEach(function (area) {
+			var id = area && area.region ? String(area.region) : '';
+			if (!id) { return; }
+			var row = out[id] || (out[id] = {
+				id: id, areas: 0, total: 0, completed: 0, reviewed: false,
+				level_min: null, level_max: null, ready: 0, coverage: null, packs: {}
+			});
+			row.areas += 1;
+			if (area.reviewed === true) { row.reviewed = true; }
+			if (area.pack) { row.packs[area.pack] = true; }
+			if (area.coverage !== null && area.coverage !== undefined) {
+				row.total += Number(area.total) || 0;
+				row.completed += Number(area.completed) || 0;
+			}
+			if (Array.isArray(area.ready_ids) && area.ready_ids.length &&
+					(area.coverage === null || area.coverage === undefined || area.coverage < 1)) {
+				row.ready += 1;
+			}
+		});
+		Object.keys(out).forEach(function (id) {
+			var row = out[id];
+			var own = Object.keys(row.packs).map(function (key) { return packById[key]; })
+				.filter(function (pack) { return pack && typeof pack.level_min === 'number'
+					&& typeof pack.level_max === 'number'; });
+			if (own.length) {
+				row.level_min = Math.min.apply(null, own.map(function (pack) { return pack.level_min; }));
+				row.level_max = Math.max.apply(null, own.map(function (pack) { return pack.level_max; }));
+			}
+			delete row.packs;
+			row.coverage = row.total ? row.completed / row.total : null;
+			row.level_fit = fit({ level_min: row.level_min, level_max: row.level_max }, characterLevel);
+		});
+		return out;
+	}
+	/**
+	 * Areas grouped by the map the game links on the region drawing. A nested
+	 * area joins its nearest linked ancestor (Bree joins Bree-land); an area
+	 * without any linked ancestor keeps its own id and gets no point.
+	 */
+	function gruppen(areas) {
+		var out = {};
+		(Array.isArray(areas) ? areas : []).forEach(function (area) {
+			if (!area) { return; }
+			var id = String(area.group || area.id || '');
+			if (!id) { return; }
+			var row = out[id] || (out[id] = {
+				id: id, areas: [], total: 0, completed: 0, coverage: null, ready: 0,
+				level_min: null, level_max: null
+			});
+			row.areas.push(area);
+			if (area.coverage !== null && area.coverage !== undefined) {
+				row.total += Number(area.total) || 0;
+				row.completed += Number(area.completed) || 0;
+			}
+			if (Array.isArray(area.ready_ids) && area.ready_ids.length &&
+					(area.coverage === null || area.coverage === undefined || area.coverage < 1)) {
+				row.ready += 1;
+			}
+			if (typeof area.level_min === 'number') {
+				row.level_min = row.level_min === null ? area.level_min : Math.min(row.level_min, area.level_min);
+			}
+			if (typeof area.level_max === 'number') {
+				row.level_max = row.level_max === null ? area.level_max : Math.max(row.level_max, area.level_max);
+			}
+		});
+		Object.keys(out).forEach(function (id) {
+			out[id].coverage = out[id].total ? out[id].completed / out[id].total : null;
+		});
+		return out;
+	}
+
 	function read(account) {
 		if (typeof account !== 'string' || !account.trim()) { return { packs: {}, vip: 'unknown' }; }
 		try {
@@ -167,7 +248,7 @@
 			return true;
 		} catch (error) { return false; }
 	}
-	var api = { analyse: analyse, access: access, read: read, write: write, key: KEY };
+	var api = { analyse: analyse, access: access, read: read, write: write, regions: regions, gruppen: gruppen, key: KEY };
 	root.MQL_ABENTEUER = api;
 	if (typeof module !== 'undefined' && module.exports) { module.exports = api; }
 })(typeof window !== 'undefined' ? window : globalThis);

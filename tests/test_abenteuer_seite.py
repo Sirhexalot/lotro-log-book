@@ -21,6 +21,13 @@ class AdventurePageTest(unittest.TestCase):
         subprocess.run(['python3', 'tools/build_abenteuer.py', '--ziel', str(cls.tmp),
                         '--web', str(cls.tmp / 'web')],
                        cwd=ROOT, check=True, capture_output=True)
+        # Region names for the map come from the prepared map table.
+        regions = {'268437557': 'Eriador', '268453619': 'Rhovanion', '268453621': 'Rohan',
+                   '268450901': 'Gondor', '268453620': 'Mordor', '268454369': 'Haradwaith'}
+        for lang in ('de', 'en', 'fr'):
+            (cls.tmp / lang).mkdir(parents=True, exist_ok=True)
+            (cls.tmp / lang / 'maps.json').write_text(json.dumps({'maps': {
+                rid: {'idx': int(rid), 'name': name} for rid, name in regions.items()}}))
         # One area page, so the area link can be checked without a full build.
         import hashlib
         shard = hashlib.md5(b'268437653').hexdigest()[:2]
@@ -69,6 +76,12 @@ class AdventurePageTest(unittest.TestCase):
         self.assertEqual(html.count('data-inhalt="'), 27)
         self.assertNotIn('data-inhalt="yondershire"', html)
         self.assertNotIn('data-inhalt="base"', html)
+        # The map is an enhancement: hidden markup, six named regions.
+        self.assertIn('id="abenteuer-welt"', html)
+        self.assertEqual(html.count('class="welt-marke"'), 6)
+        self.assertIn('/karten/de/268437554.webp', html)
+        self.assertIn('data-ansicht="karte"', html)
+        self.assertIn('id="abenteuer-kartennamen"', html)
 
     def test_every_language_has_its_own_page_and_names(self):
         english = self.render('/en/adventure/')
@@ -89,6 +102,7 @@ class AdventurePageTest(unittest.TestCase):
         self.assertIn('abenteuer-de.js', html)
         self.assertIn('abenteuer-logik.js', html)
         self.assertIn('abenteuer.js', html)
+        self.assertIn('abenteuer-karte.js', html)
         self.assertIn('abenteuer.css', html)
         self.assertIn('data-seite="abenteuer"', html)
 

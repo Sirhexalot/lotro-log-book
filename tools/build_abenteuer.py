@@ -28,7 +28,10 @@ ROOT = Path(__file__).resolve().parents[1]
 DATEN = ROOT / 'daten'
 WEB = ROOT / 'web'
 REFERENZ = ROOT / 'referenz'
+LORE = Path.home() / 'Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore'
 SPRACHEN = ('de', 'en', 'fr')
+ROOT_MAP = 268437554
+REGION_MAPS = (268437557, 268453619, 268453621, 268450901, 268453620, 268454369)
 
 
 def maps_for(lang):
@@ -157,7 +160,7 @@ def name_for(area, tree, names):
     while cursor in tree and cursor not in seen:
         seen.add(cursor)
         label = (names.get(cursor) or '').strip()
-        if label:
+        if label and not re.fullmatch(r'(?:Karte|Map|Carte)\s+\d+', label, re.I):
             return label
         parent = tree[cursor].get('eltern')
         if parent is None:
@@ -166,10 +169,165 @@ def name_for(area, tree, names):
     return ''
 
 
-def build(lang, packs, tree, quests, names):
+def link_positions():
+    """Pixel positions the game itself uses to link a child map on its parent.
+
+    ``links.xml`` gives x from 0 to 1024 and y from 0 (top) to -768 (bottom) on
+    the parent image. Only direct links are kept: a nested area has no own spot
+    on the region drawing, and inventing one would put it in the wrong place.
+    """
+    links = {}
+    path = LORE / 'maps' / 'links.xml'
+    if not path.is_file():
+        return {}
+    for match in re.finditer(r'<link parentId="(\d+)"[^>]*target="(\d+)"[^>]*from="([-\d.]+)/([-\d.]+)"',
+                             path.read_text(encoding='utf-8')):
+        parent, target = int(match.group(1)), int(match.group(2))
+        links.setdefault(parent, {})[target] = (float(match.group(3)), float(match.group(4)))
+    return links
+
+
+def mordor_projection(tree, links):
+    """Approximate drawing coordinates from same-world geographic anchors.
+
+    Mordor's parchment has pixel bounds only. Four same-world linked maps
+    support an axis-aligned fit (mean residual 24 px, maximum 48 px in the
+    current client). Other drawings have not been checked for this fallback.
+    """
+    region = 268453620
+    world = tree.get(region, {}).get('region')
+    pairs = []
+    for ident, (x, y) in links.get(region, {}).items():
+        row = tree.get(ident, {})
+        if world is None or row.get('region') != world or not row.get('bounds'):
+            continue
+        pairs.append(((row['west'] + row['east']) / 2,
+                      (row['north'] + row['south']) / 2, x, y))
+    if len(pairs) < 4:
+        return None
+
+    def line(xs, ys):
+        mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
+        variance = sum((x - mx) ** 2 for x in xs)
+        if variance == 0:
+            return None
+        slope = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / variance
+        return slope, my - slope * mx
+
+    horizontal = line([p[0] for p in pairs], [p[2] for p in pairs])
+    vertical = line([p[1] for p in pairs], [p[3] for p in pairs])
+    if not horizontal or not vertical or horizontal[0] <= 0 or vertical[0] <= 0:
+        return None
+    a, b = horizontal
+    c, d = vertical
+    errors = [math.hypot(a * lon + b - x, c * lat + d - y) for lon, lat, x, y in pairs]
+    if sum(errors) / len(errors) > 40 or max(errors) > 80:
+        return None
+    return a, b, c, d
+
+
+def map_positions(areas, links, tree=None):
+    """World-region and sub-map markers as percentages on the drawn map.
+
+    Only the game's own links are used. A nested area has no spot on the region
+    drawing; its markers hang on the direct child map of the region (Bree-land,
+    Gorgoroth …), which the game does link. ``maps`` therefore carries every
+    direct child that holds catalogue areas, ``areas`` the direct area links.
+    """
+    world = {}
+    for region in REGION_MAPS:
+        point = links.get(ROOT_MAP, {}).get(region)
+        if point:
+            x, y = point
+            world[str(region)] = [round(x / 1024 * 100, 2), round(-y / 768 * 100, 2)]
+    placed = {}
+    maps = {}
+    derived = {}
+    tree = tree or {}
+    projection = mordor_projection(tree, links)
+    ancestry = chains(tree)
+    for area in areas:
+        region = area.get('region')
+        if not region:
+            continue
+        for key in {area.get('group') or area['id']}:
+            point = links.get(int(region), {}).get(int(key))
+            if not point:
+                continue
+            x, y = point
+            maps.setdefault(str(region), {})[str(key)] = [round(x / 1024 * 100, 2), round(-y / 768 * 100, 2)]
+            if str(key) == str(area['id']):
+                placed[str(area['id'])] = maps[str(region)][str(key)]
+        ident = int(area['id'])
+        # An explicit link always wins, including cross-world map links.
+        direct = links.get(int(region), {}).get(ident)
+        if direct:
+            placed[str(ident)] = [round(direct[0] / 1024 * 100, 2), round(-direct[1] / 768 * 100, 2)]
+            continue
+        row = tree.get(ident, {})
+        # Only ordinary Gorgoroth landscapes: no historical copies, detached
+        # worlds (Draugardh), or unnamed map variants on the present-day drawing.
+        if (str(region) != '268453620' or not projection or not row.get('bounds')
+                or row.get('region') != tree.get(268453620, {}).get('region')
+                or 268452166 not in ancestry.get(ident, ())
+                or ident in (268453374, 268453367)
+                or row.get('unbenannt') or area.get('name', '').startswith(('Karte ', 'Map ', 'Carte '))):
+            continue
+        a, b, c, d = projection
+        x = a * (row['west'] + row['east']) / 2 + b
+        y = c * (row['north'] + row['south']) / 2 + d
+        if 0 <= x <= 1024 and -768 <= y <= 0:
+            placed[str(ident)] = [round(x / 1024 * 100, 2), round(-y / 768 * 100, 2)]
+            derived[str(ident)] = 'geographic-fit'
+    return {'world': world, 'areas': placed, 'maps': maps, 'derived': derived}
+
+
+def build(lang, packs, tree, quests, names, links=None):
+    links = links or {}
     assignment = map_assignment(packs, tree)
     excluded = excluded_subtrees(packs, tree)
+    chain_of = chains(tree)
     by_pack = {pack['id']: pack for pack in packs}
+
+    def region_of(ident):
+        """The tier-1 map (Eriador, Rohan …) an area belongs to."""
+        for node in chain_of.get(int(ident), ()):
+            if tree[node].get('tier') == 1:
+                return str(node)
+        return None
+
+    def named_area(ident):
+        """Deepest named map for a quest area; unnamed sub-maps join their parent.
+
+        The game data has a few maps without a name (the two Osgiliath variants,
+        Old Anórien variants, one Nan Ogol map). Treated as their own areas they
+        inherit the parent's name and appear twice in the list. They stay in the
+        same adventure and are counted where they hang.
+        """
+        pack = assignment.get(int(ident))
+        for node in chain_of.get(int(ident), ()):
+            if assignment.get(node) != pack:
+                break
+            label = (tree.get(node, {}).get('name') or '').strip()
+            if label and not re.fullmatch(r'(?:Karte|Map|Carte)\s+\d+', label, re.I):
+                return node
+        return int(ident)
+
+    def group_of(ident):
+        """The nearest map the game itself links on the region drawing.
+
+        A nested area has no own spot; it joins the closest ancestor that the
+        game links (Bree joins Bree-land, Nargroth joins Gorgoroth). Where the
+        area itself is linked it keeps its own point. The choice follows the
+        game, not a guessed position.
+        """
+        region = region_of(ident)
+        for node in chain_of.get(int(ident), ()):
+            if str(node) == str(region):
+                break
+            if region and int(node) in links.get(int(region), {}):
+                return str(node)
+        return str(ident)
     area_quests, rows = {}, []
     for quest in quests:
         if not one_time(quest):
@@ -177,6 +335,7 @@ def build(lang, packs, tree, quests, names):
         area = innermost(quest, assignment, excluded)
         if area is None:
             continue
+        area = named_area(area)
         level = str(quest.get('l') or '')
         row = {'i': str(quest['i']).upper(), 'area': str(area), 'l': level if level.isdigit() else ''}
         for key in ('v', 'vo', 'e'):
@@ -197,6 +356,8 @@ def build(lang, packs, tree, quests, names):
         areas.append({
             'id': str(area),
             'pack': assignment[area],
+            'region': region_of(area),
+            'group': group_of(area),
             'name': name_for(area, tree, names),
             'quests': len(quests_in_area),
             'reviewed': by_pack[assignment[area]].get('review') == 'landscape',
@@ -246,6 +407,7 @@ def build(lang, packs, tree, quests, names):
                 'Abenteuer sind redaktionell, Gebietsstufen aus Aufgaben abgeleitet.',
         'packs': out_packs,
         'areas': areas,
+        'positions': map_positions(areas, links, tree),
         'quests': sorted(rows, key=lambda row: row['i']),
     }
 
@@ -257,7 +419,8 @@ def catalogues():
     quests = json.loads((DATEN / 'quests-de.json').read_text(encoding='utf-8'))
     if isinstance(quests, dict):
         quests = quests['quests']
-    return {lang: build(lang, reference['packs'], tree, quests, maps_for(lang))
+    links = link_positions()
+    return {lang: build(lang, reference['packs'], tree, quests, maps_for(lang), links)
             for lang in SPRACHEN}
 
 

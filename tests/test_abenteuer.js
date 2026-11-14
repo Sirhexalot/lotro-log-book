@@ -9,9 +9,9 @@ const catalogue = () => ({
 		{ id: 'later', order: 2, level_min: 130, level_max: 140, reviewed: false }
 	],
 	areas: [
-		{ id: 'bree', pack: 'base', order: 0, name: 'Bree-land', reviewed: true, level_min: 10, level_max: 20 },
-		{ id: 'eregion', pack: 'moria', order: 1, name: 'Eregion', reviewed: true, level_min: 48, level_max: 53 },
-		{ id: 'moria', pack: 'moria', order: 2, name: 'Moria', reviewed: true, level_min: 50, level_max: 60 }
+		{ id: 'bree', pack: 'base', region: 'r1', order: 0, name: 'Bree-land', reviewed: true, level_min: 10, level_max: 20 },
+		{ id: 'eregion', pack: 'moria', region: 'r2', order: 1, name: 'Eregion', reviewed: true, level_min: 48, level_max: 53 },
+		{ id: 'moria', pack: 'moria', region: 'r2', order: 2, name: 'Moria', reviewed: true, level_min: 50, level_max: 60 }
 	],
 	quests: [
 		{ i: '00000001', area: 'bree', l: '10' },
@@ -112,3 +112,56 @@ assert.equal(advisor.write('account-a', settings, ['moria']), false);
 delete globalThis.localStorage;
 
 console.log('Adventure advisor: all assertions passed.');
+
+// Region totals use the editorial pack range, not single quest outliers.
+const withOutlier = catalogue();
+withOutlier.areas[0].level_max = 150;
+const regionRows = advisor.regions(advisor.analyse(withOutlier, character, settings).areas,
+  withOutlier.packs, 60);
+assert.deepEqual(Object.keys(regionRows).sort(), ['r1', 'r2']);
+assert.equal(regionRows.r1.areas, 1);
+assert.equal(regionRows.r1.level_min, 1);
+assert.equal(regionRows.r1.level_max, 50, 'outlier must not stretch the region');
+assert.equal(regionRows.r1.level_fit, 'below');
+assert.equal(regionRows.r2.level_min, 49);
+assert.equal(regionRows.r2.level_max, 60);
+assert.equal(regionRows.r2.level_fit, 'fits');
+assert.ok(regionRows.r2.ready >= 1, 'known continuations are counted');
+assert.equal(regionRows.r1.total, 2);
+assert.equal(regionRows.r1.completed, 1);
+assert.equal(regionRows.r1.coverage, 0.5);
+
+// Areas group by the linked sub-map; coverage adds up, ready counts areas.
+const grouped = advisor.gruppen([
+  { id: 'bree', group: 'bree-land', coverage: 0.5, total: 10, completed: 5, ready_ids: ['x'] },
+  { id: 'bree-land', group: 'bree-land', coverage: 0.25, total: 4, completed: 1, ready_ids: [] },
+  { id: 'lone', group: 'lone', coverage: null, total: 0, completed: 0, ready_ids: [] }
+]);
+assert.deepEqual(Object.keys(grouped).sort(), ['bree-land', 'lone']);
+assert.equal(grouped['bree-land'].areas.length, 2);
+assert.equal(grouped['bree-land'].total, 14);
+assert.equal(grouped['bree-land'].completed, 6);
+assert.equal(grouped['bree-land'].coverage, 6 / 14);
+assert.equal(grouped['bree-land'].ready, 1);
+assert.equal(grouped.lone.coverage, null);
+assert.equal(grouped.lone.areas.length, 1);
+
+// Every text the map asks for must exist and be non-empty in all languages.
+const fs = require('node:fs');
+const vm = require('node:vm');
+const path = require('node:path');
+const mapSource = fs.readFileSync(path.join(__dirname, '../web/abenteuer-karte.js'), 'utf8');
+const used = [...new Set([...mapSource.matchAll(/text\('([a-z0-9_]+)'\)/g)].map(m => m[1]))];
+// The wording file reads the page language from <html lang> and exports only
+// that language, so it runs once per language with a stub document.
+const source = fs.readFileSync(path.join(__dirname, '../web/texte-abenteuer.js'), 'utf8');
+for (const lang of ['de', 'en', 'fr']) {
+  const sandbox = { window: {}, document: { documentElement: { getAttribute: () => lang } } };
+  sandbox.window.document = sandbox.document;
+  vm.runInNewContext(source, sandbox);
+  const wording = sandbox.window.MQL_ABENTEUER_TEXTE;
+  for (const key of used) {
+    assert.ok(Object.prototype.hasOwnProperty.call(wording, key), `${lang}: ${key} missing`);
+    assert.notEqual(String(wording[key]).trim(), '', `${lang}: ${key} empty`);
+  }
+}

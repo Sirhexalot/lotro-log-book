@@ -1,5 +1,6 @@
 """Adventure catalogue: reference data, map assignment and the built output."""
 import json
+import re
 import shutil
 import subprocess
 import tempfile
@@ -21,11 +22,11 @@ PACKS = [{'id': 'base', 'order': 0, 'type': 'base', 'release': '2007-04-24',
           'summary': {'de': 'Tiefen', 'en': 'Depths', 'fr': 'Profondeurs'},
           'levels': [49, 60], 'candidate_map_roots': [4],
           'excluded_map_roots': [], 'review': 'landscape'}]
-TREE = {1: {'eltern': None, 'name': 'Eriador'},
-        2: {'eltern': 1, 'name': 'Bree-land'},
-        3: {'eltern': 2, 'name': 'Wildwood'},
-        4: {'eltern': None, 'name': 'Moria'},
-        5: {'eltern': 4, 'name': ''},
+TREE = {1: {'eltern': None, 'name': 'Eriador', 'tier': 1},
+        2: {'eltern': 1, 'name': 'Bree-land', 'tier': 2},
+        3: {'eltern': 2, 'name': 'Wildwood', 'tier': 3},
+        4: {'eltern': None, 'name': 'Moria', 'tier': 1},
+        5: {'eltern': 4, 'name': '', 'tier': 2},
         6: {'eltern': None, 'name': 'Elsewhere'}}
 
 
@@ -155,12 +156,18 @@ class CatalogueTests(unittest.TestCase):
             self.assertIsNotNone(area['level_max'])
         self.assertEqual(data['packs'][0]['level_min'], 1)
         self.assertEqual(data['packs'][0]['level_max'], 50)
+        by_pack = {area['pack']: area for area in data['areas']}
+        self.assertEqual(by_pack['base']['region'], '1')
+        self.assertEqual(by_pack['moria']['region'], '4')
 
     def test_quest_rows_keep_prerequisites_and_uppercase_ids(self):
         data = build_fixture()
         row = [q for q in data['quests'] if q['i'] == '00000004'][0]
         self.assertEqual(row['vb'], 1)
-        self.assertEqual(row['area'], '5')
+        # Map 5 has no name: it counts at its named parent, Moria (4), so the
+        # list does not show a second "Moria" row.
+        self.assertEqual(row['area'], '4')
+        self.assertNotIn('5', {area['id'] for area in data['areas']})
         self.assertEqual(row['l'], '50')
 
 
@@ -224,6 +231,20 @@ class BuiltCatalogueTests(unittest.TestCase):
         self.assertEqual(names['de']['base'], 'Die Schatten von Angmar')
         self.assertEqual(names['en']['moria'], 'Mines of Moria')
         self.assertEqual(names['fr']['base'], 'Les Ombres d’Angmar')
+
+    def test_areas_have_distinct_names(self):
+        # An unnamed sub-map must not become its own "Karte 268…" area or repeat
+        # the parent's name; both produced duplicate rows in the list.
+        for lang, data in self.files.items():
+            seen = set()
+            for area in data['areas']:
+                self.assertTrue(area['name'].strip(), (lang, area['id']))
+                self.assertFalse(
+                    re.fullmatch(r'(?:Karte|Map|Carte)\s+\d+', area['name'], re.I),
+                    (lang, area['id'], area['name']))
+                key = (area['region'], area['name'])
+                self.assertNotIn(key, seen, (lang, area['id'], area['name']))
+                seen.add(key)
 
     def test_browser_catalogue_matches_the_server_file(self):
         for lang in ('de', 'en', 'fr'):

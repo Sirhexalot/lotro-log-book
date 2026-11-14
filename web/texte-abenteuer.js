@@ -3,6 +3,9 @@
 	'use strict';
 	var texte = {
 		de: {
+			ab_map_approx: 'Ungefähre Gebietsmitte',
+			ab_sort_progress: 'Fortschritt ↑',
+			ab_sort_name: 'Name A–Z',
 			ab_charakter: '%s · %s · Stufe %s',
 			ab_charakter_leer: 'Noch kein Charakter gewählt.',
 			ab_import_hint: 'Lade deinen Spielstand, dann siehst du hier deinen Fortschritt.',
@@ -36,9 +39,26 @@
 			ab_gebiet_offen: '%s offen',
 			ab_gebiet_unbekannt: 'nicht erfasst',
 			ab_gebiet_zaehler: '%s von %s',
-			ab_kein_hinweis: 'Für deinen Charakter gibt es noch keinen belegten Vorschlag. Die Übersicht bleibt vollständig.'
+			ab_kein_hinweis: '',
+			ab_map_areas: '%s Gebiete',
+			ab_map_level_band: 'Stufe %s–%s',
+			ab_map_level_one: 'Stufe %s',
+			ab_map_ready_one: '1 nächste Aufgabe',
+			ab_map_ready: '%s nächste Aufgaben',
+			ab_map_none: '',
+			ab_map_ready_text: '',
+			ab_map_no_ready: '',
+			ab_map_no_import: 'Importiere deinen Spielstand, um deinen Fortschritt zu sehen.',
+			ab_map_no_point: 'kein Punkt auf der Karte',
+			ab_map_ready_areas: '%s Gebiete mit nächster Aufgabe',
+			ab_map_group_one: '1 Gebiet',
+			ab_map_group: '%s Gebiete',
+			ab_map_all_areas: 'Alle Gebiete'
 		},
 		en: {
+			ab_map_approx: 'Approximate area centre',
+			ab_sort_progress: 'Progress ↑',
+			ab_sort_name: 'Name A–Z',
 			ab_charakter: '%s · %s · level %s',
 			ab_charakter_leer: 'No character selected yet.',
 			ab_import_hint: 'Import your progress to see your own state here.',
@@ -72,9 +92,26 @@
 			ab_gebiet_offen: '%s open',
 			ab_gebiet_unbekannt: 'not recorded',
 			ab_gebiet_zaehler: '%s of %s',
-			ab_kein_hinweis: 'There is no verified suggestion for your character yet. The overview stays complete.'
+			ab_kein_hinweis: '',
+			ab_map_areas: '%s areas',
+			ab_map_level_band: 'Level %s–%s',
+			ab_map_level_one: 'Level %s',
+			ab_map_ready_one: '1 next quest',
+			ab_map_ready: '%s next quests',
+			ab_map_none: '',
+			ab_map_ready_text: '',
+			ab_map_no_ready: '',
+			ab_map_no_import: 'Import your character to see your progress.',
+			ab_map_no_point: 'no dot on the map',
+			ab_map_ready_areas: '%s areas with a next quest',
+			ab_map_group_one: '1 area',
+			ab_map_group: '%s areas',
+			ab_map_all_areas: 'All areas'
 		},
 		fr: {
+			ab_map_approx: 'Centre approximatif du pays',
+			ab_sort_progress: 'Progression ↑',
+			ab_sort_name: 'Nom A–Z',
 			ab_charakter: '%s · %s · niveau %s',
 			ab_charakter_leer: 'Aucun personnage sélectionné.',
 			ab_import_hint: 'Importez votre progression pour voir votre état ici.',
@@ -108,7 +145,21 @@
 			ab_gebiet_offen: '%s ouvertes',
 			ab_gebiet_unbekannt: 'non enregistré',
 			ab_gebiet_zaehler: '%s sur %s',
-			ab_kein_hinweis: 'Aucune suggestion attestée pour votre personnage. L’aperçu reste complet.'
+			ab_kein_hinweis: '',
+			ab_map_areas: '%s pays',
+			ab_map_level_band: 'Niveau %s–%s',
+			ab_map_level_one: 'Niveau %s',
+			ab_map_ready_one: '1 prochaine quête',
+			ab_map_ready: '%s prochaines quêtes',
+			ab_map_none: '',
+			ab_map_ready_text: '',
+			ab_map_no_ready: '',
+			ab_map_no_import: 'Importez votre personnage pour voir votre progression.',
+			ab_map_no_point: 'aucun point sur la carte',
+			ab_map_ready_areas: '%s pays avec une prochaine quête',
+			ab_map_group_one: '1 pays',
+			ab_map_group: '%s pays',
+			ab_map_all_areas: 'Tous les pays'
 		}
 	};
 	var sprache = (document.documentElement.getAttribute('lang') || 'de').slice(0, 2);

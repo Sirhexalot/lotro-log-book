@@ -31,6 +31,53 @@ Menü: **Welt → Abenteuerüberblick**.
 Die Seite ist ohne JavaScript lesbar: Der Server rendert alle Abenteuer mit Namen,
 Stufe und Gebieten. Fortschritt, Hinweise und Zugang entstehen im Browser.
 
+## Karte (14.11.2026)
+
+Die Seite hat zwei Ansichten: **Karte | Liste**. Die Karte ist eine Zugabe; ohne
+JavaScript bleibt die Kartenliste die Seite, Schalter und Kartenbereich sind dann
+ausgeblendet.
+
+- **Welt:** die gezeichnete Mittelerde-Karte des Clients (`268437554`). Die sechs
+  Regionsmarken sitzen auf den Pixelpositionen, mit denen das Spiel die Regionen
+  auf dieser Karte verknüpft (`maps/links.xml`), nicht auf einer geschätzten
+  Layoutposition.
+- **Marke:** Ring = Katalogfortschritt der geprüften Gebiete, Randfarbe =
+  Stufenpassung, Zahl = Gebiete mit einer bekannten nächsten Aufgabe. Ohne
+  Import bleibt der Fortschritt unbekannt („–“), nicht 0 %.
+- **Region:** die gezeichnete Regionskarte (z. B. Eriador) mit einem Punkt je
+  Gebiet, das das Spiel direkt auf dieser Region verlinkt. Je Punkt zeigt der
+  Ring den Fortschritt im Gebiet (Anteil erledigter Katalogaufgaben), die
+  Kernfarbe die Stufenpassung. Ohne Import bleibt der Ring leer, statt 0 % zu
+  behaupten. Die übrigen Gebiete stehen in der Liste unter der Karte; für sie
+  wird kein Punkt erfunden. Unter der Karte steht das gewählte Gebiet mit
+  Fortschritt, Stufenbereich, Stufenpassung, Anzahl nächster Aufgaben und
+  Zugang.
+- **Geländevorschau:** eine Kachel aus dem eigenen Client
+  (`/gelaende/<stand>/thumb/<karte>.webp`), sonst die gezeichnete Gebietskarte.
+  Keine Questmarker: diese Seite kennt keine Aufgabenpositionen. Knöpfe führen
+  mit `?vorkarte=<karte>` in die Kartenansicht und, wenn vorhanden, zur
+  Gebietsseite.
+- **Hinweise:** „Auf der Karte zeigen“ springt in die Region des vorgeschlagenen
+  Gebiets. Keine Route, keine Zusicherung, dass eine Aufgabe im Spiel offen ist.
+- **Gebiete als Liste:** aufklappbar unter der Regionskarte; dort stehen alle
+  Gebiete, auch die ohne eigenen Kartenpunkt.
+- Die gewählte Ansicht liegt lokal unter `mql.abenteuer.ansicht`.
+
+Daten: `tools/build_abenteuer.py` ergänzt je Gebiet `region` (die tier-1-Karte
+aus `daten/karten.json`) und schreibt `positions` aus `maps/links.xml`:
+`world` für die sechs Regionen, `areas` für die direkt verlinkten Gebiete (52
+der 153). Unbenannte Unterkarten (zwei Osgiliath-Varianten, zwei Alt-Anórien-
+Varianten, eine Nan-Ogol-Karte) werden nicht als eigene Gebiete geführt: ihre
+Aufgaben zählen bei der benannten Landschaft, unter der sie hängen. `Adventures.php` liefert die sechs Regionen mit übersetzten Namen aus
+der Kartentabelle, ihre Positionen und die vorhandenen Gebietsseiten.
+Fortschritt, Stufenpassung und nächste Aufgaben kommen aus derselben
+Browserlogik wie die Karten.
+
+Eine **durchgehende Geländewelt** gibt es bewusst nicht: Die Gebietsrahmen
+überlappen sich vielfach, die Geländeübersichten sind nur zu 41–77 % belegt,
+und gezeichnete Grenzen fehlen in den Daten. Die Regionskarte nutzt deshalb die
+vollständige Spielkartenzeichnung.
+
 ## Daten
 
 - `referenz/inhaltspakete.json` (Schema 2): je Abenteuer stabile Kennung,
@@ -62,7 +109,7 @@ Stufe und Gebieten. Fortschritt, Hinweise und Zugang entstehen im Browser.
   innerhalb einer alten Landschaft sind nicht ausgeschlossen; das steht als
   Einschränkung in den erzeugten Daten.
 
-Lokaler Bestand am 11.11.2026: 32 Abenteuer (15 Erweiterungen einschließlich Grundspiel, 12 Aufgabenpakete, 5 kostenlose Updates), 158 Gebiete, 7.821 einmalige Aufgaben.
+Lokaler Bestand am 11.11.2026: 32 Abenteuer (15 Erweiterungen einschließlich Grundspiel, 12 Aufgabenpakete, 5 kostenlose Updates), 153 Gebiete, 7.821 einmalige Aufgaben.
 
 ## Logik
 
@@ -89,8 +136,10 @@ Lokaler Bestand am 11.11.2026: 32 Abenteuer (15 Erweiterungen einschließlich Gr
 
 ## Grenzen
 
-- Keine Karten-, Stern- oder Netzansicht: die Kartenübersicht ist die beschlossene
-  Hauptansicht. Geometrie und Weltkartenprojektion bleiben unberührt.
+- Die Karte ist eine Zugabe zur Kartenliste. Sie zeigt keine durchgehende
+  Geländewelt und keine gezeichneten Grenzen. Regions- und Gebietspunkte kommen
+  aus den Kartenverknüpfungen des Spiels; nicht verlinkte Gebiete bleiben ohne
+  Punkt. Die Geländevorschau gilt je Gebiet, nicht für die Welt.
 - Keine Kaufberatung: der Katalog belegt Aufgaben, keine Zugangsrechte. Freigaben
   für VIP und kostenlose Inhalte sind noch nicht geprüft.
 - Keine Erweiterungsbilder: eigene Kartenausschnitte waren als Sigel zu klein und
@@ -110,4 +159,6 @@ node tests/test_abenteuer.js
 ```
 
 Die Seitentests rendern `/de/abenteuer/`, `/en/adventure/` und `/fr/aventure/` über
-den echten Front-Controller und prüfen Karten, Namen, Stufen und Assets.
+den echten Front-Controller und prüfen Karten, Namen, Stufen, Regionsmarken und
+Assets. `test_abenteuer.js` prüft zusätzlich die Regionssummen (Fortschritt,
+Stufenband aus den redaktionellen Abenteuerbereichen, Anschlüsse).

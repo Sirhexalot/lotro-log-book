@@ -11,7 +11,7 @@
 	var T = root.MQL_ABENTEUER_TEXTE || {};
 	if (!core || !catalogue) { return; }
 
-	function text(key) { return T[key] || key; }
+	function text(key) { return Object.prototype.hasOwnProperty.call(T, key) ? T[key] : key; }
 	function fill(template, values) {
 		var index = 0;
 		return String(template).replace(/%s/g, function () {
@@ -41,9 +41,9 @@
 		switch (row.state) {
 		case 'started': return text('ab_stand_angefangen');
 		case 'complete': return text('ab_stand_fertig');
-		case 'unrecorded': return text('ab_stand_erfasst');
-		case 'no_content': return text('ab_stand_leer');
-		default: return text('ab_stand_unbekannt');
+		case 'unrecorded': return '';
+		case 'no_content': return '';
+		default: return '';
 		}
 	}
 	function fitWord(row) {
@@ -75,7 +75,7 @@
 		var stand = card.querySelector('[data-stand-wort]');
 		if (stand) {
 			var fit = fitWord(row);
-			stand.textContent = stateWord(row) + (fit ? ' · ' + fit : '');
+			stand.textContent = [stateWord(row), fit].filter(Boolean).join(' · ');
 		}
 		var bar = card.querySelector('[data-balken]');
 		var detail = card.querySelector('[data-detail]');
@@ -91,9 +91,7 @@
 		if (detail) {
 			detail.hidden = row.coverage === null || row.coverage === undefined;
 			if (!detail.hidden) {
-				detail.textContent = (row.completed === 0
-					? fill(text('ab_zaehler_offen'), [row.total])
-					: fill(text('ab_zaehler'), [row.completed, row.total]))
+				detail.textContent = fill(text('ab_zaehler'), [row.completed, row.total])
 					+ ' · ' + fill(text('ab_prozent'), [Math.round(row.coverage * 100)]);
 			}
 		}
@@ -111,7 +109,7 @@
 			var slot = item.querySelector('[data-gebiet-stand]');
 			if (!slot) { return; }
 			if (!area || area.coverage === null || area.coverage === undefined) {
-				slot.textContent = text('ab_gebiet_unbekannt');
+				slot.textContent = '';
 				return;
 			}
 			slot.textContent = area.completed >= area.total ? text('ab_gebiet_fertig')
@@ -132,7 +130,8 @@
 		var go = box.querySelector('[data-hinweis-ziel]');
 		if (title) { title.textContent = row.name; }
 		if (body) {
-			body.textContent = text(kind === 'finish' ? 'ab_hinweis_finish' : 'ab_hinweis_level');
+			body.textContent = '';
+			body.hidden = true;
 		}
 		if (go) {
 			var area = row.next_area ? resultAreas(row).filter(function (entry) {
@@ -142,6 +141,14 @@
 				: fill(text('ab_hinweis_weiter'), [row.name]);
 			go.hidden = false;
 			go.onclick = function () { openPack(row.id, row.next_area); };
+			var map = box.querySelector('[data-hinweis-karte]');
+			if (map) {
+				var target = area ? area.id : (resultAreas(row)[0] || {}).id;
+				map.hidden = !target;
+				map.onclick = function () {
+					if (root.MQL_ABENTEUER_KARTE && target) { root.MQL_ABENTEUER_KARTE.zeige(target); }
+				};
+			}
 		}
 	}
 
@@ -270,6 +277,13 @@
 				}
 			}
 		}
+		// The map view reads the same result; no data leaves the browser.
+		root.MQL_ABENTEUER_STAND = result;
+		try {
+			if (typeof root.CustomEvent === 'function') {
+				root.dispatchEvent(new root.CustomEvent('mql:abenteuer'));
+			}
+		} catch (fehler) { /* old browser: the map reads the global directly */ }
 	}
 
 	wireExpander();

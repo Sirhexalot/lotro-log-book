@@ -15,17 +15,19 @@
 {% block haupt %}
 <main class="seite abenteuer">
 	<div class="abenteuer-kopf">
-		<p class="dach">LOTRO Log Book · {{ lw.title }}</p>
 		<h2>{{ lw.title }}</h2>
 		<p class="abenteuer-intro">{{ lw.intro }}</p>
 		<p class="abenteuer-charakter" id="abenteuer-charakter" data-leer="{{ lw.no_character }}">
 			{{ lw.no_character }} <a href="{{ spielstand_pfad }}">{{ lw.import_link }}</a>
 		</p>
+		<div class="abenteuer-ansicht" role="group" aria-label="{{ lw.view_label }}" hidden>
+			<button type="button" data-ansicht="karte" aria-pressed="true">{{ lw.view_map }}</button>
+			<button type="button" data-ansicht="liste" aria-pressed="false">{{ lw.view_list }}</button>
+		</div>
 	</div>
 
 	<details class="abenteuer-inhalte" id="inhalte">
 		<summary>{{ lw.content_link }}</summary>
-		<p class="schwach">{{ lw.content_hint }}</p>
 		<div class="inhalte-aktionen">
 			<button type="button" data-alle="owned">{{ lw.all_owned }}</button>
 			<button type="button" data-alle="missing">{{ lw.all_missing }}</button>
@@ -52,16 +54,59 @@
 			<h3 data-hinweis-titel></h3>
 			<p class="hinweis-text" data-hinweis-text></p>
 			<button type="button" class="hinweis-link" data-hinweis-ziel hidden></button>
+			<button type="button" class="hinweis-karte" data-hinweis-karte hidden>{{ lw.map_show }}</button>
 		</article>
 		<article class="hinweis" data-hinweis="level" hidden>
 			<p class="hinweis-art">{{ lw.level }}</p>
 			<h3 data-hinweis-titel></h3>
 			<p class="hinweis-text" data-hinweis-text></p>
 			<button type="button" class="hinweis-link" data-hinweis-ziel hidden></button>
+			<button type="button" class="hinweis-karte" data-hinweis-karte hidden>{{ lw.map_show }}</button>
 		</article>
 		<p class="hinweis-leer" id="hinweis-leer" hidden>{{ lw.import_hint }} <a href="{{ spielstand_pfad }}">{{ lw.import_link }}</a></p>
 	</section>
 
+	<section class="abenteuer-welt" id="abenteuer-welt" hidden data-welt-sprache="{{ lang }}" data-karte="{{ karte_pfad }}">
+		<div class="welt-welt" data-welt>
+			<div class="welt-kopf">
+				<h3>{{ lw.map_title }}</h3>
+				<p class="schwach">{{ lw.map_hint }}</p>
+			</div>
+			<figure class="weltkarte">
+				<img src="{{ weltkarte }}" alt="{{ lw.map_title }}" width="1024" height="768" loading="lazy" decoding="async">
+				<div class="welt-marken">
+					{% for region in regions %}<button type="button" class="welt-marke" data-region="{{ region.id }}" style="left: {{ region.x }}%; top: {{ region.y }}%" aria-pressed="false"><span class="welt-ring" data-ring></span><span class="welt-text"><strong>{{ region.name }}</strong><small data-wert></small></span></button>{% endfor %}
+				</div>
+			</figure>
+			<p class="welt-legende schwach">{{ lw.map_legend }}</p>
+		</div>
+		<div class="welt-region" data-regionansicht hidden>
+			<p class="region-zurueck"><button type="button" class="region-zurueck-knopf" data-zurueck>‹ {{ lw.map_regions }}</button></p>
+			<div class="region-kopf"><h3 data-region-titel></h3><p class="schwach" data-region-summe></p></div>
+			<div class="region-raster">
+			<figure class="region-karte">
+				<img data-region-bild alt="" width="1024" height="768" decoding="async">
+				<div class="region-marken" data-region-marken></div>
+			</figure>
+			<section class="region-liste" aria-label="{{ lw.map_areas_list }}"><div class="cluster-kopf" data-cluster-kopf hidden></div><h4>{{ lw.map_areas_list }}</h4><div class="gebiet-sortierung" data-gebiet-sortierung></div><ul data-gebiete></ul></section>
+			</div>
+			<div class="welt-vorschau" data-vorschau hidden>
+				<figure class="welt-bild"><img data-bild alt="" loading="lazy" decoding="async"><figcaption data-bild-name></figcaption></figure>
+				<div class="welt-detail">
+					<h3 data-vorschau-titel></h3>
+					<p class="schwach" data-vorschau-meta></p>
+					<p data-vorschau-text></p>
+					<div class="welt-knoepfe"><a class="welt-knopf" data-karte-link>{{ lw.map_open }}</a><a class="welt-knopf zweit" data-gebiet-link>{{ lw.map_area }}</a></div>
+					<p class="schwach">{{ lw.map_tip }}</p>
+				</div>
+			</div>
+			<p class="welt-legende schwach">{{ lw.map_region_legend }}</p>
+		</div>
+	</section>
+	<script type="application/json" id="abenteuer-gebieteseiten">{{ area_pages|json_encode|raw }}</script>
+	<script type="application/json" id="abenteuer-kartennamen">{{ map_names|json_encode|raw }}</script>
+
+	<div class="abenteuer-liste" data-abenteuer-liste>
 	<div class="abenteuer-liste-kopf">
 		<h3>{{ lw.adventures }}</h3>
 	</div>
@@ -94,6 +139,7 @@
 		</article>
 		{% endfor %}
 	</div>
+	</div>
 </main>
 {% endblock %}
 
@@ -112,4 +158,5 @@
 <script src="{{ catalogue_url }}?v={{ asset_stand }}" defer></script>
 <script src="/abenteuer-logik.js?v={{ asset_stand }}" defer></script>
 <script src="/abenteuer.js?v={{ asset_stand }}" defer></script>
+<script src="/abenteuer-karte.js?v={{ asset_stand }}" defer></script>
 {% endblock %}
