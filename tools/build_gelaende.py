@@ -163,6 +163,26 @@ def thumbnails(public,version,coverage,levels):
         result.save(target,'WEBP',quality=90,method=4)
         entry['thumbnail']=relative
 
+def runs(points):
+    """Tile positions as horizontal runs: [y, x0, x1] instead of one name each.
+
+    The full list was 678 kB (177 kB gzipped) on every map load. Runs keep the
+    same information in a few kilobytes, because a region's tiles lie in rows.
+    """
+    je_zeile={}
+    for x,y in points:
+        je_zeile.setdefault(y,[]).append(x)
+    ergebnis=[]
+    for y in sorted(je_zeile):
+        xs=sorted(je_zeile[y]);start=vorher=xs[0]
+        for x in xs[1:]:
+            if x==vorher+1:
+                vorher=x;continue
+            ergebnis.append([y,start,vorher]);start=vorher=x
+        ergebnis.append([y,start,vorher])
+    return ergebnis
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--client',type=Path,default=CLIENT)
@@ -226,9 +246,16 @@ def main():
         if count:coverage[str(area['idx'])]=info
         summary.append(dict(id=area['idx'],name=area['name'],available=bool(count),**info))
     thumbnails(public,version,coverage,levels)
-    manifest=dict(schema=1,version=version,tileSize=200,origin=[-146.8,-124.4],blockSize=.8,
+    # Only what the browser needs: region, frame, overview and thumbnail flag.
+    # Counts and derivation stay in coverage.json.
+    kurz={}
+    for ident,entry in coverage.items():
+        kurz[ident]=[entry['region'],*entry['frame'],
+                     1 if entry.get('overview') else 0,
+                     1 if entry.get('thumbnail') else 0]
+    manifest=dict(schema=2,version=version,tileSize=200,origin=[-146.8,-124.4],blockSize=.8,
                   resourceMaps=sorted(p.stem for p in (REPO/'web/vorkommen').glob('*.js') if p.stem.isdigit()),
-                  maps=coverage,regions={str(r):{str(z):[f'{y}_{x}' for x,y in sorted(points)] for z,points in zs.items()} for r,zs in levels.items()})
+                  maps=kurz,regions={str(r):{str(z):runs(points) for z,points in zs.items()} for r,zs in levels.items()})
     temporary=public/'manifest.json.part';temporary.write_text(json.dumps(manifest,separators=(',',':')))
     temporary.replace(public/'manifest.json')
     (args.cache/'coverage.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2))

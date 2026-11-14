@@ -2,8 +2,8 @@
 
 ## Bedienung
 
-Die Kartenanwendung bietet **Gelände | Spielkarte** in der bestehenden
-Kartenleiste. Gelände ist die Vorgabe. Ein manueller Wechsel wird unter
+Die Kartenanwendung bietet **Gelände | Spielkarte** als Umschalter über der
+Karte. Gelände ist die Vorgabe. Ein manueller Wechsel wird unter
 `mql.kartenansicht` für alle Karten und Sprachen im selben Browser gespeichert.
 Er gilt auch nach einem Reload. Fehlende Daten oder ein Ladefehler fallen auf
 die Spielkarte zurück, ohne die gespeicherte Wahl zu ändern. Kein Konto und
@@ -40,7 +40,12 @@ Alle Ausgaben liegen unter `~/.cache/llb-terrain/`:
 - `<Quellstand>/source.json`: lokale Quellpfade und Größen-/Zeitstempel.
 - `<Quellstand>/requests.tsv`: eindeutige Anforderungen aus allen Kartenrahmen.
 - `<Quellstand>/raw/`: PNG-Exporte und fortsetzbares `tiles.jsonl`.
-- `public/manifest.json`: öffentliche Rahmen, Abdeckung und Kachelindizes.
+- `public/manifest.json`: öffentliche Rahmen (Schema 2: je Karte
+  `[Region, West, Nord, Ost, Süd, Übersicht, Vorschau]`) und Kachelindizes.
+  Die Kacheln stehen als Zeilenläufe `[y, x0, x1]` statt als Einzelnamen:
+  46.850 Bytes statt 678.535, gzip 13,7 statt 177 KB je Kartenaufruf. Schema 1
+  wird vom Browser weiterhin gelesen, damit ein zwischengespeicherter Stand
+  nicht bricht.
 - `public/<Quellstand>/r<Region>/<LOD>/<Y>_<X>.webp`: geteilte Kachelpyramiden.
 - `public/<Quellstand>/thumb/<Karte>.webp`: Vorschaubilder.
 - `coverage.json`: detaillierter lokaler Abdeckungsbericht.

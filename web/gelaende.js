@@ -34,11 +34,35 @@
 			var storage; try { storage = window.localStorage; } catch (_) { storage = null; }
 			var wanted = preference(storage), current = null, manifest = null, active = false, failed = false, settled = false;
 			var scale = 1, tx = 0, ty = 0, dragging = null, moved = false, suppressClick = false;
-			var pending = 0, tiles = new Map(), available = {};
+			var pending = 0, tiles = new Map(), kachelMerk = {};
 			var layer = document.createElement('div'); layer.className = 'gelaende-kacheln'; layer.hidden = true; layer.setAttribute('aria-hidden', 'true');
 			world.insertBefore(layer, image);
-			function entry() { return manifest && current && manifest.maps[String(current.idx)]; }
+			// Manifest schema 2 stores a map as [region, west, north, east, south,
+			// overview, thumbnail] and the tiles as horizontal runs. Schema 1 with
+			// objects and single names is still read, so a cached older file works.
+			function kurz(eintrag) {
+				if (!eintrag) { return null; }
+				if (Array.isArray(eintrag)) {
+					return { region: eintrag[0], frame: [eintrag[1], eintrag[2], eintrag[3], eintrag[4]],
+						overview: !!eintrag[5], thumb: !!eintrag[6] };
+				}
+				return { region: eintrag.region, frame: eintrag.frame, overview: !!eintrag.overview,
+					thumb: !!eintrag.thumbnail };
+			}
+			function entry() { return kurz(manifest && current && manifest.maps[String(current.idx)]); }
 			function usable() { return !!(current && frameMatches(current, entry()) && !failed); }
+			function kacheln(region, level) {
+				var schluessel = region + '/' + level;
+				if (kachelMerk[schluessel]) { return kachelMerk[schluessel]; }
+				var liste = (manifest.regions[region] || {})[level] || [];
+				var satz = new Set();
+				liste.forEach(function (eintrag) {
+					if (typeof eintrag === 'string') { satz.add(eintrag); return; }
+					for (var x = eintrag[1]; x <= eintrag[2]; x += 1) { satz.add(eintrag[0] + '_' + x); }
+				});
+				kachelMerk[schluessel] = satz;
+				return satz;
+			}
 			function effectiveFrame() {
 				var e = entry();
 				return active && e ? { west:e.frame[0], north:e.frame[1], east:e.frame[2], south:e.frame[3] } : current;
@@ -111,7 +135,7 @@
 				var f=effectiveFrame(), spanX=f.east-f.west,spanY=f.north-f.south;
 				var pixels=world.clientWidth*scale*(window.devicePixelRatio||1)/(spanX/.8),level=Math.max(0,Math.min(8,Math.floor(Math.log2(200/Math.max(1,pixels)))));
 				var factor=Math.pow(2,level),size=.8*factor,region=current.mr;
-				var present=available[region]&&available[region][level];if(!present){failed=true;apply();return;}
+				var present=kacheln(region,level);if(!present){failed=true;apply();return;}
 				var wr=world.getBoundingClientRect(),sr=stage.getBoundingClientRect();
 				var nx0=Math.max(0,(sr.left-wr.left)/wr.width),nx1=Math.min(1,(sr.right-wr.left)/wr.width);
 				var ny0=Math.max(0,(sr.top-wr.top)/wr.height),ny1=Math.min(1,(sr.bottom-wr.top)/wr.height);
@@ -129,8 +153,8 @@
 				tiles.forEach(function(node,key){if(!needed.has(key)){node.onerror=null;node.remove();tiles.delete(key);}});
 			}
 			var ready = fetch('/gelaende/manifest.json').then(function(r){if(!r.ok){throw new Error('Terrain manifest unavailable');}return r.json();}).then(function(data){
-				if(data.schema!==1||!data.maps||!data.regions||!/^[a-f0-9]+$/.test(data.version)){throw new Error('Invalid terrain manifest');}
-				manifest=data;settled=true;Object.keys(data.regions).forEach(function(r){available[r]={};Object.keys(data.regions[r]).forEach(function(z){available[r][z]=new Set(data.regions[r][z]);});});apply();
+				if((data.schema!==1&&data.schema!==2)||!data.maps||!data.regions||!/^[a-f0-9]+$/.test(data.version)){throw new Error('Invalid terrain manifest');}
+				manifest=data;settled=true;apply();
 			}).catch(function(){settled=true;controls.hidden=true;zoomControls.hidden=true;});
 			return {
 				ready:ready,
@@ -139,7 +163,7 @@
 				active:function(){return active;},
 				scale:function(){return active?scale:1;},
 				layout:function(){if(active){view();}},
-				thumbnail:function(map){var e=manifest&&map&&manifest.maps[String(map.idx)];return wanted==='gelaende'&&e&&e.thumbnail?'/gelaende/'+e.thumbnail:null;},
+				thumbnail:function(map){var e=kurz(manifest&&map&&manifest.maps[String(map.idx)]);return wanted==='gelaende'&&e&&e.thumb?'/gelaende/'+manifest.version+'/thumb/'+map.idx+'.webp':null;},
 				frame:function(map){if(active&&current&&map&&map.idx===current.idx){return Object.assign({},map,effectiveFrame(),{rahmen:'gelaende',eigen:entry().overview?false:map.eigen});}return map;},
 				clear:function(){current=null;failed=false;delete world.dataset.karte;apply();}
 			};
