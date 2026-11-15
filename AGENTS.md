@@ -26,6 +26,7 @@ Stand: 08.11.2026. Diese Anleitung gilt für das Repository `lotro-log-book`, **
 - `daten/`, `Karten/`, `Karten_en/`, `Karten_fr/`, `webp/` und viele `web/*-<sprache>.js`: lokal erzeugtes Spielmaterial; Generatoren statt erzeugter Einträge ändern. Nicht per `git add -f` veröffentlichen. `.gitignore` vor dem Staging prüfen; nicht jedes neue Datenmuster ist schon abgedeckt.
 - `dist-web/` ist der historische Standard-Buildpfad, **nicht das bevorzugte Arbeitsziel**. Veröffentlichungs-Builds außerhalb iCloud erzeugen.
 - `docs/missing-map-audit.md`, `docs/deed-position-audit.md`: Karten-/Positionslücken; `docs/dat-auswertung-2026-11-06.md`: DAT-Felder; `docs/site-polish-2026-11-06.md`: frühere Oberflächenprüfung. Datierte Befunde sind keine dauerhaften aktuellen Zähler.
+- Offene technische Vorhaben mit eigener Checkliste liegen als Markdown unter `docs/todos/`. Das OpenChamber-TODO verweist auf die jeweilige Datei. Dauerhaft gültige Konzepte und technische Regeln bleiben als aktive Referenzdokumente unter `docs/`; historische Prüfstände, abgeschlossene Untersuchungen und ersetzte Konzepte gehören nach `docs/archiv/`. TODO-Datei und die zugehörige Codeänderung werden gemeinsam aktualisiert. Git bewahrt die Entwicklungsgeschichte; alte Dokumente nicht still löschen.
 
 ## Datenquellen und Grenzen
 
