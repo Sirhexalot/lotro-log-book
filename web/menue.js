@@ -135,7 +135,10 @@
 		pfeil.textContent = '▾';
 		knopf.appendChild(pfeil);
 		feld.appendChild(knopf);
-		if (gruppe.tab.length > 1) {
+		// Every family gets a flyout, including Character with its single
+		// destination. PHP renders the same shape; omitting this one made the
+		// Character control appear to work only on some page variants.
+		if (gruppe.tab.length > 0) {
 			var flieger = document.createElement('span');
 			flieger.className = 'familie-flieger';
 			flieger.id = 'familie-' + gruppe.key;

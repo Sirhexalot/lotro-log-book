@@ -140,12 +140,33 @@ main {
 
 .spalten-kopf button { font-size: 11px; padding: 2px 6px; }
 
+/* Task list tools: filter button, active state and local search. */
+.listenwerkzeuge { flex: 0 0 auto; border-bottom: 1px solid var(--rand); }
+.filter-kopf { display: flex; align-items: center; gap: 7px; padding: 6px 10px 4px; min-height: 34px; }
+.filter-knopf { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 3px 8px; }
+.filter-knopf svg { width: 14px; height: 14px; }
+.filter-knopf.aktiv { border-color: var(--gold); color: var(--gold); }
+.filter-status { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--schwach); font-size: 11px; }
+.filter-status.aktiv { color: var(--gold); }
+.filter-reset { margin-left: auto; border: 0; background: none; color: var(--schwach); font-size: 11px; padding: 3px 0; white-space: nowrap; }
+.filter-reset:hover { color: var(--gold); text-decoration: underline; }
+.filter[hidden] { display: none; }
+.filter {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	padding: 4px 10px 6px;
+	border-top: 1px solid var(--rand);
+	flex: 0 0 auto;
+}
+.aufgaben-suche { display: block; padding: 2px 10px 7px; }
+.aufgaben-suche input { width: 100%; font-size: 12px; padding: 5px 8px; }
+.visuell-versteckt { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
 /* all / open / done */
 .filter {
 	display: flex;
 	gap: 4px;
-	padding: 6px 10px;
-	border-bottom: 1px solid var(--rand);
 	flex: 0 0 auto;
 }
 
@@ -375,13 +396,13 @@ main {
 
 .punkt {
 	position: absolute;
-	width: 14px;
-	height: 14px;
-	margin: -7px 0 0 -7px;
+	width: 18px;
+	height: 18px;
+	margin: -9px 0 0 -9px;
 	border-radius: 50%;
 	background: var(--offen);
 	border: 2px solid #14100b;
-	box-shadow: 0 0 0 1px rgba(255, 244, 214, .5), 0 1px 3px rgba(0, 0, 0, .55);
+	box-shadow: 0 0 0 2px rgba(13, 11, 9, .85), 0 0 0 3px rgba(255, 244, 214, .72), 0 2px 5px rgba(0, 0, 0, .7);
 	cursor: pointer;
 	transition: transform .08s;
 }
@@ -404,6 +425,7 @@ main {
 .punkt.zielort.fertig { border-color: var(--fertig); }
 .punkt.zielort.laufend { border-color: var(--laufend); }
 .punkt.zielort.aktiv { background: var(--marke-aktiv); }
+.punkt.zielort { box-shadow: 0 0 0 2px rgba(13, 11, 9, .9), 0 0 0 3px rgba(255, 244, 214, .8), 0 2px 5px rgba(0, 0, 0, .7); }
 
 /* A pile with some quests done: half green, so the progress is visible inside it. */
 .punkt.teils { background: linear-gradient(to right, var(--fertig) 50%, var(--offen) 50%); }
@@ -411,13 +433,14 @@ main {
 
 /* Several quests on one spot: one dot, the number says how many. */
 .punkt.stapel {
-	width: 20px;
-	height: 20px;
-	margin: -10px 0 0 -10px;
-	font: bold 11px/18px sans-serif;
+	width: 26px;
+	height: 26px;
+	margin: -13px 0 0 -13px;
+	font: bold 12px/24px sans-serif;
 	color: #1b1611;
 	text-align: center;
-	box-shadow: 0 0 0 2px rgba(13, 11, 9, .75);
+	border-width: 2px;
+	box-shadow: 0 0 0 2px rgba(13, 11, 9, .9), 0 0 0 3px rgba(255, 244, 214, .8), 0 2px 5px rgba(0, 0, 0, .75);
 }
 .punkt.hervor { transform: scale(1.9); z-index: 7; box-shadow: 0 0 0 3px rgba(240, 166, 60, .55); }
 #liste li.hervor { background: rgba(240, 166, 60, .16); }
@@ -712,8 +735,9 @@ a.knopf-gold {
 .seite details p { margin: 8px 0 4px 16px; color: var(--schwach); }
 
 /* Reward index and recipe browser (own pages). */
-.belohnungsfilter { display: flex; align-items: center; gap: 8px; padding: 0 12px 6px; color: var(--schwach); }
+.belohnungsfilter { display: flex; align-items: center; gap: 8px; flex: 1 0 100%; padding: 2px 0 0; color: var(--schwach); font-size: 12px; }
 .belohnungsfilter[hidden] { display: none; }
+.belohnungsfilter select { flex: 1 1 auto; min-width: 0; font-size: 12px; padding: 3px 6px; }
 .bl-liste { margin: 10px 0 0; }
 .bl-karte {
 	border: 1px solid var(--rand); border-radius: 4px; padding: 12px 14px;
@@ -1259,9 +1283,12 @@ body main { grid-template-columns: clamp(280px, var(--listenbreite, 390px), calc
 
 /* The way to the full catalogue page stays at the bottom of the column. */
 .detail-ganz { position: sticky; bottom: -14px; display: block; margin: 18px -16px -14px;
-	padding: 12px 16px; background: var(--fläche); border-top: 1px solid var(--rand);
-	color: var(--gold); font-size: .8125rem; text-decoration: none; }
-.detail-ganz:hover { background: var(--fläche-hell); }
+	padding: 10px 16px; background: var(--fläche-hell); border: 1px solid var(--rand);
+	border-radius: 3px; color: var(--gold); font-size: .8125rem; text-align: center;
+	text-decoration: none; }
+.detail-ganz:hover, .detail-ganz:focus-visible { background: var(--fläche); border-color: var(--gold); }
+.detail-geber { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
+.detail-geber:hover, .detail-geber:focus-visible { color: var(--text); }
 
 /* Phones: the result panel belongs to the viewport, not to the narrow search
    field; otherwise it is clipped on the left. */

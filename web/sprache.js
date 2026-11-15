@@ -246,7 +246,8 @@
 
 	// stand.js first and without cache: it holds the stamp of the last build.
 	lade('stand.js?t=' + Date.now(), function () {
-		lade('daten-' + (art === 'taten' ? 'taten-' : '') + sprache + '.js' + stempel(), function () {
+		var initial = art === 'taten' ? 'daten-taten-' + sprache : 'karten-kurz-' + sprache;
+		lade(initial + '.js' + stempel(), function () {
 			if (stil) { stil.href = stil.getAttribute('href').split('?')[0] + stempel(); }
 			ladeText.textContent = t('lade_karte');
 			// The shared landscape list lets both catalogues show the same

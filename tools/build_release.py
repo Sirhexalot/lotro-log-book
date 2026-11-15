@@ -25,6 +25,7 @@ Nothing here invents data: missing sources stop the build with a clear message.
 import argparse
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -79,6 +80,15 @@ def kopiere_web(ziel: Path) -> None:
             shutil.copy2(eintrag, ziel_pfad)
 
 
+def baue_karten_kurz(ziel: Path) -> None:
+    """Generate compact first-paint data without changing the source catalogues."""
+    script = HIER / 'tools' / 'build_karten_kurz.py'
+    subprocess.run([sys.executable, str(script)], cwd=str(HIER), check=True)
+    for sprache in SPRACHEN:
+        shutil.copy2(WEB / ('karten-kurz-%s.js' % sprache),
+                     ziel / ('karten-kurz-%s.js' % sprache))
+
+
 def seo_dateien(ziel: Path) -> None:
     """robots.txt and the social preview images, from build_seo."""
     import sys
@@ -96,6 +106,19 @@ def kopiere_karten(ziel: Path) -> None:
         if not quelle.is_dir():
             raise SystemExit('MISSING: %s (run baue_webp.py)' % quelle)
         shutil.copytree(quelle, ziel / 'karten' / sprache)
+
+
+def baue_karten_vorschauen(ziel: Path) -> None:
+    """Create card-sized fallbacks before the terrain manifest is ready."""
+    from PIL import Image
+    for sprache in SPRACHEN:
+        quelle = ziel / 'karten' / sprache
+        vorschauen = quelle / 'thumb'
+        vorschauen.mkdir()
+        for bild in quelle.glob('*.webp'):
+            with Image.open(bild) as original:
+                original.convert('RGB').resize((320, 240), Image.Resampling.LANCZOS).save(
+                    vorschauen / bild.name, 'WEBP', quality=80, method=4)
 
 
 def kopiere_gelaende(ziel: Path, quelle: Path) -> None:
@@ -190,6 +213,7 @@ def main() -> int:
     ziel.mkdir(parents=True)
 
     kopiere_web(ziel)
+    baue_karten_kurz(ziel)
     tracking_schreiben(ziel)
     # A visitor-imported progress file never ships; the app writes it locally.
     (ziel / 'fortschritt.js').write_text(
@@ -197,6 +221,7 @@ def main() -> int:
         encoding='utf-8')
     seo_dateien(ziel)
     kopiere_karten(ziel)
+    baue_karten_vorschauen(ziel)
     kopiere_gelaende(ziel, optionen.gelaende)
     kopiere_app(ziel, optionen.daten)
 

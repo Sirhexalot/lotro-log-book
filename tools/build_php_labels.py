@@ -62,8 +62,11 @@ def app_seiten() -> dict:
     the title from its own file, without the site suffix.
     """
     import re
-    seiten = {key: {'title': value[0], 'description': value[1]}
-              for key, value in build_seo.PAGES.items()}
+    seiten = {}
+    for key, value in build_seo.PAGES.items():
+        lang = 'en' if key == 'start-en.html' else 'fr' if key == 'start-fr.html' else 'de'
+        title, description = build_seo.localized_page(key, value[0], value[1], lang)
+        seiten[key] = {'title': title, 'description': description}
     for datei in sorted((HIER / 'web').glob('*.html')):
         if datei.name in seiten or datei.name == '404.html':
             continue

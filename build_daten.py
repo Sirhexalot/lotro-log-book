@@ -422,6 +422,24 @@ def ortsgruppen(karten_datei):
 MERKMALE = None
 
 
+def quest_geber_ids():
+    """First recorded giver ID for each quest, when the giver catalogue exists.
+
+    The map client currently carries only the giver's display name. The
+    generated giver catalogue already has the exact quest-to-NPC relation, so
+    reusing it avoids guessing between same-named NPCs.
+    """
+    datei = HIER / 'daten' / 'auftraggeber.json'
+    if not datei.is_file():
+        return {}
+    try:
+        daten = json.loads(datei.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return {}
+    return {str(quest).upper(): str(geber).upper()
+            for quest, geber in (daten.get('quest_giver') or {}).items()}
+
+
 def questmerkmale():
     """Which instance row belongs to which chapter, and which completion rules a
     quest out (see tools/build_questmerkmale.py). Without the file both stay empty:
@@ -439,6 +457,7 @@ def questmerkmale():
 def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
     orte = orte or set()
     instanz_kapitel, ausgeschlossen = questmerkmale()
+    geber_ids = quest_geber_ids() if art != 'taten' else {}
     bekannt = {karte['idx'] for karte in json.loads(Path(karten_datei).read_text(encoding='utf-8'))}
     umgelegt = verloren = 0
     try:
@@ -582,6 +601,7 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
             **({'a': abschnitt, 'ak': abschnitt_art} if abschnitt else {}),
             # g: quest giver (first bestowing NPC), where the game names one.
             **({'g': str(field(record, 'g'))} if field(record, 'g') else {}),
+            **({'gi': geber_ids[record['id'].upper()]} if record['id'].upper() in geber_ids else {}),
             'l': str(record['l']) if 'l' in record and record['l'] else '',
             'r': region,
             'z': zone,

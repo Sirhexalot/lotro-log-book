@@ -72,7 +72,8 @@ class SeitentitelTest(unittest.TestCase):
     def test_deed_page_uses_the_map_template_with_its_own_title(self):
         self.assertIn("'taten' => 'karte'", SEITE)
         self.assertIn("if ($page === 'taten')", SEITE)
-        for titel in ("'de' => 'Taten'", "'en' => 'Deeds'", "'fr' => 'Prouesses'"):
+        for titel in ("'de' => 'HdRO Taten'", "'en' => 'LOTRO deeds'",
+                      "'fr' => 'Prouesses de SdAO'"):
             self.assertIn(titel, SEITE)
 
 

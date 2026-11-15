@@ -155,12 +155,15 @@ def thumbnails(public,version,coverage,levels):
         px=250/factor
         extent=((west-(-146.8+x0*size))*px,((-124.4+y1*size)-north)*px,
                 (east-(-146.8+x0*size))*px,((-124.4+y1*size)-south)*px)
-        scale=min(400/(east-west),300/(north-south))
+        # Landscape cards are at most about 320x240 on the public site.
+        # Keeping the preview at that native size avoids downloading a
+        # 400x300 image for a smaller mobile card.
+        scale=min(320/(east-west),240/(north-south))
         width=max(1,round((east-west)*scale));height=max(1,round((north-south)*scale))
         crop=image.transform((width,height),Image.Transform.EXTENT,extent,Image.Resampling.BICUBIC)
-        result=Image.new('RGB',(400,300),'#111610');result.paste(crop,((400-width)//2,(300-height)//2),crop.getchannel('A'))
+        result=Image.new('RGB',(320,240),'#111610');result.paste(crop,((320-width)//2,(240-height)//2),crop.getchannel('A'))
         relative=f'{version}/thumb/{ident}.webp';target=public/relative;target.parent.mkdir(parents=True,exist_ok=True)
-        result.save(target,'WEBP',quality=90,method=4)
+        result.save(target,'WEBP',quality=80,method=4)
         entry['thumbnail']=relative
 
 def runs(points):

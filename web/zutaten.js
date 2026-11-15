@@ -5,12 +5,28 @@
 	'use strict';
 	var lang = document.documentElement.lang || 'de';
 	var texte = {
-		de: ['Wo bekomme ich das?', 'Lade Herkunft …', '', 'Herkunft konnte nicht geladen werden. Schließe und öffne den Hinweis, um es erneut zu versuchen.', 'Die Rohstoffe an diesen Stellen wechseln.'],
-		en: ['Where can I get this?', 'Loading sources …', '', 'Could not load sources. Close and reopen to try again.', 'The resources at these spots change.'],
-		fr: ['Où en trouver ?', 'Chargement des sources…', '', 'Impossible de charger les sources. Fermez et rouvrez pour réessayer.', 'Les ressources à ces endroits changent.']
+		de: ['Bezugsquellen anzeigen', 'Lade Herkunft …', 'Herkunft konnte nicht geladen werden. Schließe und öffne den Hinweis, um es erneut zu versuchen.', 'Die Rohstoffe an diesen Stellen wechseln.'],
+		en: ['Show sources', 'Loading sources …', 'Could not load sources. Close and reopen to try again.', 'The resources at these spots change.'],
+		fr: ['Afficher les sources', 'Chargement des sources…', 'Impossible de charger les sources. Fermez et rouvrez pour réessayer.', 'Les ressources à ces endroits changent.']
 	};
 	var t = texte[lang] || texte.en;
 	var cache = new Map();
+	// Ingredient ids whose item page answers nothing: no toggle for them.
+	// The crafting page hands the list over; elsewhere the list stays empty
+	// and the toggle removes itself once it finds no answer.
+	var ohne = null;
+	function ohneHerkunft() {
+		if (ohne === null) {
+			ohne = {};
+			var liste = Array.isArray(window.MQL_ZUTATEN_OHNE) ? window.MQL_ZUTATEN_OHNE : [];
+			liste.forEach(function (id) { ohne[String(id).toUpperCase()] = 1; });
+		}
+		return ohne;
+	}
+	function kennung(href) {
+		var teile = String(href).replace(/[?#].*$/, '').split('/').filter(Boolean);
+		return (teile.pop() || '').toUpperCase();
+	}
 	function sources(href) {
 		var url = new URL(href, location.href);
 		if (url.origin !== location.origin) { return Promise.reject(new Error('origin')); }
@@ -26,6 +42,7 @@
 		return cache.get(url.href);
 	}
 	function hinweis(href) {
+		if (ohneHerkunft()[kennung(href)]) { return null; }
 		var details = document.createElement('details');
 		details.className = 'zutaten-herkunft';
 		var summary = document.createElement('summary');
@@ -39,7 +56,15 @@
 			laedt = true; content.textContent = t[1];
 			content.setAttribute('role', 'status');
 			sources(href).then(function (sections) {
-				content.textContent = sections.length ? '' : t[2];
+				if (!sections.length) {
+					// The item knows no source and no gathering spot. An empty
+					// An empty source list is worse than no toggle, so it goes away.
+					details.hidden = true;
+					content.textContent = '';
+					geladen = true;
+					return;
+				}
+				content.textContent = '';
 				sections.forEach(function (section) {
 					var copy = section.cloneNode(true);
 					copy.querySelectorAll('h2').forEach(function (heading) {
@@ -50,15 +75,19 @@
 				});
 				if (content.querySelector('a[href*="vorkommen="]')) {
 					var note = document.createElement('p'); note.className = 'schwach';
-					note.textContent = t[4]; content.appendChild(note);
+					note.textContent = t[3]; content.appendChild(note);
 				}
+				// On recipe detail pages, a source toggle is useful as an
+				// immediate answer. Keep the summary so it can still be closed.
+				details.open = true;
 				geladen = true;
-			}).catch(function () { content.textContent = t[3]; }).finally(function () { laedt = false; });
+			}).catch(function () { content.textContent = t[2]; }).finally(function () { laedt = false; });
 		});
 		return details;
 	}
 	window.MQL_ZUTATEN_HERKUNFT = hinweis;
 	document.querySelectorAll('a[data-zutat]').forEach(function (link) {
-		link.parentNode.appendChild(hinweis(link.href));
+		var h = hinweis(link.href);
+		if (h) { link.parentNode.appendChild(h); }
 	});
 })();

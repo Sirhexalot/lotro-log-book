@@ -638,12 +638,15 @@ def landmark_view(builder: ViewBuilder, entry: dict) -> dict:
 
 # --- recipes -----------------------------------------------------------
 
-def recipe_view(builder: ViewBuilder, row: list) -> dict:
+def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None) -> dict:
+    """One recipe page. `ohne_herkunft` names item ids whose page answers
+    neither "Vorkommen" nor "Woher"; their ingredient link carries no toggle."""
     w, lang = builder.w, builder.lang
     profession = row[9]
     entry = builder.professions.get(profession) or {}
     profession_name = ((entry.get('n') or {}).get(lang)
                        or (entry.get('n') or {}).get('en') or profession)
+    leer = ohne_herkunft or set()
 
     def part(item_part, optional=False):
         name = item_part[0]
@@ -653,6 +656,7 @@ def recipe_view(builder: ViewBuilder, row: list) -> dict:
         identifier = item_part[id_index] if len(item_part) > id_index else None
         link = builder.item_link(name)
         return {'icon': icon, 'amount': amount, 'text': name,
+                'herkunft': str(identifier) not in leer if identifier else True,
                 'url': route(lang, 'i', identifier) if identifier and identifier in builder.items
                 else (link['url'] if link else None)}
 
@@ -977,6 +981,11 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
             continue
         parts = [ctx.profession_name(profession), '%s %s' % (w['level'], tier) if tier else '']
         places = sorted(ctx.orte.get(str(ctx.index.get(str(art_id))), []), key=lambda row: -(row[2] or 0))
+        if not places:
+            # "Vorkommen" answers where a resource can be gathered. Without a
+            # recorded spot the row answers nothing, so the section stays away
+            # instead of listing a resource with an empty place line.
+            continue
         resources.append({
             'key': list(key),
             'name': res_name,
@@ -1000,8 +1009,29 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         sources.append({'url': reference, 'text': qname,
                         'extra': ' › '.join(part for part in (region, zone) if part)})
 
-    crafted_by = [{'url': route(lang, 'recipe', rid), 'text': builder.recipes[rid][0]}
-                  for rid in item.get('rezepte') or [] if rid in builder.recipes]
+    rezept_ids = [rid for rid in item.get('rezepte') or [] if rid in builder.recipes]
+    rezept_zeilen = [builder.recipes[rid] for rid in rezept_ids]
+    rezept_namen = {}
+    for row in rezept_zeilen:
+        teile = [row[3], row[5]]
+        if row[2]:
+            teile.append('%s %s' % (w['level'], row[2]))
+        label = ' · '.join(str(teil) for teil in teile if teil)
+        rezept_namen[label] = rezept_namen.get(label, 0) + 1
+    crafted_by = []
+    for rid, row in zip(rezept_ids, rezept_zeilen):
+        teile = [row[3], row[5]]
+        if row[2]:
+            teile.append('%s %s' % (w['level'], row[2]))
+        label = ' · '.join(str(teil) for teil in teile if teil)
+        # Some client exports contain several recipes with the same profession,
+        # category and level. Only those need their input as a disambiguator.
+        if rezept_namen[label] > 1:
+            zutaten = ', '.join('%s × %s' % (part[1], part[0])
+                                for part in (row[6] or []))
+            if zutaten:
+                label += ' · ' + zutaten
+        crafted_by.append({'url': route(lang, 'recipe', rid), 'text': label})
     used_in = [{'url': route(lang, 'recipe', rid), 'text': builder.recipes[rid][0]}
                for rid in item.get('zutat') or [] if rid in builder.recipes]
 

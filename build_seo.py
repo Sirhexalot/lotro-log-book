@@ -23,6 +23,26 @@ PAGES = {
     'datenschutz.html': ('Datenschutz', 'Informationen zum Datenschutz und zur Verarbeitung von Daten in LOTRO Log Book.'),
 }
 
+GAME_TERM = {'de': 'HdRO', 'en': 'LOTRO', 'fr': 'SdAO'}
+
+
+def localized_page(name, title, description, lang):
+    """Use the abbreviation players search for in each language."""
+    term = GAME_TERM[lang]
+    title = title.replace('LOTRO', term)
+    description = description.replace('LOTRO', term)
+    if name == 'index.html':
+        title = {'de': 'HdRO Aufgaben und Karten',
+                 'en': 'LOTRO quests and maps',
+                 'fr': 'Quêtes et cartes de SdAO'}[lang]
+    elif name == 'start.html':
+        title = 'Dein HdRO-Begleiter durch Mittelerde'
+    elif name == 'start-en.html':
+        title = 'Your LOTRO companion through Middle-earth'
+    elif name == 'start-fr.html':
+        title = 'Votre compagnon SdAO en Terre du Milieu'
+    return title, description
+
 
 def preview_images(ziel):
     """Use our existing map illustration, not a fabricated game screenshot."""
@@ -65,6 +85,7 @@ def build(ziel):
         path = ziel / name
         text = path.read_text(encoding='utf-8')
         lang = 'en' if name == 'start-en.html' else 'fr' if name == 'start-fr.html' else 'de'
+        title, description = localized_page(name, title, description, lang)
         url = BASE + '/' + name
         text = re.sub(r'<meta\s+name="description"[^>]*>\s*', '', text)
         image = BASE + '/bild/vorschau-' + lang + '.jpg'

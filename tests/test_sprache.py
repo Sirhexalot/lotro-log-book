@@ -57,7 +57,7 @@ class SpracheTest(unittest.TestCase):
             'accept': ['de-DE,de;q=0.9,en;q=0.8', 'fr-FR,fr;q=0.9', 'en-US,en;q=0.9',
                        'nl-NL,nl;q=0.9,en;q=0.8', 'fr-CA', 'de', 'en-GB,de;q=0.7',
                        'it-IT,fr;q=0.5', '*', '', 'de;q=0.2,fr;q=0.8'],
-            'router': {'fr': ['/'], 'de': ['/'], 'en': ['/']},
+            'router': {'fr': ['/'], 'de': ['/'], 'en': ['/', '/en/karte/']},
             'legacy': {'fr': {'/start.html': [], '/gegenstaende.html': []},
                        'en': {'/spielstand.html': []},
                        'de': {'/gegenstaende.html': {'lang': 'de'}}},
@@ -89,7 +89,15 @@ class SpracheTest(unittest.TestCase):
     def test_root_follows_the_visitor(self):
         for sprache in ('de', 'fr', 'en'):
             self.assertEqual(self.antworten['router'][sprache + ' /'],
-                             [302, '/' + sprache + '/karte/'])
+                             [302, {
+                                 'de': '/de/karte/',
+                                 'fr': '/fr/carte/',
+                                 'en': '/en/map/',
+                             }[sprache]])
+
+    def test_old_english_map_segment_redirects_to_canonical_path(self):
+        self.assertEqual(self.antworten['router']['en /en/karte/'],
+                         [301, '/en/map/'])
 
     def test_old_addresses_follow_the_visitor(self):
         legacy = self.antworten['legacy']

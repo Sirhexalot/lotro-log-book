@@ -577,6 +577,32 @@ def load_item_context(builder, model, lang):
 DEED_CATEGORIES: dict | None = None
 
 
+def zutaten_ohne_herkunft(recipes: dict, item_pages: dict) -> list:
+    """Ingredient ids whose item page answers neither "Vorkommen" nor "Woher".
+
+    The recipe pages and the crafting page hang a "Show sources" toggle
+    on every ingredient. Where the item knows no source and no gathering spot,
+    the toggle would open empty; these ids leave it away instead.
+    """
+    ids = set()
+    for row in recipes.values():
+        for part in row[6] or []:
+            if len(part) > 3 and part[3]:
+                ids.add(str(part[3]))
+        for part in row[7] or []:
+            if len(part) > 4 and part[4]:
+                ids.add(str(part[4]))
+    leer = []
+    for ident in ids:
+        page = item_pages.get(ident)
+        if page is None:
+            continue
+        if page.get('resources') or page.get('sources') or page.get('crafted_by') \
+                or page.get('vendor'):
+            continue
+        leer.append(ident)
+    return sorted(leer)
+
 def deed_categories() -> dict:
     """Deed id -> Accomplishment_Category, read once for all languages."""
     global DEED_CATEGORIES
@@ -709,16 +735,26 @@ def main() -> int:
         write_faction_index(target, lang, data['f'], builder.quests, builder.deeds, maps)
         write_instance_index(target, lang, instanz_source, maps)
 
-        recipe_pages = {ident: recipe_view(builder, row) for ident, row in data['recipe'].items()}
-        counts['page-recipe'] = len(recipe_pages)
-        write_pages(target, lang, 'recipe', recipe_pages)
-
         item_ctx = load_item_context(builder, model, lang)
         item_pages = {ident: item_view(builder, item_ctx, ident, item)
                        for ident, item in data['i'].items()}
         link_items(item_pages, set_source, lang)
         counts['page-i'] = len(item_pages)
         write_pages(target, lang, 'i', item_pages)
+
+        # Recipe pages link their ingredients; the toggle "Show sources"
+        # only makes sense where the item page answers something. Item pages
+        # come first for that reason, and the ids without an answer travel to
+        # the crafting page as well (it builds the same toggle in the browser).
+        ohne_herkunft = zutaten_ohne_herkunft(data['recipe'], item_pages)
+        (folder / 'zutaten-ohne.json').write_text(
+            json.dumps({'ids': ohne_herkunft}, ensure_ascii=False,
+                       separators=(',', ':')), encoding='utf-8')
+        recipe_pages = {ident: recipe_view(builder, row, set(ohne_herkunft))
+                        for ident, row in data['recipe'].items()}
+        counts['page-recipe'] = len(recipe_pages)
+        write_pages(target, lang, 'recipe', recipe_pages)
+
         sets = set_pages(set_source, lang, item_pages)
         data['set'] = {sid: {'id': sid, 'name': row['name']} for sid, row in sets.items()}
         write_shards(target, lang, 'set', data['set'])

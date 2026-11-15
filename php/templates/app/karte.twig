@@ -42,21 +42,35 @@
 			</div>
 			<div class="pfad" id="pfad"></div>
 			<strong class="liste-titel" id="liste-titel" data-t="aufgaben">Aufgaben</strong>
-			<div class="filter" id="filter" role="group" aria-label="Fortschritt filtern">
-				<button data-filter="alle" aria-pressed="true" data-t="filter_alle">alle</button>
-				<button data-filter="offen" aria-pressed="false" data-t="filter_offen">offen</button>
-				<button data-filter="erledigt" aria-pressed="false" data-t="filter_erledigt">erledigt</button>
-				<button data-filter="machbar" aria-pressed="false" data-t="filter_machbar" id="filter-machbar">annehmbar</button>
+			<div class="listenwerkzeuge">
+				<div class="filter-kopf">
+					<button type="button" id="filter-knopf" class="filter-knopf" aria-expanded="false" aria-controls="filter">
+						<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.5 7.2V18l-3 1v-6.8z"/></svg>
+						<span data-t="filter">Filter</span>
+					</button>
+					<span id="filter-status" class="filter-status" role="status"></span>
+					<button type="button" id="filter-zuruecksetzen" class="filter-reset" hidden data-t="filter_zuruecksetzen">zurücksetzen</button>
+				</div>
+				<div class="filter" id="filter" role="group" aria-label="Fortschritt filtern" hidden>
+					<button data-filter="alle" aria-pressed="true" data-t="filter_alle">alle</button>
+					<button data-filter="offen" aria-pressed="false" data-t="filter_offen">offen</button>
+					<button data-filter="erledigt" aria-pressed="false" data-t="filter_erledigt">erledigt</button>
+					<button data-filter="machbar" aria-pressed="false" data-t="filter_machbar" id="filter-machbar">annehmbar</button>
+					<label class="belohnungsfilter" id="belohnungsfilter-feld" hidden>
+						<span data-t="belohnung">Belohnung</span>
+						<select id="belohnungsfilter">
+							<option value="alle" data-t="belohnung_alle">alle</option>
+							<option value="tugend" data-t="belohnung_tugend">Tugend</option>
+							<option value="titel" data-t="belohnung_titel">Titel</option>
+							<option value="punkte" data-t="belohnung_punkte">LOTRO-Punkte</option>
+						</select>
+					</label>
+				</div>
+				<label class="aufgaben-suche">
+					<span class="visuell-versteckt" data-t="aufgaben_suchen">Aufgaben suchen</span>
+					<input id="aufgaben-suche" type="search" autocomplete="off" data-t-ph="aufgaben_suche_platzhalter" placeholder="Aufgabe oder Auftraggeber suchen">
+				</label>
 			</div>
-			<label class="belohnungsfilter" id="belohnungsfilter-feld" hidden>
-				<span data-t="belohnung">Belohnung</span>
-				<select id="belohnungsfilter">
-					<option value="alle" data-t="belohnung_alle">alle</option>
-					<option value="tugend" data-t="belohnung_tugend">Tugend</option>
-					<option value="titel" data-t="belohnung_titel">Titel</option>
-					<option value="punkte" data-t="belohnung_punkte">LOTRO-Punkte</option>
-				</select>
-			</label>
 			<ol id="liste"></ol>
 		</div>
 	</section>

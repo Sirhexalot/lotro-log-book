@@ -133,7 +133,8 @@
 			stueck.className = 'zutat-mit-herkunft';
 			stueck.appendChild(zutat(teil));
 			if (teil[3] && window.MQL_ZUTATEN_HERKUNFT) {
-				stueck.appendChild(window.MQL_ZUTATEN_HERKUNFT(itemUrl(teil[3])));
+				var herkunft = window.MQL_ZUTATEN_HERKUNFT(itemUrl(teil[3]));
+				if (herkunft) { stueck.appendChild(herkunft); }
 			}
 			zeile.appendChild(stueck);
 		});
@@ -184,7 +185,8 @@
 				if (teil[4]) { optionalLink.href = itemUrl(teil[4]); }
 				stueck.appendChild(optionalLink);
 				if (teil[4] && window.MQL_ZUTATEN_HERKUNFT) {
-					stueck.appendChild(window.MQL_ZUTATEN_HERKUNFT(itemUrl(teil[4])));
+					var herkunft = window.MQL_ZUTATEN_HERKUNFT(itemUrl(teil[4]));
+					if (herkunft) { stueck.appendChild(herkunft); }
 				}
 				optional.appendChild(stueck);
 			});

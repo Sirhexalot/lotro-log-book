@@ -184,15 +184,28 @@ final class Page
         // Quests and deeds share template and file name, but not their title:
         // the static build described the map once, so the deed page brings its
         // own head. The client sets the same title in its deed mode.
+        if ($page === 'karte') {
+            $seo['title'] = ['de' => 'HdRO Aufgaben und Karten',
+                             'en' => 'LOTRO quests and maps',
+                             'fr' => 'Quêtes et cartes de SdAO'][$lang];
+            $seo['description'] = [
+                'de' => 'Finde Aufgaben und Taten in HdRO nach Landschaft und Gebiet. Sieh Auftraggeber auf der Karte und blende Ziele nur auf Wunsch ein.',
+                'en' => 'Find LOTRO quests and deeds by landscape and area. See quest givers on the map and show objectives only when you want.',
+                'fr' => 'Trouvez les quêtes et prouesses de SdAO par paysage et zone. Voyez les donneurs sur la carte et affichez les objectifs à la demande.',
+            ][$lang];
+        }
         if ($page === 'taten') {
             $seo = [
-                'title' => ['de' => 'Taten', 'en' => 'Deeds', 'fr' => 'Prouesses'][$lang],
+                'title' => ['de' => 'HdRO Taten', 'en' => 'LOTRO deeds', 'fr' => 'Prouesses de SdAO'][$lang],
                 'description' => [
-                    'de' => 'Sieh Taten in LOTRO nach Region und Gebiet und auf der Karte, wo sie zu finden sind. Mit importiertem Spielstand zeigt dir das Logbuch, was dir noch fehlt.',
+                    'de' => 'Sieh Taten in HdRO nach Region und Gebiet und auf der Karte, wo sie zu finden sind. Mit importiertem Spielstand zeigt dir das Logbuch, was dir noch fehlt.',
                     'en' => 'Browse LOTRO deeds by region and area and see on the map where to find them. With your imported progress the log book shows what is still missing.',
-                    'fr' => 'Parcourez les prouesses de LOTRO par région et pays et voyez sur la carte où les trouver. Avec votre progression importée, le journal montre ce qu’il vous reste à faire.',
+                    'fr' => 'Parcourez les prouesses de SdAO par région et pays et voyez sur la carte où les trouver. Avec votre progression importée, le journal montre ce qu’il vous reste à faire.',
                 ][$lang],
             ];
+        }
+        if ($page !== 'taten' && $page !== 'karte' && isset($seo['description'])) {
+            $seo['description'] = str_replace('LOTRO', ['de' => 'HdRO', 'en' => 'LOTRO', 'fr' => 'SdAO'][$lang], $seo['description']);
         }
         $sprachen = [];
         foreach (Catalogue::LANGS as $other) {
@@ -238,6 +251,10 @@ final class Page
                 'vorkommen' => $this->shell->icon('vorkommen'),
                 'beruf' => $this->shell->icon('beruf'),
             ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
+            // Ingredients without a source or a gathering spot get no toggle.
+            $context['zutaten_ohne_json'] = json_encode(
+                $this->data->zutatenOhneHerkunft($lang),
+                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
         }
         return $this->view->render('app/' . $template . '.twig', $context);
     }

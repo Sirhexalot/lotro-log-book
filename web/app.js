@@ -16,9 +16,39 @@
 	// website under karten/<sprache>/ – hence the {sprache} placeholder.
 	var webpMuster = window.MQL_BILD_PFAD || '../webp/{sprache}/';
 	var webpOrdner = webpMuster.replace('{sprache}', sprache);
+	function kartenVorschau(karte) {
+		return webpOrdner + 'thumb/' + karte.bild.replace(/\.png$/i, '.webp');
+	}
 
 	var karten = window.MQL_KARTEN || [];
 	var quests = window.MQL_QUESTS || [];
+	var vollstaendig = false;
+	var vollstaendigLader = null;
+	function ladeVollstaendig(callback) {
+		if (vollstaendig) { callback(); return; }
+		if (vollstaendigLader) { vollstaendigLader.push(callback); return; }
+		vollstaendigLader = [callback];
+		var script = document.createElement('script');
+		script.src = 'daten-' + sprache + '.js';
+		script.onload = function () {
+			var voll = window.MQL_QUESTS || [];
+			var nachId = {};
+			voll.forEach(function (quest) { nachId[quest.i] = quest; });
+			quests.forEach(function (quest) {
+				if (nachId[quest.i]) { Object.assign(quest, nachId[quest]); }
+			});
+			vollstaendig = true;
+			var wartende = vollstaendigLader; vollstaendigLader = null;
+			wartende.forEach(function (fertig) { fertig(); });
+		};
+		script.onerror = function () {
+			var wartende = vollstaendigLader; vollstaendigLader = null;
+			wartende.forEach(function (fertig) {
+				fertig(new Error('Questdaten konnten nicht geladen werden.'));
+			});
+		};
+		document.head.appendChild(script);
+	}
 	// Progress: the character chosen in the menu (loaded on the progress page,
 	// kept in this browser). A local build may also carry a built-in file; it is
 	// only used while no character is chosen.
@@ -47,6 +77,10 @@
 	var legendeVoll = document.getElementById('legende-voll');
 	var detail = document.getElementById('detail');
 	var filterLeiste = document.getElementById('filter');
+	var filterKnopf = document.getElementById('filter-knopf');
+	var filterStatus = document.getElementById('filter-status');
+	var filterZuruecksetzen = document.getElementById('filter-zuruecksetzen');
+	var aufgabenSuche = document.getElementById('aufgaben-suche');
 	var zuklappen = document.getElementById('zuklappen');
 
 	var ANSICHT_JE_SEITE = 200;
@@ -131,10 +165,26 @@
 	}
 
 	// --- State ---------------------------------------------------------
+	function leseKartenfilter() {
+		try {
+			var daten = JSON.parse(window.localStorage.getItem('mql.kartenfilter.' + sprache) || 'null');
+			if (!daten || typeof daten !== 'object') { return {}; }
+			return daten;
+		} catch (fehler) { return {}; }
+	}
+	function speichereKartenfilter() {
+		try {
+			window.localStorage.setItem('mql.kartenfilter.' + sprache, JSON.stringify({
+				v: 1, filter: zustand.filter, belohnung: zustand.belohnung, q: zustand.q
+			}));
+		} catch (fehler) { /* private mode or quota: the list still works */ }
+	}
+	var gespeicherterFilter = leseKartenfilter();
 	var zustand = {
 		knoten: null,
-		filter: 'alle',
-		belohnung: 'alle',
+		filter: ['alle', 'offen', 'erledigt', 'machbar'].indexOf(gespeicherterFilter.filter) >= 0 ? gespeicherterFilter.filter : 'alle',
+		belohnung: ['alle', 'tugend', 'titel', 'punkte'].indexOf(gespeicherterFilter.belohnung) >= 0 ? gespeicherterFilter.belohnung : 'alle',
+		q: typeof gespeicherterFilter.q === 'string' ? gespeicherterFilter.q : '',
 		karte: null,
 		auswahl: null,
 		treffer: [],
@@ -1805,13 +1855,21 @@
 	// Requirements exist for quests only, and need a character's progress.
 	var machbarKnopf = document.getElementById('filter-machbar');
 	if (machbarKnopf && (window.MQL_ART === 'taten' || !hatFortschritt)) { machbarKnopf.hidden = true; }
+	Array.prototype.forEach.call(filterLeiste.querySelectorAll('button[data-filter]'), function (knopf) {
+		knopf.setAttribute('aria-pressed', String(knopf.dataset.filter === zustand.filter));
+	});
 	// Deeds can be narrowed to their reward; quests do not offer this.
 	var belohnungsFeld = document.getElementById('belohnungsfilter-feld');
 	var belohnungsWahl = document.getElementById('belohnungsfilter');
 	if (belohnungsFeld && belohnungsWahl && window.MQL_ART === 'taten') {
 		belohnungsFeld.hidden = false;
+		belohnungsWahl.value = zustand.belohnung;
 		belohnungsWahl.addEventListener('change', function () {
 			zustand.belohnung = belohnungsWahl.value;
+			filterLeiste.hidden = true;
+			filterKnopf.setAttribute('aria-expanded', 'false');
+			speichereKartenfilter();
+			aktualisiereFilterAnzeige();
 			zeichneListe();
 			zeichneMarker();
 			aktualisiereStand();
@@ -1843,19 +1901,35 @@
 			eintraege = eintraege.filter(belohnungPasst);
 		}
 		if (zustand.filter === 'machbar') {
-			return eintraege.filter(machbar);
-		}
-		if (zustand.filter === 'offen') {
+			eintraege = eintraege.filter(machbar);
+		} else if (zustand.filter === 'offen') {
 			// "Open" means the character can still do it.
-			return eintraege.filter(function (quest) {
+			eintraege = eintraege.filter(function (quest) {
 				var lage = zustandVon(quest);
 				return lage === 'offen' || lage === 'laufend';
 			});
+		} else if (zustand.filter === 'erledigt') {
+			eintraege = eintraege.filter(function (quest) { return fertig[quest.i] === true; });
 		}
-		if (zustand.filter === 'erledigt') {
-			return eintraege.filter(function (quest) { return fertig[quest.i] === true; });
+		var begriff = falten(zustand.q || '');
+		if (begriff) {
+			eintraege = eintraege.filter(function (quest) {
+				return falten([quest.n, quest.g].filter(Boolean).join(' ')).indexOf(begriff) >= 0;
+			});
 		}
 		return eintraege;
+	}
+
+	function aktualisiereFilterAnzeige() {
+		if (!filterStatus || !filterKnopf) { return; }
+		var aktiv = [];
+		if (zustand.filter !== 'alle') { aktiv.push(t('filter_' + zustand.filter)); }
+		if (zustand.belohnung !== 'alle') { aktiv.push(t('belohnung') + ': ' + t('belohnung_' + zustand.belohnung)); }
+		if (zustand.q) { aktiv.push('„' + zustand.q + '“'); }
+		filterStatus.textContent = aktiv.length ? aktiv.join(' · ') : t('filter_keiner');
+		filterStatus.classList.toggle('aktiv', aktiv.length > 0);
+		filterKnopf.classList.toggle('aktiv', aktiv.length > 0);
+		filterZuruecksetzen.hidden = !aktiv.length;
 	}
 
 	/** What a node's list shows: a map with places below it lists only what lies
@@ -1880,6 +1954,7 @@
 		if (zustand.belohnung !== 'alle') {
 			zusatz += ' · ' + t('belohnung') + ': ' + t('belohnung_' + zustand.belohnung);
 		}
+		if (zustand.q) { zusatz += ' · „' + zustand.q + '“'; }
 		var anzahl = listeGefiltert.filter(gezaehlt).length;
 		// The rows no longer carry a level; the range belongs to the whole area.
 		var spanne = stufenSpanne(quelle);
@@ -2030,7 +2105,18 @@
 			kennung.push(a);
 		}
 		if (quest.l) { teil(t('stufe') + ' ' + stufeText(quest) + (quest.ls ? ' (' + t('mitwachsend') + ')' : '')); }
-		if (quest.g) { teil(ersetze(t('auftraggeber'), [quest.g])); }
+		if (quest.g) {
+			if (quest.gi) {
+				var geberLink = eltern('a', ersetze(t('auftraggeber'), [quest.g]));
+				geberLink.href = '/' + sprache + '/' +
+					({ de: 'auftraggeber', en: 'quest-giver', fr: 'donneur-de-quete' }[sprache] || 'auftraggeber') +
+					'/' + quest.gi + '/';
+				geberLink.className = 'detail-geber';
+				kennung.push(geberLink);
+			} else {
+				teil(ersetze(t('auftraggeber'), [quest.g]));
+			}
+		}
 		if (quest.z) { ortsteil(ABSCHNITTE[quest.z] || quest.z, quest.fk ? quest.fk[1] : null); }
 		if (quest.u) { teil(quest.u); }
 		if (quest.r && quest.r !== quest.z) { ortsteil(quest.r, quest.fk ? quest.fk[0] : null); }
@@ -2463,6 +2549,13 @@
 		aktualisiereStand();
 		markiereZeile(quest.i);
 		if (window.MQL_MOBIL) { window.MQL_MOBIL.zeige('details'); }
+		if (!vollstaendig) {
+			ladeVollstaendig(function () {
+				zeichneDetail();
+				zeichneListe();
+				zeichneMarker();
+			});
+		}
 	}
 
 	function markiereZeile(id) {
@@ -2731,6 +2824,17 @@
 	});
 	document.addEventListener('click', function (ereignis) {
 		if (!ereignis.target.closest || !ereignis.target.closest('.globalsuche')) { schliesseSuche(); }
+		if (!ereignis.target.closest || !ereignis.target.closest('.listenwerkzeuge')) {
+			filterLeiste.hidden = true;
+			filterKnopf.setAttribute('aria-expanded', 'false');
+		}
+	});
+	document.addEventListener('keydown', function (ereignis) {
+		if (ereignis.key === 'Escape' && !filterLeiste.hidden) {
+			filterLeiste.hidden = true;
+			filterKnopf.setAttribute('aria-expanded', 'false');
+			filterKnopf.focus();
+		}
 	});
 
 	document.getElementById('zum-baum').addEventListener('click', function () {
@@ -2753,12 +2857,48 @@
 		if (!knopf) { return; }
 		zustand.filter = knopf.dataset.filter;
 		zustand.sichtbar = ANSICHT_JE_SEITE;
-		Array.prototype.forEach.call(filterLeiste.children, function (kind) {
+		Array.prototype.forEach.call(filterLeiste.querySelectorAll('button[data-filter]'), function (kind) {
 			kind.setAttribute('aria-pressed', String(kind === knopf));
 		});
+		filterLeiste.hidden = true;
+		filterKnopf.setAttribute('aria-expanded', 'false');
+		speichereKartenfilter();
+		aktualisiereFilterAnzeige();
 		zeichneListe();
 		aktualisiereStand();
 	});
+
+	filterKnopf.addEventListener('click', function () {
+		var offen = filterLeiste.hidden;
+		filterLeiste.hidden = !offen;
+		filterKnopf.setAttribute('aria-expanded', String(offen));
+	});
+	filterZuruecksetzen.addEventListener('click', function () {
+		zustand.filter = 'alle';
+		zustand.belohnung = 'alle';
+		zustand.q = '';
+		aufgabenSuche.value = '';
+		Array.prototype.forEach.call(filterLeiste.querySelectorAll('button[data-filter]'), function (knopf) {
+			knopf.setAttribute('aria-pressed', String(knopf.dataset.filter === 'alle'));
+		});
+		if (belohnungsWahl) { belohnungsWahl.value = 'alle'; }
+		filterLeiste.hidden = true;
+		filterKnopf.setAttribute('aria-expanded', 'false');
+		speichereKartenfilter();
+		aktualisiereFilterAnzeige();
+		zeichneListe();
+		aktualisiereStand();
+	});
+	aufgabenSuche.value = zustand.q;
+	aufgabenSuche.addEventListener('input', function () {
+		zustand.q = aufgabenSuche.value.trim();
+		zustand.sichtbar = ANSICHT_JE_SEITE;
+		speichereKartenfilter();
+		aktualisiereFilterAnzeige();
+		zeichneListe();
+		aktualisiereStand();
+	});
+	aktualisiereFilterAnzeige();
 
 	zuklappen.addEventListener('click', function () {
 		Object.keys(offen).forEach(function (schluessel) { offen[schluessel] = false; });
@@ -2944,7 +3084,7 @@
 		document.querySelectorAll('.landschaft-kachel[data-karte] img').forEach(function (img) {
 			var karte = karteNachIndex[img.closest('[data-karte]').dataset.karte];
 			if (!karte) { return; }
-			var quelle = gelaende.thumbnail(karte) || webpOrdner + karte.bild.replace(/\.png$/i, '.webp');
+			var quelle = gelaende.thumbnail(karte) || kartenVorschau(karte);
 			if (img.getAttribute('src') !== quelle) { delete img.dataset.spielVersucht; delete img.dataset.pngVersucht; img.src = quelle; }
 		});
 	}
@@ -2981,7 +3121,7 @@
 				var karte = karteNachIndex[e.karte];
 				if (karte) { knopf.dataset.karte = karte.idx; }
 				var platzhalter = eltern('span'); platzhalter.className = 'landschaft-bild-leer'; platzhalter.setAttribute('aria-hidden', 'true');
-				if (karte) { var img = eltern('img'); img.loading = 'lazy'; img.alt = ''; var spielBild = webpOrdner + karte.bild.replace(/\.png$/i, '.webp'); img.src = (gelaende && gelaende.thumbnail(karte)) || spielBild; img.onerror = function () { if (this.getAttribute('src') !== spielBild && !this.dataset.spielVersucht) { this.dataset.spielVersucht = '1'; this.src = spielBild; } else if (!this.dataset.pngVersucht) { this.dataset.pngVersucht = '1'; this.src = bildOrdner + karte.bild; } else { this.replaceWith(platzhalter); } }; knopf.appendChild(img); }
+				if (karte) { var img = eltern('img'); img.loading = 'lazy'; img.alt = ''; var vorschau = kartenVorschau(karte); var spielBild = webpOrdner + karte.bild.replace(/\.png$/i, '.webp'); img.src = (gelaende && gelaende.thumbnail(karte)) || vorschau; img.onerror = function () { if (this.getAttribute('src') !== spielBild && !this.dataset.spielVersucht) { this.dataset.spielVersucht = '1'; this.src = spielBild; } else if (!this.dataset.pngVersucht) { this.dataset.pngVersucht = '1'; this.src = bildOrdner + karte.bild; } else { this.replaceWith(platzhalter); } }; knopf.appendChild(img); }
 				else { knopf.appendChild(platzhalter); }
 				var inhalt = eltern('span'); inhalt.className = 'inhalt'; inhalt.appendChild(eltern('strong', e.knoten.name));
 				inhalt.appendChild(eltern('small', stufenSpanne(e.knoten.quests)));

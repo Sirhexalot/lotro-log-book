@@ -39,7 +39,14 @@ final class Router
         // a 302, because the target depends on the browser and must not be
         // cached as the one canonical answer.
         if ($path === '/') {
-            return ['status' => 302, 'redirect' => '/' . $this->sprache . '/karte/'];
+            return ['status' => 302,
+                    'redirect' => $this->catalogue->appRoute($this->sprache, 'karte')];
+        }
+        // A previous root redirect used the German segment for English. Keep
+        // that leaked address recoverable instead of serving a noindex 404.
+        if ($path === '/en/karte/') {
+            return ['status' => 301,
+                    'redirect' => $this->catalogue->appRoute('en', 'karte')];
         }
 
         // The item list page is gone: the search page with filters is the way in.

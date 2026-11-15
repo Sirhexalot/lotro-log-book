@@ -67,6 +67,17 @@ final class Data
         return $this->read($this->root . '/' . $lang . '/sets-index.json');
     }
 
+    /**
+     * Item ids whose page answers neither "Vorkommen" nor "Woher".
+     *
+     * The recipe pages read this at build time; the crafting page receives the
+     * list so the ingredient toggle does not open on an empty answer.
+     */
+    public function zutatenOhneHerkunft(string $lang): array
+    {
+        return $this->read($this->root . '/' . $lang . '/zutaten-ohne.json')['ids'] ?? [];
+    }
+
     public function giverIndex(string $lang): array
     {
         return $this->read($this->root . '/' . $lang . '/givers-index.json');

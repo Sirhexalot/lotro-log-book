@@ -284,8 +284,10 @@
 				});
 				li.appendChild(quelle);
 			}
-			if (window.MQL_ZUTATEN_HERKUNFT) { li.appendChild(window.MQL_ZUTATEN_HERKUNFT(url)); }
-			else if (!quellen.length) { li.appendChild(eltern('div', texte[2])); }
+			if (window.MQL_ZUTATEN_HERKUNFT) {
+				var herkunft = window.MQL_ZUTATEN_HERKUNFT(url);
+				if (herkunft) { li.appendChild(herkunft); }
+			} else if (!quellen.length) { li.appendChild(eltern('div', texte[2])); }
 			liste.appendChild(li);
 		});
 	}
