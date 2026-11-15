@@ -30,6 +30,9 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	color: var(--gold);
 	text-decoration: underline;
 }
+.katalog-inhalt a.katalog-knopf {
+	color: var(--gold);
+}
 .katalog-inhalt a.katalog-knopf,
 .katalog-inhalt a.katalog-chip,
 .katalog-inhalt a.katalog-ortlink { text-decoration: none; }
