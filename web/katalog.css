@@ -6,7 +6,33 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-inhalt h1 { font-size: var(--text-titel); line-height: 1.3; overflow-wrap: anywhere; }
 .katalog-inhalt h2 { font-size: var(--text-abschnitt); margin-top: 28px; }
 .katalog-inhalt h3 { font-size: var(--text-normal); }
-.katalog-seite a { color: var(--gold); }
+.katalog-inhalt article { font-size: var(--text-normal); line-height: 1.6; }
+.katalog-inhalt a:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .gebiet-tab)) {
+	color: var(--gold);
+	text-decoration-line: underline;
+	text-decoration-thickness: .08em;
+	text-underline-offset: .16em;
+}
+.katalog-inhalt a:visited:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .gebiet-tab)) {
+	color: var(--gold);
+}
+.katalog-inhalt a:focus-visible {
+	outline: 2px solid var(--gold);
+	outline-offset: 3px;
+	border-radius: 2px;
+}
+.katalog-inhalt > .katalog-pfad a {
+	color: var(--schwach);
+	text-decoration: none;
+}
+.katalog-inhalt > .katalog-pfad a:hover,
+.katalog-inhalt > .katalog-pfad a:focus-visible {
+	color: var(--gold);
+	text-decoration: underline;
+}
+.katalog-inhalt a.katalog-knopf,
+.katalog-inhalt a.katalog-chip,
+.katalog-inhalt a.katalog-ortlink { text-decoration: none; }
 .katalog-pfad { font-size: var(--text-bedienung); color: var(--schwach); overflow-wrap: anywhere; }
 .katalog-fakten { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 20px; }
 .katalog-fakten dt { color: var(--schwach); }
@@ -143,7 +169,8 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
  * The eyebrow names slot and type, the heading carries the quality colour, the
  * armour value stands alone and every bonus follows as "+n Name". */
 .katalog-augenbraue {
-	margin: 0 0 2px; color: var(--schwach); font-size: .78rem; letter-spacing: .02rem;
+	margin: 0 0 2px; color: var(--schwach); font-size: var(--text-bedienung); line-height: 1.5;
+	letter-spacing: normal;
 	/* Its own line: side by side with the title left a wide empty gap. */
 	flex: 1 1 100%;
 }
@@ -202,7 +229,7 @@ body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 .gebiet-buehne { padding-top: 18px; }
 @media (max-width: 640px) {
 	.gebiet-reiter { gap: 4px; }
-	.gebiet-tab { font-size: .8rem; padding: 9px 8px; gap: 5px; }
+	.gebiet-tab { font-size: var(--text-bedienung); padding: 9px 8px; gap: 5px; }
 }
 
 /* --- Quest-giver and faction details (12.11.2026): the lists are complete,

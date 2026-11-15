@@ -15,6 +15,8 @@
 	// The crafting page hands the list over; elsewhere the list stays empty
 	// and the toggle removes itself once it finds no answer.
 	var ohne = null;
+	var automatischOeffnen = !!(document.querySelector &&
+		document.querySelector('[data-zutaten-auto-open]'));
 	function ohneHerkunft() {
 		if (ohne === null) {
 			ohne = {};
@@ -83,6 +85,7 @@
 				geladen = true;
 			}).catch(function () { content.textContent = t[2]; }).finally(function () { laedt = false; });
 		});
+		if (automatischOeffnen) { details.open = true; }
 		return details;
 	}
 	window.MQL_ZUTATEN_HERKUNFT = hinweis;

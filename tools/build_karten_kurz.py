@@ -11,7 +11,7 @@ WEB = ROOT / 'web'
 LANGS = ('de', 'en', 'fr')
 KEEP = {
     'i', 'n', 'gt', 'a', 'ak', 'g', 'l', 'r', 'z', 'v', 'vo', 'vl', 'vb',
-    'fk', 'e', 'x', 'mp', 'ie', 'f', 't',
+    'fk', 'e', 'x', 'mp', 'ie', 'f', 't', 'd', 'rw',
 }
 
 

@@ -90,7 +90,7 @@ small { font-size: var(--text-bedienung); }
 .kopf .standsalter.alt { color: #e0827a; border-color: #e0827a; }
 .kopf .standsalter.unbekannt { color: var(--schwach); }
 .kopf .standsalter:hover { filter: brightness(1.15); }
-.kopf .menue-plugin { margin-left: auto; color: var(--schwach); font-size: 12px; }
+.kopf .menue-plugin { margin-left: auto; color: var(--schwach); font-size: var(--text-bedienung); }
 .kopf .menue-plugin:hover { color: var(--gold); }
 
 button:disabled { opacity: .45; cursor: not-allowed; }
@@ -115,16 +115,30 @@ button:disabled:hover { background: var(--fläche-hell); }
 .menue .familie-pfeil { font-size: 10px; line-height: 1; transition: transform .15s ease; }
 .menue .familie-feld.offen .familie-pfeil { transform: rotate(180deg); }
 .charakterwahl { display: flex; align-items: center; gap: 6px; margin-left: 6px; }
-.charakterwahl span { color: var(--schwach); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.charakterwahl span { color: var(--schwach); font-size: var(--text-bedienung); text-transform: uppercase; letter-spacing: .08em; }
 .charakterwahl select {
 	font: inherit;
-	font-size: 13px;
+	font-size: var(--text-bedienung);
 	color: var(--text);
 	background: var(--fläche-hell);
 	border: 1px solid var(--rand);
 	border-radius: 3px;
 	padding: 4px 6px;
 	max-width: 240px;
+}
+
+/* Text links in editorial/app content: link meaning is not carried by gold
+   alone. Whole-row cards and button-like links keep their component styling. */
+.seite-text main :is(p, li, dd, td) a:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .hinweis-link, .hinweis-karte, .karte-gebiete a)),
+.seite-start main :is(p, li) a:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result)) {
+	color: var(--gold);
+	text-decoration-line: underline;
+	text-decoration-thickness: .08em;
+	text-underline-offset: .16em;
+}
+.seite-text main :is(p, li, dd, td) a:visited:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .hinweis-link, .hinweis-karte, .karte-gebiete a)),
+.seite-start main :is(p, li) a:visited:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result)) {
+	color: var(--gold);
 }
 
 /* Scrollbars: thin and dark, gold when touched. */
@@ -195,9 +209,10 @@ footer {
 }
 footer p { margin: 0; padding: 0; color: var(--schwach); }
 footer a { color: var(--schwach); text-decoration: none; }
-footer a:hover, footer a:focus { color: var(--gold); text-decoration: underline; }
+footer a:hover, footer a:focus-visible { color: var(--gold); text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 footer .sprachen { display: flex; gap: 6px; margin: 0; }
-footer .sprachen button { font-size: 12px; padding: 2px 8px; }
+footer .sprachen button { font-size: var(--text-bedienung); padding: 2px 8px; }
 footer p { margin: 0 auto; padding: 14px 20px; color: var(--schwach); }
 body.seite-text { display: flex; flex-direction: column; }
 body.seite-text main { width: 100%; flex: 1; }
@@ -359,7 +374,7 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 /* Flyout entries: name above, one line of what waits behind it. */
 .familie-flieger a { text-decoration: none; }
 .familie-flieger a strong { display: block; font-weight: 500; color: var(--text); }
-.familie-flieger a span { display: block; margin-top: 2px; color: var(--schwach); font-size: .72rem; }
+.familie-flieger a span { display: block; margin-top: 2px; color: var(--schwach); font-size: var(--text-bedienung); }
 .familie-flieger a[aria-current="page"] strong { color: var(--gold); }
 
 /* Phones have no hover: inside the burger menu every family is an accordion.
