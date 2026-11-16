@@ -85,7 +85,14 @@ if ($path === '/api/statistik') {
     $visitor = 'v3-' . session_id();
     session_write_close();
     $userAgent = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
-    $automated = (bool) preg_match('/bot|crawler|spider|slurp|headless|playwright|lighthouse|pagespeed/', $userAgent);
+    $automated = (bool) preg_match(
+        '/bot|crawler|spider|slurp|headless|playwright|lighthouse|pagespeed'
+        . '|google-inspectiontool|googleother|adsbot-google|mediapartners-google'
+        . '|storebot-google|apis-google|feedfetcher|bingpreview|bingbot|yandex'
+        . '|duckduckbot|baiduspider|semrush|ahrefs|mj12bot|dotbot|uptimerobot'
+        . '|curl|wget|python|java|go-http-client/',
+        $userAgent
+    );
     $refererHost = strtolower((string) parse_url($_SERVER['HTTP_REFERER'] ?? '', PHP_URL_HOST));
     $requestHost = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
     $fetchSite = strtolower((string) ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? ''));
