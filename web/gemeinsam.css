@@ -250,6 +250,14 @@ footer .sprachen button { font-size: var(--text-bedienung); padding: 2px 8px; }
 footer p { margin: 0 auto; padding: 14px 20px; color: var(--schwach); }
 body.seite-text { display: flex; flex-direction: column; }
 body.seite-text main { width: 100%; flex: 1; }
+body[data-seite]:not([data-seite="karte"]),
+body.seite-start {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+body[data-seite]:not([data-seite="karte"]) main,
+body.seite-start main { flex: 1; }
 
 /* Import: one primary action; instructions and backups stay out of its way. */
 .import-seite .ablage { max-width: 44rem; margin: 1.5rem 0 1rem; padding: 2rem 1rem; }

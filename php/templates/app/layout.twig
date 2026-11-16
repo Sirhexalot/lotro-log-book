@@ -37,10 +37,6 @@
 		<h1 data-t="produkt">LOTRO Log Book</h1>
 		<nav class="menue" id="menue" aria-label="Menü"></nav>
 		{% block kopf_extra %}{% endblock %}
-		<nav class="sprachen" aria-label="Sprache">
-			{% for sprache in sprachen %}<a class="sprach-knopf" href="{{ sprache.url }}" hreflang="{{ sprache.lang }}" lang="{{ sprache.lang }}"{% if sprache.aktiv %} aria-current="page"{% endif %}>{{ sprache.label }}</a>
-			{% endfor %}
-		</nav>
 	</div>
 </header>
 {% block vor_haupt %}{% endblock %}
