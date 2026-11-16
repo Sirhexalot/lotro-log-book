@@ -11,12 +11,12 @@
 	if (!words || !window.fetch) { return; }
 
 	function id() {
-		var key = 'llb.statistik.besucher';
+		var key = 'llb.statistik.besucher.v2';
 		try {
 			var saved = root.localStorage.getItem(key);
 			if (saved) { return saved; }
-			var value = root.crypto && root.crypto.randomUUID
-				? root.crypto.randomUUID() : String(Date.now()) + '-' + Math.random();
+			var value = 'v2-' + (root.crypto && root.crypto.randomUUID
+				? root.crypto.randomUUID() : String(Date.now()) + '-' + Math.random());
 			root.localStorage.setItem(key, value);
 			return value;
 		} catch (fehler) {

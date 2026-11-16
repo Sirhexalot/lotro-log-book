@@ -14,7 +14,7 @@ namespace Llb;
 final class Statistics
 {
     private const START_IMPORTS = 150;
-    private const PRESENCE_TTL = 300;
+    private const PRESENCE_TTL = 180;
     private const BASE_MIN = 3;
     private const BASE_MAX = 5;
     private const BASE_TTL = 1800;
@@ -28,7 +28,7 @@ final class Statistics
         return $this->change(function (array $state) use ($visitor): array {
             $now = time();
             $this->clean($state, $now);
-            if ($visitor !== '' && strlen($visitor) <= 100) {
+            if (str_starts_with($visitor, 'v2-') && strlen($visitor) <= 100) {
                 $state['visitors'][$visitor] = $now;
             }
             return [$state, $this->result($state, $now)];
