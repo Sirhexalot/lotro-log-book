@@ -12,19 +12,15 @@
 
 	function zeigen(data) {
 		if (!data || typeof data.active !== 'number' || typeof data.imports !== 'number') { return; }
-		var unterwegs = document.getElementById('llb-unterwegs');
-		if (unterwegs) {
-			var unterwegsText = unterwegs.querySelector('[data-statistik-unterwegs]') || unterwegs;
+		Array.prototype.forEach.call(document.querySelectorAll('[data-statistik-aktiv]'), function (feld) {
 			var number = data.active.toLocaleString(lang);
 			var label = words.active.replace('%s', number);
-			unterwegsText.textContent = number;
-			unterwegs.title = label;
-			unterwegs.setAttribute('aria-label', label);
-			unterwegs.hidden = false;
-		}
+			var aktivText = feld.querySelector('[data-statistik-aktiv-text]') || feld;
+			aktivText.textContent = label;
+			feld.hidden = false;
+		});
 		Array.prototype.forEach.call(document.querySelectorAll('[data-statistik-importe]'), function (feld) {
-			var importText = feld.querySelector('[data-statistik-importe-text]') || feld;
-			importText.textContent = words.imports.replace('%s', data.imports.toLocaleString(lang));
+			feld.textContent = words.imports.replace('%s', data.imports.toLocaleString(lang));
 			feld.hidden = false;
 		});
 	}

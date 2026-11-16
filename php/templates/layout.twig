@@ -34,10 +34,9 @@
 
 <div class="charakter"><label class="charakterwahl" hidden><select id="katalog-charakter" aria-label="{{ w.none }}"></select></label><a href="{{ spielstand_pfad }}" class="importieren">{{ w.import_ }}</a></div>
 </div></header>
-<div class="unterwegs-badge" id="llb-unterwegs" hidden aria-live="polite"><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-unterwegs></span></div>
 <main class="katalog-inhalt"><nav aria-label="Breadcrumb" class="katalog-pfad">{{ crumbs|raw }}</nav>
 {% block inhalt %}{% endblock %}</main>
-<footer><p>{{ legal|raw }} · {{ privacy|raw }}</p><nav aria-label="Languages">{{ languages|raw }}</nav></footer>
+<footer class="seitenfuss"><p>{{ legal|raw }} · <a href="/{{ lang }}/plugin/">Plugin</a> · {{ privacy|raw }}</p><p class="footer-statistik"><span data-statistik-aktiv hidden><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-aktiv-text></span></span><span data-statistik-importe hidden></span></p><nav aria-label="Languages">{{ languages|raw }}</nav></footer>
 <script src="/statistik.js?v={{ asset_stand }}" defer></script>
 {{ scripts|raw }}
 {% if related_lists|default([]) %}
