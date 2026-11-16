@@ -48,7 +48,12 @@ async function main() {
         const failedRequests = [];
         page.on('pageerror', error => pageErrors.push(String(error)));
         page.on('requestfailed', request => {
-          if (own(request.url())) failedRequests.push(request.url());
+          // Lazy images can be cancelled when the page is closed or replaced.
+          // That is not an unavailable asset; real network failures remain
+          // blocking errors.
+          if (own(request.url()) && request.failure()?.errorText !== 'net::ERR_ABORTED') {
+            failedRequests.push(request.url());
+          }
         });
         page.on('response', response => {
           if (own(response.url()) && response.status() >= 400) {
