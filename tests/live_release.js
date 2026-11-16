@@ -15,12 +15,14 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const nodePath = execFileSync('npm', ['root', '-g'], { encoding: 'utf8' }).trim();
+const engineArgument = process.argv.find(argument => argument.startsWith('--engine='));
 const env = {
   ...process.env,
   NODE_PATH: process.env.NODE_PATH
     ? `${process.env.NODE_PATH}:${nodePath}`
     : nodePath,
 };
+if (engineArgument) env.LLB_BROWSER = engineArgument.slice('--engine='.length);
 const tests = [
   'live_abnahme.js',
   'live_entitaeten.js',

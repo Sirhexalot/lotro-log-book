@@ -9,9 +9,10 @@
  */
 
 const assert = require('node:assert/strict');
-const { chromium } = require('playwright');
+const { chromium, firefox, webkit } = require('playwright');
 
 const base = (process.env.LLB_BASE_URL || 'https://llb.sirhexalot.de').replace(/\/$/, '');
+const browserType = { chromium, firefox, webkit }[process.env.LLB_BROWSER || 'chromium'];
 const viewports = [
   ['desktop', { width: 1280, height: 900 }],
   ['tablet', { width: 768, height: 1024 }],
@@ -55,7 +56,7 @@ function own(url) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await browserType.launch({ headless: true });
   const failures = [];
   let checks = 0;
   try {
