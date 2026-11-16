@@ -328,6 +328,7 @@
 	// Keep the footer identical everywhere, including the full-height map app.
 	var footer = document.querySelector('footer');
 	if (!footer) { footer = document.createElement('footer'); document.body.appendChild(footer); }
+	if (footer.classList.contains('seitenfuss')) { return; }
 	footer.textContent = '';
 	var recht = document.createElement('p');
 	[['/impressum.html', 'footer_recht'], ['/datenschutz.html', 'footer_datenschutz']].forEach(function (item, index) {
