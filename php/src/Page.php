@@ -124,6 +124,7 @@ final class Page
             'tracking' => $this->shell->tracking(),
             'styles' => $this->shell->styles(),
             'scripts' => $this->shell->scripts(),
+            'asset_stand' => $this->shell->assetStand(),
             'menu' => $this->shell->menu($kind),
             'start_page' => $this->shell->startPage(),
             'suche_pfad' => $this->shell->appRoute('suche'),
