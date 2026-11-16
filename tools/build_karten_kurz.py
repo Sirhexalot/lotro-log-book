@@ -27,8 +27,20 @@ def build(lang: str) -> None:
     text = (WEB / ('daten-%s.js' % lang)).read_text(encoding='utf-8')
     quests = assignment(text, 'MQL_QUESTS')
     maps = assignment(text, 'MQL_KARTEN')
-    compact = [{key: value for key, value in quest.items() if key in KEEP}
-               for quest in quests]
+    compact = []
+    for quest in quests:
+        eintrag = {key: value for key, value in quest.items() if key in KEEP}
+        # The initial map shows the giver by default. Full objective lists are
+        # loaded on selection from daten-<lang>.js; for entries without a giver
+        # the first objective remains as the map fallback. This keeps the
+        # initial script small without changing the selected quest's detail
+        # view or the explicit "show objectives" mode.
+        if 't' in eintrag:
+            if quest.get('gt'):
+                del eintrag['t']
+            else:
+                eintrag['t'] = eintrag['t'][:1]
+        compact.append(eintrag)
     target = WEB / ('karten-kurz-%s.js' % lang)
     target.write_text(
         '/* Initial map data; quest details stay in daten-%s.js. */\n'
