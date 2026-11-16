@@ -212,7 +212,6 @@
 		});
 	}
 
-	var stil = document.querySelector('link[rel="stylesheet"]');
 	var stempel = function () { return '?v=' + (window.MQL_STAND || '0'); };
 
 	// Pages with their own data file: the reward index, the recipe browser and
@@ -275,7 +274,6 @@
 	lade('stand.js?t=' + Date.now(), function () {
 		var initial = art === 'taten' ? 'daten-taten-' + sprache : 'karten-kurz-' + sprache;
 		lade(initial + '.js' + stempel(), function () {
-			if (stil) { stil.href = stil.getAttribute('href').split('?')[0] + stempel(); }
 			ladeText.textContent = t('lade_karte');
 			// The shared landscape list lets both catalogues show the same
 			// navigation; a missing file leaves the tree as the entries built it.

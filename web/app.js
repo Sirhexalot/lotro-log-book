@@ -2632,14 +2632,24 @@
 	}
 
 	window.addEventListener('resize', function () {
-		passeAn();
-		setzeAnsicht(zustand.skala, zustand.x, zustand.y);
-		legendeNeuMessen();
+		planeKartenLayout();
 	});
 	// Navigation and legends can change the available height without a window
 	// resize. Keep the image and all marker layers inside the actual map stage.
+	var kartenLayoutWartet = false;
+	function planeKartenLayout() {
+		if (kartenLayoutWartet) { return; }
+		kartenLayoutWartet = true;
+		window.requestAnimationFrame(function () {
+			kartenLayoutWartet = false;
+			passeAn();
+			setzeAnsicht(zustand.skala, zustand.x, zustand.y);
+			zeichneMarker();
+			legendeNeuMessen();
+		});
+	}
 	if (window.ResizeObserver) {
-		var kartenGroesse = new ResizeObserver(function () { passeAn(); zeichneMarker(); });
+		var kartenGroesse = new ResizeObserver(planeKartenLayout);
 		kartenGroesse.observe(buehne);
 	}
 
