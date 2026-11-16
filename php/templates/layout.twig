@@ -36,7 +36,7 @@
 </div></header>
 <main class="katalog-inhalt"><nav aria-label="Breadcrumb" class="katalog-pfad">{{ crumbs|raw }}</nav>
 {% block inhalt %}{% endblock %}</main>
-<footer class="seitenfuss"><div class="seitenfuss-innen"><p>{{ legal|raw }} · <a href="/{{ lang }}/plugin/">Plugin</a> · {{ privacy|raw }}</p><p class="footer-statistik"><span data-statistik-aktiv hidden><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-aktiv-text></span></span></p><nav aria-label="Languages">{{ languages|raw }}</nav></div></footer>
+<footer class="seitenfuss"><div class="seitenfuss-innen"><div class="footer-links-links"><p>LOTRO Log Book</p><p class="footer-statistik"><span data-statistik-aktiv hidden><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-aktiv-text></span></span></p></div><nav aria-label="Languages" class="sprachen">{{ languages|raw }}</nav><p class="footer-rechts"><a href="/{{ lang }}/plugin/">Plugin</a> · {{ legal|raw }} · {{ privacy|raw }}</p></div></footer>
 <script src="/statistik.js?v={{ asset_stand }}" defer></script>
 {{ scripts|raw }}
 {% if related_lists|default([]) %}
