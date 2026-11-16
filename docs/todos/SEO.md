@@ -2,6 +2,18 @@
 
 Stand: 16.11.2026
 
+## Umsetzungsstand
+
+- [x] Unabhängige Karten-Startdaten (`gebiete` und `fortschritt`) werden
+      parallel geladen.
+- [x] Initiale Ziellisten werden für Aufgaben mit Auftraggeber nicht doppelt
+      geladen; vollständige Ziele kommen bei der Auswahl aus `daten-*.js`.
+- [x] Kartenbild mit festen 4:3-Abmessungen, asynchroner Dekodierung und hoher
+      Ladepriorität versehen.
+- [x] Unnötige erneute CSS-Anforderung nach dem Laden von `stand.js` entfernt.
+- [x] ResizeObserver- und Resize-Ereignisse für Kartenlayout und Marker
+      zusammengefasst.
+
 ## Ausgangslage
 
 PageSpeed Insights, Mobil, Bericht vom 16.11.2026:
