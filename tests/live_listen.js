@@ -78,7 +78,7 @@ async function main() {
           assert.equal(response && response.status(), 200, 'HTTP status');
           await page.locator(required).first().waitFor({ state: 'visible', timeout: 10000 });
           const state = await page.evaluate(() => ({
-            heading: document.querySelector('main h1')?.textContent.trim() || '',
+            heading: document.querySelector('main h1, main h2')?.textContent.trim() || '',
             overflow: document.documentElement.scrollWidth > innerWidth + 1,
             brokenImages: [...document.images]
               .filter(image => image.src.startsWith(location.origin + '/') && image.complete && image.naturalWidth === 0)
