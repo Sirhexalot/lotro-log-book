@@ -90,7 +90,7 @@ if ($path === '/api/statistik') {
         . '|google-inspectiontool|googleother|adsbot-google|mediapartners-google'
         . '|storebot-google|apis-google|feedfetcher|bingpreview|bingbot|yandex'
         . '|duckduckbot|baiduspider|semrush|ahrefs|mj12bot|dotbot|uptimerobot'
-        . '|curl|wget|python|java|go-http-client/',
+        . '|curl|wget|python|java|go-http-client|lightpanda/',
         $userAgent
     );
     $refererHost = strtolower((string) parse_url($_SERVER['HTTP_REFERER'] ?? '', PHP_URL_HOST));
