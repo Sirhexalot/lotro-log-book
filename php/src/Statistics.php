@@ -129,7 +129,10 @@ final class Statistics
     private function result(array $state, int $now): array
     {
         return [
-            'active' => (int) $state['base'] + count($state['visitors']),
+            // The public footer uses only the quiet base value. Search engines
+            // and headless renderers may execute JavaScript without being real
+            // visitors, so heartbeat sessions must not inflate this display.
+            'active' => (int) $state['base'],
             'imports' => (int) $state['imports'],
         ];
     }
