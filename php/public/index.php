@@ -64,6 +64,23 @@ $view = new View($root . '/php/templates', is_writable($cacheDir) ? $cacheDir : 
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 
+if ($path === '/api/statistik') {
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    $input = json_decode((string) file_get_contents('php://input'), true);
+    $input = is_array($input) ? $input : [];
+    $statsFile = getenv('LLB_STATS_FILE') ?: $root . '/phptmp/statistik.json';
+    $statistics = new \Llb\Statistics($statsFile);
+    $action = (string) ($input['action'] ?? 'current');
+    $result = $action === 'heartbeat'
+        ? $statistics->heartbeat((string) ($input['visitor'] ?? ''))
+        : ($action === 'import'
+            ? $statistics->import((string) ($input['event'] ?? ''))
+            : $statistics->current());
+    echo json_encode($result, JSON_UNESCAPED_UNICODE);
+    return;
+}
+
 // Old application addresses keep working: one 301 to the language path.
 if (preg_match('~^/(start(-(en|fr))?|index|gegenstaende|handwerk|reise|ruf|belohnungen|spielstand|companion|plugin|suche|gegenstand)\.html$~', $path)) {
     $ziel = $router->legacyTarget($path, $_GET);

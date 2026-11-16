@@ -119,6 +119,7 @@
 	function meldeImport(anzahl, art) {
 		window.dataLayer = window.dataLayer || [];
 		window.dataLayer.push({ event: 'charakter_import', anzahl: anzahl, art: art });
+		if (window.LLB_STATISTIK) { window.LLB_STATISTIK.import(); }
 	}
 
 	function verarbeite(eintraege) {

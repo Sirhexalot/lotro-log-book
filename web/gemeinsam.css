@@ -66,6 +66,17 @@ small { font-size: var(--text-bedienung); }
 .kopf .globalsuche { width: 360px; max-width: 100%; }
 .kopf .charakterwahl select { min-width: 180px; }
 .kopf .charakter { grid-area: charakter; display: flex; align-items: center; gap: 10px; min-width: 0; }
+.kopf .unterwegs {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	color: var(--schwach);
+	font-size: var(--text-bedienung);
+	white-space: nowrap;
+}
+.kopf .unterwegs img,
+.import-statistik img { width: 22px; height: 22px; object-fit: contain; vertical-align: middle; }
+.unterwegs-symbol { display: inline-flex; line-height: 0; }
 .kopf .menue { grid-area: tabs; min-width: 0; padding-top: 7px; border-top: 1px solid var(--rand); }
 .kopf .menue-knopf { grid-area: knopf; }
 .kopf > .sprachen { display: none; }
@@ -92,6 +103,15 @@ small { font-size: var(--text-bedienung); }
 .kopf .standsalter:hover { filter: brightness(1.15); }
 .kopf .menue-plugin { margin-left: auto; color: var(--schwach); font-size: var(--text-bedienung); }
 .kopf .menue-plugin:hover { color: var(--gold); }
+
+.import-statistik {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 10px 0;
+	color: var(--schwach);
+	font-size: var(--text-bedienung);
+}
 
 button:disabled { opacity: .45; cursor: not-allowed; }
 button:disabled:hover { background: var(--fläche-hell); }

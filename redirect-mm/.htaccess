@@ -21,6 +21,7 @@ RewriteRule ^(phpdata|php|vendor|phptmp)(/|$) - [F]
 # The root keeps the map application, as before, one redirect further.
 RewriteRule ^$ /index.php [END]
 RewriteRule ^(start(-(en|fr))?|index|gegenstaende|handwerk|reise|ruf|belohnungen|spielstand|companion|plugin|suche|gegenstand)\.html$ /index.php [END]
+RewriteRule ^api/statistik$ /index.php [END]
 RewriteRule ^(de|en|fr)(/|$) /index.php [END]
 RewriteRule ^sitemap(-[a-z0-9-]+)?\.xml$ /index.php [END]
 # END LLB PHP URLS
