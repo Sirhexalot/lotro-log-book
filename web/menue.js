@@ -182,13 +182,6 @@
 	// way to change it.
 	var charakter = document.createElement('div');
 	charakter.className = 'charakter';
-	var unterwegs = document.createElement('span');
-	unterwegs.className = 'unterwegs';
-	unterwegs.id = 'llb-unterwegs';
-	unterwegs.hidden = true;
-	unterwegs.setAttribute('aria-live', 'polite');
-	unterwegs.innerHTML = '<a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-unterwegs></span>';
-	charakter.appendChild(unterwegs);
 	if (speicher) {
 		var feld = document.createElement('label');
 		feld.className = 'charakterwahl';

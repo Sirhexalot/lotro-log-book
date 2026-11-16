@@ -32,8 +32,9 @@
 <button class="menue-knopf" type="button" aria-label="{{ w.menu }}" aria-controls="menue" aria-expanded="false">☰</button>
 <nav class="menue" id="menue">{{ menu|raw }}</nav>
 
-<div class="charakter"><span class="unterwegs" id="llb-unterwegs" hidden aria-live="polite"><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-unterwegs></span></span><label class="charakterwahl" hidden><select id="katalog-charakter" aria-label="{{ w.none }}"></select></label><a href="{{ spielstand_pfad }}" class="importieren">{{ w.import_ }}</a></div>
+<div class="charakter"><label class="charakterwahl" hidden><select id="katalog-charakter" aria-label="{{ w.none }}"></select></label><a href="{{ spielstand_pfad }}" class="importieren">{{ w.import_ }}</a></div>
 </div></header>
+<div class="unterwegs-badge" id="llb-unterwegs" hidden aria-live="polite"><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-unterwegs></span></div>
 <main class="katalog-inhalt"><nav aria-label="Breadcrumb" class="katalog-pfad">{{ crumbs|raw }}</nav>
 {% block inhalt %}{% endblock %}</main>
 <footer><p>{{ legal|raw }} · {{ privacy|raw }}</p><nav aria-label="Languages">{{ languages|raw }}</nav></footer>
