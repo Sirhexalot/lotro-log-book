@@ -11,7 +11,7 @@
     {% if member.card %}
         <p class="set-card-meta">{% for chip in member.card.chips %}<span>{{ chip.text }}</span>{% endfor %}</p>
         {% if member.card.required_class %}<p>{{ sw.class }}: {{ member.card.required_class }}</p>{% endif %}
-        {% if member.card.armour %}<p>{{ w.armour }}: {{ member.card.armour }}</p>{% endif %}
+        {% if member.card.armour %}<p>{{ sw.armour }}: {{ member.card.armour }}</p>{% endif %}
         {% if member.card.values %}<dl>{% for row in member.card.values %}<dt>{{ row.label }}</dt><dd>{{ row.value }}</dd>{% endfor %}</dl>{% endif %}
         {% if member.card.bonuses %}<ul class="set-card-stats">{% for row in member.card.bonuses %}<li>{{ row.display }} {{ row.label }}</li>{% endfor %}</ul>{% endif %}
         <a href="{{ member.url }}">{{ sw.item }} →</a>
