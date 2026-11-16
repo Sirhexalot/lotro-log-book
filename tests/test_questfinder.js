@@ -10,6 +10,9 @@ assert.doesNotMatch(fs.readFileSync('web/menue.js', 'utf8'), /seite:\s*'questfin
 assert.doesNotMatch(fs.readFileSync('php/src/Shell.php', 'utf8'), /\['questfinder',\s*\$app\('questfinder'\)/,
 	'the PHP family menu must not expose the finder');
 const finderStyles = fs.readFileSync('web/gegenstaende.css', 'utf8');
+const finderTemplate = fs.readFileSync('php/templates/app/aufgabenfinder.twig', 'utf8');
+assert.match(finderTemplate, /class="seite-text gs-seite" data-seite="questfinder"/,
+	'the quest finder must use the full-width text-page shell like the item browser');
 assert.match(finderStyles, /--offen:\s*#f0a63c/);
 assert.match(finderStyles, /--fertig:\s*#7fbb72/);
 assert.match(finderStyles, /--laufend:\s*#7fa6c9/);

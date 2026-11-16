@@ -81,6 +81,10 @@ async function main() {
           const state = await page.evaluate(() => ({
             heading: document.querySelector('main h1, main h2')?.textContent.trim() || '',
             overflow: document.documentElement.scrollWidth > innerWidth + 1,
+            viewportWidth: innerWidth,
+            mainWidth: document.querySelector('main')?.getBoundingClientRect().width || 0,
+            shellWidth: parseFloat(getComputedStyle(document.documentElement)
+              .getPropertyValue('--huelle')) || 0,
             brokenImages: [...document.images]
               .filter(image => image.src.startsWith(location.origin + '/') && image.complete && image.naturalWidth === 0)
               .map(image => image.src),
@@ -88,6 +92,10 @@ async function main() {
           }));
           assert.ok(state.heading, 'page heading');
           assert.equal(state.overflow, false, 'horizontal overflow');
+          if (kind === 'quest finder' && state.shellWidth < state.viewportWidth) {
+            assert.ok(Math.abs(state.mainWidth - state.shellWidth) < 1,
+              `finder main width ${state.mainWidth} differs from shell ${state.shellWidth}`);
+          }
           assert.deepEqual(state.brokenImages, [], 'broken own images');
           assert.equal(state.footer, true, 'shared footer');
           assert.deepEqual(errors, [], 'page errors');
