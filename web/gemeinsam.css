@@ -77,14 +77,13 @@ small { font-size: var(--text-bedienung); }
 }
 .footer-statistik > span + span::before { content: '·'; margin-right: 14px; color: var(--rand); }
 .footer-statistik img {
-	width: 22px;
-	height: 22px;
+	width: 16px;
+	height: 16px;
 	object-fit: contain;
-	vertical-align: middle;
 	filter: brightness(0) saturate(100%) invert(77%) sepia(48%) saturate(610%)
 		hue-rotate(357deg) brightness(91%) contrast(91%);
 }
-.unterwegs-symbol { display: inline-flex; line-height: 0; vertical-align: middle; margin-right: 4px; }
+.unterwegs-symbol { display: inline-flex; align-items: center; line-height: 1; vertical-align: middle; margin-right: 4px; }
 .kopf .menue { grid-area: tabs; min-width: 0; padding-top: 7px; border-top: 1px solid var(--rand); }
 .kopf .menue-knopf { grid-area: knopf; }
 .kopf > .sprachen { display: none; }
