@@ -28,6 +28,8 @@ const tests = [
   'live_entitaeten.js',
   'live_listen.js',
   'live_usecases.js',
+  'live_import.js',
+  'visual_live.js',
   'live_inventar.js',
 ];
 
