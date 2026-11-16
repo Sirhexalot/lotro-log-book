@@ -10,20 +10,6 @@
 	}[lang] || null;
 	if (!words || !window.fetch) { return; }
 
-	function id() {
-		var key = 'llb.statistik.besucher.v2';
-		try {
-			var saved = root.localStorage.getItem(key);
-			if (saved) { return saved; }
-			var value = 'v2-' + (root.crypto && root.crypto.randomUUID
-				? root.crypto.randomUUID() : String(Date.now()) + '-' + Math.random());
-			root.localStorage.setItem(key, value);
-			return value;
-		} catch (fehler) {
-			return String(Date.now()) + '-' + Math.random();
-		}
-	}
-
 	function zeigen(data) {
 		if (!data || typeof data.active !== 'number' || typeof data.imports !== 'number') { return; }
 		var unterwegs = document.getElementById('llb-unterwegs');
@@ -48,7 +34,7 @@
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			credentials: 'same-origin',
-			body: JSON.stringify({ action: aktion, visitor: id(), event: eventId || '' }),
+			body: JSON.stringify({ action: aktion, event: eventId || '' }),
 			keepalive: true
 		}).then(function (antwort) {
 			return antwort.ok ? antwort.json() : null;

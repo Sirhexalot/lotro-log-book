@@ -72,17 +72,18 @@ if ($path === '/api/statistik') {
     $statsFile = getenv('LLB_STATS_FILE') ?: $root . '/phptmp/statistik.json';
     $statistics = new \Llb\Statistics($statsFile);
     $action = (string) ($input['action'] ?? 'current');
-    $visitor = (string) ($_COOKIE['llb_statistik'] ?? '');
-    if (!str_starts_with($visitor, 'v2-')) {
-        $visitor = 'v2-' . bin2hex(random_bytes(16));
-    }
-    setcookie('llb_statistik', $visitor, [
-        'expires' => time() + 600,
+    $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    session_name('llb_statistik');
+    session_set_cookie_params([
+        'lifetime' => 0,
         'path' => '/',
-        'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'secure' => $secure,
         'httponly' => true,
         'samesite' => 'Lax',
     ]);
+    session_start();
+    $visitor = 'v3-' . session_id();
+    session_write_close();
     $result = $action === 'heartbeat'
         ? $statistics->heartbeat($visitor)
         : ($action === 'import'

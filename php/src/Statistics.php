@@ -28,7 +28,7 @@ final class Statistics
         return $this->change(function (array $state) use ($visitor): array {
             $now = time();
             $this->clean($state, $now);
-            if (str_starts_with($visitor, 'v2-') && strlen($visitor) <= 100) {
+            if (str_starts_with($visitor, 'v3-') && strlen($visitor) <= 100) {
                 $state['visitors'][$visitor] = $now;
             }
             return [$state, $this->result($state, $now)];
