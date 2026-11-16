@@ -185,6 +185,33 @@
 		document.body.appendChild(skript);
 	}
 
+	// These files do not depend on one another. Loading them together removes
+	// one full network round trip from the map's critical startup path. The app
+	// itself is still loaded only after both data files are available.
+	function ladeParallel(quellen, dann) {
+		var offen = quellen.length;
+		var fehlgeschlagen = false;
+		function fehler() {
+			if (fehlgeschlagen) { return; }
+			fehlgeschlagen = true;
+			var weg = document.querySelector('.lader');
+			if (weg) { weg.parentNode.removeChild(weg); }
+			var hinweis = document.getElementById('hinweis');
+			if (hinweis) { hinweis.textContent = t('keine_daten'); }
+		}
+		quellen.forEach(function (quelle) {
+			var skript = document.createElement('script');
+			skript.src = quelle;
+			skript.onload = function () {
+				if (fehlgeschlagen) { return; }
+				offen -= 1;
+				if (!offen) { dann(); }
+			};
+			skript.onerror = fehler;
+			document.body.appendChild(skript);
+		});
+	}
+
 	var stil = document.querySelector('link[rel="stylesheet"]');
 	var stempel = function () { return '?v=' + (window.MQL_STAND || '0'); };
 
@@ -252,13 +279,14 @@
 			ladeText.textContent = t('lade_karte');
 			// The shared landscape list lets both catalogues show the same
 			// navigation; a missing file leaves the tree as the entries built it.
-			lade('gebiete-' + sprache + '.js' + stempel(), function () {
-			lade('fortschritt.js' + stempel(), function () {
+			ladeParallel([
+				'gebiete-' + sprache + '.js' + stempel(),
+				'fortschritt.js' + stempel()
+			], function () {
 				lade('app.js' + stempel(), function () {
 					// The app draws in the same task; one frame later the page stands.
 					requestAnimationFrame(function () { requestAnimationFrame(fertig); });
 				});
-			});
 			});
 		});
 	});
