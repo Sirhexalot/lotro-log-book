@@ -84,8 +84,10 @@ if ($path === '/api/statistik') {
     session_start();
     $visitor = 'v3-' . session_id();
     session_write_close();
+    $userAgent = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+    $automated = (bool) preg_match('/bot|crawler|spider|slurp|headless|playwright|lighthouse|pagespeed/', $userAgent);
     $result = $action === 'heartbeat'
-        ? $statistics->heartbeat($visitor)
+        ? ($automated ? $statistics->current() : $statistics->heartbeat($visitor))
         : ($action === 'import'
             ? $statistics->import((string) ($input['event'] ?? ''))
             : $statistics->current());
