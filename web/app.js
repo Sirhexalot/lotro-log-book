@@ -3137,13 +3137,37 @@
 		url.hash = eintrag ? landschaftSlug(eintrag) + (ort != null && ort !== eintrag.karte ? '/' + ort : '') : '';
 		window.history[ersetzen ? 'replaceState' : 'pushState']({ landschaft: true }, '', url);
 	}
+	var vorschauBeobachter = window.IntersectionObserver ? new IntersectionObserver(function (eintraege) {
+		eintraege.forEach(function (eintrag) {
+			if (!eintrag.isIntersecting) { return; }
+			vorschauBeobachter.unobserve(eintrag.target);
+			ladeKartenVorschau(eintrag.target);
+		});
+	}, { rootMargin: '300px 0px' }) : null;
+	function ladeKartenVorschau(img) {
+		if (img.dataset.geladen || !img.dataset.vorschau) { return; }
+		img.dataset.geladen = '1';
+		delete img.dataset.spielVersucht;
+		delete img.dataset.pngVersucht;
+		img.src = img.dataset.vorschau;
+	}
+	function beobachteKartenVorschau(img) {
+		if (vorschauBeobachter) { vorschauBeobachter.observe(img); }
+		else { ladeKartenVorschau(img); }
+	}
 	function aktualisiereKartenVorschauen() {
-		if (!gelaende) { return; }
 		document.querySelectorAll('.landschaft-kachel[data-karte] img').forEach(function (img) {
 			var karte = karteNachIndex[img.closest('[data-karte]').dataset.karte];
 			if (!karte) { return; }
-			var quelle = gelaende.thumbnail(karte) || kartenVorschau(karte);
-			if (img.getAttribute('src') !== quelle) { delete img.dataset.spielVersucht; delete img.dataset.pngVersucht; img.src = quelle; }
+			var quelle = gelaende && gelaende.thumbnail(karte) || kartenVorschau(karte);
+			img.dataset.vorschau = quelle;
+			if (img.dataset.geladen && img.getAttribute('src') !== quelle) {
+				delete img.dataset.spielVersucht;
+				delete img.dataset.pngVersucht;
+				img.src = quelle;
+			} else if (!img.dataset.geladen) {
+				beobachteKartenVorschau(img);
+			}
 		});
 	}
 	function landschaftUebersicht(ohneVerlauf) {
@@ -3225,7 +3249,22 @@
 				var karte = karteNachIndex[e.karte];
 				if (karte) { knopf.dataset.karte = karte.idx; }
 				var platzhalter = eltern('span'); platzhalter.className = 'landschaft-bild-leer'; platzhalter.setAttribute('aria-hidden', 'true');
-				if (karte) { var img = eltern('img'); img.loading = 'lazy'; img.alt = ''; var vorschau = kartenVorschau(karte); var spielBild = webpOrdner + karte.bild.replace(/\.png$/i, '.webp'); img.src = (gelaende && gelaende.thumbnail(karte)) || vorschau; img.onerror = function () { if (this.getAttribute('src') !== spielBild && !this.dataset.spielVersucht) { this.dataset.spielVersucht = '1'; this.src = spielBild; } else if (!this.dataset.pngVersucht) { this.dataset.pngVersucht = '1'; this.src = bildOrdner + karte.bild; } else { this.replaceWith(platzhalter); } }; knopf.appendChild(img); }
+				if (karte) {
+					var img = eltern('img');
+					img.loading = 'lazy'; img.decoding = 'async'; img.width = 320; img.height = 240; img.alt = '';
+					var vorschau = (gelaende && gelaende.thumbnail(karte)) || kartenVorschau(karte);
+					var spielBild = webpOrdner + karte.bild.replace(/\.png$/i, '.webp');
+					img.dataset.vorschau = vorschau;
+					img.onerror = function () {
+						if (this.getAttribute('src') !== spielBild && !this.dataset.spielVersucht) {
+							this.dataset.spielVersucht = '1'; this.src = spielBild;
+						} else if (!this.dataset.pngVersucht) {
+							this.dataset.pngVersucht = '1'; this.src = bildOrdner + karte.bild;
+						} else { this.replaceWith(platzhalter); }
+					};
+					beobachteKartenVorschau(img);
+					knopf.appendChild(img);
+				}
 				else { knopf.appendChild(platzhalter); }
 				var inhalt = eltern('span'); inhalt.className = 'inhalt'; inhalt.appendChild(eltern('strong', e.knoten.name));
 				inhalt.appendChild(eltern('small', stufenSpanne(e.knoten.quests)));

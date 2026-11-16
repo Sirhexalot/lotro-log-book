@@ -17,6 +17,9 @@ Stand: 16.11.2026
       zusammengefasst.
 - [x] Lokale Browserprüfung der Kartenansicht mit direkter Gebietsauswahl,
       Kartenbild, Markern und Terrain-Umschalter durchgeführt.
+- [x] Landschaftsvorschauen der hashlosen Übersicht werden erst im oder nahe
+      am Viewport geladen; im lokalen Mobiltest waren zunächst 8 von 66 Bildern
+      geladen, nach dem Scrollen 12.
 
 ## Ausgangslage
 
