@@ -235,6 +235,12 @@ footer {
 	display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
 	gap: 6px 18px; padding: 10px 20px;
 }
+.seitenfuss {
+	width: 100%;
+	max-width: var(--huelle);
+	margin-inline: auto;
+	box-sizing: border-box;
+}
 footer p { margin: 0; padding: 0; color: var(--schwach); }
 footer a { color: var(--schwach); text-decoration: none; }
 footer a:hover, footer a:focus-visible { color: var(--gold); text-decoration: underline; }
