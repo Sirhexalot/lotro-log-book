@@ -29,7 +29,11 @@
 		var unterwegs = document.getElementById('llb-unterwegs');
 		if (unterwegs) {
 			var unterwegsText = unterwegs.querySelector('[data-statistik-unterwegs]') || unterwegs;
-			unterwegsText.textContent = words.active.replace('%s', data.active.toLocaleString(lang));
+			var number = data.active.toLocaleString(lang);
+			var label = words.active.replace('%s', number);
+			unterwegsText.textContent = number;
+			unterwegs.title = label;
+			unterwegs.setAttribute('aria-label', label);
 			unterwegs.hidden = false;
 		}
 		Array.prototype.forEach.call(document.querySelectorAll('[data-statistik-importe]'), function (feld) {

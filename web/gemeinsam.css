@@ -73,9 +73,11 @@ small { font-size: var(--text-bedienung); }
 	z-index: 30;
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
-	max-width: min(280px, calc(100vw - 36px));
-	padding: 7px 10px 7px 8px;
+	gap: 4px;
+	width: 48px;
+	height: 38px;
+	justify-content: center;
+	padding: 0;
 	border: 1px solid var(--rand);
 	border-radius: 999px;
 	background: color-mix(in srgb, var(--fläche) 94%, transparent);
@@ -337,9 +339,8 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 	.unterwegs-badge {
 		right: 10px;
 		bottom: 10px;
-		max-width: calc(100vw - 20px);
-		white-space: normal;
-		line-height: 1.15;
+		width: 46px;
+		height: 36px;
 	}
 	.kopf-innen {
 		grid-template-columns: auto minmax(0, 1fr) auto;
