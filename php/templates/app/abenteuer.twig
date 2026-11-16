@@ -20,10 +20,6 @@
 		<p class="abenteuer-charakter" id="abenteuer-charakter" data-leer="{{ lw.no_character }}">
 			{{ lw.no_character }} <a href="{{ spielstand_pfad }}">{{ lw.import_link }}</a>
 		</p>
-		<div class="abenteuer-ansicht" role="group" aria-label="{{ lw.view_label }}" hidden>
-			<button type="button" data-ansicht="karte" aria-pressed="true">{{ lw.view_map }}</button>
-			<button type="button" data-ansicht="liste" aria-pressed="false">{{ lw.view_list }}</button>
-		</div>
 	</div>
 
 	<details class="abenteuer-inhalte" id="inhalte">
@@ -106,40 +102,6 @@
 	<script type="application/json" id="abenteuer-gebieteseiten">{{ area_pages|json_encode|raw }}</script>
 	<script type="application/json" id="abenteuer-kartennamen">{{ map_names|json_encode|raw }}</script>
 
-	<div class="abenteuer-liste" data-abenteuer-liste>
-	<div class="abenteuer-liste-kopf">
-		<h3>{{ lw.adventures }}</h3>
-	</div>
-
-	<div class="abenteuer-raster" id="abenteuer-raster">
-		{% for pack in packs %}
-		<article class="abenteuer-karte" data-pack="{{ pack.id }}" data-stufe-min="{{ pack.level_min }}" data-stufe-max="{{ pack.level_max }}">
-			<div class="karte-oben">
-				<div class="karte-titel">
-					<h3>{{ pack.name }}</h3>
-					<p class="karte-art">{{ pack.type_label }} · {{ pack.level_label }}</p>
-				</div>
-			</div>
-			{% if pack.summary %}<p class="karte-text">{{ pack.summary }}</p>{% endif %}
-			<p class="karte-stand" data-stand><span data-stand-wort></span></p>
-			<div class="karte-balken" data-balken hidden><span></span></div>
-			<p class="karte-detail" data-detail hidden></p>
-			<p class="karte-zugang" data-zugang hidden></p>
-			<button type="button" class="karte-mehr" data-mehr aria-expanded="false" aria-controls="gebiete-{{ pack.id }}">{{ lw.open }}</button>
-			<div class="karte-gebiete" id="gebiete-{{ pack.id }}" data-gebiete hidden>
-				<h4>{{ lw.areas }}</h4>
-				{% if pack.areas_list %}
-				<ul>
-					{% for area in pack.areas_list %}{% if area.name %}
-					<li data-gebiet="{{ area.id }}" data-aufgaben="{{ area.quests }}">{% if area.url %}<a href="{{ area.url }}"><span class="gebiet-name">{{ area.name }}</span><small>{{ (area.quests == 1 ? lw.quests_one : lw.quests)|replace({'%s': area.quests}) }}</small><em data-gebiet-stand></em></a>{% else %}<span class="gebiet-name">{{ area.name }}</span><small>{{ (area.quests == 1 ? lw.quests_one : lw.quests)|replace({'%s': area.quests}) }}</small><em data-gebiet-stand></em>{% endif %}</li>
-					{% endif %}{% endfor %}
-				</ul>
-				{% else %}<p class="schwach">{{ lw.no_areas }}</p>{% endif %}
-			</div>
-		</article>
-		{% endfor %}
-	</div>
-	</div>
 </main>
 {% endblock %}
 

@@ -61,7 +61,10 @@ ausgeblendet.
   Gebiets. Keine Route, keine Zusicherung, dass eine Aufgabe im Spiel offen ist.
 - **Gebiete als Liste:** aufklappbar unter der Regionskarte; dort stehen alle
   Gebiete, auch die ohne eigenen Kartenpunkt.
-- Die gewählte Ansicht liegt lokal unter `mql.abenteuer.ansicht`.
+- Die Mittelerde-Übersicht ist direkt die Kartenansicht. Die sechs Regionen
+  werden über die Karte gewählt; eine zusätzliche globale Abenteuerliste gibt
+  es dort nicht. Innerhalb einer Region bleibt die Gebietsliste als alternative
+  Auswahl neben der Regionskarte erhalten.
 
 Daten: `tools/build_abenteuer.py` ergänzt je Gebiet `region` (die tier-1-Karte
 aus `daten/karten.json`) und schreibt `positions` aus `maps/links.xml`:

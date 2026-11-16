@@ -55,21 +55,13 @@ class AdventurePageTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         return result.stdout
 
-    def test_german_page_lists_every_adventure(self):
+    def test_german_page_uses_map_as_adventure_overview(self):
         html = self.render('/de/abenteuer/')
         self.assertIn('<title>Dein Abenteuerüberblick', html)
-        self.assertEqual(html.count('class="abenteuer-karte"'), 32)
-        self.assertIn('Die Schatten von Angmar', html)
-        self.assertIn('Grundspiel · Stufe 1–50', html)
-        self.assertIn('Aufgabenpaket · Stufe 25–50', html)
-        self.assertIn('Kostenloses Update · Stufe 7–31', html)
-        self.assertIn('Altes zu Ende bringen', html)
+        self.assertNotIn('class="abenteuer-karte"', html)
+        self.assertNotIn('data-abenteuer-liste', html)
+        self.assertNotIn('data-ansicht="liste"', html)
         self.assertIn('Meine Inhalte', html)
-        # Areas are already in the markup, so the page is usable without JS.
-        self.assertIn('Enthaltene Gebiete', html)
-        self.assertIn('Breeland', html)
-        # An area row leads to its catalogue page when that page exists.
-        self.assertIn('href="/de/gebiet/268437653/"', html)
         # Personal values stay out of the server response.
         self.assertNotIn('MQL_CHARAKTER', html)
         # Only purchasable content carries an ownership setting.
@@ -80,7 +72,6 @@ class AdventurePageTest(unittest.TestCase):
         self.assertIn('id="abenteuer-welt"', html)
         self.assertEqual(html.count('class="welt-marke"'), 6)
         self.assertIn('/karten/de/268437554.webp', html)
-        self.assertIn('data-ansicht="karte"', html)
         self.assertIn('id="abenteuer-kartennamen"', html)
 
     def test_every_language_has_its_own_page_and_names(self):
@@ -88,12 +79,10 @@ class AdventurePageTest(unittest.TestCase):
         french = self.render('/fr/aventure/')
         self.assertIn('<title>Your adventure overview', english)
         self.assertIn('<title>Votre aperçu des aventures', french)
-        self.assertIn('Mines of Moria', english)
-        self.assertIn('Les Mines de la Moria', french)
-        self.assertIn('Base game · Level 1–50', english)
-        self.assertIn('Quest pack · Level 25–50', english)
-        self.assertIn('Jeu de base · Niveau 1–50', french)
-        self.assertIn('Pack de quêtes · Niveau 25–50', french)
+        self.assertIn('Middle-earth', english)
+        self.assertIn('Terre du Milieu', french)
+        self.assertIn('Choose a region, then an area.', english)
+        self.assertIn('Choisissez une région, puis un pays.', french)
         self.assertIn('hreflang="de"', english)
         self.assertIn('/fr/aventure/', english)
 

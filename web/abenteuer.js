@@ -1,6 +1,6 @@
-/* Adventure overview: fills the server-rendered cards with the visitor's own
- * progress. Everything happens in this browser; no request carries character
- * data. Without JavaScript the cards keep their names, levels and summaries.
+/* Adventure overview: fills the map hints and content settings with the
+ * visitor's own progress. Everything happens in this browser; no request
+ * carries character data.
  */
 (function (root, document) {
 	'use strict';
@@ -154,7 +154,12 @@
 
 	function openPack(id, areaId) {
 		var card = cards[id];
-		if (!card) { return; }
+		if (!card) {
+			if (areaId && root.MQL_ABENTEUER_KARTE) {
+				root.MQL_ABENTEUER_KARTE.zeige(areaId);
+			}
+			return;
+		}
 		var more = card.querySelector('[data-mehr]');
 		var areas = card.querySelector('[data-gebiete]');
 		if (areas) { areas.hidden = false; }
@@ -227,7 +232,11 @@
 				settingsNow.packs[other.getAttribute('data-inhalt')] = other.value;
 			}
 		});
-		var ok = core.write(accountKey(), settingsNow, Object.keys(cards));
+		var packIds = Array.prototype.map.call(
+			document.querySelectorAll('[data-inhalt]'),
+			function (select) { return select.getAttribute('data-inhalt'); }
+		);
+		var ok = core.write(accountKey(), settingsNow, packIds);
 		var status = document.querySelector('.inhalte-status');
 		if (status) { status.textContent = text(ok ? 'ab_gespeichert' : 'ab_nicht_gespeichert'); }
 		if (ids) { flash(ids); }

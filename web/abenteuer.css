@@ -593,8 +593,8 @@
 }
 
 /* --- Regionskarte --------------------------------------------------- */
-.welt-welt .weltkarte { max-width: 980px; margin: 0 auto; }
-.welt-welt .welt-legende { max-width: 980px; margin: 8px auto 0; }
+.welt-welt .weltkarte { max-width: none; margin: 0; }
+.welt-welt .welt-legende { max-width: none; margin: 8px 0 0; }
 .region-zurueck { margin: 0 0 6px; }
 .region-zurueck-knopf {
 	padding: 0;

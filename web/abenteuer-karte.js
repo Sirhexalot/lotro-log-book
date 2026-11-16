@@ -9,8 +9,7 @@
  * position is made up. Mordor additionally uses checked approximate geographic
  * centres, labelled as approximate in each marker's accessible name and title.
  *
- * Without JavaScript the switch and this section stay hidden and the complete
- * card list remains the page.
+ * Without JavaScript the map remains a readable, server-rendered overview.
  */
 (function (root, document) {
 	'use strict';
@@ -28,8 +27,6 @@
 	try { mapNames = JSON.parse(document.getElementById('abenteuer-kartennamen').textContent || '{}'); }
 	catch (fehler) { mapNames = {}; }
 
-	var list = document.querySelector('[data-abenteuer-liste]');
-	var switchBox = document.querySelector('.abenteuer-ansicht');
 	var worldView = welt.querySelector('[data-welt]');
 	var regionView = welt.querySelector('[data-regionansicht]');
 	var regionImage = welt.querySelector('[data-region-bild]');
@@ -53,8 +50,7 @@
 		stand: root.MQL_ABENTEUER_STAND || null,
 		region: null,
 		cluster: null,
-		area: null,
-		view: 'karte'
+		area: null
 	};
 	var manifest = null;
 	var manifestTried = false;
@@ -501,19 +497,6 @@
 		paintMarks(core.regions(areas(), packs(), state.stand ? state.stand.level : null));
 	}
 
-	function setView(view) {
-		state.view = view === 'liste' ? 'liste' : 'karte';
-		if (welt) { welt.hidden = state.view !== 'karte'; }
-		if (list) { list.hidden = state.view !== 'liste'; }
-		if (switchBox) {
-			Array.prototype.forEach.call(switchBox.querySelectorAll('[data-ansicht]'), function (button) {
-				button.setAttribute('aria-pressed', String(button.getAttribute('data-ansicht') === state.view));
-			});
-		}
-		try { root.localStorage.setItem('mql.abenteuer.ansicht', state.view); }
-		catch (fehler) { /* private mode */ }
-	}
-
 	function wireMarks() {
 		marks.forEach(function (button) {
 			button.addEventListener('click', function () {
@@ -522,18 +505,6 @@
 		});
 		var back = welt.querySelector('[data-zurueck]');
 		if (back) { back.addEventListener('click', showWorld); }
-	}
-
-	function wireSwitch() {
-		if (!switchBox) { return; }
-		switchBox.hidden = false;
-		Array.prototype.forEach.call(switchBox.querySelectorAll('[data-ansicht]'), function (button) {
-			button.addEventListener('click', function () { setView(button.getAttribute('data-ansicht')); });
-		});
-		var stored = '';
-		try { stored = root.localStorage.getItem('mql.abenteuer.ansicht') || ''; }
-		catch (fehler) { stored = ''; }
-		setView(stored === 'liste' ? 'liste' : 'karte');
 	}
 
 	function render() {
@@ -568,7 +539,6 @@
 			sortBox.appendChild(button);
 		});
 	}
-	wireSwitch();
 	wireMarks();
 	render();
 	root.addEventListener('mql:abenteuer', function () {
@@ -580,7 +550,6 @@
 		zeige: function (areaId) {
 			var area = areaOf(areaId);
 			if (!area) { return; }
-			setView('karte');
 			selectRegion(area.region, area.id);
 			welt.scrollIntoView({ block: 'start', behavior: 'smooth' });
 		}
