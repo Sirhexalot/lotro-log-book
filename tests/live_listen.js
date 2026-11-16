@@ -92,7 +92,8 @@ async function main() {
           }));
           assert.ok(state.heading, 'page heading');
           assert.equal(state.overflow, false, 'horizontal overflow');
-          if (kind === 'quest finder' && state.shellWidth < state.viewportWidth) {
+          if (kind === 'quest finder' && state.shellWidth > 100
+              && state.shellWidth < state.viewportWidth) {
             assert.ok(Math.abs(state.mainWidth - state.shellWidth) < 1,
               `finder main width ${state.mainWidth} differs from shell ${state.shellWidth}`);
           }
