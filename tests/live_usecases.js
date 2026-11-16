@@ -1,0 +1,121 @@
+#!/usr/bin/env node
+'use strict';
+
+/*
+ * Live browser use cases. These deliberately perform actions instead of only
+ * checking that a page returned HTML.
+ */
+
+const assert = require('node:assert/strict');
+const { chromium } = require('playwright');
+
+const base = (process.env.LLB_BASE_URL || 'https://llb.sirhexalot.de').replace(/\/$/, '');
+const viewports = [
+  ['desktop', { width: 1280, height: 900 }],
+  ['mobile', { width: 390, height: 844 }],
+];
+const languages = [
+  ['de', 'aufgabenfinder', 'abenteuer', 'handwerk/rezepte', 'Rohstoffe', 'Rezepte'],
+  ['en', 'quest-finder', 'adventure', 'crafting/recipes', 'Resources', 'Recipes'],
+  ['fr', 'recherche-quetes', 'aventure', 'artisanat/recettes', 'Ressources', 'Recettes'],
+];
+
+function own(url) {
+  return new URL(url).origin === new URL(base).origin;
+}
+
+async function open(page, path, errors, badResponses) {
+  page.on('pageerror', error => errors.push(String(error)));
+  page.on('response', response => {
+    if (own(response.url()) && response.status() >= 400) {
+      badResponses.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  const response = await page.goto(base + path, {
+    waitUntil: 'networkidle',
+    timeout: 30000,
+  });
+  assert.equal(response && response.status(), 200, 'HTTP status');
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false,
+    'horizontal overflow');
+}
+
+async function main() {
+  const browser = await chromium.launch({ headless: true });
+  const failures = [];
+  let checks = 0;
+  try {
+    for (const [device, viewport] of viewports) {
+      for (const [lang, finder, adventure, crafting, resourcesLabel, recipesLabel] of languages) {
+        const errors = [];
+        const badResponses = [];
+        const page = await browser.newPage({ viewport });
+        try {
+          await open(page, `/${lang}/${finder}/`, errors, badResponses);
+          const firstQuest = await page.locator('.finder-treffer strong').first().innerText();
+          await page.locator('.filter-toolbar input').fill(firstQuest);
+          await page.waitForTimeout(250);
+          assert.equal(await page.locator('.finder-treffer').count(), 1, 'finder search result');
+          checks++;
+
+          await open(page, `/${lang}/${adventure}/`, errors, badResponses);
+          await page.locator('[data-region]').first().click();
+          await page.locator('.region-karte').waitFor({ state: 'visible' });
+          assert.ok(await page.locator('.region-liste [data-welt-gebiet]').count() > 0,
+            'adventure area list');
+          await page.locator('.region-liste [data-welt-gebiet]').first().click();
+          assert.equal(await page.locator('.region-punkt[aria-pressed="true"]').count(), 1,
+            'selected adventure area');
+          await page.locator('[data-zurueck]').click();
+          assert.equal(await page.locator('#hinweise').isVisible(), true, 'adventure back');
+          checks++;
+
+          await open(page, `/${lang}/${crafting}/`, errors, badResponses);
+          await page.getByRole('button', { name: resourcesLabel, exact: true }).click();
+          await page.locator('#hw-rohstoffe').waitFor({ state: 'visible' });
+          await page.getByRole('button', { name: recipesLabel, exact: true }).click();
+          await page.locator('#hw-rezepte').waitFor({ state: 'visible' });
+          checks++;
+
+          assert.deepEqual(errors, [], 'page errors');
+          assert.deepEqual(badResponses, [], 'own HTTP errors');
+        } catch (error) {
+          failures.push(`${device} ${lang}: ${error.message}`);
+        } finally {
+          await page.close();
+        }
+      }
+    }
+
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const errors = [];
+    const badResponses = [];
+    try {
+      await open(page, '/de/reise/', errors, badResponses);
+      await page.locator('#reise-von').fill('Bree');
+      await page.locator('#reise-von-liste button').first().click();
+      await page.locator('#reise-nach').fill('Hobbingen');
+      await page.locator('#reise-nach-liste button').first().click();
+      await page.getByRole('button', { name: 'Weg zeigen', exact: true }).click();
+      await page.locator('#reise-ergebnis').waitFor({ state: 'visible' });
+      assert.ok((await page.locator('#reise-ergebnis').innerText()).length > 0, 'travel result');
+      assert.deepEqual(errors, [], 'page errors');
+      assert.deepEqual(badResponses, [], 'own HTTP errors');
+      checks++;
+    } catch (error) {
+      failures.push(`desktop de travel: ${error.message}`);
+    } finally {
+      await page.close();
+    }
+  } finally {
+    await browser.close();
+  }
+  console.log(`Use-Case-Abnahme: ${checks} Checks, ${failures.length} Fehler`);
+  failures.forEach(failure => console.error(`- ${failure}`));
+  if (failures.length) process.exitCode = 1;
+}
+
+main().catch(error => {
+  console.error(error);
+  process.exitCode = 2;
+});
