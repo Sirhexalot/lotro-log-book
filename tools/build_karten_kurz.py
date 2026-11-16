@@ -40,6 +40,10 @@ def build(lang: str) -> None:
                 del eintrag['t']
             else:
                 eintrag['t'] = eintrag['t'][:1]
+        if isinstance(eintrag.get('d'), str) and len(eintrag['d']) > 180:
+            # The map preview displays at most 150 characters. The complete
+            # description is merged from daten-<lang>.js after selection.
+            eintrag['d'] = eintrag['d'][:180]
         compact.append(eintrag)
     target = WEB / ('karten-kurz-%s.js' % lang)
     target.write_text(
