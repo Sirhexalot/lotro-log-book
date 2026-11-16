@@ -86,8 +86,13 @@ if ($path === '/api/statistik') {
     session_write_close();
     $userAgent = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
     $automated = (bool) preg_match('/bot|crawler|spider|slurp|headless|playwright|lighthouse|pagespeed/', $userAgent);
+    $refererHost = strtolower((string) parse_url($_SERVER['HTTP_REFERER'] ?? '', PHP_URL_HOST));
+    $requestHost = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
+    $fetchSite = strtolower((string) ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? ''));
+    $fromSite = $refererHost !== '' && $refererHost === $requestHost
+        && ($fetchSite === '' || in_array($fetchSite, ['same-origin', 'same-site'], true));
     $result = $action === 'heartbeat'
-        ? ($automated ? $statistics->current() : $statistics->heartbeat($visitor))
+        ? ($automated || !$fromSite ? $statistics->current() : $statistics->heartbeat($visitor))
         : ($action === 'import'
             ? $statistics->import((string) ($input['event'] ?? ''))
             : $statistics->current());
