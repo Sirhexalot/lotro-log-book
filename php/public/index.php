@@ -85,7 +85,7 @@ if ($path === '/api/statistik') {
     $visitor = 'v3-' . session_id();
     session_write_close();
     $userAgent = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
-    $automated = (bool) preg_match(
+    $automated = \Llb\MatomoBots::matches($userAgent) || (bool) preg_match(
         '/bot|crawler|spider|slurp|headless|playwright|lighthouse|pagespeed'
         . '|google-inspectiontool|googleother|adsbot-google|mediapartners-google'
         . '|storebot-google|apis-google|feedfetcher|bingpreview|bingbot|yandex'
