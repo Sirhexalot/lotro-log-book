@@ -8,11 +8,15 @@ Stand: 16.11.2026
       parallel geladen.
 - [x] Initiale Ziellisten werden für Aufgaben mit Auftraggeber nicht doppelt
       geladen; vollständige Ziele kommen bei der Auswahl aus `daten-*.js`.
+- [x] Beschreibungen in den Initialdaten sind auf die sichtbare Vorschau
+      begrenzt; vollständige Texte kommen bei der Auswahl nach.
 - [x] Kartenbild mit festen 4:3-Abmessungen, asynchroner Dekodierung und hoher
       Ladepriorität versehen.
 - [x] Unnötige erneute CSS-Anforderung nach dem Laden von `stand.js` entfernt.
 - [x] ResizeObserver- und Resize-Ereignisse für Kartenlayout und Marker
       zusammengefasst.
+- [x] Lokale Browserprüfung der Kartenansicht mit direkter Gebietsauswahl,
+      Kartenbild, Markern und Terrain-Umschalter durchgeführt.
 
 ## Ausgangslage
 
