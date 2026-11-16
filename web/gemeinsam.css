@@ -238,6 +238,9 @@ footer {
 .seitenfuss {
 	width: 100%;
 	padding: 0;
+	position: sticky;
+	bottom: 0;
+	z-index: 24;
 }
 .seitenfuss-innen {
 	display: flex;
