@@ -45,7 +45,16 @@ def main() -> int:
          '--daten', str(args.daten)])
     run([python, 'upload.py', '--quelle', str(args.ziel),
          '--workers', str(args.workers)])
-    run([python, 'tools/cache_leeren.py'])
+    # FTP servers can reject removal of a cache directory when PHP recreates a
+    # Twig file between LIST and RMD. A second pass is safe and clears the
+    # entries created during the first pass.
+    for attempt in range(2):
+        try:
+            run([python, 'tools/cache_leeren.py'])
+            break
+        except subprocess.CalledProcessError:
+            if attempt == 1:
+                raise
     env = {**os.environ, 'LLB_BROWSER': args.browser}
     run(['node', 'tests/live_release.js'], env=env)
     print('✓ Veröffentlichung und Live-Abnahme vollständig bestanden')
