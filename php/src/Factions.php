@@ -150,6 +150,7 @@ final class Factions
             'og_locale' => ['de' => 'de_DE', 'en' => 'en_US', 'fr' => 'fr_FR'][$this->lang],
             'og_image_alt' => 'LOTRO Log Book', 'tracking' => $this->shell->tracking(),
             'styles' => $this->shell->styles(), 'scripts' => $this->shell->scripts(),
+            'asset_stand' => $this->shell->assetStand(),
             'menu' => $this->shell->menu('f'), 'start_page' => $this->catalogue->appRoute($this->lang, 'start'),
             'suche_pfad' => $this->shell->appRoute('suche'),
             'spielstand_pfad' => $this->shell->appRoute('spielstand'),
