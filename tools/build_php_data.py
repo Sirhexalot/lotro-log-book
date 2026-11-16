@@ -809,7 +809,10 @@ def main() -> int:
             elif kind == 'giver':
                 from giver_viewmodel import SEGMENT
                 segment = SEGMENT[lang]
-                detail_routes[lang][segment] = ['/%s/%s/' % (lang, segment)] + [
+                # The list page is already part of sitemap-seiten.xml. Keep
+                # the entity sitemap limited to detail pages so one canonical
+                # URL is never published in two sitemap sections.
+                detail_routes[lang][segment] = [
                     '/%s/%s/%s/' % (lang, segment, ident) for ident in sorted(ids)]
             else:
                 segment = _route(lang, kind).strip('/').split('/')[1]
