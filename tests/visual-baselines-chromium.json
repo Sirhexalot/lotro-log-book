@@ -1,0 +1,32 @@
+{
+  "start-de": {
+    "sha256": "124cdb786be2f2e5ff9e2831a5e1eafea6076b119c81c6845e1a9bce8fd948f8",
+    "width": 1440,
+    "height": 900
+  },
+  "start-en": {
+    "sha256": "b727d56c3b27d6ff5cb6ff580b1bba175656f9a8d0d66c144cc22c6629851269",
+    "width": 1440,
+    "height": 900
+  },
+  "start-fr": {
+    "sha256": "fb7ee8ee3401d8d7cc48195beeb41e1f424fd5acb8b4b1c09b6194f13bfc2b14",
+    "width": 1440,
+    "height": 900
+  },
+  "item-de-mobile": {
+    "sha256": "6844c8e503517dc1b91552a30915daaac4ecd4fa2295e220cd9cf9ebde937989",
+    "width": 390,
+    "height": 844
+  },
+  "adventure-de": {
+    "sha256": "d2f5cd7799fc63aeebd119558b7da089ca670b2334280be2b89bd1f21d256474",
+    "width": 1440,
+    "height": 900
+  },
+  "finder-de": {
+    "sha256": "4a33fdd6bf6007488ef1fa93d64700aff2c0e0f28f1955d12a7fe2321eb304de",
+    "width": 390,
+    "height": 844
+  }
+}

@@ -17,7 +17,8 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 
 const base = (process.env.LLB_BASE_URL || 'https://llb.sirhexalot.de').replace(/\/$/, '');
-const baselinePath = path.join(__dirname, 'visual-baselines.json');
+const browserName = process.env.LLB_BROWSER || 'chromium';
+const baselinePath = path.join(__dirname, `visual-baselines-${browserName}.json`);
 const artifacts = path.join(process.env.LLB_VISUAL_ARTIFACTS
   || path.join(process.env.HOME, '.cache/llb-visual'));
 const cases = [
