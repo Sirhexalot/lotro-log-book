@@ -540,6 +540,7 @@
 		});
 	}
 	wireMarks();
+	welt.hidden = false;
 	render();
 	root.addEventListener('mql:abenteuer', function () {
 		state.stand = root.MQL_ABENTEUER_STAND || state.stand;
