@@ -23,12 +23,14 @@ final class Statistics
     {
     }
 
-    public function heartbeat(string $visitor): array
+    public function heartbeat(string $visitor, string $agent = '', string $classification = 'accepted'): array
     {
-        return $this->change(function (array $state) use ($visitor): array {
+        return $this->change(function (array $state) use ($visitor, $agent, $classification): array {
             $now = time();
             $this->clean($state, $now);
-            if (str_starts_with($visitor, 'v3-') && strlen($visitor) <= 100) {
+            $this->recordAgent($state, $agent, $classification, $now);
+            if ($classification === 'accepted'
+                && str_starts_with($visitor, 'v3-') && strlen($visitor) <= 100) {
                 $state['visitors'][$visitor] = $now;
             }
             return [$state, $this->result($state, $now)];
@@ -105,7 +107,34 @@ final class Statistics
         $state['base_changed'] = (int) ($state['base_changed'] ?? time());
         $state['visitors'] = is_array($state['visitors'] ?? null) ? $state['visitors'] : [];
         $state['imports_seen'] = is_array($state['imports_seen'] ?? null) ? $state['imports_seen'] : [];
+        $state['agents'] = is_array($state['agents'] ?? null) ? $state['agents'] : [];
         return $state;
+    }
+
+    private function recordAgent(array &$state, string $agent, string $classification, int $now): void
+    {
+        $agent = trim(preg_replace('/\s+/', ' ', $agent) ?? '');
+        $agent = substr($agent, 0, 240);
+        if ($agent === '') {
+            $agent = '(leer)';
+        }
+        $classification = in_array($classification, ['accepted', 'bot', 'no-site-referrer'], true)
+            ? $classification : 'other';
+        $key = $classification . '|' . $agent;
+        if (!isset($state['agents'][$key])) {
+            if (count($state['agents']) >= 40) {
+                uasort($state['agents'], static fn (array $a, array $b): int => (int) $a['last'] <=> (int) $b['last']);
+                array_shift($state['agents']);
+            }
+            $state['agents'][$key] = [
+                'classification' => $classification,
+                'agent' => $agent,
+                'count' => 0,
+                'last' => $now,
+            ];
+        }
+        $state['agents'][$key]['count']++;
+        $state['agents'][$key]['last'] = $now;
     }
 
     private function clean(array &$state, int $now): void

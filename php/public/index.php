@@ -98,8 +98,9 @@ if ($path === '/api/statistik') {
     $fetchSite = strtolower((string) ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? ''));
     $fromSite = $refererHost !== '' && $refererHost === $requestHost
         && ($fetchSite === '' || in_array($fetchSite, ['same-origin', 'same-site'], true));
+    $classification = $automated ? 'bot' : ($fromSite ? 'accepted' : 'no-site-referrer');
     $result = $action === 'heartbeat'
-        ? ($automated || !$fromSite ? $statistics->current() : $statistics->heartbeat($visitor))
+        ? $statistics->heartbeat($visitor, $userAgent, $classification)
         : ($action === 'import'
             ? $statistics->import((string) ($input['event'] ?? ''))
             : $statistics->current());
