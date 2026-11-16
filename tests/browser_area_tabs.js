@@ -81,7 +81,9 @@ async function bereit(page, type) {
 			filter: document.querySelectorAll('.filter-group-single').length,
 			marken: [...document.querySelectorAll('.related-symbol')].slice(0, 1).map((e) => e.textContent.trim())
 		}));
-		assert.match(stand.anzahl, /266/);
+		const expectedCount = await page.evaluate(() =>
+			JSON.parse(document.getElementById('related-lists').textContent).q.rows.length);
+		assert.match(stand.anzahl, new RegExp(String(expectedCount)));
 		assert.equal(stand.filter, 1, 'Abschlussfilter fehlt');
 		assert.deepEqual(stand.marken, ['✓']);
 

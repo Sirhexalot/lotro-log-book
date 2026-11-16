@@ -78,9 +78,13 @@ const artifacts = path.join(require('node:os').homedir(), '.cache/llb-related-te
 		}
 		const noJS = await browser.newPage({ javaScriptEnabled: false });
 		await noJS.goto(base + '/de/gegenstand/70001B7E/');
-		assert.equal(await noJS.locator('[data-quellen-liste] li').count(), 95, 'all recipe links without JS');
+		const itemRows = await noJS.locator('#related-lists').textContent()
+			.then((text) => JSON.parse(text).recipe.rows.length);
+		assert.equal(await noJS.locator('[data-quellen-liste] li').count(), itemRows, 'all recipe links without JS');
 		await noJS.goto(base + '/de/gebiet/268437634/');
-		assert.equal(await noJS.locator('#gebiet-buehne li').count(), 266 + 23 + 198, 'all members without JS');
+		const areaRows = await noJS.locator('#related-lists').textContent()
+			.then((text) => Object.values(JSON.parse(text)).reduce((sum, group) => sum + group.rows.length, 0));
+		assert.equal(await noJS.locator('#gebiet-buehne li').count(), areaRows, 'all members without JS');
 		await noJS.close();
 		assert.deepEqual(errors, []);
 	} finally { await browser.close(); }
