@@ -243,10 +243,9 @@ footer {
 	z-index: 24;
 }
 .seitenfuss-innen {
-	display: flex;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 	align-items: center;
-	justify-content: space-between;
 	gap: 4px 18px;
 	width: 100%;
 	max-width: var(--huelle);
@@ -255,9 +254,9 @@ footer {
 	padding: 5px 16px;
 	box-sizing: border-box;
 }
-.footer-links-links { display: flex; align-items: center; gap: 18px; }
-.footer-rechts { text-align: right; }
-.seitenfuss .sprachen { justify-content: center; }
+.footer-links-links { justify-self: start; }
+.footer-rechts { justify-self: end; text-align: right; }
+.seitenfuss .sprachen { justify-self: center; justify-content: center; }
 footer p { margin: 0; padding: 0; color: var(--schwach); }
 footer.seitenfuss p { padding: 0; }
 footer a { color: var(--schwach); text-decoration: none; }
@@ -321,6 +320,8 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 	.funktionen { grid-template-columns: 1fr; }
 	.neuigkeiten { padding: 16px; }
 	.intro h2 { font-size: var(--text-titel); }
+	.seitenfuss-innen { grid-template-columns: 1fr; justify-items: center; }
+	.footer-links-links, .footer-rechts { justify-self: center; text-align: center; }
 }
 
 /* Second header line: the tabs of the current family. It is the only place
