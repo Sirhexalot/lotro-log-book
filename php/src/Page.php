@@ -171,6 +171,7 @@ final class Page
         $template = match ($page) {
             'start' => 'start-' . $lang,
             'taten' => 'karte',
+            'questfinder' => 'aufgabenfinder',
             default => $page,
         };
         // The title and description live in build_seo.PAGES, exported with the labels.
@@ -178,6 +179,7 @@ final class Page
             'start' => 'start' . ($lang === 'de' ? '' : '-' . $lang) . '.html',
             'karte', 'taten' => 'index.html',
             'gegenstandssuche' => 'gegenstaende.html',
+            'questfinder' => 'aufgabenfinder.html',
             default => $page . '.html',
         };
         $seo = $this->catalogue->appSeo($datei) ?? ['title' => 'LOTRO Log Book', 'description' => ''];
@@ -201,6 +203,16 @@ final class Page
                     'de' => 'Sieh Taten in HdRO nach Region und Gebiet und auf der Karte, wo sie zu finden sind. Mit importiertem Spielstand zeigt dir das Logbuch, was dir noch fehlt.',
                     'en' => 'Browse LOTRO deeds by region and area and see on the map where to find them. With your imported progress the log book shows what is still missing.',
                     'fr' => 'Parcourez les prouesses de SdAO par région et pays et voyez sur la carte où les trouver. Avec votre progression importée, le journal montre ce qu’il vous reste à faire.',
+                ][$lang],
+            ];
+        }
+        if ($page === 'questfinder') {
+            $seo = [
+                'title' => ['de' => 'Aufgabenfinder', 'en' => 'Quest finder', 'fr' => 'Recherche de quêtes'][$lang],
+                'description' => [
+                    'de' => 'Finde Aufgaben nach Thema, Klasse, Herkunft, Region, Gebiet und weiteren Merkmalen.',
+                    'en' => 'Find quests by topic, class, origin, region, area and other properties.',
+                    'fr' => 'Trouvez des quêtes par thème, classe, origine, région, pays et autres caractéristiques.',
                 ][$lang],
             ];
         }

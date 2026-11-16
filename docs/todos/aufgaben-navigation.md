@@ -1,8 +1,7 @@
 # Aufgaben-Navigation für LOTRO Log Book
 
-**Planstand:** 15. November 2026
-**Status:** Konzept und Rendering-Dokumentation; die neue Website-Navigation ist
-noch nicht zur Veröffentlichung freigegeben.
+**Planstand:** 16. November 2026
+**Status:** umgesetzt und veröffentlicht; Restabnahme einzelner Randfälle offen.
 
 Dieses Dokument bündelt den vollständigen Plan für Aufgaben im LOTRO Log Book,
 die bisherigen UI-Renderings, die verworfenen Zwischenstände und die
@@ -12,10 +11,12 @@ umgesetzt und wird hier nur als Referenz erwähnt.
 
 ## Ziel
 
-Die Website soll Aufgaben nicht nur als lange Trefferliste, sondern als
-verständlichen Weg durch Mittelerde zeigen:
+Die Website soll zwei klare Wege anbieten: Gebiete führen über ihre
+vollständigen Kacheln und Untergebietslinks in die Kartenansicht; Themen führen
+mit passender Vorauswahl in den separaten Aufgabenfinder.
 
-- Landschaften und thematische Aufgabenbereiche sind gleichrangig erreichbar.
+- Die Gebietsübersicht bleibt vollständig; der Finder ist über einen
+  prominenten Button erreichbar und kein Hauptmenüpunkt.
 - Epische Aufgaben behalten ihre Reihenfolge nach Band, Buch und Kapitel.
 - Eine Aufgabe führt von der Katalogseite nachvollziehbar zu Gebiet, Karte,
   Auftraggeber, Ziel und gegebenenfalls Reiseplaner.
@@ -25,27 +26,160 @@ verständlichen Weg durch Mittelerde zeigen:
 - Die Navigation bleibt für Aufgaben und Taten gemeinsam verständlich, ohne
   Taten-Navigation oder `/de/abenteuer/` unnötig umzubauen.
 
-## Verbindliche Endentscheidung
+## Verbindliche Endentscheidung (16.11.2026)
 
-Die Aufgaben-Navigation ist **eine gemeinsame Baumansicht**. Es gibt keinen
-Umschalter „Nach Landschaft / Nach Thema“ und keinen künstlichen Knoten
-„Weitere Inhalte“.
+Die folgenden Regeln ersetzen die früheren Zielbilder eines gemeinsamen
+Aufgabenbaums und eines darin eingebetteten Aufgabenbrowsers. Diese älteren
+Entwürfe bleiben weiter unten als Historie erhalten, sind aber **keine
+Umsetzungsvorgabe**.
 
-Auf der obersten Ebene stehen gleichrangig:
+### 1. Aufgabenseite: Gebiete bleiben der Hauptinhalt
 
-1. Landschaften beziehungsweise Regionen und ihre Landschaften
-2. Epische Geschichte
-3. Klassenaufgaben
-4. Herkunftsaufgaben
-5. Feste und Ereignisse
-6. Missionen
-7. Instanzen und Schlachten
-8. Handwerk
-9. Weitere Aufgaben
+- Die bestehende Landschafts-/Gebietsübersicht bleibt vollständig erhalten:
+  **keine Gebietskachel und kein Untergebietslink darf beim Umbau entfallen**.
+- Die bestehenden Gruppierungen und Sprungmarken nach Region bleiben erhalten.
+  Eine Gebiets- oder Untergebietsauswahl führt in die passende Kartenansicht.
+- Bestehende Reihenfolge, Kartenbilder, Gebietsinformationen und Links werden
+  nicht durch Platzhalter, verkürzte Beispielraster oder eine neue
+  Baumansicht ersetzt.
+- Ein prominenter Button **„Alle Aufgaben im Finder“** steht rechts neben der
+  Aufgabenseiten-Überschrift in derselben Zeile und führt zur separaten
+  Finder-Anwendung. Der Finder wird **kein Navigationspunkt** im Hauptmenü.
+- Der Finder wird nicht in die Kartenübersicht eingebettet. Die Aufgabenseite
+  bleibt der Einstieg über Gebiete und Themen; der Finder ist die Suche über
+  den vollständigen Aufgabenbestand.
 
-„Weitere Aufgaben“ ist eine fachliche Restgruppe für belegte, nicht anders
-zuordenbare Aufgaben. Sie ist eine normale breite Kachel beziehungsweise ein
-normaler Baumknoten, keine zusätzliche Aufklapphülle.
+### 2. Themen-Einstiege
+
+Die Seite bietet zusätzlich zu den Gebieten Themen-Einstiege. Ein Themen-Einstieg
+öffnet den Finder mit dem jeweiligen Thema vorausgewählt. Die Themen folgen
+den belegten Gruppen des Plugin-Aufgabenbaums; keine Kategorien aus
+Aufgabennamen erraten.
+
+Verbindliche Seitenstruktur für Mockup und Umsetzung:
+
+```text
+Aufgabenseite
+├─ Überschrift mit rechtsbündigem Button „Alle Aufgaben im Finder“
+├─ Regionssprungmarken
+├─ alle vorhandenen Gebietskacheln und Untergebietslinks
+├─ eigener Bereich „Alte Geschichten“ mit den drei belegten Karten
+└─ Themen-Einstiege
+   ├─ Epische Geschichte → Kartenansicht
+   └─ alle übrigen Themen → separater Finder mit Themenvorauswahl
+
+Aufgabenfinder (eigene Seite, kein Hauptmenüpunkt)
+├─ Suche und Trefferzahl
+├─ Filterspalte: Thema / Klasse / Herkunft / Region und Gebiet /
+│                 Merkmale / Stufe / Fortschritt
+└─ Trefferliste mit Statusfarbe + Symbol/Text und Karten-/Gebietslink
+```
+
+Das Diagramm legt die inhaltlichen Bereiche fest, nicht eine Pixelposition.
+Die bestehenden Gebietsgruppen, Kacheln und Untergebietslinks sind maßgeblich;
+kein Bereich darf sie durch eine reduzierte Beispieldarstellung ersetzen.
+
+- **Epische Geschichte** öffnet die Kartenansicht mit der epischen
+  Aufgabenstruktur. Bände/Reihen, Bücher und Kapitel bleiben in ihrer
+  erzählerisch/numerisch korrekten Reihenfolge.
+- **Klassenaufgaben** öffnet den Finder mit dem Thema „Klassenaufgaben“
+  vorausgewählt.
+- **Herkunftsaufgaben** öffnet den Finder mit dem Thema „Herkunftsaufgaben“
+  vorausgewählt.
+- **Feste und Ereignisse**, **Missionen**, **Instanzen und Schlachten**,
+  **Handwerk**, **Aufgabenbrett** und **Weitere Aufgaben** öffnen jeweils den
+  Finder mit dem passenden Thema vorausgewählt.
+- Klassen- und Herkunftsthemen bleiben als Einstieg bestehen, obwohl es im
+  Finder zusätzlich eigene Filter für einzelne Klassen und Herkünfte gibt.
+- **Aufgabenbrett ist ausschließlich ein Thema.** Es darf keine eigene
+  Aufgabenbrett-Filtergruppe und keine doppelte Aufgabenbrett-Auswahl geben.
+- Eine Überschrift wie „Weitere Inhalte“ darf Themen auf der Aufgabenseite
+  optisch gruppieren. Sie ist kein auswählbares Thema, kein zusätzlicher
+  Navigationsknoten und keine künstliche Filterhülle.
+
+### 3. Eigener Aufgabenfinder
+
+Der Finder ist eine separate Anwendungsseite mit Suchfeld, Filterspalte und
+Trefferliste. Filtergruppen sind:
+
+1. **Thema** – einschließlich Aufgabenbrett und Klassen-/Herkunftsthemen
+2. **Klasse** – eigene Filtergruppe für einzelne Klassen
+3. **Herkunft** – eigene Filtergruppe für einzelne Herkünfte/Völker
+4. **Region und Gebiet**
+5. **Merkmale** – belegte Aufgabenmerkmale, aber kein Aufgabenbrett
+6. **Stufe**
+7. **Fortschritt**
+
+Die sichtbare Reihenfolge der Filtergruppen beginnt mit **Fortschritt → Stufe
+→ Region und Gebiet → Thema**. Danach folgen Klasse, Herkunft und Merkmale.
+Thema, Klasse und Herkunft sind getrennte, kombinierbare Filtergruppen.
+Auswahloptionen und Bezeichnungen müssen aus belegten Quelldaten stammen;
+keine Klasse, Herkunft oder Zuordnung aus einem Aufgabennamen erschließen.
+Ein Themen-Einstieg setzt nur seinen Themenfilter voraus, nicht automatisch
+Klasse oder Herkunft.
+Bei **Region und Gebiet** ersetzt eine engere Gebiets-Auswahl die bereits
+gewählte übergeordnete Region. Eine breite Region darf eine Gebiets-Auswahl
+nicht per Oder-Verknüpfung wieder auf die ganze Region erweitern.
+
+Der Fortschrittsfilter steht **in der Filterspalte**, nicht als Leiste über
+Suche oder Trefferliste. Er bietet „Alle“, „Offen“ und „Erledigt“; „Annehmbar“
+gibt es nur, wenn ein Spielstand importiert ist. Für die Machbarkeit gelten
+dieselben Regeln wie in `app.js`: laufende Aufgaben zählen als offen,
+Voraussetzungen `v`/`vo`, Stufenbegrenzung und Sperre `vb` werden berücksichtigt;
+erledigte Ausschlussalternativen sperren die Machbarkeit.
+
+Jeder Treffer macht seinen Fortschritt direkt erkennbar. Verwendet werden die
+**bestehenden Statusfarben** aus `web/style.css` und der Kartenlegende:
+erledigt `--fertig` (grün), offen `--offen` (orange), laufend `--laufend`
+(blau). Farbe ist nie das einzige Signal; Symbol und Statustext benennen den
+Zustand zusätzlich. Eine laufende Aufgabe bleibt als „läuft“ gekennzeichnet;
+Teilziele dürfen nicht als eigener Gesamtstatus „erledigt“ erscheinen. Ohne
+importierten Spielstand bleibt der Status neutral. Fehlender Import darf weder
+als „offen“ noch als „nicht erledigt“ dargestellt werden.
+
+Suchbegriff und Filterzustand müssen über URL und Zurücksetzen nachvollziehbar
+sein. Treffer öffnen über ihre stabile Aufgaben-ID den belegten Karten-/Gebiets-
+Kontext. Ohne belegten Kartenort bleibt eine Aufgabe im Finder auffindbar,
+erhält aber keine erfundene Karte oder Position.
+
+### 4. Alte Geschichten
+
+„Alte Geschichten“ bleibt ein eigener Bereich neben den normalen Regionen und
+Themen. Dafür gibt es Kartendaten, Kartenbilder und Kartenrahmen; der Bereich
+führt deshalb **in die Kartenansicht**, nicht in den Finder.
+
+Belegte Karten und Aufgabenbezüge aus `web/karten-kurz-de.js`:
+
+| Karte | Karten-ID | Aufgaben mit Kartenbezug |
+| --- | ---: | ---: |
+| Belagertes Mordor | `268453374` | 81 |
+| Azanulbizar, 2799 D.Z. | `268453555` | 101 |
+| Nud-melek, 1981 D.Z. | `268453582` | 0 |
+
+Die 182 Aufgaben mit Kartenbezug sind die Summe der ersten beiden Karten;
+Nud-melek bleibt trotz null zugeordneter Aufgaben als belegte Karte sichtbar.
+Diese Zähler sind eine geprüfte Datenaufnahme vom 16.11.2026, keine dauerhaft
+festen Werte. Bei einer Umsetzung sind sie aus den aktuellen Quelldaten zu
+ermitteln, nicht als Konstanten einzutragen.
+
+### 5. Mockup- und Umsetzungsgrenzen
+
+- Ein Mockup muss die echte Gebietsübersicht vollständig zeigen oder klar
+  kenntlich machen, dass es nur ein Ausschnitt ist. „Weitere Gebiete folgen“,
+  leere Regionsüberschriften und Beispielkacheln sind kein vollständiges
+  Mockup.
+- Vor Codeänderungen wird das vollständige Mockup gegen diese Struktur geprüft:
+  Regionsnavigation, sämtliche Gebietskacheln/Untergebietslinks, Alte
+  Geschichten mit Karten, Themen-Einstiege, Button und separate Finder-Seite.
+- Das Mockup muss Aufgabenseite **und** separate Finder-Zielseite zeigen.
+- Im Finder-Mockup liegt Fortschritt in der Filterspalte; eine Fortschrittsleiste
+  über der Suche/Trefferliste ist falsch.
+- Die Trefferliste zeigt Statusfarben gemäß Kartenlegende; bei fehlendem
+  Spielstand bleibt der Status neutral.
+- Klasse und Herkunft stehen als separate Filtergruppen neben Thema.
+- Aufgabenbrett erscheint unter Thema und nirgends als eigene Filtergruppe.
+- Layoutdetails, die nicht ausdrücklich beschlossen sind, bleiben Vorschläge
+  und dürfen die obigen Regeln nicht verändern.
 
 ## Rendering 1: ursprünglicher Entwurf – Umschalter
 
@@ -98,13 +232,17 @@ oberhalb des Landschaftsbaums:
 │ [Eriador] [Rhovanion] [Rohan] …                                     │
 ```
 
-Die Kacheln waren als schneller Einstieg nützlich, erzeugten aber erneut zwei
-parallel gedachte Navigationssysteme. In der Endfassung werden die Themen
-deshalb direkt als gleichrangige Hauptknoten in denselben Baum aufgenommen.
+Die Kacheln waren als schneller Einstieg nützlich. Die damalige Begründung,
+Themen deshalb in denselben Baum wie die Gebiete aufzunehmen, wurde am
+16.11.2026 verworfen. Die beschlossene Fassung nutzt getrennte Themen-Einstiege
+und einen separaten Finder; siehe die verbindliche Endentscheidung oben.
 
-## Rendering 3: beschlossene Startansicht – gemeinsamer Aufgabenbaum
+## Rendering 3: früheres Zielbild – gemeinsamer Aufgabenbaum
 
-**Status: Zielbild.**
+**Status: überholt am 16.11.2026; nicht umsetzen.** Die Skizze zeigt einen
+gemeinsamen Themen-/Gebietsbaum und einen darin eingebetteten Aufgabenbrowser.
+Beides widerspricht der jetzt verbindlichen separaten Finder-Seite. Maßgeblich
+ist ausschließlich die „Verbindliche Endentscheidung“ oben.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────┐
@@ -135,7 +273,8 @@ deshalb direkt als gleichrangige Hauptknoten in denselben Baum aufgenommen.
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Regeln für dieses Rendering:
+Die folgenden damaligen Regeln sind ebenfalls überholt und dürfen nicht als
+aktuelle Vorgabe verwendet werden:
 
 - Regionen und Landschaften folgen der belegten Spielkartenhierarchie.
 - Landschaften werden innerhalb einer Region in der vereinbarten Reihenfolge
@@ -149,9 +288,12 @@ Regeln für dieses Rendering:
   werden. Suche und Fortschrittsfilter bleiben sichtbar beziehungsweise
   erreichbar.
 
-## Rendering 4: Aufgabenbrowser
+## Rendering 4: früheres Zielbild – Aufgabenbrowser in der Kartenansicht
 
-**Status: Zielbild; Umsetzung im Experiment begonnen, noch nicht übernehmen.**
+**Status: überholt am 16.11.2026; nicht als Layoutvorgabe verwenden.** Die
+Skizze mischt Gebietsbaum, Kartenansicht und Aufgabenliste in einem Browser.
+Der jetzt beschlossene Finder ist eine eigene Anwendung mit Filterspalte und
+Trefferliste; Gebiets-/Themen-Einstiege bleiben auf der separaten Aufgabenseite.
 
 ```text
 Desktop
@@ -189,7 +331,8 @@ Mobil
 └──────────────────────────────┘
 ```
 
-Verbindliche Bedienung:
+Diese damaligen Bedienungsregeln sind nur dort weiter gültig, wo sie nicht der
+verbindlichen Endentscheidung widersprechen:
 
 - Suche, Filter und Sortierung stehen in der Adresse beziehungsweise im
   lokalen Filtergedächtnis, sofern die Seite eine Anwendungsliste ist.
@@ -300,11 +443,14 @@ Betroffene Website-Dateien und Werkzeuge:
 
 - `web/app.js`
 - `web/landschaft.css`
-- `web/aufgaben-filter.js`
+- `php/templates/app/aufgabenfinder.twig`
+- `web/aufgabenfinder.css`
+- `web/aufgabenfinder.js`
+- `web/karten-aufgabenfilter.js`
 - `build_aufgaben.py`
 - `tools/build_gebiete.py`
-- `php/src/` und `php/templates/entity/quest.twig`
-- `tests/browser_navigation.js` sowie ergänzende Aufgaben-/Katalogtests
+- PHP-Routing/Viewmodel für die Finder-Routen in DE/EN/FR
+- passende Aufgaben-/Finder-Tests und Browserprüfungen
 
 Der Experiment-Worktree
 `/Users/adrian/Developer/Lotro/lotro-log-book-aufgaben-navigation` ist
@@ -329,55 +475,98 @@ Website-Repository.
 
 ### Phase 1 – Bestand und Datenvertrag
 
-- [ ] Experiment-Änderungen gegen den aktuellen `main`-Stand prüfen.
-- [ ] Gemeinsamen Pfadvertrag für Landschaften, Themen, Epik und Restgruppe
-      festlegen.
-- [ ] DE/EN/FR-Schlüssel und stabile IDs testen.
-- [ ] Keine technischen Kartennamen als sichtbare Landschaft ausgeben.
+- [ ] Bestehende Gebietsübersicht inventarisieren und sicherstellen, dass jede
+      Gebietskachel und jeder Untergebietslink im Ziel erhalten bleibt.
+- [ ] Finder-Routen, Themen-Schlüssel sowie Klasse-/Herkunftsschlüssel in
+      DE/EN/FR festlegen und mit stabilen Quelldaten verknüpfen.
+- [ ] Tatsächliche Datenquelle und Zählweise für Themen-/Finder-Treffer prüfen;
+      keine Mockup-Zähler als Produktionsdaten übernehmen.
+- [ ] Kartenbilder, Elternbeziehungen und Aufgabenbezüge für „Alte Geschichten“
+      aus den aktuellen Kartendaten ableiten.
+- [ ] Keine technischen Kartennamen, Klassen, Herkünfte oder Themen aus
+      ungesicherten Namensheuristiken erzeugen.
 
-### Phase 2 – gemeinsame Startansicht
+### Phase 2 – Aufgabenseite und Einstiege
 
-- [ ] Landschafts- und Themenknoten in einer Ansicht darstellen.
-- [ ] Umschalter, gespeicherte Strukturwahl und zusätzliche „Weitere
-      Inhalte“-Hülle entfernen.
-- [ ] Fortschrittszahlen nur aus tatsächlich zählbaren Aufgaben ableiten.
-- [ ] Suche, Filter, Breadcrumb und Zurückweg festlegen.
+- [ ] Bestehende Gebiets-/Untergebietskacheln und Regionssprungmarken vollständig
+      erhalten; Auswahl führt zur passenden Kartenansicht.
+- [ ] Prominenten Finder-Button auf der Aufgabenseite ergänzen; keinen
+      Finder-Navigationspunkt im Hauptmenü hinzufügen.
+- [ ] Themen-Einstiege ergänzen und ihre Ziele exakt abbilden: Epische
+      Geschichte → Kartenansicht; übrige Themen → Finder mit Vorauswahl.
+- [ ] „Alte Geschichten“ als eigenen Kartenbereich darstellen; Karten und
+      Trefferzahlen aus den Daten ableiten.
+- [ ] Keine Platzhalter-Regionen oder verkürzten Beispielraster als vollständige
+      Gebietsübersicht ausgeben.
 
-### Phase 3 – Aufgabenbrowser und Detailseiten
+### Phase 3 – separater Aufgabenfinder
 
-- [ ] Browserliste mit Suche, Filter, Sortierung und lokalem Zustand bauen.
-- [ ] Karten-/Gebietsweg Gebiet → Karte → Aufgabe vervollständigen.
-- [ ] Detailseite nach dem Abschnittsmodell oben prüfen.
-- [ ] Auftraggeber-, Belohnungs-, Ketten- und Reiseplanerlinks verknüpfen.
+- [ ] Separate Finder-Anwendungsseite mit Suchfeld, Filterspalte und
+      Trefferliste in DE/EN/FR umsetzen.
+- [ ] Filtergruppen Thema, Klasse, Herkunft, Region/Gebiet, Merkmale, Stufe und
+      Fortschritt getrennt implementieren; Aufgabenbrett nur unter Thema.
+- [ ] Themen-Einstiege über URL/Anwendungszustand vorauswählen; Zurücksetzen
+      setzt alle Gruppen und den Suchbegriff nachvollziehbar zurück.
+- [ ] Fortschrittsfilter ausschließlich in der Filterspalte anzeigen.
+- [ ] Trefferstatus mit `--offen`, `--fertig`, `--laufend` und der bestehenden
+      Teilfortschrittsdarstellung aus der Kartenlegende kennzeichnen; Status
+      zusätzlich mit Symbol oder Text erklären.
+- [ ] Ohne importierten Spielstand Status neutral lassen; „annehmbar“ nur bei
+      importiertem Spielstand anbieten.
+- [ ] Treffer öffnen über stabile Aufgaben-ID den belegten Kartenkontext;
+      ohne Kartenbezug keinen Ort oder Pin erfinden.
+- [ ] Vorhandene Aufgaben-Detailseite und ihre belegten Links unverändert
+      erreichbar halten.
 
 ### Phase 4 – Karte und responsive Darstellung
 
-- [ ] Drei-Spalten-Desktop umsetzen und Breite lokal speichern.
-- [ ] Feste zweizeilige Kartenleiste und stabile 4:3-Karte prüfen.
-- [ ] Sammelmarker, Legende und Hover-/Auswahlverbindung prüfen.
-- [ ] Mobilansicht mit Liste/Karte/Details und sichtbarer Suche prüfen.
+- [ ] Kartenansicht für Gebiets- und Themenziele prüfen; bestehende Regeln zu
+      Kartenrahmen, Markern und 4:3-Darstellung erhalten.
+- [ ] Finder-Layout separat für Desktop und Mobil prüfen; Mobil müssen Treffer
+      und Filter ohne horizontales Überlaufen bedienbar sein.
+- [ ] Tastaturbedienung, Fokusführung, Touch-Ziele und Filterzustände prüfen.
 
 ### Phase 5 – Qualitätssicherung
 
-- [ ] Python-Tests und Katalogprüfung ausführen.
+- [x] Python-Tests und Katalogprüfung ausführen.
 - [ ] Browserprüfung in DE/EN/FR bei Desktop und Mobil ausführen.
-- [ ] Mit und ohne synthetischen Spielstand prüfen.
+- [ ] Mit synthetischem Spielstand erledigte, laufende (auch mit Teilzielen),
+      offene und annehmbare Aufgaben prüfen.
+- [ ] Ohne Spielstand prüfen: kein Status wird fälschlich als offen oder
+      erledigt markiert; „annehmbar“ wird nicht angeboten.
+- [ ] Jeden Themen-Einstieg prüfen: genau das passende Thema ist vorausgewählt;
+      Klasse/Herkunft bleiben eigene Filtergruppen.
+- [ ] Aufgabenbrett prüfen: als Thema vorhanden, als eigene Filtergruppe nicht
+      vorhanden.
+- [ ] Alle Gebiete und Untergebiete gegen den vorherigen Bestand abgleichen.
+- [ ] „Alte Geschichten“ gegen Kartendaten prüfen, einschließlich Nud-melek
+      ohne Aufgabenbezug.
 - [ ] Ohne JavaScript lesbare Grundinhalte und echte 404/301 prüfen.
-- [ ] Build außerhalb von iCloud erzeugen und `verify_katalogseiten.py`
+- [x] Build außerhalb von iCloud erzeugen und `verify_katalogseiten.py`
       ausführen.
-- [ ] Erst nach vollständiger Abnahme veröffentlichen.
+- [x] Erst nach lokaler Abnahme veröffentlichen; Live-Abnahme am 16.11.2026.
 
 ## Abnahmekriterien
 
-Die Aufgaben-Navigation ist erst fertig, wenn:
+Die Arbeit ist erst fertig, wenn:
 
-- alle oben genannten Hauptknoten ohne Umschalter erreichbar sind;
-- Landschaften und Themen in DE/EN/FR dieselbe Struktur und dieselben IDs
-  verwenden;
-- Epik numerisch und erzählerisch korrekt sortiert ist;
-- keine unbelegte Position oder Karte als Tatsache erscheint;
-- Aufgabe, Gebiet, Karte und Detailseite über kanonische Links verbunden sind;
-- Desktop, Mobil, Tastatur und No-JavaScript-Grundinhalt funktionieren;
+- die Gebietsübersicht gegenüber dem Bestand keine Gebietskachel und keinen
+  Untergebietslink verloren hat;
+- kein Finder-Hauptmenüpunkt existiert und der prominente Button den separaten
+  Finder öffnet;
+- jedes Thema sein vereinbartes Ziel und eine korrekte Vorauswahl hat;
+- Epische Geschichte und Alte Geschichten die Kartenansicht öffnen;
+- Klasse und Herkunft eigenständige Filtergruppen sind und Aufgabenbrett nur
+  als Thema erscheint;
+- Fortschritt in der Finder-Filterspalte steht und Treffer die Legendenfarben
+  samt verständlichem Statussignal nutzen;
+- der Status ohne Import neutral ist und „annehmbar“ Import voraussetzt;
+- Landschaften/Themen/Filter in DE/EN/FR dieselbe belegte Struktur und stabile
+  Schlüssel verwenden;
+- keine unbelegte Position, Karte, Klasse, Herkunft oder Kategorie als Tatsache
+  erscheint;
+- Finder, Kartenansicht, Tastaturbedienung, Mobilansicht und No-JavaScript-
+  Grundinhalt funktionieren;
 - vorhandener Spielstand weder überschrieben noch veröffentlicht wird;
 - Tests, Buildprüfung und Browserprüfung dokumentiert bestanden sind.
 
@@ -387,6 +576,7 @@ Die Aufgaben-Navigation ist erst fertig, wenn:
 # Website-Repository
 python3 -m unittest discover -s tests -p 'test_*.py'
 node tests/test_i18n.js
+node tests/test_questfinder.js
 python3 baue_website.py --ziel "$HOME/.cache/llb-dist"
 python3 verify_katalogseiten.py "$HOME/.cache/llb-dist"
 

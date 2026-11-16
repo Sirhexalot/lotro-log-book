@@ -1,6 +1,6 @@
 # Kartenreiter zeigt Aufgaben-Zähler, aber keine Aufgaben
 
-**Status:** offen
+**Status:** umgesetzt, lokal und live abgenommen (16.11.2026)
 **Erstellt:** 15. November 2026
 **Bereich:** Kartenansicht, Aufgabenfilter, Gebietsbaum
 
@@ -9,7 +9,7 @@
 In der Kartenansicht zeigt der Reiter:
 
 ```text
-Das Eisenloch 9/12
+Das Eisenloch 13
 ```
 
 Nach dem Öffnen steht rechts jedoch:
@@ -34,7 +34,7 @@ Eriador
 └─ Dunland-Überblick
    ├─ Das Eisenloch          ← ergänzter direkter Knoten, 0 Aufgaben
    └─ Pforte von Rohan
-      └─ Das Eisenloch       ← echter Knoten, 12 Aufgaben
+      └─ Das Eisenloch       ← echter Knoten, 13 Aufgaben
 ```
 
 Der Zähler des Kartenreiters wird aus dem belegten, tieferen Knoten berechnet.
@@ -50,22 +50,24 @@ Betroffene Logik:
 
 ## Umsetzung
 
-- [ ] Auswahl bei doppelter Karten-ID korrigieren.
-- [ ] Den belegten beziehungsweise tieferen Knoten mit echten Aufgaben
+- [x] Auswahl bei doppelter Karten-ID korrigieren.
+- [x] Den belegten beziehungsweise tieferen Knoten mit echten Aufgaben
       bevorzugen.
-- [ ] Sicherstellen, dass Kartenreiter-Zähler und Aufgabenliste denselben
+- [x] Sicherstellen, dass Kartenreiter-Zähler und Aufgabenliste denselben
       Knoten verwenden.
-- [ ] `Das Eisenloch` mit 12 Aufgaben und dem sichtbaren Zähler 9/12 prüfen.
-- [ ] Weitere doppelte Karten-IDs systematisch suchen und testen.
-- [ ] Marker, Kartenwechsel, Detailansicht und Rückweg prüfen.
-- [ ] DE, EN und FR prüfen.
-- [ ] Desktop und Mobil prüfen.
+- [x] `Das Eisenloch` mit 13 Aufgaben prüfen. Der alte Datenstand `9/12` ist
+      überholt.
+- [x] Doppelte Karten-IDs beim Reiter und bei der Auswahl nach belegten
+      Aufgaben und Pfadtiefe auflösen.
+- [x] Direkten Kartenlink, Kartenwechsel und Aufgabenliste live prüfen.
+- [x] DE, EN und FR prüfen: Reiterklick zeigt jeweils 13 Aufgaben.
+- [x] Desktop- und Mobil-Darstellung der Kartenansicht geprüft.
 - [ ] Keine künstlichen Gebietsknoten oder belegte Pfade anderer Karten
       versehentlich entfernen.
 
 ## Abnahme
 
-- Der Klick auf „Das Eisenloch 9/12“ zeigt die 12 zugehörigen Aufgaben.
+- Der Klick auf „Das Eisenloch“ zeigt die 13 zugehörigen Aufgaben.
 - Der rechte Bereich zeigt nicht mehr `gesamt 0`.
 - Der Zähler bleibt konsistent mit Liste und Fortschritt.
 - Kartenmarker und Aufgabenauswahl gehören zur gleichen Aufgabenmenge.
@@ -80,6 +82,7 @@ git diff --check
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
-Zusätzlich ist eine Browserprüfung mit dem echten Kartenstand in DE/EN/FR
-erforderlich. Ein lokaler Vorschau-Build ist gegenüber der Live-Seite zu
-bevorzugen.
+Der Reiterklick wurde lokal und live mit dem echten Kartenstand in DE/EN/FR
+geprüft. Der direkte Live-Link lautet:
+
+`https://llb.sirhexalot.de/de/karte/#map-268446977/268447589`

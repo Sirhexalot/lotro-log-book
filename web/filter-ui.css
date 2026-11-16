@@ -17,7 +17,7 @@
 .filter-ui button:focus-visible,.filter-ui input:focus-visible,.filter-ui select:focus-visible,.filter-ui summary:focus-visible { outline:2px solid var(--gold,#d9b96f); outline-offset:3px; }
 .filter-toolbar { display:flex; gap:8px; align-items:stretch; margin-bottom:24px; }
 .filter-toolbar input { flex:1; width:0; min-width:0; }
-.filter-grid { display:grid; grid-template-columns:320px minmax(0,1fr); gap:24px; align-items:start; }
+.filter-grid { display:grid; grid-template-columns:320px minmax(0,1fr); grid-template-rows:88px auto; gap:24px; align-items:start; }
 /* The filter column starts level with the result bar, not below it: the left
  * column is the page's second axis and must not look indented by the count. */
 .filter-result-header { grid-column:2; grid-row:1; }

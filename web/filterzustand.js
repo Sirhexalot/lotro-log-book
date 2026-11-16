@@ -2,6 +2,11 @@
 (function (root) {
 	'use strict';
 	function copy(value) { return JSON.parse(JSON.stringify(value)); }
+	function enthaeltPfad(ober, unter) {
+		return Object.keys(ober).every(function (key) {
+			return Object.prototype.hasOwnProperty.call(unter,key) && unter[key] === ober[key];
+		});
+	}
 	function normalize(config, candidate, context) {
 		var state = copy(config.defaults(context)), notices = [];
 		candidate = candidate || {};
@@ -44,6 +49,15 @@
 						var key = JSON.stringify(sorted);
 						if (!seen[key]) { state.filters[group.id].push(sorted); seen[key] = true; }
 					});
+					if (group.exclusivePaths) {
+						var paths = state.filters[group.id];
+						state.filters[group.id] = paths.filter(function (path) {
+							return !paths.some(function (other) {
+								return other !== path && Object.keys(other).length > Object.keys(path).length &&
+									enthaeltPfad(path,other);
+							});
+						});
+					}
 				} else if (group.kind === 'boolean') {
 					state.filters[group.id] = value === true;
 				} else if (options.some(function (o) { return o.value === value; })) {
@@ -73,7 +87,15 @@
 			if (!group) { throw new Error('Unknown tree group'); }
 			function key(p) { return JSON.stringify(Object.keys(p).sort().map(function (k) { return [k,p[k]]; })); }
 			var paths = next.filters[group.id], found = paths.some(function (p) { return key(p) === key(action.path); });
-			next.filters[group.id] = found ? paths.filter(function (p) { return key(p) !== key(action.path); }) : paths.concat([action.path]);
+			if (found) {
+				next.filters[group.id] = paths.filter(function (p) { return key(p) !== key(action.path); });
+			} else if (group.exclusivePaths) {
+				next.filters[group.id] = paths.filter(function (p) {
+					return !enthaeltPfad(p,action.path) && !enthaeltPfad(action.path,p);
+				}).concat([action.path]);
+			} else {
+				next.filters[group.id] = paths.concat([action.path]);
+			}
 		}
 		else if (action.type === 'removeChip') {
 			var chip = chips(config, state, context).find(function (c) { return c.id === action.id; });

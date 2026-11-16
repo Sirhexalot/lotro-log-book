@@ -137,7 +137,8 @@ class ViewBuilder:
 
     def map_link(self, map_id, name):
         entry = self.maps.get(str(map_id))
-        if not entry:
+        if (not entry or
+                re.fullmatch(r'(?:Karte|Map|Carte)\s+\d+', entry.get('name') or '', re.IGNORECASE)):
             return None
         kind = 'region' if entry.get('tier') == 1 else 'area'
         return {'url': route(self.lang, kind, str(map_id)), 'text': name}
@@ -170,10 +171,8 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
     fk = quest.get('fk') or []
     for index, name in enumerate(quest.get('f') or []):
         link = None
-        if index == 0 and fk:
-            link = builder.map_link(fk[0], name)
-        elif index == 1 and len(fk) > 1:
-            link = builder.map_link(fk[1], name)
+        if index < len(fk):
+            link = builder.map_link(fk[index], name)
         area_trail.append({'text': name, 'url': link['url'] if link else None})
 
     place = None
@@ -599,11 +598,11 @@ def landmark_view(builder: ViewBuilder, entry: dict) -> dict:
     if karte:
         ort['map_name'] = karte.get('name')
         ort['image'] = karte.get('bild')
-        ort['map_url'] = route(lang, 'area', str(entry.get('map')))
+        map_page = builder.map_link(entry.get('map'), karte.get('name') or '')
+        ort['map_url'] = map_page['url'] if map_page else None
         eltern = builder.maps.get(str(karte.get('eltern')))
         if eltern:
-            ort['region'] = {'url': route(lang, 'region', str(eltern.get('idx'))),
-                             'text': eltern.get('name')}
+            ort['region'] = builder.map_link(eltern.get('idx'), eltern.get('name') or '')
         if entry.get('lat') is not None and entry.get('lon') is not None:
             breite = karte['east'] - karte['west']
             hoehe = karte['north'] - karte['south']
@@ -731,9 +730,7 @@ def area_view(builder: ViewBuilder, entry: dict, kind: str, members: dict) -> di
 
     parent_link = None
     if parent:
-        parent_kind = 'region' if parent.get('tier') == 1 else 'area'
-        parent_link = {'url': route(lang, parent_kind, str(parent['idx'])),
-                       'text': parent.get('name') or ''}
+        parent_link = builder.map_link(parent.get('idx'), parent.get('name') or '')
 
     sections = []
     # Full member lists for the interactive tabs; the page carries them once so
@@ -1050,12 +1047,11 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         head = set_name
         if level:
             head += ' · %s %s%s' % (w['level'], level, ('–%s' % top) if top and top != level else '')
-        # The static build lists set members as plain names (its lookup into
-        # model['all'] misses), so the migration keeps them unlinked.
+        # Stable item IDs let set members link directly to their item pages.
         members = []
         for iid in set_data.get('items') or []:
             if iid in builder.items:
-                members.append({'url': None, 'text': builder_name(builder, builder.items[iid])})
+                members.append({'url': route(lang, 'i', iid), 'text': builder_name(builder, builder.items[iid])})
             elif iid in ctx.details:
                 other = ctx.details[iid].get('name') or {}
                 text = other.get(lang) or other.get('en') or other.get('de') or ''

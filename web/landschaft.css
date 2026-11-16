@@ -17,8 +17,14 @@ main.landschaft-start > :not(#landschaften) { display: none; }
 /* Side padding matches .kopf-innen, so the cards start on the header's edge. */
 .landschaften { padding: 28px 16px; max-width: var(--huelle); margin: auto; }
 .landschaften h2 { font-size: var(--text-titel); color: var(--gold); margin: 0 0 8px; }
-.landschaft-werkzeuge { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 20px 0; }
-.landschaft-suche { max-width: 420px; }
+.aufgaben-einstieg-kopf { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px; margin:0 0 8px; }
+.aufgaben-einstieg-kopf h2 { margin:0; }
+.aufgaben-einstieg p { margin:0 0 22px; color:var(--schwach); }
+.aufgabenfinder-knopf { display:inline-flex; align-items:center; min-height:44px; padding:9px 15px; border:1px solid var(--gold); border-radius:3px; background:var(--gold); color:var(--grund); font-weight:700; text-decoration:none; }
+.aufgabenfinder-knopf:hover,.aufgabenfinder-knopf:focus-visible { filter:brightness(1.08); }
+.landschaft-werkzeuge { margin: 16px 0 8px; }
+.landschaft-suche-label { display: block; max-width: 420px; }
+.landschaft-suche { width: 100%; }
 .landschaft-spruenge { display: flex; flex-wrap: wrap; gap: 8px; position: sticky; top: 0; z-index: 5; padding: 10px 0; background: var(--grund); }
 .landschaft-spruenge a { padding: 5px 12px; border: 1px solid var(--rand); border-radius: 3px; color: var(--gold); text-decoration: none; background: var(--fläche); }
 .landschaft-spruenge a:hover, .landschaft-spruenge a:focus { border-color: var(--gold); }
@@ -36,6 +42,13 @@ main.landschaft-start > :not(#landschaften) { display: none; }
 .landschaft-kachel strong { display: block; color: var(--gold); font-size: var(--text-normal); }
 .landschaft-kachel small { display: block; color: var(--schwach); margin-top: 5px; }
 .landschaft-kachel progress { width: 100%; height: 5px; accent-color: var(--fertig); }
+.aufgaben-themen-titel { margin-top:34px; font-size:var(--text-abschnitt); }
+.aufgaben-themen { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+.aufgaben-thema { display:flex; flex-direction:column; gap:5px; min-width:0; padding:13px; border:1px solid var(--rand); border-radius:3px; background:var(--fläche); text-decoration:none; }
+.aufgaben-thema:hover,.aufgaben-thema:focus-visible { border-color:var(--gold); }
+.aufgaben-thema strong { color:var(--gold); font-size:var(--text-normal); font-weight:400; }
+.aufgaben-thema small { color:var(--schwach); }
+.aufgaben-thema span { margin-top:auto; padding-top:5px; color:var(--text); font-size:var(--text-bedienung); }
 .landschaft-orte { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 6px 10px; flex-shrink: 0; background: var(--fläche); border-bottom: 1px solid var(--rand); }
 .landschaft-orte-kopf { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0; }
 .landschaft-orte-kopf strong { font-size: 1rem; color: var(--gold); }

@@ -363,6 +363,37 @@
 		sortiere(WURZEL);
 	})();
 
+	// "Alte Geschichten" has its own authored maps, outside the landscape list
+	// built from MQL_GEBIETE. Add a separate map branch without changing each
+	// quest's ordinary geographic path.
+	var alteGeschichtenKarten = {};
+	(function ergaenzeAlteGeschichten() {
+		var passendeKarten = karten.filter(function (karte) {
+			return ['Alte Geschichten','Tales of Yore','Contes des temps jadis'].indexOf(karte.region) >= 0;
+		});
+		if (!passendeKarten.length) { return; }
+		var titel = passendeKarten[0].region;
+		passendeKarten.forEach(function (karte) { alteGeschichtenKarten[Number(karte.idx)] = titel; });
+		var wurzel = WURZEL.reihenfolge.find(function (knoten) { return knoten.name === titel; });
+		if (!wurzel) {
+			var wurzelSchluessel = '|' + titel;
+			wurzel = {schluessel:wurzelSchluessel,name:titel,tiefe:1,quests:[],eigene:[],kinder:{},reihenfolge:[],karte:null};
+			WURZEL.kinder[wurzelSchluessel] = wurzel;
+			WURZEL.reihenfolge.push(wurzel);
+		}
+		passendeKarten.forEach(function (karte) {
+			var id = Number(karte.idx), schluessel = wurzel.schluessel + '|' + karte.name;
+			var passend = quests.filter(function (quest) {
+				return (quest.fk || []).some(function (mapId) { return Number(mapId) === id; });
+			});
+			var knoten = {schluessel:schluessel,name:karte.name,tiefe:2,quests:passend,eigene:passend.slice(),
+				kinder:{},reihenfolge:[],karte:id};
+			wurzel.kinder[schluessel] = knoten;
+			wurzel.reihenfolge.push(knoten);
+		});
+		sortiere(wurzel);
+	})();
+
 	function zaehle(eintraege) {
 		// Only what a character can still do is counted (see zustandVon).
 		var erledigt = 0, gesamt = 0;
@@ -2973,9 +3004,9 @@
 	};
 	window.addEventListener('resize', listenMass);
 	var ltexte = {
-		de: ['Wohin möchtest du reisen?', '', 'Landschaft suchen', 'Alle Landschaften', 'Zuletzt geöffnet: ', 'Gebietskarte', '', 'Weitere Inhalte'],
-		en: ['Where would you like to go?', '', 'Find a landscape', 'All landscapes', 'Last opened: ', 'Landscape map', '', 'Other content'],
-		fr: ['Où veux-tu aller ?', '', 'Chercher une région', 'Toutes les régions', 'Dernière région ouverte : ', 'Carte de la région', '', 'Autres contenus']
+		de: ['Wohin möchtest du reisen?', '', 'Gebiet oder Region suchen', 'Alle Landschaften', '', 'Gebietskarte', '', 'Weitere Inhalte'],
+		en: ['Where would you like to go?', '', 'Search area or region', 'All landscapes', '', 'Landscape map', '', 'Other content'],
+		fr: ['Où veux-tu aller ?', '', 'Chercher un lieu ou une région', 'Toutes les régions', '', 'Carte de la région', '', 'Autres contenus']
 	}[sprache] || [];
 	var landschaften = [];
 	// Unnamed game-map variants are not separate landscapes. Give them an honest
@@ -3026,10 +3057,17 @@
 		return inhaltsGruppen[knoten.schluessel];
 	}
 	WURZEL.reihenfolge.forEach(function (region) {
+		// "Weitere Inhalte" is a subject catalogue, not a geographic destination.
+		// Those quests are available on the standalone quest finder page.
+		if (region.name === ABSCHNITTE.more || region.name === ltexte[7] || istThemenWurzel(region)) { return; }
 		if (!region.reihenfolge.some(function (gebiet) { return gebiet.karte != null; })) {
-			landschaften.push({ knoten: region, region: ltexte[7], karte: null }); return;
+			return;
 		}
 		region.reihenfolge.forEach(function (gebiet) {
+			// A map listed under "Alte Geschichten" must not also appear in
+			// its ordinary geographic region.
+			if (alteGeschichtenKarten[Number(gebiet.karte)] &&
+				region.name !== alteGeschichtenKarten[Number(gebiet.karte)]) { return; }
 			landschaften.push({ knoten: gebiet, region: region.name,
 				karte: gebiet.karte != null ? gebiet.karte : besteKarte(gebiet.quests, gebiet.name) });
 		});
@@ -3054,12 +3092,22 @@
 		ziel.knoten.reihenfolge.push(e.knoten); gebuendelt.push(e);
 	});
 	landschaften = landschaften.filter(function (e) { return gebuendelt.indexOf(e) < 0; });
+	// Every card in the map overview must open an actual map.
+	landschaften = landschaften.filter(function (e) { return e.karte != null; });
 	var restName = sprache === 'de' ? 'Weitere Aufgaben' : sprache === 'fr' ? 'Autres quêtes' : 'Other quests';
+	function istThemenWurzel(knoten) {
+		if (!knoten.quests.length) { return false; }
+		var thema = knoten.quests[0].th;
+		return !!thema && knoten.quests.every(function (quest) {
+			return quest.th === thema && quest.f && quest.f[0] === knoten.name;
+		});
+	}
 	landschaften.forEach(function (e) {
 		e.rest = e.knoten.name === ABSCHNITTE.other;
 		if (e.rest) { e.knoten.name = restName; }
 	});
-	var regionSortierung = ['Eriador', 'Rhovanion', 'Rohan', 'Gondor', 'Mordor', 'Haradwaith', 'Rhûn'];
+	var regionSortierung = ['Eriador', 'Rhovanion', 'Rohan', 'Gondor', 'Mordor', 'Haradwaith', 'Rhûn',
+		'Alte Geschichten', 'Tales of Yore', 'Contes des temps jadis'];
 	landschaften.sort(function (a,b) {
 		if ((a.region === ltexte[7]) !== (b.region === ltexte[7])) { return a.region === ltexte[7] ? 1 : -1; }
 		var ra = regionSortierung.indexOf(a.region), rb = regionSortierung.indexOf(b.region);
@@ -3093,14 +3141,60 @@
 		haupt.classList.add('landschaft-start'); landschaftStart.hidden = false;
 		landschaftAdresse(null, null, !!ohneVerlauf);
 		landschaftStart.textContent = '';
-		landschaftStart.appendChild(eltern('h2', ltexte[0]));
+		var kopf = eltern('div'); kopf.className = 'aufgaben-einstieg-kopf';
+		kopf.appendChild(eltern('h2', ltexte[0]));
+		var finder = eltern('a', {
+			de:'Alle Aufgaben im Finder →',en:'All quests in the finder →',fr:'Toutes les quêtes dans le moteur de recherche →'
+		}[sprache] || '');
+		finder.className = 'aufgabenfinder-knopf';
+		finder.href = ({de:'/de/aufgabenfinder/',en:'/en/quest-finder/',fr:'/fr/recherche-quetes/'}[sprache] || '/de/aufgabenfinder/');
+		kopf.appendChild(finder); landschaftStart.appendChild(kopf);
+		var einstieg = eltern('div'); einstieg.className = 'aufgaben-einstieg';
+		einstieg.appendChild(eltern('p', {
+			de:'Wähle ein Gebiet für die Karte oder suche Aufgaben direkt nach Thema.',
+			en:'Choose an area to open its map, or find quests by topic.',
+			fr:'Choisissez une région pour ouvrir sa carte ou cherchez des quêtes par thème.'
+		}[sprache] || ''));
+		landschaftStart.appendChild(einstieg);
+
 		var werkzeuge = eltern('div'); werkzeuge.className = 'landschaft-werkzeuge'; landschaftStart.appendChild(werkzeuge);
-		var zuletzt; try { zuletzt = localStorage.getItem('llb.preview.letztesGebiet'); } catch (e) {}
-		var weiter = landschaften.find(function (e) { return landschaftSlug(e) === zuletzt; });
-		if (weiter) { var w = eltern('button', ltexte[4] + weiter.knoten.name); w.onclick = function () { landschaftOeffnen(weiter); }; werkzeuge.appendChild(w); }
-		var eingabe = eltern('input'); eingabe.type = 'search'; eingabe.placeholder = ltexte[2]; eingabe.setAttribute('aria-label', ltexte[2]); eingabe.className = 'landschaft-suche'; werkzeuge.appendChild(eingabe);
+		var landschaftSuche = eltern('label'); landschaftSuche.className = 'landschaft-suche-label';
+		var eingabe = eltern('input'); eingabe.type = 'search'; eingabe.placeholder = ltexte[2]; eingabe.setAttribute('aria-label', ltexte[2]); eingabe.className = 'landschaft-suche'; landschaftSuche.appendChild(eingabe);
+		werkzeuge.appendChild(landschaftSuche);
 		var spruenge = eltern('nav'); spruenge.className = 'landschaft-spruenge'; spruenge.setAttribute('aria-label', t('gebiete')); landschaftStart.appendChild(spruenge);
 		var gruppen = eltern('div'); landschaftStart.appendChild(gruppen);
+		var themenTitel = eltern('h3', {de:'Weitere Inhalte',en:'Other content',fr:'Autres contenus'}[sprache] || 'Other content');
+		themenTitel.className = 'aufgaben-themen-titel';
+		var themen = eltern('section'); themen.className = 'aufgaben-themen';
+		landschaftStart.append(themenTitel,themen);
+		var themenTexte = {
+			de:{epic:['Epische Geschichte','Bände, Bücher und Kapitel','In der Kartenansicht öffnen'],class:['Klassenaufgaben','Aufgaben mit einer belegten Klassenbindung','Im Finder suchen'],origin:['Herkunftsaufgaben','Aufgaben mit einer belegten Herkunftsbindung','Im Finder suchen'],festivals:['Feste und Ereignisse','Zeitlich gebundene und saisonale Aufgaben','Im Finder suchen'],missions:['Missionen','Missionen und ihre Aufgaben','Im Finder suchen'],instances:['Instanzen und Schlachten','Aufgaben aus Instanzen und Schlachten','Im Finder suchen'],craft:['Handwerk','Aufgaben rund ums Handwerk','Im Finder suchen'],board:['Aufgabenbrett','Aufgaben vom Aufgabenbrett','Im Finder suchen'],other:['Weitere Aufgaben','Weitere belegte Aufgaben','Im Finder suchen']},
+			en:{epic:['Epic Story','Volumes, books and chapters','Open in the map'],class:['Class quests','Quests explicitly tied to a class','Find in quest finder'],origin:['Origin quests','Quests explicitly tied to an origin','Find in quest finder'],festivals:['Festivals and events','Seasonal and event quests','Find in quest finder'],missions:['Missions','Missions and their quests','Find in quest finder'],instances:['Instances and battles','Quests from instances and battles','Find in quest finder'],craft:['Crafting','Quests about crafting','Find in quest finder'],board:['Task board','Quests from the task board','Find in quest finder'],other:['Other quests','Other documented quests','Find in quest finder']},
+			fr:{epic:['Histoire épique','Volumes, livres et chapitres','Ouvrir sur la carte'],class:['Quêtes de classe','Quêtes explicitement liées à une classe','Chercher dans le moteur'],origin:['Quêtes d’origine','Quêtes explicitement liées à une origine','Chercher dans le moteur'],festivals:['Fêtes et événements','Quêtes saisonnières et événementielles','Chercher dans le moteur'],missions:['Missions','Missions et leurs quêtes','Chercher dans le moteur'],instances:['Instances et batailles','Quêtes d’instances et de batailles','Chercher dans le moteur'],craft:['Artisanat','Quêtes liées à l’artisanat','Chercher dans le moteur'],board:['Tableau des tâches','Quêtes du tableau des tâches','Chercher dans le moteur'],other:['Autres quêtes','Autres quêtes documentées','Chercher dans le moteur']}
+		}[sprache] || {};
+		var finderBase = ({de:'/de/aufgabenfinder/',en:'/en/quest-finder/',fr:'/fr/recherche-quetes/'}[sprache] || '/de/aufgabenfinder/');
+		['epic','class','origin','festivals','missions','instances','craft','board','other'].forEach(function (key) {
+			var boardValue = {de:'Auftrag',en:'Task',fr:'Tâche'}[sprache] || 'Task';
+			var vorhanden = key === 'board'
+				? quests.some(function (q) { return q.a === boardValue; })
+				: quests.some(function (q) { return q.th === key; });
+			if (!vorhanden || !themenTexte[key]) { return; }
+			var link = eltern('a'); link.className = 'aufgaben-thema';
+			link.appendChild(eltern('strong',themenTexte[key][0]));
+			link.appendChild(eltern('small',themenTexte[key][1]));
+			link.appendChild(eltern('span',themenTexte[key][2]));
+			if (key === 'epic') {
+				var root = WURZEL.reihenfolge.find(function (knoten) {
+					return istThemenWurzel(knoten) && knoten.quests.some(function (q) { return q.th === 'epic'; });
+				});
+				var karteUrl = new URL(({de:'/de/karte/',en:'/en/map/',fr:'/fr/carte/'}[sprache] || '/de/karte/'),window.location.origin);
+				if (root) { karteUrl.searchParams.set('gebiet',root.schluessel.replace(/^\|/,'')); }
+				link.href = karteUrl.pathname + karteUrl.search;
+			} else {
+				link.href = finderBase + '?topic=' + encodeURIComponent(key);
+			}
+			themen.appendChild(link);
+		});
 		function zeichnen() {
 			gruppen.textContent = ''; spruenge.textContent = ''; var nachRegion = {};
 			var rest = eltern('section'); rest.className = 'landschaft-rest landschaft-gruppe';
@@ -3165,8 +3259,31 @@
 		var erklaerung = eltern('span'); kopf.appendChild(erklaerung); landschaftOrte.appendChild(kopf);
 		var auswahl = eltern('div'); auswahl.className = 'landschaft-orte-auswahl'; landschaftOrte.appendChild(auswahl);
 		var kartenSet = {};
-		function sammeln(k) { if (k.karte != null) { kartenSet[k.karte] = k; } k.reihenfolge.forEach(sammeln); }
+		function sammeln(k) {
+			if (k.karte != null) {
+				var id = String(k.karte), bisher = kartenSet[id];
+				var tiefe = (k.schluessel || '').split('|').length;
+				var bisherTiefe = bisher ? (bisher.schluessel || '').split('|').length : -1;
+				var aufgaben = (k.quests || []).length, bisherAufgaben = bisher ? (bisher.quests || []).length : -1;
+				if (!bisher || (aufgaben > 0) !== (bisherAufgaben > 0) ||
+					((aufgaben > 0) === (bisherAufgaben > 0) && (tiefe > bisherTiefe ||
+						(tiefe === bisherTiefe && aufgaben > bisherAufgaben)))) {
+					kartenSet[id] = k;
+				}
+			}
+			k.reihenfolge.forEach(sammeln);
+		}
 		sammeln(landschaftBereich.knoten);
+		Object.keys(kartenSet).forEach(function (id) {
+			var passend = kartenKnoten(id);
+			if (passend && (passend.quests || []).length > (kartenSet[id].quests || []).length) {
+				kartenSet[id] = passend;
+			}
+			var passendeAufgaben = kartenAufgaben(id);
+			if (passendeAufgaben.length > (kartenSet[id].quests || []).length) {
+				kartenSet[id] = kartenAnsichtsknoten(id, passendeAufgaben, landschaftBereich.knoten);
+			}
+		});
 		if (landschaftBereich.karte != null) { kartenSet[landschaftBereich.karte] = landschaftBereich.knoten; }
 		if (zustand.karte && !kartenSet[zustand.karte.idx]) {
 			kartenSet[zustand.karte.idx] = { name: zustand.karte.name, quests: [] };
@@ -3184,6 +3301,36 @@
 			knopf.onclick = function () { landschaftOeffnen(landschaftBereich, Number(id)); };
 			auswahl.appendChild(knopf);
 		});
+	}
+	function kartenKnoten(kennung) {
+		var teil = null;
+		function finden(k) {
+			if (Number(k.karte) === Number(kennung)) {
+				var tiefe = (k.schluessel || '').split('|').length;
+				var teilTiefe = teil ? (teil.schluessel || '').split('|').length : -1;
+				var anzahl = (k.quests || []).length, teilAnzahl = teil ? (teil.quests || []).length : -1;
+				if (!teil || (anzahl > 0) !== (teilAnzahl > 0) ||
+					((anzahl > 0) === (teilAnzahl > 0) && (tiefe > teilTiefe ||
+						(tiefe === teilTiefe && anzahl > teilAnzahl)))) { teil = k; }
+			}
+			k.reihenfolge.forEach(finden);
+		}
+		finden(WURZEL);
+		return teil;
+	}
+	function kartenAufgaben(kennung) {
+		return quests.filter(function (quest) {
+			return (quest.fk || []).some(function (id) { return Number(id) === Number(kennung); });
+		});
+	}
+	function kartenAnsichtsknoten(kennung, eintraege, elternKnoten) {
+		var karte = karteNachIndex[kennung] || {};
+		return {
+			schluessel: (elternKnoten.schluessel || '') + '|' + (karte.name || ''),
+			name: karte.name || '', tiefe: (elternKnoten.tiefe || 0) + 1,
+			quests: eintraege, eigene: eintraege, kinder: {}, reihenfolge: [],
+			karte: Number(kennung),
+		};
 	}
 	function inhaltsReiter() {
 		var e = landschaftBereich;
@@ -3222,7 +3369,17 @@
 		landschaftBereich = e; haupt.classList.remove('landschaft-start'); landschaftStart.hidden = true;
 		listenMass();
 		var teil = null;
-		function finden(k) { if (k.karte === ort) { teil = k; } if (!teil) { k.reihenfolge.forEach(finden); } }
+		function finden(k) {
+			if (Number(k.karte) === Number(ort)) {
+				var tiefe = (k.schluessel || '').split('|').length;
+				var teilTiefe = teil ? (teil.schluessel || '').split('|').length : -1;
+				var anzahl = (k.quests || []).length, teilAnzahl = teil ? (teil.quests || []).length : -1;
+				if (!teil || (anzahl > 0) !== (teilAnzahl > 0) ||
+					((anzahl > 0) === (teilAnzahl > 0) && (tiefe > teilTiefe ||
+						(tiefe === teilTiefe && anzahl > teilAnzahl)))) { teil = k; }
+			}
+			k.reihenfolge.forEach(finden);
+		}
 		inhaltsAuswahl = null;
 		if (typeof ort === 'string' && ort.indexOf('group-') === 0) {
 			var schluessel; try { schluessel = decodeURIComponent(ort.slice(6)); } catch (err) { schluessel = ''; }
@@ -3230,7 +3387,17 @@
 			moegliche.slice().forEach(function (k) { if (k !== e.knoten) { moegliche = moegliche.concat(inhaltsKinder(k)); } });
 			teil = moegliche.find(function (k) { return k.schluessel === schluessel; }) || null;
 			inhaltsAuswahl = teil;
-		} else if (ort != null) { finden(e.knoten); }
+		} else if (ort != null) {
+			finden(e.knoten);
+			var globales = kartenKnoten(ort);
+			if (globales && (globales.quests || []).length > (teil && teil.quests || []).length) {
+				teil = globales;
+			}
+			var passendeAufgaben = kartenAufgaben(ort);
+			if (passendeAufgaben.length > (teil && teil.quests || []).length) {
+				teil = kartenAnsichtsknoten(ort, passendeAufgaben, e.knoten);
+			}
+		}
 		waehleKnotenAlt(teil || e.knoten, true, true);
 		// Landscape lists include their child locations, not just direct entries.
 		zustand.suchliste = true; zeichneListe(); zeichneMarker(); aktualisiereStand();

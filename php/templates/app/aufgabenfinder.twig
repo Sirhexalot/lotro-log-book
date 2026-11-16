@@ -1,0 +1,44 @@
+{% extends 'app/layout.twig' %}
+
+{% block koerper_attribute %} data-seite="questfinder"{% endblock %}
+
+{% block stile %}<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/aufgabenfinder.css?v={{ asset_stand }}">{% endblock %}
+
+{% block haupt %}
+<main class="gs questfinder">
+	<div class="gs-kopf">
+		<h1>{{ page_seo.title }}</h1>
+		<p class="gs-unter">{{ page_seo.description }}</p>
+	</div>
+	<section class="questfinder-root" id="aufgabenfinder">
+		<form data-filter-fallback method="get" role="search">
+			<label for="questfinder-fallback">{% if lang == 'de' %}Aufgaben suchen{% elseif lang == 'fr' %}Chercher des quêtes{% else %}Search quests{% endif %}</label>
+			<input id="questfinder-fallback" type="search" name="q">
+			<button type="submit">{% if lang == 'de' %}Suchen{% elseif lang == 'fr' %}Chercher{% else %}Search{% endif %}</button>
+		</form>
+		<ol class="finder-ergebnisse" data-filter-results></ol>
+	</section>
+</main>
+{% endblock %}
+
+{% block skripte %}
+<script src="/texte.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-spielstand.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-logbuch.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-site.js?v={{ asset_stand }}" defer></script>
+<script src="/sprache.js?v={{ asset_stand }}" defer></script>
+<script src="/speicher.js?v={{ asset_stand }}" defer></script>
+<script src="/menue.js?v={{ asset_stand }}" defer></script>
+<script src="/familienmenue.js?v={{ asset_stand }}" defer></script>
+<script src="/ersetzt-{{ lang }}.js?v={{ asset_stand }}" defer></script>
+<script src="/filtergedaechtnis.js?v={{ asset_stand }}" defer></script>
+<script src="/filterzustand.js?v={{ asset_stand }}" defer></script>
+<script src="/filteradapter.js?v={{ asset_stand }}" defer></script>
+<script src="/filter-ui.js?v={{ asset_stand }}" defer></script>
+<script src="/karten-aufgabenfilter.js?v={{ asset_stand }}" defer></script>
+<script src="/karten-kurz-{{ lang }}.js?v={{ asset_stand }}" defer></script>
+<script src="/aufgabenfinder.js?v={{ asset_stand }}" defer></script>
+{% endblock %}

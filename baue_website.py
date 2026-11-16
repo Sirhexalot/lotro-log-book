@@ -27,7 +27,8 @@ HIER = Path(__file__).resolve().parent
 WEB = HIER / 'web'
 SPRACHEN = ('de', 'en', 'fr')
 
-DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'landschaft.css', 'favicon.svg', 'texte.js', 'texte-spielstand.js',
+DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'sets.css', 'landschaft.css', 'aufgabenfinder.css', 'aufgabenfinder.js', 'filter-ui.css', 'filterzustand.js',
+           'filtergedaechtnis.js', 'filteradapter.js', 'filter-ui.js', 'karten-aufgabenfilter.js', 'favicon.svg', 'texte.js', 'texte-spielstand.js',
            'texte-logbuch.js', 'texte-site.js', 'texte-plugin.js', 'texte-companion.js', 'texte-reise.js',
            'sprache.js', 'speicher.js', 'menue.js', 'symbole.js', 'companion.js', 'reise.js', 'reise.css', 'reise.html',
            'spielstand.js', 'plugin.js', 'anleitung.js', 'referenz.js', 'ruf.js', 'belohnungen.js', 'gegenstand.js', 'rezepte.js',
@@ -104,9 +105,11 @@ def stempeln(ziel):
     # data file and the scripts.
     daten = hashlib.sha256(marke.encode())
     for datei in sorted(list(ziel.glob('daten-*.js')) + list(ziel.glob('notizen-*.js'))
-                         + list(ziel.glob('belohnungen-*.js')) + list(ziel.glob('rezepte-*.js'))
-                         + list(ziel.glob('suche-*.js')) + list(ziel.glob('reise-*.js'))
-                         + list(ziel.glob('vorkommen-*.js'))):
+                        + list(ziel.glob('belohnungen-*.js')) + list(ziel.glob('rezepte-*.js'))
+                        + list(ziel.glob('suche-*.js')) + list(ziel.glob('reise-*.js'))
+                        + list(ziel.glob('vorkommen-*.js'))
+                        + list(ziel.glob('karten-kurz-*.js'))
+                        + list(ziel.glob('gebiete-*.js'))):
         daten.update(datei.name.encode())
         daten.update(datei.read_bytes())
     (ziel / 'stand.js').write_text('/* Written by baue_website.py. */\nwindow.MQL_STAND = "%s";\n'
@@ -245,6 +248,8 @@ def main():
         shutil.copy2(WEB / ('reise-%s.js' % sprache), ziel / ('reise-%s.js' % sprache))
         shutil.copy2(WEB / ('daten-%s.js' % sprache), ziel / ('daten-%s.js' % sprache))
         shutil.copy2(WEB / ('daten-taten-%s.js' % sprache), ziel / ('daten-taten-%s.js' % sprache))
+        shutil.copy2(WEB / ('karten-kurz-%s.js' % sprache), ziel / ('karten-kurz-%s.js' % sprache))
+        shutil.copy2(WEB / ('gebiete-%s.js' % sprache), ziel / ('gebiete-%s.js' % sprache))
         shutil.copy2(WEB / ('notizen-%s.js' % sprache), ziel / ('notizen-%s.js' % sprache))
         shutil.copy2(WEB / ('belohnungen-%s.js' % sprache), ziel / ('belohnungen-%s.js' % sprache))
         shutil.copy2(WEB / ('rezepte-%s.js' % sprache), ziel / ('rezepte-%s.js' % sprache))

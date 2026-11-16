@@ -12,13 +12,13 @@ def set_pages(source, lang, item_pages):
             continue
         members = []
         for member in entry['members']:
-            card = item_pages.get(member['id']) if member['available'] else None
-            card = dict(card) if card else None
+            item_page = item_pages.get(member['id'])
+            card = dict(item_page) if item_page and member['available'] else None
             if card:
                 card['required_class'] = member['class_labels'].get(lang) or None
             members.append({
                 'id': member['id'], 'name': member['name'][lang],
-                'url': '/%s/%s/%s/' % (lang, ITEM[lang], member['id']) if card else None,
+                'url': '/%s/%s/%s/' % (lang, ITEM[lang], member['id']) if item_page else None,
                 'card': {key: card.get(key) for key in (
                     'chips', 'armour', 'values', 'bonuses', 'scale', 'symbol',
                     'head_class', 'required_class')} if card else None,

@@ -8,6 +8,8 @@ window.MQL_TEXTE = {
 	de: {
 		titel: 'LOTRO Log Book – Der Herr der Ringe Online',
 		titel_karte: 'Aufgaben und Karten',
+		karten_nach_landschaft: 'Gebiete',
+		karten_suche_label: 'Gebiet oder Region suchen',
 		produkt: 'LOTRO Log Book',
 		startseite: 'Startseite',
 		sprache: 'Sprache',
@@ -79,6 +81,8 @@ window.MQL_TEXTE = {
 	en: {
 		titel: 'LOTRO Log Book – The Lord of the Rings Online',
 		titel_karte: 'Quests and maps',
+		karten_nach_landschaft: 'Areas',
+		karten_suche_label: 'Search area or region',
 		produkt: 'LOTRO Log Book',
 		startseite: 'Home',
 		sprache: 'Language',
@@ -150,6 +154,8 @@ window.MQL_TEXTE = {
 	fr: {
 		titel: 'LOTRO Log Book – Le Seigneur des Anneaux Online',
 		titel_karte: 'Quêtes et cartes',
+		karten_nach_landschaft: 'Régions',
+		karten_suche_label: 'Chercher un lieu ou une région',
 		produkt: 'LOTRO Log Book',
 		startseite: 'Accueil',
 		sprache: 'Langue',

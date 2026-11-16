@@ -159,6 +159,7 @@ final class Shell
     {
         return match ($kind) {
             'set' => 'gegenstaende',
+            'questfinder' => 'welt',
             'giver', 'instances' => 'welt',
             default => $this->catalogue->famille()[$kind] ?? null,
         };
@@ -256,6 +257,7 @@ final class Shell
         $lang = $this->lang;
         $zuordnung = [
             'karte' => ['welt', $w['menue_karte']],
+            'questfinder' => ['welt', ['de' => 'Aufgabenfinder', 'en' => 'Quest finder', 'fr' => 'Recherche de quêtes'][$lang]],
             'taten' => ['welt', $w['menue_taten']],
             'reise' => ['welt', $w['menue_reise']],
             'adventures' => ['welt', $w['menue_abenteuer']],

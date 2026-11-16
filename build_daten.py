@@ -516,6 +516,8 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
                 # Sub-region, e.g. "Fornost" within the North Downs. Not in
                 # the path of every quest.
                 untergebiet = name
+        thema = next((key.split(':', 1)[1] for key in pfad
+                      if key.startswith('theme:')), None)
         # All levels as readable names, duplicates merged. For the
         # epic story these are the section, book or "Before the Shadow"
         # and the book group – the children were missing entirely before.
@@ -607,6 +609,9 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
             'z': zone,
             'u': untergebiet,
             'f': etiketten,
+            # Stable thematic classification from the client path. Keep it
+            # separate from the geographic path used by the map and deeds.
+            **({'th': thema} if thema else {}),
             # Internal: the catalogue files this under a section of its own (epic
             # story, instances, festivals, crafting, missions), not under a place.
             **({'_sek': 1} if any(key.startswith('section:') and key != 'section:other' for key in pfad) else {}),

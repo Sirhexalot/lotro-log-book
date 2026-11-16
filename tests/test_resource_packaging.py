@@ -24,3 +24,4 @@ class ResourcePackagingTest(unittest.TestCase):
             self.assertEqual((target / 'vorkommen/268437716.js').read_bytes(),
                              (web / 'vorkommen/268437716.js').read_bytes())
             self.assertIn('rohstoffe.js', build.DATEIEN)
+            self.assertIn('sets.css', build.DATEIEN)

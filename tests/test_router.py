@@ -74,6 +74,12 @@ class RouterTest(unittest.TestCase):
         self.assertEqual(antworten['/de/beruf/'],
                          [301, '/de/handwerk/rezepte/'])
 
+    def test_quest_finder_has_one_standalone_route_per_language(self):
+        pfade = ['/de/aufgabenfinder/', '/en/quest-finder/', '/fr/recherche-quetes/']
+        antworten = self.aufloesen(pfade)
+        for pfad in pfade:
+            self.assertEqual(antworten[pfad][0], 200, pfad)
+
     def test_replaced_deed_ids_redirect_to_the_current_page(self):
         datei = DATEN / 'de' / 'deed-redirects.json'
         if not datei.is_file():

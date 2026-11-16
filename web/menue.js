@@ -35,15 +35,15 @@
 	if (seite === 'karte' && window.MQL_ART === 'taten') { seite = 'taten'; }
 	// One address per page and language; the old .html?lang= forms redirect here.
 	var APP = {
-		de: { start: '', karte: 'karte', taten: 'karte/taten', gegenstandssuche: 'gegenstandssuche',
+		de: { start: '', karte: 'karte', questfinder: 'aufgabenfinder', taten: 'karte/taten', gegenstandssuche: 'gegenstandssuche',
 			handwerk: 'handwerk/rezepte', reise: 'reise', ruf: 'ruf', belohnungen: 'belohnungen',
 			spielstand: 'spielstand', companion: 'companion', plugin: 'plugin', suche: 'suche',
 			instances: 'instanz', adventures: 'abenteuer' },
-		en: { start: '', karte: 'map', taten: 'map/deeds', gegenstandssuche: 'item-search',
+		en: { start: '', karte: 'map', questfinder: 'quest-finder', taten: 'map/deeds', gegenstandssuche: 'item-search',
 			handwerk: 'crafting/recipes', reise: 'travel', ruf: 'reputation', belohnungen: 'rewards',
 			spielstand: 'progress', companion: 'companion', plugin: 'plugin', suche: 'search',
 			instances: 'instance', adventures: 'adventure' },
-		fr: { start: '', karte: 'carte', taten: 'carte/prouesses', gegenstandssuche: 'recherche-objets',
+		fr: { start: '', karte: 'carte', questfinder: 'recherche-quetes', taten: 'carte/prouesses', gegenstandssuche: 'recherche-objets',
 			handwerk: 'artisanat/recettes', reise: 'voyage', ruf: 'reputation', belohnungen: 'recompenses',
 			spielstand: 'progression', companion: 'companion', plugin: 'plugin', suche: 'recherche',
 			instances: 'instance', adventures: 'aventure' }
@@ -108,7 +108,7 @@
 	];
 
 	// Which family the current page belongs to.
-	var ZUORDNUNG = { karte: 'welt', taten: 'welt', reise: 'welt', auftraggeber: 'welt',
+	var ZUORDNUNG = { karte: 'welt', questfinder: 'welt', taten: 'welt', reise: 'welt', auftraggeber: 'welt',
 		instanzen: 'welt', abenteuer: 'welt',
 		landmarke: 'welt', fraktion: 'erfolge',
 		gegenstand: 'gegenstaende',

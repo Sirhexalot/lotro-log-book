@@ -34,6 +34,16 @@ class SetViewModelTest(unittest.TestCase):
         self.assertEqual(page['bonuses'][0]['pending'], [{'label': 'Vitalität', 'scaling': True}])
         self.assertEqual(page['available_parts'], 1)
 
+    def test_unavailable_member_still_links_when_its_item_page_exists(self):
+        item_pages = {
+            '70000002': {'name': 'Helm'},
+            '70000003': {'name': 'Nicht verfügbar'},
+        }
+        page = set_pages(self.source(), 'de', item_pages)['70000001']
+        missing = page['members'][1]
+        self.assertEqual(missing['url'], '/de/gegenstand/70000003/')
+        self.assertIsNone(missing['card'])
+
 
 if __name__ == '__main__':
     unittest.main()

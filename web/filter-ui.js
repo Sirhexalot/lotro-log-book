@@ -107,6 +107,7 @@
 			groups.querySelectorAll('details').forEach(function(n){openStates.set(n.dataset.key,n.open);});
 			groups.replaceChildren();
 			function visibleOption(group, option) {
+				if (option.keepVisible) { return true; }
 				var effective=option.groupId?config.groups.find(function(g){return g.id===option.groupId;}):group;
 				var value=effective.kind==='tree'?option.path:option.value;
 				var facet=((result&&result.facets[effective.id])||[]).find(function(f){return JSON.stringify(f.value)===JSON.stringify(value);});
