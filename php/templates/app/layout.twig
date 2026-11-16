@@ -46,11 +46,13 @@
 
 {% block fuss %}{% endblock %}
 <footer class="seitenfuss">
-	<p>LOTRO Log Book · <a href="/{{ lang }}/plugin/">Plugin</a> · <a href="/impressum.html?lang={{ lang }}">Impressum</a> · <a href="/datenschutz.html?lang={{ lang }}">Datenschutz</a></p>
-	<p class="footer-statistik">
-		<span data-statistik-aktiv hidden><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-aktiv-text></span></span>
-	</p>
-	<nav class="sprachen" aria-label="Sprache">{% for sprache in sprachen %}<a href="{{ sprache.url }}" hreflang="{{ sprache.lang }}" lang="{{ sprache.lang }}"{% if sprache.aktiv %} aria-current="page"{% endif %}>{{ sprache.label }}</a>{% endfor %}</nav>
+	<div class="seitenfuss-innen">
+		<p>LOTRO Log Book · <a href="/{{ lang }}/plugin/">Plugin</a> · <a href="/impressum.html?lang={{ lang }}">Impressum</a> · <a href="/datenschutz.html?lang={{ lang }}">Datenschutz</a></p>
+		<p class="footer-statistik">
+			<span data-statistik-aktiv hidden><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-aktiv-text></span></span>
+		</p>
+		<nav class="sprachen" aria-label="Sprache">{% for sprache in sprachen %}<a href="{{ sprache.url }}" hreflang="{{ sprache.lang }}" lang="{{ sprache.lang }}"{% if sprache.aktiv %} aria-current="page"{% endif %}>{{ sprache.label }}</a>{% endfor %}</nav>
+	</div>
 </footer>
 {# The build used to set this inline; the map reads it for its images. #}
 <script>window.MQL_BILD_PFAD = 'karten/{{ lang }}/';</script>

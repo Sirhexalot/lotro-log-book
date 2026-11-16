@@ -329,16 +329,20 @@
 	var footer = document.querySelector('footer');
 	if (!footer) { footer = document.createElement('footer'); document.body.appendChild(footer); }
 	if (footer.classList.contains('seitenfuss')) { return; }
+	footer.classList.add('seitenfuss');
 	footer.textContent = '';
+	var footerInnen = document.createElement('div');
+	footerInnen.className = 'seitenfuss-innen';
+	footer.appendChild(footerInnen);
 	var recht = document.createElement('p');
 	[['/impressum.html', 'footer_recht'], ['/datenschutz.html', 'footer_datenschutz']].forEach(function (item, index) {
 		if (index) { recht.appendChild(document.createTextNode(' · ')); }
 		var link = document.createElement('a'); link.href = item[0] + '?lang=' + sprache;
 		link.textContent = t(item[1]); recht.appendChild(link);
 	});
-	footer.appendChild(recht);
+	footerInnen.appendChild(recht);
 	// The language buttons moved from the header into the footer: the language
 	// comes from the address, the stored choice or the browser anyway.
 	var sprachen = document.querySelector('.sprachen');
-	if (sprachen && sprachen.parentNode !== footer) { footer.appendChild(sprachen); }
+	if (sprachen && sprachen.parentNode !== footerInnen) { footerInnen.appendChild(sprachen); }
 })();

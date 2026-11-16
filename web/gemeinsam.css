@@ -237,11 +237,23 @@ footer {
 }
 .seitenfuss {
 	width: 100%;
+	padding: 0;
+}
+.seitenfuss-innen {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 4px 18px;
+	width: 100%;
 	max-width: var(--huelle);
+	min-height: 38px;
 	margin-inline: auto;
+	padding: 5px 16px;
 	box-sizing: border-box;
 }
 footer p { margin: 0; padding: 0; color: var(--schwach); }
+footer.seitenfuss p { padding: 0; }
 footer a { color: var(--schwach); text-decoration: none; }
 footer a:hover, footer a:focus-visible { color: var(--gold); text-decoration: underline; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
@@ -279,7 +291,7 @@ body.seite-start main { flex: 1; }
 .zutaten-herkunft ul { padding-left: 1.25rem; }
 /* The map stays a fixed-height app; its footer must consume real layout space. */
 body[data-seite="karte"] { grid-template-rows: auto minmax(0, 1fr) auto; }
-body[data-seite="karte"] footer { padding: 4px 16px; }
+body[data-seite="karte"] .seitenfuss { padding: 0; }
 
 /* Compact start page: useful actions come before screenshots and explanation. */
 body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; padding-top: 24px; }
