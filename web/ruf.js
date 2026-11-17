@@ -172,6 +172,7 @@
 					var control = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(quellenArt(q), q[0]);
 					if (control) {
 						control.addEventListener('click', function (event) { event.stopPropagation(); });
+						li.className = 'status-zeile';
 						li.appendChild(control);
 					}
 					var info = document.createElement('span');

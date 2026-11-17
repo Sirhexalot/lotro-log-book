@@ -2194,10 +2194,14 @@
 			zeile.appendChild(typeof stueck === 'string' ? document.createTextNode(stueck) : stueck);
 		});
 		detail.appendChild(zeile);
-		var status = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(loesung ? 'deeds' : 'quests', quest.i);
+		var status = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(
+			loesung ? 'deeds' : 'quests', quest.i, null, loesung ? 'deed' : 'quest');
 		if (status) {
 			status.addEventListener('click', function (event) { event.stopPropagation(); });
-			zeile.appendChild(status);
+			var statuszeile = eltern('div', null);
+			statuszeile.className = 'kennung status-kennung';
+			statuszeile.appendChild(status);
+			detail.appendChild(statuszeile);
 		}
 		// Sticky way to the full catalogue page; added last so it holds the
 		// bottom edge of the column.

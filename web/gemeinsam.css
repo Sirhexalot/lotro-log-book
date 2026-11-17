@@ -458,6 +458,7 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 /* Manual quest/deed status control, shared by maps and catalogue pages. */
 .manueller-status { position: relative; display: inline-flex; vertical-align: middle; }
 .manueller-status { align-items: center; gap: 3px; }
+.manueller-status-label { color: var(--schwach); font-size: var(--text-bedienung); white-space: nowrap; }
 .manueller-status-auswahl {
 	border: 1px solid var(--rand); border-radius: 4px; background: var(--fläche);
 	color: inherit; padding: .12rem 1.35rem .12rem .3rem; cursor: pointer;
@@ -476,3 +477,13 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 }
 .manueller-status-zurueck:hover,
 .manueller-status-zurueck:focus-visible { color: var(--gold); }
+.status-kennung { display: flex; align-items: center; gap: 6px; margin-top: -6px; }
+.status-kennung .manueller-status { margin-left: 0; }
+.status-zeile { display: flex; align-items: center; gap: 8px; }
+.status-zeile > a:first-child { min-width: 0; flex: 1 1 auto; }
+.status-zeile > .manueller-status { margin-left: auto; flex: 0 0 auto; }
+@media (max-width: 600px) {
+	.status-zeile { align-items: flex-start; flex-wrap: wrap; }
+	.status-zeile > .manueller-status { width: 100%; margin: 4px 0 0; }
+	.status-kennung { margin-top: 0; }
+}

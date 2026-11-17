@@ -7,13 +7,16 @@
 	padding: 0;
 	list-style: none;
 }
-.questfinder .finder-ergebnisse > li { border-bottom: 1px solid var(--rand); }
+.questfinder .finder-ergebnisse > li {
+	display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start;
+	border-bottom: 1px solid var(--rand);
+}
 .questfinder .finder-treffer {
 	display: grid;
 	grid-template-columns: minmax(0,1fr) auto;
 	align-items: start;
 	gap: 4px;
-	width: 100%;
+	width: auto; min-width: 0;
 	min-height: 0;
 	padding: 12px 4px;
 	text-align: left;
@@ -29,6 +32,15 @@
 .questfinder-status-running { color:var(--laufend); }
 .questfinder-status-unknown,.questfinder-status-excluded { color:var(--schwach); }
 .questfinder .finder-treffer small { grid-column:1 / -1; grid-row:2; color:var(--schwach); font-size:.78rem; }
+.questfinder .finder-ergebnisse > li > .manueller-status {
+	grid-column: 2; grid-row: 1; margin: 12px 4px 0 12px;
+}
+@media (max-width: 600px) {
+	.questfinder .finder-ergebnisse > li { grid-template-columns: minmax(0, 1fr); }
+	.questfinder .finder-ergebnisse > li > .manueller-status {
+		grid-column: 1; grid-row: 2; margin: 4px 4px 12px;
+	}
+}
 .questfinder .finder-keine-treffer { padding: 14px 4px; color: var(--schwach); }
 .questfinder .filter-results-home > button {
 	margin-top: 16px;

@@ -95,7 +95,8 @@
                 !own ? '– ' + texts.foreign : '○ ' + texts.recipe_missing) + ' · ' + active.name;
             return;
         }
-        var control = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(art, id, render);
+        var control = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(
+            art, id, render, art === 'deeds' ? 'deed' : art === 'quests' ? 'quest' : null);
         status.replaceChildren();
         if (control) { status.appendChild(control); }
         status.hidden = !control;

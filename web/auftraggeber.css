@@ -7,11 +7,11 @@
 .giver-weg a { color: var(--gold); }
 .giver-greeting { margin: 1rem 0; }
 .giver-list { list-style: none; margin: 0; padding: 0; }
-.giver-list > li { position: relative; display: block; border-bottom: 1px solid var(--rand); padding: .55rem 8rem .55rem 0; }
+.giver-list > li { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: start; border-bottom: 1px solid var(--rand); padding: .55rem 0; }
 .giver-list > li > a { display: flex; gap: .5rem; align-items: baseline; overflow-wrap: anywhere; }
 .giver-list > li > .giver-meta { display: block; color: var(--schwach); font-size: .875rem; margin-left: 1.5rem; }
 .giver-state { flex: 0 0 1rem; align-self: center; color: var(--schwach); text-align: center; }
-.giver-manual-status { position: absolute; top: .55rem; right: 0; }
+.giver-manual-status { grid-column: 2; grid-row: 1 / span 2; margin-left: 1rem; }
 .giver-list > li[data-state="done"] > a { color: var(--schwach); }
 .giver-list > li[data-state="done"] .giver-state { color: #91b97c; }
 .giver-hide-done .giver-list > li[data-state="done"] { display: none; }
@@ -40,4 +40,6 @@
 	.giver-kopf { align-items: flex-start; }
 	.giver-symbol { width: 48px; height: 48px; }
 	.giver-symbol svg { width: 30px; height: 30px; }
+	.giver-list > li { grid-template-columns: minmax(0,1fr); }
+	.giver-manual-status { grid-column: 1; grid-row: 3; margin: .3rem 0 0 1.5rem; }
 }

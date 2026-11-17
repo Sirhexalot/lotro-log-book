@@ -2,10 +2,21 @@
 .katalog-inhalt:has(.related-list) { max-width: var(--huelle); }
 .related-list { margin-top: 16px; min-width: 0; }
 .related-results { list-style: none; padding: 0; margin: 0; columns: auto; }
-.related-results > li { position: relative; break-inside: avoid; padding-right: 8rem; }
+.related-results > li {
+	display: grid; grid-template-columns: minmax(0, 1fr) auto;
+	align-items: start; break-inside: avoid;
+	border-bottom: 1px solid var(--rand);
+}
 .related-result { display: grid; grid-template-columns: 32px minmax(0,1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--rand); text-decoration: none; }
 .related-result small { display: block; color: var(--schwach); font-size: var(--text-bedienung); margin-top: 4px; }
 .related-symbol { width: 32px; text-align: center; color: var(--gold); }
-.related-results .manueller-status { position: absolute; top: .65rem; right: 0; }
+.related-results .related-result { grid-column: 1; border-bottom: 0; min-width: 0; }
+.related-results > li > .manueller-status { grid-column: 2; margin: 12px 0 0 12px; }
 .related-results .tabellen-rahmen { overflow-x: auto; }
 .related-results .rezept-tabelle { width: 100%; }
+@media (max-width: 600px) {
+	.related-results > li { grid-template-columns: minmax(0, 1fr); }
+	.related-results > li > .manueller-status {
+		grid-column: 1; margin: 4px 0 12px 44px;
+	}
+}
