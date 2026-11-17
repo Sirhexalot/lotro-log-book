@@ -14,7 +14,7 @@
 			more: 'Weitere anzeigen', count: '%s Einträge', show: '%s Treffer anzeigen', loading: 'Lade …',
 			error: 'Ergebnisse nicht aktualisiert.', retry: 'Erneut versuchen', fallback: 'Als Seite öffnen',
 			invalidRange: 'Ungültiger Bereich', min: 'Von', max: 'Bis',
-			flag: 'Merkmale', region: 'Region', area: 'Gebiet', level: 'Stufe', status: 'Abschluss',
+			flag: 'Merkmale', geography: 'Region und Gebiet', region: 'Region', area: 'Gebiet', level: 'Stufe', status: 'Abschluss',
 			all: 'Alle', done: 'Erledigt', rest: 'Nicht als erledigt importiert',
 			name: 'Name', kind: 'Art', reward: 'Belohnung', points: 'LOTRO-Punkte', virtue: 'Tugend', title: 'Titel',
 			item: 'Gegenstand', doneMark: 'Erledigt',
@@ -25,7 +25,7 @@
 			more: 'Show more', count: '%s entries', show: 'Show %s results', loading: 'Loading …',
 			error: 'Results not updated.', retry: 'Try again', fallback: 'Open page',
 			invalidRange: 'Invalid range', min: 'From', max: 'To',
-			flag: 'Properties', region: 'Region', area: 'Area', level: 'Level', status: 'Completion',
+			flag: 'Properties', geography: 'Region and area', region: 'Region', area: 'Area', level: 'Level', status: 'Completion',
 			all: 'All', done: 'Completed', rest: 'Not imported as completed',
 			name: 'Name', kind: 'Type', reward: 'Reward', points: 'LOTRO Points', virtue: 'Virtue', title: 'Title',
 			item: 'Item', doneMark: 'Completed',
@@ -36,7 +36,7 @@
 			more: 'Afficher davantage', count: '%s entrées', show: 'Afficher %s résultats', loading: 'Chargement …',
 			error: 'Résultats non actualisés.', retry: 'Réessayer', fallback: 'Ouvrir la page',
 			invalidRange: 'Plage incorrecte', min: 'De', max: 'À',
-			flag: 'Caractéristiques', region: 'Région', area: 'Pays', level: 'Niveau', status: 'Achèvement',
+			flag: 'Caractéristiques', geography: 'Région et pays', region: 'Région', area: 'Pays', level: 'Niveau', status: 'Achèvement',
 			all: 'Tous', done: 'Terminé', rest: 'Non importé comme terminé',
 			name: 'Nom', kind: 'Type', reward: 'Récompense', points: 'Points LOTRO', virtue: 'Vertu', title: 'Titre',
 			item: 'Objet', doneMark: 'Terminé',
@@ -102,10 +102,36 @@
 				groups.push({ id: 'flag', kind: 'multi', label: w.flag, options: flags });
 			}
 		}
-		var region = multi('region', w.region, rows.map(function (r) { return r.region; }));
-		if (region) { groups.push(region); }
-		var area = multi('area', w.area, rows.map(function (r) { return r.area; }));
-		if (area) { groups.push(area); }
+		var regions = Array.from(new Set(rows.map(function (r) { return r.region; }).filter(Boolean)))
+			.sort(function (a, b) { return a.localeCompare(b, lang); });
+		var geographyMap = {};
+		regions.forEach(function (regionName) {
+			geographyMap[regionName] = Array.from(new Set(rows.filter(function (r) {
+				return r.region === regionName;
+			}).map(function (r) { return r.area; }).filter(function (areaName) {
+				return areaName && !/^karte\s+\d+/i.test(areaName);
+			}))).sort(function (a, b) { return a.localeCompare(b, lang); });
+		});
+		var geography = regions.length ? {
+			id: 'geography', kind: 'tree', label: w.geography,
+			options: regions.map(function (regionName) {
+				return {
+					path: { region: regionName }, label: regionName,
+					children: geographyMap[regionName].map(function (areaName) {
+						return { path: { region: regionName, area: areaName }, label: areaName };
+					})
+				};
+			}),
+			validatePath: function (path) {
+				return !!(path && geographyMap[path.region]
+					&& (!path.area || geographyMap[path.region].indexOf(path.area) >= 0));
+			},
+			pathLabel: function (path) {
+				return path.region + (path.area ? ' › ' + path.area : '');
+			},
+			exclusivePaths: true
+		} : null;
+		if (geography) { groups.push(geography); }
 		var levels = new Set(rows.map(function (r) { return r.level; }).filter(function (v) { return v !== null; }));
 		if (levels.size > 1) { groups.push({ id: 'level', kind: 'range', label: w.level }); }
 		if (hasStatus) {
@@ -134,6 +160,15 @@
 			if (g.kind === 'range') {
 				fields.push({ param: 'von', path: ['filters', g.id, 'min'], type: 'number' },
 					{ param: 'bis', path: ['filters', g.id, 'max'], type: 'number' });
+			} else if (g.kind === 'tree') {
+				fields.push({ param: 'gebiet', path: ['filters', g.id], type: 'multi',
+					encode: function (value) { return value.map(JSON.stringify); },
+					decode: function (value) {
+						return value.map(function (entry) {
+							try { return JSON.parse(entry); } catch (error) { return null; }
+						}).filter(Boolean);
+					}
+				});
 			} else {
 				fields.push({ param: g.id, path: ['filters', g.id],
 					type: g.kind === 'single' ? 'text' : 'multi', omit: g.kind === 'single' ? 'all' : undefined });
@@ -154,6 +189,12 @@
 					return (value.min === null && value.max === null)
 						|| (row.level !== null && (value.min === null || row.level >= value.min)
 							&& (value.max === null || row.level <= value.max));
+				}
+				if (g.id === 'geography') {
+					return !value.length || value.some(function (path) {
+						return path.region === row.region
+							&& (!path.area || path.area === row.area);
+					});
 				}
 				if (g.id === 'status') {
 					return value === 'all' || (value === 'done' ? status(row) === 'fertig' : status(row) !== 'fertig');
@@ -194,10 +235,19 @@
 				var facets = {};
 				groups.forEach(function (g) {
 					if (!g.options) { return; }
-					facets[g.id] = g.options.map(function (option) {
+					var options = [];
+					function collect(items) {
+						items.forEach(function (option) {
+							options.push(option);
+							if (option.children) { collect(option.children); }
+						});
+					}
+					collect(g.options);
+					facets[g.id] = options.map(function (option) {
 						var candidate = JSON.parse(JSON.stringify(state));
-						candidate.filters[g.id] = g.kind === 'single' ? option.value : [option.value];
-						return { value: option.value, count: all.filter(function (row) { return matches(row, candidate); }).length };
+						var value = g.kind === 'tree' ? option.path : option.value;
+						candidate.filters[g.id] = g.kind === 'single' ? value : [value];
+						return { value: value, count: all.filter(function (row) { return matches(row, candidate); }).length };
 					});
 				});
 				return facets;
@@ -207,7 +257,7 @@
 				var symbols = document.getElementById('related-list-symbols');
 				var symbol = symbols && JSON.parse(symbols.textContent)[kind];
 				// Only what differs inside this relation belongs in the row.
-				var showRegion = !!region, showArea = !!area;
+				var showRegion = !!geography, showArea = !!geography;
 				result.payload.forEach(function (row) {
 					var line = document.createElement('li'), link = document.createElement('a');
 					var mark = document.createElement('span'), body = document.createElement('span'), meta = document.createElement('small');
