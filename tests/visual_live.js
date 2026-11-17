@@ -43,6 +43,13 @@ async function main() {
       // The map overview has lazy thumbnails that can finish decoding just
       // after networkidle. Let the fixed viewport settle before capturing it.
       await page.waitForTimeout(1500);
+      // The visitor statistic changes independently of the page layout. Keep
+      // visual references deterministic by leaving its reserved footer column
+      // empty instead of hashing a changing number.
+      await page.evaluate(() => {
+        const statistic = document.querySelector('[data-statistik-aktiv]');
+        if (statistic) statistic.hidden = true;
+      });
       const buffer = await page.screenshot({ fullPage: false, animations: 'disabled' });
       hashes[name] = {
         sha256: crypto.createHash('sha256').update(buffer).digest('hex'),
