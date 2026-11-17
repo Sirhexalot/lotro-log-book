@@ -83,7 +83,8 @@
         var art = status.getAttribute('data-kind') === 'recipe' ? 'recipes'
             : (status.getAttribute('data-kind') === 'd' ? 'deeds' : 'quests');
         // Unknown data is not the same as "not completed".
-        if (store.kennt && store.kennt(art) !== true) { status.hidden = true; return; }
+        if (store.status && !store.status(art, id)) { status.hidden = true; return; }
+        if (!store.status && store.kennt && store.kennt(art) !== true) { status.hidden = true; return; }
         status.hidden = false;
         if (status.getAttribute('data-kind') === 'recipe') {
             var known = (active.rezepte || []).indexOf(id) !== -1;
@@ -94,11 +95,10 @@
                 !own ? '– ' + texts.foreign : '○ ' + texts.recipe_missing) + ' · ' + active.name;
             return;
         }
-        var ids = status.getAttribute('data-kind') === 'd' ? active.deeds : active.quests;
-        var done = (ids || []).some(function (other) { return (ersetzt[other] || other) === id; });
-        var running = active.laufend && Object.prototype.hasOwnProperty.call(active.laufend, id);
-        status.setAttribute('data-done', String(done));
-        status.textContent = (done ? '✓ ' + texts.status_done : '○ ' + (running ? texts.status_running : texts.status_unknown)) + ' · ' + active.name;
+        var control = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(art, id, render);
+        status.replaceChildren();
+        if (control) { status.appendChild(control); }
+        status.hidden = !control;
     }
     if (select && characters.length) {
         var empty = document.createElement('option');

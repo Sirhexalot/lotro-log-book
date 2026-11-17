@@ -136,7 +136,10 @@
 			}
 			meldeImport(ergebnis.characters.length, 'companion');
 			var namen = ergebnis.characters.map(function (c) { return c.name; }).join(', ');
-			melde('meldung', ersetze(t('sp_gelesen'), [ergebnis.characters.length, namen]), 'gut');
+			var ersetzt = Object.values(stand.manuellVerworfen || {}).reduce(function (summe, anzahl) { return summe + anzahl; }, 0);
+			var meldung = ersetze(t('sp_gelesen'), [ergebnis.characters.length, namen]);
+			if (ersetzt) { meldung += ' ' + ersetze(t('sp_manuell_ersetzt'), [ersetzt]); }
+			melde('meldung', meldung, 'gut');
 			window.setTimeout(function () { window.location.reload(); }, 900);
 		}).catch(function () {
 			melde('meldung', t('sp_nichts'), 'fehler');

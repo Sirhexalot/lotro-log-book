@@ -53,6 +53,12 @@ assert.ok(text.includes('["character"] = "Feldobar"'));
 assert.ok(text.includes('["70000006"] = true') && text.includes('["70000CFC"] = true'));
 assert.ok(!/= true,\r\n\t\}/.test(text), 'no trailing comma before the closing brace');
 assert.ok(!text.includes('SECRET') && !text.includes('Sirhexalot'), 'no account data in the file');
+const manualText = C.pluginData(Object.assign({}, entry, {
+	manuell: { quests: { '70000006': 'offen', '70000007': 'fertig', '70000008': 'laufend' }, deeds: {} }
+}));
+assert.ok(!manualText.includes('["70000006"] = true'), 'manual open removes imported completion');
+assert.ok(manualText.includes('["70000007"] = true'), 'manual finished is exported');
+assert.ok(manualText.includes('["70000008"] = ""'), 'manual running is exported without fake counters');
 
 // Paths: one import per character, one name list per account and server.
 const other = Object.assign({}, entry, { key: 'Sirhexalot|Meriadoc|Meri', name: 'Meri' });

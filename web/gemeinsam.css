@@ -455,3 +455,22 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 	.kopf .menue .familie-flieger a { padding: 9px 2px; border-bottom: 0; white-space: normal; }
 	.kopf .menue .familie-flieger a strong { font-weight: 400; }
 }
+/* Manual quest/deed status control, shared by maps and catalogue pages. */
+.manueller-status { position: relative; display: inline-flex; vertical-align: middle; }
+.manueller-status-knopf {
+	border: 1px solid var(--rand); border-radius: 999px; background: var(--fläche);
+	color: inherit; padding: .25rem .55rem; cursor: pointer; font: inherit;
+}
+.manueller-status-knopf.manuell { border-color: var(--gold); }
+.manueller-status-menue {
+	position: absolute; z-index: 20; top: calc(100% + .25rem); left: 0; display: grid;
+	min-width: 11rem; padding: .3rem; border: 1px solid var(--rand);
+	border-radius: .35rem; background: var(--fläche); box-shadow: 0 .25rem .8rem #0003;
+}
+.manueller-status-menue button {
+	border: 0; background: transparent; color: inherit; padding: .45rem .55rem;
+	text-align: left; cursor: pointer; font: inherit;
+}
+.manueller-status-menue button:hover,
+.manueller-status-menue button:focus-visible { background: var(--fläche-hell); }
+.manueller-status-info { border-top: 1px solid var(--rand) !important; font-size: .85em !important; }

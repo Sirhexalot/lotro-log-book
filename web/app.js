@@ -95,6 +95,20 @@
 	var aktiverCharakter = speicher && speicher.aktiv();
 	var laufend = (aktiverCharakter && aktiverCharakter.laufend) || {};
 	var hatFortschritt = fortschritt.ids.length > 0;
+	function aktualisiereEffektivenStatus() {
+		aktiverCharakter = speicher && speicher.aktiv();
+		laufend = (aktiverCharakter && aktiverCharakter.laufend) || {};
+		if (!speicher || !speicher.manuelleStatus) { return; }
+		['quests', 'deeds'].forEach(function (art) {
+			var manuell = (aktiverCharakter && aktiverCharakter.manuell && aktiverCharakter.manuell[art]) || {};
+			Object.keys(manuell).forEach(function (id) {
+				if (manuell[id] === 'fertig') { fertig[id] = true; delete laufend[id]; }
+				else if (manuell[id] === 'laufend') { delete fertig[id]; if (!laufend[id]) { laufend[id] = []; } }
+				else { delete fertig[id]; delete laufend[id]; }
+			});
+		});
+	}
+	aktualisiereEffektivenStatus();
 
 	/**
 	 * What this quest means for a character.
@@ -106,6 +120,8 @@
 	 * a pair are exclusive.
 	 */
 	function zustandVon(quest) {
+		var manuell = speicher && speicher.manuelleStatus && speicher.manuelleStatus(loesung ? 'deeds' : 'quests', quest.i);
+		if (manuell) { return manuell; }
 		if (fertig[quest.i] === true) { return 'fertig'; }
 		if (quest.x === 1) { return 'sitzung'; }
 		// Monster play: fought as a creep, never in a normal journal.
@@ -1861,6 +1877,11 @@
 				stand.className = 'laufstand';
 				questName.appendChild(stand);
 			}
+			var status = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create('quests', quest.i);
+			if (status) {
+				status.addEventListener('click', function (event) { event.stopPropagation(); });
+				zeile.appendChild(status);
+			}
 			zeile.addEventListener('click', function () { waehle(quest); });
 			zeile.addEventListener('mouseenter', function () {
 				var punkt = markerVon[quest.i];
@@ -2177,6 +2198,11 @@
 			zeile.appendChild(typeof stueck === 'string' ? document.createTextNode(stueck) : stueck);
 		});
 		detail.appendChild(zeile);
+		var status = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(loesung ? 'deeds' : 'quests', quest.i);
+		if (status) {
+			status.addEventListener('click', function (event) { event.stopPropagation(); });
+			zeile.appendChild(status);
+		}
 		// Sticky way to the full catalogue page; added last so it holds the
 		// bottom edge of the column.
 		var segment = {'q': {'de': 'aufgabe', 'en': 'quest', 'fr': 'quete'},
@@ -2588,6 +2614,14 @@
 			});
 		}
 	}
+
+	window.addEventListener('mql-status', function () {
+		aktualisiereEffektivenStatus();
+		zeichneListe();
+		zeichneMarker();
+		zeichneDetail();
+		aktualisiereStand();
+	});
 
 	function markiereZeile(id) {
 		Object.keys(zeilen).forEach(function (index) {

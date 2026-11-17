@@ -30,6 +30,22 @@
 		} catch (fehler) { return false; }
 	}
 
+	function manuelleStatusdaten(quelle) {
+		var aus = { quests: {}, deeds: {} };
+		quelle = quelle && typeof quelle === 'object' ? quelle : {};
+		['quests', 'deeds'].forEach(function (art) {
+			var werte = quelle[art];
+			if (!werte || typeof werte !== 'object') { return; }
+			Object.keys(werte).forEach(function (id) {
+				var schluessel = String(id).toUpperCase(), status = String(werte[id]);
+				if (/^[0-9A-F]{8}$/.test(schluessel) && ['offen', 'laufend', 'fertig'].indexOf(status) >= 0) {
+					aus[art][schluessel] = status;
+				}
+			});
+		});
+		return aus;
+	}
+
 	function sauber(eintrag) {
 		var hex = /^[0-9A-F]{8}$/;
 		function ids(liste) {
@@ -79,7 +95,8 @@
 			klasse: String(eintrag.klasse || ''), race: String(eintrag.race || ''), level: String(eintrag.level || ''),
 			date: String(eintrag.date || ''), quests: ids(eintrag.quests), deeds: ids(eintrag.deeds),
 			rezepte: ids(eintrag.rezepte), importMeta: importMeta(eintrag.importMeta),
-			laufend: laufend(eintrag.laufend), ruf: ruf(eintrag.ruf), handwerk: handwerk(eintrag.handwerk)
+			laufend: laufend(eintrag.laufend), ruf: ruf(eintrag.ruf), handwerk: handwerk(eintrag.handwerk),
+			manuell: manuelleStatusdaten(eintrag.manuell)
 		};
 	}
 
@@ -129,17 +146,91 @@
 			daten.aktiv = key && daten.liste[key] ? key : null;
 			return schreibe(daten);
 		},
+		importStatus: function (art, id) {
+			var eintrag = api.aktiv(), schluessel = String(id || '').toUpperCase();
+			if (!eintrag || ['quests', 'deeds'].indexOf(art) < 0 || !/^[0-9A-F]{8}$/.test(schluessel)) { return null; }
+			var ids = eintrag[art] || [], laufend = eintrag.laufend || {};
+			if (ids.indexOf(schluessel) >= 0) { return 'fertig'; }
+			if (Object.prototype.hasOwnProperty.call(laufend, schluessel)) { return 'laufend'; }
+			if (eintrag.importMeta && typeof eintrag.importMeta[art] === 'boolean') {
+				return eintrag.importMeta[art] ? 'offen' : null;
+			}
+			return ids.length || Object.keys(laufend).length ? 'offen' : null;
+		},
+		manuelleStatus: function (art, id) {
+			var eintrag = api.aktiv(), schluessel = String(id || '').toUpperCase();
+			return eintrag && eintrag.manuell && eintrag.manuell[art]
+				&& eintrag.manuell[art][schluessel] || null;
+		},
+		status: function (art, id) {
+			return api.manuelleStatus(art, id) || api.importStatus(art, id);
+		},
+		setzeStatus: function (art, id, status) {
+			if (['quests', 'deeds'].indexOf(art) < 0 || ['offen', 'laufend', 'fertig'].indexOf(status) < 0) { return false; }
+			var schluessel = String(id || '').toUpperCase();
+			if (!/^[0-9A-F]{8}$/.test(schluessel)) { return false; }
+			var daten = lies(), eintrag = daten.aktiv && daten.liste[daten.aktiv];
+			if (!eintrag) { return false; }
+			eintrag.manuell = manuelleStatusdaten(eintrag.manuell);
+			eintrag.manuell[art][schluessel] = status;
+			return schreibe(daten);
+		},
+		entferneManuellenStatus: function (art, id) {
+			var schluessel = String(id || '').toUpperCase(), daten = lies();
+			if (!daten.aktiv || !daten.liste[daten.aktiv] || ['quests', 'deeds'].indexOf(art) < 0) { return false; }
+			var eintrag = daten.liste[daten.aktiv];
+			eintrag.manuell = manuelleStatusdaten(eintrag.manuell);
+			delete eintrag.manuell[art][schluessel];
+			return schreibe(daten);
+		},
+		loescheManuelleStatus: function (art) {
+			var daten = lies();
+			if (!daten.aktiv || !daten.liste[daten.aktiv] || ['quests', 'deeds'].indexOf(art) < 0) { return 0; }
+			var eintrag = daten.liste[daten.aktiv], alt = manuelleStatusdaten(eintrag.manuell), anzahl = Object.keys(alt[art]).length;
+			alt[art] = {};
+			eintrag.manuell = alt;
+			schreibe(daten);
+			return anzahl;
+		},
 		/** Add or update characters; an existing one is replaced, never doubled. */
-		uebernimm: function (liste) {
-			var daten = lies(), neu = 0, aktualisiert = 0;
+		uebernimm: function (liste, optionen) {
+			var daten = lies(), neu = 0, aktualisiert = 0, manuellVerworfen = { quests: 0, deeds: 0 };
+			optionen = optionen || {};
 			(liste || []).forEach(function (roh) {
 				var eintrag = sauber(roh);
 				if (!eintrag) { return; }
-				if (daten.liste[eintrag.key]) { aktualisiert += 1; } else { neu += 1; }
+				var alt = daten.liste[eintrag.key];
+				if (alt) {
+					aktualisiert += 1;
+					if (optionen.sicherung) {
+						eintrag.manuell = manuelleStatusdaten(eintrag.manuell);
+						daten.liste[eintrag.key] = eintrag;
+						return;
+					}
+					var manuellAlt = manuelleStatusdaten(alt.manuell);
+					if (eintrag.importMeta) {
+						['quests', 'deeds'].forEach(function (art) {
+							if (eintrag.importMeta[art]) {
+								manuellVerworfen[art] += Object.keys(manuellAlt[art] || {}).length;
+								delete manuellAlt[art]; manuellAlt[art] = {};
+							}
+						});
+					}
+					eintrag.manuell = manuellAlt;
+					if (eintrag.importMeta) {
+						['quests', 'deeds', 'ruf', 'handwerk', 'rezepte'].forEach(function (art) {
+							var quelle = art === 'ruf' ? 'reputation' : art === 'handwerk' || art === 'rezepte' ? 'crafting' : art;
+							if (!eintrag.importMeta[quelle] && alt[art] !== undefined) { eintrag[art] = alt[art]; }
+						});
+					}
+				} else {
+					neu += 1;
+					eintrag.manuell = manuelleStatusdaten(eintrag.manuell);
+				}
 				daten.liste[eintrag.key] = eintrag;
 				if (!daten.aktiv) { daten.aktiv = eintrag.key; }
 			});
-			return { ok: schreibe(daten), neu: neu, aktualisiert: aktualisiert };
+			return { ok: schreibe(daten), neu: neu, aktualisiert: aktualisiert, manuellVerworfen: manuellVerworfen };
 		},
 		entferne: function (key) {
 			var daten = lies();
@@ -157,7 +248,7 @@
 		},
 		sicherung: function () {
 			var daten = lies();
-			return JSON.stringify({ format: 'magic-quest-log-progress', version: 1,
+			return JSON.stringify({ format: 'magic-quest-log-progress', version: 2,
 				aktiv: daten.aktiv, charaktere: api.alle() }, null, 1);
 		},
 		/** Load a backup. Returns the number of characters, or -1 for a wrong file. */
@@ -167,7 +258,7 @@
 			if (!inhalt || inhalt.format !== 'magic-quest-log-progress' || !Array.isArray(inhalt.charaktere)) {
 				return -1;
 			}
-			var ergebnis = api.uebernimm(inhalt.charaktere);
+			var ergebnis = api.uebernimm(inhalt.charaktere, { sicherung: true });
 			if (inhalt.aktiv) { api.setzeAktiv(inhalt.aktiv); }
 			return ergebnis.neu + ergebnis.aktualisiert;
 		}

@@ -1,5 +1,27 @@
 # Umsetzungskonzept: Aufgabenstatus manuell setzen
 
+**Umsetzungsstand:** Phase 1 umgesetzt, UI-Rollout noch offen.
+
+Bereits umgesetzt:
+
+- getrennte Speicherung von manuellen Aufgaben- und Tatenstatus
+- effektiver Status über eine zentrale `MQL_SPEICHER`-API
+- bereichsweises Überschreiben durch Companion-Import
+- Sicherung und Wiederherstellung des Feldes `manuell`
+- Pluginexport mit effektivem Status ohne erfundene Teilzielzähler
+- gemeinsame Statuskomponente auf Katalog-Detailseiten, Aufgabenfinder,
+  Kartenliste und Aufgabendetail
+- erste Unit- und Browserprüfungen in `tests/test_speicher.js` und
+  `tests/browser_manual_status.js`
+
+Noch offen:
+
+- Statuswechsel im Aufgabenfinder vollständig neu rendern und filtern
+- Statussteuerung in Auftraggeber- und Quellenlisten
+- vollständige Karten-/Finder-/Detailabnahme in DE/EN/FR, Desktop und Mobil
+- Sicherungs-/Importmeldungen und Pluginexport mit allen manuellen Fällen
+  vollständig browserseitig abnehmen
+
 ## Ziel
 
 Aufgaben und Taten sollen im Browser manuell auf **offen**, **in Arbeit** oder

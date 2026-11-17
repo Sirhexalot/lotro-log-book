@@ -57,11 +57,16 @@
 		var character = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv();
 		var dataset = kind === 'd' ? 'deeds' : 'quests';
 		var known = new Set((character && character[dataset]) || []);
+		var store = window.MQL_SPEICHER;
+		function status(row) {
+			if (store && store.status) { return store.status(dataset, row.id); }
+			return known.has(row.id) ? 'fertig' : null;
+		}
 		var meta = (character && character.importMeta) || {};
 		var evidence = meta.datasets && meta.datasets[dataset];
 		// "Not imported as completed" speaks about the import, not about
 		// availability, so it needs a status file or at least positive entries.
-		var hasStatus = known.size > 0 || (evidence ? evidence.status !== 'unknown'
+		var hasStatus = known.size > 0 || (character && store && rows.some(function (row) { return status(row) !== null; })) || (evidence ? evidence.status !== 'unknown'
 			: (dataset === 'deeds' ? meta.deeds : meta.quests) === true);
 
 		/* A filter that cannot separate anything is noise: a group needs at least
@@ -150,7 +155,7 @@
 							&& (value.max === null || row.level <= value.max));
 				}
 				if (g.id === 'status') {
-					return value === 'all' || (value === 'done' ? known.has(row.id) : !known.has(row.id));
+					return value === 'all' || (value === 'done' ? status(row) === 'fertig' : status(row) !== 'fertig');
 				}
 				if (g.id === 'reward') {
 					return !value.length || value.some(function (key) {
@@ -207,8 +212,9 @@
 					var mark = document.createElement('span'), body = document.createElement('span'), meta = document.createElement('small');
 					link.className = 'related-result';
 					link.href = '/' + lang + '/' + SEGMENT[kind][lang] + '/' + row.id + '/';
-					mark.className = 'related-symbol' + (known.has(row.id) ? ' fertig' : '');
-					if (known.has(row.id)) {
+					var rowStatus = status(row);
+					mark.className = 'related-symbol' + (rowStatus === 'fertig' ? ' fertig' : '');
+					if (rowStatus === 'fertig') {
 						mark.textContent = '✓';
 						mark.setAttribute('aria-label', w.doneMark);
 					} else if (symbol) {
@@ -223,7 +229,13 @@
 						.concat([showRegion ? row.region : '', showArea ? row.area : ''])
 						.filter(Boolean).join(' · ');
 					body.appendChild(meta);
-					link.append(mark, body); line.appendChild(link); target.appendChild(line);
+					link.append(mark, body); line.appendChild(link);
+					var control = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(dataset, row.id);
+					if (control) {
+						control.addEventListener('click', function (event) { event.stopPropagation(); });
+						line.appendChild(control);
+					}
+					target.appendChild(line);
 				});
 			}
 		});

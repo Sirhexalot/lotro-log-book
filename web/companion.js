@@ -239,6 +239,14 @@
 
 	/** The plugin data file Magic Quest Log reads, in the client's own layout. */
 	function pluginData(entry) {
+		var manuell = entry.manuell || {}, abgeschlossen = {};
+		entry.quests.concat(entry.deeds).forEach(function (id) { abgeschlossen[id] = true; });
+		['quests', 'deeds'].forEach(function (art) {
+			Object.keys(manuell[art] || {}).forEach(function (id) {
+				if (manuell[art][id] === 'fertig') { abgeschlossen[id] = true; }
+				else { delete abgeschlossen[id]; }
+			});
+		});
 		var lines = ['return ', '{',
 			'\t["version"] = "1",',
 			'\t["character"] = ' + luaString(entry.name) + ',',
@@ -247,7 +255,7 @@
 			'\t["level"] = ' + luaString(entry.level || '') + ',',
 			'\t["source"] = "LOTRO Companion",',
 			'\t["completed"] = {'];
-		var ids = entry.quests.concat(entry.deeds).sort();
+		var ids = Object.keys(abgeschlossen).sort();
 		ids.forEach(function (id, index) {
 			lines.push('\t\t[' + luaString(id) + '] = true' + (index < ids.length - 1 ? ',' : ''));
 		});
@@ -255,6 +263,12 @@
 		// Running counters of unfinished entries: "objective:condition:done:count;…",
 		// count "-" when Companion has none. Text, so the client never sees a number.
 		var laufend = entry.laufend || {};
+		['quests', 'deeds'].forEach(function (art) {
+			Object.keys(manuell[art] || {}).forEach(function (id) {
+				if (manuell[art][id] === 'laufend' && !laufend[id] && !abgeschlossen[id]) { laufend[id] = []; }
+				if (manuell[art][id] !== 'laufend' && manuell[art][id] !== undefined) { delete laufend[id]; }
+			});
+		});
 		var offene = Object.keys(laufend).sort();
 		lines.push('\t["running"] = {');
 		offene.forEach(function (id, index) {

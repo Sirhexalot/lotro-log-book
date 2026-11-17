@@ -82,7 +82,7 @@ final class Shell
     public function scripts(): string
     {
         return implode("\n", [$this->scriptTag('sprachwahl.js'), $this->scriptTag('familienmenue.js'),
-            $this->scriptTag('speicher.js'),
+            $this->scriptTag('speicher.js'), $this->scriptTag('status.js'),
             $this->scriptTag('ersetzt-' . $this->lang . '.js'),
             $this->scriptTag('filtergedaechtnis.js'), $this->scriptTag('katalog.js'),
             $this->scriptTag('filterzustand.js'), $this->scriptTag('filteradapter.js'),

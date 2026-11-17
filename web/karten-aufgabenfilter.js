@@ -24,14 +24,21 @@
 		var originValues = Array.from(new Set(quests.filter(function (q) {
 			return q.th === 'origin' && q.f && q.f[0] === originMarker;
 		}).map(function (q) { return q.f[1]; }).filter(Boolean))).sort(function (a,b) { return a.localeCompare(b,lang); });
-		var replaced = window.MQL_REPLACED || {};
+		var replaced = window.MQL_REPLACED || {}, store = window.MQL_SPEICHER;
 		var known = new Set(), character = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv();
 		function currentId(id) { id = String(id || '').toUpperCase(); return replaced[id] || id; }
 		var questIds = character ? (character.quests || []) : [];
 		var progressIds = character ? questIds.concat(character.deeds || []) : [];
 		progressIds.forEach(function (id) { known.add(currentId(id)); });
+		function manualStatus(id) {
+			return store && store.manuelleStatus && store.manuelleStatus('quests', currentId(id));
+		}
+		function completed(id) {
+			return known.has(currentId(id)) || (store && store.status && store.status('quests', currentId(id)) === 'fertig');
+		}
 		var hasQuestProgress = !!(character && window.MQL_SPEICHER &&
-			(window.MQL_SPEICHER.kennt('quests') === true || questIds.length > 0));
+			(window.MQL_SPEICHER.kennt('quests') === true || questIds.length > 0
+				|| quests.some(function (q) { return manualStatus(q.i); })));
 		var hasMachbar = hasQuestProgress;
 		var laufend = character && character.laufend || {};
 		var characterLevel = Number(character && character.level) || 0;
@@ -107,18 +114,20 @@
 			return flags;
 		}
 		function progressState(row) {
+			var manual = manualStatus(row.i);
+			if (manual) { return manual === 'fertig' ? 'done' : manual === 'laufend' ? 'running' : 'open'; }
 			if (known.has(currentId(row.i))) { return 'done'; }
 			if (!hasQuestProgress) { return 'unknown'; }
 			if (row.x === 1 || row.mp === 1) { return 'excluded'; }
-			if (row.e && row.e.some(function (id) { return known.has(currentId(id)); })) { return 'excluded'; }
+			if (row.e && row.e.some(function (id) { return completed(id); })) { return 'excluded'; }
 			if (laufend[row.i]) { return 'running'; }
 			return 'open';
 		}
 		function machbar(row) {
 			if (!hasQuestProgress || progressState(row) !== 'open' || row.vb) { return false; }
 			if (characterLevel && row.vl && row.vl > characterLevel) { return false; }
-			if (row.v && !row.v.every(function (id) { return known.has(currentId(id)); })) { return false; }
-			if (row.vo && !row.vo.some(function (id) { return known.has(currentId(id)); })) { return false; }
+			if (row.v && !row.v.every(function (id) { return completed(id); })) { return false; }
+			if (row.vo && !row.vo.some(function (id) { return completed(id); })) { return false; }
 			return true;
 		}
 		function matches(row,state) {
@@ -197,7 +206,10 @@
 					status.className='questfinder-status questfinder-status-'+stand;
 					status.textContent={done:'✓ '+w.done,open:'● '+w.open,running:'◒ '+w.running,unknown:'○ '+w.unknown,excluded:'– '+w.excluded}[stand];
 					var details=[q.l?w.level+' '+q.l:'',q.a===boardValue?w.task:'',q.g||(counts[q.n]>1?w.name+' · '+q.i:'')].filter(Boolean);
-					meta.textContent=details.join(' · ');button.append(name,status,meta);button.addEventListener('click',function () { selectQuest(q); });li.appendChild(button);target.appendChild(li);
+					meta.textContent=details.join(' · ');button.append(name,status,meta);button.addEventListener('click',function () { selectQuest(q); });li.appendChild(button);
+					var control=window.MQL_STATUS_UI&&window.MQL_STATUS_UI.create('quests',q.i);
+					if (control) { control.addEventListener('click',function (event) { event.stopPropagation(); }); li.appendChild(control); }
+					target.appendChild(li);
 				});
 			}
 		});
