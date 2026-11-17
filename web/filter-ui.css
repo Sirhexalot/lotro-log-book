@@ -35,7 +35,16 @@
 .filter-ui .gs-zeile .gs-meta { grid-row:2; }
 .filter-result-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
 .filter-result-toolbar [role=status] { flex:1 1 10rem; color:var(--schwach,#a89c8a); font-size:.875rem; }
-.filter-result-toolbar select { max-width:100%; min-width:0; }
+.filter-result-toolbar select {
+	max-width:100%; min-width:0; padding-right:2.5rem;
+	appearance:none; -webkit-appearance:none;
+	background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiA4Ij48cGF0aCBkPSJNMSAxbDUgNSA1LTUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2M5YzJiNSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48L3N2Zz4=");
+	background-position:right .75rem center; background-repeat:no-repeat; background-size:.75rem auto;
+}
+.filter-ui .manueller-status-auswahl {
+	background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiA4Ij48cGF0aCBkPSJNMSAxbDUgNSA1LTUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2M5YzJiNSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48L3N2Zz4=");
+	background-position:right .55rem center; background-repeat:no-repeat; background-size:.7rem auto;
+}
 .filter-chips { display:flex; flex-wrap:wrap; gap:8px; }
 .filter-chips:not(:empty) { margin-top:12px; }
 /* Quiet groups: a gold heading over a hairline, no card around every group.

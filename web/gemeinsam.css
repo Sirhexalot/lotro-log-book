@@ -463,8 +463,8 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 	border: 1px solid var(--rand); border-radius: 4px; background: var(--fläche);
 	color: inherit; padding: .12rem 2rem .12rem .3rem; cursor: pointer;
 	font: inherit; font-size: var(--text-bedienung); line-height: 1.35;
-	appearance: none;
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23c9c2b5' stroke-width='1.5'/%3E%3C/svg%3E");
+	appearance: none; -webkit-appearance: none;
+	background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiA4Ij48cGF0aCBkPSJNMSAxbDUgNSA1LTUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2M5YzJiNSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48L3N2Zz4=");
 	background-position: right .55rem center;
 	background-repeat: no-repeat;
 	background-size: .7rem auto;
