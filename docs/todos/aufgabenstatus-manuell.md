@@ -15,6 +15,8 @@ Bereits umgesetzt:
 - Statusänderungen lösen eine Neuberechnung von Finder-, Listen- und
   Fortschrittsanzeigen aus
 - kompakte Auswahlfelder ohne zusätzliche Abschluss-Haken in den Listen
+- manuelle Statuspflege auch ohne vorherigen Companion-Import über ein lokales
+  Profil „Manuelle Angaben“
 - Aufgaben-/Tatenquellen auf Titel-, Tugend-, Gebiets-, Regions- und
   Gegenstandsseiten sowie Rufquellen angeschlossen
 - Abenteuerübersichten verwenden den effektiven manuellen Aufgabenstatus für

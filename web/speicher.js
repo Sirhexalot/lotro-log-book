@@ -96,7 +96,7 @@
 			date: String(eintrag.date || ''), quests: ids(eintrag.quests), deeds: ids(eintrag.deeds),
 			rezepte: ids(eintrag.rezepte), importMeta: importMeta(eintrag.importMeta),
 			laufend: laufend(eintrag.laufend), ruf: ruf(eintrag.ruf), handwerk: handwerk(eintrag.handwerk),
-			manuell: manuelleStatusdaten(eintrag.manuell)
+			manuell: manuelleStatusdaten(eintrag.manuell), manuellOnly: eintrag.manuellOnly === true
 		};
 	}
 
@@ -146,9 +146,25 @@
 			daten.aktiv = key && daten.liste[key] ? key : null;
 			return schreibe(daten);
 		},
+		/** Create a local-only profile when no imported character exists yet. */
+		aktiviereManuell: function (name) {
+			var daten = lies();
+			if (daten.aktiv && daten.liste[daten.aktiv]) { return daten.liste[daten.aktiv]; }
+			if (Object.keys(daten.liste).length) { return null; }
+			var eintrag = sauber({
+				key: 'manual',
+				name: name || 'Manuelle Angaben',
+				manuellOnly: true
+			});
+			if (!eintrag) { return null; }
+			daten.liste[eintrag.key] = eintrag;
+			daten.aktiv = eintrag.key;
+			return schreibe(daten) ? eintrag : null;
+		},
 		importStatus: function (art, id) {
 			var eintrag = api.aktiv(), schluessel = String(id || '').toUpperCase();
 			if (!eintrag || ['quests', 'deeds'].indexOf(art) < 0 || !/^[0-9A-F]{8}$/.test(schluessel)) { return null; }
+			if (eintrag.manuellOnly) { return null; }
 			var ids = eintrag[art] || [], laufend = eintrag.laufend || {};
 			if (ids.indexOf(schluessel) >= 0) { return 'fertig'; }
 			if (Object.prototype.hasOwnProperty.call(laufend, schluessel)) { return 'laufend'; }
@@ -163,7 +179,13 @@
 				&& eintrag.manuell[art][schluessel] || null;
 		},
 		status: function (art, id) {
-			return api.manuelleStatus(art, id) || api.importStatus(art, id);
+			var manuell = api.manuelleStatus(art, id);
+			if (manuell) { return manuell; }
+			var importiert = api.importStatus(art, id);
+			if (importiert) { return importiert; }
+			var eintrag = api.aktiv();
+			return eintrag && eintrag.manuellOnly && ['quests', 'deeds'].indexOf(art) >= 0
+				&& /^[0-9A-F]{8}$/i.test(String(id || '')) ? 'offen' : null;
 		},
 		setzeStatus: function (art, id, status) {
 			if (['quests', 'deeds'].indexOf(art) < 0 || ['offen', 'laufend', 'fertig'].indexOf(status) < 0) { return false; }

@@ -18,8 +18,13 @@
 	}
 
 	function create(art, id, callback) {
-		var store = root.MQL_SPEICHER, lang = root.MQL_SPRACHE || document.documentElement.lang || 'de';
-		if (!store || !store.aktiv() || !store.status) { return null; }
+		var lang = root.MQL_SPRACHE || document.documentElement.lang || 'de';
+		var store = root.MQL_SPEICHER;
+		if (!store || !store.status) { return null; }
+		if (!store.aktiv() && store.aktiviereManuell) {
+			store.aktiviereManuell(lang === 'fr' ? 'Indications manuelles' : lang === 'en' ? 'Manual entries' : 'Manuelle Angaben');
+		}
+		if (!store.aktiv()) { return null; }
 		var status = store.status(art, id);
 		if (!status) { return null; }
 		var w = labels[lang] || labels.de, wrapper = document.createElement('span');

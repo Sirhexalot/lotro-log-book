@@ -15,6 +15,16 @@ const context = {
 vm.runInNewContext(fs.readFileSync('web/speicher.js', 'utf8'), context);
 const store = context.MQL_SPEICHER;
 
+assert.equal(store.aktiv(), null);
+assert.ok(store.aktiviereManuell('Manual'));
+assert.equal(store.aktiv().manuellOnly, true);
+assert.equal(store.status('quests', '70000009'), 'offen');
+assert.equal(store.setzeStatus('quests', '70000009', 'fertig'), true);
+assert.equal(store.status('quests', '70000009'), 'fertig');
+assert.equal(store.entferneManuellenStatus('quests', '70000009'), true);
+assert.equal(store.status('quests', '70000009'), 'offen');
+store.entferne('manual');
+
 const q = '70000001';
 const d = '70000002';
 store.uebernimm([{

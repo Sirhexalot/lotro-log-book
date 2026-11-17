@@ -78,13 +78,13 @@
     function render() {
         if (!status) { return; }
         var active = store.aktiv();
-        if (!active) { status.hidden = true; return; }
         var id = status.getAttribute('data-id');
         var art = status.getAttribute('data-kind') === 'recipe' ? 'recipes'
             : (status.getAttribute('data-kind') === 'd' ? 'deeds' : 'quests');
+        if (!active && art === 'recipes') { status.hidden = true; return; }
         // Unknown data is not the same as "not completed".
-        if (store.status && !store.status(art, id)) { status.hidden = true; return; }
-        if (!store.status && store.kennt && store.kennt(art) !== true) { status.hidden = true; return; }
+        if (active && store.status && !store.status(art, id) && art === 'recipes') { status.hidden = true; return; }
+        if (active && !store.status && store.kennt && store.kennt(art) !== true && art === 'recipes') { status.hidden = true; return; }
         status.hidden = false;
         if (status.getAttribute('data-kind') === 'recipe') {
             var known = (active.rezepte || []).indexOf(id) !== -1;
