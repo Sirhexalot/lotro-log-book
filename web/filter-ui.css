@@ -7,6 +7,9 @@
 	--filter-row:44px;
 	color:var(--text,#e2e6ed);
 }
+/* A filter is a page-wide navigation surface. Keep it out of the prose
+ * measure even when it lives inside a catalogue detail article. */
+.katalog-inhalt article:has(.filter-ui) { max-width:none; }
 .filter-ui,.filter-ui * { box-sizing:border-box; }
 .filter-ui,.filter-toolbar,.filter-grid,.filter-result-header,.filter-results-home { min-width:0; max-width:100%; }
 .filter-ui input,.filter-ui select,.filter-ui button { font:inherit; color:inherit; }
