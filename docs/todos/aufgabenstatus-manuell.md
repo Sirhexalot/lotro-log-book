@@ -1,6 +1,6 @@
 # Umsetzungskonzept: Aufgabenstatus manuell setzen
 
-**Umsetzungsstand:** Phase 1 umgesetzt, UI-Rollout noch offen.
+**Umsetzungsstand:** Statussteuerung umgesetzt; abschließende Vollabnahme noch offen.
 
 Bereits umgesetzt:
 
@@ -11,13 +11,14 @@ Bereits umgesetzt:
 - Pluginexport mit effektivem Status ohne erfundene Teilzielzähler
 - gemeinsame Statuskomponente auf Katalog-Detailseiten, Aufgabenfinder,
   Kartenliste und Aufgabendetail
+- Statussteuerung in Auftraggeber- und Quellenlisten
+- Statusänderungen lösen eine Neuberechnung von Finder-, Listen- und
+  Fortschrittsanzeigen aus
 - erste Unit- und Browserprüfungen in `tests/test_speicher.js` und
   `tests/browser_manual_status.js`
 
 Noch offen:
 
-- Statuswechsel im Aufgabenfinder vollständig neu rendern und filtern
-- Statussteuerung in Auftraggeber- und Quellenlisten
 - vollständige Karten-/Finder-/Detailabnahme in DE/EN/FR, Desktop und Mobil
 - Sicherungs-/Importmeldungen und Pluginexport mit allen manuellen Fällen
   vollständig browserseitig abnehmen

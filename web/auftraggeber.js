@@ -104,16 +104,31 @@
 		}
 		var count = 0;
 		rows.forEach(function (row) {
-			var finished = !!done[String(row.getAttribute('data-quest')).toUpperCase()];
+			var id = String(row.getAttribute('data-quest')).toUpperCase();
+			var effektiverStatus = store && store.status ? store.status('quests', id)
+				: (done[id] ? 'fertig' : bekannt ? 'offen' : null);
+			var finished = effektiverStatus === 'fertig';
 			if (finished) { count += 1; }
-			row.setAttribute('data-state', finished ? 'done' : 'open');
+			row.setAttribute('data-state', effektiverStatus === 'fertig' ? 'done'
+				: effektiverStatus === 'laufend' ? 'running' : 'open');
 			var state = row.querySelector('.giver-state');
 			if (state) {
-				state.hidden = !bekannt;
+				state.hidden = !effektiverStatus;
 				// Without an imported character there is no state to show; a
 				// column of dots would only pretend otherwise.
-				state.textContent = finished ? '✓' : '·';
-				state.title = finished ? box.getAttribute('data-done-label') : box.getAttribute('data-open-label');
+				state.textContent = effektiverStatus === 'fertig' ? '✓' : effektiverStatus === 'laufend' ? '◐' : '·';
+				state.title = effektiverStatus === 'fertig' ? box.getAttribute('data-done-label')
+					: box.getAttribute('data-open-label');
+			}
+			var alt = row.querySelector('.manueller-status');
+			if (alt && alt.parentNode) { alt.parentNode.removeChild(alt); }
+			if (window.MQL_STATUS_UI && effektiverStatus) {
+				var control = window.MQL_STATUS_UI.create('quests', id, render);
+				if (control) {
+					control.className += ' giver-manual-status';
+					control.addEventListener('click', function (event) { event.stopPropagation(); });
+					row.appendChild(control);
+				}
 			}
 		});
 		if (progress) {
@@ -153,5 +168,6 @@
 	window.addEventListener('storage', function (event) {
 		if (event.key === 'mql.charaktere') { render(); }
 	});
+	window.addEventListener('mql-status', render);
 	render();
 })();

@@ -79,6 +79,11 @@
 			if(types.length>1){root.setAttribute('aria-labelledby','related-tab-'+active);}
 			controller=window.MQL_FILTER_UI.mount(root,contextual(setup,active));
 			window.MQL_RELATED_FILTER=controller;
+			if (window.addEventListener) {
+				window.addEventListener('mql-status', function () {
+					if (controller && controller.reload) { controller.reload(); }
+				});
+			}
 			await controller.ready;fallback.hidden=true;
 			// A relation without any distinguishing filter shows the list alone
 			// instead of an empty filter column and an empty mobile dialog.

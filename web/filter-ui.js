@@ -289,6 +289,7 @@
 		var controller = {
 			config:config,
 			dispatch:dispatch, getState:function () { return JSON.parse(JSON.stringify(state)); },
+			reload:load,
 			setCharacterContext:function (c) { context = c; state = core.normalize(config,state,c).state; return load(); },
 			destroy:async function () {
 				dead = true; ++sequence; if (request) { request.abort(); } clearTimeout(timer);

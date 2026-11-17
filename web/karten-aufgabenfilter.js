@@ -214,6 +214,11 @@
 			}
 		});
 		var controller=window.MQL_FILTER_UI.mount(root,{config:config,adapter:adapter});
+		if (window.addEventListener) {
+			window.addEventListener('mql-status', function () {
+				if (controller && controller.reload) { controller.reload(); }
+			});
+		}
 		return controller;
 	}
 	window.MQL_KARTEN_AUFGABENFILTER={mount:mount,topics:topicNames};

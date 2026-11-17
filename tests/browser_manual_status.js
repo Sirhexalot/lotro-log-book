@@ -24,10 +24,34 @@ const base = process.env.LLB_FILTER_PHP || 'http://127.0.0.1:8927';
   await control.locator('button').filter({ hasText: 'Erledigt' }).click();
   assert.equal(await page.evaluate(() => MQL_SPEICHER.status('quests', '70000003')), 'fertig');
   assert.equal(await page.locator('.manueller-status-knopf').getAttribute('title'), 'manuell gesetzt');
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const [path, label] of [
+    ['/en/quest/70000003/', 'Completed'],
+    ['/fr/quete/70000003/', 'Terminée']
+  ]) {
+    await page.goto(base + path, { waitUntil: 'domcontentloaded' });
+    await page.locator('#katalog-status .manueller-status-knopf').waitFor({ state: 'visible' });
+    assert.match(await page.locator('#katalog-status .manueller-status-knopf').textContent(), new RegExp(label));
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(base + '/de/aufgabenfinder/', { waitUntil: 'domcontentloaded' });
   await page.locator('.filter-ui [data-filter-results]').waitFor();
   await page.waitForFunction(() => !document.querySelector('.filter-ui [data-filter-results]').hasAttribute('aria-busy'));
   assert.ok(await page.locator('.manueller-status').count() > 0, 'finder exposes manual status controls');
+  const giverPage = await context.newPage();
+  await giverPage.goto(base + '/de/auftraggeber/7000016E/', { waitUntil: 'domcontentloaded' });
+  await giverPage.waitForFunction(() => {
+    const row = document.querySelector('li[data-quest]');
+    return !!(row && window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv()
+      && window.MQL_SPEICHER.status('quests', row.getAttribute('data-quest')));
+  });
+  const giverId = await giverPage.locator('li[data-quest]').first().getAttribute('data-quest');
+  await giverPage.evaluate(() => document.querySelector('li[data-quest] .manueller-status-knopf').click());
+  await giverPage.evaluate(() => [...document.querySelectorAll('li[data-quest] .manueller-status-menue button')]
+    .find((button) => button.textContent.includes('Erledigt')).click());
+  assert.equal(await giverPage.evaluate((id) => MQL_SPEICHER.status('quests', id), giverId), 'fertig');
+  assert.match(await giverPage.locator('.giver-progress').textContent(), /1 von 6/);
+  await giverPage.close();
   await browser.close();
   console.log('Manual status browser check passed');
 })().catch((error) => { console.error(error); process.exit(1); });
