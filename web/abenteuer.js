@@ -29,7 +29,15 @@
 		return core.read(accountKey());
 	}
 	function questsOf(character) {
-		return character && Array.isArray(character.quests) ? character.quests : null;
+		if (!character || !Array.isArray(character.quests)) { return null; }
+		var result = character.quests.slice();
+		var manual = character.manuell && character.manuell.quests || {};
+		Object.keys(manual).forEach(function (id) {
+			var index = result.indexOf(id);
+			if (manual[id] === 'fertig' && index < 0) { result.push(id); }
+			if (manual[id] !== 'fertig' && index >= 0) { result.splice(index, 1); }
+		});
+		return result;
 	}
 
 	var cards = {};
@@ -300,6 +308,7 @@
 	wireSettings();
 	render();
 	root.addEventListener('storage', render);
+	root.addEventListener('mql-status', render);
 	if (root.MQL_SPEICHER && document.querySelector('.charakterwahl')) {
 		// A character switch reloads the page elsewhere; re-read on return.
 		document.addEventListener('visibilitychange', function () {

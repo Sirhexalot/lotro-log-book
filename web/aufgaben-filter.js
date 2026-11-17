@@ -81,7 +81,8 @@
 
 		var groups = [];
 		if (kind === 'd') {
-			groups.push(multi('type', w.kind, rows.map(function (r) { return r.type; })));
+			var types = multi('type', w.kind, rows.map(function (r) { return r.type; }));
+			if (types) { groups.push(types); }
 			var rewards = new Set();
 			rows.forEach(function (r) { r.rewards.forEach(function (key) { rewards.add(key); }); });
 			var rewardsAvailable = [{ value: 'points', label: w.points }]
@@ -226,7 +227,8 @@
 						.concat([showRegion ? row.region : '', showArea ? row.area : ''])
 						.filter(Boolean).join(' · ');
 					body.appendChild(meta);
-					link.append(mark, body); line.appendChild(link);
+					link.append(mark, body);
+					line.appendChild(link);
 					var control = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(dataset, row.id);
 					if (control) {
 						control.addEventListener('click', function (event) { event.stopPropagation(); });

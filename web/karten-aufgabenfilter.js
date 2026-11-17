@@ -206,9 +206,17 @@
 					status.className='questfinder-status questfinder-status-'+stand;
 					status.textContent={done:'✓ '+w.done,open:'● '+w.open,running:'◒ '+w.running,unknown:'○ '+w.unknown,excluded:'– '+w.excluded}[stand];
 					var details=[q.l?w.level+' '+q.l:'',q.a===boardValue?w.task:'',q.g||(counts[q.n]>1?w.name+' · '+q.i:'')].filter(Boolean);
-					meta.textContent=details.join(' · ');button.append(name,status,meta);button.addEventListener('click',function () { selectQuest(q); });li.appendChild(button);
+					meta.textContent=details.join(' · ');
 					var control=window.MQL_STATUS_UI&&window.MQL_STATUS_UI.create('quests',q.i);
-					if (control) { control.addEventListener('click',function (event) { event.stopPropagation(); }); li.appendChild(control); }
+					button.append(name);
+					if (!control) { button.append(status); }
+					button.append(meta);
+					button.addEventListener('click',function () { selectQuest(q); });
+					li.appendChild(button);
+					if (control) {
+						control.addEventListener('click',function (event) { event.stopPropagation(); });
+						li.appendChild(control);
+					}
 					target.appendChild(li);
 				});
 			}

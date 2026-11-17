@@ -14,12 +14,19 @@ Bereits umgesetzt:
 - Statussteuerung in Auftraggeber- und Quellenlisten
 - Statusänderungen lösen eine Neuberechnung von Finder-, Listen- und
   Fortschrittsanzeigen aus
+- kompakte Auswahlfelder ohne zusätzliche Abschluss-Haken in den Listen
+- Aufgaben-/Tatenquellen auf Titel-, Tugend-, Gebiets-, Regions- und
+  Gegenstandsseiten sowie Rufquellen angeschlossen
+- Abenteuerübersichten verwenden den effektiven manuellen Aufgabenstatus für
+  ihre Summen und Empfehlungen
 - erste Unit- und Browserprüfungen in `tests/test_speicher.js` und
   `tests/browser_manual_status.js`
 
 Noch offen:
 
 - vollständige Karten-/Finder-/Detailabnahme in DE/EN/FR, Desktop und Mobil
+- Gegenstandsseiten nach dem aktuellen PHP-Umbau vollständig browserseitig
+  abnehmen
 - Sicherungs-/Importmeldungen und Pluginexport mit allen manuellen Fällen
   vollständig browserseitig abnehmen
 
@@ -131,21 +138,22 @@ Zielzähler separat verfügbar.
 
 ### Gemeinsame Statuskomponente
 
-Der Status wird als klickbarer Button mit Symbol und Text dargestellt:
+Der Status wird als kompaktes Auswahlfeld mit Symbol und Text dargestellt:
 
 - `· offen`
 - `◐ in Arbeit`
 - `✓ erledigt`
 
-Ein Klick öffnet ein kleines Drei-Zustände-Menü:
+Das Auswahlfeld enthält drei Zustände:
 
 - Offen
 - In Arbeit
 - Erledigt
 
-Die manuelle Angabe bekommt den Zusatz „manuell gesetzt“. Der Status darf
-nicht ausschließlich über Farbe erkennbar sein; Symbol und Text bleiben
-immer sichtbar.
+Eine manuelle Angabe wird dezent durch den goldenen Feldrand und eine
+Rücksetzen-Aktion gekennzeichnet. Ein sichtbares „Import“-Label wird nicht
+angezeigt; die Rücksetzen-Aktion verwendet wieder den Importstatus. Symbol und
+Text bleiben immer sichtbar.
 
 ### Kartenliste
 

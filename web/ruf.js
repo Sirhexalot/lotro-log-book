@@ -117,6 +117,11 @@
 	var quellen = null, offenesFenster = null;
 	var fertigeIds = {};
 	(aktiv.quests || []).concat(aktiv.deeds || []).forEach(function (id) { fertigeIds[id] = true; });
+	function quellenArt(q) { return q[3] === 't' ? 'deeds' : 'quests'; }
+	function istFertig(q) {
+		var store = window.MQL_SPEICHER;
+		return store && store.status ? store.status(quellenArt(q), q[0]) === 'fertig' : !!fertigeIds[q[0]];
+	}
 	function ladeQuellen(dann) {
 		if (quellen) { dann(); return; }
 		var eigenes = document.querySelector('script[src*="ruf.js"]');
@@ -144,7 +149,7 @@
 		if (offenesFenster && offenesFenster.dataset.id === zeile.id) { offenesFenster = null; return; }
 		ladeQuellen(function () {
 			var liste = (quellen[zeile.id] || []).filter(sichtbar);
-			var offeneListe = liste.filter(function (q) { return !fertigeIds[q[0]]; });
+			var offeneListe = liste.filter(function (q) { return !istFertig(q); });
 			var fenster = document.createElement('tr');
 			fenster.className = 'quellen';
 			fenster.dataset.id = zeile.id;
@@ -164,6 +169,11 @@
 					a.href = '/' + sprache + '/' + ART[q[3] === 't' ? 'd' : 'q'] + '/' + q[0] + '/';
 					a.textContent = q[1];
 					li.appendChild(a);
+					var control = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(quellenArt(q), q[0]);
+					if (control) {
+						control.addEventListener('click', function (event) { event.stopPropagation(); });
+						li.appendChild(control);
+					}
 					var info = document.createElement('span');
 					info.className = 'stufe-klein';
 					info.textContent = ' ' + [q[3] === 't' ? t('ru_tat') : t('ru_aufgabe'),
@@ -189,5 +199,14 @@
 
 	el('filter').addEventListener('input', zeichne);
 	el('nur-begonnen').addEventListener('change', zeichne);
+	window.addEventListener('mql-status', function () {
+		if (offenesFenster) {
+			var id = offenesFenster.dataset.id;
+			offenesFenster.remove();
+			offenesFenster = null;
+			var tr = document.querySelector('tr[data-id="' + id + '"]');
+			if (tr) { zeigeQuellen({ id: id }, tr); }
+		}
+	});
 	zeichne();
 })();

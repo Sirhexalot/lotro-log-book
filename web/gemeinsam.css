@@ -463,6 +463,12 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 	color: inherit; padding: .12rem 1.35rem .12rem .3rem; cursor: pointer;
 	font: inherit; font-size: var(--text-bedienung); line-height: 1.35;
 }
+.filter-ui .manueller-status-auswahl {
+	padding: .12rem 1.35rem .12rem .3rem;
+	font-size: var(--text-bedienung);
+	min-height: 0;
+	width: auto;
+}
 .manueller-status.manuell .manueller-status-auswahl { border-color: var(--gold); }
 .manueller-status-zurueck {
 	border: 0; background: transparent; color: var(--schwach); padding: 0 2px;

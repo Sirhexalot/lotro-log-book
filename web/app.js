@@ -1873,7 +1873,7 @@
 				stand.className = 'laufstand';
 				questName.appendChild(stand);
 			}
-			var status = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create('quests', quest.i);
+			var status = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(loesung ? 'deeds' : 'quests', quest.i);
 			if (status) {
 				status.addEventListener('click', function (event) { event.stopPropagation(); });
 				zeile.appendChild(status);
@@ -2179,13 +2179,13 @@
 		}
 		var lage = zustandVon(quest);
 		if (hatFortschritt) {
-			if (lage === 'fertig') { teil(t('erledigt')); }
-			else if (lage === 'sitzung') { teil(t('sitzungsspiel')); }
+			// The compact status selector below is the single completion display.
+			// Keep only explanatory states that are not selectable statuses.
+			if (lage === 'sitzung') { teil(t('sitzungsspiel')); }
 			else if (lage === 'monster') { teil(t('monster_hinweis')); }
 			else if (lage === 'ausgeschlossen') { teil(t('nicht_moeglich')); }
-			else if (lage === 'laufend') { teil(t('in_arbeit') + ' · ' + laufText(quest)); }
 			else if (machbar(quest)) { teil(t('machbar_jetzt')); }
-			else { teil(t('filter_offen')); }
+			else if (lage !== 'fertig' && lage !== 'laufend') { teil(t('filter_offen')); }
 		}
 		var zeile = eltern('div', null);
 		zeile.className = 'kennung';
