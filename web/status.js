@@ -49,6 +49,8 @@
 			if (!status) { wrapper.hidden = true; return; }
 			wrapper.hidden = false;
 			select.value = status;
+			wrapper.classList.remove('status-offen', 'status-laufend', 'status-fertig');
+			wrapper.classList.add('status-' + status);
 			wrapper.classList.toggle('manuell', !!store.manuelleStatus(art, id));
 			reset.hidden = !store.manuelleStatus(art, id);
 		}
