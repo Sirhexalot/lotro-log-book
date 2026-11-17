@@ -23,15 +23,24 @@
 		return {region:region||{id:'unknown',name:unknown},landscape:landscape||{id:String(mapId),name:geography[String(mapId)]&&geography[String(mapId)].name||unknown}};
 	}
 	var words={
-		de:['Suchen','Filter','Schließen','Sortierung','Zurücksetzen','Weitere anzeigen','%s Einträge','%s Treffer anzeigen','Lade …','Ergebnisse nicht aktualisiert.','Erneut versuchen','Als Seite öffnen','Ungültiger Bereich','Von','Bis','Beruf','Handwerksstufe','Kategorie','Nur eigene Berufe','Lernstand','Alle','Gelernt','Nicht gelernt','Quelle','Sammelvorkommen','Herstellbar','Unbekannt','Optionale Zutaten einschließen','Fundgebiet','Name','Materialien und Zutaten','Persönlicher Lernstand: Ohne vollständigen Rezeptnachweis sind nur gelernte Rezepte sicher erkennbar.','Stufe nicht belegt'],
-		en:['Search','Filters','Close','Sort','Reset','Show more','%s entries','Show %s results','Loading …','Results not updated.','Try again','Open page','Invalid range','From','To','Profession','Crafting tier','Category','Only my professions','Learning status','All','Learned','Not learned','Source','Gathering nodes','Craftable','Unknown','Include optional ingredients','Gathering area','Name','Materials and ingredients','Personal learning status: Without complete recipe evidence, only learned recipes are certain.','Tier not recorded'],
-		fr:['Chercher','Filtres','Fermer','Tri','Réinitialiser','Afficher davantage','%s entrées','Afficher %s résultats','Chargement …','Résultats non actualisés.','Réessayer','Ouvrir la page','Plage incorrecte','De','À','Métier','Niveau d’artisanat','Catégorie','Mes métiers uniquement','Apprentissage','Tous','Appris','Non appris','Source','Gisements','Fabrication','Inconnue','Inclure les ingrédients facultatifs','Zone de récolte','Nom','Matériaux et ingrédients','Apprentissage : sans preuve complète des recettes, seules les recettes apprises sont certaines.','Palier non attesté']
+		de:['Suchen','Filter','Schließen','Sortierung','Zurücksetzen','Weitere anzeigen','%s Einträge','%s Treffer anzeigen','Lade …','Ergebnisse nicht aktualisiert.','Erneut versuchen','Als Seite öffnen','Ungültiger Bereich','Von','Bis','Beruf','Handwerksstufe','Kategorie','Nur eigene Berufe','Lernstand','Alle','Gelernt','Nicht gelernt','Quelle','Sammelvorkommen','Herstellbar','Unbekannt','Optionale Zutaten einschließen','Fundgebiet','Name','Materialien und Zutaten','Persönlicher Lernstand: Ohne vollständigen Rezeptnachweis sind nur gelernte Rezepte sicher erkennbar.','Stufe nicht belegt','Bis zur aktuellen Ausbildungsstufe','Gemeisterte Stufen ausblenden'],
+		en:['Search','Filters','Close','Sort','Reset','Show more','%s entries','Show %s results','Loading …','Results not updated.','Try again','Open page','Invalid range','From','To','Profession','Crafting tier','Category','Only my professions','Learning status','All','Learned','Not learned','Source','Gathering nodes','Craftable','Unknown','Include optional ingredients','Gathering area','Name','Materials and ingredients','Personal learning status: Without complete recipe evidence, only learned recipes are certain.','Tier not recorded','Up to current crafting tier','Hide mastered tiers'],
+		fr:['Chercher','Filtres','Fermer','Tri','Réinitialiser','Afficher davantage','%s entrées','Afficher %s résultats','Chargement …','Résultats non actualisés.','Réessayer','Ouvrir la page','Plage incorrecte','De','À','Métier','Niveau d’artisanat','Catégorie','Mes métiers uniquement','Apprentissage','Tous','Appris','Non appris','Source','Gisements','Fabrication','Inconnue','Inclure les ingrédients facultatifs','Zone de récolte','Nom','Matériaux et ingrédients','Apprentissage : sans preuve complète des recettes, seules les recettes apprises sont certaines.','Palier non attesté','Jusqu’au palier actuel','Masquer les paliers maîtrisés']
 	}[lang];
 	function name(o){return o && (o[lang]||o.en)||'';}
 	function profession(key){return name((refs[key]||{}).n)||key;}
 	function character(){return window.MQL_SPEICHER&&window.MQL_SPEICHER.aktiv?window.MQL_SPEICHER.aktiv():null;}
 	function own(c){return Object.keys(c&&c.handwerk||{}).filter(function(k){return c.handwerk[k]&&c.handwerk[k].length;});}
 	function complete(c){return !!(c&&c.importMeta&&c.importMeta.datasets&&c.importMeta.datasets.recipes&&c.importMeta.datasets.recipes.status==='complete');}
+	function craftProgress(c,profession){
+		var rows=c&&c.handwerk&&c.handwerk[profession]||[], current=0, mastered=new Set();
+		rows.forEach(function(row){
+			var tier=Number(row[0])||0;
+			if(row[1]>0||row[2]||row[3]>0||row[4]){current=Math.max(current,tier);}
+			if(row[4]){mastered.add(String(tier));}
+		});
+		return {current:current,mastered:mastered};
+	}
 	function text(tag,s){var n=document.createElement(tag);n.textContent=s;return n;}
 	function url(kind,id){return '/'+lang+'/'+({item:{de:'gegenstand',en:'item',fr:'objet'},recipe:{de:'rezept',en:'recipe',fr:'recette'}}[kind][lang])+'/'+id+'/';}
 	/* Tier numbers become the game's own names (Lehrling, Geselle …). The
@@ -126,6 +135,8 @@
 		if(isRecipe){groups.push(multi('kategorie',words[17],rows.map(function(r){return r.category;})));groups.push({id:'lernstand',kind:'single',label:words[19],options:[{value:'alle',label:words[20]}].concat(known.size||complete(c)?[{value:'gelernt',label:words[21]}]:[]).concat(complete(c)?[{value:'nicht-gelernt',label:words[22]}]:[])});}
 		if(isMaterial){groups.push({id:'quelle',kind:'multi',label:words[23],options:[{value:'gather',label:words[24]},{value:'crafted',label:words[25]},{value:'unknown',label:words[26]}]},
 				{id:'optional',kind:'boolean',label:words[27]});
+			groups.push({id:'aktuell',kind:'boolean',label:words[34],available:function(){return !!c&&mine.length>0;}},
+				{id:'gemeistert',kind:'boolean',label:words[35],available:function(){return !!c&&mine.length>0;}});
 			var regions=new Map(),landscapes=new Map(),zones=new Map();
 			rows.forEach(function(r){r.areas.forEach(function(a){
 				var p=parents(a.map);a.region=p.region.id;a.landscape=p.landscape.id;
@@ -156,7 +167,7 @@
 		},encode:function(s,u){u=codec.encode(s,u);u.searchParams.delete('fehlend');if(!settings.area){u.hash=tab;}return u;}};
 		function matches(r,s,skip){var f=s.filters;
 			return (!s.q||[r.name,r.id,isRecipe?r.raw[6].map(function(z){return z[0];}).join(' '):''].join(' ').toLocaleLowerCase().includes(s.q.toLocaleLowerCase()))&&
-				r.uses.some(function(u){return (skip==='beruf'||!f.beruf.length||f.beruf.includes(u.profession))&&(skip==='stufe'||!f.stufe||!f.stufe.length||f.stufe.includes(u.tier))&&(skip==='eigene'||!f.eigene||!mine.length||mine.includes(u.profession))&&(!isMaterial||skip==='optional'||f.optional||!u.optional);})&&
+				r.uses.some(function(u){var progress=craftProgress(c,u.profession),tier=Number(u.tier)||0;return (skip==='beruf'||!f.beruf.length||f.beruf.includes(u.profession))&&(skip==='stufe'||!f.stufe||!f.stufe.length||f.stufe.includes(u.tier))&&(skip==='eigene'||!f.eigene||!mine.length||mine.includes(u.profession))&&(!isMaterial||skip==='optional'||f.optional||!u.optional)&&(!isMaterial||skip==='aktuell'||!f.aktuell||tier<=progress.current)&&(!isMaterial||skip==='gemeistert'||!f.gemeistert||!progress.mastered.has(String(tier)));})&&
 				(!isRecipe||((skip==='kategorie'||!f.kategorie.length||f.kategorie.includes(r.category))&&(skip==='lernstand'||f.lernstand==='alle'||(f.lernstand==='gelernt'?known.has(r.id):!known.has(r.id)))))&&
 				(!isMaterial||((skip==='quelle'||!f.quelle.length||f.quelle.includes(r.source))&&
 					((!f.gebiet.length&&!f.region.length&&!f.landschaft.length)||r.areas.some(function(a){

@@ -43,6 +43,11 @@ async function ready(p){await p.waitForSelector('.filter-ui');await p.waitForFun
 			for(const tab of ['rezepte','rohstoffe','berufe']){
 				await p.locator('[data-hw="'+tab+'"]').click();await p.waitForFunction(t=>location.hash==='#'+t,tab);await ready(p);
 				assert.equal(await p.locator('.filter-ui').count(),1);
+				if(tab==='rohstoffe'){
+					const resourceGroups=await p.evaluate(()=>MQL_CRAFT_FILTER.config.groups.map(g=>g.id));
+					assert.ok(resourceGroups.includes('aktuell'),'resource filter has current-tier limit');
+					assert.ok(resourceGroups.includes('gemeistert'),'resource filter has mastered-tier exclusion');
+				}
 				for(const width of [390,901,1440]){await p.setViewportSize({width,height:900});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}
 				await p.locator('.filter-panel input[type=checkbox]').first().check();await ready(p);assert.ok(await p.locator('.filter-chips button').count());
 				const selected=await p.evaluate(()=>MQL_CRAFT_FILTER.getState().filters);
