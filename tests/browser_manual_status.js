@@ -20,18 +20,17 @@ const base = process.env.LLB_FILTER_PHP || 'http://127.0.0.1:8927';
   await page.reload({ waitUntil: 'domcontentloaded' });
   const control = page.locator('#katalog-status .manueller-status');
   await control.waitFor({ state: 'visible' });
-  await control.locator('.manueller-status-knopf').click();
-  await control.locator('button').filter({ hasText: 'Erledigt' }).click();
+  await control.locator('.manueller-status-auswahl').selectOption('fertig');
   assert.equal(await page.evaluate(() => MQL_SPEICHER.status('quests', '70000003')), 'fertig');
-  assert.equal(await page.locator('.manueller-status-knopf').getAttribute('title'), 'manuell gesetzt');
+  assert.equal(await control.evaluate((element) => element.classList.contains('manuell')), true);
   await page.setViewportSize({ width: 390, height: 844 });
   for (const [path, label] of [
     ['/en/quest/70000003/', 'Completed'],
     ['/fr/quete/70000003/', 'Terminée']
   ]) {
     await page.goto(base + path, { waitUntil: 'domcontentloaded' });
-    await page.locator('#katalog-status .manueller-status-knopf').waitFor({ state: 'visible' });
-    assert.match(await page.locator('#katalog-status .manueller-status-knopf').textContent(), new RegExp(label));
+    await page.locator('#katalog-status .manueller-status-auswahl').waitFor({ state: 'visible' });
+    assert.match(await page.locator('#katalog-status .manueller-status-auswahl').inputValue(), /fertig/);
   }
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(base + '/de/aufgabenfinder/', { waitUntil: 'domcontentloaded' });
@@ -46,9 +45,11 @@ const base = process.env.LLB_FILTER_PHP || 'http://127.0.0.1:8927';
       && window.MQL_SPEICHER.status('quests', row.getAttribute('data-quest')));
   });
   const giverId = await giverPage.locator('li[data-quest]').first().getAttribute('data-quest');
-  await giverPage.evaluate(() => document.querySelector('li[data-quest] .manueller-status-knopf').click());
-  await giverPage.evaluate(() => [...document.querySelectorAll('li[data-quest] .manueller-status-menue button')]
-    .find((button) => button.textContent.includes('Erledigt')).click());
+  await giverPage.evaluate(() => {
+    const select = document.querySelector('li[data-quest] .manueller-status-auswahl');
+    select.value = 'fertig';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  });
   assert.equal(await giverPage.evaluate((id) => MQL_SPEICHER.status('quests', id), giverId), 'fertig');
   assert.match(await giverPage.locator('.giver-progress').textContent(), /1 von 6/);
   await giverPage.close();

@@ -12,7 +12,6 @@
 .giver-list > li > .giver-meta { display: block; color: var(--schwach); font-size: .875rem; margin-left: 1.5rem; }
 .giver-state { flex: 0 0 1rem; align-self: center; color: var(--schwach); text-align: center; }
 .giver-manual-status { position: absolute; top: .55rem; right: 0; }
-.giver-manual-status .manueller-status-menue { left: auto; right: 0; }
 .giver-list > li[data-state="done"] > a { color: var(--schwach); }
 .giver-list > li[data-state="done"] .giver-state { color: #91b97c; }
 .giver-hide-done .giver-list > li[data-state="done"] { display: none; }

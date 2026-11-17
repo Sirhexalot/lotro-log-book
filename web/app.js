@@ -1840,9 +1840,6 @@
 			if (zustand.auswahl && zustand.auswahl.i === quest.i) {
 				zeile.classList.add('aktiv');
 			}
-			var haken = eltern('span', erledigt ? '✓' : (lage === 'offen' ? '·' : ''));
-			haken.className = 'haken';
-			zeile.appendChild(haken);
 			var questName = eltern('span', quest.n);
 			questName.className = 'qname';
 			if (quest.g && doppelt[quest.n]) {
@@ -1872,7 +1869,6 @@
 			}
 			if (lage === 'laufend') {
 				zeile.classList.add('laufend');
-				haken.textContent = '◐';
 				var stand = eltern('span', laufText(quest));
 				stand.className = 'laufstand';
 				questName.appendChild(stand);

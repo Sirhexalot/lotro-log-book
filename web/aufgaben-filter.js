@@ -214,10 +214,7 @@
 					link.href = '/' + lang + '/' + SEGMENT[kind][lang] + '/' + row.id + '/';
 					var rowStatus = status(row);
 					mark.className = 'related-symbol' + (rowStatus === 'fertig' ? ' fertig' : '');
-					if (rowStatus === 'fertig') {
-						mark.textContent = '✓';
-						mark.setAttribute('aria-label', w.doneMark);
-					} else if (symbol) {
+					if (symbol) {
 						// Only the server's established Lucide SVG, never game or user text.
 						var template = document.createElement('template');
 						template.innerHTML = symbol;

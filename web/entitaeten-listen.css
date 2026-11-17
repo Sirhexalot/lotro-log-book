@@ -7,6 +7,5 @@
 .related-result small { display: block; color: var(--schwach); font-size: var(--text-bedienung); margin-top: 4px; }
 .related-symbol { width: 32px; text-align: center; color: var(--gold); }
 .related-results .manueller-status { position: absolute; top: .65rem; right: 0; }
-.related-results .manueller-status-menue { left: auto; right: 0; }
 .related-results .tabellen-rahmen { overflow-x: auto; }
 .related-results .rezept-tabelle { width: 100%; }

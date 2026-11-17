@@ -457,21 +457,16 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 }
 /* Manual quest/deed status control, shared by maps and catalogue pages. */
 .manueller-status { position: relative; display: inline-flex; vertical-align: middle; }
-.manueller-status-knopf {
-	border: 1px solid var(--rand); border-radius: 999px; background: var(--fläche);
-	color: inherit; padding: .12rem .38rem; cursor: pointer; font: inherit;
-	font-size: var(--text-bedienung); line-height: 1.35;
+.manueller-status { align-items: center; gap: 3px; }
+.manueller-status-auswahl {
+	border: 1px solid var(--rand); border-radius: 4px; background: var(--fläche);
+	color: inherit; padding: .12rem 1.35rem .12rem .3rem; cursor: pointer;
+	font: inherit; font-size: var(--text-bedienung); line-height: 1.35;
 }
-.manueller-status-knopf.manuell { border-color: var(--gold); }
-.manueller-status-menue {
-	position: absolute; z-index: 20; top: calc(100% + .25rem); left: 0; display: grid;
-	min-width: 11rem; padding: .3rem; border: 1px solid var(--rand);
-	border-radius: .35rem; background: var(--fläche); box-shadow: 0 .25rem .8rem #0003;
+.manueller-status.manuell .manueller-status-auswahl { border-color: var(--gold); }
+.manueller-status-zurueck {
+	border: 0; background: transparent; color: var(--schwach); padding: 0 2px;
+	cursor: pointer; font: inherit; font-size: .9rem; line-height: 1;
 }
-.manueller-status-menue button {
-	border: 0; background: transparent; color: inherit; padding: .45rem .55rem;
-	text-align: left; cursor: pointer; font: inherit;
-}
-.manueller-status-menue button:hover,
-.manueller-status-menue button:focus-visible { background: var(--fläche-hell); }
-.manueller-status-info { border-top: 1px solid var(--rand) !important; font-size: .85em !important; }
+.manueller-status-zurueck:hover,
+.manueller-status-zurueck:focus-visible { color: var(--gold); }

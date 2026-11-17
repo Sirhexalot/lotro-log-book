@@ -41,7 +41,7 @@
     <ul class="giver-list" data-nosnippet>
     {% for quest in giver.quests %}
         <li data-quest="{{ quest.id }}">
-            <a href="{{ quest.url }}"><span class="giver-state" hidden></span>{{ quest.name }}</a>
+            <a href="{{ quest.url }}">{{ quest.name }}</a>
             <span class="giver-meta">{% if quest.level %}{{ gw.level_short }} {{ quest.level }}{% if quest.scaled %} *{% endif %}{% if quest.zone %} · {% endif %}{% endif %}{{ quest.zone }}{% for chip in quest.chips %} · {{ chip }}{% endfor %}</span>
         </li>
     {% endfor %}
