@@ -24,6 +24,7 @@ RewriteRule ^(start(-(en|fr))?|index|gegenstaende|handwerk|reise|ruf|belohnungen
 RewriteRule ^api/statistik$ /index.php [END]
 RewriteRule ^(de|en|fr)(/|$) /index.php [END]
 RewriteRule ^sitemap(-[a-z0-9-]+)?\.xml$ /index.php [END]
+RewriteRule ^\.llb- - [F]
 # END LLB PHP URLS
 
 # Compress text: the data files shrink from 17 MB to under 4 MB.

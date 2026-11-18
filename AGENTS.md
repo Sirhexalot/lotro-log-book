@@ -152,11 +152,15 @@ node tests/test_questfinder.js
   `upload.py --quelle <Buildordner> --gruppe programm|daten|assets|alle`
   (mehrere Gruppen mit Komma). `--dry-run` verändert weder Lock noch
   Deploymentstand; bei fehlendem Servermanifest ist zuerst ein ausdrücklich
-  gestarteter `--migration`-Lauf nötig. Der Uploadstand liegt privat in
-  `~/.config/mql-upload-state.json`, der bestätigte Komponentenstand als
-  vorgesehene Remote-Metadatei `.llb-deployment.json`; deren HTTP-Schutz muss
-  vor dem ersten Liveeinsatz noch verifiziert werden. Keine Inhalte oder
-  Zugangsdaten ausgeben oder ins Repository kopieren.
+  gestarteter `--migration`-Lauf nötig. Ist der Inhalt bereits vollständig
+  veröffentlicht (klassischer Upload), übernimmt `upload.py --adopt` den
+  Serverstand ohne erneuten Upload: ein `LIST` je Ordner prüft Existenz und
+  Größe aller Manifestdateien, jede Abweichung bricht ab, erst dann wird
+  `.llb-deployment.json` geschrieben. `--dry-run` zeigt die Prüfung ohne
+  Schreiben. Der Uploadstand liegt privat in `~/.config/mql-upload-state.json`.
+  Die Remote-Metadatei `.llb-deployment.json` ist per `.htaccess`
+  (`RewriteRule ^\.llb- - [F]`) gesperrt; live geprüft mit HTTP 403. Keine
+  Inhalte oder Zugangsdaten ausgeben oder ins Repository kopieren.
 - Der Upload vergleicht **Inhalte per `sha256`**, nicht Änderungszeiten: der Bau erzeugt den ganzen Katalog mit neuen Zeitstempeln, ohne Hash gingen jedes Mal alle ~110.000 Dateien hoch. Je Lauf ein `LIST` pro Ordner statt einer Größenabfrage pro Datei; Einträge sind `[Größe, Zeit, Hash]`, bei gleicher Größe und Zeit wird der Hash ohne Lesen wiederverwendet. Altbestand im alten Format zählt einmalig als „nicht hochgeladen“. `--workers 1–8` lässt mehrere FTPS-Verbindungen gleichzeitig schreiben; die Reihenfolge ist fest — Detailseiten, übrige Dateien, Listen (`…/index.html`), zuletzt Sitemaps —, damit ein abgebrochener Lauf nie eine Liste auf fehlende Seiten zeigen lässt. `--nur de,en,fr` und `--ohne de,en,fr` teilen einen Release in App-Teil und Katalogteil; bei aktivem Filter bleibt der Uploadstand der anderen Hälfte erhalten. Der Stand wird alle 2.000 Dateien geschrieben, ein Abbruch ist also fortsetzbar.
 - `--verwaiste` **listet nur**, was auf dem Server liegt und im Build fehlt; `--verwaiste --loeschen` löscht genau diese Dateien, schont `.htaccess`, `.user.ini`, `.well-known`, `cgi-bin`, `error_log` und `logs` und verweigert mehr als 2.000 Löschungen ohne `--force`. Ohne diesen Lauf bleiben gelöschte/umbenannte Dateien auf dem Server liegen.
 - `upload.py` lädt `.htaccess` nicht automatisch aus `redirect-mm/` mit hoch. Änderungen daran separat und gezielt einspielen. iCloud-Konfliktkopien wie `app 2.js` werden übersprungen; **`--aufraeumen` löscht auf dem Server** und ist kein bloßer Testmodus. Nicht mit `--dry-run` als vermeintlich ungefährliche Probe kombinieren.

@@ -326,6 +326,60 @@ def journal_schreiben(ftp, ziel, data):
     remote_json_schreiben(ftp, ziel, JOURNAL_NAME, data)
 
 
+def serverstand_uebernehmen(daten, basis, manifest, trocken=False):
+    """Write the deployment manifest for an already identical server tree.
+
+    This is the first step for a site that was published without a confirmed
+    component state. Existence and size of every manifest file are checked
+    against one listing per folder; content is not downloaded. Any missing
+    file or size difference aborts, so the written state cannot describe a
+    server that differs from the build.
+    """
+    ftp = verbinde(daten)
+    try:
+        ziel = daten['path']
+        vorhanden = fern_json(ftp, ziel, DEPLOYMENT_NAME)
+        if vorhanden is not None:
+            raise RuntimeError('Serverstand ist bereits vorhanden; nichts zu übernehmen')
+        print('Serververzeichnisse werden gelistet ...', flush=True)
+        fern = fern_index(ftp, ziel)
+        if fern is None:
+            raise RuntimeError('Der Server konnte nicht gelistet werden')
+        fehlt, abweichend = [], []
+        for path, entry in manifest['files'].items():
+            if path not in fern:
+                fehlt.append(path)
+                continue
+            groesse = fern[path]
+            if groesse is None or int(groesse) != int(entry['size']):
+                abweichend.append('%s (lokal %s, Server %s)'
+                                  % (path, entry['size'], groesse))
+        print('%d Dateien geprüft, %d fehlen, %d mit abweichender Größe'
+              % (len(manifest['files']), len(fehlt), len(abweichend)), flush=True)
+        for path in fehlt[:10]:
+            print('  fehlt:', path)
+        for zeile in abweichend[:10]:
+            print('  Größe:', zeile)
+        if fehlt or abweichend:
+            raise RuntimeError('Serverstand weicht ab; --migration verwenden')
+        if trocken:
+            print('Trockenlauf: Manifest nicht geschrieben', flush=True)
+            return
+        sperre_erwerben(ftp, ziel, COMPONENTS)
+        try:
+            deployment_schreiben(
+                ftp, ziel, neue_deploymentdaten(manifest, None, COMPONENTS))
+        finally:
+            sperre_freigeben(ftp, ziel)
+        print('Serverstand übernommen: %d Dateien in %d Komponenten'
+              % (len(manifest['files']), len(COMPONENTS)), flush=True)
+    finally:
+        try:
+            ftp.quit()
+        except Exception:
+            ftp.close()
+
+
 def hochladen_manifest(daten, basis, manifest, komponenten, workers=1,
                        trocken=False, migration=False):
     """Upload selected manifest components without a remote tree inventory."""
@@ -658,6 +712,8 @@ def main():
                         help='Komponenten: programm,daten,assets oder alle')
     parser.add_argument('--migration', action='store_true',
                         help='fehlenden Serverstand durch vollständigen Gruppenupload anlegen')
+    parser.add_argument('--adopt', action='store_true',
+                        help='Serverstand aus dem Manifest übernehmen, wenn Inhalt und Größen bereits übereinstimmen')
     optionen = parser.parse_args()
     if optionen.loeschen and not optionen.verwaiste:
         raise SystemExit('--loeschen only works together with --verwaiste')
@@ -669,6 +725,17 @@ def main():
     if manifest_mode and (optionen.nur or optionen.ohne):
         raise SystemExit('--nur/--ohne sind mit einem Manifestrelease nicht zulässig; '
                          'verwende --gruppe')
+    if optionen.adopt:
+        if not manifest_mode:
+            raise SystemExit('--adopt braucht ein Release mit Manifest')
+        try:
+            manifest = load_manifest(optionen.quelle)
+            serverstand_uebernehmen(daten, optionen.quelle, manifest,
+                                    trocken=optionen.dry_run)
+            return 0
+        except (ReleaseError, RuntimeError) as error:
+            print('FEHLER:', error, file=sys.stderr)
+            return 1
     if optionen.gruppe or (manifest_mode and not optionen.verwaiste
                            and not optionen.aufraeumen):
         if optionen.nur or optionen.ohne:
