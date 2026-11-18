@@ -33,6 +33,8 @@ HIER = Path(__file__).resolve().parents[1]
 WEB = HIER / 'web'
 WEBP = HIER / 'webp'
 SPRACHEN = ('de', 'en', 'fr')
+sys.path.insert(0, str(HIER / 'tools'))
+from release_components import ReleaseError, build_manifest, write_manifest
 
 # Old application pages: the front controller answers them with a 301 to the
 # language path, so their HTML must not ship again.
@@ -147,7 +149,9 @@ def kopiere_app(ziel: Path, daten: Path) -> None:
         shutil.copytree(quelle, ziel / name,
                         ignore=shutil.ignore_patterns('.DS_Store', '*.icloud',
                                                       'cache', 'tests'))
-    shutil.copytree(daten, ziel / 'phpdata')
+    shutil.copytree(
+        daten, ziel / 'phpdata',
+        ignore=shutil.ignore_patterns('.DS_Store', '*.icloud', 'cache', 'tests'))
     shutil.copy2(HIER / 'deploy' / 'index.php', ziel / 'index.php')
     # Twig writes its compiled templates here; the folder must exist and be
     # writable, and .htaccess keeps it out of the web.
@@ -229,6 +233,11 @@ def main() -> int:
     if fehler:
         for eintrag in fehler:
             print('FEHLER:', eintrag, file=sys.stderr)
+        return 1
+    try:
+        write_manifest(ziel, build_manifest(ziel))
+    except ReleaseError as error:
+        print('FEHLER:', error, file=sys.stderr)
         return 1
     dateien, groesse = zaehle(ziel)
     print('Release: %s' % ziel)

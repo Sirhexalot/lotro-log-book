@@ -10,7 +10,7 @@
 
 	var WORDS = {
 		de: {
-			search: 'Suchen', filter: 'Filter', close: 'Schließen', sort: 'Sortierung', reset: 'Zurücksetzen',
+			search: 'Suchen', placeholder: 'Aufgabe oder Tat suchen', placeholder_q: 'Aufgabe suchen', placeholder_d: 'Tat suchen', filter: 'Filter', close: 'Schließen', sort: 'Sortierung', reset: 'Zurücksetzen',
 			more: 'Weitere anzeigen', count: '%s Einträge', show: '%s Treffer anzeigen', loading: 'Lade …',
 			error: 'Ergebnisse nicht aktualisiert.', retry: 'Erneut versuchen', fallback: 'Als Seite öffnen',
 			invalidRange: 'Ungültiger Bereich', min: 'Von', max: 'Bis',
@@ -21,7 +21,7 @@
 			dy: 'täglich', rp: 'wiederholbar', gr: 'Gruppe', gr1: 'kleine Gemeinschaft', gr2: 'große Gemeinschaft', tb: 'Aufgabenbrett', ix: 'Instanz', ls: 'skaliert mit Stufe'
 		},
 		en: {
-			search: 'Search', filter: 'Filters', close: 'Close', sort: 'Sort', reset: 'Reset',
+			search: 'Search', placeholder: 'Search quest or deed', placeholder_q: 'Search quests', placeholder_d: 'Search deeds', filter: 'Filters', close: 'Close', sort: 'Sort', reset: 'Reset',
 			more: 'Show more', count: '%s entries', show: 'Show %s results', loading: 'Loading …',
 			error: 'Results not updated.', retry: 'Try again', fallback: 'Open page',
 			invalidRange: 'Invalid range', min: 'From', max: 'To',
@@ -32,7 +32,7 @@
 			dy: 'daily', rp: 'repeatable', gr: 'group', gr1: 'small fellowship', gr2: 'fellowship', tb: 'task board', ix: 'instance', ls: 'scales with level'
 		},
 		fr: {
-			search: 'Chercher', filter: 'Filtres', close: 'Fermer', sort: 'Tri', reset: 'Réinitialiser',
+			search: 'Chercher', placeholder: 'Chercher une quête ou une prouesse', placeholder_q: 'Chercher des quêtes', placeholder_d: 'Chercher une prouesse', filter: 'Filtres', close: 'Fermer', sort: 'Tri', reset: 'Réinitialiser',
 			more: 'Afficher davantage', count: '%s entrées', show: 'Afficher %s résultats', loading: 'Chargement …',
 			error: 'Résultats non actualisés.', retry: 'Réessayer', fallback: 'Ouvrir la page',
 			invalidRange: 'Plage incorrecte', min: 'De', max: 'À',
@@ -52,7 +52,9 @@
 		var lang = document.documentElement.lang, A = window.MQL_FILTERADAPTER, w = WORDS[lang] || WORDS.de;
 		var labels = {};
 		['search', 'filter', 'close', 'sort', 'reset', 'more', 'count', 'show', 'loading', 'error',
-			'retry', 'fallback', 'invalidRange', 'min', 'max'].forEach(function (key) { labels[key] = w[key]; });
+			'retry', 'fallback', 'invalidRange', 'min', 'max', 'placeholder'].forEach(function (key) { labels[key] = w[key]; });
+		// A deed-only list searches deeds, not "quest or deed".
+		labels.placeholder = (kind === 'd' ? w.placeholder_d : w.placeholder_q) || w.placeholder;
 
 		var character = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv();
 		var dataset = kind === 'd' ? 'deeds' : 'quests';

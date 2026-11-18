@@ -179,7 +179,18 @@
 		function renderChrome() {
 			chips.replaceChildren();
 			var list = core.chips(config,state,context);
-			list.forEach(function (chip) { var b = node('button',chip.label+' ×'); b.type = 'button'; b.addEventListener('click',function () { dispatch(chip.action); }); chips.appendChild(b); });
+			list.forEach(function (chip) {
+				// The default value of a single choice is shown as state only; a
+				// button with "×" would look removable but change nothing.
+				if (chip.isDefault) {
+					// "Alle" alone says nothing; the group name makes the state readable.
+					var group = (config.groups || []).find(function (g) { return g.id === chip.groupId; });
+					var label = node('span',(group ? group.label + ': ' : '') + chip.label);
+					label.className = 'filter-chip filter-chip-state';
+					chips.appendChild(label); return;
+				}
+				var b = node('button',chip.label+' ×'); b.type = 'button'; b.addEventListener('click',function () { dispatch(chip.action); }); chips.appendChild(b);
+			});
 			if (state.q) { var clear = node('button',state.q+' ×'); clear.type = 'button'; clear.addEventListener('click',function () { dispatch({type:'searchSubmit',value:''}); }); chips.appendChild(clear); }
 			open.textContent = text('filter')+(list.length ? ' · '+list.length : '');
 			sort.value = state.sort;

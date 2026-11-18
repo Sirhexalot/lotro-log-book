@@ -26,8 +26,15 @@ class BuiltSetCatalogueTest(unittest.TestCase):
                 self.assertIn('/%s/%s/' % (lang, segment), urls)
                 for sid, page in pages.items():
                     self.assertIn('/%s/%s/%s/' % (lang, segment, sid), urls)
-                    self.assertEqual(page['parts'], len(page['members']))
-                    self.assertEqual(page['available_parts'], sum(bool(m['card']) for m in page['members']))
+                    # Pieces without an item page collapse into one counted
+                    # row per name; the part count stays the real total.
+                    self.assertEqual(page['parts'],
+                                     sum(m.get('count', 1) for m in page['members']))
+                    self.assertEqual(page['available_parts'],
+                                     sum(bool(m['card']) for m in page['members']))
+                    missing = [m['name'] for m in page['members'] if m.get('missing')]
+                    self.assertEqual(len(missing), len(set(missing)),
+                                     '%s: doppelte Zeilen ohne Item-Seite' % page['id'])
                     for member in page['members']:
                         if member['url']:
                             self.assertIn(member['id'], items)

@@ -84,23 +84,8 @@ if ($path === '/api/statistik') {
     session_start();
     $visitor = 'v3-' . session_id();
     session_write_close();
-    $userAgent = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
-    $automated = \Llb\MatomoBots::matches($userAgent) || (bool) preg_match(
-        '/bot|crawler|spider|slurp|headless|playwright|lighthouse|pagespeed'
-        . '|google-inspectiontool|googleother|adsbot-google|mediapartners-google'
-        . '|storebot-google|apis-google|feedfetcher|bingpreview|bingbot|yandex'
-        . '|duckduckbot|baiduspider|semrush|ahrefs|mj12bot|dotbot|uptimerobot'
-        . '|curl|wget|python|java|go-http-client|lightpanda/',
-        $userAgent
-    );
-    $refererHost = strtolower((string) parse_url($_SERVER['HTTP_REFERER'] ?? '', PHP_URL_HOST));
-    $requestHost = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
-    $fetchSite = strtolower((string) ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? ''));
-    $fromSite = $refererHost !== '' && $refererHost === $requestHost
-        && ($fetchSite === '' || in_array($fetchSite, ['same-origin', 'same-site'], true));
-    $classification = $automated ? 'bot' : ($fromSite ? 'accepted' : 'no-site-referrer');
     $result = $action === 'heartbeat'
-        ? $statistics->heartbeat($visitor, $userAgent, $classification)
+        ? $statistics->heartbeat($visitor)
         : ($action === 'import'
             ? $statistics->import((string) ($input['event'] ?? ''))
             : $statistics->current());
@@ -120,6 +105,19 @@ if (preg_match('~^/(start(-(en|fr))?|index|gegenstaende|handwerk|reise|ruf|beloh
         return;
     }
 }
+// The reward browser lists items only. Old shared links that opened its title
+// or virtue tab keep working and land on that catalogue list instead.
+// A language in the path wins over the visitor's detected language.
+$pfadsprache = preg_match('~^/(de|en|fr)(/|$)~', $path, $treffer) ? $treffer[1] : $sprache;
+if (rtrim($path, '/') === rtrim($catalogue->appRoute($pfadsprache, 'belohnungen'), '/')) {
+    $ziel = $catalogue->rewardTabTarget($pfadsprache, $_GET);
+    if ($ziel !== null) {
+        header('Location: ' . $ziel, true, 301);
+        header('X-Robots-Tag: noindex');
+        return;
+    }
+}
+
 $result = $router->resolve($path);
 
 if ($result['status'] === 301 || $result['status'] === 302) {

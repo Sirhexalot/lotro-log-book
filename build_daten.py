@@ -283,6 +283,15 @@ def kartenpfade(quests, karten, sprache, art):
 # they matched nothing and the tags ended up in the JSON.
 MARKUP = re.compile(r'</?(?:rgb|b|i|u|br)\b[^>]*>', re.IGNORECASE)
 COUNTER = re.compile(r'\(\s*\$\{NUMBER\}\s*/\s*\$\{TOTAL\}\s*\)')
+# The client writes gendered nouns as "{Freund[m]|Freundin[f]}". The catalogue
+# has always shown both forms ("Räuber-Bezwinger / Räuber-Bezwingerin"), so the
+# deed names follow the same style instead of showing the raw template.
+GESCHLECHT = re.compile(r'\{([^{}|]*)\[m\]\|([^{}|]*)\[f\]\}')
+# A few deeds arrive with the client's own list marker in front ("-1:…", "1…").
+LISTENMARKE = re.compile(r'^\s*-?\d+:?\s*')
+# One deed name carries an opening brace without a template behind it. Removing
+# the brace keeps the client's own words; nothing is guessed into it.
+BRESTE = re.compile(r'[{}]')
 
 SEKTIONEN = {
     'de': {
@@ -388,6 +397,9 @@ def clean(text, zaehler, sprache):
     text = str(text)
     text = MARKUP.sub('', text)
     text = COUNTER.sub(zaehler, text)
+    text = LISTENMARKE.sub('', text)
+    text = GESCHLECHT.sub(lambda treffer: '%s / %s' % (treffer.group(1), treffer.group(2)), text)
+    text = BRESTE.sub('', text)
     for key in ('PLAYER', 'PLAYERNAME', 'SURNAME', 'CLASS', 'RACE'):
         text = text.replace('${%s}' % key, TOKENS[sprache][key])
     text = re.sub(r'\$\{[^}]*\}', TOKENS[sprache]['wert'], text)

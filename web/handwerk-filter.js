@@ -151,6 +151,8 @@
 				{id:'gebiet',kind:'multi',label:words[28],nestedOnly:true,options:sorted(zones.values())});
 		}
 		var labels={};['search','filter','close','sort','reset','more','count','show','loading','error','retry','fallback','invalidRange','min','max'].forEach(function(k,i){labels[k]=words[i];});
+		// Without a placeholder the search field renders as an empty box.
+		labels.placeholder={de:'Beruf, Rezept oder Rohstoff suchen',en:'Search profession, recipe or resource',fr:'Chercher un métier, une recette ou une ressource'}[lang];
 		var config={area:settings.area||(isRecipe?'rezepte':isMaterial?'rohstoffe':'berufe'),lang:lang,rootUrl:location.origin+location.pathname,labels:labels,search:{submit:'debounce',debounceMs:200},groups:groups,
 			sort:{options:[{value:'name',label:words[29]}].concat(tab==='berufe'?[]:[{value:'tier',label:words[16]}]).concat(isRecipe?[{value:'stufe',label:({de:'Gegenstandsstufe',en:'Item level',fr:'Niveau d’objet'})[lang]}]:[])},pagination:{kind:'limit',size:50},
 			defaults:function(){var f={};groups.forEach(function(g){f[g.id]=g.kind==='boolean'?false:g.kind==='single'?'alle':[];});f.eigene=!settings.area&&mine.length>0;return {q:'',filters:f,sort:'name',pagination:{kind:'limit',limit:50}};}};

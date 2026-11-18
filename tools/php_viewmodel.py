@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from build_katalogseiten import WORDS, route, escape  # noqa: E402
 from giver_viewmodel import giver_url  # noqa: E402
+from vendor_viewmodel import vendor_url  # noqa: E402
 import seo  # noqa: E402
 
 
@@ -35,17 +36,17 @@ APP_SEGMENTS = {
            'gegenstandssuche': 'gegenstandssuche', 'handwerk': 'handwerk/rezepte',
            'reise': 'reise', 'ruf': 'ruf', 'belohnungen': 'belohnungen',
            'spielstand': 'spielstand', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'suche', 'givers': 'auftraggeber', 'landmarks': 'landmarke', 'factions': 'fraktion', 'instances': 'instanz'},
+            'suche': 'suche', 'givers': 'auftraggeber', 'vendors': 'haendler', 'landmarks': 'landmarke', 'factions': 'fraktion', 'instances': 'instanz'},
     'en': {'start': '', 'karte': 'map', 'taten': 'map/deeds',
            'gegenstandssuche': 'item-search', 'handwerk': 'crafting/recipes',
            'reise': 'travel', 'ruf': 'reputation', 'belohnungen': 'rewards',
            'spielstand': 'progress', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'search', 'givers': 'quest-giver', 'landmarks': 'landmark', 'factions': 'faction', 'instances': 'instance'},
+            'suche': 'search', 'givers': 'quest-giver', 'vendors': 'vendor', 'landmarks': 'landmark', 'factions': 'faction', 'instances': 'instance'},
     'fr': {'start': '', 'karte': 'carte', 'taten': 'carte/prouesses',
            'gegenstandssuche': 'recherche-objets', 'handwerk': 'artisanat/recettes',
            'reise': 'voyage', 'ruf': 'reputation', 'belohnungen': 'recompenses',
            'spielstand': 'progression', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'recherche', 'givers': 'donneur-de-quete', 'landmarks': 'site', 'factions': 'faction', 'instances': 'instance'},
+            'suche': 'recherche', 'givers': 'donneur-de-quete', 'vendors': 'marchand', 'landmarks': 'site', 'factions': 'faction', 'instances': 'instance'},
 }
 
 
@@ -265,10 +266,6 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
         context.append({'label': w['next'],
                         'items': [{'url': route(lang, 'q', entry['id']), 'text': entry['name']}],
                         'separator': ' · '})
-    if required_by:
-        context.append({'label': w['required_by'],
-                        'items': [{'url': None, 'text': '%d %s' % (len(required_by), w['qlist'])}],
-                        'separator': ' · '})
     excludes = [{'url': route(lang, 'q', entry['id']), 'text': entry['name']}
                 for entry in rel.get('excludes') or []]
     if excludes:
@@ -322,7 +319,11 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
         'area_trail': area_trail,
         'requirements': requirements,
         'reward_groups': groups,
-        'required_by': required_by,
+        # The relation "Wird vorausgesetzt von" is a list in the context
+        # section, never part of the rewards. Only IDs travel; the renderer
+        # resolves names from the relation shards.
+        'related_quests': [entry['url'].strip('/').split('/')[-1] for entry in required_by],
+        'related_label': w['required_by'],
         'context_columns': context_columns,
         'steps': steps,
         'crumb_maps': crumb_maps,
@@ -468,6 +469,17 @@ def deed_view(builder: ViewBuilder, deed: dict, index: dict, categories: dict) -
         if link:
             crumb_maps.append(link)
 
+    # Context deeds of the same area and of the same kind, deduplicated and
+    # complete. The relation component renders and filters them; a capped
+    # eight-entry excerpt hid up to 633 related deeds.
+    # Only IDs travel in the page model; the renderer resolves names from the
+    # relation shards. Full text here would add hundreds of megabytes.
+    context_deeds = {}
+    for entry in more_area + more_kind:
+        context_deeds[entry['i']] = entry
+    context_ids = [entry['i'] for entry in
+                   sorted(context_deeds.values(), key=lambda e: e['n'].lower())]
+
     return {
         'kind': 'd',
         'id': deed['i'],
@@ -480,18 +492,8 @@ def deed_view(builder: ViewBuilder, deed: dict, index: dict, categories: dict) -
         'facts': facts,
         'rewards_fixed': fixed,
         'rewards_choice': choice,
-        'more_area': {
-            'title': w['more_deeds'] % area[-1] if area else '',
-            'count': len(more_area),
-            'entries': [{'url': route(lang, 'd', d['i']), 'text': d['n']} for d in more_area[:8]],
-            'rest': max(0, len(more_area) - 8),
-        } if more_area else None,
-        'more_kind': {
-            'title': w['same_kind'],
-            'count': len(more_kind),
-            'entries': [{'url': route(lang, 'd', d['i']), 'text': d['n']} for d in more_kind[:6]],
-            'rest': max(0, len(more_kind) - 6),
-        } if more_kind else None,
+        'related_deeds': context_ids,
+        'related_label': {'de': 'Zusammenhang', 'en': 'Context', 'fr': 'Contexte'}[lang],
         'steps': steps,
         'crumb_maps': crumb_maps,
         'seo': seo_block,
@@ -916,10 +918,15 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
     if item.get('l') and item['l'] != min_level:
         chips.append({'cls': '', 'text': '%s %s' % (w['item_level'], item['l'])})
     binding = (details or {}).get('binding')
-    if binding == 1:
+    binding_mode = item.get('bm')
+    if binding_mode == 'BOUND_TO_ACCOUNT_ON_ACQUIRE':
+        chips.append({'cls': '', 'text': w['bound_account']})
+    elif binding_mode == 'BIND_ON_ACQUIRE' or (binding_mode is None and binding == 1):
         chips.append({'cls': '', 'text': w['bound_acquire']})
-    elif binding == 2:
+    elif binding_mode == 'BIND_ON_EQUIP' or (binding_mode is None and binding == 2):
         chips.append({'cls': '', 'text': w['bound_equip']})
+    elif binding_mode and binding_mode not in ('NONE',):
+        chips.append({'cls': '', 'text': w['binding_unknown']})
     if (details or {}).get('scalable'):
         chips.append({'cls': '', 'text': w['scalable']})
     if (details or {}).get('unique'):
@@ -1004,37 +1011,119 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         else:
             reference = app_url(lang, 'karte', id=qid)
         sources.append({'url': reference, 'text': qname,
-                        'extra': ' › '.join(part for part in (region, zone) if part)})
+                        'extra': ' › '.join(part for part in (region, zone) if part),
+                        'kind': kind})
 
-    rezept_ids = [rid for rid in item.get('rezepte') or [] if rid in builder.recipes]
+    result_links = item.get('herstellung') or []
+    if not result_links:
+        result_links = [{'recipe': rid, 'role': 'regular_result'}
+                        for rid in item.get('rezepte') or []]
+    result_links = [entry for entry in result_links if entry.get('recipe') in builder.recipes]
+    rezept_ids = [entry['recipe'] for entry in result_links]
     rezept_zeilen = [builder.recipes[rid] for rid in rezept_ids]
-    rezept_namen = {}
-    for row in rezept_zeilen:
-        teile = [row[3], row[5]]
-        if row[2]:
-            teile.append('%s %s' % (w['level'], row[2]))
-        label = ' · '.join(str(teil) for teil in teile if teil)
-        rezept_namen[label] = rezept_namen.get(label, 0) + 1
     crafted_by = []
-    for rid, row in zip(rezept_ids, rezept_zeilen):
+    for relation, row in zip(result_links, rezept_zeilen):
+        rid = relation['recipe']
+        # Identity and classification only. Ingredients and the exact variant
+        # belong to the recipe page, never to the list row.
         teile = [row[3], row[5]]
         if row[2]:
             teile.append('%s %s' % (w['level'], row[2]))
         label = ' · '.join(str(teil) for teil in teile if teil)
-        # Some client exports contain several recipes with the same profession,
-        # category and level. Only those need their input as a disambiguator.
-        if rezept_namen[label] > 1:
-            zutaten = ', '.join('%s × %s' % (part[1], part[0])
-                                for part in (row[6] or []))
-            if zutaten:
-                label += ' · ' + zutaten
-        crafted_by.append({'url': route(lang, 'recipe', rid), 'text': label})
-    used_in = [{'url': route(lang, 'recipe', rid), 'text': builder.recipes[rid][0]}
-               for rid in item.get('zutat') or [] if rid in builder.recipes]
+        role_label = w['critical_result'] if relation.get('role') == 'critical_result' else w['regular_result']
+        normal_id = row[18] if len(row) > 18 and row[18] else None
+        critical_id = row[19] if len(row) > 19 and row[19] else None
 
-    # Varianten bleiben vorerst aussen vor: der statische Bau rendert sie nie
-    # (sein Zugriff auf model['all'] laeuft ins Leere). Sie zu aktivieren ist
-    # eine eigene Entscheidung, kein Umbauschritt.
+        def result_info(result_id):
+            result_item = builder.items.get(result_id) if result_id else None
+            if not result_item:
+                return None
+            result_name = builder_name(builder, result_item)
+            result_quality = ctx.quality(result_item, ctx.details.get(result_id) or {})
+            return {
+                'id': result_id,
+                'name': result_name,
+                'url': route(lang, 'i', result_id),
+                'quality': ctx.label('quality', result_quality) if result_quality else None,
+                'level': result_item.get('l') or None,
+            }
+
+        normal_info = result_info(normal_id)
+        critical_info = result_info(critical_id)
+        crafted_by.append({'url': route(lang, 'recipe', rid),
+                           'text': label, 'role': role_label,
+                           'quantity': relation.get('quantity'),
+                           'recipe_level': row[2] or None,
+                           'profession': row[3] or None,
+                           'tier': row[4] or None,
+                           'category': row[5] or None,
+                           'result': critical_info if relation.get('role') == 'critical_result'
+                           else normal_info,
+                           'other_result': normal_info if relation.get('role') == 'critical_result'
+                           else critical_info})
+    use_links = item.get('verwendung') or []
+    if not use_links:
+        use_links = [{'recipe': rid, 'role': 'ingredient'}
+                     for rid in item.get('zutat') or []]
+    use_links = [entry for entry in use_links if entry.get('recipe') in builder.recipes]
+    used_in = []
+    for relation in use_links:
+        rid = relation['recipe']
+        used_in.append({
+            'url': route(lang, 'recipe', rid),
+            'text': builder.recipes[rid][0],
+            'role': (w['optional_ingredient']
+                     if relation.get('role') == 'optional_ingredient'
+                     else w['normal_ingredient']),
+            'quantity': relation.get('quantity'),
+        })
+
+    variants = []
+    for other_id, other_item in ctx.variants(item, ident):
+        other_details = ctx.details.get(other_id) or {}
+        variants.append({
+            'url': route(lang, 'i', other_id),
+            'text': builder_name(builder, other_item),
+            'level': other_item.get('l') or other_details.get('level') or None,
+            'quality': ctx.label('quality', ctx.quality(other_item, other_details))
+                       if ctx.quality(other_item, other_details) else None,
+            'active': False,
+        })
+    if variants:
+        variants.sort(key=lambda entry: (entry['level'] or 0, entry['text'].casefold()))
+
+    where_groups = []
+    for kind, label in (('q', w['source_quests']), ('d', w['source_deeds'])):
+        entries = [entry for entry in sources if entry.get('kind') == kind]
+        if entries:
+            where_groups.append({'label': label, 'entries': entries, 'filter': 'tasks',
+                                 'source_kind': kind})
+    if resources:
+        where_groups.append({
+            'label': w['source_resources'], 'filter': None,
+            'entries': [{'text': entry['name'], 'extra': entry.get('meta'),
+                         'places': entry['places']} for entry in resources],
+        })
+    if crafted_by:
+        where_groups.append({'label': w['source_crafting'], 'entries': crafted_by,
+                             'filter': 'recipes'})
+    vendor_entries = []
+    for vendor in item.get('haendler') or []:
+        names = vendor.get('name') or {}
+        vendor_entries.append({'text': names.get(lang) or names.get('en')
+                               or names.get('de') or vendor.get('id'),
+                               'url': vendor_url(lang, vendor.get('id'))})
+    if vendor_entries:
+        where_groups.append({'label': w['source_vendors'], 'filter': None,
+                             'vendor_filter': True, 'entries': vendor_entries})
+    barter_entries = []
+    for source in item.get('tausch') or []:
+        extra = ' · '.join(part for part in (source.get('title'), source.get('area')) if part)
+        barter_entries.append({'text': source.get('name') or source.get('id'),
+                               'extra': extra})
+    if barter_entries:
+        where_groups.append({'label': w['source_barters'], 'filter': None,
+                             'entries': barter_entries})
 
     set_block = None
     set_id = (details or {}).get('set')
@@ -1105,9 +1194,23 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         'scale': scale[0] if scale and scale[0] else None,
         'resources': resources,
         'sources': sources,
-        'vendor': bool((details or {}).get('vendors')),
+        'vendor': bool(vendor_entries),
         'crafted_by': crafted_by,
         'used_in': used_in,
+        # Two directions, two relation types: recipes that produce this item
+        # and recipes that consume it. Merging them told the wrong story.
+        'related_crafted_by': [entry['url'].strip('/').split('/')[-1] for entry in crafted_by],
+        'related_used_in': [entry['url'].strip('/').split('/')[-1] for entry in used_in],
+        'where_from_count': len(resources) + len(sources) + len(crafted_by) +
+                            len(vendor_entries) + len(barter_entries),
+        'used_for_count': len(used_in),
+        'has_where_from': bool(resources or sources or crafted_by or vendor_entries or barter_entries),
+        'has_used_for': bool(used_in),
+        'where_groups': where_groups,
+        'task_filter': {},
+        'variants': variants,
+        'has_overview': bool(description or armour or basic or bonuses or scale or
+                             variants or set_block or (details or {}).get('requiredClass')),
         'set': set_block,
         'required_class': (details or {}).get('requiredClass'),
         'browse': browse,
@@ -1173,6 +1276,8 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
     katalog = _katalog()
     pilot = bool(model.get('pilot'))
     intro = w['pilot'] if pilot else w['overview']
+    # A type index says what it lists; the catalogue-wide blurb stays the fallback.
+    intros = {kind: w.get('list_intro_' + kind, intro) for kind in ('q', 'd', 'area', 'region', 'recipe', 'virtue')}
     pages = {}
 
     # Plain type indexes, 200 entries per page. Items have no list any more:
@@ -1199,7 +1304,7 @@ def list_pages(builder: ViewBuilder, model: dict, data: dict) -> dict:
                 'page': number,
                 'title': titel,
                 'canonical': page_route(lang, kind, number),
-                'intro': intro,
+                'intro': intros[kind],
                 'seo': seo.listpage(lang, label=w[kind + 'list'], page=number,
                                     pages=seiten, entries=len(teil), kind=kind),
                 'alternates': {o: page_route(o, kind, number) for o in ('de', 'en', 'fr')},

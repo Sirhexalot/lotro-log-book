@@ -34,6 +34,22 @@ const chips = api.chips(config,selected);
 assert.equal(chips.length,5);
 assert.equal(api.reduce(config,selected,chips[0].action).state.filters.quality.length,1);
 assert.equal(api.reduce(config,selected,chips[3].action).state.filters.tree.length,1);
+// A single choice shows a chip for every value, including its neutral default;
+// only a non-default chip can be removed.
+const single = {
+	groups: [{id:'status',kind:'single',options:[{value:'alle',label:'Alle'},{value:'offen',label:'Offen'}]}],
+	pagination: {size:50},
+	defaults: () => ({q:'',filters:{status:'alle'},sort:'name',pagination:{kind:'limit',limit:50}})
+};
+const atDefault = api.chips(single,{q:'',filters:{status:'alle'}});
+assert.equal(atDefault.length,1);
+assert.equal(atDefault[0].label,'Alle');
+assert.equal(atDefault[0].isDefault,true);
+const changed = api.chips(single,{q:'',filters:{status:'offen'}});
+assert.equal(changed.length,1);
+assert.equal(changed[0].isDefault,false);
+assert.equal(api.reduce(single,{q:'',filters:{status:'offen'}},changed[0].action).state.filters.status,'alle');
+
 config.urlCodec = {
 	decode:url => ({state:{q:url.searchParams.get('q') || ''},explicit:url.searchParams.has('q')}),
 	encode:(state,url) => { url.searchParams.set('q',state.q); return url; }

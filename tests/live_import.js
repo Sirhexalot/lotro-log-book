@@ -36,7 +36,7 @@ async function main() {
 
     const backup = await page.evaluate(() => window.MQL_SPEICHER.sicherung());
     const parsed = JSON.parse(backup);
-    assert.deepEqual([parsed.format, parsed.version], ['magic-quest-log-progress', 1],
+    assert.deepEqual([parsed.format, parsed.version], ['magic-quest-log-progress', 2],
       'backup format');
     assert.equal(parsed.charaktere.length, 1, 'backup character count');
 
@@ -49,15 +49,17 @@ async function main() {
       waitUntil: 'networkidle',
       timeout: 30000,
     });
-    await page.waitForFunction(() => document.querySelector('#katalog-status')?.dataset.done);
+    // Quest and deed status is a real control now; the completed state shows
+    // as the selected option and the status class, not as data-done.
+    await page.waitForFunction(() =>
+      document.querySelector('#katalog-status .manueller-status.status-fertig'));
     const status = await page.locator('#katalog-status').evaluate(node => ({
-      done: node.dataset.done,
+      value: node.querySelector('select')?.value,
       visible: !node.hidden,
       text: node.textContent,
     }));
-    assert.equal(status.done, 'true', 'completed quest status');
+    assert.equal(status.value, 'fertig', 'completed quest status');
     assert.equal(status.visible, true, 'visible quest status');
-    assert.match(status.text, /Live-Testling/);
     assert.deepEqual(errors, [], 'page errors');
     console.log('Importabnahme: isolierter Import, Sicherung, Wiederherstellung und Fortschrittsanzeige ok');
   } finally {

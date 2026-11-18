@@ -44,5 +44,5 @@
 		}
 	};
 	senden('heartbeat');
-	root.setInterval(function () { senden('heartbeat'); }, 60000);
+	root.setInterval(function () { senden('heartbeat'); }, 120000);
 })(window);

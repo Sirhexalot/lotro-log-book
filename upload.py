@@ -45,13 +45,21 @@ import re
 import os
 import sys
 import threading
+import uuid
+from datetime import datetime, timezone
 from collections import deque
 from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
+sys.path.insert(0, str(HIER / 'tools'))
+from release_components import (COMPONENTS, MANIFEST_NAME, ReleaseError,
+                                load_manifest, verify_manifest_files)
 QUELLE = HIER / 'dist-web'
 KONFIG = Path.home() / '.config/mql-upload.conf'
 STAND = Path.home() / '.config/mql-upload-state.json'
+DEPLOYMENT_NAME = '.llb-deployment.json'
+JOURNAL_NAME = '.llb-upload-journal.json'
+LOCK_NAME = '.llb-upload.lock'
 
 # Files and folders that are not part of the build but must stay on the server.
 SCHONEN = ('.htaccess', '.user.ini', '.well-known', 'cgi-bin', 'error_log', 'logs')
@@ -173,6 +181,249 @@ def hashe(datei):
     return summe.hexdigest()
 
 
+def fern_json(ftp, ziel, name):
+    """Read a small JSON control file without listing the remote tree."""
+    daten = bytearray()
+    try:
+        ftp.cwd(ziel)
+        ftp.retrbinary('RETR ' + name, daten.extend)
+    except ftplib.all_errors:
+        return None
+    try:
+        return json.loads(bytes(daten).decode('utf-8'))
+    except (UnicodeDecodeError, ValueError):
+        raise RuntimeError('Ungültige Remote-Metadaten: ' + name)
+
+
+def fern_hash(ftp, ziel, relative):
+    """Hash one remote file when resuming a journal; never trust size alone."""
+    digest = hashlib.sha256()
+    ordner, _, name = relative.rpartition('/')
+    ftp.cwd(ziel)
+    if ordner:
+        ftp.cwd(ordner)
+    ftp.retrbinary('RETR ' + name, digest.update)
+    return digest.hexdigest()
+
+
+def deployment_plan(manifest, deployed, components):
+    """Return manifest files that differ from the confirmed server state."""
+    if not deployed or deployed.get('schema') != 1:
+        raise RuntimeError(
+            'Kein gültiger Serverstand vorhanden; zuerst Migration/Audit ausführen')
+    confirmed = deployed.get('components', {})
+    plan = []
+    unchanged = []
+    for component in COMPONENTS:
+        entries = [
+            (path, entry) for path, entry in manifest['files'].items()
+            if entry['component'] == component
+        ]
+        if component not in components:
+            unchanged.append(component)
+            continue
+        if confirmed.get(component, {}).get('version') == manifest['components'][component]['version']:
+            unchanged.append(component)
+            continue
+        old_files = confirmed.get(component, {}).get('files', {})
+        for path, entry in entries:
+            if old_files.get(path, {}).get('sha256') != entry['sha256']:
+                plan.append((path, component, entry))
+    return plan, unchanged
+
+
+def pruefe_abhaengigkeiten(manifest, deployed, selected):
+    """Check explicitly declared paths before publishing their consumers."""
+    confirmed = (deployed or {}).get('components', {})
+    for relative in manifest.get('required_paths', []):
+        entry = manifest.get('files', {}).get(relative)
+        if entry is None:
+            raise RuntimeError('Deklarierte Abhängigkeit fehlt im Manifest: ' + relative)
+        component = entry['component']
+        if component in selected:
+            continue
+        if confirmed.get(component, {}).get('files', {}).get(relative, {}).get('sha256') != entry['sha256']:
+            raise RuntimeError(
+                'Abhängigkeit nicht veröffentlicht: %s (%s)' % (relative, component))
+
+
+def neue_deploymentdaten(manifest, deployed, selected):
+    """Merge successfully published components into the confirmed server state."""
+    result = dict(deployed or {})
+    result.update({'schema': 1, 'manifest_schema': manifest['schema']})
+    result['components'] = dict(result.get('components', {}))
+    for component in selected:
+        files = {
+            path: dict(entry)
+            for path, entry in manifest['files'].items()
+            if entry['component'] == component
+        }
+        result['components'][component] = {
+            'version': manifest['components'][component]['version'],
+            'files': files,
+            'build': manifest['build'],
+        }
+    return result
+
+
+def sperre_erwerben(ftp, ziel, komponenten, trocken=False):
+    if trocken:
+        return
+    ftp.cwd(ziel)
+    try:
+        ftp.mkd(LOCK_NAME)
+    except ftplib.error_perm as error:
+        raise RuntimeError('Server-Upload ist bereits gesperrt') from error
+    payload = json.dumps({
+        'schema': 1,
+        'components': sorted(komponenten),
+    }, separators=(',', ':')).encode('utf-8')
+    try:
+        from io import BytesIO
+        ftp.cwd(ziel)
+        ftp.storbinary('STOR ' + LOCK_NAME + '/owner.json', BytesIO(payload))
+    except Exception:
+        try:
+            ftp.cwd(ziel)
+            ftp.rmd(LOCK_NAME)
+        except ftplib.all_errors:
+            pass
+        raise
+
+
+def sperre_freigeben(ftp, ziel, trocken=False):
+    if trocken:
+        return
+    try:
+        ftp.cwd(ziel)
+        ftp.delete(LOCK_NAME + '/owner.json')
+        ftp.rmd(LOCK_NAME)
+    except ftplib.all_errors as error:
+        print('WARNING: Upload-Lock konnte nicht entfernt werden: %s' % error,
+              file=sys.stderr)
+
+
+def deployment_schreiben(ftp, ziel, data):
+    from io import BytesIO
+    payload = (json.dumps(data, ensure_ascii=False, indent=1, sort_keys=True)
+               + '\n').encode('utf-8')
+    temp = DEPLOYMENT_NAME + '.part'
+    ftp.cwd(ziel)
+    ftp.storbinary('STOR ' + temp, BytesIO(payload))
+    ftp.rename(temp, DEPLOYMENT_NAME)
+
+
+def remote_json_schreiben(ftp, ziel, name, data):
+    from io import BytesIO
+    payload = (json.dumps(data, ensure_ascii=False, indent=1, sort_keys=True)
+               + '\n').encode('utf-8')
+    ftp.cwd(ziel)
+    ftp.storbinary('STOR ' + name + '.part', BytesIO(payload))
+    ftp.rename(name + '.part', name)
+
+
+def journal_schreiben(ftp, ziel, data):
+    remote_json_schreiben(ftp, ziel, JOURNAL_NAME, data)
+
+
+def hochladen_manifest(daten, basis, manifest, komponenten, workers=1,
+                       trocken=False, migration=False):
+    """Upload selected manifest components without a remote tree inventory."""
+    del workers  # The manifest path is intentionally serialized around one lock.
+    verify_manifest_files(basis, manifest, komponenten)
+    ziel = daten['path']
+    ftp = verbinde(daten)
+    lock = False
+    try:
+        deployed = fern_json(ftp, ziel, DEPLOYMENT_NAME)
+        if deployed is None and not migration:
+            raise RuntimeError(
+                'Servermanifest fehlt; mit --migration zuerst einen vollständigen '
+                'Komponentenstand herstellen')
+        if deployed is None:
+            plan = [
+                (path, entry['component'], entry)
+                for path, entry in manifest['files'].items()
+                if entry['component'] in komponenten
+            ]
+            unchanged = [component for component in COMPONENTS
+                         if component not in komponenten]
+        else:
+            plan, unchanged = deployment_plan(manifest, deployed, komponenten)
+        pruefe_abhaengigkeiten(manifest, deployed, komponenten)
+        previous_journal = fern_json(ftp, ziel, JOURNAL_NAME)
+        resumable = set()
+        if (previous_journal
+                and set(previous_journal.get('components', [])) == komponenten
+                and set(previous_journal.get('files', [])) == {item[0] for item in plan}):
+            resumable = set(previous_journal.get('completed', []))
+        order = {'assets': 0, 'daten': 1, 'programm': 2}
+        plan.sort(key=lambda item: (order[item[1]], item[0]))
+        print('Komponenten: ausgewählt %s; unverändert %s' % (
+            ','.join(sorted(komponenten)),
+            ','.join(unchanged) if unchanged else 'keine'))
+        print('Dateien: %d, %.1f MB' % (
+            len(plan), sum(int(entry['size']) for _, _, entry in plan) / 1048576.0))
+        for path, component, _ in plan:
+            print('  %s [%s]' % (path, component))
+        if trocken:
+            return len(plan), 0, 0
+
+        sperre_erwerben(ftp, ziel, komponenten)
+        lock = True
+        if deployed is not None and fern_json(ftp, ziel, DEPLOYMENT_NAME) != deployed:
+            raise RuntimeError('Serverstand hat sich während der Planung verändert')
+        journal = {
+            'schema': 1,
+            'transaction': uuid.uuid4().hex,
+            'started': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'components': sorted(komponenten),
+            'files': [relative for relative, _, _ in plan],
+            'completed': [],
+        }
+        journal_schreiben(ftp, ziel, journal)
+        for relative, _, entry in plan:
+            verify_manifest_files(basis, {
+                'files': {relative: entry},
+            }, komponenten)
+            if relative in resumable:
+                try:
+                    if fern_hash(ftp, ziel, relative) == entry['sha256']:
+                        print('  wiederaufgenommen: %s' % relative)
+                        journal['completed'].append(relative)
+                        journal_schreiben(ftp, ziel, journal)
+                        continue
+                except ftplib.all_errors:
+                    pass
+            local = basis / relative
+            ftp.cwd(ziel)
+            ordner, _, name = relative.rpartition('/')
+            if ordner:
+                stelle_sicher(ftp, ordner)
+            with local.open('rb') as stream:
+                ftp.storbinary('STOR ' + name, stream)
+            remote_size = vorhandene_groesse(ftp, name)
+            if remote_size is not None and remote_size != entry['size']:
+                raise RuntimeError('Falsche Remotegröße nach Upload: ' + relative)
+            journal['completed'].append(relative)
+            journal_schreiben(ftp, ziel, journal)
+
+        verify_manifest_files(basis, manifest, komponenten)
+        deployment_schreiben(
+            ftp, ziel, neue_deploymentdaten(manifest, deployed, komponenten))
+        ftp.cwd(ziel)
+        ftp.delete(JOURNAL_NAME)
+        print('Deploymentstand bestätigt für: %s' % ', '.join(sorted(komponenten)))
+        return len(plan), 0, sum(int(entry['size']) for _, _, entry in plan)
+    finally:
+        if lock:
+            sperre_freigeben(ftp, ziel)
+        try:
+            ftp.quit()
+        except ftplib.all_errors:
+            ftp.close()
+
+
 def eintrag(datei, alt):
     """[size, mtime, sha256]; the hash is reused when the file did not change."""
     groesse = datei.stat().st_size
@@ -272,6 +523,7 @@ def hochladen(daten, basis, dateien, workers=1, trocken=False, filtern=False):
     auftraege = deque(dateien)
     zaehler = {'neu': 0, 'gleich': 0, 'bytes': 0, 'geprueft': 0}
     sperre = threading.Lock()
+    fehler = []
 
     def sichern():
         sichere_stand({k: v for k, v in list(stand.items()) if v is not None})
@@ -322,6 +574,9 @@ def hochladen(daten, basis, dateien, workers=1, trocken=False, filtern=False):
                               flush=True)
                     if geprueft % 2000 == 0:
                         sichern()
+        except BaseException as error:
+            with sperre:
+                fehler.append(error)
         finally:
             try:
                 verbindung.quit()
@@ -336,6 +591,9 @@ def hochladen(daten, basis, dateien, workers=1, trocken=False, filtern=False):
             faden.join()
     else:
         arbeit()
+
+    if fehler:
+        raise RuntimeError('Upload-Worker fehlgeschlagen: %s' % fehler[0]) from fehler[0]
 
     if not trocken:
         if filtern:
@@ -396,6 +654,10 @@ def main():
                         help='only these top-level folders, comma separated (e.g. de,en,fr)')
     parser.add_argument('--ohne', default='',
                         help='skip these top-level folders, comma separated')
+    parser.add_argument('--gruppe', default='',
+                        help='Komponenten: programm,daten,assets oder alle')
+    parser.add_argument('--migration', action='store_true',
+                        help='fehlenden Serverstand durch vollständigen Gruppenupload anlegen')
     optionen = parser.parse_args()
     if optionen.loeschen and not optionen.verwaiste:
         raise SystemExit('--loeschen only works together with --verwaiste')
@@ -403,6 +665,36 @@ def main():
         raise SystemExit('MISSING: %s' % optionen.quelle)
 
     daten = lies_konfig()
+    manifest_mode = (optionen.quelle / MANIFEST_NAME).is_file()
+    if manifest_mode and (optionen.nur or optionen.ohne):
+        raise SystemExit('--nur/--ohne sind mit einem Manifestrelease nicht zulässig; '
+                         'verwende --gruppe')
+    if optionen.gruppe or (manifest_mode and not optionen.verwaiste
+                           and not optionen.aufraeumen):
+        if optionen.nur or optionen.ohne:
+            raise SystemExit('--gruppe kann nicht mit --nur oder --ohne kombiniert werden')
+        if optionen.verwaiste or optionen.aufraeumen or optionen.loeschen:
+            raise SystemExit('--gruppe kann nicht mit Wartungsoptionen kombiniert werden')
+        try:
+            manifest = load_manifest(optionen.quelle)
+            gruppen_argument = optionen.gruppe or 'alle'
+            teile = {teil.strip() for teil in gruppen_argument.split(',') if teil.strip()}
+            if 'alle' in teile:
+                if teile != {'alle'}:
+                    raise SystemExit('--gruppe alle darf nicht mit anderen Gruppen kombiniert werden')
+                teile = set(COMPONENTS)
+            unbekannt = teile - set(COMPONENTS)
+            if not teile or unbekannt:
+                raise SystemExit('Unbekannte Gruppe: ' + ','.join(sorted(unbekannt or teile)))
+            hochladen_manifest(
+                daten, optionen.quelle, manifest, teile,
+                workers=optionen.workers, trocken=optionen.dry_run,
+                migration=optionen.migration)
+            return 0
+        except (ReleaseError, RuntimeError) as error:
+            print('FEHLER:', error, file=sys.stderr)
+            return 1
+
     ftp = verbinde(daten)
     try:
         if optionen.verwaiste:

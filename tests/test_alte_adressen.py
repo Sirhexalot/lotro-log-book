@@ -39,8 +39,14 @@ class ZielTest(unittest.TestCase):
     def test_query_and_anchor_survive(self):
         self.assertEqual(ziel('handwerk', '?lang=de&q=Eisen#rezepte'),
                          '/de/handwerk/rezepte/?q=Eisen#rezepte')
+        self.assertEqual(ziel('belohnungen', '?lang=de&q=Eisen'), '/de/belohnungen/?q=Eisen')
+
+    def test_old_reward_tabs_lead_to_their_own_lists(self):
+        # The reward browser lists items only; titles and virtues keep their pages.
         self.assertEqual(ziel('belohnungen', '?tab=t&lang=en&q=Titel'),
-                         '/en/rewards/?tab=t&q=Titel')
+                         '/en/title/?q=Titel')
+        self.assertEqual(ziel('belohnungen', '?tab=t&lang=de'), '/de/titel/')
+        self.assertEqual(ziel('belohnungen', '?tab=v&lang=fr'), '/fr/vertu/')
 
     def test_removed_lists_go_to_their_successor(self):
         # Both old list pages are 301s; link the successor directly.

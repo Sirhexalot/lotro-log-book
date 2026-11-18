@@ -34,17 +34,20 @@ async function bereit(page, area) {
 		// Landmark: its quests as a real list with the quest filters.
 		await page.goto(basis + '/de/landmarke/70047384/', { waitUntil: 'networkidle' });
 		await bereit(page, 'related-q');
-		// All eight quests share region and area, so those groups are gone; what
-		// separates them is the quest property, never the mixed quest category.
-		assert.deepEqual(await page.$$eval('.filter-group', (gs) => gs.map((g) => g.dataset.key)), ['flag', 'status']);
+		// The quests span several areas, so geography appears as its own group;
+		// what separates them is the quest property, never the mixed quest
+		// category. Filter groups follow the data, not a fixed list.
+		assert.deepEqual(await page.$$eval('.filter-group', (gs) => gs.map((g) => g.dataset.key)), ['flag', 'geography', 'status']);
 		assert.equal(await page.locator('.filter-group-multi').count(), 1, 'Merkmalsfilter in der Landmarke');
 		assert.equal(await page.locator('.filter-ui input[type=search]').count(), 1, 'Suche in der Landmarke');
 		assert.ok(await page.locator('.related-symbol.fertig').count() > 0, 'Landmarke ohne erledigten Nachweis');
 		assert.equal(await page.locator('.related-results').evaluate((n) => n.classList.contains('related-results')), true);
 
-		// Title: the awarding quests, complete with search.
+		// Title: the awarding quests. Titles never reach the five-entry
+		// threshold, so the list stays direct and carries no filter.
 		await page.goto(basis + '/de/titel/70006369/', { waitUntil: 'networkidle' });
-		await bereit(page);
+		await page.waitForSelector('.related-results > li');
+		assert.equal(await page.locator('.filter-ui').count(), 0, 'Titel unter der Schwelle ohne Filter');
 		assert.ok(await page.locator('.related-results > li').count() > 0, 'Titel ohne Quellen');
 
 		// Virtue: deed sources stay unmarked because deeds were not imported.
@@ -63,7 +66,8 @@ async function bereit(page, area) {
 		await page.goto(basis + '/de/gegenstand/70001B7E/', { waitUntil: 'networkidle' });
 		await bereit(page, 'related-recipe');
 		assert.equal(await page.locator('.katalog-art .symbol').count(), 1, 'Gegenstandsart ohne Icon');
-		assert.match(await page.locator('.filter-result-toolbar').innerText(), /95/);
+		// 91 usages plus 4 crafting recipes; the two directions stay apart.
+		assert.match(await page.locator('.filter-result-toolbar').innerText(), /91/);
 		assert.equal(await page.locator('.related-results tbody tr').count(), 50);
 		assert.equal(await page.locator('.related-symbol').count(), 0, 'Besitzstatus auf der Gegenstandsseite');
 

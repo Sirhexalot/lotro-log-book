@@ -46,11 +46,12 @@ ARTEN = ('q', 'd', 'i', 'recipe', 'title', 'virtue', 'area', 'region', 'p', 'f',
 # every profession address answers 301 to the crafting page, and a sitemap must
 # only list pages that answer 200. The router keeps the redirects for old links.
 SITEMAP_KINDS = ('q', 'd', 'i', 'area', 'region', 'recipe', 'title', 'virtue', 'set', 'giver',
-                  'f', 'l')
+                   'vendor', 'f', 'l')
 
 # Quest-giver source, read once in main() and used by every language.
 GIVER_SOURCE: dict | None = None
 QUEST_GIVERS: dict = {}
+VENDOR_SOURCE: dict | None = None
 
 
 def read_assignment(path: Path, variable: str):
@@ -172,6 +173,12 @@ def write_sitemaps(target: Path, sections: dict) -> None:
             seiten.append('/' + lang + '/' + (segment + '/' if segment else ''))
     seiten = sorted(set(seiten))
     sections = dict(sections)
+    # One canonical URL appears in exactly one section. List pages are
+    # application pages, so they stay in sitemap-seiten.xml even when a list
+    # model also names them under its entity section.
+    einmalig = set(seiten)
+    for name, urls in list(sections.items()):
+        sections[name] = [url for url in urls if url not in einmalig]
     sections['/sitemap-seiten.xml'] = seiten
     payload = {'schema': 1, 'sections': {name: urls for name, urls in sorted(sections.items())},
                'index': sorted(sections)}
@@ -635,12 +642,16 @@ def main() -> int:
     instanz_source = json.loads((DATEN / 'instanzen.json').read_text(encoding='utf-8'))['instanzen']
     from set_viewmodel import set_pages, link_items
 
-    global GIVER_SOURCE, QUEST_GIVERS
+    global GIVER_SOURCE, QUEST_GIVERS, VENDOR_SOURCE
     if not (DATEN / 'auftraggeber.json').is_file():
         raise SystemExit('MISSING: daten/auftraggeber.json (run python3 build_auftraggeber.py first)')
     GIVER_SOURCE = json.loads((DATEN / 'auftraggeber.json').read_text(encoding='utf-8'))
     from giver_viewmodel import giver_index, giver_pages, quest_givers
     QUEST_GIVERS = quest_givers(GIVER_SOURCE)
+    if not (DATEN / 'haendler.json').is_file():
+        raise SystemExit('MISSING: daten/haendler.json (run python3 build_haendler.py first)')
+    VENDOR_SOURCE = json.loads((DATEN / 'haendler.json').read_text(encoding='utf-8'))
+    from vendor_viewmodel import vendor_index, vendor_pages
 
     manifest_path = target / 'manifest.json'
     manifest = {'schema': SCHEMA, 'languages': {}, 'kinds': list(ARTEN)}
@@ -709,6 +720,15 @@ def main() -> int:
         deed_rows = task_rows(data['d'], deed_pages, other_deed)
         write_shards(target, lang, 'filter-q', quest_rows)
         write_shards(target, lang, 'filter-d', deed_rows)
+        # The deeds index is a list page, not a relation: it needs every deed at
+        # once so its search and filters cover the whole catalogue. Same rows as
+        # the embedded relation lists, sorted by name.
+        index_rows = [deed_rows[ident] for ident in sorted(
+            deed_rows, key=lambda key: (deed_rows[key]['name'].casefold(), key))]
+        (WEB / ('taten-index-%s.js' % lang)).write_text(
+            'window.MQL_INDEX_ROWS=' + json.dumps({'kind': 'd', 'rows': index_rows},
+                                                  ensure_ascii=False, separators=(',', ':')) + ';\n',
+            encoding='utf-8')
         item_filter = read_assignment(WEB / ('gegenstaende-%s.js' % lang), 'MQL_GEGENSTAENDE')
         write_shards(target, lang, 'filter-i', {row[0]: row for row in item_filter['e']})
         (folder / 'filter-items.json').write_text(json.dumps(
@@ -738,6 +758,27 @@ def main() -> int:
         item_ctx = load_item_context(builder, model, lang)
         item_pages = {ident: item_view(builder, item_ctx, ident, item)
                        for ident, item in data['i'].items()}
+        # Large item source lists reuse the task finder's complete filter
+        # schema, but only receive the tasks that award this item.
+        for ident, item in data['i'].items():
+            by_kind = {}
+            for source in item.get('quellen') or []:
+                if len(source) > 1 and source[0] in ('q', 'd'):
+                    by_kind.setdefault(source[0], []).append(source[1])
+            task_filter = {}
+            for kind, ids in by_kind.items():
+                source = data['q'] if kind == 'q' else data['d']
+                selected = []
+                fields = ('i', 'n', 'r', 'z', 'u', 'a', 'g', 'l', 'th', 'f',
+                          'dy', 'rp', 'gr', 'ix', 'ls', 'v', 'vo', 'vl', 'vb',
+                          'e', 'x', 'mp', 'rw')
+                for task_id in dict.fromkeys(ids):
+                    if task_id in source:
+                        selected.append({key: source[task_id].get(key)
+                                         for key in fields if key in source[task_id]})
+                if len(selected) > 10:
+                    task_filter[kind] = selected
+            item_pages[ident]['task_filter'] = task_filter
         link_items(item_pages, set_source, lang)
         counts['page-i'] = len(item_pages)
         write_pages(target, lang, 'i', item_pages)
@@ -777,6 +818,17 @@ def main() -> int:
         write_pages(target, lang, 'giver', giver_detail)
         counts['giver'] = counts['page-giver'] = len(giver_detail)
 
+        vendors = vendor_index(VENDOR_SOURCE, lang, maps)
+        (folder / 'vendors-index.json').write_text(
+            json.dumps(vendors, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+        data['vendor'] = {row['id']: {'id': row['id'], 'name': row['name']}
+                          for row in vendors['vendors']}
+        write_shards(target, lang, 'vendor', data['vendor'])
+        vendor_detail = vendor_pages(VENDOR_SOURCE, lang, data['i'], maps,
+                                     app_url, coords, builder.w)
+        write_pages(target, lang, 'vendor', vendor_detail)
+        counts['vendor'] = counts['page-vendor'] = len(vendor_detail)
+
         members = members_index(builder, model)
         for kind in ('area', 'region'):
             pages = {ident: area_view(builder, entry, kind, members)
@@ -806,6 +858,13 @@ def main() -> int:
                 segment = SEGMENT[lang]
                 detail_routes[lang][segment] = ['/%s/%s/' % (lang, segment)] + [
                     '/%s/%s/%s/' % (lang, segment, ident) for ident in sorted(ids)]
+            elif kind == 'vendor':
+                # Its segment lives in the vendor view model; the catalogue
+                # words hold the display label ("Bei Händlern erhältlich").
+                from vendor_viewmodel import SEGMENT, vendor_url
+                segment = SEGMENT[lang]
+                detail_routes[lang][segment] = [vendor_url(lang, ident)
+                                                for ident in sorted(ids)]
             elif kind == 'giver':
                 from giver_viewmodel import SEGMENT
                 segment = SEGMENT[lang]
@@ -819,7 +878,7 @@ def main() -> int:
                 detail_routes[lang][segment] = sorted(_route(lang, kind, ident) for ident in ids)
 
         manifest['languages'][lang] = counts
-        for kind in ('set', 'giver'):
+        for kind in ('set', 'giver', 'vendor'):
             if kind not in manifest['kinds']:
                 manifest['kinds'].append(kind)
         if not options.still:

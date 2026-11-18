@@ -76,6 +76,7 @@
 	var legendeMehr = document.getElementById('legende-mehr');
 	var legendeVoll = document.getElementById('legende-voll');
 	var detail = document.getElementById('detail');
+	var kartenBreadcrumb = document.getElementById('karten-breadcrumb');
 	var filterLeiste = document.getElementById('filter');
 	var filterKnopf = document.getElementById('filter-knopf');
 	var filterStatus = document.getElementById('filter-status');
@@ -213,6 +214,68 @@
 	var karteNachIndex = {};
 	var lesbareKartennamen = {};
 	karten.forEach(function (karte) { karteNachIndex[karte.idx] = karte; });
+
+	// Breadcrumb of the map app: the landscape overview first, then the area
+	// path of the shown list. Every step is a link, so the list column no longer
+	// needs its own "all landscapes" button or a second path line.
+	var kartenPfad = document.querySelector('.karten-pfad');
+	function zeichneKartenBreadcrumb() {
+		if (!kartenBreadcrumb) { return; }
+		if (kartenPfad) { kartenPfad.hidden = false; }
+		var uebersicht = (typeof ltexte === 'object' && ltexte && ltexte[3]) || t('gebiete');
+		var glieder = [{ text: uebersicht, uebersicht: true }];
+		var knoten = (typeof haupt !== 'undefined' && haupt &&
+			haupt.classList.contains('landschaft-start')) ? null : zustand.knoten;
+		if (knoten && knoten.schluessel) {
+			var pfad = '';
+			knoten.schluessel.split('|').filter(Boolean).forEach(function (name) {
+				pfad += '|' + name;
+				glieder.push({ text: lesbareKartennamen[name] || name, schluessel: pfad });
+			});
+		}
+		// Long story paths would push the current place out of sight: keep the
+		// overview, a gap marker and the last three steps.
+		var sichtbar = glieder.length > 4 ? [glieder[0], null].concat(glieder.slice(-3)) : glieder;
+		var aktuell = glieder[glieder.length - 1];
+		kartenBreadcrumb.textContent = '';
+		sichtbar.forEach(function (glied, nummer) {
+			if (nummer) {
+				var trenner = eltern('span', ' › ');
+				trenner.className = 'trenner';
+				trenner.setAttribute('aria-hidden', 'true');
+				kartenBreadcrumb.appendChild(trenner);
+			}
+			if (!glied) { kartenBreadcrumb.appendChild(eltern('span', '…')); return; }
+			if (glied === aktuell) {
+				var jetzt = eltern('span', glied.text);
+				jetzt.setAttribute('aria-current', 'page');
+				kartenBreadcrumb.appendChild(jetzt);
+				return;
+			}
+			var link = eltern('a', glied.text);
+			link.href = '#';
+			link.addEventListener('click', function (ereignis) {
+				ereignis.preventDefault();
+				if (glied.uebersicht) { landschaftUebersicht(); return; }
+				var ziel = findeKnoten(WURZEL, glied.schluessel);
+				if (!ziel) { return; }
+				// A region is the step above its landscapes: go to the overview and
+				// leave the reader at that region instead of a stray region list.
+				if (ziel.tiefe === 1 && !istThemenWurzel(ziel)) {
+					landschaftUebersicht();
+					window.requestAnimationFrame(function () {
+						var gruppe = Array.prototype.find.call(
+							document.querySelectorAll('.landschaft-gruppe h3'),
+							function (kopf) { return kopf.textContent.trim() === ziel.name; });
+						if (gruppe) { gruppe.scrollIntoView({ block: 'start' }); }
+					});
+					return;
+				}
+				waehleKnoten(ziel, true);
+			});
+			kartenBreadcrumb.appendChild(link);
+		});
+	}
 	var questNachId = {};
 	quests.forEach(function (quest) { questNachId[quest.i] = quest; });
 	// Chapter id → the instance rows that belong to it (built when first needed).
@@ -742,6 +805,7 @@
 		if (modus === 'baum') { markiereBaum(); }
 	}
 	function zeigePfad(knoten) {
+		if (!pfadZeile) { return; }
 		var teile = (knoten.schluessel || '').split('|').filter(function (teil) { return teil !== ''; });
 		teile.pop();
 		pfadZeile.textContent = teile.map(function (name) { return lesbareKartennamen[name] || name; }).join(' › ');
@@ -804,6 +868,7 @@
 		};
 		bild.src = webp;
 		if (gelaende) { gelaende.setMap(karte); }
+		zeichneKartenBreadcrumb();
 		zeichneMarker();
 		zeichneDetail();
 		kartenStufe();
@@ -1873,11 +1938,6 @@
 				stand.className = 'laufstand';
 				questName.appendChild(stand);
 			}
-			var status = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(loesung ? 'deeds' : 'quests', quest.i);
-			if (status) {
-				status.addEventListener('click', function (event) { event.stopPropagation(); });
-				zeile.appendChild(status);
-			}
 			zeile.addEventListener('click', function () { waehle(quest); });
 			zeile.addEventListener('mouseenter', function () {
 				var punkt = markerVon[quest.i];
@@ -1973,8 +2033,10 @@
 		var aktiv = [];
 		if (zustand.filter !== 'alle') { aktiv.push(t('filter_' + zustand.filter)); }
 		if (zustand.belohnung !== 'alle') { aktiv.push(t('belohnung') + ': ' + t('belohnung_' + zustand.belohnung)); }
-		if (zustand.q) { aktiv.push('„' + zustand.q + '“'); }
-		filterStatus.textContent = aktiv.length ? aktiv.join(' · ') : t('filter_keiner');
+		// The search term is not repeated here: the field next to it shows it,
+		// and in a 380px list column the duplicate only truncates the status.
+		// No filter needs no label: the button alone says the list is complete.
+		filterStatus.textContent = aktiv.join(' · ');
 		filterStatus.classList.toggle('aktiv', aktiv.length > 0);
 		filterKnopf.classList.toggle('aktiv', aktiv.length > 0);
 		filterZuruecksetzen.hidden = !aktiv.length;
@@ -1998,15 +2060,10 @@
 			return;
 		}
 		var listeGefiltert = gefiltert(quelle);
-		var zusatz = zustand.filter === 'alle' ? '' : ' · ' + t('filter_' + zustand.filter);
-		if (zustand.belohnung !== 'alle') {
-			zusatz += ' · ' + t('belohnung') + ': ' + t('belohnung_' + zustand.belohnung);
-		}
-		if (zustand.q) { zusatz += ' · „' + zustand.q + '“'; }
-		var anzahl = listeGefiltert.filter(gezaehlt).length;
-		// The rows no longer carry a level; the range belongs to the whole area.
-		var spanne = stufenSpanne(quelle);
-		zeigeListe(titel + ' · ' + anzahl + (spanne ? ' · ' + spanne : '') + zusatz, listeGefiltert);
+		// Counts, level ranges and the active filter belong to the tool row and
+		// the detail pane; the list header stays the plain location name.
+		zeigeListe(titel, listeGefiltert);
+		zeichneKartenBreadcrumb();
 		zeichneMarker();
 	}
 
@@ -2280,17 +2337,18 @@
 					return;
 				}
 				var merkmal = eltern('li', t({ t: 'belohnung_titel', v: 'belohnung_tugend',
-					tr: 'belohnung_fertigkeit', e: 'belohnung_emote' }[art] || 'belohnung_titel') + ': ' + name);
+					tr: 'belohnung_fertigkeit', e: 'belohnung_emote' }[art] || 'belohnung_unbekannt') + ': ' + name);
 				merkmal.className = 'merkmal';
 				liste.appendChild(merkmal);
 			});
 			if (liste.children.length) { belohnung.appendChild(liste); }
 			if (auswahl.length) {
-				var wahl = eltern('p', null);
+				var wahl = eltern('div', null);
 				wahl.className = 'auswahl';
 				wahl.appendChild(eltern('strong', t('auswahl') + ': '));
-				auswahl.forEach(function (eintrag, nummer) {
-					if (nummer) { wahl.appendChild(document.createTextNode(' · ')); }
+				var wahlListe = eltern('ul', null);
+				auswahl.forEach(function (eintrag) {
+					var wahlZeile = eltern('li', null);
 					var stueck = eltern('span', null);
 					stueck.className = 'q' + (eintrag[2] || 0);
 					var kennung = eintrag[6];
@@ -2298,8 +2356,13 @@
 					if (kennung) { stueck.appendChild(symbolBild(kennung)); }
 					stueck.appendChild(kennung ? gegenstandLink(kennung, beschriftung)
 						: document.createTextNode(beschriftung));
-					wahl.appendChild(stueck);
+					wahlZeile.appendChild(stueck);
+					if (eintrag[3]) {
+						wahlZeile.appendChild(eltern('span', '· ' + t('stufe') + ' ' + eintrag[3]));
+					}
+					wahlListe.appendChild(wahlZeile);
 				});
+				wahl.appendChild(wahlListe);
 				belohnung.appendChild(wahl);
 			}
 			detail.appendChild(belohnung);
@@ -2746,8 +2809,13 @@
 		if (art === 'g' && id) { return '/' + sprache + '/' + SEGMENT.gegenstand[sprache] + '/' + id + '/'; }
 		if (art === 't' && id) { return '/' + sprache + '/' + SEGMENT.titel[sprache] + '/' + id + '/'; }
 		if (art === 'v' && id) { return '/' + sprache + '/' + SEGMENT.tugend[sprache] + '/' + id + '/'; }
-		if (art === 't' || art === 'v') {
-			return 'belohnungen.html?lang=' + sprache + '&tab=t&q=' + encodeURIComponent(name);
+		// Titles and virtues have their own catalogue lists; the reward browser
+		// no longer carries them. Without an ID the search stays in that list.
+		if (art === 't') {
+			return '/' + sprache + '/' + SEGMENT.titel[sprache] + '/?q=' + encodeURIComponent(name);
+		}
+		if (art === 'v') {
+			return '/' + sprache + '/' + SEGMENT.tugend[sprache] + '/';
 		}
 		return 'handwerk.html?lang=' + sprache + '&q=' + encodeURIComponent(name) + '#rezepte';
 	}
@@ -2912,11 +2980,14 @@
 		}
 	});
 
-	document.getElementById('zum-baum').addEventListener('click', function () {
-		// Step back only over entries this page added, never off the site.
-		if (eigeneSchritte > 0) { window.history.back(); }
-		else { zeigeNav('baum'); }
-	});
+	var zurueckKnopf = document.getElementById('zum-baum');
+	if (zurueckKnopf) {
+		zurueckKnopf.addEventListener('click', function () {
+			// Step back only over entries this page added, never off the site.
+			if (eigeneSchritte > 0) { window.history.back(); }
+			else { zeigeNav('baum'); }
+		});
+	}
 	window.addEventListener('popstate', function (ereignis) {
 		var ziel = ereignis.state && ereignis.state.mqlListe;
 		eigeneSchritte = Math.max(0, eigeneSchritte - 1);
@@ -2965,6 +3036,15 @@
 		aktualisiereStand();
 	});
 	aufgabenSuche.value = zustand.q;
+	// The cross is compact; the tooltip says what it removes.
+	filterZuruecksetzen.title = t('filter_zuruecksetzen');
+	// The deeds view searches deeds, not "quest or giver".
+	if (window.MQL_ART === 'taten') {
+		aufgabenSuche.setAttribute('placeholder', t('taten_suche_platzhalter'));
+		aufgabenSuche.setAttribute('aria-label', t('taten_suchen'));
+		var suchFeld = document.querySelector('.aufgaben-suche .visuell-versteckt');
+		if (suchFeld) { suchFeld.textContent = t('taten_suchen'); }
+	}
 	aufgabenSuche.addEventListener('input', function () {
 		zustand.q = aufgabenSuche.value.trim();
 		zustand.sichtbar = ANSICHT_JE_SEITE;
@@ -3207,22 +3287,35 @@
 	function landschaftUebersicht(ohneVerlauf) {
 		landschaftBereich = null;
 		haupt.classList.add('landschaft-start'); landschaftStart.hidden = false;
+		zeichneKartenBreadcrumb();
 		landschaftAdresse(null, null, !!ohneVerlauf);
 		landschaftStart.textContent = '';
 		var kopf = eltern('div'); kopf.className = 'aufgaben-einstieg-kopf';
 		kopf.appendChild(eltern('h2', ltexte[0]));
-		var finder = eltern('a', {
+		// The deeds view gets the deed finder, never the quest finder.
+		var tatenFinder = window.MQL_ART === 'taten';
+		var finder = eltern('a', (tatenFinder ? {
+			de:'Alle Taten im Finder →',en:'All deeds in the finder →',fr:'Toutes les prouesses dans le moteur de recherche →'
+		} : {
 			de:'Alle Aufgaben im Finder →',en:'All quests in the finder →',fr:'Toutes les quêtes dans le moteur de recherche →'
-		}[sprache] || '');
+		})[sprache] || '');
 		finder.className = 'aufgabenfinder-knopf';
-		finder.href = ({de:'/de/aufgabenfinder/',en:'/en/quest-finder/',fr:'/fr/recherche-quetes/'}[sprache] || '/de/aufgabenfinder/');
+		finder.href = (tatenFinder ? {
+			de:'/de/tat/',en:'/en/deed/',fr:'/fr/prouesse/'
+		} : {
+			de:'/de/aufgabenfinder/',en:'/en/quest-finder/',fr:'/fr/recherche-quetes/'
+		})[sprache] || '/de/tat/';
 		kopf.appendChild(finder); landschaftStart.appendChild(kopf);
 		var einstieg = eltern('div'); einstieg.className = 'aufgaben-einstieg';
-		einstieg.appendChild(eltern('p', {
+		einstieg.appendChild(eltern('p', (tatenFinder ? {
+			de:'Wähle ein Gebiet für die Karte oder filtere alle Taten im Finder.',
+			en:'Choose an area to open its map, or filter all deeds in the finder.',
+			fr:'Choisissez une région pour ouvrir sa carte ou filtrez toutes les prouesses dans le moteur de recherche.'
+		} : {
 			de:'Wähle ein Gebiet für die Karte oder suche Aufgaben direkt nach Thema.',
 			en:'Choose an area to open its map, or find quests by topic.',
 			fr:'Choisissez une région pour ouvrir sa carte ou cherchez des quêtes par thème.'
-		}[sprache] || ''));
+		})[sprache] || ''));
 		landschaftStart.appendChild(einstieg);
 
 		var werkzeuge = eltern('div'); werkzeuge.className = 'landschaft-werkzeuge'; landschaftStart.appendChild(werkzeuge);
@@ -3504,8 +3597,10 @@
 	window.addEventListener('popstate', function () { landschaftAusAdresse(); });
 	window.addEventListener('hashchange', landschaftAusAdresse);
 	var altZurueck = document.getElementById('zum-baum');
-	var neuZurueck = altZurueck.cloneNode(true); altZurueck.replaceWith(neuZurueck);
-	neuZurueck.textContent = '‹ ' + ltexte[3]; neuZurueck.onclick = function () { landschaftUebersicht(); };
+	if (altZurueck) {
+		var neuZurueck = altZurueck.cloneNode(true); altZurueck.replaceWith(neuZurueck);
+		neuZurueck.textContent = '‹ ' + ltexte[3]; neuZurueck.onclick = function () { landschaftUebersicht(); };
+	}
 	if (window.MQL_GELAENDE) {
 		gelaende = window.MQL_GELAENDE.create({ world:welt, stage:buehne, image:bild, language:sprache,
 			onChange:function () {

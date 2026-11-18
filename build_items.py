@@ -16,6 +16,7 @@ itself has no ID (the resource spawn table), and then only as a hint.
 """
 import json
 import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from itemnamen import sauberer_name
@@ -26,9 +27,15 @@ DATEN = HIER / 'daten'
 SPRACHEN = ('de', 'en', 'fr')
 REZEPTE = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
                '/rezepte-2026-11-06/recipes.json')
+VENDOR_ITEMS = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
+                    '/vendor-items-2026-11-08/vendor-items.json')
+RECIPE_SOURCES = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
+                      '/recipe-sources-2026-11-06/recipe-sources.json')
 # Full item export: supplies the client icon ID (`ic`) for every item.
 VOLL = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
             '/items-2026-11-08/items.json')
+ITEM_LORE = Path('/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion'
+                 '/app/data/lore/items.xml')
 
 
 def js_datei(pfad, variable):
@@ -40,8 +47,21 @@ def js_datei(pfad, variable):
 
 
 def leeres_item():
-    return {'n': {}, 'q': None, 'l': None, 'b': None, 'kat': None, 'slot': None,
-            'sub': None, 'ic': None, 'w': {}, 'quellen': [], 'rezepte': [], 'zutat': [], 'vor': []}
+    return {'n': {}, 'q': None, 'l': None, 'b': None, 'bm': None, 'kat': None, 'slot': None,
+            'sub': None, 'ic': None, 'w': {}, 'quellen': [], 'rezepte': [], 'herstellung': [],
+            'zutat': [], 'verwendung': [], 'vor': [], 'haendler': [], 'tausch': []}
+
+
+def binding_modes():
+    """Read the client's explicit binding enum without changing legacy `b`."""
+    if not ITEM_LORE.is_file():
+        return {}
+    modes = {}
+    for entry in ET.parse(ITEM_LORE).getroot().iter('item'):
+        key, mode = entry.get('key'), entry.get('binding')
+        if key and mode:
+            modes['%08X' % (int(key) & 0xffffffff)] = mode
+    return modes
 
 
 def rohstoff_schluessel(text):
@@ -90,6 +110,7 @@ def ressourcen_schluessel(text):
 
 def baue():
     items = {}
+    modes = binding_modes()
 
     def eintrag(iid):
         return items.setdefault(str(iid).upper(), leeres_item())
@@ -102,6 +123,7 @@ def baue():
         e['q'] = row.get('quality')
         e['l'] = row.get('level') or None
         e['b'] = row.get('binding')
+        e['bm'] = modes.get(str(iid).upper())
         e['kat'] = row.get('category')
         e['slot'] = row.get('slot')
         e['sub'] = row.get('subtype')
@@ -141,16 +163,74 @@ def baue():
                     if namen.get(sprache):
                         e['n'].setdefault(sprache, namen[sprache])
         for rezept in rezepte['recipes']:
+            recipe_id = str(rezept['id']).upper()
             rid = rezept['r'][0]
             stufe = int(rezept.get('t') or 0)
             if rid:
-                eintrag(rid)['rezepte'].append(str(rezept['id']).upper())
+                result = eintrag(rid)
+                result['rezepte'].append(recipe_id)
+                result['herstellung'].append({
+                    'recipe': recipe_id, 'role': 'regular_result',
+                    'quantity': rezept['r'][1] if len(rezept['r']) > 1 else None,
+                })
+
             for teil in rezept.get('i') or []:
                 if teil and teil[0]:
-                    eintrag(teil[0])['zutat'].append(str(rezept['id']).upper())
+                    ingredient = eintrag(teil[0])
+                    ingredient['zutat'].append(recipe_id)
+                    ingredient['verwendung'].append({
+                        'recipe': recipe_id, 'role': 'ingredient',
+                        'quantity': teil[1] if len(teil) > 1 else None,
+                    })
+                    item_stufen.setdefault(str(teil[0]).upper(), set()).add(stufe)
+            for teil in rezept.get('o') or []:
+                if teil and teil[0]:
+                    ingredient = eintrag(teil[0])
+                    ingredient['zutat'].append(recipe_id)
+                    ingredient['verwendung'].append({
+                        'recipe': recipe_id, 'role': 'optional_ingredient',
+                        'quantity': teil[1] if len(teil) > 1 else None,
+                        'criticalBonus': teil[2] if len(teil) > 2 else None,
+                    })
                     item_stufen.setdefault(str(teil[0]).upper(), set()).add(stufe)
             if rezept.get('cr') and rezept['cr'][0]:
-                eintrag(rezept['cr'][0])['zutat'].append(str(rezept['id']).upper())
+                result = eintrag(rezept['cr'][0])
+                result['herstellung'].append({
+                    'recipe': recipe_id, 'role': 'critical_result',
+                    'quantity': rezept['cr'][1] if len(rezept['cr']) > 1 else None,
+                })
+
+    # 3b. Concrete vendor and barter sources from the Companion exports.
+    if VENDOR_ITEMS.is_file():
+        vendor_data = json.loads(VENDOR_ITEMS.read_text(encoding='utf-8'))
+        vendors = vendor_data.get('vendors') or {}
+        for iid, vendor_ids in (vendor_data.get('items') or {}).items():
+            if str(iid).upper() not in items:
+                continue
+            item = eintrag(iid)
+            for vendor_id in vendor_ids:
+                vendor = vendors.get(str(vendor_id).upper())
+                if not vendor:
+                    continue
+                item['haendler'].append({
+                    'id': str(vendor_id).upper(),
+                    'name': vendor.get('n') or {},
+                })
+    if RECIPE_SOURCES.is_file():
+        source_data = json.loads(RECIPE_SOURCES.read_text(encoding='utf-8'))
+        for iid, sources in (source_data.get('sources') or {}).items():
+            if str(iid).upper() not in items:
+                continue
+            item = eintrag(iid)
+            for source in sources:
+                if source.get('art') != 'tausch':
+                    continue
+                item['tausch'].append({
+                    'id': str(source.get('id') or ''),
+                    'name': source.get('name') or '',
+                    'title': source.get('titel') or '',
+                    'area': source.get('gebiet') or '',
+                })
 
     # 4. Ressourcen: Spawn-Tabelle nennt keine Item-IDs, nur Namen und Beruf.
     # Direct names cover the few exact matches. Wood logs and ore are named
@@ -194,6 +274,7 @@ def baue():
     voll = json.loads(VOLL.read_text(encoding='utf-8')).get('items', {}) if VOLL.is_file() else {}
     for iid, e in items.items():
         eintrag = voll.get(iid) or {}
+        e['bm'] = modes.get(iid)
         symbol = eintrag.get('ic')
         if symbol:
             e['ic'] = int(symbol)
@@ -206,6 +287,18 @@ def baue():
     for e in items.values():
         e['zutat'] = sorted(set(e['zutat']))
         e['rezepte'] = sorted(set(e['rezepte']))
+        e['herstellung'] = sorted(e['herstellung'], key=lambda row: (
+            row['recipe'], row['role'], row.get('quantity') or 0))
+        e['verwendung'] = sorted(e['verwendung'], key=lambda row: (
+            row['recipe'], row['role'], row.get('quantity') or 0))
+        e['haendler'] = sorted(
+            {json.dumps(row, ensure_ascii=False, sort_keys=True): row
+             for row in e['haendler']}.values(),
+            key=lambda row: (row.get('name', {}).get('de', ''), row['id']))
+        e['tausch'] = sorted(
+            {json.dumps(row, ensure_ascii=False, sort_keys=True): row
+             for row in e['tausch']}.values(),
+            key=lambda row: (row.get('name', ''), row['id']))
 
     return items
 

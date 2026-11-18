@@ -79,13 +79,13 @@ async function bereit(page, type) {
 		const stand = await page.evaluate(() => ({
 			anzahl: document.querySelector('.filter-result-toolbar [role=status]')?.textContent,
 			filter: document.querySelectorAll('.filter-group-single').length,
-			marken: [...document.querySelectorAll('.related-symbol')].slice(0, 1).map((e) => e.textContent.trim())
+			marken: [...document.querySelectorAll('.related-symbol')].slice(0, 1).map((e) => e.classList.contains('fertig'))
 		}));
 		const expectedCount = await page.evaluate(() =>
 			JSON.parse(document.getElementById('related-lists').textContent).q.rows.length);
 		assert.match(stand.anzahl, new RegExp(String(expectedCount)));
 		assert.equal(stand.filter, 1, 'Abschlussfilter fehlt');
-		assert.deepEqual(stand.marken, ['✓']);
+		assert.deepEqual(stand.marken, [true], 'erledigter Nachweis fehlt am Symbol');
 
 		await page.locator('.filter-group-single label', { hasText: /Nicht als erledigt importiert/ }).first().click();
 		await page.waitForFunction(() => window.MQL_RELATED_FILTER.getState().filters.status === 'rest');

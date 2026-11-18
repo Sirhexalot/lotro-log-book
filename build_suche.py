@@ -82,8 +82,13 @@ def baue(katalog_dir, sprache):
                 name = (eintrag['n'].get(sprache) or eintrag['n'].get('en') or '').strip()
                 if name:
                     mit_id[name] = ident
-        for name, _quellen in belohnungen[art]:
-            rows.append([buchstabe, mit_id.get(name, ''), name, '', ''])
+        for eintrag in belohnungen[art]:
+            if len(eintrag) == 3:
+                ident, name = eintrag[0], eintrag[1]
+            else:
+                name = eintrag[0]
+                ident = mit_id.get(name, '')
+            rows.append([buchstabe, ident or mit_id.get(name, ''), name, '', ''])
 
     # Items come from the merged namespace (build_items.py): equipment, reward
     # items and crafting items in one list with one ID.

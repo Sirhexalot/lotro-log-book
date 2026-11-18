@@ -1,300 +1,220 @@
-/* Reward index: virtues, titles and items, grouped by deed type, region and
- * area. Data: belohnungen-<language>.js (build_belohnungen.py). */
+/* Reward browser: compact results with the shared filter shell. */
 (function () {
 	'use strict';
-	var t = window.MQL_T || function (key) { return key; };
-	var sprache = window.MQL_SPRACHE || 'de';
-	var liste = document.getElementById('bl-liste');
-	var suche = document.getElementById('bl-suche');
-	var anzahl = document.getElementById('bl-anzahl');
-	var mehr = document.getElementById('bl-mehr');
-	var typWahl = document.getElementById('bl-art');
-	var regionWahl = document.getElementById('bl-region');
-	if (!liste) { return; }
+	var T = window.MQL_T || function (key) { return key; };
+	var lang = window.MQL_SPRACHE || 'de';
+	var main = document.getElementById('belohnungen');
+	if (!main || !window.MQL_FILTER_UI || !window.MQL_FILTERADAPTER) { return; }
+	var controller;
 
-	var art = 'v';
-	var grenze = { v: 30, t: 60, g: 100 };
-	var daten = null;
-	var typ = '', region = '';
-	var typeOrder = [];
-
-	function quellenZahl(n) {
-		return n + ' ' + t(n === 1 ? 'bl_quelle' : 'bl_quellen');
+	function node(tag, text) {
+		var element = document.createElement(tag);
+		if (text !== undefined) { element.textContent = text; }
+		return element;
+	}
+	function sourcePath(source) {
+		return source[7] || [];
+	}
+	/* Only reward items live here. Titles and virtues have their own catalogue
+	 * pages in the Erfolge menu, and duplicating them produced two lists of the
+	 * same 2.500 entries. */
+	function renderRow(row) {
+		var li = node('li');
+		var article = node('article');
+		article.className = 'bl-ergebnis-zeile bl-art-g';
+		var icon = node('span');
+		icon.className = 'symbol symbol-svg bl-symbol';
+		icon.innerHTML = window.MQL_SYMBOL ? window.MQL_SYMBOL('gegenstand', 'bl-symbol-svg') : '';
+		article.appendChild(icon);
+		var heading = node('div');
+		heading.className = 'bl-ergebnis-kopf';
+		var name = node('a', row.name);
+		name.className = 'bl-name q' + (row.raw[2] || 0);
+		name.href = '/' + lang + '/' +
+			({de: 'gegenstand', en: 'item', fr: 'objet'}[lang] || 'gegenstand') + '/' +
+			encodeURIComponent(row.raw[0]) + '/';
+		heading.appendChild(name);
+		var meta = [T('bl_gegenstaende')];
+		if (row.raw[3]) { meta.push(T('stufe') + ' ' + row.raw[3]); }
+		var metadata = node('span', meta.join(' · '));
+		metadata.className = 'bl-meta';
+		heading.appendChild(metadata);
+		article.appendChild(heading);
+		li.appendChild(article);
+		return li;
 	}
 
-	function eltern(tag, text) {
-		var node = document.createElement(tag);
-		if (text != null) { node.textContent = text; }
-		return node;
-	}
-
-	// --- source grouping --------------------------------------------------
-	/** Sources as type → region → area, each area with a name/level table. */
-	function quelleBaum(quellen) {
-		var baum = document.createElement('div');
-		baum.className = 'bl-baum';
-		var nachArt = {};
-		quellen.forEach(function (q) { (nachArt[q[5]] = nachArt[q[5]] || []).push(q); });
-		var arten = Object.keys(nachArt).sort(function (a, b) {
-			var ia = typeOrder.indexOf(a), ib = typeOrder.indexOf(b);
-			return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-		});
-		arten.forEach(function (artName) {
-			var eintraege = nachArt[artName];
-			var block = eltern('section');
-			block.className = 'bl-art';
-			var kopf = eltern('h4', artName + ' (' + eintraege.length + ')');
-			block.appendChild(kopf);
-			var nachRegion = {};
-			eintraege.forEach(function (q) { (nachRegion[q[4] || '—'] = nachRegion[q[4] || '—'] || []).push(q); });
-			Object.keys(nachRegion).sort().forEach(function (regName) {
-				var reg = eltern('div');
-				reg.className = 'bl-region';
-				if (regName && regName !== '—') { reg.appendChild(eltern('h5', regName)); }
-				var nachZone = {};
-				nachRegion[regName].forEach(function (q) { (nachZone[q[3] || '—'] = nachZone[q[3] || '—'] || []).push(q); });
-				Object.keys(nachZone).sort().forEach(function (zone) {
-					var gruppe = eltern('div');
-					gruppe.className = 'bl-zone';
-					if (zone && zone !== '—') { gruppe.appendChild(eltern('h6', zone)); }
-					var tabelle = eltern('table');
-					tabelle.className = 'tabelle bl-quellen';
-					var koerper = eltern('tbody');
-					nachZone[zone]
-						.sort(function (a, b) { return a[2].localeCompare(b[2]); })
-						.forEach(function (q) {
-							var tr = eltern('tr');
-							var name = eltern('td');
-							var link = eltern('a', q[2]);
-							link.href = window.MQL_KARTE_LINK(q[0], q[1]);
-							name.appendChild(link);
-							tr.appendChild(name);
-							var stufe = eltern('td', q[6] ? t('stufe') + ' ' + q[6] : '');
-							stufe.className = 'zahl bl-lvl';
-							tr.appendChild(stufe);
-							koerper.appendChild(tr);
-						});
-					tabelle.appendChild(koerper);
-					gruppe.appendChild(tabelle);
-					reg.appendChild(gruppe);
-				});
-				block.appendChild(reg);
-			});
-			// Long type blocks start collapsed.
-			if (eintraege.length > 10) {
-				var details = eltern('details');
-				details.appendChild(eltern('summary', artName + ' (' + eintraege.length + ')'));
-				kopf.remove();
-				details.appendChild(block);
-				baum.appendChild(details);
-			} else {
-				baum.appendChild(block);
+	function makeGeoTree(rows) {
+		var roots = [];
+		var known = new Map();
+		function add(path, depth, parent) {
+			if (depth >= path.length) { return; }
+			var pair = path[depth], id = String(pair[0]);
+			var key = (parent ? parent.key + '/' : '') + id;
+			var option = known.get(key);
+			if (!option) {
+				var pathIds = (parent ? parent.pathIds : []).concat([id]);
+				var pathObject = {geo: pathIds};
+				option = {path: pathObject, label: pair[1], children: [], pathIds: pathIds, key: key};
+				known.set(key, option);
+				(parent ? parent.children : roots).push(option);
 			}
-		});
-		return baum;
-	}
-
-	function passtQuelle(q) {
-		return (!typ || q[5] === typ) && (!region || q[4] === region);
-	}
-
-	function quellenVon(quellen) {
-		return (quellen || []).filter(passtQuelle);
-	}
-
-	function trifftName(name, quellen) {
-		if (!suche.value.trim()) { return true; }
-		var text = suche.value.trim().toLowerCase();
-		if (name.toLowerCase().indexOf(text) >= 0) { return true; }
-		return quellen.some(function (q) { return q[2].toLowerCase().indexOf(text) >= 0; });
-	}
-
-	// --- views ------------------------------------------------------------
-	function zeigeTugenden() {
-		var eintraege = daten.v.filter(function (eintrag) {
-			return trifftName(eintrag[0], eintrag[1]) && quellenVon(eintrag[1]).length;
-		});
-		eintraege.slice(0, grenze.v).forEach(function (eintrag) {
-			var karte = eltern('section');
-			karte.className = 'bl-karte';
-			var kopf = eltern('div');
-			kopf.className = 'bl-karte-kopf';
-			kopf.appendChild(eltern('h3', eintrag[0]));
-			var zahl = eltern('span', quellenZahl(quellenVon(eintrag[1]).length));
-			zahl.className = 'bl-zahl';
-			kopf.appendChild(zahl);
-			karte.appendChild(kopf);
-			karte.appendChild(quelleBaum(quellenVon(eintrag[1])));
-			liste.appendChild(karte);
-		});
-		zaehle(eintraege.length, grenze.v);
-	}
-
-	function zeigeTitel() {
-		var eintraege = daten.t.filter(function (eintrag) {
-			return trifftName(eintrag[0], eintrag[1]) && quellenVon(eintrag[1]).length;
-		});
-		eintraege.slice(0, grenze.t).forEach(function (eintrag) {
-			var quellen = quellenVon(eintrag[1]);
-			var details = eltern('details');
-			details.className = 'bl-titel';
-			var summary = eltern('summary');
-			summary.appendChild(eltern('span', eintrag[0]));
-			var zahl = eltern('span', quellenZahl(quellen.length));
-			zahl.className = 'bl-zahl';
-			summary.appendChild(zahl);
-			details.appendChild(summary);
-			var inhalt = eltern('div');
-			inhalt.className = 'bl-titel-inhalt';
-			var gefuellt = false;
-			details.addEventListener('toggle', function () {
-				if (!gefuellt && details.open) {
-					inhalt.appendChild(quelleBaum(quellen));
-					gefuellt = true;
-				}
-			});
-			details.appendChild(inhalt);
-			liste.appendChild(details);
-		});
-		zaehle(eintraege.length, grenze.t);
-	}
-
-	function zeigeGegenstaende() {
-		var eintraege = daten.g.filter(function (eintrag) {
-			return trifftName(eintrag[1], eintrag[5]) && quellenVon(eintrag[5]).length;
-		});
-		var rahmen = eltern('div');
-		rahmen.className = 'tabellen-rahmen';
-		var tabelle = eltern('table');
-		tabelle.className = 'tabelle bl-gegenstaende';
-		tabelle.innerHTML = '<thead><tr><th>' + t('bl_gegenstand') + '</th><th>' +
-			t('stufe') + '</th><th>' + t('bl_quellen') + '</th><th></th></tr></thead>';
-		var koerper = eltern('tbody');
-		eintraege.slice(0, grenze.g).forEach(function (eintrag) {
-			var quellen = quellenVon(eintrag[5]);
-			var tr = eltern('tr');
-			tr.className = 'bl-zeile';
-			var name = eltern('td');
-			name.className = 'q' + (eintrag[2] || 0);
-			name.appendChild(document.createTextNode(eintrag[1]));
-			tr.appendChild(name);
-			tr.appendChild(eltern('td', eintrag[3] || ''));
-			var anzahlZelle = eltern('td', quellenZahl(quellen.length));
-			anzahlZelle.className = 'zahl';
-			tr.appendChild(anzahlZelle);
-			var detailLink = eltern('a', t('bl_details') + ' ›');
-			detailLink.className = 'bl-details-link';
-			detailLink.href = 'gegenstand.html?id=' + eintrag[0] + '&lang=' + sprache;
-			var detailZelle = eltern('td');
-			detailZelle.className = 'bl-details';
-			detailZelle.appendChild(detailLink);
-			// The row toggles the inline sources; the link leaves the page.
-			detailZelle.addEventListener('click', function (ereignis) { ereignis.stopPropagation(); });
-			tr.appendChild(detailZelle);
-			koerper.appendChild(tr);
-			var detail = eltern('tr');
-			detail.className = 'bl-detail';
-			detail.hidden = true;
-			var zelle = eltern('td');
-			zelle.colSpan = 4;
-			var gefuellt = false;
-			tr.addEventListener('click', function () {
-				if (!gefuellt) {
-					zelle.appendChild(quelleBaum(quellen));
-					gefuellt = true;
-				}
-				detail.hidden = !detail.hidden;
-				tr.classList.toggle('offen', !detail.hidden);
-			});
-			detail.appendChild(zelle);
-			koerper.appendChild(detail);
-		});
-		tabelle.appendChild(koerper);
-		rahmen.appendChild(tabelle);
-		liste.appendChild(rahmen);
-		zaehle(eintraege.length, grenze.g);
-	}
-
-	function zaehle(gesamt, grenzeWert) {
-		anzahl.textContent = window.MQL_ERSETZE(t(gesamt === 1 ? 'bl_eintrag' : 'bl_anzahl'), [gesamt]);
-		mehr.hidden = gesamt <= grenzeWert;
-		mehr.textContent = gesamt > grenzeWert
-			? window.MQL_ERSETZE(t('bl_mehr'), [gesamt - grenzeWert]) : '';
-	}
-
-	function zeichne() {
-		if (!daten) { return; }
-		liste.textContent = '';
-		if (art === 'v') { zeigeTugenden(); }
-		else if (art === 't') { zeigeTitel(); }
-		else { zeigeGegenstaende(); }
-		if (!liste.children.length) {
-			var leer = eltern('p', t('bl_keine'));
-			leer.className = 'leer-tabelle';
-			liste.appendChild(leer);
-			anzahl.textContent = '';
-			mehr.hidden = true;
+			add(path, depth + 1, option);
 		}
-	}
-
-	// --- controls ---------------------------------------------------------
-	function optionen() {
-		var arten = {}, regionen = {};
-		daten.v.forEach(function (eintrag) { eintrag[1].forEach(sammle); });
-		daten.t.forEach(function (eintrag) { eintrag[1].forEach(sammle); });
-		daten.g.forEach(function (eintrag) { eintrag[5].forEach(sammle); });
-		function sammle(q) {
-			if (q[5]) { arten[q[5]] = true; }
-			if (q[4]) { regionen[q[4]] = true; }
-		}
-		var sortiert = typeOrder.filter(function (name) { return arten[name]; });
-		Object.keys(arten).forEach(function (name) {
-			if (sortiert.indexOf(name) < 0) { sortiert.push(name); }
+		rows.forEach(function (row) {
+			row.sources.forEach(function (source) { add(sourcePath(source), 0, null); });
 		});
-		sortiert.forEach(function (name) {
-			var option = eltern('option', name);
-			option.value = name;
-			typWahl.appendChild(option);
-		});
-		Object.keys(regionen).sort().forEach(function (name) {
-			var option = eltern('option', name);
-			option.value = name;
-			regionWahl.appendChild(option);
-		});
-	}
-
-	document.querySelectorAll('[data-bl]').forEach(function (knopf) {
-		knopf.addEventListener('click', function () {
-			art = knopf.getAttribute('data-bl');
-			document.querySelectorAll('[data-bl]').forEach(function (anderer) {
-				anderer.setAttribute('aria-pressed', String(anderer === knopf));
+		function clean(options) {
+			options.sort(function (a, b) { return a.label.localeCompare(b.label, lang); });
+			options.forEach(function (option) {
+				if (!option.children.length) { delete option.children; }
+				else { clean(option.children); }
+				delete option.pathIds; delete option.key;
 			});
-			zeichne();
-		});
-	});
-	if (suche) { suche.addEventListener('input', zeichne); }
-	if (typWahl) { typWahl.addEventListener('change', function () { typ = typWahl.value; zeichne(); }); }
-	if (regionWahl) { regionWahl.addEventListener('change', function () { region = regionWahl.value; zeichne(); }); }
+		}
+		clean(roots);
+		return roots;
+	}
 
 	window.MQL_BELOHNUNGEN_ZEICHNEN = function () {
-		if (!window.MQL_BELOHNUNGEN) { return; }
-		daten = window.MQL_BELOHNUNGEN;
-		typeOrder = daten.o || [];
-		if (typWahl) { typWahl.setAttribute('aria-label', t('bl_art')); }
-		if (regionWahl) { regionWahl.setAttribute('aria-label', t('bl_region')); }
-		// A link from the search page opens one tab with a name already filled in.
-		var parameter = new URLSearchParams(window.location.search);
-		var wunsch = parameter.get('tab');
-		if (wunsch && 'vtg'.indexOf(wunsch) >= 0) {
-			art = wunsch;
-			document.querySelectorAll('[data-bl]').forEach(function (knopf) {
-				knopf.setAttribute('aria-pressed', String(knopf.getAttribute('data-bl') === art));
+		if (controller || !window.MQL_BELOHNUNGEN) { return; }
+		var data = window.MQL_BELOHNUNGEN, rows = [], allGeoPaths = new Map();
+		function add(raw, name, sources) {
+			sources = sources || [];
+			var geo = [];
+			sources.forEach(function (source) {
+				var path = sourcePath(source);
+				for (var length = 1; length <= path.length; length++) {
+					var ids = path.slice(0, length).map(function (pair) { return String(pair[0]); });
+					var key = JSON.stringify(ids);
+					if (!allGeoPaths.has(key)) { allGeoPaths.set(key, path.slice(0, length)); }
+					if (length === path.length && !geo.some(function (p) { return JSON.stringify(p) === key; })) {
+						geo.push(ids);
+					}
+				}
+			});
+			rows.push({
+				id: 'g:' + raw[0], raw: raw, name: name, sources: sources, geo: geo,
+				search: (name + '\n' + sources.map(function (source) { return source[2]; }).join('\n')).toLocaleLowerCase()
 			});
 		}
-		var begriff = parameter.get('q');
-		if (begriff && suche) { suche.value = begriff; }
-		optionen();
-		zeichne();
+		data.g.forEach(function (row) { add(row, row[1], row[5]); });
+
+		var typeValues = [];
+		(data.o || []).forEach(function (label) {
+			if (!typeValues.some(function (value) { return value.label === label; })) {
+				typeValues.push({value: label, label: label});
+			}
+		});
+		var tree = makeGeoTree(rows);
+		var geoKeys = new Set(Array.from(allGeoPaths.keys()));
+		var A = window.MQL_FILTERADAPTER;
+		var extra = {
+			de: {close: 'Schließen', show: '%s Treffer anzeigen', error: 'Ergebnisse nicht aktualisiert.', retry: 'Erneut versuchen', fallback: 'Als Seite öffnen'},
+			en: {close: 'Close', show: 'Show %s results', error: 'Results not updated.', retry: 'Try again', fallback: 'Open page'},
+			fr: {close: 'Fermer', show: 'Afficher %s résultats', error: 'Résultats non actualisés.', retry: 'Réessayer', fallback: 'Ouvrir la page'}
+		}[lang] || {};
+		var config = {
+			area: 'belohnungen', lang: lang, rootUrl: location.origin + location.pathname,
+			labels: {
+				search: T('gs_suchen'), filter: T('gs_filter'), close: extra.close,
+				sort: T('gs_sort'), reset: T('gs_reset'), more: T('gs_mehr'),
+				count: T('bl_anzahl'), show: extra.show,
+				loading: T('gs_lade'), error: extra.error, retry: extra.retry, fallback: extra.fallback,
+				min: T('gs_von'), max: T('gs_bis'), placeholder: T('bl_suche')
+			},
+			groups: [
+				{id: 'art', kind: 'multi', label: T('bl_art'), options: typeValues},
+				{id: 'geo', kind: 'tree', label: T('bl_region_gebiet'), options: tree,
+					exclusivePaths: true, validatePath: function (path) {
+						return Array.isArray(path.geo) && geoKeys.has(JSON.stringify(path.geo));
+					}, pathLabel: function (path) {
+						var labels = [], ids = path.geo || [];
+						ids.forEach(function (id, index) {
+							var pair = allGeoPaths.get(JSON.stringify(ids.slice(0, index + 1)));
+							if (pair && pair[index]) { labels.push(pair[index][1]); }
+						});
+						return labels.join(' › ');
+					}}
+			],
+			pagination: {kind: 'limit', size: 50},
+			defaults: function () {
+				return {q: '', filters: {art: [], geo: []},
+					pagination: {kind: 'limit', limit: 50}};
+			}
+		};
+		// Deed kinds are labels, not numbers: a "csv" field would parse them to
+		// NaN and silently drop the filter on reload.
+		var baseCodec = A.codec([
+			{param: 'q', path: ['q']},
+			{param: 'art', path: ['filters', 'art'], type: 'multi'}
+		], config.defaults);
+		config.urlCodec = {
+			decode: function (url) {
+				var parsed = baseCodec.decode(url);
+				parsed.state.filters.geo = url.searchParams.getAll('gebiet').map(function (raw) {
+					return {geo: raw.split('>').filter(Boolean)};
+				});
+				if (url.searchParams.has('gebiet')) { parsed.explicit = true; }
+				return parsed;
+			},
+			encode: function (state, url) {
+				url = baseCodec.encode(state, url);
+				url.searchParams.delete('gebiet');
+				(state.filters.geo || []).forEach(function (path) {
+					url.searchParams.append('gebiet', (path.geo || []).join('>'));
+				});
+				return url;
+			}
+		};
+		function pathMatches(row, selected) {
+			return row.geo.some(function (path) {
+				return selected.geo.every(function (id, index) { return path[index] === id; });
+			});
+		}
+		function matches(row, state, skip) {
+			var filters = state.filters;
+			return (!state.q || row.search.indexOf(state.q.toLocaleLowerCase()) >= 0) &&
+				(skip !== 'art' && filters.art.length ? row.sources.some(function (source) { return filters.art.indexOf(source[5]) >= 0; }) : true) &&
+				(skip !== 'geo' && filters.geo.length ? filters.geo.some(function (path) { return pathMatches(row, path); }) : true) &&
+				row.sources.length > 0;
+		}
+		function facets(rowsToCount, state) {
+			function count(group, value) {
+				var candidate = {q: state.q, filters: JSON.parse(JSON.stringify(state.filters))};
+				return rowsToCount.filter(function (row) {
+					if (group === 'art') { candidate.filters.art = [value]; }
+					if (group === 'geo') { candidate.filters.geo = [value]; }
+					return matches(row, candidate);
+				}).length;
+			}
+			var geoFacets = [];
+			allGeoPaths.forEach(function (path, key) {
+				geoFacets.push({value: {geo: JSON.parse(key)}, count: count('geo', {geo: JSON.parse(key)})});
+			});
+			return {
+				art: typeValues.map(function (option) { return {value: option.value, count: count('art', option.value)}; }),
+				geo: geoFacets
+			};
+		}
+		var adapter = A.client({
+			rows: rows, id: function (row) { return row.id; }, matches: matches, facets: facets,
+			compare: function (a, b) { return a.name.localeCompare(b.name, lang) || a.id.localeCompare(b.id); },
+			renderResults: function (result, target) {
+				target.replaceChildren();
+				result.payload.forEach(function (row) { target.appendChild(renderRow(row)); });
+				if (!result.total) {
+					var empty = node('li', T('bl_keine')); empty.className = 'gs-leer'; target.appendChild(empty);
+				}
+			}
+		});
+		var target = document.getElementById('bl-ergebnis');
+		target.dataset.filterResults = '';
+		main.appendChild(target);
+		main.querySelector('.gs-raster').remove();
+		main.querySelector('#bl-suche').remove();
+		controller = window.MQL_FILTER_UI.mount(main, {config: config, adapter: adapter});
+		window.MQL_BELOHNUNGEN_FILTER = controller;
 	};
 	if (window.MQL_BELOHNUNGEN) { window.MQL_BELOHNUNGEN_ZEICHNEN(); }
-})();
+}());

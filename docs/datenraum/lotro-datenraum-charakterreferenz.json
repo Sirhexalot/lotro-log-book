@@ -1,0 +1,387 @@
+{
+  "rules": [
+    {
+      "source": "races.xml",
+      "selector": ".//nationality",
+      "attribute": "id",
+      "target": [
+        "nationalities.xml",
+        "./nationality",
+        "code"
+      ],
+      "occurrences": 28,
+      "resolved": 28,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "races.xml",
+      "selector": ".//allowedClass",
+      "attribute": "id",
+      "target": [
+        "classes.xml",
+        "./class",
+        "key"
+      ],
+      "occurrences": 69,
+      "resolved": 69,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "races.xml",
+      "selector": ".//raceTrait",
+      "attribute": "traitId",
+      "target": [
+        "traits.xml",
+        "./trait",
+        "identifier"
+      ],
+      "occurrences": 74,
+      "resolved": 74,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "races.xml",
+      "selector": ".//earnableTrait",
+      "attribute": "traitId",
+      "target": [
+        "traits.xml",
+        "./trait",
+        "identifier"
+      ],
+      "occurrences": 72,
+      "resolved": 72,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "classes.xml",
+      "selector": ".//classTrait",
+      "attribute": "traitId",
+      "target": [
+        "traits.xml",
+        "./trait",
+        "identifier"
+      ],
+      "occurrences": 295,
+      "resolved": 295,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "classes.xml",
+      "selector": ".//classSkill",
+      "attribute": "skillId",
+      "target": [
+        "skills.xml",
+        "./*",
+        "identifier"
+      ],
+      "occurrences": 551,
+      "resolved": 551,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "classes.xml",
+      "selector": "./class",
+      "attribute": "traitTreeID",
+      "target": [
+        "traitTrees.xml",
+        "./traitTree",
+        "id"
+      ],
+      "occurrences": 12,
+      "resolved": 12,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "nationalities.xml",
+      "selector": "./nationality",
+      "attribute": "titleID",
+      "target": [
+        "titles.xml",
+        "./title",
+        "id"
+      ],
+      "occurrences": 28,
+      "resolved": 28,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "virtues.xml",
+      "selector": "./virtue",
+      "attribute": "maxRankProgression",
+      "target": [
+        "progressions.xml",
+        "./*",
+        "identifier"
+      ],
+      "occurrences": 21,
+      "resolved": 21,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "virtues.xml",
+      "selector": "./virtue",
+      "attribute": "passivesEffect",
+      "target": [
+        "effects.xml",
+        "./*",
+        "id"
+      ],
+      "occurrences": 21,
+      "resolved": 21,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "virtues.xml",
+      "selector": ".//stat",
+      "attribute": "scaling",
+      "target": [
+        "progressions.xml",
+        "./*",
+        "identifier"
+      ],
+      "occurrences": 64,
+      "resolved": 64,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "allegiances.xml",
+      "selector": "./allegiance",
+      "attribute": "advancementProgressionID",
+      "target": [
+        "allegiances.xml",
+        "./curve",
+        "id"
+      ],
+      "occurrences": 7,
+      "resolved": 7,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "allegiances.xml",
+      "selector": "./allegiance",
+      "attribute": "travelSkillId",
+      "target": [
+        "skills.xml",
+        "./*",
+        "identifier"
+      ],
+      "occurrences": 7,
+      "resolved": 7,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "allegiances.xml",
+      "selector": ".//deed",
+      "attribute": "id",
+      "target": [
+        "deeds.xml",
+        "./deed",
+        "id"
+      ],
+      "occurrences": 210,
+      "resolved": 210,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "collections.xml",
+      "selector": ".//title",
+      "attribute": "id",
+      "target": [
+        "titles.xml",
+        "./title",
+        "id"
+      ],
+      "occurrences": 27,
+      "resolved": 27,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "crafting.xml",
+      "selector": ".//mastery",
+      "attribute": "titleId",
+      "target": [
+        "titles.xml",
+        "./title",
+        "id"
+      ],
+      "occurrences": 160,
+      "resolved": 160,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "crafting.xml",
+      "selector": ".//proficiency",
+      "attribute": "titleId",
+      "target": [
+        "titles.xml",
+        "./title",
+        "id"
+      ],
+      "occurrences": 160,
+      "resolved": 160,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "crafting.xml",
+      "selector": ".//recipe",
+      "attribute": "id",
+      "target": [
+        "recipes.xml",
+        "./recipe",
+        "id"
+      ],
+      "occurrences": 1733,
+      "resolved": 1733,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "crafting.xml",
+      "selector": "./profession",
+      "attribute": "guildFaction",
+      "target": [
+        "factions.xml",
+        "./*",
+        "id"
+      ],
+      "occurrences": 7,
+      "resolved": 7,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "factions.xml",
+      "selector": ".//level",
+      "attribute": "deedKey",
+      "target": [
+        "deeds.xml",
+        "./deed",
+        "key"
+      ],
+      "occurrences": 358,
+      "resolved": 358,
+      "missing": {},
+      "target_note": "Union deed/@key und deed/@id"
+    },
+    {
+      "source": "traitTrees.xml",
+      "selector": ".//cell",
+      "attribute": "traitId",
+      "target": [
+        "traits.xml",
+        "./trait",
+        "identifier"
+      ],
+      "occurrences": 1201,
+      "resolved": 1201,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "traitTrees.xml",
+      "selector": ".//step",
+      "attribute": "traitId",
+      "target": [
+        "traits.xml",
+        "./trait",
+        "identifier"
+      ],
+      "occurrences": 270,
+      "resolved": 270,
+      "missing": {},
+      "target_note": null
+    },
+    {
+      "source": "traitTrees.xml",
+      "selector": ".//*[@mainTraitId]",
+      "attribute": "mainTraitId",
+      "target": [
+        "traits.xml",
+        "./trait",
+        "identifier"
+      ],
+      "occurrences": 36,
+      "resolved": 36,
+      "missing": {},
+      "target_note": null
+    }
+  ],
+  "decoder_classes": {
+    "796": "IItem",
+    "1723": "MonsterTemplate",
+    "1724": "NPCTemplate"
+  },
+  "decoder_class_resource": "delta/games/lotro/dat/wlib/classes/io/classes.xml",
+  "missing_maps": {
+    "268448107": {
+      "labels": {
+        "de": [],
+        "en": [],
+        "fr": []
+      },
+      "incoming_links": [
+        {
+          "parentId": "268451272",
+          "contentLayerId": "0",
+          "target": "268448107",
+          "from": "-40.266663/-33.966667"
+        }
+      ]
+    },
+    "268449764": {
+      "labels": {
+        "de": [],
+        "en": [],
+        "fr": []
+      },
+      "incoming_links": [
+        {
+          "parentId": "268451272",
+          "contentLayerId": "0",
+          "target": "268449764",
+          "from": "-47.333332/-40.066666"
+        }
+      ]
+    }
+  },
+  "input_sha256": {
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/nationalities.xml": "33ab6dceb0df4c990aaade743805e09a8347d9baaecbc633b1e4a5d500b111c0",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/races.xml": "5e2688dc4ed577331f924cc8d2c96843517c47303a195b2f0fec4974edc4012f",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/classes.xml": "cb1d91c45c6749d86ac9ae1815a935ee45a9df01f28b519c6febac99de45389e",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/traits.xml": "0229fd8436b9112fd5d52b898397bf572a3ef0e6d9fa8baa55b9a867e0ad5125",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/skills.xml": "53d94aadc79df951f0821ac18b4bcb9562e6d66ce3d589fb3cc1469d99e6afde",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/traitTrees.xml": "dfc8afd6315fc22887093610152cf0297e8c1f285fa2368072ba33b763554055",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/titles.xml": "f26961944480d615e347c170dde314814b7f436f8b921178e6f48b04f58a3f51",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/progressions.xml": "4137f644645cf1537a4cb732b6e954473d972bc72dfe41a61697358ba8e41937",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/virtues.xml": "20ca081ea986be763d439b263872e1b699ae73d4a195871a2c2a820bb0d59182",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/effects.xml": "fef5b9d5016f18472a71297666946a876439dee1e0f182b33f73af10f0aefab5",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/allegiances.xml": "f23f51333852532bb4e29d790e3fa3216d7118051c0e7f600d59766bcfd91ef6",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/deeds.xml": "b49976dd25cf853c03f234d306546c4c0ea3cdc5eada421f31aa3ac5a97c4b0d",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/collections.xml": "316236826e0d01674eaf867b83a84ded8a440999183952fc002c5edc6dc602b1",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/crafting.xml": "a996149e173fff6b1973246ec0998265027f9a125ebdad36a928ff60271251ca",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/recipes.xml": "6942348e882a0f5fcaa8ef7e18053718f7aa98b68a12273c7936103c4f3ee7e8",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/factions.xml": "9d5cfdd705abc8e11f4b162488bc3a691eee66de610ef6d8064195423ee5304a",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/lib/delta-lotro-dat-utils-11.13.jar": "bbb5ea58987e4fcd4bca612fbe7ecd1f39ab7cb88818a401b9feb15c862d49f2",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/maps/labels/de/basemaps.xml": "9cdb1063e1e56f8f6ed084755e695d3d1483aad58413a4359259a55537c0a0c4",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/maps/labels/en/basemaps.xml": "fd96da08edd640c465253600029552ed214426f3a772f4f61ef4cee26223ab4a",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/maps/labels/fr/basemaps.xml": "77e9bfd811d98e83913747ea772f8844daa1f4fba17747a2acd664a12a1c6e62",
+    "/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/maps/links.xml": "e9bfbefabcbd1fa28439e2ae8825cd675eef10d36bc466e892b1f1fa234d5e0d"
+  }
+}

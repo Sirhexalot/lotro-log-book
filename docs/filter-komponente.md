@@ -3,8 +3,8 @@
 ## Umfang
 
 Die gemeinsamen Bausteine sind implementiert und mit isolierten synthetischen
-Testseiten geprüft. **Gegenstandssuche und Sets sind jetzt in den regulären
-PHP-Templates lokal angebunden, aber noch nicht veröffentlicht.**
+Testseiten geprüft. **Gegenstandssuche, Sets und Belohnungen sind jetzt in den
+regulären PHP-Templates lokal angebunden, aber noch nicht veröffentlicht.**
 Auftraggeber, Landmarken, Fraktionen, Instanzen sowie die drei Handwerksreiter
 sind ebenfalls lokal auf die Komponente migriert. Keine
 Veröffentlichung ist erfolgt. Der detaillierte Umsetzungsplan liegt unter
@@ -46,6 +46,41 @@ Paginationlinks des erweiterten Modus erhalten `data-filter-page="2"` usw.
 Ein vollständiges ausführbares Beispiel liefern die isolierten Testfixtures.
 
 ## Reproduzierbare Tests
+
+### Entitätenvertrag
+
+`docs/datenraum/lotro-datenraum-entitaeten.json` ist die eine Quelle für die
+Ausprägung jeder Entität: Zeilenfelder, Filtergruppen, erlaubte Relationen,
+Fortschritt und der Status jeder Liste.
+
+- `component`: die Liste nutzt die gemeinsame Filterkomponente.
+- `direct`: höchstens fünf Einträge, direkte Darstellung.
+- `open`: bekannte Lücke mit Grund; `tests/test_relationen_audit.py` prüft, dass
+  sie in den echten Daten tatsächlich über der Schwelle liegt.
+
+Die Listenzeile trägt nur Identität und Einordnung (Symbol, Name, Beruf/Art,
+Stufe oder Lernstand) und führt selbst zum Detail. Zutaten, Quellen, Werte und
+ weitere Angaben gehören ausschließlich auf die Detailseite;
+`tests/test_entitaeten_vertrag.py` hält das fest.
+
+### Relationale Listen auf Detailseiten
+
+Für jede relationale Liste auf einer Detailseite gilt dieselbe globale Schwelle:
+
+- **0 bis einschließlich 5 Einträge:** direkte Liste, ohne Filterkomponente.
+- **Ab 6 Einträgen:** gemeinsame Filterkomponente mit derselben Ergebnisdarstellung
+  wie auf der zugehörigen Standardliste; auf Detailseiten nutzt sie die volle
+  Inhaltsbreite.
+- Die Suchzeile nutzt diese volle Breite. Das Suchfeld wächst flexibel, ohne
+  Mindestbreite, damit der Suchknopf nicht aus dem Bildschirm läuft. Die
+  Trefferleiste darf einzelne Bedienelemente umbrechen; sie darf aber weder
+  den Filtercontainer überschreiten noch einen horizontalen Seitenüberlauf
+  erzeugen. Auf Mobilgeräten sind Umbrüche innerhalb der Trefferleiste erlaubt.
+
+Die Beziehung selbst bleibt fester Kontext und kann durch „Zurücksetzen“ nicht
+entfernt werden. Die Schwelle ist im PHP-Seitenmodell als
+`FilterRegeln::MAX_DIREKTLISTE` definiert und wird vom Relation-Renderer
+übernommen.
 
 Lokale Gegenstandssuche (kein Build/Upload, bindet nur an Loopback):
 

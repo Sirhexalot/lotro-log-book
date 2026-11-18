@@ -407,7 +407,7 @@ final class Givers
             [['text' => $giver['name'], 'url' => null]]
         ));
         $context['icon'] = $this->shell->icon('auftraggeber');
-        $related = (new RelatedLists($this->data, $this->lang))->forPage('giver', $giver);
+        $related = (new RelatedLists($this->data, $this->lang, $this->catalogue))->forPage('giver', $giver);
         $context['related_lists'] = $related;
         $context['related_json'] = json_encode($related, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
         $context['related_icons_json'] = json_encode(['q' => $this->shell->icon('aufgabe')], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);

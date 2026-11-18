@@ -30,19 +30,22 @@ APP = {
            'gegenstandssuche': 'gegenstandssuche', 'handwerk': 'handwerk/rezepte',
            'reise': 'reise', 'ruf': 'ruf', 'belohnungen': 'belohnungen',
            'spielstand': 'spielstand', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'suche', 'gegenstand': 'gegenstand', 'auftraggeber': 'auftraggeber',
+            'suche': 'suche', 'gegenstand': 'gegenstand', 'auftraggeber': 'auftraggeber',
+            'haendler': 'haendler',
            'landmarks': 'landmarke', 'factions': 'fraktion', 'instances': 'instanz'},
     'en': {'start': '', 'karte': 'map', 'taten': 'map/deeds',
            'gegenstandssuche': 'item-search', 'handwerk': 'crafting/recipes',
            'reise': 'travel', 'ruf': 'reputation', 'belohnungen': 'rewards',
            'spielstand': 'progress', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'search', 'gegenstand': 'item', 'auftraggeber': 'quest-giver',
+            'suche': 'search', 'gegenstand': 'item', 'auftraggeber': 'quest-giver',
+            'haendler': 'vendor',
            'landmarks': 'landmark', 'factions': 'faction', 'instances': 'instance'},
     'fr': {'start': '', 'karte': 'carte', 'taten': 'carte/prouesses',
            'gegenstandssuche': 'recherche-objets', 'handwerk': 'artisanat/recettes',
            'reise': 'voyage', 'ruf': 'reputation', 'belohnungen': 'recompenses',
            'spielstand': 'progression', 'companion': 'companion', 'plugin': 'plugin',
-           'suche': 'recherche', 'gegenstand': 'objet', 'auftraggeber': 'donneur-de-quete',
+            'suche': 'recherche', 'gegenstand': 'objet', 'auftraggeber': 'donneur-de-quete',
+            'haendler': 'marchand',
            'landmarks': 'site', 'factions': 'faction', 'instances': 'instance'},
 }
 
@@ -53,6 +56,11 @@ SEITEN = {
     'belohnungen': 'belohnungen', 'spielstand': 'spielstand',
     'companion': 'companion', 'plugin': 'plugin', 'suche': 'suche',
 }
+
+# The reward browser lists items only; its old tab links lead to the lists that
+# own titles and virtues.
+TITEL = {'de': 'titel', 'en': 'title', 'fr': 'titre'}
+TUGEND = {'de': 'tugend', 'en': 'virtue', 'fr': 'vertu'}
 
 # Still their own files at the site root, no redirect involved.
 STATISCH = ('impressum', 'datenschutz')
@@ -85,6 +93,14 @@ def ziel(name: str, query: str) -> str | None:
         if kennung and KENNUNG.match(kennung):
             return '/%s/%s/%s/%s' % (sprache, APP[sprache]['gegenstand'], kennung, anker)
         return '/%s/%s/' % (sprache, APP[sprache]['gegenstandssuche'])
+
+    if name == 'belohnungen' and werte.get('tab') in ('t', 'v'):
+        if werte['tab'] == 'v':
+            return '/%s/%s/%s' % (sprache, TUGEND[sprache], anker)
+        adresse = '/%s/%s/' % (sprache, TITEL[sprache])
+        if werte.get('q'):
+            adresse += '?' + urlencode([('q', werte['q'])])
+        return adresse + anker
 
     seite = SEITEN.get(name)
     if seite is None:

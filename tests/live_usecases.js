@@ -67,8 +67,15 @@ async function main() {
           await page.locator('.region-liste [data-welt-gebiet]').first().click();
           assert.equal(await page.locator('.region-punkt[aria-pressed="true"]').count(), 1,
             'selected adventure area');
+          // The area view replaces the list; give the app a beat so the back
+          // button belongs to the new state before clicking it.
+          await page.waitForTimeout(400);
           await page.locator('[data-zurueck]').click();
-          assert.equal(await page.locator('#hinweise').isVisible(), true, 'adventure back');
+          // Back returns to the world overview: its region buttons are visible
+          // again. The hints block stays in the DOM but may have zero height
+          // when there is nothing to report.
+          await page.locator('[data-region]').first().waitFor({ state: 'visible', timeout: 10000 });
+          assert.ok(await page.locator('[data-region]:visible').count() > 0, 'adventure back');
           checks++;
 
           await open(page, `/${lang}/${crafting}/`, errors, badResponses);

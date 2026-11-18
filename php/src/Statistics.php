@@ -14,23 +14,18 @@ namespace Llb;
 final class Statistics
 {
     private const START_IMPORTS = 150;
-    private const PRESENCE_TTL = 180;
-    private const BASE_MIN = 3;
-    private const BASE_MAX = 5;
-    private const BASE_TTL = 1800;
+    private const PRESENCE_TTL = 1080;
 
     public function __construct(private string $file)
     {
     }
 
-    public function heartbeat(string $visitor, string $agent = '', string $classification = 'accepted'): array
+    public function heartbeat(string $visitor): array
     {
-        return $this->change(function (array $state) use ($visitor, $agent, $classification): array {
+        return $this->change(function (array $state) use ($visitor): array {
             $now = time();
             $this->clean($state, $now);
-            $this->recordAgent($state, $agent, $classification, $now);
-            if ($classification === 'accepted'
-                && str_starts_with($visitor, 'v3-') && strlen($visitor) <= 100) {
+            if (str_starts_with($visitor, 'v3-') && strlen($visitor) <= 100) {
                 $state['visitors'][$visitor] = $now;
             }
             return [$state, $this->result($state, $now)];
@@ -93,8 +88,6 @@ final class Statistics
     {
         return [
             'imports' => self::START_IMPORTS,
-            'base' => random_int(self::BASE_MIN, self::BASE_MAX),
-            'base_changed' => time(),
             'visitors' => [],
             'imports_seen' => [],
         ];
@@ -103,38 +96,9 @@ final class Statistics
     private function normalise(array $state): array
     {
         $state['imports'] = max(self::START_IMPORTS, (int) ($state['imports'] ?? self::START_IMPORTS));
-        $state['base'] = max(self::BASE_MIN, min(self::BASE_MAX, (int) ($state['base'] ?? 4)));
-        $state['base_changed'] = (int) ($state['base_changed'] ?? time());
         $state['visitors'] = is_array($state['visitors'] ?? null) ? $state['visitors'] : [];
         $state['imports_seen'] = is_array($state['imports_seen'] ?? null) ? $state['imports_seen'] : [];
-        $state['agents'] = is_array($state['agents'] ?? null) ? $state['agents'] : [];
         return $state;
-    }
-
-    private function recordAgent(array &$state, string $agent, string $classification, int $now): void
-    {
-        $agent = trim(preg_replace('/\s+/', ' ', $agent) ?? '');
-        $agent = substr($agent, 0, 240);
-        if ($agent === '') {
-            $agent = '(leer)';
-        }
-        $classification = in_array($classification, ['accepted', 'bot', 'no-site-referrer'], true)
-            ? $classification : 'other';
-        $key = $classification . '|' . $agent;
-        if (!isset($state['agents'][$key])) {
-            if (count($state['agents']) >= 40) {
-                uasort($state['agents'], static fn (array $a, array $b): int => (int) $a['last'] <=> (int) $b['last']);
-                array_shift($state['agents']);
-            }
-            $state['agents'][$key] = [
-                'classification' => $classification,
-                'agent' => $agent,
-                'count' => 0,
-                'last' => $now,
-            ];
-        }
-        $state['agents'][$key]['count']++;
-        $state['agents'][$key]['last'] = $now;
     }
 
     private function clean(array &$state, int $now): void
@@ -149,25 +113,18 @@ final class Statistics
                 unset($state['imports_seen'][$id]);
             }
         }
-        if ($now - (int) $state['base_changed'] >= self::BASE_TTL) {
-            $state['base'] = random_int(self::BASE_MIN, self::BASE_MAX);
-            $state['base_changed'] = $now;
-        }
     }
 
     private function result(array $state, int $now): array
     {
         return [
-            // The public footer uses only the quiet base value. Search engines
-            // and headless renderers may execute JavaScript without being real
-            // visitors, so heartbeat sessions must not inflate this display.
-            'active' => (int) $state['base'],
+            'active' => count($state['visitors']),
             'imports' => (int) $state['imports'],
         ];
     }
 
     private function fallback(): array
     {
-        return ['active' => random_int(self::BASE_MIN, self::BASE_MAX), 'imports' => self::START_IMPORTS];
+        return ['active' => 0, 'imports' => self::START_IMPORTS];
     }
 }

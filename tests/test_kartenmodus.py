@@ -62,10 +62,16 @@ class ErkennungTest(unittest.TestCase):
         self.assertIn("seite === 'karte' && window.MQL_ART === 'taten'", MENUE)
 
     def test_canonical_map_links_carry_the_mode(self):
+        # Any link into the map app goes through MQL_KARTE_LINK, so a deed
+        # source cannot open the quest mode. The reward browser lists no
+        # sources and therefore builds no map links; the old-address check
+        # still applies to it.
+        for datei in ('app.js', 'gegenstand.js'):
+            text = (HIER / 'web' / datei).read_text(encoding='utf-8')
+            self.assertIn('MQL_KARTE_LINK', text, datei)
         for datei in ('app.js', 'belohnungen.js', 'gegenstand.js'):
             text = (HIER / 'web' / datei).read_text(encoding='utf-8')
             self.assertNotIn('index.html?art=taten', text, datei)
-            self.assertIn('MQL_KARTE_LINK', text, datei)
 
 
 class SeitentitelTest(unittest.TestCase):

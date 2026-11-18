@@ -293,8 +293,14 @@ body.seite-start main { flex: 1; }
 .zutaten-herkunft h4 { font-size: 1rem; margin: .75rem 0 .25rem; }
 .zutaten-herkunft section { margin: .75rem 0; }
 .zutaten-herkunft ul { padding-left: 1.25rem; }
-/* The map stays a fixed-height app; its footer must consume real layout space. */
-body[data-seite="karte"] { grid-template-rows: auto minmax(0, 1fr) auto; }
+/* The map stays a fixed-height app; its footer must consume real layout space.
+   Rows are assigned explicitly so the breadcrumb row can disappear without
+   pulling the map out of its row. */
+body[data-seite="karte"] { grid-template-rows: auto auto minmax(0, 1fr) auto; }
+body[data-seite="karte"] > .kopf { grid-row: 1; }
+body[data-seite="karte"] > .karten-pfad { grid-row: 2; }
+body[data-seite="karte"] > main { grid-row: 3; }
+body[data-seite="karte"] > .seitenfuss { grid-row: 4; }
 body[data-seite="karte"] .seitenfuss { padding: 0; }
 
 /* Compact start page: useful actions come before screenshots and explanation. */

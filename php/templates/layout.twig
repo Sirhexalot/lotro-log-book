@@ -24,6 +24,7 @@
 {{ tracking|raw }}
 {{ styles|raw }}<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 {% if related_lists|default([]) %}<link rel="stylesheet" href="/handwerk.css?v={{ asset_stand }}"><link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}"><link rel="stylesheet" href="/entitaeten-listen.css?v={{ asset_stand }}">{% endif %}
+{% if index_filter|default(false) %}<link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}"><link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}"><link rel="stylesheet" href="/entitaeten-listen.css?v={{ asset_stand }}">{% endif %}
 <noscript><style>.kopf .menue,.kopf .charakter{display:flex}.menue-knopf{display:none}</style></noscript>
 </head><body class="seite-text katalog-seite" data-art="{{ kind }}" data-katalog-texte="{{ katalog_texte }}">
 <header class="kopf"><div class="kopf-innen">
@@ -34,7 +35,7 @@
 
 <div class="charakter"><label class="charakterwahl" hidden><select id="katalog-charakter" aria-label="{{ w.none }}"></select></label><a href="{{ spielstand_pfad }}" class="importieren">{{ w.import_ }}</a></div>
 </div></header>
-<main class="katalog-inhalt"><nav aria-label="Breadcrumb" class="katalog-pfad">{{ crumbs|raw }}</nav>
+<main class="katalog-inhalt" data-related-filter-limit="{{ related_direct_list_max|default(5) }}"><nav aria-label="Breadcrumb" class="katalog-pfad">{{ crumbs|raw }}</nav>
 {% block inhalt %}{% endblock %}</main>
 <footer class="seitenfuss"><div class="seitenfuss-innen"><div class="footer-links-links"><p class="footer-statistik"><span data-statistik-aktiv hidden><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-aktiv-text></span></span></p></div><nav aria-label="Languages" class="sprachen">{{ languages|raw }}</nav><p class="footer-rechts"><a href="/{{ lang }}/plugin/">Plugin</a> · {{ legal|raw }} · {{ privacy|raw }}</p></div></footer>
 <script src="/statistik.js?v={{ asset_stand }}" defer></script>
@@ -44,5 +45,10 @@
 <script type="application/json" id="related-lists">{{ related_json|raw }}</script>
 <script type="application/json" id="related-list-symbols">{{ related_icons_json|raw }}</script>
 {% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','listen-sprache.js','referenz.js','handwerk-filter.js','rezepte.js','gegenstaende-filter.js','aufgaben-filter.js','entitaeten-listen.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
+{% endif %}
+{% if index_filter|default(false) %}
+{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','filterzustand.js','filteradapter.js','filter-ui.js','aufgaben-filter.js','taten-index.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
+<script src="/taten-index-{{ lang }}.js?v={{ asset_stand }}" defer></script>
+<script src="/taten-index.js?v={{ asset_stand }}" defer></script>
 {% endif %}
 </body></html>

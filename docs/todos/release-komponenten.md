@@ -2,12 +2,15 @@
 
 **Projekt:** LOTRO Log Book, ausschließlich Website
 **Stand:** 17. November 2026
-**Status:** Konzept; nicht implementiert, keine Veröffentlichungsfreigabe
+**Status:** Lokale Umsetzung vorhanden; vollständige Liveabnahme und
+Veröffentlichungsfreigabe noch offen
 **Vorgesehener Projektpfad:** `lotro-log-book/docs/todos/release-komponenten.md`
 
-Dieses Dokument liegt wegen des aktiven Plan-Modus zunächst unter
-`~/.opencode/plan/`. Nach Moduswechsel ins Projekt-TODO-Verzeichnis übernehmen.
 Plugin, persönliche Charakterdaten und Spielinstallation bleiben unberührt.
+
+Die lokale Umsetzung besteht aus `tools/release_components.py`, dem erweiterten
+`tools/build_release.py` und dem manifestbasierten Pfad in `upload.py`.
+Ein echter Upload oder eine Hostingänderung ist damit nicht freigegeben.
 
 ## 1. Ziel
 
@@ -333,17 +336,17 @@ erhalten; nicht drei unvollständige Websites als Testgrundlage verwenden.
 
 ### Unit-Tests: Klassifikation und Manifest
 
-- [ ] Jeder zulässige Pfad gehört genau einer Komponente an.
-- [ ] Programm-JavaScript und generierte Daten-JavaScripts korrekt getrennt.
-- [ ] Vorkommen/Kartennotizen Daten; Bilder und Geländemanifest Assets.
-- [ ] Unbekannte und mehrdeutige Pfade werden abgelehnt.
-- [ ] Gleicher Inhalt ergibt trotz anderer Reihenfolge/Zeitstempel gleiche Version.
-- [ ] Änderung nur einer Komponente ändert nur deren Version.
-- [ ] Neuer und entfallener Pfad ändern die passende Version.
-- [ ] Manifest hat keinen Selbstbezug; kanonische Serialisierung stabil.
-- [ ] Absolute Pfade, `..`, Symlinks außerhalb des Builds und private Daten abweisen.
-- [ ] Verschachtelte Releasekopien und Laufzeitcache werden nicht ausgeliefert.
-- [ ] Während des Uploads veränderte Builddatei wird erkannt.
+- [x] Jeder zulässige Pfad gehört genau einer Komponente an.
+- [x] Programm-JavaScript und generierte Daten-JavaScripts korrekt getrennt.
+- [x] Vorkommen/Kartennotizen Daten; Bilder und Geländemanifest Assets.
+- [x] Unbekannte und mehrdeutige Pfade werden abgelehnt.
+- [x] Gleicher Inhalt ergibt trotz anderer Reihenfolge/Zeitstempel gleiche Version.
+- [x] Änderung nur einer Komponente ändert nur deren Version.
+- [x] Neuer und entfallener Pfad ändern die passende Version.
+- [x] Manifest hat keinen Selbstbezug; kanonische Serialisierung stabil.
+- [x] Absolute Pfade, `..`, Symlinks außerhalb des Builds und private Daten abweisen.
+- [x] Verschachtelte Releasekopien und Laufzeitcache werden nicht ausgeliefert.
+- [x] Während des Uploads veränderte Builddatei wird erkannt.
 
 ### Integration: simulierter FTPS-Server
 
@@ -351,24 +354,24 @@ Tests müssen ohne produktive Zugangsdaten und ohne Live-Schreibzugriffe laufen.
 Ein instrumentierter Fake prüft Aufrufe; ein lokaler FTP/FTPS-Testserver
 prüft insbesondere Rename, Fehlerantworten und Wiederaufnahme realitätsnah.
 
-- [ ] Unveränderter Release: null Dateiübertragungen.
-- [ ] Eine CSS-Änderung: nur eine Programmdatei plus nötige Deploymentmetadaten.
-- [ ] Itemänderung: nur tatsächlich geänderte Daten-Dateien.
+- [x] Unveränderter Release: null Dateiübertragungen.
+- [x] Eine CSS-Änderung: nur eine Programmdatei plus nötige Deploymentmetadaten.
+- [x] Itemänderung: nur tatsächlich geänderte Daten-Dateien.
 - [ ] Neues Item-Symbol vor dem darauf verweisenden Datenstand.
-- [ ] Zeitstempeländerung allein: null Dateiübertragungen.
-- [ ] Programmupdate ruft keine rekursive Asset-Inventur auf.
-- [ ] Teilupdate erhält die Versionsstände aller anderen Komponenten.
+- [x] Zeitstempeländerung allein: null Dateiübertragungen.
+- [x] Programmupdate ruft keine rekursive Asset-Inventur auf.
+- [x] Teilupdate erhält die Versionsstände aller anderen Komponenten.
 - [ ] Einzeldateiupload behauptet keinen vollständigen Komponentenstand.
-- [ ] Netzwerkabbruch, falsche Remote-Größe und Renamefehler verhindern Bestätigung.
-- [ ] Workerfehler führen zu Fehlerexitcode und keinem falschen Erfolg.
-- [ ] Wiederaufnahme sendet fehlende Dateien und prüft vorhandene Journaleinträge.
-- [ ] Während eines Uploads geänderter Serverstand wird als Konflikt erkannt.
-- [ ] Paralleler Lock wird abgewiesen; verwaister Lock nicht automatisch entfernt.
-- [ ] Fehlendes/beschädigtes Manifest verlangt Migration oder Fehlerbehandlung.
-- [ ] Unterbrochene Metadatenbestätigung lässt letzten gültigen Stand erhalten.
-- [ ] Teilupdates löschen keine Remote-Dateien.
-- [ ] Dry-run schreibt weder Lock noch Journal/Bestätigung.
-- [ ] Inkompatible Formate und fehlende deklarierte Abhängigkeiten blockieren Upload.
+- [x] Netzwerkabbruch, falsche Remote-Größe und Renamefehler verhindern Bestätigung.
+- [x] Workerfehler führen zu Fehlerexitcode und keinem falschen Erfolg.
+- [x] Wiederaufnahme sendet fehlende Dateien und prüft vorhandene Journaleinträge.
+- [x] Während eines Uploads geänderter Serverstand wird als Konflikt erkannt.
+- [x] Paralleler Lock wird abgewiesen; verwaister Lock nicht automatisch entfernt.
+- [x] Fehlendes/beschädigtes Manifest verlangt Migration oder Fehlerbehandlung.
+- [x] Unterbrochene Metadatenbestätigung lässt den letzten gültigen Stand erhalten.
+- [x] Teilupdates löschen keine Remote-Dateien.
+- [x] Dry-run schreibt weder Lock noch Journal/Bestätigung.
+- [x] Fehlende deklarierte Abhängigkeiten blockieren Upload.
 - [ ] Fachliches Geländemanifest wird erst nach seinen Kacheln aktiviert.
 
 ### Bestehende Website-Tests

@@ -16,15 +16,15 @@ final class Catalogue
         'de' => ['q' => 'aufgabe', 'd' => 'tat', 'i' => 'gegenstand', 'area' => 'gebiet',
                  'region' => 'region', 'catalog' => 'katalog', 'p' => 'beruf', 'recipe' => 'rezept',
                   'craft' => 'handwerk', 'title' => 'titel', 'virtue' => 'tugend', 'set' => 'set',
-                  'giver' => 'auftraggeber', 'f' => 'fraktion', 'l' => 'landmarke'],
+                  'giver' => 'auftraggeber', 'vendor' => 'haendler', 'f' => 'fraktion', 'l' => 'landmarke'],
         'en' => ['q' => 'quest', 'd' => 'deed', 'i' => 'item', 'area' => 'area',
                  'region' => 'region', 'catalog' => 'catalogue', 'p' => 'profession', 'recipe' => 'recipe',
                   'craft' => 'crafting', 'title' => 'title', 'virtue' => 'virtue', 'set' => 'set',
-                  'giver' => 'quest-giver', 'f' => 'faction', 'l' => 'landmark'],
+                   'giver' => 'quest-giver', 'vendor' => 'vendor', 'f' => 'faction', 'l' => 'landmark'],
         'fr' => ['q' => 'quete', 'd' => 'prouesse', 'i' => 'objet', 'area' => 'zone',
                  'region' => 'region', 'catalog' => 'catalogue', 'p' => 'metier', 'recipe' => 'recette',
                   'craft' => 'artisanat', 'title' => 'titre', 'virtue' => 'vertu', 'set' => 'ensemble',
-                  'giver' => 'donneur-de-quete', 'f' => 'faction', 'l' => 'site'],
+                   'giver' => 'donneur-de-quete', 'vendor' => 'marchand', 'f' => 'faction', 'l' => 'site'],
     ];
 
     /**
@@ -39,21 +39,21 @@ final class Catalogue
                  'reise' => 'reise', 'ruf' => 'ruf', 'belohnungen' => 'belohnungen',
                  'spielstand' => 'spielstand', 'companion' => 'companion', 'plugin' => 'plugin',
                   'suche' => 'suche', 'sets' => 'set', 'givers' => 'auftraggeber',
-                  'landmarks' => 'landmarke', 'titles' => 'titel', 'factions' => 'fraktion', 'instances' => 'instanz',
+                   'landmarks' => 'landmarke', 'vendors' => 'haendler', 'titles' => 'titel', 'factions' => 'fraktion', 'instances' => 'instanz',
                   'adventures' => 'abenteuer'],
         'en' => ['start' => '', 'karte' => 'map', 'questfinder' => 'quest-finder', 'taten' => 'map/deeds',
                  'gegenstandssuche' => 'item-search', 'handwerk' => 'crafting/recipes',
                  'reise' => 'travel', 'ruf' => 'reputation', 'belohnungen' => 'rewards',
                  'spielstand' => 'progress', 'companion' => 'companion', 'plugin' => 'plugin',
                   'suche' => 'search', 'sets' => 'set', 'givers' => 'quest-giver',
-                  'landmarks' => 'landmark', 'titles' => 'title', 'factions' => 'faction', 'instances' => 'instance',
+                   'landmarks' => 'landmark', 'vendors' => 'vendor', 'titles' => 'title', 'factions' => 'faction', 'instances' => 'instance',
                   'adventures' => 'adventure'],
         'fr' => ['start' => '', 'karte' => 'carte', 'questfinder' => 'recherche-quetes', 'taten' => 'carte/prouesses',
                  'gegenstandssuche' => 'recherche-objets', 'handwerk' => 'artisanat/recettes',
                  'reise' => 'voyage', 'ruf' => 'reputation', 'belohnungen' => 'recompenses',
                  'spielstand' => 'progression', 'companion' => 'companion', 'plugin' => 'plugin',
                   'suche' => 'recherche', 'sets' => 'ensemble', 'givers' => 'donneur-de-quete',
-                  'landmarks' => 'site', 'titles' => 'titre', 'factions' => 'faction', 'instances' => 'instance',
+                   'landmarks' => 'site', 'vendors' => 'marchand', 'titles' => 'titre', 'factions' => 'faction', 'instances' => 'instance',
                   'adventures' => 'aventure'],
     ];
 
@@ -144,6 +144,26 @@ final class Catalogue
             . ($identifier !== null ? $identifier . '/' : '');
     }
 
+    /**
+     * Target of an old reward-browser tab link.
+     *
+     * The reward browser lists items only; titles and virtues have their own
+     * catalogue pages in the Erfolge menu. Shared links keep working.
+     */
+    public function rewardTabTarget(string $lang, array $query): ?string
+    {
+        $tab = (string) ($query['tab'] ?? '');
+        if ($tab === 't') {
+            $ziel = $this->appRoute($lang, 'titles');
+            $q = trim((string) ($query['q'] ?? ''));
+            return $q === '' ? $ziel : $ziel . '?q=' . rawurlencode($q);
+        }
+        if ($tab === 'v') {
+            return $this->route($lang, 'virtue');
+        }
+        return null;
+    }
+
     public function pageRoute(string $lang, string $kind, int $page = 1): string
     {
         $base = $this->route($lang, $kind);
@@ -165,7 +185,7 @@ final class Catalogue
 
     public static function validId(string $kind, string $identifier): bool
     {
-        if ($kind === 'set' || $kind === 'giver') {
+        if ($kind === 'set' || $kind === 'giver' || $kind === 'vendor') {
             return preg_match('/^[0-9A-Fa-f]{8}$/', $identifier) === 1;
         }
         $pattern = $kind === 'p' ? '/^[A-Z][A-Z_]*$/' : '/^[0-9A-Fa-f]+$/';

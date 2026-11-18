@@ -31,6 +31,10 @@ def main() -> int:
     parser.add_argument('--daten', required=True, type=Path,
                         help='PHP-Datenordner für den Release')
     parser.add_argument('--workers', type=int, default=8)
+    parser.add_argument('--gruppe', default='alle',
+                        help='Komponenten für den Upload (Standard: alle)')
+    parser.add_argument('--migration', action='store_true',
+                        help='fehlenden Serverstand initial durch vollständigen Upload anlegen')
     parser.add_argument('--browser', choices=('chromium', 'webkit'), default='chromium')
     parser.add_argument('--upload', action='store_true',
                         help='tatsächlich veröffentlichen; ohne Option wird abgebrochen')
@@ -43,8 +47,11 @@ def main() -> int:
     python = sys.executable
     run([python, 'tools/build_release.py', '--ziel', str(args.ziel),
          '--daten', str(args.daten)])
-    run([python, 'upload.py', '--quelle', str(args.ziel),
-         '--workers', str(args.workers)])
+    upload = [python, 'upload.py', '--quelle', str(args.ziel),
+              '--workers', str(args.workers), '--gruppe', args.gruppe]
+    if args.migration:
+        upload.append('--migration')
+    run(upload)
     # FTP servers can reject removal of a cache directory when PHP recreates a
     # Twig file between LIST and RMD. A second pass is safe and clears the
     # entries created during the first pass.

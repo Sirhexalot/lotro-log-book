@@ -1,0 +1,29 @@
+{
+  "references": {
+    "1879443606": {
+      "hex": "70060896",
+      "decoded": {
+        "source": "/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/quests.json",
+        "class_index": 1398
+      }
+    },
+    "1879407580": {
+      "hex": "70057BDC",
+      "decoded": {
+        "source": "/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/quests.json",
+        "class_index": 1398
+      }
+    },
+    "1879049597": {
+      "hex": "7000057D",
+      "decoded": {
+        "source": "/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/quests.json",
+        "class_index": 1398
+      }
+    }
+  },
+  "source_sha256": {
+    "/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/quests.json": "c82278200c593451a6931d6beffc1b93ba93704716c4b50fd14805663bbbbd1f",
+    "/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/deeds.json": "aea1cabbcf0494466d98bdc1ad8742a50802b07fe10bd45900550aff786b9942"
+  }
+}

@@ -112,37 +112,11 @@
 		return img;
 	}
 
-	/** Ingredients keep their symbol beside the name, not in a separate column. */
-	function zutat(teil) {
-		var id = teil[3] || '';
-		var stueck = eltern(id ? 'a' : 'span');
-		stueck.className = 'zutat';
-		if (id) { stueck.href = itemUrl(id); }
-		var symbol = bild(teil[2]);
-		if (symbol) { stueck.appendChild(symbol); }
-		stueck.appendChild(document.createTextNode(menge(teil)));
-		return stueck;
-	}
-
-	function zutatenZeile(teile, zusatz) {
-		var zeile = eltern('span');
-		zeile.className = 'zutaten-zeile';
-		teile.forEach(function (teil, nummer) {
-			if (nummer) { zeile.appendChild(document.createTextNode(', ')); }
-			var stueck = eltern('span');
-			stueck.className = 'zutat-mit-herkunft';
-			stueck.appendChild(zutat(teil));
-			if (teil[3] && window.MQL_ZUTATEN_HERKUNFT) {
-				var herkunft = window.MQL_ZUTATEN_HERKUNFT(itemUrl(teil[3]));
-				if (herkunft) { stueck.appendChild(herkunft); }
-			}
-			zeile.appendChild(stueck);
-		});
-		if (zusatz) { zeile.appendChild(document.createTextNode(zusatz)); }
-		return zeile;
-	}
-
-	/** One recipe row: result, ingredients (optional and critical below), profession. */
+	/** One recipe row: identity and classification only.
+	 *
+	 * Ingredients, optional ingredients, critical results, sources and timings
+	 * belong to the recipe page. A list row answers "which recipe is this",
+	 * never "what does it need" – see the list-row rule in AGENTS.md. */
 	function zeile(wert, optionen) {
 		var tr = document.createElement('tr');
 		var name = document.createElement('td');
@@ -151,8 +125,8 @@
 		if (zeichen) { name.appendChild(zeichen); }
 		var ergebnis = bild(wert[16]);
 		if (ergebnis) { name.appendChild(ergebnis); }
-		var ergebnisLink = eltern(wert[18] ? 'a' : 'span', wert[0]);
-		if (wert[18]) { ergebnisLink.href = itemUrl(wert[18]); }
+		var ergebnisLink = eltern('a', wert[0]);
+		ergebnisLink.href = recipeUrl(wert[10]);
 		name.appendChild(ergebnisLink);
 		if (optionen.mitStufe && wert[2]) {
 			var stufeText = eltern('span', ' · ' + t('stufe') + ' ' + wert[2]);
@@ -165,60 +139,6 @@
 			beruf.className = 'rezept-beruf';
 			tr.appendChild(beruf);
 		}
-		var zutaten = eltern('td');
-		zutaten.className = 'rezept-zutaten';
-		zutaten.appendChild(zutatenZeile(wert[6]));
-		var extra = eltern('details');
-		extra.appendChild(eltern('summary', t('hw_weitere_angaben')));
-		if (wert[7] && wert[7].length) {
-			var optional = eltern('div');
-			optional.className = 'schwach';
-			optional.appendChild(document.createTextNode(t('hw_optional') + ': '));
-			wert[7].forEach(function (teil, nummer) {
-				if (nummer) { optional.appendChild(document.createTextNode(', ')); }
-				var stueck = eltern('span');
-				stueck.className = 'zutat';
-				var symbol = bild(teil[3]);
-				if (symbol) { stueck.appendChild(symbol); }
-				var optionalLink = eltern(teil[4] ? 'a' : 'span', menge(teil) +
-					(teil[2] ? ' (' + Math.round(teil[2] * 100) + ' %)' : ''));
-				if (teil[4]) { optionalLink.href = itemUrl(teil[4]); }
-				stueck.appendChild(optionalLink);
-				if (teil[4] && window.MQL_ZUTATEN_HERKUNFT) {
-					var herkunft = window.MQL_ZUTATEN_HERKUNFT(itemUrl(teil[4]));
-					if (herkunft) { stueck.appendChild(herkunft); }
-				}
-				optional.appendChild(stueck);
-			});
-			extra.appendChild(optional);
-		}
-		if (wert[8] && wert[8] !== wert[0]) {
-			var kritisch = eltern('div');
-			kritisch.className = 'rezept-kritisch';
-			kritisch.appendChild(document.createTextNode(t('hw_kritisch_kurz') + ': '));
-			var symbol = bild(wert[17]);
-			if (symbol) { kritisch.appendChild(symbol); }
-			var kritischLink = eltern(wert[19] ? 'a' : 'span', wert[8]);
-			if (wert[19]) { kritischLink.href = itemUrl(wert[19]); }
-			kritisch.appendChild(kritischLink);
-			extra.appendChild(kritisch);
-		}
-		var meta = [];
-		if (wert[12]) { meta.push(t('hw_kritisch_kurz') + ' ' + wert[12] + ' %'); }
-		if (wert[13]) { meta.push(wert[13] + ' s'); }
-		if (meta.length) {
-			var angaben = eltern('div', meta.join(' · '));
-			angaben.className = 'schwach rezept-meta';
-			extra.appendChild(angaben);
-		}
-		var detail = eltern('div');
-		detail.className = 'rezept-detail';
-		var detailLink = eltern('a', t('hw_rezept_details'));
-		detailLink.href = recipeUrl(wert[10]);
-		detail.appendChild(detailLink);
-		if (extra.children.length > 1) { zutaten.appendChild(extra); }
-		zutaten.appendChild(detail);
-		tr.appendChild(zutaten);
 		return tr;
 	}
 
@@ -230,13 +150,13 @@
 		tabelle.className = 'tabelle rezept-tabelle';
 		var kopf = eltern('thead');
 		var kopfZeile = eltern('tr');
-		[['hw_ergebnis'], optionen.mitBeruf ? ['hw_beruf'] : null, ['hw_zutaten']]
+		[['hw_ergebnis'], optionen.mitBeruf ? ['hw_beruf'] : null]
 			.filter(Boolean).forEach(function (spalte) {
 				kopfZeile.appendChild(eltern('th', t(spalte[0])));
 			});
 		kopf.appendChild(kopfZeile);
 		tabelle.appendChild(kopf);
-		var spalten = optionen.mitBeruf ? 3 : 2;
+		var spalten = (optionen.mitBeruf ? 1 : 0) + 1;
 		gruppen.forEach(function (gruppe) {
 			var koerper = eltern('tbody');
 			if (gruppe.name) {
@@ -640,6 +560,10 @@
 	}
 
 	window.MQL_RECIPE_RESULTS = function(rows) {
+		bekannt = {}; meineBerufe = {}; charakter();
+		return tabelle([{name:'',zeilen:rows}],{mitBeruf:true,mitStufe:true});
+	};
+	window.MQL_RECIPE_CONTEXT_RESULTS = function(rows) {
 		bekannt = {}; meineBerufe = {}; charakter();
 		return tabelle([{name:'',zeilen:rows}],{mitBeruf:true,mitStufe:true});
 	};

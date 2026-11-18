@@ -32,13 +32,16 @@ final class Page
         if ($kind === 'giver') {
             return (new Givers($this->catalogue, $this->data, $this->shell, $this->view, $this->lang))->detail($identifier);
         }
+        if ($kind === 'vendor') {
+            return (new Vendors($this->catalogue, $this->data, $this->shell, $this->view, $this->lang))->detail($identifier);
+        }
         $page = $this->data->page($this->lang, $kind, $identifier);
         if ($page === null) {
             return null;
         }
         $template = 'entity/' . self::templateFor($kind) . '.twig';
         $maps = $page['crumb_maps'] ?? $this->crumbMaps($page, $identifier);
-        $related = (new RelatedLists($this->data, $this->lang))->forPage($kind, $page);
+        $related = (new RelatedLists($this->data, $this->lang, $this->catalogue))->forPage($kind, $page);
 
         $context = [
             'lang' => $this->lang,
@@ -70,6 +73,7 @@ final class Page
             'privacy' => link_tag('/datenschutz.html?lang=' . $this->lang, $this->w['privacy']),
             'icon' => $this->shell->icon($page['icon'] ?? ($kind === 'i' ? 'gegenstand' : '')),
             'entity_id' => $identifier,
+            'related_direct_list_max' => FilterRegeln::MAX_DIREKTLISTE,
             'related_lists' => $related,
             'related_icons_json' => json_encode(['q' => $this->shell->icon('aufgabe'), 'd' => $this->shell->icon('tat')], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
             'related_json' => json_encode($related, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR),
@@ -131,6 +135,9 @@ final class Page
             'spielstand_pfad' => $this->shell->appRoute('spielstand'),
             'katalog_texte' => $this->katalogTexte(),
             'crumbs' => $this->listCrumbs($kind),
+            'index_filter' => $kind === 'd' && (int) $page['page'] === 1,
+            'index_symbol' => json_encode(['d' => $this->shell->icon('tat')],
+                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
             'languages' => $this->listLanguages($page),
             'legal' => link_tag('/impressum.html?lang=' . $this->lang, $this->w['legal']),
             'privacy' => link_tag('/datenschutz.html?lang=' . $this->lang, $this->w['privacy']),
@@ -151,6 +158,9 @@ final class Page
         }
         if ($page === 'givers') {
             return (new Givers($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
+        }
+        if ($page === 'vendors') {
+            return (new Vendors($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);
         }
         if ($page === 'landmarks') {
             return (new Landmarks($this->catalogue, $this->data, $this->shell, $this->view, $lang))->listing($_GET);

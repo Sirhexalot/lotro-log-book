@@ -76,11 +76,11 @@
 	// header never grows when a content type is added (see README, navigation).
 	var SEGMENT = {
 		de: { gegenstand: 'gegenstand', beruf: 'beruf', titel: 'titel', tugend: 'tugend', set: 'set',
-			auftraggeber: 'auftraggeber' },
+			auftraggeber: 'auftraggeber', vendor: 'haendler' },
 		en: { gegenstand: 'item', beruf: 'profession', titel: 'title', tugend: 'virtue', set: 'set',
-			auftraggeber: 'quest-giver' },
+			auftraggeber: 'quest-giver', vendor: 'vendor' },
 		fr: { gegenstand: 'objet', beruf: 'metier', titel: 'titre', tugend: 'vertu', set: 'ensemble',
-			auftraggeber: 'donneur-de-quete' }
+			auftraggeber: 'donneur-de-quete', vendor: 'marchand' }
 	}[sprache] || {};
 	function pfad(art) { return '/' + sprache + '/' + (SEGMENT[art] || art) + '/'; }
 
@@ -95,6 +95,7 @@
 		{ seite: 'instanzen', href: app('instances'), text: t('menue_instanzen'), desc: 'd_instanzen' }] },
 		{ key: 'gegenstaende', text: t('nav_gegenstaende'), tab: [
 			{ seite: 'gegenstand', href: app('gegenstandssuche'), text: t('menue_gegenstandssuche'), desc: 'd_gegenstand' },
+			{ seite: 'vendor', href: pfad('vendor'), text: t('menue_haendler'), desc: 'd_haendler' },
 			{ seite: 'set', href: pfad('set'), text: t('menue_sets'), desc: 'd_sets' },
 			{ seite: 'handwerk', href: app('handwerk'), text: t('menue_handwerk'), desc: 'd_handwerk' }] },
 		{ key: 'erfolge', text: t('nav_erfolge'), tab: [
@@ -111,7 +112,7 @@
 	var ZUORDNUNG = { karte: 'welt', questfinder: 'welt', taten: 'welt', reise: 'welt', auftraggeber: 'welt',
 		instanzen: 'welt', abenteuer: 'welt',
 		landmarke: 'welt', fraktion: 'erfolge',
-		gegenstand: 'gegenstaende',
+		gegenstand: 'gegenstaende', vendor: 'gegenstaende',
 		handwerk: 'gegenstaende', beruf: 'gegenstaende', titel: 'erfolge', tugend: 'erfolge',
 		ruf: 'erfolge', belohnungen: 'erfolge', spielstand: 'charakter', plugin: 'charakter' };
 	var familie = ZUORDNUNG[seite] || 'welt';

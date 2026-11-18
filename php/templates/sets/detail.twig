@@ -6,8 +6,8 @@
 <section id="setteile"><h2>{{ sw.pieces }}</h2>
 <div class="set-cards">
 {% for member in set.members %}
-<article class="set-card">
-    <h3>{% if member.card and member.card.symbol %}<img src="/bild/items/{{ member.card.symbol }}.webp" alt="" width="32" height="32" loading="lazy">{% endif %}{% if member.url %}<a class="{{ member.card.head_class }}" href="{{ member.url }}">{{ member.name ?: sw.unnamed }}</a>{% else %}{{ member.name ?: sw.unnamed }}{% endif %}</h3>
+<article class="set-card{% if member.missing %} set-card-missing{% endif %}">
+    <h3>{% if member.card and member.card.symbol %}<img src="/bild/items/{{ member.card.symbol }}.webp" alt="" width="32" height="32" loading="lazy">{% endif %}{% if member.url %}<a class="{{ member.card.head_class }}" href="{{ member.url }}">{{ member.name ?: sw.unnamed }}</a>{% else %}{{ member.name ?: sw.unnamed }}{% endif %}{% if member.count > 1 %} <span class="set-card-count">· {{ member.count }}×</span>{% endif %}</h3>
     {% if member.card %}
         <p class="set-card-meta">{% for chip in member.card.chips %}<span>{{ chip.text }}</span>{% endfor %}</p>
         {% if member.card.required_class %}<p>{{ sw.class }}: {{ member.card.required_class }}</p>{% endif %}

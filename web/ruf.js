@@ -99,6 +99,7 @@
 			tr.appendChild(balkenZelle);
 			tr.appendChild(punkte);
 			tr.className = 'klickbar';
+			tr.dataset.id = zeile.id;
 			tr.title = t('ru_klick');
 			tr.addEventListener('click', function () { zeigeQuellen(zeile, tr); });
 			ziel.appendChild(tr);

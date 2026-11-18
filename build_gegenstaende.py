@@ -151,9 +151,12 @@ class Renderer(katalog.Renderer):
         # Slot, armour/weapon type and category are already the eyebrow above the
         # heading; repeating them as chips made the row say everything twice.
         binding = (details or {}).get('binding')
-        if binding == 1:
+        binding_mode = item.get('bm')
+        if binding_mode == 'BOUND_TO_ACCOUNT_ON_ACQUIRE':
+            chips.append(('', w.get('bound_account', w['bound_acquire'])))
+        elif binding_mode == 'BIND_ON_ACQUIRE' or (binding_mode is None and binding == 1):
             chips.append(('', w['bound_acquire']))
-        elif binding == 2:
+        elif binding_mode == 'BIND_ON_EQUIP' or (binding_mode is None and binding == 2):
             chips.append(('', w['bound_equip']))
         if (details or {}).get('scalable'):
             chips.append(('', w['scalable']))
@@ -271,16 +274,44 @@ class Renderer(katalog.Renderer):
         for art, qid, qname, zone, region in item.get('quellen') or []:
             quellen.append('<li>%s%s</li>' % (self.link(art, qid, qname),
                 ' · ' + katalog.escape(' › '.join(filter(None, [region, zone]))) if zone or region else ''))
-        rezepte = [self.link('recipe', rid, self.selected['recipe'][rid][0])
-                   for rid in item.get('rezepte') or [] if rid in self.selected['recipe']]
+        relations = item.get('herstellung') or [
+            {'recipe': rid, 'role': 'regular_result'} for rid in item.get('rezepte') or []
+        ]
+        rezepte = []
+        for relation in relations:
+            rid = relation['recipe']
+            if rid not in self.selected['recipe']:
+                continue
+            text = self.selected['recipe'][rid][0]
+            if relation.get('role') == 'critical_result':
+                text += ' · ' + w.get('critical_result', 'Critical result')
+            rezepte.append(self.link('recipe', rid, text))
         vendor = bool((details or {}).get('vendors'))
         inhalt = ''
         if quellen:
             inhalt += '<ul>%s</ul>' % ''.join(quellen)
         if rezepte:
             inhalt += '<h3>%s</h3><ul>%s</ul>' % (w['crafted_by'], ''.join('<li>%s</li>' % x for x in rezepte))
-        if vendor:
-            inhalt += katalog.paragraph(w['vendor'], 'katalog-hinweis')
+        vendors = item.get('haendler') or []
+        if vendors:
+            names = [entry.get('name', {}).get(self.lang)
+                     or entry.get('name', {}).get('en')
+                     or entry.get('name', {}).get('de')
+                     or entry.get('id', '') for entry in vendors]
+            inhalt += '<h3>%s</h3><ul>%s</ul>' % (
+                w.get('source_vendors', w['vendor']),
+                ''.join('<li>%s</li>' % katalog.escape(name)
+                    for entry, name in zip(vendors, names)))
+        barters = item.get('tausch') or []
+        if barters:
+            inhalt += '<h3>%s</h3><ul>%s</ul>' % (
+                w.get('source_barters', 'Barterers'),
+                ''.join('<li>%s%s</li>' % (
+                    katalog.escape(entry.get('name') or entry.get('id', '')),
+                    (' · ' + katalog.escape(' · '.join(filter(None, (
+                        entry.get('title'), entry.get('area')))))
+                     if entry.get('title') or entry.get('area') else ''))
+                        for entry in barters))
         if not inhalt:
             # "No source recorded" on thousands of pages said nothing; the
             # section only appears when there is something behind it.
@@ -289,8 +320,18 @@ class Renderer(katalog.Renderer):
 
     def wofuer(self, item):
         w = self.w
-        zutaten = [self.link('recipe', rid, self.selected['recipe'][rid][0])
-                   for rid in item.get('zutat') or [] if rid in self.selected['recipe']]
+        relations = item.get('verwendung') or [
+            {'recipe': rid, 'role': 'ingredient'} for rid in item.get('zutat') or []
+        ]
+        zutaten = []
+        for relation in relations:
+            rid = relation['recipe']
+            if rid not in self.selected['recipe']:
+                continue
+            text = self.selected['recipe'][rid][0]
+            if relation.get('role') == 'optional_ingredient':
+                text += ' · ' + w.get('optional_ingredient', 'Optional ingredient')
+            zutaten.append(self.link('recipe', rid, text))
         if not zutaten:
             return ''
         inhalt = katalog.paragraph(w['used_count'].replace('%s', str(len(zutaten))))

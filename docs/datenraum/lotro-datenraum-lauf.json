@@ -1,0 +1,33 @@
+{
+  "created_utc": "2026-11-17T09:39:02.221362+00:00",
+  "xml_files": 1141,
+  "xml_paths": 2785,
+  "raw_sources": [
+    [
+      "/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/raw.jsonl",
+      26477,
+      11
+    ],
+    [
+      "/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/npcs-2026-11-03/raw.jsonl",
+      4716,
+      5
+    ],
+    [
+      "/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/placed-2026-11-03/raw.jsonl",
+      51527,
+      31
+    ],
+    [
+      "/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/reputation-crafting-2026-11-03/raw.jsonl",
+      463,
+      5
+    ],
+    [
+      "/Users/adrian/Developer/Lotro/lotro-log-book/daten/instanzen-roh.jsonl",
+      1578,
+      2
+    ]
+  ],
+  "reference_rules": 25
+}

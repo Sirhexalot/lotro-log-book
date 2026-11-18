@@ -6,6 +6,10 @@
 		settings=settings||{};
 		var lang = window.MQL_SPRACHE || document.documentElement.lang || 'de', T = window.MQL_T;
 		if (!data || !data.e) { return; }
+		if (settings.ids && settings.ids.length) {
+			var erlaubt = new Set(settings.ids);
+			data = Object.assign({}, data, {e: data.e.filter(function (row) { return erlaubt.has(row[0]); })});
+		}
 		var A = window.MQL_FILTERADAPTER, fields = {kat:3,art:6,platz:5,klasse:8,gattung:9};
 		function key(dim,index) { return String(data[dim+'Key'][index]); }
 		function label(dim,value) { var i=data[dim+'Key'].indexOf(value); return data[dim][i] || T('gs_kat_ohne'); }
@@ -108,9 +112,11 @@
 		return {config:config,adapter:adapter};
 	};
 	window.MQL_GEGENSTAENDE_ZEICHNEN = function () {
-		if(controller||!document.querySelector('main.gs')||!window.MQL_GEGENSTAENDE){return;}
-		var setup=window.MQL_ITEM_FILTER_SETUP(window.MQL_GEGENSTAENDE);
-		var main=document.querySelector('main.gs'), list=document.getElementById('gs-ergebnis');list.dataset.filterResults='';
+		var main=document.querySelector('main.gs,[data-item-filter-root]');
+		if(controller||!main||!window.MQL_GEGENSTAENDE){return;}
+		var ids=(main.dataset.itemIds||'').split(',').filter(Boolean);
+		var setup=window.MQL_ITEM_FILTER_SETUP(window.MQL_GEGENSTAENDE,{area:ids.length?'haendler':'gegenstaende',ids:ids});
+		var list=main.querySelector('#gs-ergebnis');list.dataset.filterResults='';
 		main.appendChild(list);main.querySelector('.gs-raster').remove();main.querySelector('#gs-suche').remove();
 		controller=window.MQL_FILTER_UI.mount(main,setup);window.MQL_ITEM_FILTER=controller;
 	};

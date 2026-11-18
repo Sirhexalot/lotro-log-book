@@ -46,7 +46,6 @@
 	// answers it instead of a 301 from an old flat address.
 	var KARTE = { de: 'karte', en: 'map', fr: 'carte' }[sprache] || 'karte';
 	var TATEN = { de: 'karte/taten', en: 'map/deeds', fr: 'carte/prouesses' }[sprache] || 'karte/taten';
-	var BELOHNUNGEN = { de: 'belohnungen', en: 'rewards', fr: 'recompenses' }[sprache] || 'belohnungen';
 	var HANDWERK = { de: 'handwerk/rezepte', en: 'crafting/recipes',
 		fr: 'artisanat/recettes' }[sprache] || 'handwerk/rezepte';
 
@@ -70,7 +69,8 @@
 		if (art === 'g' && id) { return '/' + sprache + '/' + GEGENSTAND + '/' + id + '/'; }
 		if (art === 't' && id) { return '/' + sprache + '/' + TITEL + '/' + id + '/'; }
 		if (art === 'v' && id) { return '/' + sprache + '/' + TUGEND + '/' + id + '/'; }
-		if (art === 't' || art === 'v') { return '/' + sprache + '/' + BELOHNUNGEN + '/?tab=t&q=' + encodeURIComponent(name); }
+		if (art === 't') { return '/' + sprache + '/' + TITEL + '/?q=' + encodeURIComponent(name); }
+		if (art === 'v') { return '/' + sprache + '/' + TUGEND + '/'; }
 		return '/' + sprache + '/' + HANDWERK + '/?q=' + encodeURIComponent(name) + '#rezepte';
 	}
 

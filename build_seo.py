@@ -16,7 +16,7 @@ PAGES = {
     'reise.html': ('Reise', 'Plane deinen Weg durch Mittelerde. Finde Stallmeister und Verbindungen mit Preisen und Mindeststufen, Schnellreise und Reisefertigkeiten deiner Klasse.'),
     'ruf.html': ('Ruf und Fraktionen', 'Finde LOTRO-Fraktionen und Aufgaben mit Rufbelohnungen. Mit importiertem Spielstand siehst du deinen eigenen Ruf-Fortschritt.'),
     'handwerk.html': ('Handwerk und Rezepte', 'Durchsuche LOTRO-Rezepte nach Beruf und Stufe, mit Zutaten und Ergebnissen. Importiere deinen Spielstand, um bekannte und fehlende Rezepte zu sehen.'),
-    'belohnungen.html': ('Belohnungen', 'Welcher Titel fehlt dir noch? Finde Aufgaben und Taten, die dich mit Tugenden, Titeln und Gegenständen für deine Abenteuer in LOTRO belohnen.'),
+    'belohnungen.html': ('Belohnungen', 'Welcher Gegenstand fehlt dir noch? Finde die Aufgaben und Taten, die ihn in LOTRO als Belohnung vergeben – mit Stufe und Fundort.'),
     'gegenstand.html': ('Gegenstand', 'Schlage die Werte von LOTRO-Gegenständen nach und finde heraus, mit welchen Aufgaben und Taten du sie bekommst.'),
     'suche.html': ('Suche', 'Durchsuche Aufgaben, Taten, Gegenstände und Rezepte in LOTRO Log Book.'),
     'impressum.html': ('Impressum', 'Impressum und Kontakt für LOTRO Log Book.'),

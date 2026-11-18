@@ -114,8 +114,9 @@
 		var out = [];
 		(config.groups || []).forEach(function (group) {
 			var value = state.filters[group.id];
-			function add(key, label, replacement) {
+			function add(key, label, replacement, isDefault) {
 				out.push({id: group.id + ':' + key, groupId: group.id, label: label,
+					isDefault: isDefault === true,
 					action: {type: group.kind === 'range' ? 'setRange' : 'setValues', groupId: group.id, value: replacement}});
 			}
 			if (group.kind === 'multi' || group.kind === 'tree') {
@@ -128,9 +129,13 @@
 				add('range', group.rangeLabel(value), {min:null,max:null});
 			} else if (group.kind === 'boolean' && value) {
 				add('true', group.label, false);
-			} else if (group.kind === 'single' && value !== config.defaults(context).filters[group.id]) {
+			} else if (group.kind === 'single') {
+				// A single choice is always shown, including its neutral default:
+				// otherwise the same control produced a chip for one value and none
+				// for another. The default chip is a state label, not a reset.
 				var selected = group.options.find(function (o) { return o.value === value; });
-				if (selected) { add(String(value), selected.label, config.defaults(context).filters[group.id]); }
+				var standard = config.defaults(context).filters[group.id];
+				if (selected) { add(String(value), selected.label, standard, value === standard); }
 			}
 		});
 		return out;

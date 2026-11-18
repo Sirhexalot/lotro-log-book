@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
+from itemnamen import sauberer_name
 BASIS = Path('/Users/adrian/Documents/07_Hobbys/Lotro')
 STANDARD_KATALOG = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data'
 STANDARD_EXPORT = BASIS / 'Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03'
@@ -63,7 +64,39 @@ def sammle(katalog_dir, sprache, art):
     return out
 
 
-def eintrag(kind, record, kategorien, labels):
+def katalog_geografie(sprache):
+    """Return translated map paths with stable map ids for reward sources."""
+    out = {}
+    for art in ('taten', 'quests'):
+        pfad = HIER / 'daten' / ('%s-%s.json' % (art, sprache))
+        if not pfad.is_file():
+            continue
+        daten = json.loads(pfad.read_text(encoding='utf-8'))
+        for record in daten.get('quests', []):
+            namen = record.get('f') or []
+            ids = record.get('fk') or []
+            path = []
+            for name, ident in zip(namen, ids):
+                if name and ident is not None:
+                    path.append((str(ident), name))
+            if path:
+                out[record.get('i')] = tuple(path)
+    return out
+
+
+def reward_ids(sprache, dateiname):
+    pfad = HIER / 'daten' / dateiname
+    if not pfad.is_file():
+        return {}
+    eintraege = json.loads(pfad.read_text(encoding='utf-8')).get('eintraege', {})
+    return {
+        sauberer_name((eintrag.get('n') or {}).get(sprache) or
+                      (eintrag.get('n') or {}).get('en') or '', sprache): ident
+        for ident, eintrag in eintraege.items()
+    }
+
+
+def eintrag(kind, record, kategorien, labels, geografien):
     zone, region = '', ''
     for part in liste(record['p'] if 'p' in record else None):
         if str(part['k']).startswith('zone:'):
@@ -75,7 +108,8 @@ def eintrag(kind, record, kategorien, labels):
     else:
         art = 'quest'
     level = record['l'] if 'l' in record and record['l'] else ''
-    return [kind, record['id'], record['name'], zone, region, labels[art], level]
+    return [kind, record['id'], record['name'], zone, region, labels[art], level,
+            geografien.get(record['id'], ())]
 
 
 def item_stats(rewards_dir, sprache):
@@ -115,14 +149,17 @@ def baue(katalog_dir, sprache, ziel, export_dir, rewards_dir):
         for row in json.loads(deeds.read_text(encoding='utf-8')):
             kategorien[row['id']] = (row.get('properties') or {}).get('Accomplishment_Category')
     labels = TYPE_LABELS[sprache]
+    geografien = katalog_geografie(sprache)
+    tugend_ids = reward_ids(sprache, 'tugenden.json')
+    titel_ids = reward_ids(sprache, 'titel.json')
     statistik = item_stats(rewards_dir, sprache)
     tugenden, titel, gegenstaende = {}, {}, {}
     for art, kind in (('taten', 'd'), ('aufgaben', 'q')):
         for record in sammle(katalog_dir, sprache, art):
-            quelle = eintrag(kind, record, kategorien, labels)
+            quelle = eintrag(kind, record, kategorien, labels, geografien)
             for reward in liste(record['rw'] if 'rw' in record else None):
                 art_reward = reward[1]
-                name = reward[2]
+                name = sauberer_name(reward[2], sprache)
                 if not name:
                     continue
                 if art_reward == 'v':
@@ -146,8 +183,10 @@ def baue(katalog_dir, sprache, ziel, export_dir, rewards_dir):
         if label not in order:
             order.append(label)
     return {
-        'v': [[name, sorted({tuple(q) for q in quellen})] for name, quellen in sorted(tugenden.items())],
-        't': [[name, sorted({tuple(q) for q in quellen})] for name, quellen in sorted(titel.items())],
+        'v': [[tugend_ids.get(name, ''), name, sorted({tuple(q) for q in quellen})]
+              for name, quellen in sorted(tugenden.items())],
+        't': [[titel_ids.get(name, ''), name, sorted({tuple(q) for q in quellen})]
+              for name, quellen in sorted(titel.items())],
         'g': [[ident, item['n'], item['q'], item['l'], item['b'], sorted(item['s']),
                statistik.get(str(ident).upper(), {})]
               for ident, item in sorted(gegenstaende.items(), key=lambda pair: (pair[1]['n'].lower(), pair[0]))],
@@ -170,6 +209,13 @@ def main():
                     encoding='utf-8')
     print('%d Tugenden, %d Titel, %d Gegenstände -> %s (%.1f MB)'
           % (len(data['v']), len(data['t']), len(data['g']), ziel.name, ziel.stat().st_size / 1048576))
+    # The reward browser shows items only; a title without a catalogue entry is
+    # listed nowhere else, so the build names it instead of dropping it quietly.
+    ohne_katalog = [row[1] for row in data['t'] if not row[0]]
+    if ohne_katalog:
+        print('Hinweis: %d Titel ohne Katalogeintrag (nur in Belohnungsdaten): %s%s'
+              % (len(ohne_katalog), ', '.join(ohne_katalog[:5]),
+                 ' …' if len(ohne_katalog) > 5 else ''))
 
 
 if __name__ == '__main__':

@@ -73,9 +73,11 @@ final class Shell
             $this->assetTag('style.css'),
             $this->assetTag('gemeinsam.css'),
             $this->assetTag('katalog.css'),
-            $this->assetTag('sets.css'),
-            $this->assetTag('filter-ui.css'),
-            $this->assetTag('auftraggeber.css'),
+             $this->assetTag('sets.css'),
+             $this->assetTag('gegenstaende.css'),
+             $this->assetTag('filter-ui.css'),
+             $this->assetTag('aufgabenfinder.css'),
+             $this->assetTag('auftraggeber.css'),
         ]);
     }
 
@@ -86,9 +88,12 @@ final class Shell
             $this->scriptTag('ersetzt-' . $this->lang . '.js'),
             $this->scriptTag('filtergedaechtnis.js'), $this->scriptTag('katalog.js'),
             $this->scriptTag('filterzustand.js'), $this->scriptTag('filteradapter.js'),
-            $this->scriptTag('filter-ui.js'), $this->scriptTag('filter-server.js'),
-            $this->scriptTag('zutaten.js'), $this->scriptTag('sets.js'),
-            $this->scriptTag('auftraggeber.js')]);
+             $this->scriptTag('filter-ui.js'), $this->scriptTag('filter-server.js'),
+             $this->scriptTag('zutaten.js'), $this->scriptTag('sets.js'),
+             $this->scriptTag('auftraggeber.js'), $this->scriptTag('aufgaben-filter.js'),
+              $this->scriptTag('karten-aufgabenfilter.js'),
+              $this->scriptTag('gegenstaende-filter.js'),
+              $this->scriptTag('item-detail.js'), $this->scriptTag('item-task-filter.js')]);
     }
 
     /** Stamp for every app script and stylesheet, so a change reaches browsers. */
@@ -132,12 +137,13 @@ final class Shell
                 ['d', $app('taten'), $w['menue_taten'], $w['d_taten']],
                 ['adventures', $app('adventures'), $w['menue_abenteuer'], $w['d_abenteuer']],
                 ['reise', $app('reise'), $w['menue_reise'], $w['d_reise']],
-                ['giver', $app('givers'), Givers::words($lang)['title'], Givers::words($lang)['intro']],
+                 ['giver', $app('givers'), Givers::words($lang)['title'], $w['d_auftraggeber']],
                 ['l', $this->catalogue->route($lang, 'l'), $w['menue_landmarken'], $w['d_landmarken']],
                 ['instances', $app('instances'), $w['menue_instanzen'], $w['d_instanzen']],
             ]],
             ['key' => 'gegenstaende', 'text' => $w['familie_gegenstaende'], 'tabs' => [
                 ['i', $app('gegenstandssuche'), $w['menue_gegenstandssuche'], $w['d_gegenstand']],
+                ['vendor', $app('vendors'), Vendors::words($lang)['title'], $w['d_haendler']],
                 ['set', $app('sets'), Sets::words($lang)['title'], Sets::words($lang)['intro']],
                 ['craft', $app('handwerk'), $w['menue_handwerk'], $w['d_handwerk']],
             ]],
@@ -161,6 +167,7 @@ final class Shell
             'set' => 'gegenstaende',
             'questfinder' => 'welt',
             'giver', 'instances' => 'welt',
+            'vendor' => 'gegenstaende',
             default => $this->catalogue->famille()[$kind] ?? null,
         };
     }
@@ -261,7 +268,8 @@ final class Shell
             'taten' => ['welt', $w['menue_taten']],
             'reise' => ['welt', $w['menue_reise']],
             'adventures' => ['welt', $w['menue_abenteuer']],
-            'givers' => ['welt', Givers::words($lang)['title']],
+             'givers' => ['welt', Givers::words($lang)['title']],
+             'vendors' => ['gegenstaende', Vendors::words($lang)['title']],
             'landmarks' => ['welt', $w['menue_landmarken']],
             'factions' => ['erfolge', Factions::words($lang)['title']],
             'titles' => ['erfolge', Titles::words($lang)['title']],

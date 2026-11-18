@@ -2,7 +2,8 @@
 
 Stand: 17.11.2026
 Projekt: LOTRO Log Book
-Status: Konzept, noch nicht umgesetzt
+Status: Gegenstandsseiten umgesetzt; Tauschquellen bleiben mangels
+Zuordnung zu öffentlichen Gegenstandsseiten offen
 
 ## 1. Anlass
 
@@ -362,28 +363,53 @@ Beziehungstabellen. Fremde Plugin-Daten werden nicht ungeprüft in die Website
 
 ### Phase 1: Datenabhängige Reiter und Quellenfilter
 
-- lokale Reiter/Anker „Übersicht“, „Woher“, „Wofür“
-- Reiter nur bei vorhandenen Daten einblenden
-- Zähler je Reiter aus allen tatsächlichen Einträgen berechnen
-- Gruppierung von „Woher“ nach Aufgaben, Taten, Händler und Herstellung
-- Aufgabenfilter für Suche, Region, Gebiet, Stufe und Fortschritt
+- [x] lokale Reiter/Anker „Übersicht“, „Woher“, „Wofür“
+- [x] Reiter nur bei vorhandenen Daten einblenden
+- [x] Zähler je Reiter aus den vorhandenen Einträgen berechnen
+- [x] Gruppierung von „Woher“ nach Aufgaben, Taten, Vorkommen, Händler und Herstellung
+- [x] einfacher Namensfilter für Aufgabenquellen sowie Namens-/Ergebnisfilter
+  für Herstellungsbeziehungen
+- Aufgabenfilter für Region, Gebiet, Stufe und Fortschritt
 - Begrenzung langer Listen mit „Weitere anzeigen“
-- DE/EN/FR-Texte und mobile Bedienung
+- [x] DE/EN/FR-Texte und mobile Grunddarstellung
+
+Die lokale Navigation ist als HTML-Anker umgesetzt. Die ersten Filter laufen
+ohne JavaScript-Abhängigkeit für die Liste; feinere Aufgabenfacetten folgen
+mit den strukturierten Quellfeldern.
 
 ### Phase 2: Datenkorrekturen
 
-- normales und kritisches Rezeptergebnis verbinden
-- normale und optionale Zutaten kennzeichnen
+- [x] normales und kritisches Rezeptergebnis im Itemmodell verbinden
+- [x] normale und optionale Zutaten im Itemmodell kennzeichnen
+- [x] Accountbindung von normaler Aufnahmbindung im Itemmodell unterscheiden
 - feste und wählbare Belohnungen unterscheiden
 - bestehende Filterzustände und Rücklinks erhalten
 
+Die neuen Rückwärtsbeziehungen liegen in `daten/items.json` zunächst parallel
+zu den Legacy-Feldern: `herstellung` enthält `regular_result` und
+`critical_result`, `verwendung` enthält `ingredient` und
+`optional_ingredient`. Die alte `b`-Bindung und die Felder `rezepte`/`zutat`
+bleiben für die Übergangszeit erhalten.
+
 ### Phase 3: Händler und Tausch
 
-- Händlernamen und Tätigkeiten
-- Tauschhändler und Barterquellen
+- [x] konkrete Händlernamen aus dem Companion-Export
+- [x] Händlerbeziehungen auf die bestehenden 52.798 Web-Item-IDs begrenzen
+- [x] Händler als eigene kartenfähige Entität mit Itemlinks
+- [ ] Tauschhändler und Barterquellen für direkt sichtbare Gegenstandsseiten
 - Gebiet/Region
 - Kartenlink nur bei eindeutigem Standort
 - gegebenenfalls Filter nach Gebiet und Quellart
+
+Der Vendor-Export belegt 2.693 bestehende Web-Items mit mindestens einem
+konkreten Händler. Die vorhandenen Tauschquellen betreffen im aktuellen Export
+keine dieser öffentlichen Gegenstandsseiten; deshalb werden sie nicht als
+scheinbare Quellen angezeigt.
+
+Händlerseiten verwenden die NPC-ID des Spiels als stabile ID. Der aktuelle
+Export liefert 1.469 Händler, davon 1.466 mit Standort und 1.092 mit
+zuordenbarer Webkarte. Händler erscheinen damit auf Itemseiten als Links und
+zeigen ihrerseits den Kartenstandort sowie das belegte Warenangebot.
 
 ### Phase 4: zusätzliche Spielinhalte
 

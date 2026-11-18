@@ -66,8 +66,11 @@ class PfadTest(unittest.TestCase):
         layout = (ROOT / 'php' / 'templates' / 'app' / 'layout.twig').read_text()
         self.assertIn('aria-label="Breadcrumb"', layout)
         karte = (ROOT / 'php' / 'templates' / 'app' / 'karte.twig').read_text()
-        # The full-height map keeps its own way back; an extra row would shrink it.
-        self.assertIn('{% block pfad %}{% endblock %}', karte)
+        # The map app carries a breadcrumb row of its own under the header; its
+        # links replace the former "all landscapes" button in the list column.
+        self.assertIn('id="karten-breadcrumb"', karte)
+        self.assertIn('class="karten-pfad"', karte)
+        self.assertNotIn('id="zum-baum"', karte)
 
 
 if __name__ == '__main__':

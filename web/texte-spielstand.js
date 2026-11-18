@@ -198,7 +198,7 @@
 			sp_gelesen: '%s personnage(s) lu(s) : %s',
 			sp_manuell_ersetzt: '%s statut(s) manuel(s) remplacé(s) par l’import.',
 			sp_manuell_titel: 'Comment fonctionnent les statuts manuels des quêtes ?',
-			sp_manuell_hilfe: '<p>Tu peux marquer les quêtes et prouesses comme ouvertes, en cours ou terminées. Cette indication reste uniquement dans ce navigateur jusqu’au prochain import Companion correspondant.</p><p>L’import reste prioritaire et peut remplacer les indications manuelles pour les quêtes ou prouesses lues. « En cours » ne crée pas d’objectifs importés.</p>',
+			sp_manuell_hilfe: '<p>Vous pouvez marquer les quêtes et prouesses comme ouvertes, en cours ou terminées. Cette indication reste uniquement dans ce navigateur jusqu’au prochain import Companion correspondant.</p><p>L’import reste prioritaire et peut remplacer les indications manuelles pour les quêtes ou prouesses lues. « En cours » ne crée pas d’objectifs importés.</p>',
 			sp_nichts: 'Aucune progression Companion trouvée. Choisissez le dossier « characters ». Si vous n’avez pas encore récupéré votre personnage avec Companion, suivez le guide « Voici comment faire ».',
 			sp_speicher_voll: 'Votre progression n’a pas pu être enregistrée. Essayez une fenêtre normale plutôt qu’une fenêtre privée. Le stockage de votre navigateur est peut-être aussi plein.',
 			sp_schritt3: 'Vos personnages',

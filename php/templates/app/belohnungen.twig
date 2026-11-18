@@ -1,34 +1,36 @@
 {% extends 'app/layout.twig' %}
 
-{% block koerper_attribute %} data-seite="belohnungen" class="seite-text"{% endblock %}
+{% block koerper_attribute %} class="seite-text gs-seite" data-seite="belohnungen"{% endblock %}
 
-{% block stile %}<link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
-<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">{% endblock %}
+{% block stile %}<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/belohnungen.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">{% endblock %}
 
 {% block kopf_extra %}{% endblock %}
-
 {% block vor_haupt %}{% endblock %}
 
 {% block haupt %}
-<main class="seite">
-<h2 data-t="bl_titel">Belohnungen</h2>
-	<p data-t="bl_text">Tugenden, Titel und Gegenstände aus den Belohnungstabellen. Wähle eine Kategorie und suche nach einem Namen.</p>
-
-	<div class="reiter" role="tablist" id="bl-reiter">
-		<button type="button" data-bl="v" aria-pressed="true" data-t="bl_tugenden">Tugenden</button>
-		<button type="button" data-bl="t" aria-pressed="false" data-t="bl_titel_tab">Titel</button>
-		<button type="button" data-bl="g" aria-pressed="false" data-t="bl_gegenstaende">Gegenstände</button>
+<main class="gs belohnungen" id="belohnungen">
+	<div class="gs-kopf">
+		<h1 data-t="bl_titel">Belohnungen</h1>
+		<p class="gs-unter" data-t="bl_text">Finde die Aufgaben und Taten, die einen Gegenstand als Belohnung vergeben.</p>
+		<form class="gs-fallback" id="bl-suche" method="get" data-filter-fallback role="search">
+			<input type="search" name="q" data-t-ph="bl_suche" autocomplete="off">
+			<button type="submit" class="knopf" data-t="gs_suchen">Suchen</button>
+		</form>
 	</div>
-
-	<div class="kopf-zeile">
-		<input type="search" id="bl-suche" data-t-ph="bl_suche" autocomplete="off">
-		<select id="bl-art" aria-label="Art"><option value="" data-t="bl_alle_arten">Alle Arten</option></select>
-		<select id="bl-region" aria-label="Region"><option value="" data-t="bl_alle_regionen">Alle Regionen</option></select>
-		<span class="stufe-klein" id="bl-anzahl" role="status"></span>
+	<div class="gs-raster">
+		<button type="button" class="gs-filter-knopf" aria-expanded="false" aria-controls="bl-filter" data-t="gs_filter">Filter</button>
+		<aside class="gs-filter" id="bl-filter" aria-label="Filter"></aside>
+		<section class="gs-liste">
+			<div class="gs-sortierung">
+				<span data-t="bl_titel">Belohnungen</span>
+			</div>
+			<p class="gs-stand" role="status" data-t="gs_lade">Lade Belohnungen …</p>
+			<ul class="gs-ergebnis bl-ergebnis" id="bl-ergebnis" data-filter-results></ul>
+		</section>
 	</div>
-
-	<div class="bl-liste" id="bl-liste"></div>
-	<p class="schwach" id="bl-mehr" hidden></p>
 </main>
 {% endblock %}
 
@@ -40,8 +42,12 @@
 <script src="/texte-logbuch.js?v={{ asset_stand }}" defer></script>
 <script src="/texte-site.js?v={{ asset_stand }}" defer></script>
 <script src="/sprache.js?v={{ asset_stand }}" defer></script>
-<script src="/speicher.js?v={{ asset_stand }}" defer></script>
 <script src="/menue.js?v={{ asset_stand }}" defer></script>
 <script src="/familienmenue.js?v={{ asset_stand }}" defer></script>
+<script src="/symbole.js?v={{ asset_stand }}" defer></script>
+<script src="/filtergedaechtnis.js?v={{ asset_stand }}" defer></script>
+<script src="/filterzustand.js?v={{ asset_stand }}" defer></script>
+<script src="/filteradapter.js?v={{ asset_stand }}" defer></script>
+<script src="/filter-ui.js?v={{ asset_stand }}" defer></script>
 <script src="/belohnungen.js?v={{ asset_stand }}" defer></script>
 {% endblock %}

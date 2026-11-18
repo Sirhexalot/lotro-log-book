@@ -205,7 +205,8 @@
 					var stand=progressState(q);
 					status.className='questfinder-status questfinder-status-'+stand;
 					status.textContent={done:'✓ '+w.done,open:'● '+w.open,running:'◒ '+w.running,unknown:'○ '+w.unknown,excluded:'– '+w.excluded}[stand];
-					var details=[q.l?w.level+' '+q.l:'',q.a===boardValue?w.task:'',q.g||(counts[q.n]>1?w.name+' · '+q.i:'')].filter(Boolean);
+					var rewardCount = Array.isArray(q.rw) ? q.rw.length : 0;
+					var details=[q.l?w.level+' '+q.l:'',q.a===boardValue?w.task:'',q.g||(counts[q.n]>1?w.name+' · '+q.i:''),rewardCount ? ((window.MQL_T && window.MQL_T('belohnungen')) || 'Belohnungen')+' '+rewardCount:''].filter(Boolean);
 					meta.textContent=details.join(' · ');
 					var control=window.MQL_STATUS_UI&&window.MQL_STATUS_UI.create('quests',q.i);
 					button.append(name);

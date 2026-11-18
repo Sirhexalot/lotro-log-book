@@ -20,7 +20,11 @@
 .filter-ui button:focus-visible,.filter-ui input:focus-visible,.filter-ui select:focus-visible,.filter-ui summary:focus-visible { outline:2px solid var(--gold,#d9b96f); outline-offset:3px; }
 .filter-toolbar { display:flex; gap:8px; align-items:stretch; margin-bottom:24px; }
 .filter-toolbar input { flex:1; width:0; min-width:0; }
-.filter-grid { display:grid; grid-template-columns:320px minmax(0,1fr); grid-template-rows:88px auto; gap:24px; align-items:start; }
+/* The first row holds toolbar, chips and the error box. It starts at 88px so
+ * the filter column keeps its usual top edge, but it must grow: a fixed row
+ * let the error box overlap the results, whose rows then swallowed its retry
+ * button. */
+.filter-grid { display:grid; grid-template-columns:320px minmax(0,1fr); grid-template-rows:minmax(88px,auto) auto; gap:24px; align-items:start; }
 /* The filter column starts level with the result bar, not below it: the left
  * column is the page's second axis and must not look indented by the count. */
 .filter-result-header { grid-column:2; grid-row:1; }
@@ -50,6 +54,13 @@
 }
 .filter-chips { display:flex; flex-wrap:wrap; gap:8px; }
 .filter-chips:not(:empty) { margin-top:12px; }
+/* A single choice at its neutral default is a state label, not a filter that
+ * can be removed: no "×", no button, quieter than an active chip. */
+.filter-chips .filter-chip-state {
+	display:inline-flex; align-items:center; min-height:var(--filter-control,1.5rem);
+	padding:0 .6rem; border:1px dashed var(--rand,#526078); border-radius:999px;
+	color:var(--schwach,#a89c8a); font-size:.8125rem;
+}
 /* Quiet groups: a gold heading over a hairline, no card around every group.
  * That is the look the older list filters had, now for every migrated page. */
 .filter-panel .filter-group { margin:0; padding:0; background:none; border:0; border-top:1px solid var(--rand,#526078); border-radius:0; }

@@ -1,0 +1,482 @@
+{
+  "schema": 1,
+  "stand": "2026-11-17",
+  "regeln": {
+    "komponente": "web/filter-ui.js mit filterzustand.js, filteradapter.js, filtergedaechtnis.js und filter-ui.css",
+    "schwelle": 5,
+    "schwelle_text": "0 bis 5 Eintraege direkt, ab 6 die gemeinsame Komponente in voller Inhaltsbreite",
+    "kontext": "Eine Relation ist fester Kontext, nicht abwaehlbar, und bleibt beim Zuruecksetzen erhalten",
+    "listenzeile": "Symbol, Name, Einordnung (Beruf/Art), Stufe oder Lernstand. Sonst nichts. Die Zeile fuehrt zum Detail.",
+    "detail": "Zutaten, Quellen, Werte, Herkunft, Verwendung und Schaalter gehoeren ausschliesslich auf die Detailseite",
+    "fortschritt": "Nur mit belegten Daten, nie erfunden"
+  },
+  "entitaeten": {
+    "q": {
+      "name": "Aufgabe",
+      "segmente": {
+        "de": "aufgabe",
+        "en": "quest",
+        "fr": "quete"
+      },
+      "zeilenfelder": [
+        "symbol",
+        "name",
+        "stufe",
+        "gebiet",
+        "status"
+      ],
+      "filter": [
+        "thema",
+        "klasse",
+        "herkunft",
+        "geografie",
+        "merkmale",
+        "stufe",
+        "fortschritt"
+      ],
+      "relationen": [
+        "q",
+        "d",
+        "i",
+        "title",
+        "virtue",
+        "giver"
+      ],
+      "fortschritt": true,
+      "listen": [
+        {
+          "id": "required_by",
+          "label": "Wird vorausgesetzt von",
+          "oberflaeche": "detail",
+          "status": "component"
+        },
+        {
+          "id": "rewards",
+          "label": "Belohnungen",
+          "oberflaeche": "detail",
+          "status": "direct"
+        },
+        {
+          "id": "chain",
+          "label": "Zusammenhang",
+          "oberflaeche": "detail",
+          "status": "direct"
+        }
+      ]
+    },
+    "d": {
+      "name": "Tat",
+      "segmente": {
+        "de": "tat",
+        "en": "deed",
+        "fr": "prouesse"
+      },
+      "zeilenfelder": [
+        "symbol",
+        "name",
+        "art",
+        "stufe",
+        "gebiet",
+        "status"
+      ],
+      "filter": [
+        "art",
+        "geografie",
+        "merkmale",
+        "stufe",
+        "fortschritt"
+      ],
+      "relationen": [
+        "d",
+        "q",
+        "i",
+        "title",
+        "virtue"
+      ],
+      "fortschritt": true,
+      "listen": [
+        {
+          "id": "context",
+          "label": "Zusammenhang",
+          "oberflaeche": "detail",
+          "status": "component"
+        }
+      ]
+    },
+    "i": {
+      "name": "Gegenstand",
+      "segmente": {
+        "de": "gegenstand",
+        "en": "item",
+        "fr": "objet"
+      },
+      "zeilenfelder": [
+        "symbol",
+        "name",
+        "seltenheit",
+        "stufe",
+        "art"
+      ],
+      "filter": [
+        "kategorie",
+        "art",
+        "platz",
+        "klasse",
+        "gattung",
+        "seltenheit",
+        "stufe"
+      ],
+      "relationen": [
+        "recipe",
+        "q",
+        "vendor",
+        "i"
+      ],
+      "fortschritt": false,
+      "listen": [
+        {
+          "id": "used_in",
+          "label": "Wofuer",
+          "oberflaeche": "detail",
+          "status": "component"
+        },
+        {
+          "id": "where_tasks",
+          "label": "Woher: Aufgaben",
+          "oberflaeche": "detail",
+          "status": "component"
+        },
+        {
+          "id": "where_vendors",
+          "label": "Woher: Haendler",
+          "oberflaeche": "detail",
+          "status": "component"
+        },
+        {
+          "id": "where_recipes",
+          "label": "Woher: Herstellung",
+          "oberflaeche": "detail",
+          "status": "component",
+          "hinweis": "Eigener Relationstyp recipe_made; getrennt von Wofuer (recipe)."
+        },
+        {
+          "id": "where_plain",
+          "label": "Woher: weitere Quellen",
+          "oberflaeche": "detail",
+          "status": "open",
+          "grund": "Haendler- und Tauschgruppen erscheinen als einfache Liste"
+        }
+      ]
+    },
+    "recipe": {
+      "name": "Rezept",
+      "segmente": {
+        "de": "rezept",
+        "en": "recipe",
+        "fr": "recette"
+      },
+      "zeilenfelder": [
+        "symbol",
+        "name",
+        "beruf",
+        "stufe",
+        "lernstand"
+      ],
+      "filter": [
+        "beruf",
+        "stufe",
+        "kategorie",
+        "lernstand",
+        "quelle"
+      ],
+      "relationen": [
+        "i"
+      ],
+      "fortschritt": true,
+      "listen": [
+        {
+          "id": "ingredients",
+          "label": "Zutaten",
+          "oberflaeche": "detail",
+          "status": "direct"
+        },
+        {
+          "id": "context",
+          "label": "Kontextzeilen",
+          "oberflaeche": "detail",
+          "status": "component"
+        }
+      ]
+    },
+    "set": {
+      "name": "Set",
+      "segmente": {
+        "de": "set",
+        "en": "set",
+        "fr": "ensemble"
+      },
+      "zeilenfelder": [
+        "symbol",
+        "name",
+        "stufe"
+      ],
+      "filter": [
+        "art",
+        "klasse",
+        "stufe"
+      ],
+      "relationen": [
+        "i"
+      ],
+      "fortschritt": false,
+      "listen": [
+        {
+          "id": "members",
+          "label": "Setteile",
+          "oberflaeche": "detail",
+          "status": "direct",
+          "hinweis": "Setteile sind die Definition des Sets, keine Browsing-Relation. Teile ohne Item-Seite werden je Name zu einer gezaehlten Zeile zusammengefasst."
+        }
+      ]
+    },
+    "giver": {
+      "name": "Auftraggeber",
+      "segmente": {
+        "de": "auftraggeber",
+        "en": "quest-giver",
+        "fr": "donneur-de-quete"
+      },
+      "zeilenfelder": [
+        "symbol",
+        "name",
+        "art",
+        "gebiet",
+        "stufe"
+      ],
+      "filter": [
+        "geografie",
+        "art",
+        "stufe",
+        "merkmale"
+      ],
+      "relationen": [
+        "q"
+      ],
+      "fortschritt": true,
+      "listen": [
+        {
+          "id": "quests",
+          "label": "Aufgaben dieses Auftraggebers",
+          "oberflaeche": "detail",
+          "status": "component"
+        }
+      ]
+    },
+    "vendor": {
+      "name": "Haendler",
+      "segmente": {
+        "de": "haendler",
+        "en": "vendor",
+        "fr": "marchand"
+      },
+      "zeilenfelder": [
+        "symbol",
+        "name",
+        "art",
+        "gebiet",
+        "anzahl"
+      ],
+      "filter": [
+        "geografie",
+        "art"
+      ],
+      "relationen": [
+        "i"
+      ],
+      "fortschritt": false,
+      "listen": [
+        {
+          "id": "items",
+          "label": "Warenangebot",
+          "oberflaeche": "detail",
+          "status": "component"
+        }
+      ]
+    },
+    "title": {
+      "name": "Titel",
+      "segmente": {
+        "de": "titel",
+        "en": "title",
+        "fr": "titre"
+      },
+      "zeilenfelder": [
+        "name",
+        "quelle"
+      ],
+      "filter": [
+        "geografie",
+        "art",
+        "herkunft"
+      ],
+      "relationen": [
+        "d"
+      ],
+      "fortschritt": true,
+      "listen": [
+        {
+          "id": "sources",
+          "label": "Quellen",
+          "oberflaeche": "detail",
+          "status": "component"
+        }
+      ]
+    },
+    "virtue": {
+      "name": "Tugend",
+      "segmente": {
+        "de": "tugend",
+        "en": "virtue",
+        "fr": "vertu"
+      },
+      "zeilenfelder": [
+        "name",
+        "quelle"
+      ],
+      "filter": [
+        "geografie"
+      ],
+      "relationen": [
+        "d"
+      ],
+      "fortschritt": true,
+      "listen": [
+        {
+          "id": "sources",
+          "label": "Quellen",
+          "oberflaeche": "detail",
+          "status": "component"
+        }
+      ]
+    },
+    "f": {
+      "name": "Fraktion",
+      "segmente": {
+        "de": "fraktion",
+        "en": "faction",
+        "fr": "faction"
+      },
+      "zeilenfelder": [
+        "symbol",
+        "name",
+        "gebiet"
+      ],
+      "filter": [
+        "geografie",
+        "quellen"
+      ],
+      "relationen": [
+        "q",
+        "d"
+      ],
+      "fortschritt": true,
+      "listen": [
+        {
+          "id": "sources",
+          "label": "Wodurch du Ruf bekommst",
+          "oberflaeche": "detail",
+          "status": "component"
+        }
+      ]
+    },
+    "l": {
+      "name": "Landmarke",
+      "segmente": {
+        "de": "landmarke",
+        "en": "landmark",
+        "fr": "site"
+      },
+      "zeilenfelder": [
+        "name",
+        "gebiet",
+        "aufgaben"
+      ],
+      "filter": [
+        "geografie",
+        "aufgaben"
+      ],
+      "relationen": [
+        "q"
+      ],
+      "fortschritt": true,
+      "listen": [
+        {
+          "id": "quests",
+          "label": "Aufgaben hier",
+          "oberflaeche": "detail",
+          "status": "component"
+        }
+      ]
+    },
+    "area": {
+      "name": "Gebiet",
+      "segmente": {
+        "de": "gebiet",
+        "en": "area",
+        "fr": "zone"
+      },
+      "zeilenfelder": [
+        "name",
+        "region",
+        "fortschritt"
+      ],
+      "filter": [
+        "region",
+        "fortschritt"
+      ],
+      "relationen": [
+        "q",
+        "d",
+        "i"
+      ],
+      "fortschritt": true,
+      "listen": [
+        {
+          "id": "members",
+          "label": "Inhalte",
+          "oberflaeche": "detail",
+          "status": "component"
+        }
+      ]
+    },
+    "region": {
+      "name": "Region",
+      "segmente": {
+        "de": "region",
+        "en": "region",
+        "fr": "region"
+      },
+      "zeilenfelder": [
+        "name",
+        "fortschritt"
+      ],
+      "filter": [
+        "fortschritt"
+      ],
+      "relationen": [
+        "q",
+        "d",
+        "i"
+      ],
+      "fortschritt": true,
+      "listen": [
+        {
+          "id": "members",
+          "label": "Inhalte",
+          "oberflaeche": "detail",
+          "status": "component"
+        }
+      ]
+    }
+  }
+}

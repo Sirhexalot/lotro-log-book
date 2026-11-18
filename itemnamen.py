@@ -56,6 +56,13 @@ def sauberer_name(text, sprache='de'):
     i = 0
     while i < len(text):
         zeichen = text[i]
+        # Some reward strings contain ordinary ASCII quote characters instead
+        # of the client's \q marker. Treat them as the same paired quotes.
+        if zeichen == '"':
+            aus.append(offen if naechste_offen else zu)
+            naechste_offen = not naechste_offen
+            i += 1
+            continue
         # \q is the marker; a lone backslash before a letter is the same marker
         # with its q lost in the export ("\Essenz …", "\Stechen\q").
         if zeichen == '\\' and i + 1 < len(text) and text[i + 1].isalpha():

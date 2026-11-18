@@ -27,7 +27,11 @@ class BuiltGiverCatalogueTest(unittest.TestCase):
                 quests = set(records(DATA / lang / 'q'))
                 self.assertEqual({row['id'] for row in index['givers']}, set(pages))
                 urls = set(sitemaps['/%s/%s/sitemap.xml' % (lang, segment)])
-                self.assertIn('/%s/%s/' % (lang, segment), urls)
+                # The list page lives in sitemap-seiten.xml; listing it in the
+                # entity sitemap as well would publish one URL twice.
+                seiten = set(sitemaps['/sitemap-seiten.xml'])
+                self.assertIn('/%s/%s/' % (lang, segment), seiten)
+                self.assertNotIn('/%s/%s/' % (lang, segment), urls)
                 for row in index['givers']:
                     self.assertTrue(row['name'].strip())
                     for marker in ('key:', '${', '%s'):
