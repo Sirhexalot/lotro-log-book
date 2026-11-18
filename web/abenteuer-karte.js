@@ -269,7 +269,19 @@
 		back.type = 'button';
 		back.addEventListener('click', clearCluster);
 		var line = el('span', 'cluster-zeile');
-		line.appendChild(el('strong', 'cluster-titel', groupName(cluster.id)));
+		var clusterTitle = el('strong', 'cluster-titel', groupName(cluster.id));
+		// A displayed group can be keyed by its linked map rather than by the
+		// catalogue area ID. For a one-area group, link to that area's page.
+		var clusterPage = pages[cluster.id] ||
+			(cluster.areas.length === 1 ? pages[cluster.areas[0].id] : null);
+		if (clusterPage) {
+			var clusterLink = el('a', 'cluster-titel-link');
+			clusterLink.href = clusterPage;
+			clusterLink.appendChild(clusterTitle);
+			line.appendChild(clusterLink);
+		} else {
+			line.appendChild(clusterTitle);
+		}
 		line.appendChild(el('span', 'cluster-meta schwach',
 			[areaCount(cluster.areas.length), percent(cluster), weiter(cluster.ready)].filter(Boolean).join(' · ')));
 		clusterHead.appendChild(back);
@@ -444,6 +456,9 @@
 		markPressed('[data-welt-gruppe]', 'data-welt-gruppe', null);
 		if (state.region) { paintRegionList(state.region); }
 		paintPreview();
+		if (preview && root.matchMedia && root.matchMedia('(max-width: 900px)').matches) {
+			preview.scrollIntoView({ block: 'start', behavior: 'smooth' });
+		}
 	}
 	/** One linked sub-map: its areas replace the region list until the way back. */
 	function selectGroup(id) {

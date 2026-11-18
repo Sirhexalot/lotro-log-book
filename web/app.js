@@ -29,7 +29,7 @@
 		if (vollstaendigLader) { vollstaendigLader.push(callback); return; }
 		vollstaendigLader = [callback];
 		var script = document.createElement('script');
-		script.src = 'daten-' + sprache + '.js';
+		script.src = (window.MQL_ART === 'taten' ? 'daten-taten-' : 'daten-') + sprache + '.js';
 		script.onload = function () {
 			var voll = window.MQL_QUESTS || [];
 			var nachId = {};
@@ -61,6 +61,16 @@
 	// Old duplicate deed ids count for their replacement.
 	var ersetzt = window.MQL_REPLACED || {};
 	fortschritt.ids = fortschritt.ids.map(function (id) { return ersetzt[id] || id; });
+	var zusammenfassungNachPfad = {};
+	(window.MQL_KARTEN_SUMMARY || []).forEach(function (quest) {
+		if (ersetzt[quest.i] || !quest.f || !quest.f.length) { return; }
+		var schluessel = '';
+		quest.f.forEach(function (label) {
+			schluessel += '|' + label;
+			(zusammenfassungNachPfad[schluessel] ||
+				(zusammenfassungNachPfad[schluessel] = [])).push(quest);
+		});
+	});
 
 	var suche = document.getElementById('suche');
 	var baum = document.getElementById('baum');
@@ -199,7 +209,7 @@
 	var gespeicherterFilter = leseKartenfilter();
 	var zustand = {
 		knoten: null,
-		filter: ['alle', 'offen', 'erledigt', 'machbar'].indexOf(gespeicherterFilter.filter) >= 0 ? gespeicherterFilter.filter : 'alle',
+		filter: ['alle', 'offen', 'laufend', 'erledigt', 'machbar'].indexOf(gespeicherterFilter.filter) >= 0 ? gespeicherterFilter.filter : 'alle',
 		belohnung: ['alle', 'tugend', 'titel', 'punkte'].indexOf(gespeicherterFilter.belohnung) >= 0 ? gespeicherterFilter.belohnung : 'alle',
 		q: typeof gespeicherterFilter.q === 'string' ? gespeicherterFilter.q : '',
 		karte: null,
@@ -340,6 +350,9 @@
 	var WURZEL = { schluessel: '', name: '', tiefe: 0, quests: [], kinder: {}, reihenfolge: [] };
 
 	function eintragen(labels, quest) {
+		if (questNachId[quest.i]) { return; }
+		quests.push(quest);
+		questNachId[quest.i] = quest;
 		var knoten = WURZEL;
 		knoten.quests.push(quest);
 		labels.forEach(function (label, index) {
@@ -482,6 +495,10 @@
 			if (fertig[quest.i]) { erledigt += 1; }
 		});
 		return { gesamt: gesamt, erledigt: erledigt };
+	}
+	function zaehlEintraege(knoten) {
+		return knoten && zusammenfassungNachPfad[knoten.schluessel] ||
+			(knoten && knoten.quests) || [];
 	}
 
 	/**
@@ -640,7 +657,7 @@
 		var wrapper = eltern('div', null);
 		wrapper.className = 'ast tiefe' + knoten.tiefe;
 
-		var zahlen = zaehle(knoten.quests);
+		var zahlen = zaehle(zaehlEintraege(knoten));
 		var blatt = knoten.reihenfolge.length === 0;
 		var hatPunkte = knoten.quests.some(function (quest) { return orte(quest).length > 0; });
 		var knopf = eltern('button', null);
@@ -660,7 +677,7 @@
 		name.className = 'name';
 		// Level range under the name for areas (second level) only; elsewhere
 		// it would double the tree's length, so there it is in the tooltip.
-		var spanne = stufenSpanne(knoten.quests);
+		var spanne = stufenSpanne(zaehlEintraege(knoten));
 		if (spanne) {
 			if (knoten.tiefe === 2) {
 				var bereich = eltern('span', spanne);
@@ -811,7 +828,67 @@
 		pfadZeile.textContent = teile.map(function (name) { return lesbareKartennamen[name] || name; }).join(' › ');
 	}
 
-	function waehleKnoten(knoten, alsListe, ohneVerlauf) {
+	var geladeneGebietsShards = {};
+	var gebietsLader = {};
+	function ladeGebietsDaten(knoten, fertig) {
+		if (!knoten || knoten === WURZEL) { fertig(); return; }
+		var dateien = [], gesehen = {};
+		function add(datei) {
+			if (datei && !gesehen[datei] && !geladeneGebietsShards[datei]) {
+				gesehen[datei] = true; dateien.push(datei);
+			}
+		}
+		function mapsUnterhalb(ast) {
+			if (ast.karte != null) { add('map-' + ast.karte + '.js'); }
+			ast.reihenfolge.forEach(mapsUnterhalb);
+		}
+		mapsUnterhalb(knoten);
+		var teile = knoten.schluessel.split('|').filter(function (teil) { return teil !== ''; });
+		var region = teile[0];
+		var regionDatei = window.MQL_SHARD_REGION && window.MQL_SHARD_REGION[region];
+		if (regionDatei) { add(regionDatei); }
+		function next() {
+			var datei = dateien.shift();
+			if (!datei) { sortiere(WURZEL); instanzenJeKapitel = null; fertig(); return; }
+			if (gebietsLader[datei]) {
+				gebietsLader[datei].push(next);
+				return;
+			}
+			gebietsLader[datei] = [next];
+			var skript = document.createElement('script');
+			var artOrdner = window.MQL_ART === 'taten' ? 'taten' : 'aufgaben';
+			skript.src = 'karten-daten/' + artOrdner + '/' + sprache + '/' + datei +
+				'?v=' + (window.MQL_STAND || '0');
+			skript.onload = function () {
+				var rows = window.MQL_GEBIETS_DATEN || [];
+				delete window.MQL_GEBIETS_DATEN;
+				geladeneGebietsShards[datei] = true;
+				var wartende = gebietsLader[datei]; delete gebietsLader[datei];
+				rows.forEach(function (quest) {
+					var labels = quest.f && quest.f.length ? quest.f : (function () {
+						var zone = quest.z || t('ohne_zuordnung');
+						var gebiet = ABSCHNITTE[zone] || zone;
+						var regionName = quest.r || ABSCHNITTE[zone] || t('ohne_obergebiet');
+						var gebaut = [regionName];
+						if (gebiet !== regionName) { gebaut.push(gebiet); }
+						if (quest.u) { gebaut.push(quest.u); }
+						return gebaut;
+					})();
+					eintragen(labels, quest);
+				});
+				sortiere(WURZEL);
+				wartende.forEach(function (callback) { callback(); });
+			};
+			skript.onerror = function () {
+				var wartende = gebietsLader[datei]; delete gebietsLader[datei];
+				wartende.forEach(function (callback) { callback(); });
+			};
+			document.head.appendChild(skript);
+		}
+		next();
+	}
+
+	function waehleKnotenSofort(knoten, alsListe, ohneVerlauf) {
 		zustand.knoten = knoten;
 		zu = {};
 		zustand.suchliste = knoten.schluessel === '';
@@ -844,6 +921,26 @@
 		aktualisiereStand();
 		markiereBaum();
 		zeichneDetail();
+	}
+
+	function waehleKnoten(knoten, alsListe, ohneVerlauf) {
+		if (!knoten || knoten === WURZEL || knoten.gebietsDatenGeladen) {
+			waehleKnotenSofort(knoten, alsListe, ohneVerlauf);
+			return;
+		}
+		zustand.knoten = knoten;
+		zustand.auswahl = null;
+		zeigePfad(knoten);
+		if (alsListe) { zeigeNav('liste'); }
+		listeTitel.textContent = knoten.name;
+		liste.textContent = '';
+		var hinweis = eltern('li', t('lade_karte'));
+		hinweis.className = 'listen-hinweis';
+		liste.appendChild(hinweis);
+		ladeGebietsDaten(knoten, function () {
+			knoten.gebietsDatenGeladen = true;
+			waehleKnotenSofort(knoten, alsListe, ohneVerlauf);
+		});
 	}
 
 	function zeigeKarte(index) {
@@ -887,7 +984,7 @@
 			if (!knoten || knoten === WURZEL || zustand.suchliste) {
 				knoten = knotenMitKarte(WURZEL, zustand.karte.idx);
 			}
-			if (knoten && knoten !== WURZEL) { text = stufenSpanne(knoten.quests); }
+			if (knoten && knoten !== WURZEL) { text = stufenSpanne(zaehlEintraege(knoten)); }
 		}
 		feld.textContent = text;
 		feld.hidden = !text;
@@ -1784,17 +1881,17 @@
 		zustand.auswahl = null;
 		detail.textContent = '';
 		detail.appendChild(eltern('h2', knoten.name));
-		var z = zaehle(knoten.quests);
+		var z = zaehle(zaehlEintraege(knoten));
 		var kopf = eltern('div', ersetze(t('region_kopf'), [knoten.reihenfolge.length, zahl(z.erledigt, z.gesamt)]));
 		kopf.className = 'kennung';
 		detail.appendChild(kopf);
 		var ul = eltern('ul', null);
 		ul.className = 'gebietsliste';
 		knoten.reihenfolge.forEach(function (kind) {
-			var kz = zaehle(kind.quests);
+			var kz = zaehle(zaehlEintraege(kind));
 			var li = eltern('li', null);
 			li.appendChild(eltern('span', kind.name));
-			var info = eltern('span', [stufenSpanne(kind.quests), zahl(kz.erledigt, kz.gesamt)].filter(Boolean).join(' · '));
+			var info = eltern('span', [stufenSpanne(zaehlEintraege(kind)), zahl(kz.erledigt, kz.gesamt)].filter(Boolean).join(' · '));
 			info.className = 'stufe';
 			li.appendChild(info);
 			li.addEventListener('click', function () { waehleKnoten(kind, true); });
@@ -1857,7 +1954,7 @@
 				var ort = eltern('li', null);
 				ort.className = 'unterkarte';
 				ort.appendChild(eltern('span', '▸ ' + kind.name));
-				var kz = zaehle(kind.quests);
+				var kz = zaehle(zaehlEintraege(kind));
 				var zahlOrt = eltern('span', zahl(kz.erledigt, kz.gesamt));
 				zahlOrt.className = 'stufe';
 				ort.appendChild(zahlOrt);
@@ -2011,11 +2108,11 @@
 		if (zustand.filter === 'machbar') {
 			eintraege = eintraege.filter(machbar);
 		} else if (zustand.filter === 'offen') {
-			// "Open" means the character can still do it.
 			eintraege = eintraege.filter(function (quest) {
-				var lage = zustandVon(quest);
-				return lage === 'offen' || lage === 'laufend';
+				return zustandVon(quest) === 'offen';
 			});
+		} else if (zustand.filter === 'laufend') {
+			eintraege = eintraege.filter(function (quest) { return zustandVon(quest) === 'laufend'; });
 		} else if (zustand.filter === 'erledigt') {
 			eintraege = eintraege.filter(function (quest) { return fertig[quest.i] === true; });
 		}
@@ -2158,13 +2255,13 @@
 			if (zustand.knoten && zustand.knoten !== WURZEL) {
 				var k = zustand.knoten;
 				detail.appendChild(eltern('h2', k.name));
-				var spanneText = stufenSpanne(k.quests);
+				var spanneText = stufenSpanne(zaehlEintraege(k));
 				if (spanneText) {
 					var unter = eltern('div', spanneText);
 					unter.className = 'kennung';
 					detail.appendChild(unter);
 				}
-				var z = zaehle(k.quests);
+				var z = zaehle(zaehlEintraege(k));
 				var werte = [[t('detail_gesamt'), z.gesamt]];
 				if (hatFortschritt) {
 					var nOffen = 0, nLauf = 0, nAnn = 0;
@@ -3394,8 +3491,8 @@
 				}
 				else { knopf.appendChild(platzhalter); }
 				var inhalt = eltern('span'); inhalt.className = 'inhalt'; inhalt.appendChild(eltern('strong', e.knoten.name));
-				inhalt.appendChild(eltern('small', stufenSpanne(e.knoten.quests)));
-				var z = zaehle(e.knoten.quests);
+				inhalt.appendChild(eltern('small', stufenSpanne(zaehlEintraege(e.knoten))));
+				var z = zaehle(zaehlEintraege(e.knoten));
 				inhalt.appendChild(eltern('small', zahl(z.erledigt, z.gesamt) + ' ' + t('aufgaben')));
 				if (hatFortschritt) { var p = eltern('progress'); p.max = z.gesamt || 1; p.value = z.erledigt; inhalt.appendChild(p); }
 				knopf.appendChild(inhalt); knopf.onclick = function () { landschaftOeffnen(e); };
@@ -3470,7 +3567,7 @@
 			var istGebiet = Number(id) === landschaftBereich.karte;
 			var name = istGebiet ? (sprache === 'de' ? 'Ganz ' : sprache === 'fr' ? 'Toute la région : ' : 'All of ') + landschaftBereich.knoten.name : kartenSet[id].name;
 			var knopf = eltern('button'); knopf.appendChild(eltern('span', name));
-			var zaehler = zaehle(kartenSet[id].quests);
+			var zaehler = zaehle(zaehlEintraege(kartenSet[id]));
 			var zahlText = eltern('small', zahl(zaehler.erledigt, zaehler.gesamt)); knopf.appendChild(zahlText);
 			knopf.title = name + ' · ' + zahl(zaehler.erledigt, zaehler.gesamt) + ' ' + t('aufgaben');
 			knopf.setAttribute('aria-pressed', String(zustand.karte && zustand.karte.idx === Number(id)));
@@ -3517,7 +3614,7 @@
 				var name = kind.name;
 				if (knoten !== e.knoten) { name = name.replace(/^.*?,\s*((?:Buch|Book|Livre)\s+)/i, '$1').replace(/^.*?:\s*(Prolog(?:ue)?)/i, '$1'); }
 				var knopf = eltern('button'); knopf.appendChild(eltern('span', index ? name : (sprache === 'de' ? 'Alle: ' : sprache === 'fr' ? 'Tout : ' : 'All: ') + knoten.name));
-				var z = zaehle(kind.quests); knopf.appendChild(eltern('small', zahl(z.erledigt, z.gesamt)));
+				var z = zaehle(zaehlEintraege(kind)); knopf.appendChild(eltern('small', zahl(z.erledigt, z.gesamt)));
 				knopf.setAttribute('aria-pressed', String(kind === aktiv));
 				knopf.onclick = function () { landschaftOeffnen(e, 'group-' + encodeURIComponent(kind.schluessel)); };
 				auswahl.appendChild(knopf);
@@ -3611,7 +3708,7 @@
 			onView:function () { schliesseHaufen(); if (zustand.karte) { zeichneVorkommen(); } }
 		});
 	}
-	if (!karten.length || !quests.length) {
+	if (!karten.length) {
 		haupt.classList.remove('karte-laedt');
 		hinweis.textContent = t('keine_daten');
 		detail.textContent = '';
