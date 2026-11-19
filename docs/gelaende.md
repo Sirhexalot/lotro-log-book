@@ -3,20 +3,24 @@
 ## Bedienung
 
 Die Kartenanwendung bietet **Gelände | Spielkarte** als Umschalter über der
-Karte. Gelände ist die Vorgabe. Ein manueller Wechsel wird unter
+Karte. Die Spielkarte ist die Vorgabe. Ein manueller Wechsel wird unter
 `mql.kartenansicht` für alle Karten und Sprachen im selben Browser gespeichert.
-Er gilt auch nach einem Reload. Fehlende Daten oder ein Ladefehler fallen auf
-die Spielkarte zurück, ohne die gespeicherte Wahl zu ändern. Kein Konto und
-keine Synchronisierung zwischen Geräten. Gesperrter Browserspeicher wird
-abgefangen.
+Der Umschalter steht auch in den Aufgaben- und Tatenübersichten; dort wechseln
+die Landschaftsvorschauen gemeinsam mit der Kartenbühne zwischen Gelände und
+Spielkarte. Er gilt auch nach einem Reload. Eine einmalige Migration setzt die bisherige
+Ansicht auf Spielkarte und schaltet Rohstoffvorkommen aus; sie verändert weder
+Filter und Notizen noch Charaktere und Spielstände. Danach bleiben persönliche
+Karten- und Vorkommensauswahlen erhalten. Ein Link mit `?vorkommen=` aktiviert
+weiterhin gezielt die angeforderte Sorte. Kein Konto und keine Synchronisierung
+zwischen Geräten. Gesperrter Browserspeicher wird abgefangen.
 
-Nur Gelände erlaubt Zoom und Verschieben. Zoom ist auf die native Auflösung
-beziehungsweise höchstens 4× begrenzt. Aufgabe, Liste und Auswahl bleiben beim
-Ansichtswechsel erhalten. Quest-, Ziel-, Hinweis- und Notizzeichen werden gegen
-den Zoom skaliert; Ressourcen werden in passender Canvasauflösung und gleich
-großen Zeichen neu gezeichnet. Popups verwenden weiterhin ihre vorhandenen
-Auswahl- und Detailfunktionen. Die Spielkarte bleibt unverzerrt in 4:3 und ohne
-Zoom. Die Geländeansicht verwendet den tatsächlichen geografischen Rahmen.
+Beide Ansichten erlauben Zoom und Verschieben. Zoom ist auf die native
+Auflösung beziehungsweise höchstens 4× begrenzt. Aufgabe, Liste und Auswahl
+bleiben beim Ansichtswechsel erhalten. Quest-, Ziel-, Hinweis- und Notizzeichen
+zoomen mit der Karte; in der Geländeansicht bleiben sie lesbar. Ressourcen
+werden in passender Canvasauflösung gezeichnet. Popups verwenden weiterhin ihre
+vorhandenen Auswahl- und Detailfunktionen. Die Spielkarte bleibt unverzerrt in
+4:3. Die Geländeansicht verwendet den tatsächlichen geografischen Rahmen.
 
 Die Übersicht nutzt Gelände-Vorschaubilder, wenn Gelände gewählt wurde. Ohne
 verfügbares Bild bleibt ein leerer Bildplatz gleicher Höhe. Kartenzeilen richten
@@ -143,14 +147,15 @@ nachgeprüft. Die
 Handyprüfung ist eine Browserbreite, keine physische Touch-/Safari- oder
 Screenreader-Abnahme.
 
-## Resource layer memory (13.11.2026)
+## Vorkommen-Auswahl und Migration
 
-The "Vorkommen" layer now stores its choice the way it was meant to: whether
-anything was saved decides the start, not the content of the saved object. A
-visitor who switched every trade off kept the layer off after a reload; before,
-an empty saved choice was read as "nothing stored" and all trades came back.
-Browsers without any stored choice still start with all trades on.
-`tests/browser_gelaende.js` covers both directions (all off, then all on).
+Bei der einmaligen Umstellung wird `mql.vorkommen` auf eine leere Auswahl
+gesetzt. Künftige Besucher starten ebenfalls ohne Rohstoffpunkte; sie können
+Berufe oder einzelne Sorten bewusst einschalten. Ein gespeicherter Zustand
+„nichts“ bleibt nach dem Neuladen aus. Die Migrationsmarke verhindert, dass
+spätere persönliche Änderungen erneut überschrieben werden.
+`tests/browser_gelaende.js` prüft Defaults, Wiederladen und den gezielten
+Vorkommen-Link.
 
 ## Shared landscape navigation (13.11.2026)
 

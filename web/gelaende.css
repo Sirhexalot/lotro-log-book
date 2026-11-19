@@ -11,9 +11,10 @@
 .gelaende-kacheln { position:absolute; inset:0; overflow:hidden; background:#111610; pointer-events:none; }
 .gelaende-kacheln img { position:absolute; display:block; max-width:none; max-height:none; margin:0; padding:0; border:0; }
 .welt.gelaende-aktiv > #bild { visibility:hidden; }
-.welt.gelaende-aktiv .punkt,.welt.gelaende-aktiv .schritt,.welt.gelaende-aktiv .jagdpunkt,.welt.gelaende-aktiv .hinweispunkt,.welt.gelaende-aktiv .notiz { scale:var(--gelaende-invers,1); }
-.buehne.gelaende-aktiv { touch-action:none; cursor:grab; }
-.buehne.gelaende-aktiv:active { cursor:grabbing; }
+.welt.gelaende-aktiv .punkt,.welt.gelaende-aktiv .schritt,.welt.gelaende-aktiv .jagdpunkt,.welt.gelaende-aktiv .hinweispunkt,.welt.gelaende-aktiv .notiz,
+.welt.karten-zoom-aktiv .punkt,.welt.karten-zoom-aktiv .schritt,.welt.karten-zoom-aktiv .jagdpunkt,.welt.karten-zoom-aktiv .hinweispunkt,.welt.karten-zoom-aktiv .notiz { scale:var(--gelaende-invers,1); }
+.buehne.gelaende-aktiv,.buehne.karten-zoom-aktiv { touch-action:none; cursor:grab; }
+.buehne.gelaende-aktiv:active,.buehne.karten-zoom-aktiv:active { cursor:grabbing; }
 .gelaende-status { color:var(--text-leise,#b6ad96); font-size:.875rem; }
 .gelaende-status:empty { display:none; }
 .kartenansicht[hidden],.gelaende-zoom[hidden],.gelaende-kacheln[hidden] { display:none; }

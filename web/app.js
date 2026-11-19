@@ -1340,11 +1340,11 @@
 	var vorkListe = document.getElementById('vorkommen-liste');
 	// Whether anything was saved decides the start, not what it contains: a
 	// stored choice of "nothing" must stay off after a reload (13.11.2026).
-	// Only a browser without any stored choice gets all trades on.
+	// Keep the map quiet unless the player has explicitly enabled resources.
 	var vorkGespeichert = null;
 	try { vorkGespeichert = window.localStorage.getItem('mql.vorkommen'); } catch (fehler) { vorkGespeichert = null; }
 	if (vorkGespeichert === null) {
-		Object.keys(VORK_FARBE).forEach(function (beruf) { vorkWahl[beruf] = '*'; });
+		Object.keys(VORK_FARBE).forEach(function (beruf) { vorkWahl[beruf] = ''; });
 	} else {
 		try {
 			var vorkAlt = JSON.parse(vorkGespeichert) || {};
@@ -2818,9 +2818,9 @@
 		if (gelaende) { gelaende.layout(); }
 	}
 
-	// Parchment stays still. Only the client-derived terrain view can move/zoom.
+	// The map controller owns zoom and pan in both map views.
 	function setzeAnsicht() {
-		if (gelaende && gelaende.active()) { gelaende.layout(); return; }
+		if (gelaende) { gelaende.layout(); return; }
 		zustand.skala = 1; zustand.x = 0; zustand.y = 0;
 		welt.style.transform = 'none';
 	}
@@ -3366,6 +3366,7 @@
 		if (vorschauBeobachter) { vorschauBeobachter.observe(img); }
 		else { ladeKartenVorschau(img); }
 	}
+	var abmeldenUebersichtAnsicht = null;
 	function aktualisiereKartenVorschauen() {
 		document.querySelectorAll('.landschaft-kachel[data-karte] img').forEach(function (img) {
 			var karte = karteNachIndex[img.closest('[data-karte]').dataset.karte];
@@ -3382,6 +3383,7 @@
 		});
 	}
 	function landschaftUebersicht(ohneVerlauf) {
+		if (abmeldenUebersichtAnsicht) { abmeldenUebersichtAnsicht(); abmeldenUebersichtAnsicht = null; }
 		landschaftBereich = null;
 		haupt.classList.add('landschaft-start'); landschaftStart.hidden = false;
 		zeichneKartenBreadcrumb();
@@ -3389,6 +3391,22 @@
 		landschaftStart.textContent = '';
 		var kopf = eltern('div'); kopf.className = 'aufgaben-einstieg-kopf';
 		kopf.appendChild(eltern('h2', ltexte[0]));
+		var viewWords = window.MQL_GELAENDE && window.MQL_GELAENDE.words(sprache);
+		if (viewWords && window.MQL_GELAENDE.subscribePreference) {
+			var viewControls = eltern('div'); viewControls.className = 'kartenansicht landschaft-ansicht';
+			viewControls.setAttribute('role', 'group'); viewControls.setAttribute('aria-label', viewWords[2]);
+			var terrainChoice = eltern('button', viewWords[0]); terrainChoice.type = 'button';
+			var gameChoice = eltern('button', viewWords[1]); gameChoice.type = 'button';
+			terrainChoice.dataset.kartenansicht = 'gelaende'; gameChoice.dataset.kartenansicht = 'karte';
+			viewControls.append(terrainChoice, gameChoice);
+			abmeldenUebersichtAnsicht = window.MQL_GELAENDE.subscribePreference(function (mode) {
+				terrainChoice.setAttribute('aria-pressed', String(mode === 'gelaende'));
+				gameChoice.setAttribute('aria-pressed', String(mode === 'karte'));
+			});
+			terrainChoice.addEventListener('click', function () { window.MQL_GELAENDE.setPreference('gelaende'); });
+			gameChoice.addEventListener('click', function () { window.MQL_GELAENDE.setPreference('karte'); });
+			kopf.appendChild(viewControls);
+		}
 		// The deeds view gets the deed finder, never the quest finder.
 		var tatenFinder = window.MQL_ART === 'taten';
 		var finder = eltern('a', (tatenFinder ? {
@@ -3639,6 +3657,7 @@
 		}
 	};
 	function landschaftOeffnen(e, ort, ohneVerlauf) {
+		if (abmeldenUebersichtAnsicht) { abmeldenUebersichtAnsicht(); abmeldenUebersichtAnsicht = null; }
 		landschaftBereich = e; haupt.classList.remove('landschaft-start'); landschaftStart.hidden = true;
 		listenMass();
 		var teil = null;

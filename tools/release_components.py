@@ -16,14 +16,14 @@ MANIFEST_SCHEMA = 1
 
 _DATA_FILE = re.compile(
     r"^(?:abenteuer|belohnungen|daten|daten-taten|gebiete|gegenstaende|"
-    r"karten-kurz|notizen|reise|rezepte|ruf-quellen|suche|vorkommen|ersetzt)"
+    r"karten-start-taten|karten-start|karten-kurz-taten|karten-kurz|notizen|reise|rezepte|ruf-quellen|suche|vorkommen|ersetzt)"
     r"-(?:de|en|fr)\.js$")
 _ASSET_EXTENSIONS = {".gif", ".ico", ".jpeg", ".jpg", ".png", ".svg", ".webp"}
 _PROGRAM_EXTENSIONS = {
     ".css", ".html", ".htaccess", ".js", ".json", ".php", ".txt", ".xml",
 }
 _KNOWN_DIRS = {
-    "bild", "gelaende", "karten", "notizen", "php", "phpdata", "vendor",
+    "bild", "gelaende", "karten", "karten-daten", "notizen", "php", "phpdata", "vendor",
     "vorkommen",
 }
 _EXCLUDED_DIRS = {"phptmp", ".git", "__pycache__", "tests"}
@@ -73,7 +73,7 @@ def classify(relative: str | Path) -> str | None:
         raise ReleaseError(f"Unbekannter Releaseordner: {path}")
     if top in {"bild", "gelaende", "karten"}:
         return "assets"
-    if top in {"phpdata", "notizen", "vorkommen"}:
+    if top in {"phpdata", "karten-daten", "notizen", "vorkommen"}:
         return "daten"
     if top in {"php", "vendor"}:
         return "programm"

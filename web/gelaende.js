@@ -2,15 +2,50 @@
 (function () {
 	'use strict';
 	var KEY = 'mql.kartenansicht';
+	var VORK_KEY = 'mql.vorkommen';
+	var MIGRATION_KEY = 'mql.karten-voreinstellungen-migration';
+	var MIGRATION_VERSION = '2026-11-19';
 	var WORDS = {
 		de: ['Gelände', 'Spielkarte', 'Kartenansicht', 'Vergrößern', 'Verkleinern', 'Gebiet einpassen', 'Für diese Karte ist keine Geländeansicht verfügbar.', 'Gelände konnte nicht geladen werden. Die Spielkarte wird angezeigt.'],
 		en: ['Terrain', 'Game map', 'Map view', 'Zoom in', 'Zoom out', 'Fit area', 'Terrain is not available for this map.', 'Terrain could not be loaded. Showing the game map.'],
 		fr: ['Terrain', 'Carte du jeu', 'Vue de la carte', 'Zoom avant', 'Zoom arrière', 'Afficher la zone', 'Le terrain n’est pas disponible pour cette carte.', 'Impossible de charger le terrain. La carte du jeu est affichée.']
 	};
+	var preferenceListeners = [];
 	function preference(storage) {
-		try { return storage.getItem(KEY) === 'karte' ? 'karte' : 'gelaende'; }
-		catch (_) { return 'gelaende'; }
+		try { return storage && storage.getItem(KEY) === 'gelaende' ? 'gelaende' : 'karte'; }
+		catch (_) { return 'karte'; }
 	}
+	function notifyPreference(mode) {
+		preferenceListeners.slice().forEach(function (listener) { listener(mode); });
+	}
+	function setPreference(mode) {
+		if (mode !== 'gelaende' && mode !== 'karte') { return; }
+		try { window.localStorage.setItem(KEY, mode); } catch (_) {}
+		notifyPreference(mode);
+	}
+	function subscribePreference(listener) {
+		preferenceListeners.push(listener);
+		listener(preference(migrationStorage));
+		return function () {
+			var index = preferenceListeners.indexOf(listener);
+			if (index >= 0) { preferenceListeners.splice(index, 1); }
+		};
+	}
+	function migratePreferences(storage) {
+		if (!storage) { return false; }
+		try {
+			if (storage.getItem(MIGRATION_KEY) === MIGRATION_VERSION) { return false; }
+			storage.setItem(KEY, 'karte');
+			storage.setItem(VORK_KEY, JSON.stringify({ wahl: {} }));
+			storage.setItem(MIGRATION_KEY, MIGRATION_VERSION);
+			return true;
+		} catch (_) {
+			return false;
+		}
+	}
+	var migrationStorage;
+	try { migrationStorage = window.localStorage; } catch (_) { migrationStorage = null; }
+	migratePreferences(migrationStorage);
 	function frameMatches(map, entry) {
 		return !!(map && entry && map.mr === entry.region && Array.isArray(entry.frame) && entry.frame.length === 4 && entry.frame.every(Number.isFinite)
 			&& entry.frame[2] > entry.frame[0] && entry.frame[1] > entry.frame[3]
@@ -18,6 +53,10 @@
 	}
 	window.MQL_GELAENDE = {
 		preference: preference,
+		setPreference: setPreference,
+		subscribePreference: subscribePreference,
+		words: function (language) { return WORDS[language] || WORDS.en; },
+		migratePreferences: migratePreferences,
 		frameMatches: frameMatches,
 		create: function (options) {
 			var world = options.world, stage = options.stage, image = options.image;
@@ -68,21 +107,22 @@
 				return active && e ? { west:e.frame[0], north:e.frame[1], east:e.frame[2], south:e.frame[3] } : current;
 			}
 			function maximum() {
+				if (!active) { return current ? 4 : 1; }
 				var f = effectiveFrame();
 				return f ? Math.max(1, Math.min(4, (f.east-f.west)*250 / (world.clientWidth || 720))) : 1;
 			}
 			function clear() { tiles.forEach(function (node) { node.onerror=null;node.remove(); }); tiles.clear(); }
 			function schedule() { if (!pending) { pending = requestAnimationFrame(function () { pending = 0; draw(); }); } }
 			function view() {
-				if (!active) { return; }
+				if (!current) { return; }
 				scale = Math.max(1, Math.min(maximum(), scale));
 				var mx = world.clientWidth*(scale-1)/2, my = world.clientHeight*(scale-1)/2;
 				tx = Math.max(-mx,Math.min(mx,tx)); ty = Math.max(-my,Math.min(my,ty));
 				world.style.setProperty('--gelaende-invers', String(1/scale));
 				world.style.transformOrigin = 'center'; world.style.transform = 'translate('+tx+'px,'+ty+'px) scale('+scale+')';
-				plus.disabled = scale >= maximum()-.001; minus.disabled = scale <= 1.001;
+				plus.disabled = scale >= maximum()-.001; minus.disabled = scale <= 1.001; fit.disabled = scale <= 1.001;
 				zoomControls.dataset.scale = String(scale);
-				schedule();
+				if (active) { schedule(); }
 				if (options.onView) { options.onView(); }
 			}
 			function apply() {
@@ -90,38 +130,46 @@
 				world.dataset.kartenansicht=active?'gelaende':'karte';
 				layer.hidden = !active;
 				world.classList.toggle('gelaende-aktiv', active);
+				world.classList.toggle('karten-zoom-aktiv', !!current && !active);
 				stage.classList.toggle('gelaende-aktiv', active);
 				terrainButton.disabled = !usable(); terrainButton.title = usable() ? '' : words[6];
 				terrainButton.setAttribute('aria-pressed', String(active)); gameButton.setAttribute('aria-pressed', String(!active));
 				controls.hidden = !manifest || !current;
 				// Reserve the same toolbar space in both views; never cover the image.
-				zoomControls.hidden = controls.hidden; zoomControls.classList.toggle('inaktiv', !active);
-				plus.disabled = !active; minus.disabled = !active; fit.disabled = !active;
+				zoomControls.hidden = !current; zoomControls.classList.toggle('inaktiv', !current);
+				plus.disabled = !current || scale >= maximum()-.001; minus.disabled = !current || scale <= 1.001; fit.disabled = !current || scale <= 1.001;
 				status.textContent = failed ? words[7] : '';
-				if (!active) { world.style.transform = 'none'; clear(); }
+				if (!active) { clear(); }
 				if (options.onChange) { options.onChange(); }
-				if (active) { stage.classList.remove('keinbild'); view(); }
+				if (current) {
+					stage.classList.toggle('gelaende-aktiv', active);
+					stage.classList.toggle('karten-zoom-aktiv', !active);
+					if (active) { stage.classList.remove('keinbild'); }
+					view();
+				} else {
+					world.style.transform = 'none';
+					stage.classList.remove('karten-zoom-aktiv');
+				}
 			}
 			function select(mode) {
-				wanted = mode;
-				try { if (storage) { storage.setItem(KEY, mode); } } catch (_) {}
-				scale=1;tx=0;ty=0; apply();
+				if (wanted === mode) { return; }
+				scale=1;tx=0;ty=0; setPreference(mode);
 			}
 			terrainButton.addEventListener('click',function(){select('gelaende');});
 			gameButton.addEventListener('click',function(){select('karte');});
 			function zoom(factor, x, y) {
-				if (!active) { return; }
+				if (!current) { return; }
 				var next=Math.max(1,Math.min(maximum(),scale*factor)), ratio=next/scale;
 				tx=tx*ratio+(x||0)*(1-ratio);ty=ty*ratio+(y||0)*(1-ratio);scale=next;view();
 			}
 			plus.addEventListener('click',function(){zoom(1.4);}); minus.addEventListener('click',function(){zoom(1/1.4);});
 			fit.addEventListener('click',function(){scale=1;tx=0;ty=0;view();});
 			stage.addEventListener('wheel',function(e){
-				if(!active){return;}e.preventDefault();var r=world.getBoundingClientRect();
+				if(!current){return;}e.preventDefault();var r=world.getBoundingClientRect();
 				zoom(e.deltaY<0?1.15:1/1.15,e.clientX-r.left-r.width/2+tx,e.clientY-r.top-r.height/2+ty);
 			},{passive:false});
 			stage.addEventListener('pointerdown',function(e){
-				if(!active||e.button!==0||e.target.closest('button,a,.punkt,.schritt,.jagdpunkt,.hinweispunkt,.notiz')){return;}
+				if(!current||e.button!==0||e.target.closest('button,a,.punkt,.schritt,.jagdpunkt,.hinweispunkt,.notiz')){return;}
 				dragging={id:e.pointerId,x:e.clientX,y:e.clientY,tx:tx,ty:ty};moved=false;
 			});
 			stage.addEventListener('pointermove',function(e){if(!dragging||dragging.id!==e.pointerId){return;}var dx=e.clientX-dragging.x,dy=e.clientY-dragging.y;if(Math.abs(dx)+Math.abs(dy)>4){moved=true;if(!stage.hasPointerCapture(e.pointerId)){stage.setPointerCapture(e.pointerId);}}if(!moved){return;}tx=dragging.tx+dx;ty=dragging.ty+dy;view();});
@@ -129,7 +177,11 @@
 			window.addEventListener('pointerup',function(e){if(dragging&&dragging.id===e.pointerId){dragging=null;}});
 			stage.addEventListener('click',function(e){if(suppressClick){e.preventDefault();e.stopImmediatePropagation();suppressClick=false;}},true);
 			['pointercancel','lostpointercapture'].forEach(function(name){stage.addEventListener(name,function(){dragging=null;});});
-			window.addEventListener('storage',function(e){if(e.key===KEY){wanted=preference(storage);apply();}});
+			var unsubscribePreference = subscribePreference(function (mode) {
+				if (wanted === mode) { return; }
+				wanted = mode; scale=1;tx=0;ty=0;apply();
+			});
+			window.addEventListener('storage',function(e){if(e.key===KEY){notifyPreference(preference(storage));}});
 			function draw() {
 				if(!active||!manifest||!current){return;}
 				var f=effectiveFrame(), spanX=f.east-f.west,spanY=f.north-f.south;
@@ -161,8 +213,8 @@
 				hasResources:function(id){return !settled?undefined:manifest&&Array.isArray(manifest.resourceMaps)?manifest.resourceMaps.indexOf(String(id))>=0:null;},
 				setMap:function(map){clear();current=map;world.dataset.karte=String(map.idx);failed=false;scale=1;tx=0;ty=0;apply();},
 				active:function(){return active;},
-				scale:function(){return active?scale:1;},
-				layout:function(){if(active){view();}},
+				scale:function(){return current?scale:1;},
+				layout:function(){if(current){view();}},
 				thumbnail:function(map){var e=kurz(manifest&&map&&manifest.maps[String(map.idx)]);return wanted==='gelaende'&&e&&e.thumb?'/gelaende/'+manifest.version+'/thumb/'+map.idx+'.webp':null;},
 				frame:function(map){if(active&&current&&map&&map.idx===current.idx){return Object.assign({},map,effectiveFrame(),{rahmen:'gelaende',eigen:entry().overview?false:map.eigen});}return map;},
 				clear:function(){current=null;failed=false;delete world.dataset.karte;apply();}

@@ -22,6 +22,9 @@ main.landschaft-start > :not(#landschaften) { display: none; }
 .aufgaben-einstieg p { margin:0 0 22px; color:var(--schwach); }
 .aufgabenfinder-knopf { display:inline-flex; align-items:center; min-height:44px; padding:9px 15px; border:1px solid var(--gold); border-radius:3px; background:var(--gold); color:var(--grund); font-weight:700; text-decoration:none; }
 .aufgabenfinder-knopf:hover,.aufgabenfinder-knopf:focus-visible { filter:brightness(1.08); }
+.landschaft-ansicht { margin-left:auto; }
+.landschaft-ansicht button { min-height:44px; }
+@media (max-width:700px) { .landschaft-ansicht { margin-left:0; } }
 .landschaft-werkzeuge { margin: 16px 0 8px; }
 .landschaft-suche-label { display: block; max-width: 420px; }
 .landschaft-suche { width: 100%; }
