@@ -19,6 +19,9 @@ web/vorkommen-*.js
 web/vorkommen/
 web/fortschritt.js
 web/stand.js
+web/karten-start-*.js
+web/karten-kurz-*.js
+web/karten-daten/
 web/download/
 web/bild/
 

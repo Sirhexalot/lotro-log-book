@@ -163,8 +163,8 @@
           "id": "where_plain",
           "label": "Woher: weitere Quellen",
           "oberflaeche": "detail",
-          "status": "open",
-          "grund": "Haendler- und Tauschgruppen erscheinen als einfache Liste"
+          "status": "component",
+          "hinweis": "Händler- und Tauschgruppen nutzen die gemeinsame Filterkomponente."
         }
       ]
     },

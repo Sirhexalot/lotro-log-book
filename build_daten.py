@@ -909,7 +909,8 @@ def main():
         stempel.update(str(datei.stat().st_size).encode())
         stempel.update(str(int(datei.stat().st_mtime)).encode())
     # Also the project's own files: otherwise a changed app.js stays cached.
-    for name in ('app.js', 'style.css', 'texte.js', 'sprache.js'):
+    for name in ('app.js', 'style.css', 'texte.js', 'sprache.js',
+                 'gebiete-%s.js' % options.sprache):
         datei = HIER / 'web' / name
         if datei.is_file():
             stempel.update(name.encode())

@@ -51,7 +51,7 @@ final class Adventures
                 'all_missing' => 'Alles nicht vorhanden',
                 'owned' => 'vorhanden',
                 'missing' => 'nicht vorhanden',
-                'unknown' => 'unbekannt',
+                'unknown' => 'Nicht ausgewählt',
                 'areas' => 'Enthaltene Gebiete',
                 'no_areas' => 'Für dieses Abenteuer sind noch keine Gebiete zugeordnet.',
                 'level_band' => 'Stufe %s–%s',
@@ -92,7 +92,7 @@ final class Adventures
                 'all_missing' => 'None owned',
                 'owned' => 'owned',
                 'missing' => 'not owned',
-                'unknown' => 'unknown',
+                'unknown' => 'Not selected',
                 'areas' => 'Areas included',
                 'no_areas' => 'No areas are assigned to this adventure yet.',
                 'level_band' => 'Level %s–%s',
@@ -133,7 +133,7 @@ final class Adventures
                 'all_missing' => 'Rien possédé',
                 'owned' => 'possédé',
                 'missing' => 'non possédé',
-                'unknown' => 'inconnu',
+                'unknown' => 'Non sélectionné',
                 'areas' => 'Pays inclus',
                 'no_areas' => 'Aucun pays n’est encore attribué à cette aventure.',
                 'level_band' => 'Niveau %s–%s',
@@ -148,13 +148,13 @@ final class Adventures
                 'quests_one' => '1 quête',
                 'view_label' => 'Affichage', 'view_map' => 'Carte', 'view_list' => 'Liste',
                 'map_title' => 'Terre du Milieu', 'map_regions' => 'Toutes les régions',
-                'map_areas_list' => 'Pays sous forme de liste',
-                'map_hint' => 'Choisissez une région, puis un pays.',
+                'map_areas_list' => 'Zones',
+                'map_hint' => 'Choisissez une région, puis une zone.',
                 'map_show' => 'Afficher sur la carte',
                 'map_open' => 'Ouvrir sur la carte',
-                'map_area' => 'Voir le pays',
-                'map_legend' => 'Anneau = progression du catalogue · nombre = pays avec une prochaine quête · bord = niveau',
-                'map_region_legend' => 'Pourcentage = progression dans le pays · bordure = niveau · nombre = pays d’une sous-carte',
+                'map_area' => 'Voir la zone',
+                'map_legend' => 'Anneau : progression · nombre : zones où poursuivre une quête · bordure : niveau',
+                'map_region_legend' => 'Pourcentage : progression dans la zone · bordure : niveau · nombre : zones sur la carte suivante',
                 'map_tip' => 'Astuce : « Ouvrir sur la carte » montre les donneurs et les objectifs.',
                 'map_no_import' => '',
                 'map_preview' => 'Aperçu du terrain',
@@ -168,7 +168,7 @@ final class Adventures
         $low = $pack['level_min'] ?? null;
         $high = $pack['level_max'] ?? null;
         if ($low === null || $high === null) {
-            return $words['level_unknown'];
+            return '';
         }
         return $low === $high
             ? sprintf($words['level_single'], $low)

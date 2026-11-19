@@ -113,7 +113,6 @@
 		}
 		nameEl.textContent = eintrag[1];
 		nameEl.className = 'q' + (eintrag[2] || 0);
-		document.title = eintrag[1] + ' – LOTRO Log Book';
 		var teile = [];
 		if (eintrag[3]) { teile.push(t('stufe') + ' ' + eintrag[3]); }
 		teile.push(eintrag[4] ? t('gs_gebunden') : t('gs_frei'));

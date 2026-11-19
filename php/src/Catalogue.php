@@ -79,9 +79,10 @@ final class Catalogue
     }
 
     /** Title and description of an application page ("ruf.html"). */
-    public function appSeo(string $datei): ?array
+    public function appSeo(string $datei, string $lang = 'de'): ?array
     {
-        return $this->labels['app'][$datei] ?? null;
+        $page = $this->labels['app'][$datei] ?? null;
+        return $page[$lang] ?? $page;
     }
 
     public function symbols(): array

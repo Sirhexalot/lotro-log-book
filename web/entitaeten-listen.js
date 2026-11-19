@@ -75,10 +75,15 @@
 		};
 		return setup;
 	}
-	function vendorSetup(data){
+	function vendorSetup(data,barterOnly){
 		var A=window.MQL_FILTERADAPTER;
 		var rows=data.rows, labels=data.labels||{}, regionLabels=labels.region||{}, areaLabels=labels.area||{}, areaRegion=labels.area_region||{};
-		var typeLabels={de:{vendor:'Normaler Händler',both:'Händler und Tauschhändler'},en:{vendor:'Regular vendor',both:'Vendor and barterer'},fr:{vendor:'Marchand normal',both:'Marchand et troqueur'}}[lang];
+		var entityWord=barterOnly
+			? {de:'Tauschhändler',fr:'Marchands troqueurs',en:'Barterers'}[lang]
+			: {de:'Händler',fr:'Marchands',en:'Vendors'}[lang];
+		var typeLabels=barterOnly
+			? {barter:lang==='de'?'Tauschhändler':lang==='fr'?'Marchand troqueur':'Barterer'}
+			: {vendor:'Normaler Händler',both:'Tauschhändler'}[lang==='de'?'de':lang==='fr'?'fr':'en'];
 		var regionOptions=Object.keys(regionLabels).map(function(id){return {path:{region:String(id)},label:regionLabels[id],children:[]};});
 		var byRegion={};regionOptions.forEach(function(o){byRegion[o.path.region]=o;});
 		Object.keys(areaLabels).forEach(function(id){
@@ -86,19 +91,19 @@
 			if(parent){parent.children.push({path:{region:String(region),area:String(id)},label:areaLabels[id],groupId:'location'});}
 		});
 		var config={area:'vendors',lang:lang,rootUrl:location.origin+location.pathname,
-			labels:{search:lang==='de'?'Händler suchen':lang==='fr'?'Chercher un marchand':'Search for a vendor',
-				placeholder:lang==='de'?'Händler suchen':lang==='fr'?'Chercher un marchand':'Search for a vendor',
+			labels:{search:(lang==='de'?entityWord+' suchen':lang==='fr'?'Chercher '+entityWord.toLowerCase():'Search for '+entityWord.toLowerCase()),
+				placeholder:(lang==='de'?entityWord+' suchen':lang==='fr'?'Chercher '+entityWord.toLowerCase():'Search for '+entityWord.toLowerCase()),
 				filter:lang==='de'?'Filter':lang==='fr'?'Filtres':'Filters',close:lang==='de'?'Schließen':lang==='fr'?'Fermer':'Close',
 				sort:lang==='fr'?'Tri':'Sortierung',reset:lang==='de'?'Zurücksetzen':lang==='fr'?'Réinitialiser':'Reset',
 				more:lang==='de'?'Weitere anzeigen':lang==='fr'?'Afficher davantage':'Show more',
-				count:lang==='de'?'%s Händler':lang==='fr'?'%s marchands':'%s vendors',
+				count:lang==='de'?'%s '+entityWord:lang==='fr'?'%s '+entityWord.toLowerCase():'%s '+entityWord,
 				show:lang==='de'?'%s Treffer anzeigen':lang==='fr'?'Afficher %s résultats':'Show %s results',
 				loading:lang==='de'?'Lade …':lang==='fr'?'Chargement …':'Loading …',
 				error:lang==='de'?'Ergebnisse nicht aktualisiert.':lang==='fr'?'Résultats non actualisés.':'Results not updated.',
 				retry:lang==='de'?'Erneut versuchen':lang==='fr'?'Réessayer':'Try again',
 				fallback:lang==='de'?'Als Seite öffnen':lang==='fr'?'Ouvrir la page':'Open page'},
 			search:{submit:'enter'},
-			groups:[
+			groups:barterOnly ? [] : [
 				{id:'location',kind:'tree',label:lang==='de'?'Region und Landschaft':lang==='fr'?'Région et pays':'Region and landscape',
 					options:regionOptions,exclusivePaths:true,
 					validatePath:function(path){return !!path.region&&(!path.area||String(areaRegion[path.area])===String(path.region));},
@@ -151,12 +156,12 @@
 			},
 			renderResults:function(result,target){
 				target.replaceChildren();
-				result.payload.forEach(function(r){var li=document.createElement('li'),a=document.createElement('a');a.href=r.url;a.className='sets-zeile';
+				result.payload.forEach(function(r){var li=document.createElement('li'),a=document.createElement(r.url?'a':'span');if(r.url){a.href=r.url;}a.className='sets-zeile';
 					var preview=document.createElement('span');preview.className='sets-preview';var strong=document.createElement('strong');strong.textContent=r.name;preview.appendChild(strong);
 					var names=[];(r.areas||[]).slice(0,3).forEach(function(id){var n=areaLabels[String(id)]||regionLabels[String(id)];if(n&&names.indexOf(n)<0)names.push(n);});
-					var metaText=names.join(' · ');if(r.count>0)metaText+=(metaText?' · ':'')+r.count;
+					var metaText=names.join(' · ')||r.extra||'';if(r.count>0)metaText+=(metaText?' · ':'')+r.count;
 					var meta=document.createElement('span');meta.className='sets-meta';meta.textContent=metaText;a.append(preview,meta);li.appendChild(a);target.appendChild(li);});
-				var nav=document.createElement('nav');nav.className='sets-pagination';nav.setAttribute('aria-label',typeLabels.vendor||'Vendors');
+				var nav=document.createElement('nav');nav.className='sets-pagination';nav.setAttribute('aria-label',entityWord);
 				if(result.pagination.page>1){var prev=document.createElement('a');prev.href='#';prev.dataset.filterPage=String(result.pagination.page-1);prev.textContent='‹ '+(lang==='de'?'Zurück':lang==='fr'?'Précédent':'Previous');nav.appendChild(prev);}
 				var label=document.createElement('span');label.textContent=(lang==='de'?'Seite ':lang==='fr'?'Page ':'Page ')+result.pagination.page+' '+(lang==='de'?'von':lang==='fr'?'sur':'of')+' '+result.pagination.pages;nav.appendChild(label);
 				if(result.pagination.page<result.pagination.pages){var next=document.createElement('a');next.href='#';next.dataset.filterPage=String(result.pagination.page+1);next.textContent=(lang==='de'?'Weiter':lang==='fr'?'Suivant':'Next')+' ›';nav.appendChild(next);}
@@ -215,6 +220,18 @@
 			var vendorTarget=document.createElement('ul');vendorTarget.className='related-results';vendorTarget.dataset.filterResults='';vendorRoot.appendChild(vendorTarget);vendorGroup.appendChild(vendorRoot);
 			var vendorFilterSetup=contextual(vendorSetup(lists.vendor),'vendor');
 			window.MQL_FILTER_UI.mount(vendorRoot,vendorFilterSetup).ready.then(function(){vendorFallback.hidden=true;});
+		}
+	}
+	if(lists.barter){
+		var barterGroup=document.querySelector('[data-barter-filter-group]');
+		if(barterGroup&&needsFilter(lists.barter.rows.length)){
+			var barterFallback=document.createElement('div');barterFallback.dataset.filterFallback='';
+			Array.from(barterGroup.children).forEach(function(n){if(n.tagName!=='H3'){barterFallback.appendChild(n);}});
+			barterGroup.appendChild(barterFallback);
+			var barterRoot=document.createElement('div');barterRoot.className='related-list';barterRoot.id='barter-related-panel';
+			var barterTarget=document.createElement('ul');barterTarget.className='related-results';barterTarget.dataset.filterResults='';barterRoot.appendChild(barterTarget);barterGroup.appendChild(barterRoot);
+			var barterFilterSetup=contextual(vendorSetup(lists.barter,true),'barter');
+			window.MQL_FILTER_UI.mount(barterRoot,barterFilterSetup).ready.then(function(){barterFallback.hidden=true;});
 		}
 	}
 	// "Herstellung": recipes that produce this item. Same recipe row as the

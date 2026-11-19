@@ -32,10 +32,13 @@ DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'sets.css', 'lan
            'texte-logbuch.js', 'texte-site.js', 'texte-plugin.js', 'texte-companion.js', 'texte-reise.js',
            'sprache.js', 'speicher.js', 'menue.js', 'symbole.js', 'companion.js', 'reise.js', 'reise.css', 'reise.html',
            'spielstand.js', 'plugin.js', 'anleitung.js', 'referenz.js', 'ruf.js', 'belohnungen.js', 'gegenstand.js', 'rezepte.js',
-           'gegenstaende.html', 'gegenstaende.js', 'gegenstaende.css',
-           'suche.js', 'suche.html', 'ruf-quellen-de.js',
-           'ruf-quellen-en.js', 'ruf-quellen-fr.js', 'handwerk.js',
-           'stand.js', 'rohstoffe.js',
+            'gegenstaende.html', 'gegenstaende.js', 'gegenstaende.css',
+            'suche.js', 'suche.html', 'ruf-quellen-de.js',
+            'ruf-quellen-en.js', 'ruf-quellen-fr.js', 'handwerk.js',
+            'stand.js', 'rohstoffe.js',
+            'karten-start-de.js', 'karten-start-en.js', 'karten-start-fr.js',
+            'karten-start-taten-de.js', 'karten-start-taten-en.js',
+            'karten-start-taten-fr.js',
             'start.html', 'start-en.html', 'start-fr.html', 'spielstand.html', '404.html',
            'plugin.html', 'companion.html', 'ruf.html', 'handwerk.html', 'belohnungen.html', 'gegenstand.html', 'impressum.html', 'datenschutz.html')
 BILDER = ('bild/start.jpg', 'bild/start-en.jpg', 'bild/start-fr.jpg',
@@ -66,6 +69,10 @@ def kopiere(ziel):
     ziel_ordner = ziel / 'bild' / 'items'
     if not (ziel_ordner.exists() and ziel_ordner.resolve() == ordner.resolve()):
         shutil.copytree(ordner, ziel_ordner, dirs_exist_ok=True)
+    daten = WEB / 'karten-daten'
+    if not daten.is_dir():
+        raise SystemExit('MISSING: %s (run build_karten_kurz.py)' % daten)
+    shutil.copytree(daten, ziel / 'karten-daten', dirs_exist_ok=True)
 
 
 def index_bauen(ziel):
@@ -108,9 +115,13 @@ def stempeln(ziel):
                         + list(ziel.glob('belohnungen-*.js')) + list(ziel.glob('rezepte-*.js'))
                         + list(ziel.glob('suche-*.js')) + list(ziel.glob('reise-*.js'))
                         + list(ziel.glob('vorkommen-*.js'))
-                        + list(ziel.glob('karten-kurz-*.js'))
+                         + list(ziel.glob('karten-kurz-*.js'))
+                        + list(ziel.glob('karten-start-*.js'))
                         + list(ziel.glob('gebiete-*.js'))):
         daten.update(datei.name.encode())
+        daten.update(datei.read_bytes())
+    for datei in sorted((ziel / 'karten-daten').rglob('*.js')):
+        daten.update(str(datei.relative_to(ziel)).encode())
         daten.update(datei.read_bytes())
     (ziel / 'stand.js').write_text('/* Written by baue_website.py. */\nwindow.MQL_STAND = "%s";\n'
                                    % daten.hexdigest()[:10], encoding='utf-8')

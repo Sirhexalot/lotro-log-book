@@ -6,9 +6,33 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 import seo
+from build_php_labels import app_seiten
+from build_titel import tugendname
 
 
 class SpielertexteTest(unittest.TestCase):
+    def test_virtue_name_with_client_line_break(self):
+        self.assertEqual(tugendname('Einfühlungs-&#10; vermögen'), 'Einfühlungsvermögen')
+        self.assertEqual(tugendname('Ein Wort'), 'Ein Wort')
+
+    def test_shared_app_pages_have_translated_search_snippets(self):
+        pages = app_seiten()
+        for key in ('gegenstaende', 'handwerk', 'reise', 'spielstand', 'companion',
+                    'plugin', 'ruf', 'belohnungen', 'suche'):
+            page = pages[key + '.html']
+            self.assertTrue(page['description'])
+            for lang in ('en', 'fr'):
+                with self.subTest(page=key, lang=lang):
+                    self.assertTrue(page[lang]['description'])
+                    self.assertNotEqual(page['description'], page[lang]['description'])
+        self.assertIn('LOTRO Companion', pages['companion.html']['description'])
+
+    def test_no_status_filler_in_detail_templates(self):
+        for path, key in (('vendors/detail.twig', 'gw.no_place'),
+                          ('sets/detail.twig', 'sw.unclear_threshold'),
+                          ('sets/detail.twig', 'sw.unnamed')):
+            self.assertNotIn(key, (ROOT / 'php/templates' / path).read_text())
+
     def test_identical_descriptions_do_not_get_ids(self):
         for lang in ('de', 'en', 'fr'):
             pages = {key: {'seo': seo.item(lang, name='Soup')} for key in ('70000001', '70000002')}

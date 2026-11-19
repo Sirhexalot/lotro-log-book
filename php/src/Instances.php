@@ -25,8 +25,8 @@ final class Instances
     {
         return [
             'de' => [
-                'title' => 'Instanzenfinder', 'intro' => 'Finde Instanzen, Schlachtzüge, Scharmützel und epische Schlachten – nach den Clustern des Instanzenfinders im Spiel.',
-                'cluster' => 'Instanzcluster', 'no_cluster' => 'Ohne Cluster',
+                'title' => 'Instanzenfinder', 'intro' => 'Finde Instanzen, Schlachtzüge, Scharmützel und epische Schlachten für deine Stufe und Gruppengröße.',
+                'cluster' => 'Instanzgruppe', 'no_cluster' => 'Ohne Gruppe',
                 'difficulty' => 'Schwierigkeit', 'tier' => 'T%s',
                 'type_scharmuetzel' => 'Scharmützel', 'type_schlacht' => 'Epische Schlacht', 'type_team' => 'Team',
                 'search' => 'Instanz suchen', 'filter' => 'Filter', 'apply' => 'Anwenden',
@@ -37,9 +37,7 @@ final class Instances
                 'page' => 'Seite %s von %s',
                 'level' => 'Stufe', 'from' => 'Von', 'to' => 'Bis',
                 'players' => 'Spieler', 'players_n' => '%s Spieler', 'players_one' => '1 Spieler',
-                'art' => 'Art', 'mit_level' => 'Nur mit belegter Stufe',
-                'filter_note' => 'Gruppengrößen und Stufenspannen stammen aus dem Spielclient. Serverregeln können abweichen; dein Zugang wird hier nicht geprüft.',
-                'no_level' => 'Stufe nicht belegt', 'no_place' => 'Ort nicht belegt',
+                'art' => 'Art', 'mit_level' => 'Nur mit Stufenangabe',
                 'type_instanz' => 'Instanz', 'type_mission' => 'Mission',
                 'type_oeffentlich' => 'Öffentliche Instanz', 'type_offen' => 'Offene Instanz',
                 'type_privat' => 'Privat-Instanz', 'type_zwischenspiel' => 'Zwischenspiel',
@@ -47,8 +45,8 @@ final class Instances
                 'type_sonst' => 'Ohne Artangabe',
             ],
             'en' => [
-                'title' => 'Instance Finder', 'intro' => 'Find instances, raids, skirmishes and epic battles, grouped by the clusters in the in-game Instance Finder.',
-                'cluster' => 'Instance cluster', 'no_cluster' => 'No cluster',
+                'title' => 'Instance Finder', 'intro' => 'Find instances, raids, skirmishes and epic battles for your level and group size.',
+                'cluster' => 'Instance group', 'no_cluster' => 'No group',
                 'difficulty' => 'Difficulty', 'tier' => 'T%s',
                 'type_scharmuetzel' => 'Skirmish', 'type_schlacht' => 'Epic battle', 'type_team' => 'Team',
                 'search' => 'Search for an instance', 'filter' => 'Filters', 'apply' => 'Apply',
@@ -59,36 +57,32 @@ final class Instances
                 'page' => 'Page %s of %s',
                 'level' => 'Level', 'from' => 'From', 'to' => 'To',
                 'players' => 'Players', 'players_n' => '%s players', 'players_one' => '1 player',
-                'art' => 'Type', 'mit_level' => 'Only with a recorded level',
-                'filter_note' => 'Group sizes and level ranges come from the game client. Server rules may differ; your access is not checked here.',
-                'no_level' => 'Level not recorded', 'no_place' => 'Place not recorded',
+                'art' => 'Type', 'mit_level' => 'Only with a level',
                 'type_instanz' => 'Instance', 'type_mission' => 'Mission',
                 'type_oeffentlich' => 'Public instance', 'type_offen' => 'Open instance',
                 'type_privat' => 'Private instance', 'type_zwischenspiel' => 'Interlude',
                 'type_schlachtzug' => 'Raid', 'type_solo' => 'Solo instance',
-                'type_sonst' => 'Type not recorded',
+                'type_sonst' => 'No type',
             ],
             'fr' => [
-                'title' => 'Recherche d’instances', 'intro' => 'Trouvez des instances, raids, escarmouches et batailles épiques, regroupés comme dans la recherche d’instances du jeu.',
+                'title' => 'Recherche d’instances', 'intro' => 'Trouvez des instances, raids, escarmouches et batailles épiques selon votre niveau et la taille de votre groupe.',
                 'cluster' => 'Groupe d’instances', 'no_cluster' => 'Sans groupe',
                 'difficulty' => 'Difficulté', 'tier' => 'T%s',
                 'type_scharmuetzel' => 'Escarmouche', 'type_schlacht' => 'Bataille épique', 'type_team' => 'Équipe',
                 'search' => 'Chercher une instance', 'filter' => 'Filtres', 'apply' => 'Appliquer',
-                'reset' => 'Réinitialiser', 'region' => 'Région', 'area' => 'Pays',
-                'wo' => 'Région et pays',
+                'reset' => 'Réinitialiser', 'region' => 'Région', 'area' => 'Zone',
+                'wo' => 'Région et zone',
                 'count' => '%s instances', 'count_one' => '1 instance',
                 'empty' => 'Aucune instance correspondante.', 'previous' => 'Précédent', 'next' => 'Suivant',
                 'page' => 'Page %s sur %s',
                 'level' => 'Niveau', 'from' => 'De', 'to' => 'À',
                 'players' => 'Joueurs', 'players_n' => '%s joueurs', 'players_one' => '1 joueur',
-                'art' => 'Type', 'mit_level' => 'Uniquement avec niveau attesté',
-                'filter_note' => 'Les tailles de groupe et niveaux viennent du client du jeu. Les règles du serveur peuvent différer ; votre accès n’est pas vérifié ici.',
-                'no_level' => 'Niveau non attesté', 'no_place' => 'Lieu non attesté',
+                'art' => 'Type', 'mit_level' => 'Avec un niveau uniquement',
                 'type_instanz' => 'Instance', 'type_mission' => 'Mission',
                 'type_oeffentlich' => 'Instance publique', 'type_offen' => 'Instance ouverte',
                 'type_privat' => 'Instance privée', 'type_zwischenspiel' => 'Interlude',
                 'type_schlachtzug' => 'Raid', 'type_solo' => 'Instance solo',
-                'type_sonst' => 'Type non attesté',
+                'type_sonst' => 'Sans type',
             ],
         ][$lang];
     }
@@ -283,7 +277,7 @@ final class Instances
         foreach ($page_rows as &$row) {
             $row['url'] = $row['quest']
                 ? $this->catalogue->route($this->lang, 'q', $row['quest']) : null;
-            $teile = [$words['type_' . $row['type']] ?? $row['type']];
+            $teile = $row['type'] === 'sonst' ? [] : [$words['type_' . $row['type']] ?? $row['type']];
             $range = (string) $row['level'];
             if ($row['level_max'] !== null && $row['level_max'] !== $row['level']) {
                 $range .= '–' . $row['level_max'];
@@ -303,7 +297,7 @@ final class Instances
         foreach ($page_rows as $row) {
             $cluster = $row['cluster_id'];
             if (!isset($groups[$cluster])) {
-                $groups[$cluster] = ['name' => $row['cluster'] ?: $words['no_cluster'], 'rows' => []];
+                $groups[$cluster] = ['name' => $row['cluster'], 'rows' => []];
             }
             $groups[$cluster]['rows'][] = $row;
         }

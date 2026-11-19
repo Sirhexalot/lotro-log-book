@@ -193,7 +193,7 @@ final class Page
             'questfinder' => 'aufgabenfinder.html',
             default => $page . '.html',
         };
-        $seo = $this->catalogue->appSeo($datei) ?? ['title' => 'LOTRO Log Book', 'description' => ''];
+        $seo = $this->catalogue->appSeo($datei, $lang) ?? ['title' => 'LOTRO Log Book', 'description' => ''];
         // Quests and deeds share template and file name, but not their title:
         // the static build described the map once, so the deed page brings its
         // own head. The client sets the same title in its deed mode.
@@ -204,7 +204,7 @@ final class Page
             $seo['description'] = [
                 'de' => 'Finde Aufgaben und Taten in HdRO nach Landschaft und Gebiet. Sieh Auftraggeber auf der Karte und blende Ziele nur auf Wunsch ein.',
                 'en' => 'Find LOTRO quests and deeds by landscape and area. See quest givers on the map and show objectives only when you want.',
-                'fr' => 'Trouvez les quêtes et prouesses de SdAO par paysage et zone. Voyez les donneurs sur la carte et affichez les objectifs à la demande.',
+                'fr' => 'Retrouvez les quêtes et les prouesses de SdAO par région et par zone. Affichez les donneurs de quête et les objectifs sur la carte.',
             ][$lang];
         }
         if ($page === 'taten') {
@@ -213,7 +213,7 @@ final class Page
                 'description' => [
                     'de' => 'Sieh Taten in HdRO nach Region und Gebiet und auf der Karte, wo sie zu finden sind. Mit importiertem Spielstand zeigt dir das Logbuch, was dir noch fehlt.',
                     'en' => 'Browse LOTRO deeds by region and area and see on the map where to find them. With your imported progress the log book shows what is still missing.',
-                    'fr' => 'Parcourez les prouesses de SdAO par région et pays et voyez sur la carte où les trouver. Avec votre progression importée, le journal montre ce qu’il vous reste à faire.',
+                    'fr' => 'Trouvez les prouesses de SdAO par région et par zone. Importez votre progression pour voir celles qu’il vous reste à terminer.',
                 ][$lang],
             ];
         }
@@ -222,13 +222,10 @@ final class Page
                 'title' => ['de' => 'Aufgabenfinder', 'en' => 'Quest finder', 'fr' => 'Recherche de quêtes'][$lang],
                 'description' => [
                     'de' => 'Finde Aufgaben nach Thema, Klasse, Herkunft, Region, Gebiet und weiteren Merkmalen.',
-                    'en' => 'Find quests by topic, class, origin, region, area and other properties.',
-                    'fr' => 'Trouvez des quêtes par thème, classe, origine, région, pays et autres caractéristiques.',
+                    'en' => 'Find quests by theme, class, origin or location.',
+                    'fr' => 'Trouvez des quêtes par thème, classe, origine ou lieu.',
                 ][$lang],
             ];
-        }
-        if ($page !== 'taten' && $page !== 'karte' && isset($seo['description'])) {
-            $seo['description'] = str_replace('LOTRO', ['de' => 'HdRO', 'en' => 'LOTRO', 'fr' => 'SdAO'][$lang], $seo['description']);
         }
         $sprachen = [];
         foreach (Catalogue::LANGS as $other) {

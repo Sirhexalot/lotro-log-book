@@ -109,7 +109,7 @@
 			ab_map_all_areas: 'All areas'
 		},
 		fr: {
-			ab_map_approx: 'Centre approximatif du pays',
+			ab_map_approx: 'Centre de la zone',
 			ab_sort_progress: 'Progression ↑',
 			ab_sort_name: 'Nom A–Z',
 			ab_charakter: '%s · %s · niveau %s',
@@ -146,7 +146,7 @@
 			ab_gebiet_unbekannt: 'non enregistré',
 			ab_gebiet_zaehler: '%s sur %s',
 			ab_kein_hinweis: '',
-			ab_map_areas: '%s pays',
+			ab_map_areas: '%s zones',
 			ab_map_level_band: 'Niveau %s–%s',
 			ab_map_level_one: 'Niveau %s',
 			ab_map_ready_one: '1 prochaine quête',
@@ -156,10 +156,10 @@
 			ab_map_no_ready: '',
 			ab_map_no_import: 'Importez votre personnage pour voir votre progression.',
 			ab_map_no_point: 'aucun point sur la carte',
-			ab_map_ready_areas: '%s pays avec une prochaine quête',
-			ab_map_group_one: '1 pays',
-			ab_map_group: '%s pays',
-			ab_map_all_areas: 'Tous les pays'
+			ab_map_ready_areas: '%s zones où poursuivre une quête',
+			ab_map_group_one: '1 zone',
+			ab_map_group: '%s zones',
+			ab_map_all_areas: 'Toutes les zones'
 		}
 	};
 	var sprache = (document.documentElement.getAttribute('lang') || 'de').slice(0, 2);

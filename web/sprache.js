@@ -113,19 +113,8 @@
 	document.querySelectorAll('[data-t-ph]').forEach(function (element) {
 		element.setAttribute('placeholder', t(element.getAttribute('data-t-ph')));
 	});
-	// One pattern for every page: "<content> – LOTRO Log Book". The map names its
-	// content, so quests and deeds no longer share the game's name as a title.
-	var seitentitel = { gegenstaende: 'gs_titel', spielstand: 'sp_titel', ruf: 'ru_titel', handwerk: 'hw_titel',
-		belohnungen: 'bl_titel', plugin: 'pl_titel', companion: 'cp_titel',
-		karte: 'titel_karte' }[seiteArt];
-	if (document.body.dataset.recht === 'datenschutz') { seitentitel = 'ds_titel'; }
-	// Deeds bring their own, complete title; appending the suffix again gave
-	// "Taten – LOTRO Log Book – LOTRO Log Book".
-	if (seiteArt === 'karte' && art === 'taten') {
-		document.title = t('titel_taten');
-	} else if (seitentitel) {
-		document.title = t(seitentitel) + ' – LOTRO Log Book';
-	}
+	// PHP supplies the localized, page-specific SEO title. Do not replace it
+	// with a generic client-side label after the page has loaded.
 	var attribute = [
 		['.menue', 'aria-label', 'nav_menu'], ['.sprachen', 'aria-label', 'nav_sprache'],
 		['#baum', 'aria-label', 'gebiete'], ['#filter', 'aria-label', 'nav_filter'],

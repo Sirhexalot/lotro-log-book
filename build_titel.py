@@ -14,6 +14,7 @@ title without a confirmed ID gets no page.
 """
 import json
 import re
+from html import unescape
 from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
@@ -24,6 +25,12 @@ EXPORT = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exp
               '/rewards-2026-11-06/rewards.json')
 
 TAG = re.compile(r'\[[A-Za-z]{1,4}\]')
+
+
+def tugendname(text):
+    # The client wraps long labels with an encoded line break.
+    text = re.sub(r'(?<=\w)-[ \t]*\r?\n[ \t]*(?=\w)', '', unescape(text))
+    return ' '.join(text.split())
 
 
 def js_datei(pfad, variable):
@@ -60,6 +67,8 @@ def baue(art):
     for ident, eintrag in rohdaten.items():
         for sprache in SPRACHEN:
             name = aus_vorlage(eintrag['n'].get(sprache, ''))
+            if art == 'v':
+                name = tugendname(name)
             if name:
                 ids.setdefault(sprache, {}).setdefault(name, []).append(ident)
 
@@ -67,8 +76,12 @@ def baue(art):
     statistik = {'gefunden': 0, 'mehrdeutig': 0, 'ohne_id': 0}
     for sprache in SPRACHEN:
         eintraege = js_datei(WEB / ('belohnungen-%s.js' % sprache), 'MQL_BELOHNUNGEN')[art]
-        for name, quellen in eintraege:
-            kandidaten = ids.get(sprache, {}).get(name, [])
+        for zeile in eintraege:
+            ident = zeile[0] if len(zeile) == 3 else ''
+            name, quellen = zeile[-2:]
+            if art == 'v':
+                name = tugendname(name)
+            kandidaten = [ident] if ident in rohdaten else ids.get(sprache, {}).get(name, [])
             if not kandidaten:
                 statistik['ohne_id'] += 1
                 continue
@@ -84,6 +97,13 @@ def baue(art):
                 wert = [quelle[0], quelle[1], quelle[2], quelle[3] or '', quelle[4] or '', quelle[5] or '']
                 if wert not in liste:
                     liste.append(wert)
+    if art == 'v':
+        for ident, eintrag in gesammelt.items():
+            # A virtue can have a client name even if no quest in that
+            # language supplies the link to it.
+            for sprache, name in rohdaten[ident]['n'].items():
+                if sprache in SPRACHEN and name:
+                    eintrag['n'][sprache] = tugendname(name)
     return gesammelt, statistik
 
 

@@ -150,11 +150,16 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
         name = sauberer_name((quelle.get('n') or {}).get(sprache)
                              or (item.get('n') or {}).get(sprache)
                              or (quelle.get('n') or {}).get('en')
-                             or (item.get('n') or {}).get('en') or '', sprache)
+                             or (item.get('n') or {}).get('en')
+                             or (quelle.get('n') or {}).get('de')
+                             or (item.get('n') or {}).get('de') or '', sprache)
         if not name:
             continue
 
-        kat = (quelle.get('c') or item.get('kat') or '').upper()
+        # A few valid client items (currently quest-specific frames) have no
+        # equipment record at all. Keep them searchable as ordinary items
+        # instead of losing them from the catalogue.
+        kat = (quelle.get('c') or item.get('kat') or 'ITEM').upper()
         kat = KATEGORIE_ALIAS.get(kat, kat)
         if kat == 'ITEM' and klasse_code == SCHMUCK_KLASSE:
             kat = 'JEWELLERY'
@@ -195,6 +200,9 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
             art_id = art_index[art]
 
         klasse_id = klasse_index.get(klasse_code, -1) if kat == KAT['ITEM'] else -1
+        if kat == KAT['ITEM'] and klasse_id < 0:
+            # The client enum reserves index 0 for an unclassified item.
+            klasse_id = 0
         gattung_id = gattung_index.get(gattung_code, -1) if kat == KAT['JEWELLERY'] else -1
 
         stufe = quelle.get('l')

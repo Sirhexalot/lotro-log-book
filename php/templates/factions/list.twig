@@ -37,11 +37,11 @@
         <section class="sets-results" data-filter-results aria-label="{{ fw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? fw.count_one : fw.count)|replace({'%s': count}) }}</p>
             <ul class="sets-list">{% for row in factions %}<li><a href="{{ row.url }}"><span class="sets-preview"><strong>{{ row.name }}</strong></span><span class="sets-meta">{{ row.meta }}</span></a></li>{% else %}<li>{{ fw.empty }}</li>{% endfor %}</ul>
-            <nav class="sets-pagination" aria-label="{{ fw.title }}">
+            {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ fw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ fw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>
                 {% if next_url %}<a href="{{ next_url }}">{{ fw.next }} ›</a>{% endif %}
-            </nav>
+            </nav>{% endif %}
         </section>
     </div>
 </form>

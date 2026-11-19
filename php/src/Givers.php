@@ -108,7 +108,7 @@ final class Givers
                 'tag_ix' => 'instance', 'tag_ls' => 'évolue avec le niveau',
                 'filter_note' => 'Les filtres reposent sur les quêtes et lieux attestés.',
                 'sort' => 'Tri', 'sort_name' => 'Nom', 'sort_level' => 'Niveau',
-                'wo' => 'Région et pays',
+                'wo' => 'Région et zone',
                 'same_name' => 'Autres entrées portant ce nom',
                 'same_name_all' => 'Toutes les entrées portant ce nom',
                 'unknown_place' => 'Lieu non attesté',

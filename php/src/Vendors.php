@@ -24,6 +24,7 @@ final class Vendors
                      'reset' => 'Zurücksetzen', 'region' => 'Region', 'area' => 'Landschaft',
                      'type' => 'Art', 'type_vendor' => 'Normaler Händler',
                      'type_barter' => 'Tauschhändler', 'type_both' => 'Händler und Tauschhändler',
+                     'type_filter_vendor' => 'Normaler Händler', 'type_filter_both' => 'Tauschhändler',
                      'level' => 'Gegenstandsstufe', 'from' => 'von', 'to' => 'bis',
                      'filter_items' => 'Anwenden', 'reset_items' => 'Alle Gegenstände',
                      'wo' => 'Region und Landschaft', 'empty' => 'Keinen passenden Händler gefunden.',
@@ -36,8 +37,9 @@ final class Vendors
             'en' => ['title' => 'Vendors', 'intro' => 'Vendors with their locations and stock.',
                      'search' => 'Search for a vendor', 'filter' => 'Filters', 'apply' => 'Apply',
                      'reset' => 'Reset', 'region' => 'Region', 'area' => 'Landscape',
-                     'type' => 'Type', 'type_vendor' => 'Regular vendor',
-                     'type_barter' => 'Barterer', 'type_both' => 'Vendor and barterer',
+                      'type' => 'Type', 'type_vendor' => 'Regular vendor',
+                      'type_barter' => 'Barterer', 'type_both' => 'Vendor and barterer',
+                      'type_filter_vendor' => 'Regular vendor', 'type_filter_both' => 'Barterer',
                      'level' => 'Item level', 'from' => 'from', 'to' => 'to',
                      'filter_items' => 'Apply', 'reset_items' => 'All items',
                      'wo' => 'Region and landscape', 'empty' => 'No matching vendor found.',
@@ -50,8 +52,9 @@ final class Vendors
             'fr' => ['title' => 'Marchands', 'intro' => 'Marchands avec leur emplacement et leurs marchandises.',
                      'search' => 'Chercher un marchand', 'filter' => 'Filtres', 'apply' => 'Appliquer',
                      'reset' => 'Réinitialiser', 'region' => 'Région', 'area' => 'Pays',
-                     'type' => 'Type', 'type_vendor' => 'Marchand normal',
-                     'type_barter' => 'Marchand troqueur', 'type_both' => 'Marchand et troqueur',
+                      'type' => 'Type', 'type_vendor' => 'Marchand normal',
+                      'type_barter' => 'Marchand troqueur', 'type_both' => 'Marchand et troqueur',
+                      'type_filter_vendor' => 'Marchand normal', 'type_filter_both' => 'Marchand troqueur',
                      'level' => 'Niveau des objets', 'from' => 'de', 'to' => 'à',
                      'filter_items' => 'Appliquer', 'reset_items' => 'Tous les objets',
                      'wo' => 'Région et pays', 'empty' => 'Aucun marchand correspondant.',
@@ -197,7 +200,7 @@ final class Vendors
                 $candidate[$key] = [$key === 'type' ? (string) $value : (int) $value];
                 $count = count(array_filter($rows, fn ($row) => self::matches($row, $candidate)));
                 $label = $key === 'type'
-                    ? $words['type_' . $value]
+                    ? $words['type_filter_' . $value]
                     : $index['labels'][$key][$value];
                 $options[] = ['value' => $value, 'label' => $label,
                               'count' => $count,
@@ -226,7 +229,6 @@ final class Vendors
                 if ($name !== '' && !in_array($name, $names, true)) $names[] = $name;
             }
             $meta = $names ? [implode(' · ', $names)] : [];
-            if ($row['count'] > 0) $meta[] = (string) $row['count'];
             $row['meta'] = implode(' · ', $meta);
         }
         unset($row);

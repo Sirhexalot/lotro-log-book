@@ -15,7 +15,7 @@
 {% for section in page.sections %}<section><h2>{{ section.title }}</h2><ul class="katalog-liste">{% for entry in section.entries %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul></section>{% endfor %}
 {% if page.links %}<ul>{% for entry in page.links %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul>{% endif %}
 {% if page.foot_link %}<p><a href="{{ page.foot_link.url }}">{{ page.foot_link.text }}</a></p>{% endif %}
-{% if page.nav %}<nav class="katalog-seiten">{% if page.nav.prev %}<a href="{{ page.nav.prev }}">{{ w.prevpage }}</a> · {% endif %}{{ page.nav.label }}{% if page.nav.next %} · <a href="{{ page.nav.next }}">{{ w.nextpage }}</a>{% endif %}</nav>{% endif %}
+{% if page.nav.prev|default('') or page.nav.next|default('') %}<nav class="katalog-seiten">{% if page.nav.prev %}<a href="{{ page.nav.prev }}">{{ w.prevpage }}</a> · {% endif %}{{ page.nav.label }}{% if page.nav.next %} · <a href="{{ page.nav.next }}">{{ w.nextpage }}</a>{% endif %}</nav>{% endif %}
 {% if index_filter|default(false) %}</div>{% endif %}
 </article>
 {% endblock %}

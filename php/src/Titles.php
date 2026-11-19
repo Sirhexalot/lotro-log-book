@@ -58,7 +58,7 @@ final class Titles
                 'title' => 'Titres', 'intro' => 'Tous les titres de la Terre du Milieu – avec la prouesse ou la quête qui les accorde.',
                 'search' => 'Chercher un titre', 'filter' => 'Filtres', 'apply' => 'Appliquer',
                 'reset' => 'Réinitialiser', 'region' => 'Région', 'area' => 'Pays',
-                'wo' => 'Région et pays', 'kind' => 'Origine', 'art' => 'Type',
+                'wo' => 'Région et zone', 'kind' => 'Origine', 'art' => 'Type',
                 'count' => '%s titres', 'count_one' => '1 titre',
                 'empty' => 'Aucun titre correspondant.', 'previous' => 'Précédent', 'next' => 'Suivant',
                 'page' => 'Page %s sur %s',

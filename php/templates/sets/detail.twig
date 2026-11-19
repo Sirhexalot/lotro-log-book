@@ -5,9 +5,9 @@
 <p class="katalog-aktionen"><a class="katalog-knopf" href="#setteile">{{ sw.pieces }}</a> <a class="katalog-knopf" href="#setboni">{{ sw.bonuses }}</a></p>
 <section id="setteile"><h2>{{ sw.pieces }}</h2>
 <div class="set-cards">
-{% for member in set.members %}
+{% for member in set.members|filter(member => member.name) %}
 <article class="set-card{% if member.missing %} set-card-missing{% endif %}">
-    <h3>{% if member.card and member.card.symbol %}<img src="/bild/items/{{ member.card.symbol }}.webp" alt="" width="32" height="32" loading="lazy">{% endif %}{% if member.url %}<a class="{{ member.card.head_class }}" href="{{ member.url }}">{{ member.name ?: sw.unnamed }}</a>{% else %}{{ member.name ?: sw.unnamed }}{% endif %}{% if member.count > 1 %} <span class="set-card-count">· {{ member.count }}×</span>{% endif %}</h3>
+    <h3>{% if member.card and member.card.symbol %}<img src="/bild/items/{{ member.card.symbol }}.webp" alt="" width="32" height="32" loading="lazy">{% endif %}{% if member.url %}<a class="{{ member.card.head_class }}" href="{{ member.url }}">{{ member.name }}</a>{% else %}{{ member.name }}{% endif %}{% if member.count > 1 %} <span class="set-card-count">· {{ member.count }}×</span>{% endif %}</h3>
     {% if member.card %}
         <p class="set-card-meta">{% for chip in member.card.chips %}<span>{{ chip.text }}</span>{% endfor %}</p>
         {% if member.card.required_class %}<p>{{ sw.class }}: {{ member.card.required_class }}</p>{% endif %}
@@ -21,7 +21,7 @@
 </div></section>
 <section class="set-bonuses" id="setboni"><h2>{{ sw.bonuses }}</h2>
 {% for bonus in set.bonuses %}
-    <h3>{% if bonus.valid %}{{ sw.threshold|replace({'%s': bonus.pieces}) }}{% else %}{{ sw.unclear_threshold }}{% endif %}</h3>
+    {% if bonus.valid %}<h3>{{ sw.threshold|replace({'%s': bonus.pieces}) }}</h3>{% endif %}
     <ul>{% for text in bonus.texts %}<li>{{ text }}</li>{% endfor %}
     {% for pending in bonus.pending %}{% if pending.label %}<li>{{ pending.label }}{% if pending.scaling %}: {{ sw.scaling }}{% endif %}</li>{% endif %}{% endfor %}</ul>
 {% endfor %}

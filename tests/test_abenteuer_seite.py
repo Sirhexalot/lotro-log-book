@@ -82,7 +82,7 @@ class AdventurePageTest(unittest.TestCase):
         self.assertIn('Middle-earth', english)
         self.assertIn('Terre du Milieu', french)
         self.assertIn('Choose a region, then an area.', english)
-        self.assertIn('Choisissez une région, puis un pays.', french)
+        self.assertIn('Choisissez une région, puis une zone.', french)
         self.assertIn('hreflang="de"', english)
         self.assertIn('/fr/aventure/', english)
 

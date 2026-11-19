@@ -36,7 +36,7 @@
 			more: 'Afficher davantage', count: '%s entrées', show: 'Afficher %s résultats', loading: 'Chargement …',
 			error: 'Résultats non actualisés.', retry: 'Réessayer', fallback: 'Ouvrir la page',
 			invalidRange: 'Plage incorrecte', min: 'De', max: 'À',
-			flag: 'Caractéristiques', geography: 'Région et pays', region: 'Région', area: 'Pays', level: 'Niveau', status: 'Achèvement',
+			flag: 'Caractéristiques', geography: 'Région et zone', region: 'Région', area: 'Zone', level: 'Niveau', status: 'Achèvement',
 			all: 'Tous', done: 'Terminé', rest: 'Non importé comme terminé',
 			name: 'Nom', kind: 'Type', reward: 'Récompense', points: 'Points LOTRO', virtue: 'Vertu', title: 'Titre',
 			item: 'Objet', doneMark: 'Terminé',

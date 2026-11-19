@@ -1,7 +1,7 @@
 # Gegenstandsseite: Quellgruppen auf die gemeinsame Komponente
 
-Stand: 17.11.2026  
-Status: Herstellung umgesetzt (17.11.2026), Tauschhändler offen
+Stand: 18.11.2026
+Status: umgesetzt
 
 ## Ausgangslage
 
@@ -13,7 +13,7 @@ heute von den Regeln ab:
 | Aufgaben | bis 753 | gemeinsame Komponente | keiner |
 | Herstellung (`filter=recipes`) | bis 77 | gemeinsame Komponente (`recipe_made`) | keiner |
 | Händler (`vendor_filter`) | bis 333 | gemeinsame Komponente | keiner |
-| Tauschhändler (`filter=None`, ohne URL) | bis 333 | einfache Liste | offen |
+| Tauschhändler (`barter`) | bis 333 | gemeinsame Komponente | keiner |
 
 Zusätzlich zeigt die Herstellungszeile den vollständigen Rezepttext
 („Koch · Wilde Essenzen · Stufe 1 · 1 × …"), wodurch 77 verschiedene Rezepte
@@ -26,6 +26,7 @@ Jede Gruppe ist eine Relation auf **eine** Entität und nutzt deren Ausprägung:
 - Aufgaben → `MQL_TASK_FILTER_SETUP(rows, 'q')`
 - Herstellung → `MQL_RECIPE_FILTER` mit `MQL_RECIPE_CONTEXT_RESULTS`
 - Händler → Händler-Ausprägung (dieselbe Zeile wie die Händlerliste)
+- Tauschhändler → eigene `barter`-Relation mit derselben Händler-Komponente
 
 Damit gelten überall Schwelle 5/6, Suche, Facetten, Sortierung, Pagination,
 Kontext-URL und die gemeinsame Zeilenregel.
@@ -66,14 +67,13 @@ geschrieben, damit der Adapter ohne URL-Parsing arbeitet.
 - Bei 77 Rezepten mit identischem Ergebnis unterscheiden sich die Zeilen nur
   durch Beruf, Stufe und Kategorie. Das ist gewollt; die Zutaten stehen auf
   der Rezeptseite.
-- Tauschhändler und normale Händler sind heute eine Gruppe mit
-  unterschiedlichem `type`. Die Facette trennt sie, die Zeile nennt die Art.
+- Tauschhändler und normale Händler bleiben getrennte Quellgruppen. Die
+  Händlergruppe kann weiterhin nach Händlerart unterscheiden; die
+  Tauschhändlergruppe zeigt ausschließlich Tauschhändler.
 
 ## Tests
 
-- `tests/test_relationen_audit.py`: keine Gruppe über 5 ohne Komponente; die
-  Vertragsliste `where_recipes` und `where_plain` wechselt von `open` auf
-  `component`.
+- `tests/test_relationen_audit.py`: keine Gruppe über 5 ohne Komponente.
 - `tests/test_entitaeten_vertrag.py`: Zeilenfelder der drei Gruppen.
 - Browsertest auf `/de/gegenstand/70047510/` (77 Rezepte) und
   `/de/gegenstand/700005D1/` (333 Händler): je eine Komponente pro Gruppe,

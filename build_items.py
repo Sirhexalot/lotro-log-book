@@ -153,6 +153,7 @@ def baue():
 
     # 3. Rezepte: Ergebnis und Zutaten, mit IDs
     item_stufen = {}
+    recipe_results = {}
     if REZEPTE.is_file():
         rezepte = json.loads(REZEPTE.read_text(encoding='utf-8'))
         for rezept_id, zeile in rezepte['items'].items():
@@ -166,6 +167,11 @@ def baue():
             recipe_id = str(rezept['id']).upper()
             rid = rezept['r'][0]
             stufe = int(rezept.get('t') or 0)
+            recipe_results[recipe_id] = [
+                str(result_id).upper() for result_id in
+                ([(rid)] if rid else []) +
+                ([rezept['cr'][0]] if rezept.get('cr') and rezept['cr'][0] else [])
+            ]
             if rid:
                 result = eintrag(rid)
                 result['rezepte'].append(recipe_id)
@@ -218,19 +224,20 @@ def baue():
                 })
     if RECIPE_SOURCES.is_file():
         source_data = json.loads(RECIPE_SOURCES.read_text(encoding='utf-8'))
-        for iid, sources in (source_data.get('sources') or {}).items():
-            if str(iid).upper() not in items:
+        for recipe_id, sources in (source_data.get('sources') or {}).items():
+            result_ids = recipe_results.get(str(recipe_id).upper(), [])
+            if not result_ids:
                 continue
-            item = eintrag(iid)
             for source in sources:
                 if source.get('art') != 'tausch':
                     continue
-                item['tausch'].append({
-                    'id': str(source.get('id') or ''),
-                    'name': source.get('name') or '',
-                    'title': source.get('titel') or '',
-                    'area': source.get('gebiet') or '',
-                })
+                for result_id in result_ids:
+                    eintrag(result_id)['tausch'].append({
+                        'id': str(source.get('id') or ''),
+                        'name': source.get('name') or '',
+                        'title': source.get('titel') or '',
+                        'area': source.get('gebiet') or '',
+                    })
 
     # 4. Ressourcen: Spawn-Tabelle nennt keine Item-IDs, nur Namen und Beruf.
     # Direct names cover the few exact matches. Wood logs and ore are named

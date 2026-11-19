@@ -651,6 +651,11 @@ def main() -> int:
     if not (DATEN / 'haendler.json').is_file():
         raise SystemExit('MISSING: daten/haendler.json (run python3 build_haendler.py first)')
     VENDOR_SOURCE = json.loads((DATEN / 'haendler.json').read_text(encoding='utf-8'))
+    region_ids = {
+        int(row['region']): int(row['idx'])
+        for row in json.loads((DATEN / 'karten.json').read_text(encoding='utf-8'))
+        if row.get('tier') == 1 and row.get('region') is not None
+    }
     from vendor_viewmodel import vendor_index, vendor_pages
 
     manifest_path = target / 'manifest.json'
@@ -825,7 +830,7 @@ def main() -> int:
                           for row in vendors['vendors']}
         write_shards(target, lang, 'vendor', data['vendor'])
         vendor_detail = vendor_pages(VENDOR_SOURCE, lang, data['i'], maps,
-                                     app_url, coords, builder.w)
+                                     app_url, coords, builder.w, region_ids)
         write_pages(target, lang, 'vendor', vendor_detail)
         counts['vendor'] = counts['page-vendor'] = len(vendor_detail)
 

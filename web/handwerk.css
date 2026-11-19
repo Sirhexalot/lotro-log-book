@@ -1,6 +1,7 @@
 /* Same search/sidebar/results pattern as the item browser. */
-.handwerk-seite #hw-rezepte > h2,
-.handwerk-seite #hw-rezepte > p { display: none; }
+.handwerk-einleitung { margin: 1.25rem 0 1.5rem; max-width: 72ch; }
+.handwerk-seite #hw-rezepte > p,
+.handwerk-seite #hw-rohstoffe > p { display: none; }
 .hw-raster { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 28px; align-items: start; }
 .hw-filter { border-right: 1px solid var(--rand); padding-right: 20px; }
 .hw-filter h3 { font-size: .875rem; margin: 1.25rem 0 .5rem; }

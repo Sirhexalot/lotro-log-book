@@ -33,15 +33,15 @@
         <section class="sets-results" data-filter-results aria-label="{{ iw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? iw.count_one : iw.count)|replace({'%s': count}) }}</p>
             {% for group in instance_groups %}
-            <section><h2>{{ group.name }}</h2>
-                <ul class="sets-list">{% for row in group.rows %}<li><span class="sets-preview"><strong>{{ row.name }}</strong></span><span class="sets-meta">{{ row.meta }}</span></li>{% endfor %}</ul>
+            <section>{% if group.name %}<h2>{{ group.name }}</h2>{% endif %}
+                <ul class="sets-list">{% for row in group.rows %}<li><span class="sets-preview"><strong>{{ row.name }}</strong></span>{% if row.meta %}<span class="sets-meta">{{ row.meta }}</span>{% endif %}</li>{% endfor %}</ul>
             </section>
             {% else %}<p>{{ iw.empty }}</p>{% endfor %}
-            <nav class="sets-pagination" aria-label="{{ iw.title }}">
+            {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ iw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ iw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>
                 {% if next_url %}<a href="{{ next_url }}">{{ iw.next }} ›</a>{% endif %}
-            </nav>
+            </nav>{% endif %}
         </section>
     </div>
 </form>

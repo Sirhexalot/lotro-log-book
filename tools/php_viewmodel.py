@@ -190,6 +190,7 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
             'image': None, 'pin_x': None, 'pin_y': None,
             'coords': None, 'points': len(goals) if len(goals) > 1 else 0,
             'map_name': None, 'map_url': None,
+            'area_url': None,
             'occurrences_url': None,
             'map_link': app_url(lang, 'karte', id=quest['i']),
             'travel_url': travel,
@@ -208,6 +209,7 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
             if map_entry:
                 place['map_name'] = map_entry.get('name')
                 place['map_url'] = app_url(lang, 'karte', id=quest['i'])
+                place['area_url'] = route(lang, 'area', spot[0])
                 place['occurrences_url'] = app_url(lang, 'karte', vorkarte=spot[0])
 
     requirements = {'level': quest.get('vl'), 'all': [], 'one': [], 'extra': bool(quest.get('vb'))}
@@ -506,7 +508,7 @@ def honor_view(builder: ViewBuilder, art: str, entry: dict) -> dict:
     """Title or virtue page: what it is and which deeds award it."""
     w, lang = builder.w, builder.lang
     name = entry.get('name') or ''
-    rows = (entry.get('q') or {}).get(lang) or (entry.get('q') or {}).get('en') or []
+    rows = (entry.get('q') or {}).get(lang) or []
     sources = []
     for row in rows:
         kind, qid, qname = row[0], row[1], row[2]
@@ -1119,10 +1121,17 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
     barter_entries = []
     for source in item.get('tausch') or []:
         extra = ' · '.join(part for part in (source.get('title'), source.get('area')) if part)
-        barter_entries.append({'text': source.get('name') or source.get('id'),
-                               'extra': extra})
+        barter_entries.append({
+            'id': source.get('id'),
+            'name': source.get('name') or source.get('id'),
+            'title': source.get('title'),
+            'area': source.get('area'),
+            'text': source.get('name') or source.get('id'),
+            'extra': extra,
+        })
     if barter_entries:
         where_groups.append({'label': w['source_barters'], 'filter': None,
+                             'vendor_filter': True, 'barter_filter': True,
                              'entries': barter_entries})
 
     set_block = None
@@ -1195,6 +1204,11 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         'resources': resources,
         'sources': sources,
         'vendor': bool(vendor_entries),
+        'barter_sources': [
+            {'id': entry.get('id'), 'name': entry.get('name'),
+             'title': entry.get('title'), 'area': entry.get('area')}
+            for entry in barter_entries
+        ],
         'crafted_by': crafted_by,
         'used_in': used_in,
         # Two directions, two relation types: recipes that produce this item

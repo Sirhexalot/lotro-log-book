@@ -11,7 +11,7 @@
 <div>{% if place.chain %}<p class="katalog-hinweis giver-weg">{% for part in place.chain %}{% if not loop.first %} › {% endif %}<a href="{{ part.url }}">{{ part.name }}</a>{% endfor %}</p>{% endif %}
 {% if place.coords %}<p class="katalog-hinweis">{{ place.coords }}</p>{% endif %}
 <p class="katalog-aktionen">{% if place.map_url %}<a href="{{ place.map_url }}" class="katalog-knopf">{{ gw.map }}</a> {% endif %}<a href="{{ place.travel_url }}" class="katalog-link">{{ gw.route }}</a></p>
-</div></div>{% endfor %}</section>{% else %}<p class="katalog-hinweis">{{ gw.no_place }}</p>{% endif %}
+</div></div>{% endfor %}</section>{% endif %}
 <section class="katalog-abschnitt vendor-items gs"{% if vendor.item_total > 5 %} data-item-filter-root data-item-ids="{{ vendor.item_ids }}"{% endif %}>
 <h2>{{ gw.items }}</h2>
 {% if vendor.item_total <= 5 %}<ul class="gs-ergebnis">{% for item in vendor.items %}<li><a class="gs-zeile" href="{{ item.url }}"><span class="gs-name">{{ item.name }}</span><span class="gs-meta">{% if item.level %}{{ gw.level }} {{ item.level }}{% endif %}</span></a></li>{% endfor %}</ul>

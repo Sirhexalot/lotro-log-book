@@ -36,9 +36,9 @@ final class RelatedLists
             }
         } else {
             $entries = $kind === 'i' ? [] : array_merge($page['sources'] ?? [], $page['quests'] ?? []);
-            if ($kind === 'i') {
-                foreach ($page['where_groups'] ?? [] as $group) {
-                    foreach ($group['entries'] ?? [] as $entry) {
+        if ($kind === 'i') {
+            foreach ($page['where_groups'] ?? [] as $group) {
+                foreach ($group['entries'] ?? [] as $entry) {
                         // Recipes are explicitly split into used_in/crafted_by.
                         $this->collect($ids, $entry['url'] ?? '', true);
                     }
@@ -57,6 +57,12 @@ final class RelatedLists
                     $this->collect($ids, $entry['url'] ?? '');
                 }
             }
+        }
+        if ($kind === 'i' && !empty($page['barter_sources'])) {
+            $ids['barter'] = array_map(
+                static fn (array $entry): string => (string) ($entry['id'] ?? ''),
+                $page['barter_sources']
+            );
         }
         $lists = [];
         foreach ($ids as $type => $members) {
@@ -84,6 +90,40 @@ final class RelatedLists
                         'rows' => $rows,
                         'labels' => $index['labels'] ?? [],
                     ];
+                }
+                continue;
+            }
+            if ($type === 'barter') {
+                $by_id = [];
+                foreach ($page['barter_sources'] ?? [] as $entry) {
+                    $id = (string) ($entry['id'] ?? '');
+                    if ($id !== '') {
+                        $by_id[$id] = $entry;
+                    }
+                }
+                $rows = [];
+                foreach ($members as $member) {
+                    $entry = $by_id[(string) $member] ?? null;
+                    if (!$entry) {
+                        continue;
+                    }
+                    $extra = implode(' · ', array_filter([
+                        $entry['title'] ?? '',
+                        $entry['area'] ?? '',
+                    ], static fn ($value): bool => $value !== ''));
+                    $rows[] = [
+                        'id' => (string) $member,
+                        'name' => (string) ($entry['name'] ?? $member),
+                        'url' => '',
+                        'type' => 'barter',
+                        'extra' => $extra,
+                        'regions' => [],
+                        'areas' => [],
+                        'count' => 0,
+                    ];
+                }
+                if ($rows) {
+                    $lists[$type] = ['rows' => $rows, 'labels' => []];
                 }
                 continue;
             }

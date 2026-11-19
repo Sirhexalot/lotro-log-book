@@ -37,11 +37,11 @@
         <section class="sets-results" data-filter-results aria-label="{{ lw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? lw.count_one : lw.count)|replace({'%s': count}) }}</p>
             <ul class="sets-list">{% for row in landmarks %}<li><a href="{{ row.url }}"><span class="sets-preview"><strong>{{ row.name }}</strong></span><span class="sets-meta">{{ row.meta }}</span></a></li>{% else %}<li>{{ lw.empty }}</li>{% endfor %}</ul>
-            <nav class="sets-pagination" aria-label="{{ lw.title }}">
+            {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ lw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ lw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>
                 {% if next_url %}<a href="{{ next_url }}">{{ lw.next }} ›</a>{% endif %}
-            </nav>
+            </nav>{% endif %}
         </section>
     </div>
 </form>

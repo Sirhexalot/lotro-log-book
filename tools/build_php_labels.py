@@ -67,6 +67,10 @@ def app_seiten() -> dict:
         lang = 'en' if key == 'start-en.html' else 'fr' if key == 'start-fr.html' else 'de'
         title, description = build_seo.localized_page(key, value[0], value[1], lang)
         seiten[key] = {'title': title, 'description': description}
+        for other, translations in build_seo.APP_TRANSLATIONS.items():
+            if key in translations:
+                title, description = translations[key]
+                seiten[key][other] = {'title': title, 'description': description}
     for datei in sorted((HIER / 'web').glob('*.html')):
         if datei.name in seiten or datei.name == '404.html':
             continue

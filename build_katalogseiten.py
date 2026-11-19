@@ -128,7 +128,7 @@ chain='Suite de quêtes', previous='Précédente', next='Suivante', back='Retour
 EXTRA = {
     'de': dict(menue_karte='Aufgaben', menue_taten='Taten', menue_reise='Reise', menue_gegenstaende='Gegenstände', menue_handwerk='Handwerk', menue_berufe='Berufe', menue_titel='Titel', menue_tugenden='Tugenden', menue_ruf='Ruf', menue_fortschritt='Fortschritt', menue_plugin='Plugin fürs Spiel',
          menue_landmarken='Landmarken', menue_haendler='Händler', menue_fraktionen='Fraktionen', menue_instanzen='Instanzen',
-         d_landmarken='Sehenswürdigkeiten mit ihren Aufgaben', d_haendler='Händler mit Standort und Waren', d_fraktionen='Ruf, Stufen und Quellen', d_instanzen='Cluster, Gruppengrößen und Stufen',
+         d_landmarken='Sehenswürdigkeiten mit ihren Aufgaben', d_haendler='Händler mit Standort und Waren', d_fraktionen='Ruf, Stufen und Quellen', d_instanzen='Schlachtzüge, Scharmützel und epische Schlachten',
         title='titel', virtue='tugend', titlelist='Titel', virtuelist='Tugenden', titlelabel='Titel', virtuelabel='Tugend',
         gendered='Die Form richtet sich nach dem Geschlecht des Charakters.', ranked='Der vollständige Titel enthält Rang und Namen des Charakters.', availability='Der Katalog belegt die Quelle, nicht ob der Titel heute noch erreichbar ist.',
         menue_meine_berufe='Meine Berufe', menue_mein_ruf='Mein Ruf', menue_belohnungen='Belohnungen', menue_gegenstandssuche='Gegenstandssuche', d_belohnungen='Gegenstände aus Taten und Aufgaben',
@@ -181,7 +181,7 @@ EXTRA = {
         deed_no_position='Für diese Tat ist kein Zielort bekannt.'),
     'en': dict(menue_karte='Quests', menue_taten='Deeds', menue_reise='Travel', menue_gegenstaende='Items', menue_handwerk='Crafting', menue_berufe='Professions', menue_titel='Titles', menue_tugenden='Virtues', menue_ruf='Reputation', menue_fortschritt='Progress', menue_plugin='In-game plugin',
          menue_landmarken='Landmarks', menue_haendler='Vendors', menue_fraktionen='Factions', menue_instanzen='Instances',
-         d_landmarken='Sights and the quests there', d_haendler='Vendors with locations and stock', d_fraktionen='Reputation, tiers and sources', d_instanzen='Clusters, group sizes and levels',
+         d_landmarken='Sights and the quests there', d_haendler='Vendors with locations and stock', d_fraktionen='Reputation, tiers and sources', d_instanzen='Raids, skirmishes and epic battles',
         title='title', virtue='virtue', titlelist='Titles', virtuelist='Virtues', titlelabel='Title', virtuelabel='Virtue',
         gendered='The wording follows the gender of the character.', ranked='The full title also contains the rank and name of the character.', availability='The catalogue records the source, not whether the title is still obtainable today.',
         menue_meine_berufe='My professions', menue_mein_ruf='My reputation', menue_belohnungen='Rewards', menue_gegenstandssuche='Item search', d_belohnungen='Items from deeds and quests',
@@ -234,7 +234,7 @@ EXTRA = {
         deed_no_position='No objective location is known for this deed.'),
     'fr': dict(menue_karte='Quêtes', menue_taten='Prouesses', menue_reise='Voyage', menue_gegenstaende='Objets', menue_handwerk='Artisanat', menue_berufe='Métiers', menue_titel='Titres', menue_tugenden='Vertus', menue_ruf='Réputation', menue_fortschritt='Progression', menue_plugin='Plugin en jeu',
          menue_landmarken='Sites', menue_haendler='Marchands', menue_fraktionen='Factions', menue_instanzen='Instances',
-         d_landmarken='Sites et leurs quêtes', d_haendler='Marchands avec lieu et marchandises', d_fraktionen='Réputation, paliers et sources', d_instanzen='Groupes, joueurs et niveaux',
+         d_landmarken='Sites et leurs quêtes', d_haendler='Marchands avec lieu et marchandises', d_fraktionen='Réputation, paliers et sources', d_instanzen='Raids, escarmouches et batailles épiques',
         title='titre', virtue='vertu', titlelist='Titres', virtuelist='Vertus', titlelabel='Titre', virtuelabel='Vertu',
         gendered='La forme dépend du genre du personnage.', ranked='Le titre complet contient aussi le rang et le nom du personnage.', availability='Le catalogue atteste la source, pas si le titre est encore obtenable aujourd’hui.',
         menue_meine_berufe='Mes métiers', menue_mein_ruf='Ma réputation', menue_belohnungen='Récompenses', menue_gegenstandssuche='Recherche d’objets', d_belohnungen='Objets issus des prouesses et des quêtes',
@@ -854,13 +854,14 @@ class Renderer:
                     # plain, crawlable list of every item.
                     body = ('<p class="katalog-hinweis">%s</p>'
                             % a('/gegenstaende.html?lang=' + self.lang, w['item_search'])) + body
-                pages = []
-                if number > 1:
-                    pages.append(a(page_route(self.lang, kind, number - 1), w['prevpage']))
-                pages.append('%s %d / %d' % (w['page'], number, count))
-                if number < count:
-                    pages.append(a(page_route(self.lang, kind, number + 1), w['nextpage']))
-                body += '<nav class="katalog-seiten">%s</nav>' % ' · '.join(pages)
+                if count > 1:
+                    pages = []
+                    if number > 1:
+                        pages.append(a(page_route(self.lang, kind, number - 1), w['prevpage']))
+                    pages.append('%s %d / %d' % (w['page'], number, count))
+                    if number < count:
+                        pages.append(a(page_route(self.lang, kind, number + 1), w['nextpage']))
+                    body += '<nav class="katalog-seiten">%s</nav>' % ' · '.join(pages)
                 title = w[kind + 'list'] + (' – %s %d' % (w['page'], number) if number > 1 else '')
                 self.write(kind, None, title, w['overview'], body, page=number)
         for kind in ('area', 'region'):
@@ -893,7 +894,7 @@ class Renderer:
         """Title or virtue page: what it is, where it comes from, and its limits."""
         w = self.w
         name = eintrag['n'].get(self.lang) or eintrag['n'].get('en') or ''
-        quellen_sprache = eintrag['q'].get(self.lang) or eintrag['q'].get('en') or []
+        quellen_sprache = eintrag['q'].get(self.lang) or []
         quellen = []
         for art_q, qid, qname, zone, region, sorte in quellen_sprache:
             zusatz = ' · '.join(filter(None, [sorte, region, zone]))

@@ -289,7 +289,7 @@ final class Shell
         // Titles that have no menu word come from the page's own SEO entry.
         $datei = ['karte' => 'index.html', 'taten' => 'index.html',
                   'gegenstandssuche' => 'gegenstaende.html'][$page] ?? $page . '.html';
-        $seo = $this->catalogue->appSeo($datei) ?? [];
+        $seo = $this->catalogue->appSeo($datei, $this->lang) ?? [];
         $teile = [['text' => $w['home'], 'url' => $this->startPage()]];
         if ($page === 'suche') {
             $teile[] = ['text' => $seo['title'] ?? '', 'url' => null];

@@ -23,7 +23,8 @@ def _label(maps, spot):
 
 
 def vendor_pages(source: dict, lang: str, items: dict, maps: dict,
-                 app_url, coords, words: dict) -> dict:
+                 app_url, coords, words: dict,
+                 region_ids: dict[int, int] | None = None) -> dict:
     pages = {}
     by_name = defaultdict(list)
     for ident, vendor in source['vendors'].items():
@@ -41,8 +42,33 @@ def vendor_pages(source: dict, lang: str, items: dict, maps: dict,
                 'level': item.get('l') or '',
             })
         rows.sort(key=lambda row: (str(row['name']).casefold(), row['id']))
-        places = [_place_view(spot, lang, maps, app_url, coords)
-                  for spot in vendor.get('places') or []]
+        places = []
+        for spot in vendor.get('places') or []:
+            place = _place_view(spot, lang, maps, app_url, coords)
+            # Some NPC positions are known only at region scale: the client
+            # coordinates do not fit any of its named map frames. Keep the
+            # known region useful without inventing a landscape or a pin.
+            if spot.get('map') is None:
+                number = spot.get('region')
+                region_id = None
+                if region_ids and number is not None:
+                    try:
+                        region_id = region_ids.get(int(number))
+                    except (TypeError, ValueError):
+                        pass
+                if region_id is None:
+                    region_id = region_of(maps, None, number)
+                region = maps.get(str(region_id)) if region_id is not None else None
+                if region and region.get('name'):
+                    place['chain'] = [{
+                        'id': region_id,
+                        'name': region['name'],
+                        'tier': 1,
+                        'url': route(lang, 'region', str(region_id)),
+                    }]
+                    place['map_url'] = app_url(
+                        lang, 'karte', vorkarte=region_id)
+            places.append(place)
         name = (vendor.get('name') or {}).get(lang) or (vendor.get('name') or {}).get('en') or ident
         pages[ident] = {
             'id': ident, 'name': name,

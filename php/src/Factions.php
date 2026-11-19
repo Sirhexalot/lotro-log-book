@@ -57,10 +57,10 @@ final class Factions
                 'none' => 'No reputation source recorded', 'nowhere' => 'No place recorded',
             ],
             'fr' => [
-                'title' => 'Factions', 'intro' => 'Qui tu peux gagner la faveur – avec paliers, description et toutes les quêtes et prouesses qui donnent de la réputation.',
+                'title' => 'Factions', 'intro' => 'Trouvez les quêtes et les prouesses qui vous font gagner de la réputation auprès de chaque faction.',
                 'search' => 'Chercher une faction', 'filter' => 'Filtres', 'apply' => 'Appliquer',
                 'reset' => 'Réinitialiser', 'region' => 'Région', 'area' => 'Pays',
-                'wo' => 'Région et pays',
+                'wo' => 'Région et zone',
                 'count' => '%s factions', 'count_one' => '1 faction',
                 'empty' => 'Aucune faction correspondante.', 'previous' => 'Précédent', 'next' => 'Suivant',
                 'page' => 'Page %s sur %s',

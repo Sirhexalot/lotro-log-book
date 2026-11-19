@@ -15,7 +15,8 @@ PAGES = {
     'plugin.html': ('Plugin fürs Spiel', 'Nimm dein Logbuch mit ins Spiel: Magic Quest Log zeigt Aufgaben, Taten und deinen Fortschritt direkt in LOTRO. Mit Anleitung zum Installieren.'),
     'reise.html': ('Reise', 'Plane deinen Weg durch Mittelerde. Finde Stallmeister und Verbindungen mit Preisen und Mindeststufen, Schnellreise und Reisefertigkeiten deiner Klasse.'),
     'ruf.html': ('Ruf und Fraktionen', 'Finde LOTRO-Fraktionen und Aufgaben mit Rufbelohnungen. Mit importiertem Spielstand siehst du deinen eigenen Ruf-Fortschritt.'),
-    'handwerk.html': ('Handwerk und Rezepte', 'Durchsuche LOTRO-Rezepte nach Beruf und Stufe, mit Zutaten und Ergebnissen. Importiere deinen Spielstand, um bekannte und fehlende Rezepte zu sehen.'),
+    'handwerk.html': ('Handwerk und Rezepte', 'Finde Rezepte nach Beruf und Handwerksstufe. Schau nach, was du herstellen kannst und welche Zutaten du brauchst.'),
+    'gegenstaende.html': ('Gegenstandssuche', 'Finde Waffen, Rüstungen und andere Gegenstände nach Name, Stufe und Seltenheit.'),
     'belohnungen.html': ('Belohnungen', 'Welcher Gegenstand fehlt dir noch? Finde die Aufgaben und Taten, die ihn in LOTRO als Belohnung vergeben – mit Stufe und Fundort.'),
     'gegenstand.html': ('Gegenstand', 'Schlage die Werte von LOTRO-Gegenständen nach und finde heraus, mit welchen Aufgaben und Taten du sie bekommst.'),
     'suche.html': ('Suche', 'Durchsuche Aufgaben, Taten, Gegenstände und Rezepte in LOTRO Log Book.'),
@@ -25,12 +26,44 @@ PAGES = {
 
 GAME_TERM = {'de': 'HdRO', 'en': 'LOTRO', 'fr': 'SdAO'}
 
+APP_TRANSLATIONS = {
+    'en': {
+        'spielstand.html': ('Import progress', 'Import your characters from LOTRO Companion to track quests, deeds and recipes. Your characters stay in your browser.'),
+        'companion.html': ('LOTRO Companion', 'Use LOTRO Companion to export your characters and bring their progress into LOTRO Log Book.'),
+        'plugin.html': ('In-game plugin', 'Install Magic Quest Log to see quests, deeds and your progress while you play LOTRO.'),
+        'reise.html': ('Travel planner', 'Plan your ride through Middle-earth. Find stable-masters, swift travel, fares and class travel skills.'),
+        'ruf.html': ('Reputation', 'Find quests and deeds that earn reputation. Import your progress to see your standing with each faction.'),
+        'handwerk.html': ('Crafting and recipes', 'Find recipes by profession and crafting tier. See what you can make and which ingredients you need.'),
+        'gegenstaende.html': ('Item search', 'Find weapons, armour and other items by name, level and rarity.'),
+        'belohnungen.html': ('Rewards', 'Find the quests and deeds that reward the gear you’re looking for.'),
+        'suche.html': ('Search', 'Look up LOTRO quests, deeds, items and recipes in one search.'),
+        'impressum.html': ('Legal notice', 'Legal notice and contact details for LOTRO Log Book.'),
+        'datenschutz.html': ('Privacy policy', 'How LOTRO Log Book handles your data.'),
+    },
+    'fr': {
+        'spielstand.html': ('Importer la progression', 'Importez vos personnages depuis LOTRO Companion pour suivre quêtes, prouesses et recettes. Vos personnages restent dans votre navigateur.'),
+        'companion.html': ('LOTRO Companion', 'Exportez vos personnages avec LOTRO Companion pour retrouver leur progression dans LOTRO Log Book.'),
+        'plugin.html': ('Plugin en jeu', 'Installez Magic Quest Log pour retrouver vos quêtes, vos prouesses et votre progression en jeu.'),
+        'reise.html': ('Planifier un voyage', 'Préparez votre trajet en Terre du Milieu : maîtres d’écurie, voyages rapides, tarifs et compétences de voyage.'),
+        'ruf.html': ('Réputation', 'Trouvez les quêtes et les prouesses qui rapportent de la réputation. Importez votre progression pour retrouver votre rang auprès de chaque faction.'),
+        'handwerk.html': ('Artisanat et recettes', 'Trouvez des recettes par métier et par palier. Voyez ce que vous pouvez fabriquer et de quels ingrédients vous avez besoin.'),
+        'gegenstaende.html': ('Recherche d’objets', 'Trouvez des armes, des armures et d’autres objets par nom, niveau et rareté.'),
+        'belohnungen.html': ('Récompenses', 'Retrouvez les quêtes et les prouesses qui donnent l’équipement que vous cherchez.'),
+        'suche.html': ('Recherche', 'Retrouvez les quêtes, les prouesses, les objets et les recettes de SdAO.'),
+        'impressum.html': ('Mentions légales', 'Mentions légales et coordonnées de LOTRO Log Book.'),
+        'datenschutz.html': ('Confidentialité', 'Comment LOTRO Log Book traite vos données.'),
+    },
+}
+
 
 def localized_page(name, title, description, lang):
     """Use the abbreviation players search for in each language."""
+    if name in APP_TRANSLATIONS.get(lang, {}):
+        return APP_TRANSLATIONS[lang][name]
     term = GAME_TERM[lang]
-    title = title.replace('LOTRO', term)
-    description = description.replace('LOTRO', term)
+    pattern = r'\bLOTRO\b(?! (?:Log Book|Companion))'
+    title = re.sub(pattern, term, title)
+    description = re.sub(pattern, term, description)
     if name == 'index.html':
         title = {'de': 'HdRO Aufgaben und Karten',
                  'en': 'LOTRO quests and maps',
