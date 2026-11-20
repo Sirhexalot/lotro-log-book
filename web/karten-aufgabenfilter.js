@@ -68,20 +68,28 @@
 			});
 		});
 		var regions = Object.keys(geoTree).sort(function (a, b) { return a.localeCompare(b, lang); });
-		function geoKinder(node, region, path, tiefe) {
+		// Deep tree labels repeat their group ("Ost-Rohan: Die Steppe"). The
+		// heading already names the group, so the option keeps the short name.
+		function geoLabel(name) {
+			// Map labels repeat their group as a prefix ("Ost-Rohan: Die Steppe").
+			// The branch above already carries that name.
+			return name.replace(/^[^:]{2,32}:\s+/, '');
+		}
+		function geoKinder(node, region, path, tiefe, area) {
 			return Object.keys(node.children).sort(function (a, b) { return a.localeCompare(b, lang); }).map(function (name) {
 				var kind = node.children[name];
 				var next = Object.assign({}, path);
+				var nextArea = area || name;
 				if (tiefe === 1) { next.area = name; } else { next.teil = (next.teil ? next.teil + ' › ' : '') + name; }
-				var option = { path: next, label: name };
-				var kinder = geoKinder(kind, region, next, tiefe + 1);
+				var option = { path: next, label: geoLabel(name) };
+				var kinder = geoKinder(kind, region, next, tiefe + 1, nextArea);
 				if (kinder.length) { option.children = kinder; }
 				return option;
 			});
 		}
 		var geoOptions = regions.map(function (region) {
 			var path = { region: region };
-			return { path: path, label: region, children: geoKinder(geoTree[region], region, path, 1) };
+			return { path: path, label: region, children: geoKinder(geoTree[region], region, path, 1, '') };
 		});
 		function validPath(path) {
 			var node = path && geoTree[path.region];

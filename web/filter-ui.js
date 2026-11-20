@@ -174,7 +174,7 @@
 							});
 							label.append(input,node('span',option.label),node('small',facet ? facet.count.toLocaleString(config.lang) : ''));
 							if (option.children && option.children.length) {
-								var branch = node('details'); branch.dataset.key = group.id+':'+JSON.stringify(value); branch.className = 'filter-branch';
+								var branch = node('details'); branch.dataset.key = group.id+':'+JSON.stringify(value); branch.className = 'filter-branch'; branch.style.setProperty('--depth',depth);
 								branch.open = openStates.get(branch.dataset.key) === true;
 								var summary = node('summary'); summary.style.setProperty('--depth',depth);
 								summary.append(arrow(),label); branch.appendChild(summary);

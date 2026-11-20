@@ -87,6 +87,14 @@ class DarstellungIststandTest(unittest.TestCase):
         self.assertRegex(twig, r'data-hw="rezepte" aria-pressed="true"')
         self.assertIn('<section id="hw-berufe" hidden>', twig)
 
+    def test_deep_filter_tree_keeps_its_hierarchy(self):
+        css = read('web/filter-ui.css')
+        self.assertIn('--filter-indent:18px', css)
+        self.assertIn('.filter-branch .filter-branch::before', css)
+        js = read('web/karten-aufgabenfilter.js')
+        self.assertIn('geoLabel', js)
+        self.assertIn("replace(/^[^:]{2,32}:", js)
+
 
 if __name__ == '__main__':
     unittest.main()
