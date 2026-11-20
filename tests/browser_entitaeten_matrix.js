@@ -25,13 +25,16 @@ const matrix = JSON.parse(fs.readFileSync(path.join(__dirname, 'entitaeten_matri
 				assert.ok(await rows.count() > 0, entity.kind + ' Liste ohne Zeilen');
 				if (entity.row === '.mql-row') {
 					const first = rows.first();
-					const border = await first.evaluate(row => getComputedStyle(row).borderTopWidth === '1px' && getComputedStyle(row).borderBottomWidth === '0px' ||
-						getComputedStyle(row).borderBottomWidth === '1px' && getComputedStyle(row).borderTopWidth === '0px');
-					assert.ok(border, entity.kind + ': doppelte Trennlinie');
+					const border = await first.evaluate(row => ({
+						top: getComputedStyle(row).borderTopWidth,
+						bottom: getComputedStyle(row).borderBottomWidth,
+					}));
+					assert.ok(!(border.top === '1px' && border.bottom === '1px'), entity.kind + ': doppelte Trennlinie');
 					const icons = await first.locator('.mql-row-icon').count();
 					assert.equal(icons, 1, entity.kind + ': Icon fehlt');
-					const width = Math.round((await first.locator('.mql-row-icon').boundingBox()).width);
-					assert.equal(width, 64, entity.kind + ': Icon nicht 64 px');
+					const iconBox = await first.locator('.mql-row-icon').first().boundingBox();
+					assert.ok(iconBox, entity.kind + ': Icon nicht sichtbar');
+					assert.equal(Math.round(iconBox.width), 64, entity.kind + ': Icon nicht 64 px');
 					assert.ok(await page.locator('.mql-row-heading').count() > 0, entity.kind + ': Spaltenkopf fehlt');
 				}
 			}
