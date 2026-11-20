@@ -14,6 +14,8 @@
 
 	var SCHLUESSEL = 'mql.charaktere';
 	var ALT = 'mql.fortschritt';
+	var gespeicherteDaten = null;
+	var datenGeladen = false;
 
 	function importStatus(eintrag, art, id, index) {
 		var key = String(id || '').toUpperCase();
@@ -33,18 +35,38 @@
 	}
 
 	function lies() {
+		if (datenGeladen) { return gespeicherteDaten; }
 		var daten = null;
 		try { daten = JSON.parse(root.localStorage.getItem(SCHLUESSEL) || 'null'); }
 		catch (fehler) { daten = null; }
 		if (!daten || typeof daten !== 'object' || !daten.liste) { daten = { aktiv: null, liste: {} }; }
-		return daten;
+		gespeicherteDaten = daten;
+		datenGeladen = true;
+		return gespeicherteDaten;
 	}
 
 	function schreibe(daten) {
 		try {
 			root.localStorage.setItem(SCHLUESSEL, JSON.stringify(daten));
+			gespeicherteDaten = daten;
+			datenGeladen = true;
 			return true;
-		} catch (fehler) { return false; }
+		} catch (fehler) {
+			// The caller may already have changed this object. Do not serve that
+			// unpersisted state from the cache after a quota or storage error.
+			gespeicherteDaten = null;
+			datenGeladen = false;
+			return false;
+		}
+	}
+
+	if (typeof root.addEventListener === 'function') {
+		root.addEventListener('storage', function (event) {
+			if (!event || event.key === SCHLUESSEL || event.key === null) {
+				gespeicherteDaten = null;
+				datenGeladen = false;
+			}
+		});
 	}
 
 	function manuelleStatusdaten(quelle) {
