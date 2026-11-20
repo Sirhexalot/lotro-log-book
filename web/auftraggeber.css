@@ -32,6 +32,11 @@
 .giver-kinder { margin: .1rem 0 .35rem 2.95rem; }
 .giver-kinder[hidden] { display: none; }
 .giver-kind { padding-left: 0; }
+.landmarken-gebietgruppe { margin: .35rem 0 .5rem; padding-left: .55rem; border-left: 2px solid var(--rand); }
+.landmarken-gebietgruppe > strong { display: block; margin: 0 0 .15rem; color: var(--gold); font-size: .875rem; font-weight: 600; }
+.landmarken-gebietgruppe[data-gebietgruppe="east-rohan"] { border-left-color: #7eb6c6; }
+.landmarken-gebietgruppe[data-gebietgruppe="west-rohan"] { border-left-color: #c5a56b; }
+.landmarken-gebietgruppe[data-gebietgruppe="dunland"] { border-left-color: #83a276; }
 .sets-sort { display: flex; flex-wrap: wrap; gap: .75rem; align-items: baseline;
 	margin: 0 0 .5rem; font-size: .875rem; }
 .sets-sort > span { color: var(--schwach); }

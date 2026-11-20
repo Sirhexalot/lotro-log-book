@@ -835,7 +835,7 @@ class ItemContext:
 
     def __init__(self, builder: ViewBuilder, details: dict, sets: dict, labels: dict,
                  typen: dict, vorkommen: dict, boni: dict, boni_labels: dict,
-                 referenz: dict):
+                 referenz: dict, full: dict | None = None, damage_types: dict | None = None):
         self.builder = builder
         self.details = details
         self.sets = sets
@@ -845,11 +845,13 @@ class ItemContext:
         self.boni = boni
         self.boni_labels = boni_labels
         self.referenz = referenz
+        self.full = full or {}
+        self.damage_types = damage_types or {}
         self.by_name = {}
         for ident, item in builder.items.items():
-            for name in (item.get('n') or {}).values():
-                if name:
-                    self.by_name.setdefault(sauber(name), []).append((ident, item))
+            name = sauber(builder_name(builder, item))
+            if name:
+                self.by_name.setdefault(name, []).append((ident, item))
         self.orte, self.index, self.resource_names = self._resource_places()
 
     def _resource_places(self):
@@ -894,6 +896,55 @@ class ItemContext:
         name = sauber(builder_name(self.builder, item))
         return [(other, entry) for other, entry in self.by_name.get(name, []) if other != ident]
 
+    def item_facts(self, ident, item, details):
+        raw = self.full.get(ident) or {}
+        return (details.get('minLevel') or raw.get('ml') or None,
+                details.get('level') or raw.get('l') or item.get('l') or None,
+                self.quality(item, details) or raw.get('q') or '')
+
+    def item_values(self, ident, item, details):
+        raw = self.full.get(ident) or {}
+        values = item.get('w') or {}
+        fields = {'armour': 'ar', 'dps': 'dps', 'damage': 'dmg', 'speed': 'spd'}
+        result = {key: details.get(key) or values.get(key) or raw.get(source)
+                  for key, source in fields.items()}
+        damage_type = details.get('damageType') or values.get('damageType')
+        result['damageType'] = self.damage_types.get(damage_type, damage_type) if damage_type else (
+            self.damage_types.get(raw.get('dt')))
+        return result
+
+    def variant_choices(self, ident, item):
+        w, lang = self.builder.w, self.builder.lang
+        candidates = self.variants(item, ident)
+        if not candidates:
+            return []
+        candidates.append((ident, item))
+        groups = {}
+        for other, entry in candidates:
+            minimum, level, quality = self.item_facts(other, entry, self.details.get(other) or {})
+            quality = self.label('quality', quality)
+            parts = [f"{w['min_level']} {minimum}" if minimum else '',
+                     f"{w['item_level']} {level}" if level else '', quality]
+            parts = [part for part in parts if part]
+            if parts:
+                groups.setdefault(parts[0], []).append((other, minimum, level, parts))
+        by_label = {}
+        for group in groups.values():
+            for other, minimum, level, parts in group:
+                label = ' · '.join(parts) if len(group) > 1 else parts[0]
+                by_label.setdefault(label, []).append((other, minimum, level))
+        choices = []
+        for label, group in by_label.items():
+            if len(group) != 1:
+                continue  # The name and every displayable fact are indistinguishable.
+            other, minimum, level = group[0]
+            choices.append((minimum or level or 0, level or 0, {'label': label,
+                            'url': route(lang, 'i', other), 'active': other == ident}))
+        # A single labelled choice does not make a useful variant picker.
+        if len(choices) < 2:
+            return []
+        return [choice for _, _, choice in sorted(choices, key=lambda row: (row[0], row[1], row[2]['url']))]
+
 
 def builder_name(builder: ViewBuilder, item: dict) -> str:
     names = item.get('n') or {}
@@ -911,14 +962,13 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
                   (details or {}).get('subtype') or item.get('sub') or '')) if part)
 
     chips = []
-    quality = ctx.quality(item, details)
+    min_level, item_level, quality = ctx.item_facts(ident, item, details)
     if quality:
         chips.append({'cls': 'q%d' % QUALITY_NUMBER.get(quality, 0), 'text': ctx.label('quality', quality)})
-    min_level = (details or {}).get('minLevel')
     if min_level:
         chips.append({'cls': '', 'text': '%s %s' % (w['min_level'], min_level)})
-    if item.get('l') and item['l'] != min_level:
-        chips.append({'cls': '', 'text': '%s %s' % (w['item_level'], item['l'])})
+    if item_level and item_level != min_level:
+        chips.append({'cls': '', 'text': '%s %s' % (w['item_level'], item_level)})
     binding = (details or {}).get('binding')
     binding_mode = item.get('bm')
     if binding_mode == 'BOUND_TO_ACCOUNT_ON_ACQUIRE':
@@ -936,13 +986,13 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
     if (details or {}).get('essenceSlots'):
         chips.append({'cls': '', 'text': '%s %s' % (w['essence_slots'], details['essenceSlots'])})
 
-    values = item.get('w') or {}
-    armour = (details or {}).get('armour') or values.get('armour')
-    dps = (details or {}).get('dps') or values.get('dps')
-    damage = (details or {}).get('damage') or values.get('damage')
-    speed = (details or {}).get('speed') or values.get('speed')
-    damage_type = (details or {}).get('damageType') or values.get('damageType')
+    values = ctx.item_values(ident, item, details)
+    armour, dps, damage, speed, damage_type = (values[key] for key in
+        ('armour', 'dps', 'damage', 'speed', 'damageType'))
     def zahl(value):
+        if isinstance(value, float):
+            text = f'{value:.2f}'.rstrip('0').rstrip('.')
+            return text.replace('.', ',') if lang in ('de', 'fr') else text
         return str(value)
 
     basic, seen = [], set()
@@ -1080,19 +1130,7 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
             'quantity': relation.get('quantity'),
         })
 
-    variants = []
-    for other_id, other_item in ctx.variants(item, ident):
-        other_details = ctx.details.get(other_id) or {}
-        variants.append({
-            'url': route(lang, 'i', other_id),
-            'text': builder_name(builder, other_item),
-            'level': other_item.get('l') or other_details.get('level') or None,
-            'quality': ctx.label('quality', ctx.quality(other_item, other_details))
-                       if ctx.quality(other_item, other_details) else None,
-            'active': False,
-        })
-    if variants:
-        variants.sort(key=lambda entry: (entry['level'] or 0, entry['text'].casefold()))
+    variants = ctx.variant_choices(ident, item)
 
     where_groups = []
     for kind, label in (('q', w['source_quests']), ('d', w['source_deeds'])):

@@ -1,0 +1,31 @@
+.feedback-seite { width: 100%; max-width: var(--huelle); margin-inline: auto; }
+.feedback-seite > h2 { margin-top: 0; }
+.feedback-seite > p { max-width: 68ch; }
+.feedback-seite form { max-width: 760px; margin-top: 24px; }
+.feedback-feld { display: grid; gap: 6px; margin: 0 0 18px; }
+.feedback-feld span { font-weight: 600; }
+.feedback-feld textarea,
+.feedback-feld input {
+	width: 100%; max-width: 100%; padding: 10px 12px;
+	color: var(--text); background: var(--fläche);
+	border: 1px solid var(--rand); border-radius: 4px;
+	font: inherit;
+}
+.feedback-feld textarea { resize: vertical; min-height: 150px; }
+.feedback-feld :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.feedback-bezug {
+	margin: 18px 0; padding: 10px 12px;
+	background: var(--fläche); border-left: 3px solid var(--gold);
+	color: var(--schwach); overflow-wrap: anywhere;
+}
+.feedback-hinweis, .feedback-datenschutz {
+	color: var(--schwach); font-size: var(--text-bedienung);
+}
+.feedback-status { min-height: 1.6em; margin: 12px 0; }
+.feedback-status.fehler { color: #ef9a87; }
+.feedback-status.erfolg { color: #9bc887; }
+.feedback-falle {
+	position: absolute !important; left: -10000px !important; top: auto !important;
+	width: 1px !important; height: 1px !important; overflow: hidden !important;
+}
+.feedback-seite button:disabled { opacity: .6; cursor: wait; }

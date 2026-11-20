@@ -4,17 +4,13 @@
    without one and then claims nothing about progress. #}
 {% block inhalt %}
 <article class="giver-detail">
-<div class="giver-kopf">
-    <span class="giver-symbol" aria-hidden="true">{{ icon|raw }}</span>
-    <div>
-        <h1>{{ giver.name }}</h1>
-        {% if giver.kind != 'unknown' or giver.title %}<p class="giver-art">{% if giver.kind != 'unknown' %}{{ attribute(kind_words, 'kind_' ~ giver.kind) }}{% endif %}{% if giver.title %}{% if giver.kind != 'unknown' %} · {% endif %}{{ giver.title }}{% endif %}</p>{% endif %}
-    </div>
-</div>
+{% import 'entity/_header.twig' as heading %}
+{{ heading.detail(kind, lang, w, giver.name, icon, '', '', entity_filter_url|default(''), entity_filter_label|default('')) }}
+{% if giver.kind != 'unknown' or giver.title %}<p class="giver-art">{% if giver.kind != 'unknown' %}{{ attribute(kind_words, 'kind_' ~ giver.kind) }}{% endif %}{% if giver.title %}{% if giver.kind != 'unknown' %} · {% endif %}{{ giver.title }}{% endif %}</p>{% endif %}
 
-{% if giver.description %}<section class="katalog-abschnitt"><h2>{{ gw.background }}</h2><p class="katalog-text">{{ giver.description }}</p><p class="katalog-hinweis">{{ gw.game_text }}</p></section>{% endif %}
+{% if giver.description %}<section class="katalog-abschnitt"><h2>{{ gw.background }}</h2><p class="katalog-text">{{ giver.description }}</p></section>{% endif %}
 
-{% if giver.greeting %}<details class="katalog-ziele giver-greeting"><summary>{{ gw.greeting }}</summary><p class="katalog-text">{{ giver.greeting }}</p><p class="katalog-hinweis">{{ gw.greeting_hint }}</p></details>{% endif %}
+{% if giver.greeting %}<details class="katalog-ziele giver-greeting"><summary>{{ gw.greeting }}</summary><p class="katalog-text">{{ giver.greeting }}</p></details>{% endif %}
 
 {% if giver.places %}<section class="katalog-abschnitt"><h2>{{ gw.places }}</h2>
 {% for place in giver.places %}

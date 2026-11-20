@@ -37,6 +37,7 @@
 		function text(key) { if (config.labels[key] === undefined) { throw new Error('Missing filter label: ' + key); } return config.labels[key]; }
 		function listen(n, event, fn) { n.addEventListener(event,fn); listeners.push(function () { n.removeEventListener(event,fn); }); }
 		var shell = node('div'); shell.className = 'filter-ui';
+		if (!(config.groups || []).length) { shell.classList.add('filter-ui-ohne-gruppen'); }
 		var toolbar = node('div'); toolbar.className = 'filter-toolbar';
 		var search = node('input'); search.type = 'search'; search.maxLength = 400; search.value = state.q;
 		search.setAttribute('aria-label',text('search'));
@@ -101,6 +102,17 @@
 			var v = state.filters[group.id];
 			if (group.kind === 'tree') { return v.some(function (p) { return JSON.stringify(p) === JSON.stringify(value); }); }
 			return Array.isArray(v) ? v.indexOf(value)>=0 : v === value;
+		}
+		function markWrappedOptions() {
+			groups.querySelectorAll('.filter-option').forEach(function (label) {
+				var span = label.querySelector(':scope > span');
+				if (!span) { return; }
+				var lineHeight = parseFloat(getComputedStyle(span).lineHeight) || 0;
+				var wrapped = span.getBoundingClientRect().height > lineHeight + 1;
+				label.classList.toggle('filter-option-wrapped', wrapped);
+				var summary = label.closest('.filter-branch > summary');
+				if (summary) { summary.classList.toggle('filter-summary-wrapped', wrapped); }
+			});
 		}
 		function renderGroups() {
 			var active = document.activeElement, focusKey = active && active.dataset.filterKey;
@@ -174,6 +186,7 @@
 				}
 				groups.appendChild(details);
 			});
+			markWrappedOptions();
 			if (focusKey) { Array.from(groups.querySelectorAll('input')).some(function (n) { if (n.dataset.filterKey === focusKey) { n.focus({preventScroll:true}); return true; } return false; }); }
 		}
 		function renderChrome() {
@@ -292,6 +305,7 @@
 			dispatch({type:'searchInput',value:search.value});
 		});
 		listen(search,'blur',function () { searching = false; });
+		listen(window,'resize',markWrappedOptions);
 		listen(target,'click',function (e) {
 			var link = e.target.closest('a[data-filter-page]');
 			if (link && !e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) { e.preventDefault(); dispatch({type:'page',value:Number(link.dataset.filterPage)}); }

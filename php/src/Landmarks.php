@@ -149,6 +149,7 @@ final class Landmarks
             'styles' => $this->shell->styles(), 'scripts' => $this->shell->scripts(),
             'asset_stand' => $this->shell->assetStand(),
             'menu' => $this->shell->menu('l'), 'start_page' => $this->catalogue->appRoute($this->lang, 'start'),
+            'entity_symbol' => $this->shell->icon('landmarke'),
             'suche_pfad' => $this->shell->appRoute('suche'),
             'spielstand_pfad' => $this->shell->appRoute('spielstand'),
             'katalog_texte' => json_encode(['none' => $this->shell->words()['none']], JSON_UNESCAPED_UNICODE),
@@ -198,33 +199,49 @@ final class Landmarks
             $facets[$key] = $options;
         }
         $area_by_region = [];
+        $area_groups_by_region = [];
         $area_rest = [];
         foreach ($facets['area'] as $option) {
             $region = $labels['area_region'][(string) $option['value']] ?? null;
             if ($region === null || $region === '') {
                 $area_rest[] = $option;
+            } elseif (isset($labels['area_group'][(string) $option['value']])) {
+                $group = $labels['area_group'][(string) $option['value']];
+                $key = (string) $region . '|' . $group['id'];
+                if (!isset($area_groups_by_region[(string) $region][$key])) {
+                    $area_groups_by_region[(string) $region][$key] = [
+                        'id' => $group['id'], 'label' => $group['label'], 'areas' => [],
+                    ];
+                }
+                $area_groups_by_region[(string) $region][$key]['areas'][] = $option;
             } else {
                 $area_by_region[(string) $region][] = $option;
             }
         }
+        foreach ($area_groups_by_region as &$groups) {
+            $groups = array_values($groups);
+            usort($groups, static fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
+        }
+        unset($groups);
 
         $page_rows = array_slice($selected, ($page - 1) * self::PAGE_SIZE, self::PAGE_SIZE);
         foreach ($page_rows as &$row) {
             $row['url'] = $this->catalogue->route($this->lang, 'l', $row['id']);
             $teile = [];
-            if ($row['area'] !== null) {
+            $areaGroup = $labels['area_group'][(string) $row['area']] ?? null;
+            if ($areaGroup !== null && $row['region'] !== null) {
+                $teile[] = $labels['region'][(string) $row['region']] ?? '';
+                $teile[] = $areaGroup['label'];
+                $teile[] = $labels['area'][(string) $row['area']] ?? '';
+            } elseif ($row['area'] !== null) {
                 // A region map is its own area; its name is the region name.
                 $teile[] = $labels['area'][(string) $row['area']]
                     ?? $labels['region'][(string) $row['area']] ?? '';
             }
-            if ($row['region'] !== null && $row['region'] !== $row['area']) {
+            if ($areaGroup === null && $row['region'] !== null && $row['region'] !== $row['area']) {
                 $teile[] = $labels['region'][(string) $row['region']] ?? '';
             }
             $teile = array_values(array_filter($teile));
-            if ($row['quests'] > 0) {
-                $teile[] = str_replace('%s', (string) $row['quests'],
-                    $row['quests'] === 1 ? $words['quests_one'] : $words['quests']);
-            }
             $row['meta'] = implode(' · ', $teile);
         }
         unset($row);
@@ -240,7 +257,8 @@ final class Landmarks
             (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
         ) + [
             'filters' => $filters, 'facets' => $facets, 'landmarks' => $page_rows,
-            'area_by_region' => $area_by_region, 'area_rest' => $area_rest,
+            'area_by_region' => $area_by_region,
+            'area_groups_by_region' => $area_groups_by_region, 'area_rest' => $area_rest,
             'count' => count($selected), 'page_label' => sprintf($words['page'], $page, $pages),
             'previous_url' => $page > 1 ? $this->url($filters, $page - 1) : null,
             'next_url' => $page < $pages ? $this->url($filters, $page + 1) : null,

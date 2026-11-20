@@ -10,6 +10,8 @@ is **LOTRO Log Book** in every language.
 
 Runs at **https://llb.sirhexalot.de/**.
 
+For architecture, data contracts and operating guides, see the [documentation index](docs/README.md).
+
 ## Travel planner (08.11.2026)
 
 `reise.html` answers the question the game does not answer: *where is the next
@@ -265,7 +267,7 @@ Every variant retains its own map ID and coordinate frame; sharing an image does
 not mean the projections can be interchanged. Existing direct map links still
 open the original variant.
 
-See [the missing-map audit](docs/missing-map-audit.md): an unassigned card is not
+See [the missing-map audit](docs/archiv/missing-map-audit.md): an unassigned card is not
 necessarily a missing image. No speculative map assignments were added.
 
 ### Map markers (07.11.2026)
@@ -366,8 +368,9 @@ point, shared Twig templates and prepared data shards instead of ~255,000 HTML
 files. `tools/build_release.py` assembles the release folder, `upload.py`
 uploads it and `tools/umschalten.py` switches the `.htaccess` (or back).
 `python3 baue_website.py` still builds the old static `dist-web/` for
-comparison. The full release and rollback procedure is in
-`docs/php-umbau.md`.
+comparison. For current release guidance, see [Operations](docs/betrieb/README.md).
+The original cutover and its rollback procedure are documented in the
+[migration archive](docs/archiv/php-umbau.md).
 
 ## Tests
 

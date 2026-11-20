@@ -14,9 +14,17 @@
         });
     }
     if (tabs.length) {
-        tabs.forEach(function (tab) {
+        tabs.forEach(function (tab, index) {
             tab.addEventListener('click', function () {
                 showTab(tab.getAttribute('data-item-tab'));
+            });
+            tab.addEventListener('keydown', function (event) {
+                if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) { return; }
+                event.preventDefault();
+                var next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
+                    : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+                showTab(tabs[next].getAttribute('data-item-tab'));
+                tabs[next].focus();
             });
         });
         var recipeQuery = Array.from(new URL(location.href).searchParams.keys())
@@ -39,15 +47,20 @@
     }
     function attachTaskStatuses() {
         if (!window.MQL_STATUS_UI) { return; }
-        document.querySelectorAll('[data-item-tab-panel] li').forEach(function (row) {
-            if (row.closest('.item-task-filter') || row.querySelector('.manueller-status')) { return; }
+        document.querySelectorAll('[data-item-task-direct] > li').forEach(function (row) {
             var reference = taskReference(row);
             if (!reference) { return; }
             var control = window.MQL_STATUS_UI.create(reference.kind, reference.id);
             if (!control) { return; }
             control.addEventListener('click', function (event) { event.stopPropagation(); });
-            row.classList.add('status-zeile');
-            row.appendChild(control);
+            var progress = row.querySelector('.mql-row-progress');
+            if (!progress) {
+                progress = document.createElement('span');
+                progress.className = 'mql-row-progress';
+                row.appendChild(progress);
+            }
+            row.classList.remove('mql-row-no-progress');
+            progress.replaceChildren(control);
         });
     }
     document.querySelectorAll('[data-item-filter-group]').forEach(function (group) {
@@ -73,6 +86,8 @@
         apply();
     });
     attachTaskStatuses();
-    window.addEventListener('mql-status', attachTaskStatuses);
     document.addEventListener('mql:characterchange', attachTaskStatuses);
+    document.addEventListener('change', function (event) {
+        if (event.target.id === 'katalog-charakter') { attachTaskStatuses(); }
+    });
 }());

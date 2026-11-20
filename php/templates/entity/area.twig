@@ -5,7 +5,7 @@
    list once; the browser filters it, so a tab never searches only the rendered
    excerpt. Without JavaScript the server-rendered links below stay usable. #}
 {% block inhalt %}
-<article class="gebiet"><div class="katalog-kopf"><h1>{{ icon|raw }}{{ page.name }}</h1></div>
+<article class="gebiet">{{ include('entity/_heading.twig') }}
 {% if page.image %}<figure class="katalog-karte-gross"><img src="/karten/{{ lang }}/{{ page.image|replace({'.png': '.webp'}) }}" alt="{{ page.name }}" width="640" height="480" loading="lazy" decoding="async"></figure>{% endif %}
 <p class="katalog-aktionen"><a class="katalog-knopf" href="{{ page.map_url }}">{{ w.area_map }}</a></p>
 {% if page.parent %}<p><a href="{{ page.parent.url }}">{{ page.parent.text }}</a></p>{% endif %}

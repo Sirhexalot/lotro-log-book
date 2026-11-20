@@ -15,6 +15,23 @@
 	var SCHLUESSEL = 'mql.charaktere';
 	var ALT = 'mql.fortschritt';
 
+	function importStatus(eintrag, art, id, index) {
+		var key = String(id || '').toUpperCase();
+		if (!eintrag || eintrag.manuellOnly || ['quests', 'deeds'].indexOf(art) < 0 || !/^[0-9A-F]{8}$/.test(key)) { return null; }
+		var ids = eintrag[art] || [], running = eintrag.laufend || {};
+		if (index ? index.has(key) : ids.indexOf(key) >= 0) { return 'fertig'; }
+		if (Object.prototype.hasOwnProperty.call(running, key)) { return 'laufend'; }
+		if (eintrag.importMeta && typeof eintrag.importMeta[art] === 'boolean') { return eintrag.importMeta[art] ? 'offen' : null; }
+		return ids.length || Object.keys(running).length ? 'offen' : null;
+	}
+	function manualStatus(eintrag, art, id) {
+		return eintrag && eintrag.manuell && eintrag.manuell[art]
+			&& eintrag.manuell[art][String(id || '').toUpperCase()] || null;
+	}
+	function statusFor(eintrag, art, id, index) {
+		return manualStatus(eintrag, art, id) || importStatus(eintrag, art, id, index);
+	}
+
 	function lies() {
 		var daten = null;
 		try { daten = JSON.parse(root.localStorage.getItem(SCHLUESSEL) || 'null'); }
@@ -162,30 +179,18 @@
 			return schreibe(daten) ? eintrag : null;
 		},
 		importStatus: function (art, id) {
-			var eintrag = api.aktiv(), schluessel = String(id || '').toUpperCase();
-			if (!eintrag || ['quests', 'deeds'].indexOf(art) < 0 || !/^[0-9A-F]{8}$/.test(schluessel)) { return null; }
-			if (eintrag.manuellOnly) { return null; }
-			var ids = eintrag[art] || [], laufend = eintrag.laufend || {};
-			if (ids.indexOf(schluessel) >= 0) { return 'fertig'; }
-			if (Object.prototype.hasOwnProperty.call(laufend, schluessel)) { return 'laufend'; }
-			if (eintrag.importMeta && typeof eintrag.importMeta[art] === 'boolean') {
-				return eintrag.importMeta[art] ? 'offen' : null;
-			}
-			return ids.length || Object.keys(laufend).length ? 'offen' : null;
+			return importStatus(api.aktiv(), art, id);
+		},
+		/** One character read for a batch of list/filter status checks. */
+		statusSnapshot: function (art, eintrag) {
+			var ids = new Set(eintrag && eintrag[art] || []);
+			return function (id) { return statusFor(eintrag, art, id, ids); };
 		},
 		manuelleStatus: function (art, id) {
-			var eintrag = api.aktiv(), schluessel = String(id || '').toUpperCase();
-			return eintrag && eintrag.manuell && eintrag.manuell[art]
-				&& eintrag.manuell[art][schluessel] || null;
+			return manualStatus(api.aktiv(), art, id);
 		},
 		status: function (art, id) {
-			var manuell = api.manuelleStatus(art, id);
-			if (manuell) { return manuell; }
-			var importiert = api.importStatus(art, id);
-			if (importiert) { return importiert; }
-			var eintrag = api.aktiv();
-			return eintrag && eintrag.manuellOnly && ['quests', 'deeds'].indexOf(art) >= 0
-				&& /^[0-9A-F]{8}$/i.test(String(id || '')) ? 'offen' : null;
+			return statusFor(api.aktiv(), art, id);
 		},
 		setzeStatus: function (art, id, status) {
 			if (['quests', 'deeds'].indexOf(art) < 0 || ['offen', 'laufend', 'fertig'].indexOf(status) < 0) { return false; }

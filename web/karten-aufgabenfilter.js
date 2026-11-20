@@ -16,6 +16,7 @@
 	}
 	function mount(root, quests, selectQuest) {
 		var lang = document.documentElement.lang, w = labels[lang] || labels.de, topics = topicNames[lang] || topicNames.de;
+		var progress = window.MQL_STATUS_UI?.words?.(lang) || Object.assign({unset:'Nicht gesetzt',available:w.machbar},w,{progress:w.status});
 		var boardValue = {de:'Auftrag',en:'Task',fr:'Tâche'}[lang] || 'Task';
 		var classMarker = 'themeClass', originMarker = 'themeOrigin';
 		var classValues = Array.from(new Set(quests.filter(function (q) {
@@ -25,23 +26,30 @@
 			return q.th === 'origin' && q.f && q.f[0] === originMarker;
 		}).map(function (q) { return q.f[1]; }).filter(Boolean))).sort(function (a,b) { return a.localeCompare(b,lang); });
 		var replaced = window.MQL_REPLACED || {}, store = window.MQL_SPEICHER;
-		var known = new Set(), character = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv();
+		var known, manual, hasQuestProgress, hasMachbar, laufend, characterLevel, progressCache;
 		function currentId(id) { id = String(id || '').toUpperCase(); return replaced[id] || id; }
-		var questIds = character ? (character.quests || []) : [];
-		var progressIds = character ? questIds.concat(character.deeds || []) : [];
-		progressIds.forEach(function (id) { known.add(currentId(id)); });
+		function refreshProgress() {
+			// Facet counting visits the same rows repeatedly. Never read and parse
+			// the entire local character store from inside a row predicate.
+			var character = store && store.aktiv();
+			var questIds = character && character.quests || [];
+			known = new Set(questIds.concat(character && character.deeds || []).map(currentId));
+			manual = character && character.manuell && character.manuell.quests || {};
+			laufend = character && character.laufend || {};
+			characterLevel = Number(character && character.level) || 0;
+			hasMachbar = !!(character && ((character.importMeta && character.importMeta.quests === true) || questIds.length > 0));
+			hasQuestProgress = hasMachbar || !!Object.keys(laufend).length
+				|| !!(Object.keys(manual).length && quests.some(function (q) { return manualStatus(q.i); }));
+			progressCache = new Map();
+		}
 		function manualStatus(id) {
-			return store && store.manuelleStatus && store.manuelleStatus('quests', currentId(id));
+			var key = currentId(id);
+			return Object.prototype.hasOwnProperty.call(manual, key) ? manual[key] : null;
 		}
 		function completed(id) {
-			return known.has(currentId(id)) || (store && store.status && store.status('quests', currentId(id)) === 'fertig');
+			return known.has(currentId(id)) || manualStatus(id) === 'fertig';
 		}
-		var hasQuestProgress = !!(character && window.MQL_SPEICHER &&
-			(window.MQL_SPEICHER.kennt('quests') === true || questIds.length > 0
-				|| quests.some(function (q) { return manualStatus(q.i); })));
-		var hasMachbar = hasQuestProgress;
-		var laufend = character && character.laufend || {};
-		var characterLevel = Number(character && character.level) || 0;
+		refreshProgress();
 		var regions = Array.from(new Set(quests.map(function (q) { return q.r; }).filter(Boolean))).sort(function (a,b) { return a.localeCompare(b,lang); });
 		var geoMap = {};
 		regions.forEach(function (region) {
@@ -76,9 +84,17 @@
 				return w.level + ' ' + (value.min === null ? '0' : value.min) + '–' + (value.max === null ? '∞' : value.max);
 			}}
 		];
-		var statusGroup = {id:'status',kind:'single',label:w.status,options:[
-			{value:'all',label:w.all,keepVisible:true},{value:'open',label:w.open,keepVisible:true},{value:'done',label:w.done,keepVisible:true}
-		].concat(hasMachbar ? [{value:'machbar',label:w.machbar,keepVisible:true}] : [])};
+		function statusOptions() {
+			var options = [{value:'all',label:progress.all,keepVisible:true}];
+			if (hasQuestProgress) {
+				['open','running','done','unset'].forEach(function (key) {
+					options.push({value:key,label:progress[key],keepVisible:true});
+				});
+			}
+			if (hasMachbar) { options.push({value:'machbar',label:progress.available,keepVisible:true}); }
+			return options;
+		}
+		var statusGroup = {id:'status',kind:'single',label:progress.progress,available:function () { return hasQuestProgress; },options:statusOptions()};
 		var groupsById = {};
 		groups.forEach(function (group) { groupsById[group.id] = group; });
 		groups = [statusGroup,groupsById.level,groupsById.geography,groupsById.topic,
@@ -114,6 +130,10 @@
 			return flags;
 		}
 		function progressState(row) {
+			if (!progressCache.has(row)) { progressCache.set(row, computeProgress(row)); }
+			return progressCache.get(row);
+		}
+		function computeProgress(row) {
 			var manual = manualStatus(row.i);
 			if (manual) { return manual === 'fertig' ? 'done' : manual === 'laufend' ? 'running' : 'open'; }
 			if (known.has(currentId(row.i))) { return 'done'; }
@@ -121,7 +141,7 @@
 			if (row.x === 1 || row.mp === 1) { return 'excluded'; }
 			if (row.e && row.e.some(function (id) { return completed(id); })) { return 'excluded'; }
 			if (laufend[row.i]) { return 'running'; }
-			return 'open';
+			return hasMachbar ? 'open' : 'unknown';
 		}
 		function machbar(row) {
 			if (!hasQuestProgress || progressState(row) !== 'open' || row.vb) { return false; }
@@ -161,7 +181,9 @@
 				if (group.id === 'status') {
 					if (value === 'all') { return true; }
 					if (value === 'done') { return progressState(row) === 'done'; }
-					if (value === 'open') { return progressState(row) === 'open' || progressState(row) === 'running'; }
+					if (value === 'open') { return progressState(row) === 'open'; }
+					if (value === 'running') { return progressState(row) === 'running'; }
+					if (value === 'unset') { return ['unknown','excluded'].includes(progressState(row)); }
 					return value === 'machbar' && hasMachbar && machbar(row);
 				}
 				return true;
@@ -193,6 +215,11 @@
 			},
 		renderResults:function (result,target) {
 			target.replaceChildren();
+			var rowUI=window.MQL_TREFFERZEILE;
+			if(rowUI){
+				rowUI.header(target,{progress:true,levelHeading:rowUI.words.questLevel});
+				if(!hasMachbar){rowUI.help(target,rowUI.words.noProgress);}
+			}
 			if (!result.payload.length) {
 				var empty=document.createElement('li'); empty.className='finder-keine-treffer'; empty.textContent=w.noResults;
 					target.appendChild(empty); return;
@@ -200,6 +227,19 @@
 				var counts={};
 				result.payload.forEach(function (q) { counts[q.n]=(counts[q.n]||0)+1; });
 				result.payload.forEach(function (q) {
+					if(rowUI){
+						var stand=progressState(q);
+						var control=window.MQL_STATUS_UI&&window.MQL_STATUS_UI.create('quests',q.i,null,'questfinder',
+							{done:'fertig',running:'laufend',open:'offen'}[stand]||null);
+						var meta=[q.g,q.z||q.r,q.a===boardValue?w.task:''].filter(Boolean).join(' · ');
+						var values=q.l?[{label:rowUI.words.questLevel,value:q.l}]:[];
+						target.appendChild(rowUI.row(target,{
+							// Older cached catalogue builds can contain an orphaned chapter separator.
+							icon:'aufgabe',name:q.n.replace(/^\.\s+/, ''),meta:meta,values:values,progress:control,levelHeading:rowUI.words.questLevel,
+							onActivate:function(){selectQuest(q);}
+						}));
+						return;
+					}
 					var li=document.createElement('li'),button=document.createElement('button'),name=document.createElement('strong'),meta=document.createElement('small'),status=document.createElement('span');
 					button.type='button';button.className='finder-treffer';name.textContent=q.n;
 					var stand=progressState(q);
@@ -208,7 +248,8 @@
 					var rewardCount = Array.isArray(q.rw) ? q.rw.length : 0;
 					var details=[q.l?w.level+' '+q.l:'',q.a===boardValue?w.task:'',q.g||(counts[q.n]>1?w.name+' · '+q.i:''),rewardCount ? ((window.MQL_T && window.MQL_T('belohnungen')) || 'Belohnungen')+' '+rewardCount:''].filter(Boolean);
 					meta.textContent=details.join(' · ');
-					var control=window.MQL_STATUS_UI&&window.MQL_STATUS_UI.create('quests',q.i);
+					var control=window.MQL_STATUS_UI&&window.MQL_STATUS_UI.create('quests',q.i,null,'questfinder',
+						{done:'fertig',running:'laufend',open:'offen'}[stand] || null);
 					button.append(name);
 					if (!control) { button.append(status); }
 					button.append(meta);
@@ -225,7 +266,9 @@
 		var controller=window.MQL_FILTER_UI.mount(root,{config:config,adapter:adapter});
 		if (window.addEventListener) {
 			window.addEventListener('mql-status', function () {
-				if (controller && controller.reload) { controller.reload(); }
+				refreshProgress();
+				statusGroup.options = statusOptions();
+				if (controller && controller.setCharacterContext) { controller.setCharacterContext(null); }
 			});
 		}
 		return controller;

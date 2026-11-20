@@ -1,0 +1,28 @@
+{% macro heading(lang, middle = '', progress = false) %}
+{% set labels = {
+    'Einordnung': {de: 'Einordnung', en: 'Category', fr: 'Catégorie'},
+    'Herkunft': {de: 'Herkunft', en: 'Source', fr: 'Origine'},
+    'Gebiet': {de: 'Gebiet', en: 'Area', fr: 'Région'},
+    'Art und Ort': {de: 'Art und Ort', en: 'Type and location', fr: 'Type et lieu'},
+    'Stufe': {de: 'Stufe', en: 'Level', fr: 'Niveau'}
+} %}
+<li class="mql-row-heading{% if not middle %} mql-row-no-levels{% endif %}{% if not progress %} mql-row-heading-no-progress{% endif %}"{% if progress == 'reputation' %} data-progress-heading="reputation" hidden{% endif %}>
+    <span>{{ {de: 'Treffer', en: 'Results', fr: 'Résultats'}[lang] }}</span>
+    {% if middle %}<span>{{ labels[middle][lang]|default(middle) }}</span>{% endif %}
+    {% if progress %}<span>{{ {de: 'Dein Fortschritt', en: 'Your progress', fr: 'Votre progression'}[lang] }}</span>{% endif %}
+</li>
+{% endmacro %}
+
+{% macro row(lang, url, name, meta = '', icon = '', image = '', middle = '', value = '', progress = '', progress_kind = '', progress_id = '') %}
+<li class="mql-row{% if not middle %} mql-row-no-levels{% endif %}{% if not progress or progress_kind %} mql-row-no-progress{% endif %}"{% if progress_kind %} data-progress-kind="{{ progress_kind }}" data-progress-id="{{ progress_id }}"{% endif %}>
+    <{{ url ? 'a' : 'div' }} class="mql-row-hit"{% if url %} href="{{ url }}"{% endif %}>
+        <span class="mql-row-icon{% if image %} mql-row-icon-item{% else %} mql-row-icon-entity{% endif %}">
+            {% if image %}<img src="/bild/items/{{ image }}.webp" alt="" width="48" height="48" loading="lazy" decoding="async">
+            {% elseif icon %}{{ icon|raw }}{% endif %}
+        </span>
+        <span class="mql-row-body"><strong class="mql-row-name">{{ name }}</strong>{% if meta %}<small class="mql-row-meta">{{ meta }}</small>{% endif %}</span>
+    </{{ url ? 'a' : 'div' }}>
+    {% if middle %}<span class="mql-row-levels">{% if value %}<span class="mql-row-value"><span class="mql-row-value-label">{{ middle }}: </span><b>{{ value }}</b></span>{% endif %}</span>{% endif %}
+    {% if progress %}<span class="mql-row-progress">{{ progress|raw }}</span>{% endif %}
+</li>
+{% endmacro %}

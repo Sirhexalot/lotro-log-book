@@ -13,6 +13,7 @@
 	var area=document.getElementById('gebiet-buehne');
 	var source=document.querySelector('[data-quellen-liste]');
 	var host=area||(source&&source.closest('section'))||document.querySelector('.giver-quests');
+	var isItem=document.body.dataset.art==='i';
 	// A page may carry only group-level relations (e.g. an item's crafting
 	// list). Then there is no tab panel, but the group mounts still run.
 	var hasPanel=!!host;
@@ -21,7 +22,7 @@
 	window.MQL_RELATED_FILTER_LIMIT=filterLimit;
 	window.MQL_RELATED_NEEDS_FILTER=needsFilter;
 	var controller=null,active='',queue=Promise.resolve();
-	var types=Object.keys(lists).filter(function(k){return ORDER.includes(k)&&k!=='vendor'&&k!=='recipe_made';})
+	var types=Object.keys(lists).filter(function(k){return ORDER.includes(k)&&k!=='vendor'&&k!=='recipe_made'&&(!isItem||(k!=='q'&&k!=='d'));})
 		.sort(function(a,b){return ORDER.indexOf(a)-ORDER.indexOf(b);});
 	// The tab panel exists only where a relation list has a host section.
 	// Pages with just group-level relations (an item's crafting list) keep
@@ -36,7 +37,7 @@
 	var root=document.createElement('div');root.className='related-list';root.id='related-panel';root.setAttribute('role','tabpanel');
 	if(hasTabs){
 		Array.from(host.children).forEach(function(n){
-			if(!area&&/^H[12]$/.test(n.tagName)){return;}
+			if(!area&&(/^H[12]$/.test(n.tagName)||n.hasAttribute('data-related-intro'))){return;}
 			fallback.appendChild(n);
 		});host.appendChild(fallback);
 		tablist.setAttribute('aria-label',host.querySelector('h2')?.textContent||document.querySelector('h1')?.textContent||'');
@@ -83,7 +84,9 @@
 			: {de:'Händler',fr:'Marchands',en:'Vendors'}[lang];
 		var typeLabels=barterOnly
 			? {barter:lang==='de'?'Tauschhändler':lang==='fr'?'Marchand troqueur':'Barterer'}
-			: {vendor:'Normaler Händler',both:'Tauschhändler'}[lang==='de'?'de':lang==='fr'?'fr':'en'];
+			: {de:{vendor:'Normaler Händler',both:'Händler und Tauschhändler'},
+				en:{vendor:'Regular vendor',both:'Vendor and barterer'},
+				fr:{vendor:'Marchand',both:'Marchand et troqueur'}}[lang];
 		var regionOptions=Object.keys(regionLabels).map(function(id){return {path:{region:String(id)},label:regionLabels[id],children:[]};});
 		var byRegion={};regionOptions.forEach(function(o){byRegion[o.path.region]=o;});
 		Object.keys(areaLabels).forEach(function(id){
@@ -156,11 +159,13 @@
 			},
 			renderResults:function(result,target){
 				target.replaceChildren();
-				result.payload.forEach(function(r){var li=document.createElement('li'),a=document.createElement(r.url?'a':'span');if(r.url){a.href=r.url;}a.className='sets-zeile';
-					var preview=document.createElement('span');preview.className='sets-preview';var strong=document.createElement('strong');strong.textContent=r.name;preview.appendChild(strong);
+				var rowUI=window.MQL_TREFFERZEILE;
+				if(result.payload.length){rowUI.header(target,{levels:false});}
+				result.payload.forEach(function(r){
 					var names=[];(r.areas||[]).slice(0,3).forEach(function(id){var n=areaLabels[String(id)]||regionLabels[String(id)];if(n&&names.indexOf(n)<0)names.push(n);});
-					var metaText=names.join(' · ')||r.extra||'';if(r.count>0)metaText+=(metaText?' · ':'')+r.count;
-					var meta=document.createElement('span');meta.className='sets-meta';meta.textContent=metaText;a.append(preview,meta);li.appendChild(a);target.appendChild(li);});
+					var metaText=[typeLabels[r.type],names.join(' · ')||r.extra].filter(Boolean).join(' · ');
+					target.appendChild(rowUI.row(target,{href:r.url,name:r.name,icon:'haendler',meta:metaText,levels:false}));
+				});
 				var nav=document.createElement('nav');nav.className='sets-pagination';nav.setAttribute('aria-label',entityWord);
 				if(result.pagination.page>1){var prev=document.createElement('a');prev.href='#';prev.dataset.filterPage=String(result.pagination.page-1);prev.textContent='‹ '+(lang==='de'?'Zurück':lang==='fr'?'Précédent':'Previous');nav.appendChild(prev);}
 				var label=document.createElement('span');label.textContent=(lang==='de'?'Seite ':lang==='fr'?'Page ':'Page ')+result.pagination.page+' '+(lang==='de'?'von':lang==='fr'?'sur':'of')+' '+result.pagination.pages;nav.appendChild(label);
@@ -210,6 +215,16 @@
 		}).catch(function(e){console.error(e);fallback.hidden=false;});
 		return queue;
 	}
+	document.querySelectorAll('[data-item-task-filter]').forEach(function (group) {
+		var kind=group.dataset.itemTaskFilter, list=lists[kind];
+		if(!list||!list.rows.length){return;}
+		var target=group.querySelector('[data-filter-results]');
+		var fallback=group.querySelector('[data-item-task-fallback]');
+		var setup=contextual(window.MQL_TASK_FILTER_SETUP(list.rows,kind),kind);
+		var filter=window.MQL_FILTER_UI.mount(group,setup);
+		filter.ready.then(function(){fallback.hidden=true;target.hidden=false;});
+		window.addEventListener('mql-status',function(){filter.reload();});
+	});
 	if(lists.vendor){
 		var vendorGroup=document.querySelector('[data-vendor-filter-group]');
 		if(vendorGroup&&needsFilter(lists.vendor.rows.length)){

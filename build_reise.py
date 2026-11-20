@@ -29,6 +29,8 @@ WELTKARTE = 268437554
 
 sys.path.insert(0, str(BASIS / 'MagicQuestLog/tools'))
 sys.path.insert(0, str(HIER))
+sys.path.insert(0, str(HIER / 'tools'))
+from gebietssicht import display_name, group_for
 
 
 def kartenname(ident, sprache):
@@ -132,7 +134,8 @@ def karten_liste(karten, sprache):
             continue
         liste.append({
             'i': eintrag['idx'],
-            'nm': kartenname(eintrag['idx'], sprache),
+            'nm': display_name(eintrag['idx'], kartenname(eintrag['idx'], sprache), sprache),
+            'gruppe': ((group_for(eintrag['idx']) or {}).get('label') or {}).get(sprache, ''),
             'w': round(eintrag['west'], 5),
             'o': round(eintrag['east'], 5),
             's': round(eintrag['south'], 5),

@@ -8,6 +8,20 @@
             button.setAttribute('aria-expanded', String(header.classList.toggle('menue-offen')));
         });
     }
+    var feedback = document.querySelector('.entity-feedback-link');
+    if (feedback) {
+        feedback.addEventListener('click', function () {
+            var name = document.querySelector('main h1');
+            var context = {
+                url: window.location.href,
+                type: document.body.getAttribute('data-art') || '',
+                id: document.body.getAttribute('data-entity-id') || '',
+                name: name ? name.textContent.trim().slice(0, 180) : '',
+                viewport: window.innerWidth + 'x' + window.innerHeight
+            };
+            try { window.sessionStorage.setItem('llb.feedback.context', JSON.stringify(context)); } catch (_) {}
+        });
+    }
     // Back links to a list carry the filters this browser last used there.
     // Only links without a query are touched, so shared links keep their state.
     (function () {

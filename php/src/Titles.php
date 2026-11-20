@@ -172,6 +172,7 @@ final class Titles
             'styles' => $this->shell->styles(), 'scripts' => $this->shell->scripts(),
             'asset_stand' => $this->shell->assetStand(),
             'menu' => $this->shell->menu('title'), 'start_page' => $this->catalogue->appRoute($this->lang, 'start'),
+            'entity_symbol' => $this->shell->icon('titel'),
             'suche_pfad' => $this->shell->appRoute('suche'),
             'spielstand_pfad' => $this->shell->appRoute('spielstand'),
             'katalog_texte' => json_encode(['none' => $this->shell->words()['none']], JSON_UNESCAPED_UNICODE),

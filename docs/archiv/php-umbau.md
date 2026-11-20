@@ -1,5 +1,7 @@
 # Umbau des Katalogs auf PHP + Twig
 
+> Historischer Stand der PHP-Umschaltung. Für heutige Builds und reguläre Releases siehe [Betrieb](../betrieb/README.md).
+
 Stand: 09.11.2026. **Die Seite ist umgestellt**: seit dem 09.11.2026 liefert
 der PHP-Front-Controller Katalog, Anwendungsseiten und Sitemaps aus; die alten
 HTML-Dateien sind entfernt (siehe „Veröffentlichen“). Dieser Text beschreibt den Umbau von erzeugten statischen

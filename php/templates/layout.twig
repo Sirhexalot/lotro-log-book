@@ -9,6 +9,7 @@
 <title>{{ seo_title }}</title><meta name="description" content="{{ page_seo.description }}">
 {% if noindex|default(false) %}<meta name="robots" content="noindex,follow">{% endif %}
 <link rel="canonical" href="{{ base }}{{ canonical_url }}">
+{% if entity_id|default('') %}<link rel="stylesheet" href="/feedback.css?v={{ asset_stand }}">{% endif %}
 {% for alt in alternates %}<link rel="alternate" hreflang="{{ alt.lang }}" href="{{ base }}{{ alt.url }}">
 {% endfor %}<meta property="og:type" content="website">
 <meta property="og:site_name" content="LOTRO Log Book">
@@ -26,17 +27,22 @@
 {% if related_lists|default([]) %}<link rel="stylesheet" href="/handwerk.css?v={{ asset_stand }}"><link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}"><link rel="stylesheet" href="/entitaeten-listen.css?v={{ asset_stand }}">{% endif %}
 {% if index_filter|default(false) %}<link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}"><link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}"><link rel="stylesheet" href="/entitaeten-listen.css?v={{ asset_stand }}">{% endif %}
 <noscript><style>.kopf .menue,.kopf .charakter{display:flex}.menue-knopf{display:none}</style></noscript>
-</head><body class="seite-text katalog-seite" data-art="{{ kind }}" data-katalog-texte="{{ katalog_texte }}">
+</head><body class="seite-text katalog-seite" data-art="{{ kind }}" data-entity-id="{{ entity_id|default('') }}" data-katalog-texte="{{ katalog_texte }}">
 <header class="kopf"><div class="kopf-innen">
 <a class="katalog-marke" href="{{ start_page }}">LOTRO Log Book</a>
 <a class="suchen-knopf" href="{{ suche_pfad }}">{{ w.search }}</a>
 <button class="menue-knopf" type="button" aria-label="{{ w.menu }}" aria-controls="menue" aria-expanded="false">☰</button>
 <nav class="menue" id="menue">{{ menu|raw }}</nav>
 
-<div class="charakter"><label class="charakterwahl" hidden><select id="katalog-charakter" aria-label="{{ w.none }}"></select></label><a href="{{ spielstand_pfad }}" class="importieren">{{ w.import_ }}</a></div>
+ <div class="charakter"><label class="charakterwahl" hidden><select id="katalog-charakter" aria-label="{{ w.none }}"></select></label><a href="{{ spielstand_pfad }}" class="importieren">{{ w.import_ }}</a><a class="feedback-global" href="/{{ lang }}/{{ lang == 'fr' ? 'retour' : 'feedback' }}/" data-feedback-link>{% if lang == 'de' %}Feedback senden{% elseif lang == 'fr' %}Envoyer un retour{% else %}Send feedback{% endif %}</a></div>
 </div></header>
-<main class="katalog-inhalt" data-related-filter-limit="{{ related_direct_list_max|default(5) }}"><nav aria-label="Breadcrumb" class="katalog-pfad">{{ crumbs|raw }}</nav>
-{% block inhalt %}{% endblock %}</main>
+<main class="katalog-inhalt" data-related-filter-limit="{{ related_direct_list_max|default(5) }}">
+<div class="katalog-orientierung">
+	<nav aria-label="Breadcrumb" class="katalog-pfad">{{ crumbs|raw }}</nav>
+	{% if entity_id|default('') %}<a class="entity-feedback-link" href="/{{ lang }}/{{ lang == 'fr' ? 'retour' : 'feedback' }}/" data-feedback-link>{{ {de: 'Feedback zu dieser Seite', en: 'Feedback on this page', fr: 'Donner votre avis sur cette page'}[lang] }} →</a>{% endif %}
+</div>
+{% block inhalt %}{% endblock %}
+</main>
 <footer class="seitenfuss"><div class="seitenfuss-innen"><div class="footer-links-links"><p class="footer-statistik"><span data-statistik-aktiv hidden><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-aktiv-text></span></span></p></div><nav aria-label="Languages" class="sprachen">{{ languages|raw }}</nav><p class="footer-rechts"><a href="/{{ lang }}/plugin/">Plugin</a> · {{ legal|raw }} · {{ privacy|raw }}</p></div></footer>
 <script src="/statistik.js?v={{ asset_stand }}" defer></script>
 <script src="/status.js?v={{ asset_stand }}" defer></script>
@@ -44,10 +50,10 @@
 {% if related_lists|default([]) %}
 <script type="application/json" id="related-lists">{{ related_json|raw }}</script>
 <script type="application/json" id="related-list-symbols">{{ related_icons_json|raw }}</script>
-{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','listen-sprache.js','referenz.js','handwerk-filter.js','rezepte.js','gegenstaende-filter.js','aufgaben-filter.js','entitaeten-listen.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
+{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','listen-sprache.js','referenz.js','symbole.js','treffer-zeile.js','handwerk-filter.js','rezepte.js','gegenstaende-filter.js','aufgaben-filter.js','entitaeten-listen.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
 {% endif %}
 {% if index_filter|default(false) %}
-{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','filterzustand.js','filteradapter.js','filter-ui.js','aufgaben-filter.js','taten-index.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
+{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','filterzustand.js','filteradapter.js','filter-ui.js','symbole.js','treffer-zeile.js','aufgaben-filter.js','taten-index.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
 <script src="/taten-index-{{ lang }}.js?v={{ asset_stand }}" defer></script>
 <script src="/taten-index.js?v={{ asset_stand }}" defer></script>
 {% endif %}

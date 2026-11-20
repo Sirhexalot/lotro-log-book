@@ -595,7 +595,7 @@ unfertige Aufgaben-Navigation zu veröffentlichen.
 - Ausgangsstand vor dem Experiment: Commit `95fc39c`
 - Plugin-Referenz, gemeinsame Aufgabenansicht: Commit `8b67b98`
 - Plugin-Release mit Beschreibung: Commit `002f26c`
-- Frühere Oberflächenprüfung: `docs/site-polish-2026-11-06.md`
-- Epische Aufgabenlogik: `docs/epische-geschichte.md`
+- Frühere Oberflächenprüfung: `docs/archiv/site-polish-2026-11-06.md`
+- Epische Aufgabenlogik: `docs/fachbereiche/epische-geschichte.md`
 - Aufgabenseiten: `build_aufgaben.py` und
-  `docs/katalogseite-spec-2026-11-08.md`
+  `docs/archiv/katalogseite-spec-2026-11-08.md`

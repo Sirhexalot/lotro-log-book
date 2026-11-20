@@ -23,8 +23,11 @@ import json
 import math
 import re
 from pathlib import Path
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'tools'))
+from gebietssicht import display_name, group_for
 DATEN = ROOT / 'daten'
 WEB = ROOT / 'web'
 REFERENZ = ROOT / 'referenz'
@@ -358,7 +361,9 @@ def build(lang, packs, tree, quests, names, links=None):
             'pack': assignment[area],
             'region': region_of(area),
             'group': group_of(area),
-            'name': name_for(area, tree, names),
+            'name': display_name(area, name_for(area, tree, names), lang),
+            'display_group': (group_for(area, tree) or {}).get('id'),
+            'display_group_name': ((group_for(area, tree) or {}).get('label') or {}).get(lang, ''),
             'quests': len(quests_in_area),
             'reviewed': by_pack[assignment[area]].get('review') == 'landscape',
             'level_min': low,

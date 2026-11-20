@@ -27,6 +27,10 @@ class ComposerStaticInit9ea7f741f588c70e9c81da7252e6d03b
             'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Polyfill\\Ctype\\' => 23,
         ),
+        'P' =>
+        array (
+            'PHPMailer\\PHPMailer\\' => 20,
+        ),
         'L' =>
         array (
             'Llb\\' => 4,
@@ -46,6 +50,10 @@ class ComposerStaticInit9ea7f741f588c70e9c81da7252e6d03b
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
         ),
+        'PHPMailer\\PHPMailer\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
+        ),
         'Llb\\' =>
         array (
             0 => __DIR__ . '/../..' . '/php/src',
@@ -54,12 +62,32 @@ class ComposerStaticInit9ea7f741f588c70e9c81da7252e6d03b
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Llb\\Adventures' => __DIR__ . '/../..' . '/php/src/Adventures.php',
         'Llb\\Catalogue' => __DIR__ . '/../..' . '/php/src/Catalogue.php',
         'Llb\\Data' => __DIR__ . '/../..' . '/php/src/Data.php',
+        'Llb\\Factions' => __DIR__ . '/../..' . '/php/src/Factions.php',
+        'Llb\\FilterRegeln' => __DIR__ . '/../..' . '/php/src/FilterRegeln.php',
+        'Llb\\Givers' => __DIR__ . '/../..' . '/php/src/Givers.php',
+        'Llb\\Instances' => __DIR__ . '/../..' . '/php/src/Instances.php',
+        'Llb\\Landmarks' => __DIR__ . '/../..' . '/php/src/Landmarks.php',
         'Llb\\Page' => __DIR__ . '/../..' . '/php/src/Page.php',
+        'Llb\\RelatedLists' => __DIR__ . '/../..' . '/php/src/RelatedLists.php',
         'Llb\\Router' => __DIR__ . '/../..' . '/php/src/Router.php',
+        'Llb\\Sets' => __DIR__ . '/../..' . '/php/src/Sets.php',
         'Llb\\Shell' => __DIR__ . '/../..' . '/php/src/Shell.php',
+        'Llb\\Sitemap' => __DIR__ . '/../..' . '/php/src/Sitemap.php',
+        'Llb\\Sprache' => __DIR__ . '/../..' . '/php/src/Sprache.php',
+        'Llb\\Statistics' => __DIR__ . '/../..' . '/php/src/Statistics.php',
+        'Llb\\Titles' => __DIR__ . '/../..' . '/php/src/Titles.php',
+        'Llb\\Vendors' => __DIR__ . '/../..' . '/php/src/Vendors.php',
         'Llb\\View' => __DIR__ . '/../..' . '/php/src/View.php',
+        'PHPMailer\\PHPMailer\\DSNConfigurator' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/DSNConfigurator.php',
+        'PHPMailer\\PHPMailer\\Exception' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/Exception.php',
+        'PHPMailer\\PHPMailer\\OAuth' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/OAuth.php',
+        'PHPMailer\\PHPMailer\\OAuthTokenProvider' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/OAuthTokenProvider.php',
+        'PHPMailer\\PHPMailer\\PHPMailer' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/PHPMailer.php',
+        'PHPMailer\\PHPMailer\\POP3' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/POP3.php',
+        'PHPMailer\\PHPMailer\\SMTP' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/SMTP.php',
         'Symfony\\Polyfill\\Ctype\\Ctype' => __DIR__ . '/..' . '/symfony/polyfill-ctype/Ctype.php',
         'Symfony\\Polyfill\\Mbstring\\Mbstring' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/Mbstring.php',
         'Twig\\AbstractTwigCallable' => __DIR__ . '/..' . '/twig/twig/src/AbstractTwigCallable.php',

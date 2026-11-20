@@ -38,6 +38,7 @@ class KartenstartTest(unittest.TestCase):
             self.assertIn('window.MQL_QUESTS = [];', text, name)
             self.assertIn('window.MQL_KARTEN = ', text, name)
             self.assertIn('window.MQL_SHARD_REGION = ', text, name)
+            self.assertIn('window.MQL_SHARD_MAPS = ', text, name)
             self.assertIn('window.MQL_KARTEN_SUMMARY = ', text, name)
 
     def test_quest_and_deed_shards_are_separate_and_loadable(self):
@@ -76,6 +77,56 @@ class KartenstartTest(unittest.TestCase):
                 self.assertTrue(all(row.get('i') and row.get('f') for row in summary), name)
                 self.assertTrue(all(not {'n', 'd', 'gt', 't'} & row.keys()
                                     for row in summary), name)
+
+    def test_every_shard_has_a_detail_shard_without_map_fields(self):
+        for sprache in ('de', 'en', 'fr'):
+            for art in ('aufgaben', 'taten'):
+                ordner = ROOT / 'web' / 'karten-daten' / art / sprache
+                for shard in list(ordner.glob('map-*.js')) + list(ordner.glob('region-*.js')):
+                    detail = ordner / ('detail-' + shard.name)
+                    self.assertTrue(detail.is_file(), detail)
+                    text = detail.read_text(encoding='utf-8')
+                    rows = json.loads(
+                        text.split('window.MQL_GEBIETS_DETAILS = ', 1)[1]
+                        .rstrip().rstrip(';'))
+                    self.assertIsInstance(rows, dict, detail)
+                    for kennung, eintrag in list(rows.items())[:5]:
+                        self.assertRegex(kennung, r'^[0-9A-F]{8}$', detail)
+                        self.assertLessEqual(
+                            set(eintrag),
+                            {'d', 's', 't', 'u', 'gi', 'nq', 'pq', 'tl', 'lp'},
+                            detail)
+                        self.assertFalse(
+                            {'n', 'gt', 'fw', 'fk', 'rw'} & set(eintrag), detail)
+
+    def test_map_loads_detail_shards_instead_of_the_catalogue(self):
+        code = (ROOT / 'web' / 'app.js').read_text(encoding='utf-8')
+        self.assertIn("'detail-map-' + karten[karten.length - 1]", code)
+        self.assertIn("'detail-' + datei", code)
+        self.assertIn('window.MQL_GEBIETS_DETAILS', code)
+        # The full catalogue stays a fallback for an old deployment only.
+        self.assertEqual(code.count('ladeVollstaendig('), 2, code.count('ladeVollstaendig('))
+        self.assertIn('script.onerror = function () {\n\t\t\tvar wartende = detailLader[datei]', code)
+
+    def test_map_start_summary_carries_the_map_ids_for_tabs(self):
+        for lang in ('de', 'en', 'fr'):
+            text = (ROOT / 'web' / ('karten-start-%s.js' % lang)).read_text(encoding='utf-8')
+            summary = json.JSONDecoder().raw_decode(
+                text.split('window.MQL_KARTEN_SUMMARY = ', 1)[1])[0]
+            self.assertTrue(all(row.get('fk') for row in summary if len(row.get('f') or []) > 2),
+                            lang)
+            # The overview tiles (Epic story, class, origin, …) are built from
+            # the compact metadata before any shard is loaded.
+            self.assertTrue(any(row.get('th') == 'epic' for row in summary), lang)
+
+    def test_epic_topic_shard_exists_for_every_language(self):
+        for lang in ('de', 'en', 'fr'):
+            datei = ROOT / 'web' / ('thema-epic-%s.js' % lang)
+            self.assertTrue(datei.is_file(), datei)
+            text = datei.read_text(encoding='utf-8')
+            rows = json.JSONDecoder().raw_decode(text.split('window.MQL_THEMA_DATEN = ', 1)[1])[0]
+            self.assertTrue(rows, datei)
+            self.assertTrue(all(row.get('th') == 'epic' for row in rows), datei)
 
     def test_running_filter_has_dropdown_labels_in_all_languages(self):
         code = (ROOT / 'web' / 'app.js').read_text(encoding='utf-8')

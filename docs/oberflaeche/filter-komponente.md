@@ -148,11 +148,10 @@ Desktop- und Mobil-Screenshots wurden zusätzlich visuell geprüft.
 - Filterzeile: 16 px Pfeil, 16 px Checkbox, flexibler Text, 7ch Trefferzahl,
   jeweils 8 px Zwischenraum. SVG-Pfeile ersetzen Textzeichen/native Marker.
   Gruppenüberschriften und flache Optionen verwenden dieselben Achsen.
-- 16 px Einzug je Unterebene, unveränderte rechte Zahlenkante; der Kopf einer
-  Gruppe bleibt einzeilig zentriert, Checkbox und Aufklapppfeil einer Option
-  stehen dagegen bündig auf der **ersten Textzeile**, auch wenn das Label
-  umbricht (12.11.2026 korrigiert, vorher mittig zum Gesamtblock). Desktop
-  mindestens 32 px, Mobil mindestens 44 px Zeilenhöhe. Karten
+- 16 px Einzug je Unterebene, unveränderte rechte Zahlenkante; Gruppenüberschriften
+  und einzeilige Optionen sind in ihrer Zeile zentriert. Bei umgebrochenen
+  Labels bleiben Checkbox und Aufklapppfeil an der **ersten Textzeile**.
+  Desktop mindestens 32 px, Mobil mindestens 44 px Zeilenhöhe. Karten
   innen/untereinander je 12 px.
 - Ergebniszeile: 32 px Symbolspalte, 12 px Textabstand, identische Kante für
   Titel/Metadaten und durchgehende Trennlinien; Pagination im Ergebniscontainer.

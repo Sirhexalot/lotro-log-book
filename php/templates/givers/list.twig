@@ -1,4 +1,5 @@
 {% extends 'layout.twig' %}
+{% import 'entity/_result_row.twig' as result %}
 {# Shared filter-browser shell: the classes are the ones sets.css and sets.js
    already enhance, so checkboxes filter immediately in both catalogues. #}
 {% block inhalt %}
@@ -41,7 +42,11 @@
                 <a href="{{ sort_name_url }}"{% if sort_active == '' %} aria-current="true"{% endif %}>{{ gw.sort_name }}</a>
                 <a href="{{ sort_level_url }}"{% if sort_active == 'stufe' %} aria-current="true"{% endif %}>{{ gw.sort_level }}</a>
             </div>
-            <ul class="sets-list">{% for row in givers %}<li><a href="{{ row.url }}"><span class="sets-preview"><strong>{{ row.name }}</strong></span><span class="sets-meta">{{ row.meta }}</span></a></li>{% else %}<li>{{ gw.empty }}</li>{% endfor %}</ul>
+            {% set has_levels = givers|filter(row => row.low is not null)|length > 0 %}
+            <ul class="sets-list mql-row-list">{% if givers %}{{ result.heading(lang, has_levels ? gw.level_short : '') }}{% endif %}{% for row in givers %}
+                {% set level = row.low is not null and row.high > row.low ? row.low ~ '–' ~ row.high : row.low %}
+                {{ result.row(lang, row.url, row.name, [row.kind_text, row.title, row.places_text]|filter(v => v)|join(' · '), entity_symbol, '', has_levels ? gw.level_short : '', level) }}
+            {% else %}<li>{{ gw.empty }}</li>{% endfor %}</ul>
             {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ gw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ gw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>

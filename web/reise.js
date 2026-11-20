@@ -377,6 +377,7 @@
 
 		var fuss = eltern('figcaption');
 		fuss.appendChild(eltern('strong', karte.nm || t('reise_karte')));
+		if (karte.gruppe) { fuss.appendChild(eltern('small', karte.gruppe, 'reise-karten-gruppe')); }
 		var liste = eltern('ul', null, 'reise-karte-liste');
 		gruppe.orte.forEach(function (eintrag) {
 			var punkt = eltern('li');

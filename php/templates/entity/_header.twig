@@ -1,0 +1,20 @@
+{% macro detail(kind, lang, w, name, icon, game_icon = '', head_class = '', filter_url = '', filter_label = '') %}
+{%- set labels = {
+    q: w.qlabel, d: w.dlabel, i: w.ilabel, recipe: w.recipelabel,
+    title: w.titlelabel, virtue: w.virtuelabel, p: w.plabel, f: w.flabel, l: w.llabel,
+    area: {de: 'Gebiet', en: 'Area', fr: 'Zone'}[lang],
+    region: {de: 'Region', en: 'Region', fr: 'Région'}[lang],
+    giver: {de: 'Auftraggeber', en: 'Quest giver', fr: 'Donneur de quête'}[lang],
+    vendor: {de: 'Händler', en: 'Vendor', fr: 'Marchand'}[lang],
+    set: {de: 'Set', en: 'Set', fr: 'Ensemble'}[lang]
+} -%}
+{%- set symbol = game_icon ?: icon -%}
+<header class="katalog-kopf katalog-detailkopf">
+    <p class="katalog-art">{{ labels[kind] }}</p>
+    <div class="katalog-titelzeile">
+        {% if symbol %}<span class="mql-row-icon{% if game_icon %} mql-row-icon-item{% endif %}" aria-hidden="true">{{ symbol|raw }}</span>{% endif %}
+        <h1{% if head_class %} class="{{ head_class }}"{% endif %}>{{ name }}</h1>
+    </div>
+</header>
+{% if filter_url %}<p class="entity-filter-link"><a href="{{ filter_url }}">{{ filter_label }} →</a></p>{% endif %}
+{% endmacro %}

@@ -11,6 +11,14 @@
 	display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start;
 	border-bottom: 1px solid var(--rand);
 }
+.questfinder .finder-ergebnisse > li.mql-row,
+.questfinder .finder-ergebnisse > li.mql-row-heading {
+	grid-template-columns:minmax(0,1.45fr) minmax(0,.9fr) minmax(145px,.62fr);
+	align-items:start;
+	/* The shared row already carries its top rule; a second bottom border read
+	   as two lines directly next to each other. */
+	border-bottom: 0;
+}
 .questfinder .finder-treffer {
 	display: grid;
 	grid-template-columns: minmax(0,1fr) auto;
@@ -37,6 +45,8 @@
 }
 @media (max-width: 600px) {
 	.questfinder .finder-ergebnisse > li { grid-template-columns: minmax(0, 1fr); }
+	.questfinder .finder-ergebnisse > li.mql-row,
+	.questfinder .finder-ergebnisse > li.mql-row-heading { grid-template-columns:54px minmax(0,1fr); }
 	.questfinder .finder-ergebnisse > li > .manueller-status {
 		grid-column: 1; grid-row: 2; margin: 4px 4px 12px;
 	}

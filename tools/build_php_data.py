@@ -27,6 +27,7 @@ import json
 import re
 import shutil
 import sys
+import xml.etree.ElementTree as ET
 from collections import defaultdict
 from pathlib import Path
 
@@ -34,7 +35,9 @@ HIER = Path(__file__).resolve().parents[1]
 DATEN = HIER / 'daten'
 WEB = HIER / 'web'
 sys.path.insert(0, str(HIER))
+sys.path.insert(0, str(HIER / 'tools'))
 from itemnamen import sauberer_name  # noqa: E402
+from gebietssicht import display_name, group_for, map_tree  # noqa: E402
 
 SPRACHEN = ('de', 'en', 'fr')
 SCHEMA = 1
@@ -207,7 +210,8 @@ def write_landmark_index(target: Path, lang: str, landmarks: dict, maps: dict) -
     second lookup. The landmarks without a position keep an empty area and are
     collected under "no area" in the browser.
     """
-    labels = {'area': {}, 'region': {}, 'area_region': {}}
+    labels = {'area': {}, 'region': {}, 'area_region': {}, 'area_group': {}}
+    tree = map_tree()
     for idx, entry in maps.items():
         name = entry.get('name')
         if not name:
@@ -215,7 +219,12 @@ def write_landmark_index(target: Path, lang: str, landmarks: dict, maps: dict) -
         if entry.get('tier') == 1:
             labels['region'][str(idx)] = name
         else:
-            labels['area'][str(idx)] = name
+            labels['area'][str(idx)] = display_name(int(idx), name, lang)
+            group = group_for(int(idx), tree)
+            if group:
+                labels['area_group'][str(idx)] = {
+                    'id': group['id'], 'label': group['label'][lang]
+                }
     for ident, entry in landmarks.items():
         area = entry.get('area')
         # A region map is its own area: the region filter already covers it,
@@ -229,6 +238,9 @@ def write_landmark_index(target: Path, lang: str, landmarks: dict, maps: dict) -
         teile = [entry['name']]
         if area is not None:
             teile.append(labels['area'].get(str(area), ''))
+            group = labels['area_group'].get(str(area))
+            if group:
+                teile.append(group['label'])
         if region is not None:
             teile.append(labels['region'].get(str(region), ''))
         rows.append({'id': ident, 'name': entry['name'],
@@ -544,23 +556,44 @@ BONI_DATEI = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source
 # Der vollständige Gegenstands-Export: Symbol, Art und ein sauberer Name.
 VOLL_DATEI = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
                   '/items-2026-11-08/items.json')
+ITEM_FULL: dict = {}
+DAMAGE_TYPES: dict = {}
+
+
+def damage_types(lore):
+    """Resolve the client enum to the labels actually present in each language."""
+    enum = lore / 'enums/DamageType.xml'
+    if not enum.is_file():
+        return {}
+    keys = {e.get('key'): e.get('name') for e in ET.parse(enum).getroot()
+            if e.get('key')}
+    result = {}
+    for lang in SPRACHEN:
+        path = lore / 'labels' / lang / 'enum-DamageType.xml'
+        if path.is_file():
+            labels = {e.get('key'): e.get('value') for e in ET.parse(path).getroot()}
+            result[lang] = {key: labels[name] for key, name in keys.items() if labels.get(name)}
+    return result
 
 
 def load_item_context(builder, model, lang):
     """Details, set tables, labels and resource places for the item pages."""
     global ITEM_SETS, ITEM_DETAILS, ITEM_LABELS, ITEM_TYPEN, ITEM_BONI
+    global ITEM_FULL, DAMAGE_TYPES
     from php_viewmodel import ItemContext
     if ITEM_DETAILS is None:
         ITEM_DETAILS = json.loads((DATEN / 'gegenstand-details.json').read_text(encoding='utf-8')).get('items') or {}
         # Die Ausrüstungsdatei trägt den Namen nur für einen Teil der
         # Gegenstände und mit Export-Markup; der volle Export ist die Quelle.
-        voll = (json.loads(VOLL_DATEI.read_text(encoding='utf-8')).get('items') or {}
-                if VOLL_DATEI.is_file() else {})
+        ITEM_FULL = (json.loads(VOLL_DATEI.read_text(encoding='utf-8')).get('items') or {}
+                     if VOLL_DATEI.is_file() else {})
+        from build_items import ITEM_LORE
+        DAMAGE_TYPES = damage_types(ITEM_LORE.parent)
         for ident, eintrag in ITEM_DETAILS.items():
             namen = eintrag.get('name')
             if not isinstance(namen, dict):
                 namen = eintrag['name'] = {}
-            quelle = (voll.get(str(ident).upper()) or {}).get('n') or {}
+            quelle = (ITEM_FULL.get(str(ident).upper()) or {}).get('n') or {}
             for sprache in SPRACHEN:
                 sauber = sauberer_name(quelle.get(sprache), sprache)
                 if sauber:
@@ -578,7 +611,7 @@ def load_item_context(builder, model, lang):
     boni = ITEM_BONI.get('items') or {}
     boni_labels = (ITEM_BONI.get('labels') or {}).get(lang) or {}
     return ItemContext(builder, ITEM_DETAILS, ITEM_SETS, ITEM_LABELS, ITEM_TYPEN,
-                       vorkommen, boni, boni_labels, referenz)
+                       vorkommen, boni, boni_labels, referenz, ITEM_FULL, DAMAGE_TYPES.get(lang, {}))
 
 
 DEED_CATEGORIES: dict | None = None

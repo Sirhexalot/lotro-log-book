@@ -15,6 +15,15 @@ small { font-size: var(--text-bedienung); }
 
 /* Background and line belong to the shell, not to one page's stylesheet:
    pages without style.css (item search, start) had no header background. */
+:root {
+	--llb-raster: repeat(12, minmax(0, 1fr));
+	--llb-raster-abstand: clamp(12px, 1.8vw, 24px);
+	--llb-flaechen-innen: clamp(12px, 1.6vw, 20px);
+	--llb-flaechen-ton: #29241e;
+	--llb-flaechen-rand: #605343;
+	--llb-flaechen-radius: 5px;
+}
+.llb-raster { display: grid; grid-template-columns: var(--llb-raster); gap: var(--llb-raster-abstand); align-items: start; }
 .kopf { background: var(--fläche); border-bottom: 1px solid var(--rand); }
 .kopf h1 { margin: 0; font-size: 16px; font-weight: normal; letter-spacing: .04em; }
 .kopf h1 a.logo {
@@ -95,6 +104,15 @@ small { font-size: var(--text-bedienung); }
 .kopf .suchen-knopf:hover { color: var(--gold); border-bottom-color: var(--gold); }
 .kopf .importieren { color: var(--schwach); text-decoration: none; border-bottom: 2px solid transparent; }
 .kopf .importieren:hover, .kopf .importieren[aria-current="page"] { color: var(--gold); border-bottom-color: var(--gold); }
+.kopf .feedback-global {
+	display: inline-flex; align-items: center; justify-content: center;
+	padding: 5px 9px; border: 1px solid var(--rand); border-radius: 4px;
+	color: var(--gold); text-decoration: none; white-space: nowrap;
+	font-size: var(--text-bedienung);
+}
+.kopf .feedback-global:hover, .kopf .feedback-global[aria-current="page"] {
+	border-color: var(--gold); background: var(--fläche-hell);
+}
 /* Age of the imported progress: one clock, three colours. */
 .kopf .standsalter {
 	display: inline-flex; align-items: center; justify-content: center;
@@ -156,15 +174,15 @@ button:disabled:hover { background: var(--fläche-hell); }
 
 /* Text links in editorial/app content: link meaning is not carried by gold
    alone. Whole-row cards and button-like links keep their component styling. */
-.seite-text main :is(p, li, dd, td) a:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .hinweis-link, .hinweis-karte, .karte-gebiete a)),
-.seite-start main :is(p, li) a:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result)) {
+.seite-text main :is(p, li, dd, td) a:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .mql-row-hit, .hinweis-link, .hinweis-karte, .karte-gebiete a)),
+.seite-start main :is(p, li) a:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .mql-row-hit)) {
 	color: var(--gold);
 	text-decoration-line: underline;
 	text-decoration-thickness: .08em;
 	text-underline-offset: .16em;
 }
-.seite-text main :is(p, li, dd, td) a:visited:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .hinweis-link, .hinweis-karte, .karte-gebiete a)),
-.seite-start main :is(p, li) a:visited:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result)) {
+.seite-text main :is(p, li, dd, td) a:visited:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .mql-row-hit, .hinweis-link, .hinweis-karte, .karte-gebiete a)),
+.seite-start main :is(p, li) a:visited:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .mql-row-hit)) {
 	color: var(--gold);
 }
 
@@ -484,10 +502,10 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 .manueller-status.status-offen .manueller-status-auswahl { color: var(--offen); }
 .manueller-status.status-laufend .manueller-status-auswahl { color: var(--laufend); }
 .manueller-status.status-fertig .manueller-status-auswahl { color: var(--fertig); }
-.manueller-status-auswahl option[value="offen"] { color: var(--offen); }
-.manueller-status-auswahl option[value="laufend"] { color: var(--laufend); }
-.manueller-status-auswahl option[value="fertig"] { color: var(--fertig); }
-.manueller-status.manuell .manueller-status-auswahl { border-color: var(--gold); }
+.manueller-status-auswahl { color-scheme: dark; }
+.manueller-status-auswahl option { color: var(--text); background: var(--fläche); }
+.manueller-status-auswahl:focus-visible,
+.manueller-status-zurueck:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .manueller-status-zurueck {
 	border: 0; background: transparent; color: var(--schwach); padding: 0 2px;
 	cursor: pointer; font: inherit; font-size: .9rem; line-height: 1;

@@ -28,7 +28,7 @@ const base=process.env.LLB_ITEM_PREVIEW || 'http://127.0.0.1:8924';
 				const longName=page.locator('.filter-option>span').filter({hasText:/^Legendärer Gegenstand$/});
 				assert.equal(await longName.evaluate(n=>n.getBoundingClientRect().height<=parseFloat(getComputedStyle(n).lineHeight)+1),true);
 			}
-			assert.equal(await page.locator('.filter-group-heading').first().evaluate(n=>getComputedStyle(n).backgroundColor!==getComputedStyle(n.parentElement).backgroundColor),true);
+			assert.equal(await page.locator('.filter-group-heading').first().evaluate(n=>getComputedStyle(n).backgroundColor==='rgba(0, 0, 0, 0)'&&getComputedStyle(n.parentElement).borderTopStyle==='solid'),true);
 			// Content geometry, not merely presence/overflow: same axes across groups.
 			assert.deepEqual(await page.evaluate(()=>{
 				const failures=[], rect=n=>n.getBoundingClientRect(), near=(a,b)=>Math.abs(a-b)<=1;
@@ -46,15 +46,19 @@ const base=process.env.LLB_ITEM_PREVIEW || 'http://127.0.0.1:8924';
 					if(summary){const arrow=rect(summary.querySelector('svg'));if(!near(arrow.y+arrow.height/2,input.y+input.height/2)){failures.push('arrow center');}}
 				}
 				const first=document.querySelector('#gs-ergebnis li'), title=rect(first.querySelector('.gs-name')),meta=rect(first.querySelector('.gs-meta'));
-				const list=rect(document.querySelector('.filter-results-home')),card=rect(document.querySelector('.filter-group'));
+				const list=rect(document.querySelector('.filter-results-home')),header=rect(document.querySelector('.filter-result-header'));
 				if(!near(title.left,meta.left)){failures.push('result text');}
-				if(!near(list.top,card.top)){failures.push('content top');}
+				if(!near(list.top-header.bottom,16)){failures.push('result gap');}
 				if(!near(rect(document.querySelector('.filter-result-toolbar')).left,list.left)){failures.push('count edge');}
-				// Deliberately wrap a label: controls must remain centered without nudges.
+				// Deliberately wrap a label: controls stay on its first text line.
 				const span=reference.querySelector('span'),original=span.textContent;
 				span.textContent='Ein sehr langer mehrzeiliger Filtername für die Ausrichtungsprüfung';
-				const c=rect(reference.querySelector('input')),t=rect(span);
-				if(!near(c.y+c.height/2,t.y+t.height/2)){failures.push('multiline center');}span.textContent=original;
+				window.dispatchEvent(new Event('resize'));
+				const c=rect(reference.querySelector('input')),range=document.createRange();
+				range.selectNodeContents(span);
+				const firstLine=range.getClientRects()[0];
+				if(!reference.classList.contains('filter-option-wrapped')||!near(c.y+c.height/2,firstLine.y+firstLine.height/2)){failures.push('multiline first-line alignment');}
+				span.textContent=original;window.dispatchEvent(new Event('resize'));
 				return failures;
 			}),[]);
 			// Facet optimization must preserve the independent category counts.

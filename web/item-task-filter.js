@@ -7,7 +7,8 @@
     document.querySelectorAll('[data-item-task-filter]').forEach(function (root) {
         var kind = root.getAttribute('data-item-task-filter');
         var rows = lists[kind] || [];
-        if (rows.length <= 10) { return; }
+        // PHP item pages use the shard-based contextual adapter instead.
+        if (document.getElementById('related-lists') || rows.length <= (Number(document.querySelector('[data-related-filter-limit]')?.dataset.relatedFilterLimit) || 5)) { return; }
         var fallback = root.querySelector('[data-item-task-fallback]');
         var target = root.querySelector('[data-filter-results]');
         var controller;

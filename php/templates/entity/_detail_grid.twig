@@ -1,0 +1,7 @@
+{# Both columns flow independently. Empty columns do not reserve space. #}
+{% if reading_panel|trim or place_panel|trim %}
+<div class="entity-detail-grid llb-raster{% if reading_panel|trim and place_panel|trim %} entity-detail-split{% endif %}">
+    {% if reading_panel|trim %}<div class="entity-detail-reading">{{ reading_panel }}</div>{% endif %}
+    {% if place_panel|trim %}<div class="entity-detail-place">{{ place_panel }}</div>{% endif %}
+</div>
+{% endif %}

@@ -9,5 +9,10 @@
 	if (!root || !window.MQL_INDEX_ROWS || !window.MQL_TASK_FILTER_SETUP || !window.MQL_FILTER_UI) { return; }
 	var rows = window.MQL_INDEX_ROWS.rows || [];
 	if (rows.length < 2) { return; }
-	window.MQL_FILTER_UI.mount(root, window.MQL_TASK_FILTER_SETUP(rows, 'd'));
+	var filter = window.MQL_FILTER_UI.mount(root, window.MQL_TASK_FILTER_SETUP(rows, 'd'));
+	window.addEventListener('mql-status', function () { filter.reload(); });
+	document.addEventListener('mql:characterchange', function () { filter.reload(); });
+	document.addEventListener('change', function (event) {
+		if (event.target.id === 'katalog-charakter') { filter.reload(); }
+	});
 }());

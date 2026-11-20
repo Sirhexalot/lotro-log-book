@@ -296,16 +296,22 @@ BRESTE = re.compile(r'[{}]')
 SEKTIONEN = {
     'de': {
         'story': 'Epische Geschichte', 'shadow': 'Epische Geschichte',
+        'themeEpic': 'Epische Geschichte', 'themeClass': 'Klassenaufgaben',
+        'themeOrigin': 'Herkunftsaufgaben', 'themeOther': 'Ohne Gebiet',
         'missions': 'Missionen', 'craft': 'Handwerk', 'festivals': 'Feste',
         'instances': 'Instanzen', 'other': 'Ohne Gebiet', 'more': 'Weitere Inhalte',
     },
     'en': {
         'story': 'Epic Story', 'shadow': 'Epic Story',
+        'themeEpic': 'Epic Story', 'themeClass': 'Class quests',
+        'themeOrigin': 'Origin quests', 'themeOther': 'No region',
         'missions': 'Missions', 'craft': 'Crafting', 'festivals': 'Festivals',
         'instances': 'Instances', 'other': 'No region', 'more': 'More content',
     },
     'fr': {
         'story': 'Histoire épique', 'shadow': 'Histoire épique',
+        'themeEpic': 'Histoire épique', 'themeClass': 'Quêtes de classe',
+        'themeOrigin': 'Quêtes d’origine', 'themeOther': 'Sans région',
         'missions': 'Missions', 'craft': 'Artisanat', 'festivals': 'Festivals',
         'instances': 'Instances', 'other': 'Sans région', 'more': 'Autres contenus',
     },
@@ -386,7 +392,7 @@ def label(schluessel, name, sprache):
     return SEKTIONEN[sprache].get(koerper.split(':', 1)[0], koerper)
 
 
-def clean(text, zaehler, sprache):
+def clean(text, zaehler, sprache, *, keep_numbered_title=False):
     """Make game text readable: strip markup, replace placeholders.
 
     For objectives `zaehler` is passed empty, because the page appends the
@@ -397,7 +403,10 @@ def clean(text, zaehler, sprache):
     text = str(text)
     text = MARKUP.sub('', text)
     text = COUNTER.sub(zaehler, text)
-    text = LISTENMARKE.sub('', text)
+    # Quest chapter names such as "01. Die weiteren Abenteuer …" have a
+    # real numeric title prefix, unlike technical list markers such as "-1:".
+    if not keep_numbered_title or not re.match(r'^\s*\d+\.\s', text):
+        text = LISTENMARKE.sub('', text)
     text = GESCHLECHT.sub(lambda treffer: '%s / %s' % (treffer.group(1), treffer.group(2)), text)
     text = BRESTE.sub('', text)
     for key in ('PLAYER', 'PLAYERNAME', 'SURNAME', 'CLASS', 'RACE'):
@@ -594,7 +603,8 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
             schritte.append([str(step['i']), zeilen, ziele_je_schritt])
         quests.append({
             'i': record['id'],
-            'n': clean(record['name'], TOKENS[sprache]['zaehler'], sprache),
+            'n': clean(record['name'], TOKENS[sprache]['zaehler'], sprache,
+                       keep_numbered_title=art == 'aufgaben'),
             # Requirements: v all completed, vo one of them completed, vl minimum
             # level, vb something else we cannot check (class, race, faction …).
             **({'v': [str(x) for x in step_list(field(record, 'v'))]} if field(record, 'v') else {}),
@@ -785,10 +795,13 @@ def main():
                         help='character Progress.lua; if missing, nothing is coloured')
     options = parser.parse_args()
     if options.katalog is None:
-        base = LOKALES_PLUGIN if options.art == 'taten' else STANDARD_KATALOG.parent
-        options.katalog = (base /
-                           ('%s_%s.lua' % ('Deeds' if options.art == 'taten' else 'Quests',
-                                           options.sprache)))
+        # The plugin checkout next to this repository is the current export;
+        # iCloud only keeps the read-only legacy copy (no theme paths, older
+        # positions). Prefer the local one for quests and deeds alike and fall
+        # back to iCloud only when it is missing.
+        name = '%s_%s.lua' % ('Deeds' if options.art == 'taten' else 'Quests', options.sprache)
+        lokal = LOKALES_PLUGIN / name
+        options.katalog = lokal if lokal.is_file() else STANDARD_KATALOG.parent / name
 
     for name, path in (('catalogue', options.katalog), ('karten.json', options.karten)):
         if not path.is_file():

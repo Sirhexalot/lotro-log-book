@@ -43,6 +43,11 @@ KATEGORIE_LABEL = {
 # Zwei Schreibweisen derselben Art (Stufe 100 aufwärts) gehören zusammen.
 KATEGORIE_ALIAS = {'LEGENDARY_WEAPON2': 'LEGENDARY_WEAPON', 'LEGENDARY_ITEM2': 'LEGENDARY_ITEM',
                    'CARRY_ALL': 'ITEM'}
+KLASSENWERKZEUG_KLASSEN = {
+    'Weapon Oils', 'Trap', 'Potion', 'Healing Potion', 'Food', 'Thrown',
+    'Weapon Auras', 'Instrument', 'Socketed Instrument',
+    'Shield-spikes', 'Champion Horns', 'Word of Mastery', 'Mariner Items',
+}
 
 # Der Client-Export kennt die Art jedes Gegenstands; die Ausrüstungsdatei nur
 # Rüstung, Waffe und den Rest.
@@ -75,6 +80,14 @@ def roh_klassen() -> dict:
         ergebnis['%08X' % (int(schluessel) & 0xffffffff)] = {
             'klasse': eintrag.get('class') or '',
             'gattung': eintrag.get('equipmentCategory') or '',
+            'requiredClass': eintrag.get('requiredClass') or '',
+            'requiredRace': eintrag.get('requiredRace') or '',
+            'armourType': eintrag.get('armourType') or '',
+            'weaponType': eintrag.get('weaponType') or '',
+            'minLevel': eintrag.get('minLevel') or '',
+            'hasExtraRequirement': any(eintrag.get(name) for name in (
+                'requiredEffect', 'requiredFaction', 'requiredGloryRank',
+                'requiredProfession', 'requiredTrait')),
         }
     return ergebnis
 
@@ -126,6 +139,11 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
     klasse_liste = [klasse_namen[code].get(sprache) or klasse_namen[code].get('en') or ''
                     for code in klasse_namen]
     klasse_index = {code: nummer for nummer, code in enumerate(klasse_namen)}
+    klassenwerkzeug_klassen = [
+        code for code, names in klasse_namen.items()
+        if 'Class Items' in (names.get('en') or '')
+        or (names.get('en') or '') in KLASSENWERKZEUG_KLASSEN
+    ]
     gattung_liste = [gattung_namen[code].get(sprache) or gattung_namen[code].get('en') or ''
                      for code in gattung_namen]
     gattung_index = {code: nummer for nummer, code in enumerate(gattung_namen)}
@@ -213,7 +231,13 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
 
         eintraege.append([ident, name, quelle.get('ic') or item.get('ic') or 0, kat,
                           qualitaet(quelle.get('q') or item.get('q')),
-                          platz_id, art_id, stufe, klasse_id, gattung_id])
+                          platz_id, art_id, stufe, klasse_id, gattung_id,
+                          klassen.get(ident, {}).get('requiredClass', ''),
+                          klassen.get(ident, {}).get('requiredRace', ''),
+                          klassen.get(ident, {}).get('armourType', ''),
+                          klassen.get(ident, {}).get('weaponType', ''),
+                          int(klassen.get(ident, {}).get('minLevel') or 0),
+                          bool(klassen.get(ident, {}).get('hasExtraRequirement'))])
 
     eintraege.sort(key=lambda zeile: (zeile[1].casefold(), zeile[0]))
     daten = {
@@ -228,6 +252,7 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
         'artKey': list(art_index),
         'klasse': klasse_liste,
         'klasseKey': list(klasse_index),
+        'classToolKeys': klassenwerkzeug_klassen,
         'gattung': gattung_liste,
         'gattungKey': list(gattung_index),
         'e': eintraege,

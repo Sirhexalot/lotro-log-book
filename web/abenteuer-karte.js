@@ -213,6 +213,14 @@
 		});
 	}
 
+	/** Select an area and bring its map preview under the region map into view. */
+	function selectAndReveal(id, keepCluster) {
+		selectArea(id, keepCluster);
+		setTimeout(function () {
+			if (preview) { preview.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+		}, 0);
+	}
+
 	function paintRegionList(region) {
 		if (!listBox) { return; }
 		var groups = groupsOf(region);
@@ -231,30 +239,42 @@
 			return String(a.name).localeCompare(String(b.name), lang, { numeric: true });
 		}).forEach(function (area) {
 			var item = el('li');
-			var button = el('button', 'welt-gebiet');
-			button.type = 'button';
-			button.setAttribute('data-welt-gebiet', area.id);
-			button.setAttribute('aria-pressed', String(state.area === area.id));
-			var head = el('span', 'wg-kopf');
+			var row = el('div', 'welt-gebiet');
+			if (state.area === area.id) { row.setAttribute('data-selected', 'true'); }
+			var head = el('button', 'wg-kopf');
+			head.type = 'button';
+			head.title = area.name;
+			head.addEventListener('click', function () { selectAndReveal(area.id, !!cluster); });
 			head.appendChild(el('strong', 'wg-name', area.name));
+			if (area.display_group_name) {
+				head.appendChild(el('span', 'wg-meta', area.display_group_name));
+			}
 			if (area.coverage !== null && area.coverage !== undefined) {
 				head.appendChild(el('span', 'wg-prozent', percent(area)));
 			}
-			button.appendChild(head);
+			row.appendChild(head);
 			if (area.coverage !== null && area.coverage !== undefined) {
 				var bar = el('span', 'wg-balken');
 				var fillBar = el('i');
 				fillBar.style.width = Math.round(area.coverage * 100) + '%';
 				bar.appendChild(fillBar);
-				button.appendChild(bar);
+				row.appendChild(bar);
 			}
 			var ready = area.ready_ids ? area.ready_ids.length : 0;
 			var pack = packOf(area.pack);
 			var meta = [levelLabel(area), weiter(ready), hasLevel() ? fitWord(area.level_fit) : ''];
 			if (pack && pack.access === 'missing') { meta.push(text('ab_zugang_missing')); }
-			button.appendChild(el('span', 'wg-meta', meta.filter(Boolean).join(' · ')));
-			button.addEventListener('click', function () { selectArea(area.id, !!cluster); });
-			item.appendChild(button);
+			var fuss = el('span', 'wg-fuss');
+			fuss.appendChild(el('span', 'wg-meta', meta.filter(Boolean).join(' · ')));
+			// The name opens the map; this control keeps the preview reachable.
+			var details = el('button', 'wg-details', text('ab_map_details'));
+			details.type = 'button';
+			details.setAttribute('data-welt-gebiet', area.id);
+			details.setAttribute('aria-pressed', String(state.area === area.id));
+			details.addEventListener('click', function () { selectAndReveal(area.id, !!cluster); });
+			fuss.appendChild(details);
+			row.appendChild(fuss);
+			item.appendChild(row);
 			listBox.appendChild(item);
 		});
 	}

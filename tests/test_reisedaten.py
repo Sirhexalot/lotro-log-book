@@ -173,6 +173,19 @@ class ReiseDatenTest(unittest.TestCase):
         udun = next(k for k in inhalt['knoten'] if k['n'] == 'Udûn-Brückenkopf')
         self.assertEqual(karten[udun['karte']]['nm'], 'Udûn')
 
+    def test_display_groups_do_not_replace_travel_map_ids(self):
+        expected = {
+            'de': (268448407, 'Ost-Rohan', 'Die Steppe'),
+            'en': (268448407, 'East Rohan', 'The Wold'),
+            'fr': (268448407, 'Rohan oriental', 'Le Plateau'),
+        }
+        for lang, (ident, group, name) in expected.items():
+            page = lade_seite(lang)
+            maps = {int(row['i']): row for row in page['karten']}
+            self.assertEqual(maps[ident]['i'], ident)
+            self.assertEqual(maps[ident]['gruppe'], group)
+            self.assertEqual(maps[ident]['nm'], name)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -91,6 +91,29 @@ class GegenstandssucheTests(unittest.TestCase):
             for zeile in daten['e']:
                 if zeile[5] >= 0:
                     self.assertTrue(daten['platzKey'][zeile[5]], zeile)
+            self.assertTrue({'14', '20'} <= set(daten['classToolKeys']), sprache)
+            self.assertTrue(all(len(zeile) >= 16 for zeile in daten['e']), sprache)
+        english = lies('en')
+        bear_trap = next(row for row in english['e'] if row[1] == 'Barrow-iron Bear Trap')
+        fire_oil = next(row for row in english['e'] if row[1] == 'Fire-oil')
+        self.assertEqual(bear_trap[10], 'Hunter')
+        self.assertEqual(fire_oil[10], 'Hunter;Warden')
+        item_classes = dict(zip(english['klasseKey'], english['klasse']))
+        player_classes = {'Beorning', 'Brawler', 'Burglar', 'Captain', 'Champion',
+                          'Corsair', 'Guardian', 'Hunter', 'Lore-master', 'Minstrel',
+                          'Rune-keeper', 'Warden'}
+        covered_classes = {
+            required for row in english['e']
+            if english['katKey'][row[3]] == 'ITEM'
+            and english['klasseKey'][row[8]] in english['classToolKeys']
+            for required in (row[10] or '').split(';')
+        }
+        self.assertTrue(player_classes <= covered_classes, player_classes - covered_classes)
+        for class_item in ('Shield-spikes', 'Champion Horns', 'Word of Mastery',
+                           'Mariner Items'):
+            code = next(key for key, label in item_classes.items()
+                        if label == class_item)
+            self.assertIn(code, english['classToolKeys'], class_item)
 
     def test_every_category_names_its_children(self):
         """A category may never show a count its children cannot add up to."""

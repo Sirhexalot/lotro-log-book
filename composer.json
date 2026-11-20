@@ -6,6 +6,7 @@
     "require": {
         "php": ">=8.1",
         "ext-json": "*",
+        "phpmailer/phpmailer": "^6.10",
         "twig/twig": "^3.8"
     },
     "config": {

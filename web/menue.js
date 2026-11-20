@@ -35,17 +35,17 @@
 	if (seite === 'karte' && window.MQL_ART === 'taten') { seite = 'taten'; }
 	// One address per page and language; the old .html?lang= forms redirect here.
 	var APP = {
-		de: { start: '', karte: 'karte', questfinder: 'aufgabenfinder', taten: 'karte/taten', gegenstandssuche: 'gegenstandssuche',
+		de: { start: '', karte: 'karte', questfinder: 'aufgabenfinder', taten: 'karte/taten', gegenstandssuche: 'gegenstandssuche', klassen: 'klassen',
 			handwerk: 'handwerk/rezepte', reise: 'reise', ruf: 'ruf', belohnungen: 'belohnungen',
-			spielstand: 'spielstand', companion: 'companion', plugin: 'plugin', suche: 'suche',
+			spielstand: 'spielstand', companion: 'companion', plugin: 'plugin', suche: 'suche', feedback: 'feedback',
 			instances: 'instanz', adventures: 'abenteuer' },
-		en: { start: '', karte: 'map', questfinder: 'quest-finder', taten: 'map/deeds', gegenstandssuche: 'item-search',
+		en: { start: '', karte: 'map', questfinder: 'quest-finder', taten: 'map/deeds', gegenstandssuche: 'item-search', klassen: 'classes',
 			handwerk: 'crafting/recipes', reise: 'travel', ruf: 'reputation', belohnungen: 'rewards',
-			spielstand: 'progress', companion: 'companion', plugin: 'plugin', suche: 'search',
+			spielstand: 'progress', companion: 'companion', plugin: 'plugin', suche: 'search', feedback: 'feedback',
 			instances: 'instance', adventures: 'adventure' },
-		fr: { start: '', karte: 'carte', questfinder: 'recherche-quetes', taten: 'carte/prouesses', gegenstandssuche: 'recherche-objets',
+		fr: { start: '', karte: 'carte', questfinder: 'recherche-quetes', taten: 'carte/prouesses', gegenstandssuche: 'recherche-objets', klassen: 'classes',
 			handwerk: 'artisanat/recettes', reise: 'voyage', ruf: 'reputation', belohnungen: 'recompenses',
-			spielstand: 'progression', companion: 'companion', plugin: 'plugin', suche: 'recherche',
+			spielstand: 'progression', companion: 'companion', plugin: 'plugin', suche: 'recherche', feedback: 'retour',
 			instances: 'instance', adventures: 'aventure' }
 	};
 	function app(seite) {
@@ -72,8 +72,7 @@
 		titel.appendChild(logo);
 	}
 
-	// Four families, one row. Their tabs sit in a second line below, so the
-	// header never grows when a content type is added (see README, navigation).
+	// Four families, plus the site-wide feedback destination.
 	var SEGMENT = {
 		de: { gegenstand: 'gegenstand', beruf: 'beruf', titel: 'titel', tugend: 'tugend', set: 'set',
 			auftraggeber: 'auftraggeber', vendor: 'haendler' },
@@ -105,6 +104,7 @@
 			{ seite: 'ruf', href: app('ruf'), text: t('menue_ruf'), desc: 'd_ruf' },
 			{ seite: 'fraktion', href: pfad('fraktion'), text: t('menue_fraktionen'), desc: 'd_fraktionen' }] },
 		{ key: 'charakter', text: t('nav_charakter'), tab: [
+			{ seite: 'klassen', href: app('klassen'), text: t('menue_klassen'), desc: 'd_klassen' },
 			{ seite: 'spielstand', href: app('spielstand'), text: t('menue_fortschritt'), desc: 'd_fortschritt' }] }
 	];
 
@@ -114,8 +114,8 @@
 		landmarke: 'welt', fraktion: 'erfolge',
 		gegenstand: 'gegenstaende', vendor: 'gegenstaende',
 		handwerk: 'gegenstaende', beruf: 'gegenstaende', titel: 'erfolge', tugend: 'erfolge',
-		ruf: 'erfolge', belohnungen: 'erfolge', spielstand: 'charakter', plugin: 'charakter' };
-	var familie = ZUORDNUNG[seite] || 'welt';
+		ruf: 'erfolge', belohnungen: 'erfolge', klassen: 'charakter', spielstand: 'charakter', plugin: 'charakter' };
+	var familie = seite === 'feedback' ? '' : (ZUORDNUNG[seite] || 'welt');
 
 	FAMILIEN.forEach(function (gruppe) {
 		// A family is a group, not a page: the button opens its list and every
@@ -159,7 +159,6 @@
 		}
 		ziel.appendChild(feld);
 	});
-
 	// Open/close behaviour lives in familienmenue.js, which catalogue pages use
 	// too. It is loaded right after this file.
 	function familieMenue() {
@@ -267,7 +266,30 @@
 	importieren.textContent = t('menue_import_kurz');
 	if (seite === 'spielstand') { importieren.setAttribute('aria-current', 'page'); }
 	charakter.appendChild(importieren);
+	var feedbackLink = document.createElement('a');
+	feedbackLink.className = 'feedback-global';
+	feedbackLink.href = app('feedback');
+	feedbackLink.textContent = t('feedback_nav');
+	feedbackLink.setAttribute('data-feedback-link', '');
+	if (seite === 'feedback') { feedbackLink.setAttribute('aria-current', 'page'); }
+	charakter.appendChild(feedbackLink);
 	if (behaelter) { behaelter.appendChild(charakter); }
+
+	// Keep the current deep link and entity context locally for the feedback form.
+	document.addEventListener('click', function (event) {
+		var link = event.target.closest ? event.target.closest('[data-feedback-link]') : null;
+		if (!link) { return; }
+		var body = document.body;
+		var name = document.querySelector('main h1');
+		var context = {
+			url: window.location.href,
+			type: body.getAttribute('data-art') || '',
+			id: body.getAttribute('data-entity-id') || '',
+			name: name ? name.textContent.trim().slice(0, 180) : '',
+			viewport: window.innerWidth + 'x' + window.innerHeight
+		};
+		try { window.sessionStorage.setItem('llb.feedback.context', JSON.stringify(context)); } catch (_) {}
+	});
 
 	// Phones get a burger button: everything but the search waits behind it.
 	if (kopf && ziel) {

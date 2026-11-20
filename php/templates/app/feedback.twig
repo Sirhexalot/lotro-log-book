@@ -1,0 +1,51 @@
+{% extends 'app/layout.twig' %}
+
+{% block koerper_attribute %} data-seite="feedback" class="seite-text"{% endblock %}
+
+{% block stile %}<link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/feedback.css?v={{ asset_stand }}">{% endblock %}
+
+{% block vor_haupt %}{% endblock %}
+
+{% block haupt %}
+<main class="seite feedback-seite">
+	<h2 data-t="feedback_title">Feedback senden</h2>
+	<p data-t="feedback_intro"></p>
+	<p class="feedback-bezug" id="feedback-bezug" hidden></p>
+	<form id="feedback-form" action="/api/feedback" method="post">
+		<input type="hidden" name="token" value="{{ feedback_token }}">
+		<input type="hidden" name="page_url" id="feedback-page-url">
+		<input type="hidden" name="entity_type" id="feedback-entity-type">
+		<input type="hidden" name="entity_id" id="feedback-entity-id">
+		<input type="hidden" name="entity_name" id="feedback-entity-name">
+		<input type="hidden" name="viewport" id="feedback-viewport">
+		<div class="feedback-falle" aria-hidden="true">
+			<label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+		</div>
+		<label class="feedback-feld">
+			<span data-t="feedback_message">Dein Feedback</span>
+			<textarea name="message" rows="7" maxlength="5000" required></textarea>
+		</label>
+		<label class="feedback-feld">
+			<span data-t="feedback_reply">Deine E-Mail-Adresse (optional, falls du eine Antwort möchtest)</span>
+			<input name="reply_email" type="email" maxlength="254" autocomplete="email">
+		</label>
+		<p class="feedback-hinweis" data-t="feedback_context_general"></p>
+		<p class="feedback-status" id="feedback-status" role="status" aria-live="polite"></p>
+		<button class="knopf-gold" type="submit" data-t="feedback_submit">Feedback senden</button>
+	</form>
+</main>
+{% endblock %}
+
+{% block skripte %}
+<script src="/texte.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-spielstand.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-logbuch.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-site.js?v={{ asset_stand }}" defer></script>
+<script src="/sprache.js?v={{ asset_stand }}" defer></script>
+<script src="/speicher.js?v={{ asset_stand }}" defer></script>
+<script src="/menue.js?v={{ asset_stand }}" defer></script>
+<script src="/familienmenue.js?v={{ asset_stand }}" defer></script>
+<script src="/feedback.js?v={{ asset_stand }}" defer></script>
+{% endblock %}

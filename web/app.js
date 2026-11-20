@@ -37,6 +37,11 @@
 			quests.forEach(function (quest) {
 				if (nachId[quest.i]) { Object.assign(quest, nachId[quest]); }
 			});
+			// Area shards carry their own objects; they need the full record too,
+			// otherwise a selected row keeps an empty description and no steps.
+			Object.keys(questNachId).forEach(function (id) {
+				if (nachId[id]) { Object.assign(questNachId[id], nachId[id]); }
+			});
 			vollstaendig = true;
 			var wartende = vollstaendigLader; vollstaendigLader = null;
 			wartende.forEach(function (fertig) { fertig(); });
@@ -45,6 +50,51 @@
 			var wartende = vollstaendigLader; vollstaendigLader = null;
 			wartende.forEach(function (fertig) {
 				fertig(new Error('Questdaten konnten nicht geladen werden.'));
+			});
+		};
+		document.head.appendChild(script);
+	}
+	// Everything the detail pane needs beyond the compact map entry (description,
+	// steps, complete objectives) lives in one small shard per map or region.
+	// The 22 MB catalogue is only the fallback for an old deployment.
+	var detailGeladen = {};
+	var detailLader = {};
+	function detailDatei(quest) {
+		var karten = (quest && quest.fk) || [];
+		if (karten.length) { return 'detail-map-' + karten[karten.length - 1] + '.js'; }
+		var labels = (quest && quest.f) || [];
+		var region = labels[0] || (quest && quest.r) || '';
+		var datei = window.MQL_SHARD_REGION && window.MQL_SHARD_REGION[region];
+		return datei ? 'detail-' + datei : null;
+	}
+	function hatDetails(quest) {
+		if (vollstaendig) { return true; }
+		var datei = detailDatei(quest);
+		return !!(datei && detailGeladen[datei]);
+	}
+	function ladeDetails(quest, callback) {
+		var datei = detailDatei(quest);
+		if (!datei || detailGeladen[datei]) { callback(); return; }
+		if (detailLader[datei]) { detailLader[datei].push(callback); return; }
+		detailLader[datei] = [callback];
+		var artOrdner = window.MQL_ART === 'taten' ? 'taten' : 'aufgaben';
+		var script = document.createElement('script');
+		script.src = 'karten-daten/' + artOrdner + '/' + sprache + '/' + datei +
+			'?v=' + (window.MQL_STAND || '0');
+		script.onload = function () {
+			var rows = window.MQL_GEBIETS_DETAILS || {};
+			delete window.MQL_GEBIETS_DETAILS;
+			Object.keys(rows).forEach(function (id) {
+				if (questNachId[id]) { Object.assign(questNachId[id], rows[id]); }
+			});
+			detailGeladen[datei] = true;
+			var wartende = detailLader[datei]; delete detailLader[datei];
+			wartende.forEach(function (fertig) { fertig(); });
+		};
+		script.onerror = function () {
+			var wartende = detailLader[datei]; delete detailLader[datei];
+			ladeVollstaendig(function () {
+				wartende.forEach(function (fertig) { fertig(); });
 			});
 		};
 		document.head.appendChild(script);
@@ -62,6 +112,7 @@
 	var ersetzt = window.MQL_REPLACED || {};
 	fortschritt.ids = fortschritt.ids.map(function (id) { return ersetzt[id] || id; });
 	var zusammenfassungNachPfad = {};
+	var zusammenfassungNachKarte = {};
 	(window.MQL_KARTEN_SUMMARY || []).forEach(function (quest) {
 		if (ersetzt[quest.i] || !quest.f || !quest.f.length) { return; }
 		var schluessel = '';
@@ -69,6 +120,13 @@
 			schluessel += '|' + label;
 			(zusammenfassungNachPfad[schluessel] ||
 				(zusammenfassungNachPfad[schluessel] = [])).push(quest);
+		});
+		// A flat tab (the shared landscape list puts every sub-area one level
+		// below the landscape) has no catalogue path, but it always has its map.
+		(quest.fk || []).forEach(function (kennung) {
+			if (kennung == null) { return; }
+			(zusammenfassungNachKarte[String(kennung)] ||
+				(zusammenfassungNachKarte[String(kennung)] = [])).push(quest);
 		});
 	});
 
@@ -108,7 +166,9 @@
 	var hatFortschritt = fortschritt.ids.length > 0;
 	function aktualisiereEffektivenStatus() {
 		aktiverCharakter = speicher && speicher.aktiv();
-		laufend = (aktiverCharakter && aktiverCharakter.laufend) || {};
+		fertig = {};
+		fortschritt.ids.forEach(function (id) { fertig[id] = true; });
+		laufend = Object.assign({}, aktiverCharakter && aktiverCharakter.laufend);
 		if (!speicher || !speicher.manuelleStatus) { return; }
 		['quests', 'deeds'].forEach(function (art) {
 			var manuell = (aktiverCharakter && aktiverCharakter.manuell && aktiverCharakter.manuell[art]) || {};
@@ -144,6 +204,18 @@
 		}
 		if (laufend[quest.i]) { return 'laufend'; }
 		return 'offen';
+	}
+
+	// "Open" is the default for catalogue counts, not evidence of progress.
+	function listenStatus(lage, quest) {
+		if (lage === 'fertig' || lage === 'laufend') { return lage; }
+		if (lage !== 'offen') { return null; }
+		var art = loesung ? 'deeds' : 'quests';
+		var profil = aktiverCharakter;
+		var quelle = profil && profil.importMeta && profil.importMeta[art];
+		var manuell = profil && profil.manuell && profil.manuell[art];
+		return (manuell && manuell[quest.i] === 'offen') || quelle === true ||
+			(quelle !== false && hatFortschritt) ? 'offen' : null;
 	}
 
 	/**
@@ -209,7 +281,7 @@
 	var gespeicherterFilter = leseKartenfilter();
 	var zustand = {
 		knoten: null,
-		filter: ['alle', 'offen', 'laufend', 'erledigt', 'machbar'].indexOf(gespeicherterFilter.filter) >= 0 ? gespeicherterFilter.filter : 'alle',
+		filter: ['alle', 'offen', 'laufend', 'erledigt', 'nicht_gesetzt', 'machbar'].indexOf(gespeicherterFilter.filter) >= 0 ? gespeicherterFilter.filter : 'alle',
 		belohnung: ['alle', 'tugend', 'titel', 'punkte'].indexOf(gespeicherterFilter.belohnung) >= 0 ? gespeicherterFilter.belohnung : 'alle',
 		q: typeof gespeicherterFilter.q === 'string' ? gespeicherterFilter.q : '',
 		karte: null,
@@ -412,14 +484,25 @@
 	(function gleicheGebieteAn() {
 		var liste = window.MQL_GEBIETE;
 		if (!liste || !liste.regionen) { return; }
+		/** The node for a map id, preferring one that already carries entries. */
 		function mitKarte(knoten, kennung, tief) {
-			if (knoten.karte != null && Number(knoten.karte) === Number(kennung)) { return knoten; }
-			if (!tief) { return null; }
-			for (var i = 0; i < knoten.reihenfolge.length; i += 1) {
-				var treffer = mitKarte(knoten.reihenfolge[i], kennung, true);
-				if (treffer) { return treffer; }
+			var treffer = null;
+			function suche(ast) {
+				if (ast.karte != null && Number(ast.karte) === Number(kennung)) {
+					var tiefe = (ast.schluessel || '').split('|').length;
+					var tiefeTreffer = treffer ? (treffer.schluessel || '').split('|').length : -1;
+					var anzahl = (ast.quests || []).length;
+					var anzahlTreffer = treffer ? (treffer.quests || []).length : -1;
+					if (!treffer || (anzahl > 0) !== (anzahlTreffer > 0) ||
+						((anzahl > 0) === (anzahlTreffer > 0) && (tiefe > tiefeTreffer ||
+							(tiefe === tiefeTreffer && anzahl > anzahlTreffer)))) {
+						treffer = ast;
+					}
+				}
+				if (tief) { ast.reihenfolge.forEach(suche); }
 			}
-			return null;
+			suche(knoten);
+			return treffer;
 		}
 		function mitName(knoten, name) {
 			for (var i = 0; i < knoten.reihenfolge.length; i += 1) {
@@ -442,7 +525,15 @@
 					mitName(regionKnoten, gebiet.name) || neu(regionKnoten, gebiet.name, gebiet.karte);
 				if (knoten.karte == null && gebiet.karte != null) { knoten.karte = gebiet.karte; }
 				(gebiet.unter || []).forEach(function (unter) {
-					if (mitKarte(knoten, unter[0], false)) { return; }
+					// Some sub-areas sit one level deeper in the game (Isengart under
+					// Nan Curunír, Das Eisenloch under Pforte von Rohan). Their node
+					// already exists. A flat copy next to the landscape had no entries
+					// and showed 0/0 until its shard happened to load.
+					var bereits = mitKarte(knoten, unter[0], true);
+					if (bereits) {
+						if (bereits.karte == null) { bereits.karte = unter[0]; }
+						return;
+					}
 					var vorhanden = mitName(knoten, unter[1]);
 					if (vorhanden) {
 						if (vorhanden.karte == null) { vorhanden.karte = unter[0]; }
@@ -497,8 +588,17 @@
 		return { gesamt: gesamt, erledigt: erledigt };
 	}
 	function zaehlEintraege(knoten) {
-		return knoten && zusammenfassungNachPfad[knoten.schluessel] ||
-			(knoten && knoten.quests) || [];
+		if (!knoten) { return []; }
+		var nachPfad = zusammenfassungNachPfad[knoten.schluessel];
+		if (nachPfad) { return nachPfad; }
+		// Areas that the game nests deeper than the shared list shows (Isengart
+		// under Nan Curunír, Das Eisenloch under Pforte von Rohan) keep their map
+		// id. Counting by map fills their tab before any shard is loaded.
+		if (knoten.karte != null) {
+			var nachKarte = zusammenfassungNachKarte[String(knoten.karte)];
+			if (nachKarte) { return nachKarte; }
+		}
+		return knoten.quests || [];
 	}
 
 	/**
@@ -830,6 +930,9 @@
 
 	var geladeneGebietsShards = {};
 	var gebietsLader = {};
+	// Four at a time: a landscape with twelve sub-areas waited for twelve round
+	// trips one after another before its tabs showed their counters.
+	var SHARD_GLEICHZEITIG = 4;
 	function ladeGebietsDaten(knoten, fertig) {
 		if (!knoten || knoten === WURZEL) { fertig(); return; }
 		var dateien = [], gesehen = {};
@@ -839,7 +942,12 @@
 			}
 		}
 		function mapsUnterhalb(ast) {
-			if (ast.karte != null) { add('map-' + ast.karte + '.js'); }
+			// Overview maps such as the Dunland overview have no entries of their
+			// own and therefore no shard; the start file names the existing ones.
+			if (ast.karte != null && (!window.MQL_SHARD_MAPS ||
+				window.MQL_SHARD_MAPS.indexOf(String(ast.karte)) >= 0)) {
+				add('map-' + ast.karte + '.js');
+			}
 			ast.reihenfolge.forEach(mapsUnterhalb);
 		}
 		mapsUnterhalb(knoten);
@@ -847,14 +955,27 @@
 		var region = teile[0];
 		var regionDatei = window.MQL_SHARD_REGION && window.MQL_SHARD_REGION[region];
 		if (regionDatei) { add(regionDatei); }
-		function next() {
-			var datei = dateien.shift();
-			if (!datei) { sortiere(WURZEL); instanzenJeKapitel = null; fertig(); return; }
+		if (!dateien.length) { fertig(); return; }
+		var offen = dateien.length;
+		var naechste = 0;
+		var laufen = 0;
+		function abschluss() {
+			sortiere(WURZEL);
+			instanzenJeKapitel = null;
+			fertig();
+		}
+		function erledigt() {
+			laufen -= 1;
+			offen -= 1;
+			if (!offen) { abschluss(); return; }
+			starte();
+		}
+		function hole(datei) {
 			if (gebietsLader[datei]) {
-				gebietsLader[datei].push(next);
+				gebietsLader[datei].push(erledigt);
 				return;
 			}
-			gebietsLader[datei] = [next];
+			gebietsLader[datei] = [erledigt];
 			var skript = document.createElement('script');
 			var artOrdner = window.MQL_ART === 'taten' ? 'taten' : 'aufgaben';
 			skript.src = 'karten-daten/' + artOrdner + '/' + sprache + '/' + datei +
@@ -876,7 +997,6 @@
 					})();
 					eintragen(labels, quest);
 				});
-				sortiere(WURZEL);
 				wartende.forEach(function (callback) { callback(); });
 			};
 			skript.onerror = function () {
@@ -885,7 +1005,13 @@
 			};
 			document.head.appendChild(skript);
 		}
-		next();
+		function starte() {
+			while (laufen < SHARD_GLEICHZEITIG && naechste < dateien.length) {
+				var datei = dateien[naechste]; naechste += 1; laufen += 1;
+				hole(datei);
+			}
+		}
+		starte();
 	}
 
 	function waehleKnotenSofort(knoten, alsListe, ohneVerlauf) {
@@ -2002,6 +2128,17 @@
 			if (zustand.auswahl && zustand.auswahl.i === quest.i) {
 				zeile.classList.add('aktiv');
 			}
+			var standSymbol = { fertig: ['✓', 'filter_erledigt'], laufend: ['◐', 'filter_laufend'], offen: ['○', 'filter_offen'] }[listenStatus(lage, quest)];
+			if (standSymbol) {
+				var marke = eltern('span', standSymbol[0]);
+				marke.className = 'listen-status status-' + lage;
+				marke.setAttribute('aria-hidden', 'true');
+				marke.title = t(standSymbol[1]);
+				zeile.appendChild(marke);
+				var standText = eltern('span', t(standSymbol[1]) + ': ');
+				standText.className = 'visuell-versteckt';
+				zeile.appendChild(standText);
+			}
 			var questName = eltern('span', quest.n);
 			questName.className = 'qname';
 			if (quest.g && doppelt[quest.n]) {
@@ -2109,12 +2246,14 @@
 			eintraege = eintraege.filter(machbar);
 		} else if (zustand.filter === 'offen') {
 			eintraege = eintraege.filter(function (quest) {
-				return zustandVon(quest) === 'offen';
+				return listenStatus(zustandVon(quest), quest) === 'offen';
 			});
 		} else if (zustand.filter === 'laufend') {
 			eintraege = eintraege.filter(function (quest) { return zustandVon(quest) === 'laufend'; });
 		} else if (zustand.filter === 'erledigt') {
 			eintraege = eintraege.filter(function (quest) { return fertig[quest.i] === true; });
+		} else if (zustand.filter === 'nicht_gesetzt') {
+			eintraege = eintraege.filter(function (quest) { return !listenStatus(zustandVon(quest), quest); });
 		}
 		var begriff = falten(zustand.q || '');
 		if (begriff) {
@@ -2287,100 +2426,95 @@
 			detail.appendChild(leer);
 			return;
 		}
-		var titel = eltern('h2', null);
-		titel.appendChild(symbol(loesung ? 'tat' : 'aufgabe'));
-		titel.appendChild(document.createTextNode(quest.n));
-		detail.appendChild(titel);
-		var kennung = [];
-		function teil(wert) { kennung.push(wert); }
-		/** Zone and region jump to their area in the tree, not to another page. */
-		function ortsteil(name, karte) {
+
+		var lage = zustandVon(quest);
+
+		/** One framed section; the body is where the content goes. */
+		function abschnitt(klasse, titelText) {
+			var box = eltern('section', null);
+			box.className = 'detail-abschnitt' + (klasse ? ' ' + klasse : '');
+			if (titelText) {
+				var kopf = eltern('h3', titelText);
+				box.appendChild(kopf);
+			}
+			detail.appendChild(box);
+			return box;
+		}
+
+		function gebietssprung(name, karte, klasse) {
 			var knoten = karte != null ? knotenMitKarte(WURZEL, karte) : null;
-			if (!knoten) { teil(name); return; }
+			if (!knoten) { return document.createTextNode(name); }
 			var a = eltern('a', name);
 			a.href = '#';
-			a.className = 'gebietsprung';
+			a.className = klasse || 'gebietsprung';
 			a.addEventListener('click', function (ereignis) {
 				ereignis.preventDefault();
 				waehleKnoten(knoten, true, true);
 			});
-			kennung.push(a);
+			return a;
 		}
-		if (quest.l) { teil(t('stufe') + ' ' + stufeText(quest) + (quest.ls ? ' (' + t('mitwachsend') + ')' : '')); }
+
+		// --- Head: type, title, icon ------------------------------------
+		var kopf = eltern('header', null);
+		kopf.className = 'detail-kopf';
+		var art = eltern('p', t(loesung ? 'ru_tat' : 'ru_aufgabe'));
+		art.className = 'detail-art';
+		kopf.appendChild(art);
+		var titel = eltern('div', null);
+		titel.className = 'detail-titel';
+		var bild = eltern('span', null);
+		bild.className = 'detail-symbol';
+		bild.setAttribute('aria-hidden', 'true');
+		bild.appendChild(symbol(loesung ? 'tat' : 'aufgabe'));
+		titel.appendChild(bild);
+		titel.appendChild(eltern('h2', quest.n));
+		kopf.appendChild(titel);
+		detail.appendChild(kopf);
+
+		// --- Facts: labels, not a run-on line ---------------------------
+		var fakten = eltern('dl', null);
+		fakten.className = 'detail-fakten';
+		function faktum(label, inhalt) {
+			fakten.appendChild(eltern('dt', label));
+			var wert = eltern('dd', null);
+			if (inhalt == null || inhalt === '') { return; }
+			if (typeof inhalt === 'string' || typeof inhalt === 'number') {
+				wert.textContent = String(inhalt);
+			} else {
+				wert.appendChild(inhalt);
+			}
+			fakten.appendChild(wert);
+		}
+		if (quest.l) {
+			faktum(t('stufe'), stufeText(quest) + (quest.ls ? ' · ' + t('mitwachsend') : ''));
+		}
 		if (quest.g) {
 			if (quest.gi) {
-				var geberLink = eltern('a', ersetze(t('auftraggeber'), [quest.g]));
+				var geberLink = eltern('a', quest.g);
 				geberLink.href = '/' + sprache + '/' +
 					({ de: 'auftraggeber', en: 'quest-giver', fr: 'donneur-de-quete' }[sprache] || 'auftraggeber') +
 					'/' + quest.gi + '/';
 				geberLink.className = 'detail-geber';
-				kennung.push(geberLink);
+				faktum(t('detail_auftraggeber'), geberLink);
 			} else {
-				teil(ersetze(t('auftraggeber'), [quest.g]));
+				faktum(t('detail_auftraggeber'), quest.g);
 			}
 		}
-		if (quest.z) { ortsteil(ABSCHNITTE[quest.z] || quest.z, quest.fk ? quest.fk[1] : null); }
-		if (quest.u) { teil(quest.u); }
-		if (quest.r && quest.r !== quest.z) { ortsteil(quest.r, quest.fk ? quest.fk[0] : null); }
-		if (zeigtZiele(quest) && quest.t.length) {
-			teil(quest.t.length + ' ' + (quest.t.length === 1 ? t('ziel') : t('ziele')));
-		} else if (quest.hz && quest.hz.length) {
-			teil(t('aufgabenorte'));
-		} else if (quest.h && quest.h.length) {
-			teil(t('jagdorte'));
-		} else if (zeigtZiele(quest)) {
-			teil(t('ohne_ziel_kurz'));
+		var gebiet = quest.z ? (ABSCHNITTE[quest.z] || quest.z) : (quest.f && quest.f.length ? quest.f[quest.f.length - 1] : '');
+		if (gebiet) {
+			faktum(t('detail_gebiet'), gebietssprung(gebiet, quest.fk ? quest.fk[quest.fk.length - 1] : null));
 		}
-		var lage = zustandVon(quest);
-		if (hatFortschritt) {
-			// The compact status selector below is the single completion display.
-			// Keep only explanatory states that are not selectable statuses.
-			if (lage === 'sitzung') { teil(t('sitzungsspiel')); }
-			else if (lage === 'monster') { teil(t('monster_hinweis')); }
-			else if (lage === 'ausgeschlossen') { teil(t('nicht_moeglich')); }
-			else if (machbar(quest)) { teil(t('machbar_jetzt')); }
-			else if (lage !== 'fertig' && lage !== 'laufend') { teil(t('filter_offen')); }
+		if (quest.r && quest.r !== quest.z) {
+			faktum(t('detail_region'), gebietssprung(quest.r, quest.fk ? quest.fk[0] : null));
 		}
-		var zeile = eltern('div', null);
-		zeile.className = 'kennung';
-		kennung.forEach(function (stueck, nummer) {
-			if (nummer) { zeile.appendChild(document.createTextNode(' · ')); }
-			zeile.appendChild(typeof stueck === 'string' ? document.createTextNode(stueck) : stueck);
-		});
-		detail.appendChild(zeile);
-		var status = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(
-			loesung ? 'deeds' : 'quests', quest.i, null, loesung ? 'deed' : 'quest');
-		if (status) {
-			status.addEventListener('click', function (event) { event.stopPropagation(); });
-			var statuszeile = eltern('div', null);
-			statuszeile.className = 'kennung status-kennung';
-			statuszeile.appendChild(status);
-			detail.appendChild(statuszeile);
-		}
-		// Sticky way to the full catalogue page; added last so it holds the
-		// bottom edge of the column.
-		var segment = {'q': {'de': 'aufgabe', 'en': 'quest', 'fr': 'quete'},
-			'd': {'de': 'tat', 'en': 'deed', 'fr': 'prouesse'}}[loesung ? 'd' : 'q'][sprache];
-		function fuss() {
-			var gross = eltern('a', t('ganze_seite'));
-			gross.className = 'detail-ganz';
-			gross.href = '/' + sprache + '/' + segment + '/' + quest.i + '/';
-			detail.appendChild(gross);
-		}
+		if (quest.a) { faktum(t('bl_art'), quest.a); }
+		if (quest.lp) { faktum(t('belohnung_punkte'), String(quest.lp)); }
+		var zielAnzahl = 0;
+		(quest.s || []).forEach(function (schritt) { zielAnzahl += (schritt[2] || []).length; });
+		if (zielAnzahl) { faktum(t('ziele'), String(zielAnzahl)); }
+		detail.appendChild(fakten);
 
-		// Same way to the travel planner as on the catalogue page.
-		var punkt = quest.gt || (quest.t && quest.t[0]);
-		if (punkt) {
-			var reise = eltern('a', t('hin_reise'));
-			reise.className = 'detail-reise';
-			reise.href = 'reise.html?lang=' + sprache + '&nach=' +
-				encodeURIComponent(koordinatenText(punkt[1], punkt[2]));
-			detail.appendChild(reise);
-		}
-
-		// Facts from the game data as small tags.
 		var marken = [];
-		if (quest.lp) { marken.push(ersetze(t('marke_lp'), [quest.lp])); }
 		if (quest.dy) { marken.push(t('marke_taeglich')); }
 		if (quest.rp === -1) { marken.push(t('marke_wiederholbar')); }
 		else if (quest.rp > 1) { marken.push(ersetze(t('marke_bis'), [quest.rp])); }
@@ -2399,46 +2533,189 @@
 			detail.appendChild(markenZeile);
 		}
 
+		// --- Progress: the only place that names the state ---------------
+		var fortschrittZeile = eltern('div', null);
+		fortschrittZeile.className = 'detail-fortschritt';
+		fortschrittZeile.appendChild(eltern('span', t('detail_fortschritt')));
+		var status = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(
+			loesung ? 'deeds' : 'quests', quest.i, null, loesung ? 'deed' : 'quest');
+		if (status) {
+			status.addEventListener('click', function (event) { event.stopPropagation(); });
+			fortschrittZeile.appendChild(status);
+		}
+		var lageHinweis = lage === 'sitzung' ? t('sitzungsspiel')
+			: lage === 'monster' ? t('monster_hinweis')
+			: lage === 'ausgeschlossen' ? t('nicht_moeglich') : '';
+		if (lageHinweis) {
+			var lageText = eltern('span', lageHinweis);
+			lageText.className = 'detail-lage';
+			fortschrittZeile.appendChild(lageText);
+		}
+		detail.appendChild(fortschrittZeile);
+
+		// --- Actions ----------------------------------------------------
+		var aktionen = eltern('div', null);
+		aktionen.className = 'detail-aktionen';
+		var segment = {'q': {'de': 'aufgabe', 'en': 'quest', 'fr': 'quete'},
+			'd': {'de': 'tat', 'en': 'deed', 'fr': 'prouesse'}}[loesung ? 'd' : 'q'][sprache];
+		var gross = eltern('a', t('ganze_seite') + ' →');
+		gross.href = '/' + sprache + '/' + segment + '/' + quest.i + '/';
+		aktionen.appendChild(gross);
+		var punkt = quest.gt || (quest.t && quest.t[0]);
+		if (punkt) {
+			var reise = eltern('a', t('hin_reise'));
+			reise.href = 'reise.html?lang=' + sprache + '&nach=' +
+				encodeURIComponent(koordinatenText(punkt[1], punkt[2]));
+			aktionen.appendChild(reise);
+		}
+		detail.appendChild(aktionen);
+
+		// --- Description -------------------------------------------------
 		if (quest.d) {
+			var beschreibung = abschnitt('detail-beschreibung', t('detail_beschreibung'));
 			var text = eltern('p', quest.d);
-			text.className = 'text beschreibung';
-			detail.appendChild(text);
+			text.className = 'text';
+			beschreibung.appendChild(text);
 		}
 
-		// Rewards come straight from the game's reward table. They are not
-		// objectives, so they stay visible; only item quality is coloured.
+		// --- What to do: steps and objectives ----------------------------
+		if ((quest.s || []).length || (quest.v || quest.vo || quest.vl || quest.vb)) {
+			// requirements get their own section below
+		}
+		if ((quest.s || []).length) {
+			var zielBox = abschnitt('detail-ziele', t('detail_was_tun'));
+			var schalter = eltern('button', (zieleOffen ? '▾ ' + t('ziele_aus') : '▸ ' + t('ziele_ein')) +
+				(zielAnzahl ? ' (' + zielAnzahl + ')' : ''));
+			schalter.className = 'ziele-schalter';
+			schalter.type = 'button';
+			schalter.setAttribute('aria-expanded', String(zieleOffen));
+			schalter.addEventListener('click', function () { setzeZiele(!zieleOffen); });
+			zielBox.appendChild(schalter);
+			if (zieleOffen) {
+				(quest.s || []).forEach(function (schritt) {
+					var block = eltern('div', null);
+					block.className = 'detail-schritt';
+					schritt[1].forEach(function (absatz) {
+						var p = eltern('p', absatz);
+						p.className = 'text';
+						block.appendChild(p);
+					});
+					if (schritt[2].length) {
+						var ul = eltern('ol', null);
+						ul.className = 'detail-ziele-liste';
+						var stand = lage === 'laufend' ? lauf(quest) : null;
+						schritt[2].forEach(function (ziel) {
+							var li = eltern('li', ziel[0]);
+							var z = stand && ziel[2] >= 0 ? stand.zaehler(schritt[0], ziel[2]) : null;
+							if (z && z[2]) {
+								li.classList.add('ziel-fertig');
+								li.appendChild(document.createTextNode(' '));
+								var ok = eltern('span', '✓');
+								ok.className = 'zahl';
+								li.appendChild(ok);
+							} else if (z && z[3] !== null && ziel[1] > 1) {
+								var wert = Math.min(z[3], ziel[1]);
+								li.appendChild(document.createTextNode(' '));
+								var zahlText = eltern('span', '(' + wert + '/' + ziel[1] + ')');
+								zahlText.className = 'zahl';
+								li.appendChild(zahlText);
+								var leiste = eltern('span', null);
+								leiste.className = 'zielbalken';
+								var balken = eltern('span', null);
+								balken.style.width = Math.round(wert / ziel[1] * 100) + '%';
+								leiste.appendChild(balken);
+								li.appendChild(leiste);
+							} else if (ziel[1]) {
+								li.appendChild(document.createTextNode(' '));
+								var anzahl = eltern('span', '(' + ziel[1] + ')');
+								anzahl.className = 'zahl';
+								li.appendChild(anzahl);
+							}
+							ul.appendChild(li);
+						});
+						block.appendChild(ul);
+						// The coordinates belong to the step; they are not a link per goal.
+						var punkte = [], gesehen = {};
+						quest.t.forEach(function (ort) {
+							if (String(ort[3]) !== String(schritt[0])) { return; }
+							var karte = karteNachIndex[ort[0]];
+							var zeile = (karte ? karte.name + ' · ' : '') + koordinatenText(ort[1], ort[2]);
+							if (!gesehen[zeile]) { gesehen[zeile] = true; punkte.push(zeile); }
+						});
+						if (punkte.length) {
+							var ortsliste = eltern('div', null);
+							ortsliste.className = 'zielorte';
+							punkte.forEach(function (zeile) { ortsliste.appendChild(eltern('p', zeile)); });
+							block.appendChild(ortsliste);
+						}
+					}
+					[['h', 'jagdorte', 'jagd_hinweis'], ['hz', 'aufgabenorte', 'aufgabenorte_hinweis']].forEach(function (art2) {
+						var jagd = (quest[art2[0]] || []).filter(function (ort) { return String(ort[3]) === String(schritt[0]); });
+						if (!jagd.length) { return; }
+						var hinweis = eltern('div', null);
+						hinweis.className = 'zielorte jagdhinweis';
+						hinweis.appendChild(eltern('h4', t(art2[1])));
+						hinweis.appendChild(eltern('p', t(art2[2])));
+						var karten = {};
+						jagd.forEach(function (ort) { karten[ort[0]] = (karten[ort[0]] || 0) + 1; });
+						Object.keys(karten).forEach(function (id) {
+							var knopf = eltern('button', (karteNachIndex[id] ? karteNachIndex[id].name : '') + ' · ' + karten[id]);
+							knopf.type = 'button';
+							knopf.addEventListener('click', function () {
+								var knoten = zustand.knoten;
+								zeigeKarte(Number(id));
+								zustand.knoten = knoten;
+								zustand.auswahl = quest;
+								zeichneMarker(); zeichneDetail();
+							});
+							hinweis.appendChild(knopf);
+						});
+						block.appendChild(hinweis);
+					});
+					zielBox.appendChild(block);
+				});
+			}
+		}
+
+		// --- Rewards -----------------------------------------------------
 		if (!window.MQL_REFERENZ && (quest.rw || []).some(function (r) { return r[6]; })) {
 			ladeReferenz(function () { zeichneDetail(); });
 		}
 		if ((quest.rw || []).length) {
-			var belohnung = eltern('div', null);
-			belohnung.className = 'belohnungen';
-			belohnung.appendChild(eltern('h3', t('belohnungen')));
-			var liste = eltern('ul', null), auswahl = [];
+			var belohnung = abschnitt('detail-belohnungen', t('belohnungen'));
+			var liste = null, auswahl = [];
 			quest.rw.forEach(function (eintrag) {
-				var art = eintrag[0], name = eintrag[1], kennung = eintrag[6];
+				var art3 = eintrag[0], name = eintrag[1], kennung = eintrag[6];
 				var beschriftung = (eintrag[4] > 1 ? eintrag[4] + ' × ' : '') + name;
-				if (art === 'i' || art === 'c') {
+				if (art3 === 'i' || art3 === 'c') {
+					if (!liste) { liste = eltern('ul', null); liste.className = 'detail-reward-liste'; belohnung.appendChild(liste); }
 					var zeile = eltern('li', null);
 					zeile.className = 'q' + (eintrag[2] || 0);
-					if (kennung) { zeile.appendChild(symbolBild(kennung)); }
-					zeile.appendChild(kennung ? gegenstandLink(kennung, beschriftung)
-						: document.createTextNode(beschriftung));
+					if (kennung) {
+						var bild = eltern('span', null);
+						bild.className = 'detail-reward-symbol';
+						bild.appendChild(symbolBild(kennung));
+						zeile.appendChild(bild);
+					}
+					var stueck = eltern('span', null);
+					stueck.className = 'detail-reward-text';
+					stueck.appendChild(kennung ? gegenstandLink(kennung, beschriftung) : document.createTextNode(beschriftung));
 					if (eintrag[3]) {
 						var stufe = eltern('span', '· ' + t('stufe') + ' ' + eintrag[3]);
 						stufe.className = 'stufe';
-						zeile.appendChild(stufe);
+						stueck.appendChild(stufe);
 					}
-					if (art === 'c') { auswahl.push(eintrag); return; }
+					zeile.appendChild(stueck);
+					if (art3 === 'c') { auswahl.push(eintrag); zeile.remove(); return; }
 					liste.appendChild(zeile);
 					return;
 				}
+				if (!liste) { liste = eltern('ul', null); liste.className = 'detail-reward-liste'; belohnung.appendChild(liste); }
 				var merkmal = eltern('li', t({ t: 'belohnung_titel', v: 'belohnung_tugend',
-					tr: 'belohnung_fertigkeit', e: 'belohnung_emote' }[art] || 'belohnung_unbekannt') + ': ' + name);
+					tr: 'belohnung_fertigkeit', e: 'belohnung_emote' }[art3] || 'belohnung_unbekannt') + ': ' + name);
 				merkmal.className = 'merkmal';
 				liste.appendChild(merkmal);
 			});
-			if (liste.children.length) { belohnung.appendChild(liste); }
 			if (auswahl.length) {
 				var wahl = eltern('div', null);
 				wahl.className = 'auswahl';
@@ -2451,8 +2728,7 @@
 					var kennung = eintrag[6];
 					var beschriftung = (eintrag[4] > 1 ? eintrag[4] + ' × ' : '') + eintrag[1];
 					if (kennung) { stueck.appendChild(symbolBild(kennung)); }
-					stueck.appendChild(kennung ? gegenstandLink(kennung, beschriftung)
-						: document.createTextNode(beschriftung));
+					stueck.appendChild(kennung ? gegenstandLink(kennung, beschriftung) : document.createTextNode(beschriftung));
 					wahlZeile.appendChild(stueck);
 					if (eintrag[3]) {
 						wahlZeile.appendChild(eltern('span', '· ' + t('stufe') + ' ' + eintrag[3]));
@@ -2462,10 +2738,37 @@
 				wahl.appendChild(wahlListe);
 				belohnung.appendChild(wahl);
 			}
-			detail.appendChild(belohnung);
 		}
 
-		// Quest chain: what leads here and what comes next, each clickable.
+		// --- Prerequisites ----------------------------------------------
+		if (quest.v || quest.vo || quest.vl || quest.vb) {
+			var bedingungen = abschnitt('detail-voraussetzungen', t('voraussetzungen'));
+			var ul2 = eltern('ul', null);
+			ul2.className = 'detail-bedingungen';
+			function punkt(text, ok) {
+				var li = eltern('li', null);
+				var zeichen = eltern('span', ok === null ? '·' : (ok ? '✓' : '○'));
+				zeichen.className = 'zeichen' + (ok ? ' ok' : '');
+				li.appendChild(zeichen);
+				li.appendChild(document.createTextNode(' ' + text));
+				ul2.appendChild(li);
+				return li;
+			}
+			function aufgabe(id, vorsilbe) {
+				var andere = questNachId[id];
+				if (!andere) { return; }
+				var li = punkt((vorsilbe || '') + andere.n, hatFortschritt ? fertig[id] === true : null);
+				li.classList.add('sprung');
+				li.addEventListener('click', function () { waehle(andere); });
+				mitVorschau(li, andere);
+			}
+			if (quest.vl) { punkt(t('stufe') + ' ' + quest.vl, charakterStufe ? charakterStufe >= quest.vl : null); }
+			(quest.v || []).forEach(function (id) { aufgabe(id); });
+			(quest.vo || []).forEach(function (id) { aufgabe(id, t('eine_davon') + ' '); });
+			if (ul2.children.length) { bedingungen.appendChild(ul2); }
+		}
+
+		// --- Chain -------------------------------------------------------
 		var davor = [], davorGesehen = {};
 		(quest.pq || []).forEach(function (id) {
 			var andere = questNachId[id];
@@ -2473,10 +2776,9 @@
 		});
 		var danach = quest.nq ? questNachId[quest.nq] : null;
 		if (davor.length || danach) {
-			var kette = eltern('div', null);
-			kette.className = 'bedingungen';
-			kette.appendChild(eltern('h3', t('kette')));
+			var kette = abschnitt('detail-kette', t('kette'));
 			var kl = eltern('ul', null);
+			kl.className = 'detail-kette-liste';
 			function glied(andere, pfeil) {
 				var li = eltern('li', null);
 				var zeichen = eltern('span', pfeil);
@@ -2494,50 +2796,14 @@
 			});
 			if (danach) { var liDanach = glied(danach, '→'); mitVorschau(liDanach, danach); }
 			kette.appendChild(kl);
-			detail.appendChild(kette);
 		}
 
-		// Requirements, each with its state for the active character.
-		if (quest.v || quest.vo || quest.vl || quest.vb) {
-			var bedingungen = eltern('div', null);
-			bedingungen.className = 'bedingungen';
-			bedingungen.appendChild(eltern('h3', t('voraussetzungen')));
-			var ul = eltern('ul', null);
-			function punkt(text, ok) {
-				var li = eltern('li', null);
-				var zeichen = eltern('span', ok === null ? '·' : (ok ? '✓' : '○'));
-				zeichen.className = 'zeichen' + (ok ? ' ok' : '');
-				li.appendChild(zeichen);
-				li.appendChild(document.createTextNode(' ' + text));
-				ul.appendChild(li);
-				return li;
-			}
-			function aufgabe(id, vorsilbe) {
-				var andere = questNachId[id];
-				if (!andere) { return; }  // outside the catalogue: says nothing useful
-				var li = punkt((vorsilbe || '') + (andere ? andere.n : t('unbekannte_aufgabe')),
-					hatFortschritt ? fertig[id] === true : null);
-				if (andere) {
-					li.classList.add('sprung');
-					li.addEventListener('click', function () { waehle(andere); });
-					mitVorschau(li, andere);
-				}
-			}
-			if (quest.vl) { punkt(t('stufe') + ' ' + quest.vl, charakterStufe ? charakterStufe >= quest.vl : null); }
-			(quest.v || []).forEach(function (id) { aufgabe(id); });
-			(quest.vo || []).forEach(function (id) { aufgabe(id, t('eine_davon') + ' '); });
-
-			bedingungen.appendChild(ul);
-			if (ul.children.length) { detail.appendChild(bedingungen); }
-		}
-
-		// Which quests name this one as a requirement: the reverse of v.
+		// --- What requires this entry ------------------------------------
 		var braucht = loesung ? [] : (baueVoraussetzer()[quest.i] || []);
 		if (braucht.length) {
-			var folge = eltern('div', null);
-			folge.className = 'bedingungen';
-			folge.appendChild(eltern('h3', t('noetig_fuer')));
+			var folge = abschnitt('detail-folge', t('noetig_fuer'));
 			var fl = eltern('ul', null);
+			fl.className = 'detail-bedingungen';
 			braucht.slice(0, 8).forEach(function (andere) {
 				var li = eltern('li', null);
 				var zeichen = eltern('span', '→');
@@ -2548,14 +2814,29 @@
 				li.addEventListener('click', function () { waehle(andere); });
 				fl.appendChild(li);
 			});
-			if (braucht.length > 8) {
-				fl.appendChild(eltern('li', '… ' + (braucht.length - 8)));
-			}
+			if (braucht.length > 8) { fl.appendChild(eltern('li', '… ' + (braucht.length - 8))); }
 			folge.appendChild(fl);
-			detail.appendChild(folge);
 		}
 
-		// Why an entry is not counted. Same wording as the plugin.
+		// --- Where the recorded objectives lie ---------------------------
+		if (quest.t && quest.t.length) {
+			var kartenZeile = eltern('div', null);
+			kartenZeile.className = 'detail-aktionen detail-kartenaktion';
+			var kartenKnopf = eltern('button', t('detail_ziele_karte'));
+			kartenKnopf.type = 'button';
+			kartenKnopf.className = 'katalog-knopf';
+			kartenKnopf.addEventListener('click', function () {
+				var knoten = zustand.knoten;
+				zeigeKarte(Number(quest.t[0][0]));
+				zustand.knoten = knoten;
+				zustand.auswahl = quest;
+				zeichneMarker(); zeichneDetail();
+				if (window.MQL_MOBIL) { window.MQL_MOBIL.zeige('karte'); }
+			});
+			kartenZeile.appendChild(kartenKnopf);
+			detail.appendChild(kartenZeile);
+		}
+
 		if (lage === 'monster') {
 			hinweis.textContent = t('monster_hinweis');
 			hinweis.hidden = false;
@@ -2581,102 +2862,12 @@
 			detail.appendChild(hinweisOhne);
 		}
 
-		// One line under the description folds this quest's objectives in or out.
-		if ((quest.s || []).length) {
-			var schalter = eltern('button', (zieleOffen ? '▾ ' + t('ziele_aus') : '▸ ' + t('ziele_ein')) +
-				(quest.t.length ? ' (' + quest.t.length + ')' : ''));
-			schalter.className = 'ziele-schalter';
-			schalter.setAttribute('aria-expanded', String(zieleOffen));
-			schalter.addEventListener('click', function () { setzeZiele(!zieleOffen); });
-			detail.appendChild(schalter);
-			if (!zieleOffen) { fuss(); return; }
+		// The compact map payload has no description; the detail shard does.
+		if (!hatDetails(quest)) {
+			ladeDetails(quest, function () {
+				if (zustand.auswahl && zustand.auswahl.i === quest.i) { zeichneDetail(); }
+			});
 		}
-		(quest.s || []).forEach(function (schritt) {
-			var block = eltern('div', null);
-			schritt[1].forEach(function (absatz) {
-				var p = eltern('p', absatz);
-				p.className = 'text';
-				block.appendChild(p);
-			});
-			if (schritt[2].length) {
-				var ul = eltern('ul', null);
-				var stand = lage === 'laufend' ? lauf(quest) : null;
-				schritt[2].forEach(function (ziel) {
-					var li = eltern('li', ziel[0]);
-					var z = stand && ziel[2] >= 0 ? stand.zaehler(schritt[0], ziel[2]) : null;
-					if (z && z[2]) {
-						// Done according to LOTRO Companion.
-						li.classList.add('ziel-fertig');
-						li.appendChild(document.createTextNode(' '));
-						var ok = eltern('span', '✓');
-						ok.className = 'zahl';
-						li.appendChild(ok);
-					} else if (z && z[3] !== null && ziel[1] > 1) {
-						var wert = Math.min(z[3], ziel[1]);
-						li.appendChild(document.createTextNode(' '));
-						var zahlText = eltern('span', '(' + wert + '/' + ziel[1] + ')');
-						zahlText.className = 'zahl';
-						li.appendChild(zahlText);
-						var leiste = eltern('span', null);
-						leiste.className = 'zielbalken';
-						var balken = eltern('span', null);
-						balken.style.width = Math.round(wert / ziel[1] * 100) + '%';
-						leiste.appendChild(balken);
-						li.appendChild(leiste);
-					} else if (ziel[1]) {
-						li.appendChild(document.createTextNode(' '));
-						var anzahl = eltern('span', '(' + ziel[1] + ')');
-						anzahl.className = 'zahl';
-						li.appendChild(anzahl);
-					}
-					ul.appendChild(li);
-				});
-				block.appendChild(ul);
-			}
-			// Coordinates belong to a step, not necessarily to one individual goal.
-			// Keep them behind the objective disclosure, just like the map rings.
-			var punkte = [], gesehen = {};
-			quest.t.forEach(function (ort) {
-				if (String(ort[3]) !== String(schritt[0])) { return; }
-				var karte = karteNachIndex[ort[0]];
-				var zeile = (karte ? karte.name + ' · ' : '') + koordinatenText(ort[1], ort[2]);
-				if (!gesehen[zeile]) { gesehen[zeile] = true; punkte.push(zeile); }
-			});
-			if (punkte.length) {
-				var ortsliste = eltern('div', null);
-				ortsliste.className = 'zielorte';
-				ortsliste.appendChild(eltern('h3', t('kartenpunkte')));
-				punkte.forEach(function (zeile) { ortsliste.appendChild(eltern('p', zeile)); });
-				block.appendChild(ortsliste);
-			}
-			[['h', 'jagdorte', 'jagd_hinweis'], ['hz', 'aufgabenorte', 'aufgabenorte_hinweis']].forEach(function (art) {
-			var jagd = (quest[art[0]] || []).filter(function (ort) { return String(ort[3]) === String(schritt[0]); });
-			if (jagd.length) {
-				var hinweis = eltern('div', null);
-				hinweis.className = 'zielorte jagdhinweis';
-				hinweis.appendChild(eltern('h3', t(art[1])));
-				hinweis.appendChild(eltern('p', t(art[2])));
-				var karten = {};
-				jagd.forEach(function (ort) { karten[ort[0]] = (karten[ort[0]] || 0) + 1; });
-				Object.keys(karten).forEach(function (id) {
-					var knopf = eltern('button', (karteNachIndex[id] ? karteNachIndex[id].name : '') + ' · ' + karten[id]);
-					knopf.type = 'button';
-					knopf.addEventListener('click', function () {
-						var knoten = zustand.knoten;
-						zeigeKarte(Number(id));
-						zustand.knoten = knoten;
-						zustand.auswahl = quest;
-						zeichneMarker(); zeichneDetail();
-					});
-					hinweis.appendChild(knopf);
-				});
-				block.appendChild(hinweis);
-			}
-			});
-			detail.appendChild(block);
-		});
-
-		fuss();
 	}
 
 	// --- Preview flyout --------------------------------------------------
@@ -2766,8 +2957,8 @@
 		aktualisiereStand();
 		markiereZeile(quest.i);
 		if (window.MQL_MOBIL) { window.MQL_MOBIL.zeige('details'); }
-		if (!vollstaendig) {
-			ladeVollstaendig(function () {
+		if (!hatDetails(quest)) {
+			ladeDetails(quest, function () {
 				zeichneDetail();
 				zeichneListe();
 				zeichneMarker();
@@ -3294,6 +3485,50 @@
 		});
 		if (!region.reihenfolge.length) { landschaften.push({ knoten: region, region: ltexte[7], karte: region.karte }); }
 	});
+	// Presentation-only grouping: keep map IDs, parent paths and catalogue
+	// records intact while giving a few oversized/over-prefixed regions clearer
+	// cards. The source config is generated with the shared quest/deed geography.
+	var gebietsAnzeige = window.MQL_GEBIETE && window.MQL_GEBIETE.anzeige || {};
+	function knotenFuerKarte(knoten, ident) {
+		if (knoten.karte != null && Number(knoten.karte) === Number(ident)) { return knoten; }
+		for (var i = 0; i < (knoten.reihenfolge || []).length; i += 1) {
+			var treffer = knotenFuerKarte(knoten.reihenfolge[i], ident);
+			if (treffer) { return treffer; }
+		}
+		return null;
+	}
+	(gebietsAnzeige.promote || []).forEach(function (regel) {
+		var uebersicht = landschaften.filter(function (e) {
+			return Number(e.karte) === Number(regel.from);
+		})[0];
+		if (!uebersicht) { return; }
+		var promoted = [];
+		(regel.maps || []).forEach(function (id) {
+			var knoten = knotenFuerKarte(uebersicht.knoten, id);
+			if (!knoten || promoted.some(function (e) { return e.knoten === knoten; })) { return; }
+			promoted.push({ knoten: knoten, region: uebersicht.region, karte: Number(id),
+				promoted: true, sourceParent: Number(regel.from),
+				anzeigeGruppe: regel.group ? { id: regel.group, label: regel.label } : null });
+		});
+		if (!promoted.length) { return; }
+		// The overview map remains a real, reachable card. Its node keeps its
+		// children and entries: the tab bar and the list need both. Promoted
+		// child cards count their own subtrees.
+		uebersicht.showOverviewLink = true;
+		landschaften = landschaften.concat(promoted);
+	});
+	function gruppenMetadaten(ident) {
+		for (var i = 0; i < (gebietsAnzeige.groups || []).length; i += 1) {
+			var gruppe = gebietsAnzeige.groups[i];
+			if ((gruppe.maps || []).some(function (map) { return Number(map) === Number(ident); })) {
+				return gruppe;
+			}
+		}
+		return null;
+	}
+	landschaften.forEach(function (e) {
+		e.anzeigeGruppe = gruppenMetadaten(e.karte);
+	});
 	var gebuendelt = [];
 	landschaften.forEach(function (e) {
 		var karte = karteNachIndex[e.karte];
@@ -3332,7 +3567,16 @@
 	landschaften.sort(function (a,b) {
 		if ((a.region === ltexte[7]) !== (b.region === ltexte[7])) { return a.region === ltexte[7] ? 1 : -1; }
 		var ra = regionSortierung.indexOf(a.region), rb = regionSortierung.indexOf(b.region);
-		return (ra < 0 ? 99 : ra) - (rb < 0 ? 99 : rb) || a.region.localeCompare(b.region, sprache) || a.knoten.name.localeCompare(b.knoten.name, sprache);
+		var regionVergleich = (ra < 0 ? 99 : ra) - (rb < 0 ? 99 : rb) || a.region.localeCompare(b.region, sprache);
+		if (regionVergleich) { return regionVergleich; }
+		var ga = a.anzeigeGruppe, gb = b.anzeigeGruppe;
+		if (ga && gb && ga.id !== gb.id) {
+			return (gebietsAnzeige.groups || []).findIndex(function (g) { return g.id === ga.id; }) -
+				(gebietsAnzeige.groups || []).findIndex(function (g) { return g.id === gb.id; });
+		}
+		if (ga && !gb) { return 1; }
+		if (!ga && gb) { return -1; }
+		return a.knoten.name.localeCompare(b.knoten.name, sprache);
 	});
 	function landschaftSlug(eintrag) {
 		// Game map IDs survive language changes; no English names are guessed.
@@ -3441,8 +3685,8 @@
 		var gruppen = eltern('div'); landschaftStart.appendChild(gruppen);
 		var themenTitel = eltern('h3', {de:'Weitere Inhalte',en:'Other content',fr:'Autres contenus'}[sprache] || 'Other content');
 		themenTitel.className = 'aufgaben-themen-titel';
+		themenTitel.id = 'themen';
 		var themen = eltern('section'); themen.className = 'aufgaben-themen';
-		landschaftStart.append(themenTitel,themen);
 		var themenTexte = {
 			de:{epic:['Epische Geschichte','Bände, Bücher und Kapitel','In der Kartenansicht öffnen'],class:['Klassenaufgaben','Aufgaben mit einer belegten Klassenbindung','Im Finder suchen'],origin:['Herkunftsaufgaben','Aufgaben mit einer belegten Herkunftsbindung','Im Finder suchen'],festivals:['Feste und Ereignisse','Zeitlich gebundene und saisonale Aufgaben','Im Finder suchen'],missions:['Missionen','Missionen und ihre Aufgaben','Im Finder suchen'],instances:['Instanzen und Schlachten','Aufgaben aus Instanzen und Schlachten','Im Finder suchen'],craft:['Handwerk','Aufgaben rund ums Handwerk','Im Finder suchen'],board:['Aufgabenbrett','Aufgaben vom Aufgabenbrett','Im Finder suchen'],other:['Weitere Aufgaben','Weitere belegte Aufgaben','Im Finder suchen']},
 			en:{epic:['Epic Story','Volumes, books and chapters','Open in the map'],class:['Class quests','Quests explicitly tied to a class','Find in quest finder'],origin:['Origin quests','Quests explicitly tied to an origin','Find in quest finder'],festivals:['Festivals and events','Seasonal and event quests','Find in quest finder'],missions:['Missions','Missions and their quests','Find in quest finder'],instances:['Instances and battles','Quests from instances and battles','Find in quest finder'],craft:['Crafting','Quests about crafting','Find in quest finder'],board:['Task board','Quests from the task board','Find in quest finder'],other:['Other quests','Other documented quests','Find in quest finder']},
@@ -3451,28 +3695,72 @@
 		var finderBase = ({de:'/de/aufgabenfinder/',en:'/en/quest-finder/',fr:'/fr/recherche-quetes/'}[sprache] || '/de/aufgabenfinder/');
 		['epic','class','origin','festivals','missions','instances','craft','board','other'].forEach(function (key) {
 			var boardValue = {de:'Auftrag',en:'Task',fr:'Tâche'}[sprache] || 'Task';
+			// Before any area is opened the catalogue entries are not loaded yet;
+			// the compact start metadata knows every topic as well.
+			var quelle = quests.length ? quests : (window.MQL_KARTEN_SUMMARY || []);
 			var vorhanden = key === 'board'
-				? quests.some(function (q) { return q.a === boardValue; })
-				: quests.some(function (q) { return q.th === key; });
+				? quelle.some(function (q) { return q.a === boardValue; })
+				: quelle.some(function (q) { return q.th === key; });
 			if (!vorhanden || !themenTexte[key]) { return; }
 			var link = eltern('a'); link.className = 'aufgaben-thema';
 			link.appendChild(eltern('strong',themenTexte[key][0]));
 			link.appendChild(eltern('small',themenTexte[key][1]));
 			link.appendChild(eltern('span',themenTexte[key][2]));
 			if (key === 'epic') {
+				var epikName = {de:'Epische Geschichte',en:'Epic Story',fr:'Histoire épique'}[sprache] || 'Epic Story';
 				var root = WURZEL.reihenfolge.find(function (knoten) {
 					return istThemenWurzel(knoten) && knoten.quests.some(function (q) { return q.th === 'epic'; });
 				});
 				var karteUrl = new URL(({de:'/de/karte/',en:'/en/map/',fr:'/fr/carte/'}[sprache] || '/de/karte/'),window.location.origin);
 				if (root) { karteUrl.searchParams.set('gebiet',root.schluessel.replace(/^\|/,'')); }
+				else if ((window.MQL_KARTEN_SUMMARY || []).some(function (row) { return (row.f || [])[0] === epikName; })) {
+					karteUrl.searchParams.set('gebiet',epikName);
+				}
 				link.href = karteUrl.pathname + karteUrl.search;
 			} else {
 				link.href = finderBase + '?topic=' + encodeURIComponent(key);
 			}
 			themen.appendChild(link);
 		});
+		// An empty heading would promise content that is not there.
+		if (themen.childElementCount) { landschaftStart.append(themenTitel,themen); }
 		function zeichnen() {
 			gruppen.textContent = ''; spruenge.textContent = ''; var nachRegion = {};
+			var sichtbareGruppen = {};
+			// Groups are their own jump targets; remember where their region chip sits.
+			var sprungNach = {};
+			/** All maps of an overview group, including its named sub-areas. */
+			function gruppenKarten(gruppe, eintrag) {
+				var gefunden = [], gesehen = {}, wurzeln = [];
+				// Dunland's overview node holds all its maps; other groups list them.
+				var uebersicht = eintrag && eintrag.sourceParent ? knotenFuerKarte(WURZEL, eintrag.sourceParent) : null;
+				if (uebersicht) {
+					gesehen[Number(uebersicht.karte)] = true;
+					wurzeln = uebersicht.reihenfolge || [];
+				} else {
+					(gruppe.maps || []).forEach(function (id) {
+						var knoten = knotenFuerKarte(WURZEL, id);
+						if (knoten) { wurzeln.push(knoten); }
+					});
+				}
+				wurzeln.forEach(function (knoten) {
+					(function sammle(k) {
+						if (k.karte != null && !gesehen[Number(k.karte)]) {
+							gesehen[Number(k.karte)] = true;
+							gefunden.push({ name: k.name, karte: Number(k.karte), knoten: k });
+						}
+						(k.reihenfolge || []).forEach(sammle);
+					})(knoten);
+				});
+				return gefunden.sort(function (a, b) { return a.name.localeCompare(b.name, sprache, { numeric: true }); });
+			}
+			function sprungZiel(link, ziel, titel) {
+				link.href = '#' + ziel.id;
+				link.onclick = function (event) {
+					event.preventDefault(); ziel.scrollIntoView({ block: 'start' });
+					if (titel) { titel.focus({ preventScroll: true }); }
+				};
+			}
 			var rest = eltern('section'); rest.className = 'landschaft-rest landschaft-gruppe';
 			var restBox = eltern('div'); restBox.className = 'landschaft-kacheln'; rest.appendChild(restBox);
 			landschaften.forEach(function (e) {
@@ -3485,11 +3773,79 @@
 					// Region jumps scroll this view, not the landscape routing hash.
 					sprung.onclick = function (event) { event.preventDefault(); s.scrollIntoView({ block: 'start' }); titel.focus({ preventScroll: true }); };
 					spruenge.appendChild(sprung);
+					sprungNach[e.region] = sprung;
 					box = eltern('div'); box.className = 'landschaft-kacheln'; s.appendChild(box); gruppen.appendChild(s); nachRegion[e.region] = box;
 				}
+				if (e.anzeigeGruppe) {
+					var gruppenId = e.region + '|' + e.anzeigeGruppe.id;
+					if (!sichtbareGruppen[gruppenId]) {
+						var gruppenKopf = eltern('h4', e.anzeigeGruppe.label);
+						gruppenKopf.className = 'landschaft-kachelgruppe';
+						gruppenKopf.dataset.gebietgruppe = e.anzeigeGruppe.id;
+						gruppenKopf.id = 'gruppe-' + e.anzeigeGruppe.id;
+						if (e.anzeigeGruppe.id === 'dunland') {
+							var overview = landschaften.find(function (eintrag) { return eintrag.showOverviewLink; });
+							if (overview && falten(e.anzeigeGruppe.label + ' ' + overview.knoten.name).indexOf(falten(eingabe.value)) >= 0) {
+								var overviewLink = eltern('button', {
+									de:'Übersichtskarte öffnen',en:'Open overview map',fr:'Ouvrir la carte générale'
+								}[sprache] || '');
+								overviewLink.type = 'button';
+								overviewLink.className = 'landschaft-uebersicht-link';
+								overviewLink.onclick = function () { landschaftOeffnen(overview); };
+								gruppenKopf.appendChild(overviewLink);
+							}
+						}
+						box.appendChild(gruppenKopf);
+						// A group chip next to its region, plus direct links to every
+						// map it contains (overview cards keep their previews).
+						var kurz = e.anzeigeGruppe.label.replace(/^Aperçu du\s+/i, '').replace(/\s*[-–]?\s*(Überblick|Overview|Vue d[’']ensemble)\s*$/i, '').trim() || e.anzeigeGruppe.label;
+						var gruppenSprung = eltern('a', kurz);
+						gruppenSprung.className = 'sprung-gruppe';
+						sprungZiel(gruppenSprung, gruppenKopf, gruppenKopf);
+						var vor = sprungNach[e.region];
+						if (vor && vor.parentNode) { spruenge.insertBefore(gruppenSprung, vor.nextSibling); sprungNach[e.region] = gruppenSprung; }
+						else { spruenge.appendChild(gruppenSprung); }
+						var gruppe = (gebietsAnzeige.groups || []).find(function (g) { return g.id === e.anzeigeGruppe.id; });
+						if (gruppe) {
+							var orte = gruppenKarten(gruppe, e);
+							if (orte.length) {
+								var leiste = eltern('nav');
+								leiste.className = 'landschaft-gruppeorte';
+								leiste.setAttribute('aria-label', gruppenKopf.textContent);
+								orte.forEach(function (ort) {
+									var z = zaehle(zaehlEintraege(ort.knoten));
+									var link = eltern('a');
+									link.href = '#' + landschaftSlug(e) + '/' + ort.karte;
+									link.dataset.karte = String(ort.karte);
+									link.appendChild(eltern('span', ort.name));
+									var stand = eltern('span', zahl(z.erledigt, z.gesamt));
+									stand.className = 'zahl';
+									link.appendChild(stand);
+									leiste.appendChild(link);
+								});
+								leiste.addEventListener('click', function (event) {
+									var link = event.target.closest && event.target.closest('a[data-karte]');
+									if (!link) { return; }
+									event.preventDefault();
+									var id = Number(link.dataset.karte);
+									var eintrag = landschaften.find(function (x) { return Number(x.karte) === id; }) ||
+										{ knoten: knotenFuerKarte(WURZEL, id), region: e.region, karte: id };
+									landschaftOeffnen(eintrag, id);
+								});
+								box.appendChild(leiste);
+							}
+						}
+						sichtbareGruppen[gruppenId] = true;
+					}
+				}
+				// The Dunland overview has no entries of its own. Keep its map
+				// reachable from the group heading, not as an empty landscape card.
+				if (e.showOverviewLink) { return; }
 				var knopf = eltern('button'); knopf.className = 'landschaft-kachel'; knopf.dataset.landschaft = landschaftSlug(e);
 				var karte = karteNachIndex[e.karte];
 				if (karte) { knopf.dataset.karte = karte.idx; }
+				if (e.promoted) { knopf.dataset.gebietgruppe = 'dunland'; }
+				else if (e.anzeigeGruppe) { knopf.dataset.gebietgruppe = e.anzeigeGruppe.id; }
 				var platzhalter = eltern('span'); platzhalter.className = 'landschaft-bild-leer'; platzhalter.setAttribute('aria-hidden', 'true');
 				if (karte) {
 					var img = eltern('img');
@@ -3509,6 +3865,13 @@
 				}
 				else { knopf.appendChild(platzhalter); }
 				var inhalt = eltern('span'); inhalt.className = 'inhalt'; inhalt.appendChild(eltern('strong', e.knoten.name));
+				if (e.showOverviewLink) {
+					inhalt.appendChild(eltern('small', {
+						de:'Übersichtskarte · Gebiete einzeln darunter',
+						en:'Overview map · areas listed separately below',
+						fr:'Carte générale · zones détaillées ci-dessous'
+					}[sprache] || ''));
+				}
 				inhalt.appendChild(eltern('small', stufenSpanne(zaehlEintraege(e.knoten))));
 				var z = zaehle(zaehlEintraege(e.knoten));
 				inhalt.appendChild(eltern('small', zahl(z.erledigt, z.gesamt) + ' ' + t('aufgaben')));
@@ -3526,7 +3889,10 @@
 						unterorte(kind);
 					});
 				}
-				if (e.karte == null) {
+				if (e.showOverviewLink) {
+					// Promoted maps have their own cards. Avoid listing them again
+					// as links under the overview card.
+				} else if (e.karte == null) {
 					inhaltsKinder(e.knoten).forEach(function (kind) {
 						var ziel = 'group-' + encodeURIComponent(kind.schluessel);
 						var link = eltern('a', kind.name); link.href = '#' + landschaftSlug(e) + '/' + ziel;
@@ -3538,6 +3904,12 @@
 				box.appendChild(kachel);
 			});
 			if (restBox.childElementCount) { gruppen.appendChild(rest); }
+			if (themen.childElementCount) {
+				var themenSprung = eltern('a', themenTitel.textContent);
+				themenSprung.className = 'sprung-themen';
+				sprungZiel(themenSprung, themenTitel, themenTitel);
+				spruenge.appendChild(themenSprung);
+			}
 		}
 		eingabe.oninput = zeichnen; zeichnen();
 	}
@@ -3656,47 +4028,77 @@
 			waehleKnotenAlt(knoten, true, true);
 		}
 	};
+	var landschaftAuftrag = 0;
+	// ?id=<quest id> names an entry, not a landscape. Its area is known from the
+	// compact start metadata; select it once the shards are here.
+	var auswahlNachLaden = null;
 	function landschaftOeffnen(e, ort, ohneVerlauf) {
 		if (abmeldenUebersichtAnsicht) { abmeldenUebersichtAnsicht(); abmeldenUebersichtAnsicht = null; }
 		landschaftBereich = e; haupt.classList.remove('landschaft-start'); landschaftStart.hidden = true;
 		listenMass();
-		var teil = null;
-		function finden(k) {
-			if (Number(k.karte) === Number(ort)) {
-				var tiefe = (k.schluessel || '').split('|').length;
-				var teilTiefe = teil ? (teil.schluessel || '').split('|').length : -1;
-				var anzahl = (k.quests || []).length, teilAnzahl = teil ? (teil.quests || []).length : -1;
-				if (!teil || (anzahl > 0) !== (teilAnzahl > 0) ||
-					((anzahl > 0) === (teilAnzahl > 0) && (tiefe > teilTiefe ||
-						(tiefe === teilTiefe && anzahl > teilAnzahl)))) { teil = k; }
+		var auftrag = ++landschaftAuftrag;
+		function zeichne() {
+			// A later click (or a hash change) wins over a slow shard load.
+			if (auftrag !== landschaftAuftrag) { return; }
+			var teil = null;
+			function finden(k) {
+				if (Number(k.karte) === Number(ort)) {
+					var tiefe = (k.schluessel || '').split('|').length;
+					var teilTiefe = teil ? (teil.schluessel || '').split('|').length : -1;
+					var anzahl = (k.quests || []).length, teilAnzahl = teil ? (teil.quests || []).length : -1;
+					if (!teil || (anzahl > 0) !== (teilAnzahl > 0) ||
+						((anzahl > 0) === (teilAnzahl > 0) && (tiefe > teilTiefe ||
+							(tiefe === teilTiefe && anzahl > teilAnzahl)))) { teil = k; }
+				}
+				k.reihenfolge.forEach(finden);
 			}
-			k.reihenfolge.forEach(finden);
+			inhaltsAuswahl = null;
+			if (typeof ort === 'string' && ort.indexOf('group-') === 0) {
+				var schluessel; try { schluessel = decodeURIComponent(ort.slice(6)); } catch (err) { schluessel = ''; }
+				var moegliche = [e.knoten].concat(inhaltsKinder(e.knoten));
+				moegliche.slice().forEach(function (k) { if (k !== e.knoten) { moegliche = moegliche.concat(inhaltsKinder(k)); } });
+				teil = moegliche.find(function (k) { return k.schluessel === schluessel; }) || null;
+				inhaltsAuswahl = teil;
+			} else if (ort != null) {
+				finden(e.knoten);
+				var globales = kartenKnoten(ort);
+				if (globales && (globales.quests || []).length > (teil && teil.quests || []).length) {
+					teil = globales;
+				}
+				var passendeAufgaben = kartenAufgaben(ort);
+				if (passendeAufgaben.length > (teil && teil.quests || []).length) {
+					teil = kartenAnsichtsknoten(ort, passendeAufgaben, e.knoten);
+				}
+			}
+			waehleKnotenAlt(teil || e.knoten, true, true);
+			// Landscape lists include their child locations, not just direct entries.
+			zustand.suchliste = true; zeichneListe(); zeichneMarker(); aktualisiereStand();
+			if (ort != null && karteNachIndex[ort]) { zeigeKarte(ort); zeichneMarker(); }
+			landschaftReiter();
+			if (!ohneVerlauf) { landschaftAdresse(e, ort); }
+			try { localStorage.setItem('llb.preview.letztesGebiet', landschaftSlug(e)); } catch (err) {}
+			if (auswahlNachLaden) {
+				var kennung = auswahlNachLaden; auswahlNachLaden = null;
+				var eintrag = questNachId[kennung];
+				if (eintrag) {
+					zustand.sichtbar = Math.max(zustand.sichtbar, e.knoten.quests.indexOf(eintrag) + 1);
+					waehle(eintrag);
+					if (zeilen[eintrag.i]) { zeilen[eintrag.i].scrollIntoView({ block: 'center' }); }
+				}
+			}
 		}
-		inhaltsAuswahl = null;
-		if (typeof ort === 'string' && ort.indexOf('group-') === 0) {
-			var schluessel; try { schluessel = decodeURIComponent(ort.slice(6)); } catch (err) { schluessel = ''; }
-			var moegliche = [e.knoten].concat(inhaltsKinder(e.knoten));
-			moegliche.slice().forEach(function (k) { if (k !== e.knoten) { moegliche = moegliche.concat(inhaltsKinder(k)); } });
-			teil = moegliche.find(function (k) { return k.schluessel === schluessel; }) || null;
-			inhaltsAuswahl = teil;
-		} else if (ort != null) {
-			finden(e.knoten);
-			var globales = kartenKnoten(ort);
-			if (globales && (globales.quests || []).length > (teil && teil.quests || []).length) {
-				teil = globales;
-			}
-			var passendeAufgaben = kartenAufgaben(ort);
-			if (passendeAufgaben.length > (teil && teil.quests || []).length) {
-				teil = kartenAnsichtsknoten(ort, passendeAufgaben, e.knoten);
-			}
-		}
-		waehleKnotenAlt(teil || e.knoten, true, true);
-		// Landscape lists include their child locations, not just direct entries.
-		zustand.suchliste = true; zeichneListe(); zeichneMarker(); aktualisiereStand();
-		if (ort != null && karteNachIndex[ort]) { zeigeKarte(ort); zeichneMarker(); }
-		landschaftReiter();
-		if (!ohneVerlauf) { landschaftAdresse(e, ort); }
-		try { localStorage.setItem('llb.preview.letztesGebiet', landschaftSlug(e)); } catch (err) {}
+		// Tabs, progress and the selected area need the landscape's shards. Draw
+		// once they are here; before, every deeper sub-area sat at 0/0.
+		if (e.knoten === WURZEL || e.knoten.gebietsDatenGeladen) { zeichne(); return; }
+		listeTitel.textContent = e.knoten.name;
+		liste.textContent = '';
+		var ladehinweis = eltern('li', t('lade_karte'));
+		ladehinweis.className = 'listen-hinweis';
+		liste.appendChild(ladehinweis);
+		ladeGebietsDaten(e.knoten, function () {
+			e.knoten.gebietsDatenGeladen = true;
+			zeichne();
+		});
 	}
 	function landschaftAusAdresse() {
 		var hash = window.location.hash.slice(1).split('/');
@@ -3771,11 +4173,29 @@
 	gebietsuche.addEventListener('input', filtereBaum);
 
 	// ?id=<quest id> (from the reputation page): open its area and select it.
+	function starteAnsicht() {
 	var gewuenscht = null;
 	try {
 		gewuenscht = questNachId[(new URLSearchParams(window.location.search).get('id') || '').toUpperCase()] || null;
 	} catch (fehler) { gewuenscht = null; }
-	var start = gewuenscht && gewuenscht.knoten && gewuenscht.knoten !== WURZEL ? gewuenscht.knoten : knotenAusAdresse();
+	// The compact start carries no entries. A link that names only an id finds
+	// its area through the start metadata; the entry is selected once the
+	// area's shard has arrived.
+	var wunschStart = null;
+	if (!gewuenscht) {
+		var wunschId = '';
+		try { wunschId = (new URLSearchParams(window.location.search).get('id') || '').toUpperCase(); } catch (fehler) { wunschId = ''; }
+		if (wunschId) {
+			var zeile = (window.MQL_KARTEN_SUMMARY || []).find(function (row) { return row.i === wunschId; }) || null;
+			var pfadTeile = zeile && zeile.f ? zeile.f : [];
+			if (pfadTeile.length >= 2) {
+				wunschStart = findeKnoten(WURZEL, '|' + pfadTeile[0] + '|' + pfadTeile[1]);
+				if (wunschStart) { auswahlNachLaden = wunschId; }
+			}
+		}
+	}
+	var start = (gewuenscht && gewuenscht.knoten && gewuenscht.knoten !== WURZEL ? gewuenscht.knoten : null) ||
+		wunschStart || knotenAusAdresse();
 	// A resource link from the crafting page names the map to open.
 	var wunschkarte = 0;
 	try { wunschkarte = parseInt(new URLSearchParams(window.location.search).get('vorkarte'), 10) || 0; } catch (fehler) { wunschkarte = 0; }
@@ -3804,8 +4224,11 @@
 		offen[pfad] = true;
 	});
 	baueBaum();
-	var mitAdresse = !!gewuenscht || !!knotenAusAdresse() || !!wunschkarte;
-	if (mitAdresse || window.location.hash) { waehleKnoten(start, mitAdresse, true); }
+	var mitAdresse = !!gewuenscht || !!auswahlNachLaden || !!knotenAusAdresse() || !!wunschkarte;
+	// A hash link already names its landscape. Starting the default area as well
+	// let its late shards overwrite the linked list (Breeland above Isengart).
+	var hashOeffnet = !!window.location.hash && !gewuenscht;
+	if (!hashOeffnet && (mitAdresse || window.location.hash)) { waehleKnoten(start, mitAdresse, true); }
 	try { window.history.replaceState(mitAdresse ? { mqlListe: start.schluessel } : null, '', window.location.href); } catch (fehler) {}
 	var vorgabeSuche = '';
 	try { vorgabeSuche = new URLSearchParams(window.location.search).get('suche') || ''; } catch (fehler) {}
@@ -3815,7 +4238,31 @@
 		waehle(gewuenscht);
 		if (zeilen[gewuenscht.i]) { zeilen[gewuenscht.i].scrollIntoView({ block: 'center' }); }
 	}
-	if (window.location.hash && !gewuenscht) { landschaftAusAdresse(); }
+	if (hashOeffnet) { landschaftAusAdresse(); }
 	else if (!mitAdresse && !vorgabeSuche) { landschaftUebersicht(true); }
 	haupt.classList.remove('karte-laedt');
+	}
+
+	// The epic tile opens the map, not the finder. Its chapter entries come from
+	// their own small file; load it before the tree is built.
+	var themaGebiet = '';
+	try { themaGebiet = (new URLSearchParams(window.location.search).get('gebiet') || '').toLowerCase(); } catch (fehler) { themaGebiet = ''; }
+	var epikName = {de:'Epische Geschichte',en:'Epic Story',fr:'Histoire épique'}[sprache] || 'Epic Story';
+	if (themaGebiet === epikName.toLowerCase() && !findeKnoten(WURZEL, '|' + epikName) && !window.MQL_THEMA_GELADEN) {
+		var themaSkript = document.createElement('script');
+		themaSkript.src = 'thema-epic-' + sprache + '.js?v=' + (window.MQL_STAND || '0');
+		themaSkript.onload = function () {
+			window.MQL_THEMA_GELADEN = true;
+			(window.MQL_THEMA_DATEN || []).forEach(function (quest) {
+				eintragen(quest.f && quest.f.length ? quest.f : [], quest);
+			});
+			sortiere(WURZEL);
+			baueBaum();
+			starteAnsicht();
+		};
+		themaSkript.onerror = function () { starteAnsicht(); };
+		document.head.appendChild(themaSkript);
+	} else {
+		starteAnsicht();
+	}
 })();

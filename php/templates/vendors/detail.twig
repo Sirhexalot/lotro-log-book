@@ -1,10 +1,10 @@
 {% extends 'layout.twig' %}
 {% block inhalt %}
 <article class="giver-detail vendor-detail">
-<div class="giver-kopf"><span class="giver-symbol" aria-hidden="true">{{ icon|raw }}</span><div>
-<h1>{{ vendor.name }}</h1>{% if vendor.title %}<p class="giver-art">{{ vendor.title }}</p>{% endif %}
+{% import 'entity/_header.twig' as heading %}
+{{ heading.detail(kind, lang, w, vendor.name, icon, '', '', entity_filter_url|default(''), entity_filter_label|default('')) }}
+{% if vendor.title %}<p class="giver-art">{{ vendor.title }}</p>{% endif %}
 <p class="giver-art">{{ vendor.type_label }}</p>
-</div></div>
 {% if vendor.places %}<section class="katalog-abschnitt"><h2>{{ gw.places }}</h2>
 {% for place in vendor.places %}<div class="katalog-ort-flex">
 {% if place.image %}<a class="katalog-ortlink" href="{{ place.map_url }}"><figure class="katalog-ort"><img src="/karten/{{ lang }}/{{ place.image|replace({'.png': '.webp'}) }}" alt="" width="320" height="240" loading="lazy" decoding="async"><i class="katalog-pin" style="left:{{ place.pin_x|pin }}%;top:{{ place.pin_y|pin }}%"></i></figure></a>{% endif %}

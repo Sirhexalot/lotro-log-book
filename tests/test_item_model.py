@@ -64,7 +64,9 @@ class ItemModelTests(unittest.TestCase):
                 ['ARMOUR', 'WEAPON', 'LEGENDARY_WEAPON', 'LEGENDARY_ITEM',
                  'ESSENCE', 'ITEM', 'JEWELLERY'],
             )
-            self.assertEqual(len(data['e'][0]), 10)
+            # id, name, icon, category, quality, slot, type, level, class,
+            # genre, required class/race, armour, weapon, min level, extra condition
+            self.assertEqual(len(data['e'][0]), 16)
             self.assertNotIn('binding', data)
 
     def test_php_item_page_has_separate_where_and_used_for_models(self):

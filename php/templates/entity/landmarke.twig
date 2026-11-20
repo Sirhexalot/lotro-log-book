@@ -3,7 +3,7 @@
 {# Landmark page: the spot on its map and the quests that lead there.
    No category and no description: the client export leaves both empty. #}
 {% block inhalt %}
-<article><div class="katalog-kopf"><h1>{{ icon|raw }}{{ page.name }}</h1></div>
+<article>{{ include('entity/_heading.twig') }}
 {% if page.place.image %}
 <section class="katalog-abschnitt"><h2>{{ w.place }}</h2>
 <figure class="katalog-ort"><img src="/karten/{{ lang }}/{{ page.place.image|replace({'.png': '.webp'}) }}" alt="" width="320" height="240" loading="lazy" decoding="async"><i class="katalog-pin" style="left:{{ page.place.pin_x|pin }}%;top:{{ page.place.pin_y|pin }}%"></i></figure>

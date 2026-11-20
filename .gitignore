@@ -21,6 +21,7 @@ web/fortschritt.js
 web/stand.js
 web/karten-start-*.js
 web/karten-kurz-*.js
+web/thema-*.js
 web/karten-daten/
 web/download/
 web/bild/

@@ -115,10 +115,10 @@ class ListenzeilenRegelTest(unittest.TestCase):
 
     def test_related_vendor_rows_use_the_catalogue_row(self):
         js = (ROOT / 'web/entitaeten-listen.js').read_text(encoding='utf-8')
-        self.assertIn("a.className='sets-zeile'", js)
-        css = (ROOT / 'web/entitaeten-listen.css').read_text(encoding='utf-8')
-        self.assertIn('.related-results .sets-zeile', css)
-        self.assertIn('.sets-zeile .sets-meta', css)
+        self.assertIn("rowUI.row(target,{href:r.url,name:r.name,icon:'haendler'", js)
+        twig = (ROOT / 'php/templates/vendors/list.twig').read_text(encoding='utf-8')
+        self.assertIn("result.row(lang, row.url, row.name", twig)
+        self.assertNotIn("result.heading(lang, 'Art und Ort')", twig)
 
     def test_contract_is_referenced_by_the_project_rules(self):
         agents = (ROOT / 'AGENTS.md').read_text(encoding='utf-8')

@@ -84,6 +84,16 @@ def kopiere_web(ziel: Path) -> None:
             shutil.copy2(eintrag, ziel_pfad)
 
 
+def baue_klassen() -> None:
+    subprocess.run([sys.executable, str(HIER / 'tools' / 'build_class_data.py')],
+                   cwd=str(HIER), check=True)
+
+
+def baue_gegenstandssuche() -> None:
+    subprocess.run([sys.executable, str(HIER / 'build_gegenstandssuche.py')],
+                   cwd=str(HIER), check=True)
+
+
 def baue_karten_kurz(ziel: Path) -> None:
     """Generate compact first-paint data without changing the source catalogues."""
     script = HIER / 'tools' / 'build_karten_kurz.py'
@@ -183,7 +193,10 @@ def pruefen(ziel: Path) -> list[str]:
     for name in ('index.php', 'tracking.html', 'style.css', 'gemeinsam.css',
                  '404.html', 'robots.txt', 'vendor/autoload.php',
                  'php/public/index.php', 'phpdata/labels.json',
-                 'phpdata/manifest.json', 'sets.css', 'sets.js', 'php/src/Sets.php',
+                  'php/src/Feedback.php', 'php/templates/app/feedback.twig',
+                  'feedback.js', 'feedback.css',
+                  'klassen.css', 'klassen.js', 'php/templates/app/klassen.twig',
+                  'phpdata/manifest.json', 'sets.css', 'sets.js', 'php/src/Sets.php',
                  'php/templates/sets/list.twig', 'php/templates/sets/detail.twig',
                  'auftraggeber.css', 'auftraggeber.js', 'php/src/Givers.php',
                  'php/templates/givers/list.twig', 'php/templates/givers/detail.twig',
@@ -192,6 +205,12 @@ def pruefen(ziel: Path) -> list[str]:
         if not (ziel / name).is_file():
             fehler.append('fehlt: ' + name)
     for sprache in SPRACHEN:
+        if not (ziel / ('klassen-%s.js' % sprache)).is_file():
+            fehler.append('fehlt: klassen-%s.js' % sprache)
+        if not (ziel / ('klassen-katalog-%s.js' % sprache)).is_file():
+            fehler.append('fehlt: klassen-katalog-%s.js' % sprache)
+        if not (ziel / ('gegenstaende-%s.js' % sprache)).is_file():
+            fehler.append('fehlt: gegenstaende-%s.js' % sprache)
         if not (ziel / 'phpdata' / sprache / 'sets-index.json').is_file():
             fehler.append('fehlt: phpdata/' + sprache + '/sets-index.json')
         if not (ziel / 'phpdata' / sprache / 'givers-index.json').is_file():
@@ -239,6 +258,8 @@ def main() -> int:
     baue_karten_kurz(ziel)
     # Generate the start files and both shard trees before copying web/.
     # Otherwise a release could contain stale shards from the previous build.
+    baue_gegenstandssuche()
+    baue_klassen()
     kopiere_web(ziel)
     tracking_schreiben(ziel)
     # A visitor-imported progress file never ships; the app writes it locally.

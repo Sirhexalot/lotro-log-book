@@ -418,10 +418,10 @@ sind keine austauschbaren Begriffe.
   Spielobjekten erklären.
 - `docs/todos/SEO.md`: behandelt Ladeverhalten, keine zusätzlichen
   Spielrelationen. Gekürzte Initialdaten sind nicht der vollständige Katalog.
-- `docs/dat-auswertung-2026-11-06.md`: datierter Untersuchungsstand,
+- `docs/archiv/dat-auswertung-2026-11-06.md`: datierter Untersuchungsstand,
   einschließlich damaliger offener Punkte. Nicht ungeprüft als aktueller
   Feld-/Verfügbarkeitsnachweis übernehmen.
-- `docs/instanzenfinder-dat.md` ersetzt die ältere Namenspräfix-/Queststufen-
+- `docs/fachbereiche/instanzenfinder-dat.md` ersetzt die ältere Namenspräfix-/Queststufen-
   Ableitung für die Finder-Darstellung.
 
 ## 6. Noch nicht abgeschlossene Vollständigkeitsnachweise

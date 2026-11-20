@@ -1,0 +1,5 @@
+<div class="katalog-kompaktleiste">
+    {% set chips = progress_chips|default(page.chips) %}
+    {% if chips %}<p class="katalog-metazeile">{{ chips|join(' · ') }}</p>{% endif %}
+    <p id="katalog-status" hidden data-id="{{ page.id }}" data-kind="{{ kind }}" data-profession=""></p>
+</div>

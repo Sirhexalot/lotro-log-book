@@ -1,0 +1,76 @@
+{% extends 'app/layout.twig' %}
+
+{% block koerper_attribute %} data-seite="klassen" class="seite-text"{% endblock %}
+
+{% block stile %}
+<link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/klassen.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/entitaeten-listen.css?v={{ asset_stand }}">
+{% endblock %}
+
+{% block haupt %}
+<main class="seite klassen-seite">
+	<h2 id="klassen-titel" data-klassen-titel>Klassen &amp; Völker</h2>
+	<p id="klassen-intro" class="klassen-intro" data-klassen-intro></p>
+	<div class="klassen-auswahl">
+		<label><span id="label-klasse" data-label-klasse>Klasse</span><select id="klassen-klasse" class="auswahl-chevron"></select></label>
+		<label><span id="label-volk" data-label-volk>Volk</span><select id="klassen-volk" class="auswahl-chevron"></select></label>
+		<label><span id="label-stufe" data-label-stufe>Stufe</span><input id="klassen-stufe" type="number" min="1" max="160" aria-labelledby="label-stufe"></label>
+		<button type="button" id="klassen-mein-charakter"></button>
+	</div>
+	<p id="klassen-charakter-status" class="klassen-status" aria-live="polite"></p>
+	<section id="klassen-profil" aria-live="polite">
+		<h3 id="klassen-profil-titel"></h3>
+		<p id="klassen-kombination"></p>
+		<div class="klassen-proficienzen">
+			<section><h4 id="label-ruestung" data-label-ruestung>Rüstung</h4><ul id="klassen-ruestung"></ul></section>
+			<section><h4 id="label-waffen" data-label-waffen>Waffen</h4><ul id="klassen-waffen"></ul></section>
+		</div>
+	</section>
+	<section class="klassen-katalog" aria-label="Aufgaben, Taten und Gegenstände">
+		<div class="klassen-reiter katalog-reiter" role="tablist">
+			<button type="button" role="tab" id="reiter-aufgaben" aria-controls="liste-aufgaben">Aufgaben</button>
+			<button type="button" role="tab" id="reiter-taten" aria-controls="liste-taten">Taten</button>
+			<button type="button" role="tab" id="reiter-gegenstaende" aria-controls="liste-gegenstaende">Gegenstände</button>
+		</div>
+		<div id="liste-aufgaben" class="klassen-filter related-list" role="tabpanel" aria-labelledby="reiter-aufgaben">
+			<p class="klassen-filter-fehler" data-filter-error hidden></p>
+			<ol id="klassen-aufgaben" class="related-results" data-filter-results></ol>
+		</div>
+		<div id="liste-taten" class="klassen-filter related-list" role="tabpanel" aria-labelledby="reiter-taten" hidden>
+			<p class="klassen-filter-fehler" data-filter-error hidden></p>
+			<ol id="klassen-taten" class="related-results" data-filter-results></ol>
+		</div>
+		<div id="liste-gegenstaende" role="tabpanel" aria-labelledby="reiter-gegenstaende" hidden>
+			<div id="filter-gegenstaende" class="klassen-filter related-list">
+				<p class="klassen-filter-fehler" data-filter-error hidden></p>
+				<ol id="klassen-gegenstaende" class="related-results" data-filter-results></ol>
+			</div>
+		</div>
+	</section>
+</main>
+{% endblock %}
+
+{% block skripte %}
+<script src="/texte.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-spielstand.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-logbuch.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-site.js?v={{ asset_stand }}" defer></script>
+<script src="/sprache.js?v={{ asset_stand }}" defer></script>
+<script src="/speicher.js?v={{ asset_stand }}" defer></script>
+<script src="/menue.js?v={{ asset_stand }}" defer></script>
+<script src="/familienmenue.js?v={{ asset_stand }}" defer></script>
+<script src="/filtergedaechtnis.js?v={{ asset_stand }}" defer></script>
+<script src="/filterzustand.js?v={{ asset_stand }}" defer></script>
+<script src="/filteradapter.js?v={{ asset_stand }}" defer></script>
+<script src="/filter-ui.js?v={{ asset_stand }}" defer></script>
+<script src="/symbole.js?v={{ asset_stand }}" defer></script>
+<script src="/treffer-zeile.js?v={{ asset_stand }}" defer></script>
+<script src="/aufgaben-filter.js?v={{ asset_stand }}" defer></script>
+<script src="/gegenstaende-filter.js?v={{ asset_stand }}" defer></script>
+<script src="/klassen-{{ lang }}.js?v={{ asset_stand }}" defer></script>
+<script src="/klassen.js?v={{ asset_stand }}" defer></script>
+{% endblock %}

@@ -50,6 +50,7 @@
 
 	window.MQL_TASK_FILTER_SETUP = function (rows, kind) {
 		var lang = document.documentElement.lang, A = window.MQL_FILTERADAPTER, w = WORDS[lang] || WORDS.de;
+		var progress = window.MQL_STATUS_UI?.words?.(lang) || {progress:'Fortschritt',all:'Alle',open:'Offen',running:'In Arbeit',done:'Erledigt',unset:'Nicht gesetzt'};
 		var labels = {};
 		['search', 'filter', 'close', 'sort', 'reset', 'more', 'count', 'show', 'loading', 'error',
 			'retry', 'fallback', 'invalidRange', 'min', 'max', 'placeholder'].forEach(function (key) { labels[key] = w[key]; });
@@ -60,16 +61,16 @@
 		var dataset = kind === 'd' ? 'deeds' : 'quests';
 		var known = new Set((character && character[dataset]) || []);
 		var store = window.MQL_SPEICHER;
+		var snapshot = store && store.statusSnapshot && store.statusSnapshot(dataset, character);
 		function status(row) {
+			if (snapshot) { return snapshot(row.id); }
 			if (store && store.status) { return store.status(dataset, row.id); }
 			return known.has(row.id) ? 'fertig' : null;
 		}
 		var meta = (character && character.importMeta) || {};
 		var evidence = meta.datasets && meta.datasets[dataset];
-		// "Not imported as completed" speaks about the import, not about
-		// availability, so it needs a status file or at least positive entries.
-		var hasStatus = known.size > 0 || (character && store && rows.some(function (row) { return status(row) !== null; })) || (evidence ? evidence.status !== 'unknown'
-			: (dataset === 'deeds' ? meta.deeds : meta.quests) === true);
+		var hasImportedStatus = evidence ? evidence.status !== 'unknown' : meta[dataset] === true;
+		var hasStatus = known.size > 0 || hasImportedStatus || !!(character && store && rows.some(function (row) { return status(row) !== null; }));
 
 		/* A filter that cannot separate anything is noise: a group needs at least
 		   two values in this relation, a range at least two distinct levels. */
@@ -136,10 +137,11 @@
 		if (geography) { groups.push(geography); }
 		var levels = new Set(rows.map(function (r) { return r.level; }).filter(function (v) { return v !== null; }));
 		if (levels.size > 1) { groups.push({ id: 'level', kind: 'range', label: w.level }); }
-		if (hasStatus) {
-			groups.push({ id: 'status', kind: 'single', label: w.status,
-				options: [{ value: 'all', label: w.all }, { value: 'done', label: w.done }, { value: 'rest', label: w.rest }] });
-		}
+		groups.unshift({ id: 'status', kind: 'single', label: progress.progress,
+				available: function () { return hasStatus; },
+				options: ['all', 'open', 'running', 'done', 'unset'].map(function (key) {
+					return {value:key,label:progress[key],keepVisible:true};
+				}) });
 
 		var filters = {};
 		groups.forEach(function (g) {
@@ -199,7 +201,7 @@
 					});
 				}
 				if (g.id === 'status') {
-					return value === 'all' || (value === 'done' ? status(row) === 'fertig' : status(row) !== 'fertig');
+					return value === 'all' || (status(row) || null) === {open:'offen',running:'laufend',done:'fertig',unset:null}[value];
 				}
 				if (g.id === 'reward') {
 					return !value.length || value.some(function (key) {
@@ -256,11 +258,35 @@
 			},
 			renderResults: function (result, target) {
 				target.replaceChildren();
+				var rowUI = window.MQL_TREFFERZEILE;
+				var levelHeading = rowUI && (kind === 'q' ? rowUI.words.questLevel : rowUI.words.deedLevel);
+				if (rowUI) {
+					rowUI.header(target, { progress: true, levelHeading: levelHeading });
+					if (!hasImportedStatus) { rowUI.help(target, rowUI.words.noProgress); }
+				}
 				var symbols = document.getElementById('related-list-symbols');
 				var symbol = symbols && JSON.parse(symbols.textContent)[kind];
 				// Only what differs inside this relation belongs in the row.
 				var showRegion = !!geography, showArea = !!geography;
 				result.payload.forEach(function (row) {
+					if (rowUI) {
+						var mappedStatus = status(row);
+						var control = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(
+							dataset, row.id, null, 'questfinder', mappedStatus);
+						var metaParts = [row.type].concat(row.flags.map(function (key) { return w[key]; }));
+						if (geography) { metaParts.push(row.region, row.area); }
+						target.appendChild(rowUI.row(target, {
+							icon: kind === 'q' ? 'aufgabe' : 'tat',
+							name: kind === 'q' ? row.name.replace(/^\.\s+/, '') : row.name,
+							href: '/' + lang + '/' + SEGMENT[kind][lang] + '/' + row.id + '/',
+							meta: metaParts.filter(Boolean).join(' · '),
+							levelHeading: levelHeading,
+							values: row.level ? [{ label: levelHeading,
+								value: row.level }] : [],
+							progress: control
+						}));
+						return;
+					}
 					var line = document.createElement('li'), link = document.createElement('a');
 					var mark = document.createElement('span'), body = document.createElement('span'), meta = document.createElement('small');
 					link.className = 'related-result';
@@ -290,6 +316,18 @@
 				});
 			}
 		});
+		var load = adapter.load;
+		adapter.load = function (state, context) {
+			if (store && store.statusSnapshot) {
+				var active = store.aktiv();
+				snapshot = store.statusSnapshot(dataset, active);
+				var imported = active && active.importMeta || {};
+				var source = imported.datasets && imported.datasets[dataset];
+				hasImportedStatus = source ? source.status !== 'unknown' : imported[dataset] === true;
+				hasStatus = hasImportedStatus || !!(active && rows.some(function (row) { return snapshot(row.id) != null; }));
+			}
+			return load(state, context);
+		};
 		return { config: config, adapter: adapter };
 	};
 })();

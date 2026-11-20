@@ -37,6 +37,7 @@ RewriteRule ^(phpdata|php|vendor|phptmp)(/|$) - [F]
 RewriteRule ^$ /index.php [END]
 RewriteRule ^(start(-(en|fr))?|index|gegenstaende|handwerk|reise|ruf|belohnungen|spielstand|companion|plugin|suche|gegenstand)\\.html$ /index.php [END]
 RewriteRule ^api/statistik$ /index.php [END]
+RewriteRule ^api/feedback$ /index.php [END]
 RewriteRule ^(de|en|fr)(/|$) /index.php [END]
 RewriteRule ^sitemap(-[a-z0-9-]+)?\\.xml$ /index.php [END]'''
 
@@ -83,6 +84,8 @@ def pruefen() -> int:
         ('/', {301}),
         ('/de/', {200}),
         ('/de/karte/', {200}),
+        ('/de/feedback/', {200}),
+        ('/api/feedback', {405}),
         ('/de/reise/', {200}),
         ('/de/gegenstandssuche/', {200}),
         ('/de/aufgabe/700005C0/', {200}),

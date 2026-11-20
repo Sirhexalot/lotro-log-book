@@ -2,7 +2,7 @@
 
 - **Status:** offen; dieser Audit beschreibt Soll und Ist, noch keine Produktänderung
 - **Verbindliche Regeln:** [`AGENTS.md`](../../AGENTS.md), Abschnitt „Navigation, Karte und Darstellung“, und [`lotro-datenraum-entitaeten.json`](../datenraum/lotro-datenraum-entitaeten.json)
-- **Ist-Übersicht:** [`arc42`, Abschnitt 5.9](../arc42/README.md#L280)
+- **Ist-Übersicht:** [arc42, Abschnitt 5.9](../arc42/05-bausteinsicht.md#59-konkrete-darstellungs--und-filtermatrix-nach-entität-und-auftrittsort)
 - **Arbeitsgrenze:** Code und JSON-Vertrag bleiben unverändert, bis die Umsetzung beauftragt ist.
 
 ## So ist die Liste zu bearbeiten

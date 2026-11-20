@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "promote": [
+    {
+      "from": 268446977,
+      "maps": [268447030, 268447045, 268447051],
+      "group": "dunland",
+      "label": {
+        "de": "Gebiete im Dunland-Überblick",
+        "en": "Areas in the Dunland overview",
+        "fr": "Zones de l’aperçu du Pays de Dun"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "dunland",
+      "region": 268437557,
+      "label": {
+        "de": "Dunland-Überblick",
+        "en": "Dunland Overview",
+        "fr": "Aperçu du Pays de Dun"
+      },
+      "maps": [268447030, 268447045, 268447051],
+      "cards": false
+    },
+    {
+      "id": "east-rohan",
+      "region": 268453621,
+      "label": {
+        "de": "Ost-Rohan",
+        "en": "East Rohan",
+        "fr": "Rohan oriental"
+      },
+      "maps": [268448407, 268448410, 268448413, 268448416, 268448419, 268448422],
+      "cards": true
+    },
+    {
+      "id": "west-rohan",
+      "region": 268453621,
+      "label": {
+        "de": "West-Rohan",
+        "en": "West Rohan",
+        "fr": "Rohan occidental"
+      },
+      "maps": [268449746, 268449749, 268449752, 268449755, 268449758, 268449767],
+      "cards": true
+    }
+  ]
+}

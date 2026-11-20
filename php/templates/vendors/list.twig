@@ -1,4 +1,5 @@
 {% extends 'layout.twig' %}
+{% import 'entity/_result_row.twig' as result %}
 {# Same filter browser as landmarks and quest givers. #}
 {% block inhalt %}
 <div class="sets-browser" data-filter-schema="1" data-filter-area="haendler" data-filter-total="{{ count }}" data-filter-count-label="{{ gw.count }}">
@@ -35,7 +36,7 @@
         </details>
         <section class="sets-results" data-filter-results aria-label="{{ gw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? gw.count_one : gw.count)|replace({'%s': count}) }}</p>
-            <ul class="sets-list">{% for row in vendors %}<li><a href="{{ row.url }}"><span class="sets-preview"><strong>{{ row.name }}</strong></span><span class="sets-meta">{{ row.meta }}</span></a></li>{% else %}<li>{{ gw.empty }}</li>{% endfor %}</ul>
+            <ul class="sets-list mql-row-list">{% if vendors %}{{ result.heading(lang) }}{% endif %}{% for row in vendors %}{{ result.row(lang, row.url, row.name, [attribute(gw, 'type_' ~ row.type), row.meta]|filter(v => v)|join(' · '), entity_symbol) }}{% else %}<li>{{ gw.empty }}</li>{% endfor %}</ul>
             {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ gw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ gw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>

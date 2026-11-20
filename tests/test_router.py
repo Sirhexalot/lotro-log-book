@@ -80,6 +80,12 @@ class RouterTest(unittest.TestCase):
         for pfad in pfade:
             self.assertEqual(antworten[pfad][0], 200, pfad)
 
+    def test_class_race_browser_has_one_route_per_language(self):
+        pfade = ['/de/klassen/', '/en/classes/', '/fr/classes/']
+        antworten = self.aufloesen(pfade)
+        for pfad in pfade:
+            self.assertEqual(antworten[pfad][0], 200, pfad)
+
     def test_replaced_deed_ids_redirect_to_the_current_page(self):
         datei = DATEN / 'de' / 'deed-redirects.json'
         if not datei.is_file():

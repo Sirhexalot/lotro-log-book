@@ -152,6 +152,7 @@ final class Factions
             'styles' => $this->shell->styles(), 'scripts' => $this->shell->scripts(),
             'asset_stand' => $this->shell->assetStand(),
             'menu' => $this->shell->menu('f'), 'start_page' => $this->catalogue->appRoute($this->lang, 'start'),
+            'entity_symbol' => $this->shell->icon('fraktion'),
             'suche_pfad' => $this->shell->appRoute('suche'),
             'spielstand_pfad' => $this->shell->appRoute('spielstand'),
             'katalog_texte' => json_encode(['none' => $this->shell->words()['none']], JSON_UNESCAPED_UNICODE),
@@ -219,19 +220,7 @@ final class Factions
                     $namen[] = $name;
                 }
             }
-            $teile = $namen ? [implode(' · ', $namen)] : [];
-            if ($row['quests'] > 0) {
-                $teile[] = str_replace('%s', (string) $row['quests'],
-                    $row['quests'] === 1 ? $words['quests_one'] : $words['quests']);
-            }
-            if ($row['deeds'] > 0) {
-                $teile[] = str_replace('%s', (string) $row['deeds'],
-                    $row['deeds'] === 1 ? $words['deeds_one'] : $words['deeds']);
-            }
-            if ($row['quests'] + $row['deeds'] === 0) {
-                // No source to list.
-            }
-            $row['meta'] = implode(' · ', $teile);
+            $row['meta'] = implode(' · ', $namen);
         }
         unset($row);
 

@@ -93,7 +93,22 @@
 				return {tree:Array.from(branchIndex,function(pair){return {value:pair[1],count:counts.get(pair[0])||0};}),quality:qualityCounts.map(function(count,value){return {value:value,count:count};})};
 			},renderResults:function(r,target){
 				target.replaceChildren();
+				var rowUI=window.MQL_TREFFERZEILE;
+				if(rowUI){rowUI.header(target,{progress:false,levelHeading:rowUI.words.itemLevel});}
 				r.payload.forEach(function(row){
+					if(rowUI){
+						var parts=[label('kat',key('kat',row[3])),T('gs_qual_'+row[4])];
+						['art','gattung','klasse','platz'].forEach(function(dim){if(row[fields[dim]]>=0){parts.push(label(dim,key(dim,row[fields[dim]])));}});
+						target.appendChild(rowUI.row(target,{
+							image:row[2],icon:'gegenstand',name:row[1],
+							href:'/'+lang+'/'+({de:'gegenstand',en:'item',fr:'objet'}[lang])+'/'+row[0]+'/',
+							meta:parts.filter(Boolean).join(' · '),
+							levelHeading:rowUI.words.itemLevel,
+							values:row[7]>0?[{label:rowUI.words.itemLevel,value:row[7]}]:[],
+							progress:null
+						}));
+						return;
+					}
 					var li=document.createElement('li'),a=document.createElement('a');a.className='gs-zeile';
 					a.href=(location.pathname.endsWith('.html')?'https://llb.sirhexalot.de':'')+'/'+lang+'/'+({de:'gegenstand',en:'item',fr:'objet'}[lang])+'/'+row[0]+'/';
 					var icon=document.createElement('img');icon.className='symbol';icon.width=26;icon.height=26;icon.alt='';icon.loading='lazy';

@@ -32,14 +32,20 @@ function fakeElement(tag) {
 
 function finder(imported) {
 	let captured;
+	const events = {};
+	let reads = 0, reloads = 0;
+	let character = imported ? { quests: ['DONE0001'], deeds: [], level: '20',
+		laufend: { RUN00001: [] }, importMeta: {quests:true} } : null;
 	const window = {
 		MQL_REPLACED: {},
-		MQL_SPEICHER: imported ? {
-			aktiv: () => ({ quests: ['DONE0001'], deeds: [], level: '20', laufend: { RUN00001: [] } }),
-			kennt: () => true
-		} : { aktiv: () => null, kennt: () => false },
+		addEventListener: (name, listener) => { events[name] = listener; },
+		MQL_SPEICHER: {
+			aktiv: () => { reads++; return character; },
+			manuelleStatus: () => assert.fail('row predicates must not read local storage'),
+			status: () => assert.fail('prerequisites must not read local storage')
+		},
 		MQL_FILTERADAPTER: { codec: (fields, defaults) => ({fields,defaults}), client: options => options },
-		MQL_FILTER_UI: { mount: (root, options) => { captured = options; return {}; } }
+		MQL_FILTER_UI: { mount: (root, options) => { captured = options; return {setCharacterContext: () => { reloads++; }}; } }
 	};
 	const document = {
 		documentElement: { lang: 'de' },
@@ -62,7 +68,8 @@ function finder(imported) {
 		{i:'EAST0001',n:'Aufgabe in der Steppe',r:'Rohan',z:'Die Steppe',l:75}
 	];
 	window.MQL_KARTEN_AUFGABENFILTER.mount(root, quests, () => {});
-	return { config: captured.config, adapter: captured.adapter };
+	return { config: captured.config, adapter: captured.adapter, reads: () => reads, reloads: () => reloads,
+		setCharacter: (next) => { character = next; events['mql-status'](); } };
 }
 
 const unimported = finder(false);
@@ -77,7 +84,10 @@ assert.equal(groups.board, undefined, 'task board is not a separate filter group
 assert.deepEqual(Array.from(groups.topic.options, option => option.value), ['class', 'origin', 'board']);
 assert.deepEqual(Array.from(groups.class.options, option => option.value), ['Jäger']);
 assert.deepEqual(Array.from(groups.origin.options, option => option.value), ['Hobbit']);
-assert.deepEqual(Array.from(groups.status.options, option => option.value), ['all', 'open', 'done']);
+assert.equal(groups.status.available(), false, 'no progress filter without known quest status');
+assert.deepEqual(Array.from(groups.status.options, option => option.value), ['all']);
+assert.equal(filterState.normalize(unimported.config, {filters:{status:'done'}}, null).state.filters.status, 'all',
+	'a saved progress filter cannot hide results when progress is unknown');
 assert.ok(groups.status.options.every(option => option.keepVisible), 'empty status choices stay visible');
 
 const state = filters => ({ q:'', filters:Object.assign({
@@ -114,11 +124,12 @@ assert.match(target.children[0].children[0].children[1].className, /questfinder-
 
 const imported = finder(true);
 const importedGroups = Object.fromEntries(imported.config.groups.map(group => [group.id, group]));
-assert.deepEqual(Array.from(importedGroups.status.options, option => option.value), ['all', 'open', 'done', 'machbar']);
+assert.deepEqual(Array.from(importedGroups.status.options, option => option.value), ['all', 'open', 'running', 'done', 'unset', 'machbar']);
 const importedRows = imported.adapter.rows;
 const importedState = status => state({status});
 assert.equal(imported.adapter.matches(importedRows[3], importedState('done')), true);
-assert.equal(imported.adapter.matches(importedRows[4], importedState('open')), true);
+assert.equal(imported.adapter.matches(importedRows[4], importedState('open')), false);
+assert.equal(imported.adapter.matches(importedRows[4], importedState('running')), true);
 assert.equal(imported.adapter.matches(importedRows[5], importedState('open')), true);
 const importedTarget = fakeElement('ol');
 imported.adapter.renderResults({payload:[importedRows[3], importedRows[4], importedRows[5]]}, importedTarget);
@@ -126,5 +137,54 @@ const statuses = Array.from(importedTarget.children, row => row.children[0].chil
 assert.match(statuses[0], /questfinder-status-done/);
 assert.match(statuses[1], /questfinder-status-running/);
 assert.match(statuses[2], /questfinder-status-open/);
+
+assert.equal(imported.adapter.matches({...importedRows[5], v:['DONE0001']}, importedState('machbar')), true);
+assert.equal(imported.adapter.matches({...importedRows[5], v:['MISSING1']}, importedState('machbar')), false);
+assert.equal(imported.adapter.matches({...importedRows[5], e:['DONE0001']}, importedState('open')), false);
+imported.adapter.facets(importedRows, importedState('machbar'));
+assert.equal(imported.reads(), 1, 'all progress facets share one character snapshot');
+imported.setCharacter({quests:['DONE0001'], manuell:{quests:{OPEN0001:'fertig'}}});
+assert.equal(imported.adapter.matches(importedRows[5], importedState('done')), true, 'status event invalidates cached states');
+assert.equal(imported.adapter.matches({...importedRows[0], v:['OPEN0001']}, importedState('machbar')), true);
+assert.equal(imported.reads(), 2);
+assert.equal(imported.reloads(), 1);
+unimported.setCharacter({manuell:{quests:{OPEN0001:'fertig'}}});
+assert.equal(groups.status.available(), true, 'a manual status enables progress filters without a page reload');
+assert.ok(!groups.status.options.some(option => option.value === 'machbar'), 'manual progress alone does not establish quest availability');
+assert.equal(unimported.adapter.matches(rows[5], state({status:'done'})), true);
+assert.equal(unimported.adapter.matches(rows[3], state({status:'open'})), false, 'unmarked quests stay unknown with manual-only progress');
+unimported.setCharacter({manuell:{quests:{}}});
+assert.equal(groups.status.available(), false, 'clearing the last manual state hides the progress filters');
+
+let manualProfile = null, writes = 0;
+const statusDocument = {
+	documentElement: {lang:'de'},
+	createElement(tag) {
+		return Object.assign(fakeElement(tag), {
+			dataset:{}, classList:{add(){}, remove(){}, toggle(){}}, setAttribute(){}, events:{},
+			addEventListener(name, fn) { this.events[name] = fn; }
+		});
+	}
+};
+const statusContext = {
+	document:statusDocument, Event, dispatchEvent() {},
+	MQL_SPEICHER:{
+		aktiv: () => manualProfile,
+		aktiviereManuell: () => { manualProfile = {}; },
+		status: () => 'offen',
+		manuelleStatus: () => manualProfile?.status,
+		setzeStatus: (_art, _id, value) => { writes++; manualProfile.status = value; }
+	}
+};
+vm.runInNewContext(fs.readFileSync('web/status.js', 'utf8'), statusContext);
+const control = statusContext.MQL_STATUS_UI.create('quests', '700005C0', null, 'questfinder', null);
+const choice = control.children[1];
+assert.equal(choice.children[0].textContent, 'Nicht gesetzt');
+assert.equal(choice.value, '');
+assert.equal(manualProfile, null, 'rendering must not create a manual profile');
+choice.value = 'fertig';
+choice.events.change();
+assert.equal(writes, 1);
+assert.equal(choice.value, 'fertig');
 
 console.log('Aufgabenfinder: Themen, getrennte Filter und Fortschritt ok');

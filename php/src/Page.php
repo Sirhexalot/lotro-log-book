@@ -39,6 +39,10 @@ final class Page
         if ($page === null) {
             return null;
         }
+        // Old generated quest records lost the number before a chapter separator.
+        if ($kind === 'q' && isset($page['name'])) {
+            $page['name'] = preg_replace('/^\.\s+/u', '', $page['name']);
+        }
         $template = 'entity/' . self::templateFor($kind) . '.twig';
         $maps = $page['crumb_maps'] ?? $this->crumbMaps($page, $identifier);
         $related = (new RelatedLists($this->data, $this->lang, $this->catalogue))->forPage($kind, $page);
@@ -71,19 +75,21 @@ final class Page
             'languages' => $this->languagesHtml($kind, $identifier),
             'legal' => link_tag('/impressum.html?lang=' . $this->lang, $this->w['legal']),
             'privacy' => link_tag('/datenschutz.html?lang=' . $this->lang, $this->w['privacy']),
-            'icon' => $this->shell->icon($page['icon'] ?? ($kind === 'i' ? 'gegenstand' : '')),
+            'icon' => $this->shell->icon($page['icon'] ?? '') ?: $this->shell->icon(match ($kind) {
+                'q' => 'aufgabe', 'd' => 'tat', 'i' => 'gegenstand', 'recipe' => 'rezept',
+                'title' => 'titel', 'virtue' => 'tugend', 'area' => 'gebiet', 'region' => 'region',
+                'p' => 'beruf', 'f' => 'fraktion', 'l' => 'landmarke', default => '',
+            }),
             'entity_id' => $identifier,
+            'entity_filter_url' => $this->entityFilterUrl($kind),
+            'entity_filter_label' => $this->entityFilterLabel($kind),
             'related_direct_list_max' => FilterRegeln::MAX_DIREKTLISTE,
             'related_lists' => $related,
             'related_icons_json' => json_encode(['q' => $this->shell->icon('aufgabe'), 'd' => $this->shell->icon('tat')], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
             'related_json' => json_encode($related, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR),
             // Only the related IDs travel to the browser; the rows come from
             // the list shards of their own type, never as a full catalogue.
-            // Recipes and items show the client's own symbol next to the name.
-            'symbol_gross' => !empty($page['symbol'])
-                ? '<img class="symbol symbol-gross" src="/bild/items/' . esc((string) $page['symbol'])
-                  . '.webp" alt="" width="32" height="32" decoding="async">'
-                : '',
+            'symbol_gross' => $this->shell->gameItemIcon($page['symbol'] ?? null),
         ];
 
         return $this->view->render($template, $context);
@@ -183,6 +189,7 @@ final class Page
             'start' => 'start-' . $lang,
             'taten' => 'karte',
             'questfinder' => 'aufgabenfinder',
+            'klassen' => 'klassen',
             default => $page,
         };
         // The title and description live in build_seo.PAGES, exported with the labels.
@@ -191,6 +198,7 @@ final class Page
             'karte', 'taten' => 'index.html',
             'gegenstandssuche' => 'gegenstaende.html',
             'questfinder' => 'aufgabenfinder.html',
+            'klassen' => 'klassen.html',
             default => $page . '.html',
         };
         $seo = $this->catalogue->appSeo($datei, $lang) ?? ['title' => 'LOTRO Log Book', 'description' => ''];
@@ -224,6 +232,38 @@ final class Page
                     'de' => 'Finde Aufgaben nach Thema, Klasse, Herkunft, Region, Gebiet und weiteren Merkmalen.',
                     'en' => 'Find quests by theme, class, origin or location.',
                     'fr' => 'Trouvez des quêtes par thème, classe, origine ou lieu.',
+                ][$lang],
+            ];
+        }
+        if ($page === 'reise') {
+            $seo = [
+                'title' => ['de' => 'Reise', 'en' => 'Travel planner',
+                    'fr' => 'Planifier un voyage'][$lang],
+                'description' => [
+                    'de' => 'Plane deinen Weg durch Mittelerde. Finde Stallmeister und Verbindungen mit Preisen und Mindeststufen, Schnellreise und Reisefertigkeiten deiner Klasse.',
+                    'en' => 'Plan your ride through Middle-earth. Find stable-masters, swift travel, fares and class travel skills.',
+                    'fr' => 'Préparez votre trajet en Terre du Milieu : maîtres d’écurie, voyages rapides, tarifs et compétences de voyage.',
+                ][$lang],
+            ];
+        }
+        if ($page === 'feedback') {
+            $seo = [
+                'title' => ['de' => 'Feedback senden', 'en' => 'Send feedback', 'fr' => 'Envoyer un retour'][$lang],
+                'description' => [
+                    'de' => 'Schick eine Rückmeldung zum LOTRO Log Book.',
+                    'en' => 'Send feedback about the LOTRO Log Book.',
+                    'fr' => 'Envoyez un retour sur le LOTRO Log Book.',
+                ][$lang],
+            ];
+        }
+        if ($page === 'klassen') {
+            $seo = [
+                'title' => ['de' => 'Klassen und Völker in HdRO', 'en' => 'LOTRO classes and races',
+                    'fr' => 'Classes et races de SdAO'][$lang],
+                'description' => [
+                    'de' => 'Sieh, welche Völker die einzelnen Klassen spielen können und welche Waffen und Rüstungsarten sie beherrschen.',
+                    'en' => 'See which races can play each class and which weapons and armour they can use.',
+                    'fr' => 'Découvrez quelles races peuvent jouer chaque classe et quelles armes et armures elles maîtrisent.',
                 ][$lang],
             ];
         }
@@ -276,6 +316,10 @@ final class Page
                 $this->data->zutatenOhneHerkunft($lang),
                 JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
         }
+        if ($page === 'feedback') {
+            header('Cache-Control: private, no-store');
+            $context['feedback_token'] = Feedback::formToken();
+        }
         return $this->view->render('app/' . $template . '.twig', $context);
     }
 
@@ -316,6 +360,39 @@ final class Page
         };
     }
 
+    private function entityFilterUrl(string $kind): string
+    {
+        return match ($kind) {
+            'q' => $this->catalogue->appRoute($this->lang, 'questfinder'),
+            'd', 'virtue' => $this->catalogue->route($this->lang, $kind),
+            'i' => $this->catalogue->appRoute($this->lang, 'gegenstandssuche'),
+            'recipe', 'p' => $this->catalogue->appRoute($this->lang, 'handwerk'),
+            'title' => $this->catalogue->appRoute($this->lang, 'titles'),
+            'f' => $this->catalogue->appRoute($this->lang, 'factions'),
+            'l' => $this->catalogue->appRoute($this->lang, 'landmarks'),
+            'giver' => $this->catalogue->appRoute($this->lang, 'givers'),
+            'vendor' => $this->catalogue->appRoute($this->lang, 'vendors'),
+            'set' => $this->catalogue->appRoute($this->lang, 'sets'),
+            'area', 'region' => $this->catalogue->appRoute($this->lang, 'karte'),
+            default => '',
+        };
+    }
+
+    private function entityFilterLabel(string $kind): string
+    {
+        if ($kind === 'q' || $kind === 'i' || $kind === 'd') {
+            return [
+                'q' => ['de' => 'Zum Aufgabenfinder', 'en' => 'Quest finder', 'fr' => 'Recherche de quêtes'],
+                'i' => ['de' => 'Zur Gegenstandssuche', 'en' => 'Item search', 'fr' => 'Recherche d’objets'],
+                'd' => ['de' => 'Zur Tatenübersicht', 'en' => 'Deed finder', 'fr' => 'Recherche de prouesses'],
+            ][$kind][$this->lang];
+        }
+        $filtered = in_array($kind, ['q', 'd', 'i', 'recipe', 'p', 'title', 'f', 'l', 'giver', 'vendor', 'set'], true);
+        return $filtered
+            ? ['de' => 'In der gefilterten Übersicht suchen', 'en' => 'Browse the filtered list', 'fr' => 'Parcourir la liste filtrée'][$this->lang]
+            : ['de' => 'Zur Übersicht', 'en' => 'Open overview', 'fr' => 'Voir la liste'][$this->lang];
+    }
+
     /**
      * The status wording the catalogue JavaScript reads from the page.
      *
@@ -341,6 +418,9 @@ final class Page
 
     private function crumbsHtml(string $kind, array $page, array $maps): string
     {
+        if (in_array($kind, ['i', 'q', 'd'], true)) {
+            unset($page['name']); // The detail heading already names the current entry.
+        }
         return $this->shell->crumbHtml($this->shell->crumbs($kind, ['crumb_maps' => $maps] + $page));
     }
 

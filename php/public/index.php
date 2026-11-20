@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 use Llb\Catalogue;
 use Llb\Data;
+use Llb\Feedback;
 use Llb\Sprache;
 use Llb\Page;
 use Llb\Router;
@@ -63,6 +64,32 @@ $router = new Router($catalogue, $data, $sprache);
 $view = new View($root . '/php/templates', is_writable($cacheDir) ? $cacheDir : null);
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+
+if ($path === '/api/feedback') {
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    header('X-Content-Type-Options: nosniff');
+    $documentRoot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
+    $envFile = getenv('LLB_FEEDBACK_ENV')
+        ?: (is_file($root . '/phptmp/llb-feedback.env')
+            ? $root . '/phptmp/llb-feedback.env'
+            : Feedback::defaultEnvPath($documentRoot ?: $root, dirname($root, 2)));
+    $feedback = new Feedback(
+        $envFile,
+        dirname($envFile) . '/llb-feedback-rate.json',
+        'llb.sirhexalot.de',
+        $root . '/phptmp/llb-feedback.log',
+    );
+    $post = $_POST;
+    if (str_contains(strtolower((string) ($_SERVER['CONTENT_TYPE'] ?? '')), 'application/json')) {
+        $json = json_decode((string) file_get_contents('php://input'), true);
+        $post = is_array($json) ? $json : [];
+    }
+    $response = $feedback->submit($_SERVER, $post);
+    http_response_code($response['status']);
+    echo json_encode($response['body'], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    return;
+}
 
 if ($path === '/api/statistik') {
     header('Content-Type: application/json; charset=utf-8');
@@ -176,5 +203,12 @@ if ($html === null) {
 header('Content-Type: text/html; charset=utf-8');
 // Revalidate on every navigation: a page cached for minutes kept showing
 // a half-written upload long after the data was there.
-header('Cache-Control: public, max-age=0, must-revalidate');
+if (isset($result['app']) && in_array($result['app'], ['karte', 'taten'], true)) {
+    // The map shell is frequently updated; do not let the browser reuse old HTML.
+    header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+} else {
+    header('Cache-Control: public, max-age=0, must-revalidate');
+}
 echo $html;

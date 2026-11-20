@@ -62,7 +62,7 @@ nicht verschoben und nicht gemittelt, um „auf die Karte zu passen“.
   der Seitenaufteilung, damit Blättern und JavaScript-freie Nutzung stimmen.
 - Der Filterstand wird lokal gemerkt und beim parameterlosen Aufruf
   wiederhergestellt; Rücklinks von Detailseiten tragen ihn mit
-  (`docs/filter-sortierung.md`).
+  (`docs/oberflaeche/filter-sortierung.md`).
 - Detailseiten verlinken unter „Weitere Einträge mit diesem Namen“ die übrigen
   Spiel-IDs desselben Namens mit Ort und Aufgabenzahl. Die Einträge bleiben
   getrennt, weil die Spieldaten keine Identität belegen; ab zwölf verweist ein

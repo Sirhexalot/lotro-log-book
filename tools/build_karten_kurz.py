@@ -19,7 +19,14 @@ KEEP = {
 # the first-paint payload saves a substantial amount on both map modes; the
 # full catalogue is merged by app.js when the detail is opened.
 INITIAL_KEEP = KEEP - {'d'}
-SUMMARY_KEEP = {'i', 'z', 'ie', 'x', 'mp', 'e', 'l', 'ls', 'vl', 'vb', 'v', 'vo', 'f'}
+SUMMARY_KEEP = {'i', 'z', 'ie', 'x', 'mp', 'e', 'l', 'ls', 'vl', 'vb', 'v', 'vo', 'f', 'fk', 'th', 'a'}
+# Everything the detail pane needs beyond the compact map entry. The full
+# catalogue is never fetched for the map any more: one small file per map (or
+# per region for entries without a map) carries exactly these fields.
+DETAIL_KEEP = ('d', 's', 't', 'u', 'gi', 'nq', 'pq', 'tl', 'lp')
+# Localized root name of the epic story; it is the only topic that opens on the
+# map instead of the finder.
+THEMA_EPIK = {'de': 'Epische Geschichte', 'en': 'Epic Story', 'fr': 'Histoire épique'}
 
 
 def assignment(text: str, name: str):
@@ -43,11 +50,13 @@ def build(lang: str, deeds: bool = False) -> None:
     ]
     map_shards = {}
     region_shards = {}
+    detail_map = {}
+    detail_region = {}
     for quest in quests:
         eintrag = {key: value for key, value in quest.items()
                    if key in INITIAL_KEEP}
         # The initial map shows the giver by default. Full objective lists are
-        # loaded on selection from the full catalogue; for entries without a giver
+        # loaded on selection from the detail shard; for entries without a giver
         # the first objective remains as the map fallback. This keeps the
         # initial script small without changing the selected quest's detail
         # view or the explicit "show objectives" mode.
@@ -59,17 +68,25 @@ def build(lang: str, deeds: bool = False) -> None:
         compact.append(eintrag)
         karten = quest.get('fk') or []
         if karten:
-            map_shards.setdefault(str(karten[-1]), []).append(eintrag)
+            gruppe_map = str(karten[-1])
+            gruppe_region = None
+            map_shards.setdefault(gruppe_map, []).append(eintrag)
         else:
             labels = quest.get('f') or []
-            region = labels[0] if labels else quest.get('r') or 'ohne-zuordnung'
-            region_shards.setdefault(region, []).append(eintrag)
+            gruppe_region = labels[0] if labels else quest.get('r') or 'ohne-zuordnung'
+            gruppe_map = None
+            region_shards.setdefault(gruppe_region, []).append(eintrag)
+        detail = {key: quest[key] for key in DETAIL_KEEP if key in quest}
+        if gruppe_map is not None:
+            detail_map.setdefault(gruppe_map, {})[quest['i']] = detail
+        else:
+            detail_region.setdefault(gruppe_region, {})[quest['i']] = detail
     target = WEB / (ziel % lang)
     prefix = 'deed ' if deeds else ''
     replacement = ('window.MQL_REPLACED = %s;\n' %
                    json.dumps(replaced, ensure_ascii=False, separators=(',', ':'))) if deeds else ''
     target.write_text(
-        '/* Initial map data; full %sdetails stay in the catalogue data file. */\n'
+        '/* %sInitial map data; descriptions and steps come from the detail shards. */\n'
         '%swindow.MQL_QUESTS = %s;\nwindow.MQL_KARTEN = %s;\n' % (
             prefix, replacement,
             json.dumps(compact, ensure_ascii=False, separators=(',', ':')),
@@ -80,11 +97,18 @@ def build(lang: str, deeds: bool = False) -> None:
     if shard_dir.exists():
         shutil.rmtree(shard_dir)
     shard_dir.mkdir(parents=True)
+    detail_dir = shard_dir
+    detail_bytes = 0
     for map_id, rows in map_shards.items():
         (shard_dir / ('map-' + map_id + '.js')).write_text(
             'window.MQL_GEBIETS_DATEN = %s;\n' %
             json.dumps(rows, ensure_ascii=False, separators=(',', ':')),
             encoding='utf-8')
+        inhalt = json.dumps(detail_map.get(map_id, {}), ensure_ascii=False,
+                            separators=(',', ':'))
+        (detail_dir / ('detail-map-' + map_id + '.js')).write_text(
+            'window.MQL_GEBIETS_DETAILS = %s;\n' % inhalt, encoding='utf-8')
+        detail_bytes += len(inhalt.encode('utf-8'))
     region_index = {}
     for number, (region, rows) in enumerate(sorted(region_shards.items())):
         filename = 'region-%d.js' % number
@@ -93,19 +117,40 @@ def build(lang: str, deeds: bool = False) -> None:
             'window.MQL_GEBIETS_DATEN = %s;\n' %
             json.dumps(rows, ensure_ascii=False, separators=(',', ':')),
             encoding='utf-8')
+        inhalt = json.dumps(detail_region.get(region, {}), ensure_ascii=False,
+                            separators=(',', ':'))
+        (detail_dir / ('detail-' + filename)).write_text(
+            'window.MQL_GEBIETS_DETAILS = %s;\n' % inhalt, encoding='utf-8')
+        detail_bytes += len(inhalt.encode('utf-8'))
+    # The map knows from here which shards exist; a landscape overview map has
+    # no shard of its own and must not cost a 404 on every visit.
+    shard_maps = sorted(map_shards, key=lambda wert: int(wert))
+    # The epic story is the one topic that opens on the map instead of the
+    # finder. Its chapter entries stay out of the area shards, so they travel in
+    # a small file of their own; the tile link loads it before the tree is built.
+    thema_epic = [eintrag for eintrag in compact
+                  if (eintrag.get('f') or [''])[0] == THEMA_EPIK[lang]]
+    if not deeds:
+        (WEB / ('thema-epic-%s.js' % lang)).write_text(
+            'window.MQL_THEMA_DATEN = %s;\n' %
+            json.dumps(thema_epic, ensure_ascii=False, separators=(',', ':')),
+            encoding='utf-8')
     start_name = ('karten-start-taten-%s.js' if deeds else 'karten-start-%s.js') % lang
     start_target = WEB / start_name
     start_target.write_text(
         '/* Map structure only; entries load when an area is opened. */\n'
         '%swindow.MQL_QUESTS = [];\nwindow.MQL_KARTEN = %s;\n'
-        'window.MQL_SHARD_REGION = %s;\nwindow.MQL_KARTEN_SUMMARY = %s;\n' % (
+        'window.MQL_SHARD_REGION = %s;\nwindow.MQL_SHARD_MAPS = %s;\n'
+        'window.MQL_KARTEN_SUMMARY = %s;\n' % (
             replacement,
             json.dumps(maps, ensure_ascii=False, separators=(',', ':')),
             json.dumps(region_index, ensure_ascii=False, separators=(',', ':')),
+            json.dumps(shard_maps, ensure_ascii=False, separators=(',', ':')),
             json.dumps(summary, ensure_ascii=False, separators=(',', ':'))),
         encoding='utf-8')
-    print('%s%s: %d entries, %.1f KiB' %
-          (prefix, lang, len(compact), target.stat().st_size / 1024))
+    print('%s%s: %d entries, %.1f KiB, details %.1f MiB' %
+          (prefix, lang, len(compact), target.stat().st_size / 1024,
+           detail_bytes / 1048576))
 
 
 if __name__ == '__main__':

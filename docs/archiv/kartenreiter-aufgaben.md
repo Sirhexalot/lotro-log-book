@@ -4,6 +4,11 @@
 **Erstellt:** 15. November 2026
 **Bereich:** Kartenansicht, Aufgabenfilter, Gebietsbaum
 
+> **Nachtrag 20.11.2026:** Der Karten-Erststart vom 18.11. hat den Fehler über
+> einen anderen Weg zurückgebracht: flache Reiter tiefer liegender Gebiete
+> fanden keine Zählmetadaten und zeigten wieder `0/0`. Ursachen, Umsetzung und
+> Prüfpunkte stehen in [`docs/todos/karte-reiter-details.md`](../todos/karte-reiter-details.md).
+
 ## Beobachtung
 
 In der Kartenansicht zeigt der Reiter:

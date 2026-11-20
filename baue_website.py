@@ -117,6 +117,7 @@ def stempeln(ziel):
                         + list(ziel.glob('vorkommen-*.js'))
                          + list(ziel.glob('karten-kurz-*.js'))
                         + list(ziel.glob('karten-start-*.js'))
+                        + list(ziel.glob('thema-*.js'))
                         + list(ziel.glob('gebiete-*.js'))):
         daten.update(datei.name.encode())
         daten.update(datei.read_bytes())

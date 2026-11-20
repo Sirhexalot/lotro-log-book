@@ -1,35 +1,66 @@
 {% extends 'layout.twig' %}
+{% import 'entity/_result_row.twig' as result %}
 
 {# Item page: descriptive item content first, related sources/usages as tabs. #}
 {% block inhalt %}
 {% set direct_list_max = related_direct_list_max|default(5) %}
-<article class="item-seite{% if page.task_filter|default(false) %} item-seite-mit-filter{% endif %}">
-<div class="katalog-kopf"><p class="katalog-art">{{ icon|raw }}<span>{{ w.ilabel }}</span></p>{% if page.eyebrow %}<p class="katalog-augenbraue">{{ page.eyebrow }}</p>{% endif %}<h1{% if page.head_class %} class="{{ page.head_class }}"{% endif %}>{{ symbol_gross|raw }}{{ page.name }}</h1></div>
-{% if page.chips %}<p class="katalog-chips">{% for chip in page.chips %}<span class="katalog-chip{{ chip.cls ? ' ' ~ chip.cls : '' }}">{{ chip.text }}</span>{% endfor %}</p>{% endif %}
-
-{% if page.description %}<p class="katalog-text">{{ page.description }}</p>{% endif %}
-{% if page.has_values %}<section><h2>{{ w.values }}</h2>{% if page.armour %}<p class="katalog-grundwert"><span>{{ w.armour }}</span><b>{{ page.armour }}</b></p>{% endif %}{% if page.values %}<dl class="katalog-fakten katalog-werte">{% for row in page.values %}<dt>{{ row.label }}</dt><dd>{{ row.value }}</dd>{% endfor %}</dl>{% endif %}{% if page.bonuses %}<ul class="katalog-boni">{% for row in page.bonuses %}<li><b>{{ row.display }}</b><span>{{ row.label }}</span></li>{% endfor %}</ul>{% endif %}{% if page.scale %}<p class="katalog-hinweis">{{ w.scalable }} {{ page.scale }}</p>{% endif %}</section>{% endif %}
-{% if page.variants|default([]) %}<section><h2>{{ w.variants }}</h2><ul class="katalog-chips">{% for variant in page.variants|default([]) %}<li><a class="katalog-chip" href="{{ variant.url }}">{{ variant.level|default('?') }}{% if variant.quality %} · {{ variant.quality }}{% endif %}</a></li>{% endfor %}</ul></section>{% endif %}
+<article class="item-seite katalog-detailraster entity-detail-layout">
+{{ include('entity/_heading.twig') }}
+{% if page.eyebrow %}<p class="katalog-augenbraue">{{ page.eyebrow }}</p>{% endif %}
+{% if page.chips and not page.has_values %}<p class="katalog-metazeile">{{ page.chips|map(chip => chip.text)|join(' · ') }}</p>{% endif %}
+<div class="entity-detail-grid llb-raster{% if page.description and page.has_values %} entity-detail-overview-pair{% endif %}">
+{% if page.description %}<section class="entity-item-description" aria-label="{{ w.description }}"><p class="katalog-text">{{ page.description }}</p></section>{% endif %}
+{% if page.has_values %}<section class="katalog-abschnitt katalog-flaeche katalog-werteflaeche">
+<h2>{{ w.values }}</h2>
+{% if page.chips %}<p class="katalog-metazeile">{% for chip in page.chips %}{% if not loop.first %} · {% endif %}<span class="{{ chip.cls }}">{{ chip.text }}</span>{% endfor %}</p>{% endif %}
+{% if page.required_class|default(false) %}<p class="katalog-metazeile">{{ w.required_class }}: {{ page.required_class }}</p>{% endif %}
+{% if page.armour %}<p class="katalog-grundwert"><span>{{ w.armour }}</span><b>{{ page.armour }}</b></p>{% endif %}
+{% if page.values %}<dl class="katalog-werte-raster">{% for row in page.values %}<div><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>{% endfor %}</dl>{% endif %}
+{% if page.bonuses %}<ul class="katalog-boni">{% for row in page.bonuses %}<li><b>{{ row.display }}</b><span>{{ row.label }}</span></li>{% endfor %}</ul>{% endif %}
+{% if page.scale %}<p class="katalog-hinweis">{{ w.scalable }} {{ page.scale }}</p>{% endif %}
+</section>{% endif %}
+{% set variants = page.variants|default([])|filter(variant => variant.label|default('')) %}
+{% if variants %}<section><h2>{{ w.variants }}</h2><ul class="katalog-chips katalog-varianten">
+{% for variant in variants %}
+<li>{% if variant.active %}<span class="katalog-chip aktiv" aria-current="page">{{ variant.label }}</span>{% else %}<a class="katalog-chip" href="{{ variant.url }}">{{ variant.label }}</a>{% endif %}</li>
+{% endfor %}
+</ul></section>{% endif %}
 {% if page.set_links|default([]) %}<section><h2>{{ lang == 'fr' ? 'Ensemble' : 'Set' }}</h2><ul>{% for entry in page.set_links %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul></section>{% endif %}
-{% if page.set|default(false) or page.required_class|default(false) %}<section><h2>{{ w.context }}</h2>{% if page.set|default(false) %}<h3>{{ w.set_members }}</h3><p>{{ page.set.head }}</p>{% if page.set.members %}<ul>{% for member in page.set.members %}<li>{% if member.url %}<a href="{{ member.url }}">{{ member.text }}</a>{% else %}{{ member.text }}{% endif %}</li>{% endfor %}</ul>{% endif %}{% if page.set.bonuses %}<h3>{{ w.set_bonus }}</h3><ul>{% for bonus in page.set.bonuses %}<li>{{ bonus.amount }} {{ w.set_members }}: {{ bonus.text }}</li>{% endfor %}</ul>{% endif %}{% endif %}{% if page.required_class|default(false) %}<p>{{ w.required_class }}: {{ page.required_class }}</p>{% endif %}</section>{% endif %}
+{% if page.set|default(false) %}<section><h2>{{ w.context }}</h2><h3>{{ w.set_members }}</h3><p>{{ page.set.head }}</p>{% if page.set.members %}<ul>{% for member in page.set.members %}<li>{% if member.url %}<a href="{{ member.url }}">{{ member.text }}</a>{% else %}{{ member.text }}{% endif %}</li>{% endfor %}</ul>{% endif %}{% if page.set.bonuses %}<h3>{{ w.set_bonus }}</h3><ul>{% for bonus in page.set.bonuses %}<li>{{ bonus.amount }} {{ w.set_members }}: {{ bonus.text }}</li>{% endfor %}</ul>{% endif %}</section>{% endif %}
+{% if not page.has_values and page.required_class|default(false) %}<p class="katalog-metazeile">{{ w.required_class }}: {{ page.required_class }}</p>{% endif %}
 {% if page.browse|default(false) %}<section><h2>{{ w.browse }}</h2><p>{{ page.browse.note }}</p><p><a href="{{ page.browse.url }}" class="katalog-knopf">{{ page.browse.text }}</a></p></section>{% endif %}
 
-{% if page.has_where_from|default(false) or page.has_used_for|default(false) %}<div class="katalog-reiter" role="tablist" aria-label="{{ w.ilabel }}">
-{% if page.has_where_from|default(false) %}<button type="button" role="tab" aria-selected="true" aria-controls="item-tab-woher" data-item-tab="woher">{{ w.tab_where_from }}</button>{% endif %}
-{% if page.has_used_for|default(false) %}<button type="button" role="tab" aria-selected="{{ page.has_where_from|default(false) ? 'false' : 'true' }}" aria-controls="item-tab-wofuer" data-item-tab="wofuer">{{ w.tab_used_for }}</button>{% endif %}
+{% set both_relations = page.has_where_from|default(false) and page.has_used_for|default(false) %}
+{% if both_relations %}<div class="item-bezugsreiter">
+<div class="katalog-reiter" role="tablist" aria-label="{{ w.ilabel }}">
+<button type="button" role="tab" id="item-reiter-woher" aria-selected="true" aria-controls="item-tab-woher" data-item-tab="woher">{{ w.tab_where_from }}</button>
+<button type="button" role="tab" id="item-reiter-wofuer" aria-selected="false" aria-controls="item-tab-wofuer" tabindex="-1" data-item-tab="wofuer">{{ w.tab_used_for }}</button>
 </div>{% endif %}
 {% if page.task_filter|default(false) %}<script type="application/json" id="item-task-filter-data">{{ page.task_filter|json_encode|raw }}</script>{% endif %}
 
-{% if page.has_where_from|default(false) %}<section id="item-tab-woher" data-item-tab-panel="woher">
-{% for group in page.where_groups %}<section{% if group.barter_filter|default(false) and group.entries|length > direct_list_max %} data-barter-filter-group{% elseif group.vendor_filter|default(false) and group.entries|length > direct_list_max %} data-vendor-filter-group{% elseif group.filter|default('') == 'recipes' and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-recipe-filter-group{% elseif group.filter|default('') and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-item-filter-group{% endif %}>
+{% if page.has_where_from|default(false) %}<section id="item-tab-woher" data-item-tab-panel="woher"{% if both_relations %} role="tabpanel" aria-labelledby="item-reiter-woher" tabindex="0"{% else %} class="katalog-abschnitt katalog-beziehungen"{% endif %}>
+{% if not both_relations %}<h2>{{ w.tab_where_from }}</h2>{% endif %}
+{% for group in page.where_groups %}
+{% if group.source_kind|default('') and group.entries|length <= direct_list_max %}
+{% set source_type = group.source_kind == 'q' ? {de: 'Aufgabe', en: 'Quest', fr: 'Quête'}[lang] : {de: 'Tat', en: 'Deed', fr: 'Prouesse'}[lang] %}
+<ul class="mql-row-list item-quellen-kompakt" data-item-task-direct>
+{% for entry in group.entries %}
+    {{ result.row(lang, entry.url|default(''), entry.text, source_type, symbol(group.source_kind == 'q' ? 'aufgabe' : 'tat')) }}
+{% endfor %}
+</ul>
+{% else %}
+<section{% if group.barter_filter|default(false) and group.entries|length > direct_list_max %} data-barter-filter-group{% elseif group.vendor_filter|default(false) and group.entries|length > direct_list_max %} data-vendor-filter-group{% elseif group.filter|default('') == 'recipes' and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-recipe-filter-group{% elseif group.filter|default('') and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-item-filter-group{% endif %}>
 <h3>{{ group.label }}</h3>
 {% if group.source_kind|default('') and group.entries|length > direct_list_max %}<div class="questfinder item-task-filter" data-item-task-filter="{{ group.source_kind }}"><div data-item-task-fallback><ul>{% for entry in group.entries %}<li>{% if entry.url|default('') %}<a href="{{ entry.url }}">{{ entry.text }}</a>{% else %}{{ entry.text }}{% endif %}{% if entry.extra|default('') %} · {{ entry.extra }}{% endif %}</li>{% endfor %}</ul></div><ul class="finder-ergebnisse" data-filter-results hidden></ul></div>{% else %}{% if group.filter|default('') and group.filter != 'recipes' and group.entries|length > direct_list_max %}<p class="katalog-detail-filter"><label>{{ w.search }} <input type="search" data-item-filter-search></label>{% if group.filter|default('') == 'recipes' %}<label><select data-item-filter-role><option value="">{{ w.all }}</option><option value="{{ w.regular_result }}">{{ w.regular_result }}</option><option value="{{ w.critical_result }}">{{ w.critical_result }}</option></select></label>{% endif %}</p>{% endif %}<ul>{% for entry in group.entries %}<li{% if group.filter|default('') and group.entries|length > direct_list_max %} data-item-filter-row{% endif %}{% if entry.role|default('') %} data-role="{{ entry.role }}"{% endif %}>{% if entry.places is defined %}<strong>{{ entry.text }}</strong>{% if entry.extra|default('') %} <span class="katalog-gabe-art">{{ entry.extra }}</span>{% endif %}<br><span class="schwach">{% for place in entry.places %}{% if not loop.first %}, {% endif %}<a href="{{ place.url }}">{{ place.name }}</a> ({{ place.count }}){% endfor %}</span>{% else %}{% if entry.url|default('') %}<a href="{{ entry.url }}">{{ entry.text }}</a>{% else %}{{ entry.text }}{% endif %}{% if group.filter|default('') == 'recipes' %}{% if entry.role|default('') and entry.role != w.regular_result %} · {{ entry.role }}{% endif %}{% else %}{% if entry.role|default('') %} · {{ entry.role }}{% endif %}{% if entry.quantity|default(0) %} · {{ w.quantity }}: {{ entry.quantity }}{% endif %}{% if entry.recipe_level|default(0) %} · {{ w.level }}: {{ entry.recipe_level }}{% endif %}{% if entry.result is defined and entry.result %} · {{ entry.result.name }}{% if entry.result.level %} ({{ w.level }} {{ entry.result.level }}){% endif %}{% endif %}{% endif %}{% if group.filter|default('') != 'recipes' %}{% if entry.other_result is defined and entry.other_result %} · {{ entry.other_result.name }}{% endif %}{% endif %}{% if entry.extra|default('') %} · {{ entry.extra }}{% endif %}{% endif %}</li>{% endfor %}</ul>{% endif %}
-</section>{% endfor %}
+</section>{% endif %}{% endfor %}
 </section>{% endif %}
 
-{% if page.has_used_for|default(false) %}<section id="item-tab-wofuer" data-item-tab-panel="wofuer"{% if page.has_where_from|default(false) %} hidden{% endif %}{% if page.used_in|length > direct_list_max %} data-item-filter-group{% endif %}>
+{% if page.has_used_for|default(false) %}<section id="item-tab-wofuer" data-item-tab-panel="wofuer"{% if both_relations %} role="tabpanel" aria-labelledby="item-reiter-wofuer" tabindex="0" hidden{% else %} class="katalog-abschnitt katalog-beziehungen"{% endif %}{% if page.used_in|length > direct_list_max %} data-item-filter-group{% endif %}>
+{% if not both_relations %}<h2>{{ w.tab_used_for }}</h2>{% endif %}
 {% if page.used_in|length > direct_list_max %}<p class="katalog-detail-filter"><label>{{ w.search }} <input type="search" data-item-filter-search></label><label><select data-item-filter-role><option value="">{{ w.all }}</option><option value="{{ w.normal_ingredient }}">{{ w.normal_ingredient }}</option><option value="{{ w.optional_ingredient }}">{{ w.optional_ingredient }}</option></select></label></p>{% endif %}
 <ul class="quellen-liste" data-quellen-liste>{% for entry in page.used_in %}<li data-url="{{ entry.url }}"{% if page.used_in|length > direct_list_max %} data-item-filter-row{% endif %}{% if entry.role|default('') %} data-role="{{ entry.role }}"{% endif %}><a href="{{ entry.url }}">{{ entry.text }}</a>{% if entry.role|default('') %} · {{ entry.role }}{% endif %}{% if entry.quantity|default(0) %} · {{ w.quantity }}: {{ entry.quantity }}{% endif %}</li>{% endfor %}</ul>
 </section>{% endif %}
+{% if both_relations %}</div>{% endif %}
+</div>
 </article>
 {% endblock %}

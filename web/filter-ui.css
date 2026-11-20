@@ -17,19 +17,88 @@
 	background:var(--fläche,#202c3c); border:1px solid var(--rand,#526078); border-radius:.35rem; padding:8px 12px;
 }
 .filter-ui button { cursor:pointer; }
+/* The native number spinners render black on the dark field; lift them to the
+   text colour instead of hiding them. */
+.filter-ui input[type=number]::-webkit-inner-spin-button,
+.filter-ui input[type=number]::-webkit-outer-spin-button { filter: invert(1) brightness(1.4); opacity: .85; }
+.filter-ui input[type=number] { color-scheme: dark; }
 .filter-ui button:focus-visible,.filter-ui input:focus-visible,.filter-ui select:focus-visible,.filter-ui summary:focus-visible { outline:2px solid var(--gold,#d9b96f); outline-offset:3px; }
+
+/* One result-row contract for filter-backed entity lists. */
+.mql-row-heading,.mql-row {
+	display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,.9fr) minmax(145px,.62fr);
+	gap:0 var(--llb-raster-abstand); align-items:start; padding:9px 0;
+}
+.mql-row-list { list-style:none; margin:0; padding:0; }
+.mql-row-list > li { min-width:0; }
+.mql-row-list > li > .mql-row-hit { box-sizing:border-box; }
+.sets-list.mql-row-list > li > .mql-row-hit { display:grid; padding:0; }
+.mql-row-list > li.mql-row-heading { border-bottom:1px solid var(--rand); }
+.mql-row-heading { color:var(--schwach); background:var(--fläche); font-size:var(--text-bedienung); }
+.mql-row-heading > span:first-child { padding-inline-start:8px; }
+.mql-row-heading:not(.mql-row-heading-no-progress) > :last-child { justify-self:stretch; text-align:end; padding-inline-end:8px; }
+.mql-row-heading[hidden],.mql-row-progress[hidden] { display:none; }
+.mql-row { border-top:1px solid var(--rand); min-width:0; }
+.mql-row-no-progress,.mql-row-heading-no-progress { grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); }
+.mql-row-no-levels { grid-template-columns:minmax(0,1fr) minmax(145px,.35fr); }
+.mql-row-no-levels.mql-row-no-progress,.mql-row-no-levels.mql-row-heading-no-progress { grid-template-columns:minmax(0,1fr); }
+.mql-row-hit { display:grid; grid-template-columns:64px minmax(0,1fr); gap:12px; align-items:start; min-width:0; color:inherit; text-decoration:none; }
+.mql-row-hit:is(button) { width:100%; padding:0; border:0; background:transparent; color:inherit; text-align:left; font:inherit; cursor:pointer; }
+.mql-row-hit:hover .mql-row-name { color:var(--gold); text-decoration:underline; }
+.mql-row-hit:focus-visible { outline:2px solid var(--gold); outline-offset:3px; border-radius:3px; }
+.mql-row-icon { box-sizing:border-box; width:64px; height:64px; display:grid; place-items:center; color:var(--gold); background:var(--fläche); border:1px solid #514638; border-radius:4px; }
+.mql-row-icon-item { background:#362f26; border-color:#65563f; }
+.mql-row-icon img { width:75%; height:75%; object-fit:contain; margin:0; padding:0; background:none; border:0; box-shadow:none; border-radius:0; filter:brightness(1.4); }
+.mql-row-icon-missing img { display:none; }
+.mql-row-icon svg { width:27px; height:27px; margin:0; padding:0; background:none; box-shadow:none; filter:none; }
+.mql-row-body { min-width:0; }
+.mql-row .mql-row-name { display:block; color:var(--text); font-weight:500; line-height:1.24; overflow-wrap:anywhere; }
+.mql-row-hit:focus-visible .mql-row-name,.mql-row-hit:hover .mql-row-name { color:var(--gold); }
+.mql-row-meta { display:block; margin-top:4px; color:var(--schwach); font-size:var(--text-bedienung); line-height:1.35; }
+.mql-row-levels { display:grid; gap:4px; min-width:0; }
+.mql-row-value { display:block; color:var(--schwach); font-size:var(--text-bedienung); line-height:1.35; overflow-wrap:anywhere; }
+.mql-row-value b { color:var(--text); font-variant-numeric:tabular-nums; }
+.mql-row-progress { display:flex; align-items:center; justify-content:flex-end; gap:6px; min-width:0; color:var(--text); font-size:var(--text-bedienung); justify-self:end; text-align:end; }
+.mql-row-status-symbol { color:var(--fertig); font-weight:700; }
+.mql-row-progress .manueller-status { margin:0; }
+.mql-row-help { display:flex; flex-wrap:wrap; gap:4px 12px; padding:10px 12px; color:var(--schwach); background:var(--fläche); font-size:var(--text-bedienung); }
+.mql-row-help a { color:var(--gold); text-decoration:underline; }
+.mql-row-progress .manueller-status { display:inline-flex; align-items:center; gap:5px; min-width:0; }
+.mql-row-progress .manueller-status-label { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.mql-row-progress select { max-width:100%; padding:4px 8px; font-size:var(--text-bedienung); }
+.mql-row-progress button { padding:2px 5px; }
+@media(min-width:701px) {
+	.mql-row-single-level { grid-template-columns:minmax(0,1fr) 10rem 10rem; }
+	.mql-row-single-level:is(.mql-row-no-progress,.mql-row-heading-no-progress) { grid-template-columns:minmax(0,1fr) 10rem; }
+	.mql-row-single-level > :is(span,.mql-row-levels) { justify-self:start; }
+	.mql-row-single-level > .mql-row-progress { justify-self:end; }
+	.mql-row-value-label-repeated { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+}
+@media(max-width:700px) {
+	.mql-row-heading { display:none; }
+	.mql-row,.mql-row-no-levels.mql-row-no-progress { grid-template-columns:54px minmax(0,1fr); gap:5px 10px; padding:10px; }
+	.mql-row-heading { padding-inline:10px; }
+	.mql-row-hit { display:contents; }
+	.sets-list.mql-row-list > li > .mql-row-hit { display:contents; }
+	.mql-row-icon { grid-column:1; grid-row:1 / span 3; width:54px; height:54px; }
+	.mql-row-icon svg { width:24px; height:24px; }
+	.mql-row-body { grid-column:2; }
+	.mql-row-hit:focus-visible .mql-row-body { outline:2px solid var(--gold); outline-offset:3px; }
+	.mql-row-levels,.mql-row-progress { grid-column:2; }
+}
 .filter-toolbar { display:flex; gap:8px; align-items:stretch; margin-bottom:24px; }
 .filter-toolbar input { flex:1; width:0; min-width:0; }
-/* The first row holds toolbar, chips and the error box. It starts at 88px so
- * the filter column keeps its usual top edge, but it must grow: a fixed row
- * let the error box overlap the results, whose rows then swallowed its retry
- * button. */
-.filter-grid { display:grid; grid-template-columns:320px minmax(0,1fr); grid-template-rows:minmax(88px,auto) auto; gap:24px; align-items:start; }
+/* The first row holds toolbar, one line of chips and the error box. It must
+ * grow for wrapped chips/errors, but should not leave a large blank above the
+ * results when the header is short. */
+.filter-grid { display:grid; grid-template-columns:var(--llb-raster); grid-template-rows:minmax(39px,auto) auto; gap:12px var(--llb-raster-abstand); align-items:start; }
+.filter-ui-ohne-gruppen .filter-result-header, .filter-ui-ohne-gruppen .filter-results-home { grid-column: 1 / -1; }
+.filter-ui-ohne-gruppen .filter-home, .filter-ui-ohne-gruppen .filter-open { display: none; }
 /* The filter column starts level with the result bar, not below it: the left
  * column is the page's second axis and must not look indented by the count. */
-.filter-result-header { grid-column:2; grid-row:1; }
-.filter-home { grid-column:1; grid-row:1 / span 2; }
-.filter-results-home { grid-column:2; grid-row:2; }
+.filter-result-header { grid-column:4 / -1; grid-row:1; }
+.filter-home { grid-column:1 / span 3; grid-row:1 / span 2; min-width:0; }
+.filter-results-home { grid-column:4 / -1; grid-row:2; }
 .filter-results-home>[data-filter-results] { max-width:100%; overflow-x:auto; }
 .filter-craft-row { border-bottom:1px solid var(--rand,#526078); padding:12px 0; }
 .filter-craft-row h3 { margin:0 0 8px; font-size:1rem; }
@@ -42,7 +111,7 @@
 .filter-ui .gs-zeile .gs-meta { grid-row:2; }
 .filter-result-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
 .filter-result-toolbar [role=status] { flex:1 1 10rem; color:var(--schwach,#a89c8a); font-size:.875rem; }
-.filter-result-toolbar select {
+.filter-result-toolbar select, select.auswahl-chevron {
 	max-width:100%; min-width:0; padding-right:2.5rem;
 	appearance:none; -webkit-appearance:none;
 	background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiA4Ij48cGF0aCBkPSJNMSAxbDUgNSA1LTUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2M5YzJiNSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48L3N2Zz4=");
@@ -70,9 +139,8 @@
 	display:grid; grid-template-columns:16px var(--filter-control) minmax(0,1fr) var(--filter-count);
 	column-gap:var(--filter-gap); align-items:center; min-height:var(--filter-row); padding:0;
 }
-/* A wrapped option keeps its control on the first line: centring it against a
- * three-line label put the checkbox in the middle of the text. */
-.filter-panel .filter-option,.filter-panel .filter-branch>summary { align-items:start; }
+/* One-line options are centred in their row. Wrapped labels opt into
+ * first-line control alignment below. */
 .filter-panel .filter-group-heading {
 	font-weight:400; font-size:.875rem; color:var(--gold,#d9b96f);
 	margin:0; padding:12px 0 6px; background:none; border:0; border-radius:0;
@@ -94,12 +162,17 @@ details[open]>.filter-group-heading>.filter-arrow,details[open]>summary>.filter-
 .filter-panel .filter-branch>summary>.filter-option>input { grid-column:1; }
 .filter-panel .filter-branch>summary>.filter-option>span { grid-column:2; }
 .filter-panel .filter-branch>summary>.filter-option>small { grid-column:3; }
-/* First-line alignment of the control, derived from the text line box rather
- * than a pixel guess. It must follow the margin reset above. */
+/* Keep controls with wrapped labels beside their first text line. */
 .filter-panel .filter-option>input,
 .filter-panel .filter-branch>summary>.filter-arrow {
+	align-self:center; margin:0;
+}
+.filter-panel .filter-option.filter-option-wrapped { align-items:start; }
+.filter-panel .filter-option.filter-option-wrapped>input,
+.filter-panel .filter-branch>summary.filter-summary-wrapped>.filter-arrow {
 	align-self:start; margin-block-start:calc((1.4em - var(--filter-control)) / 2);
 }
+.filter-panel .filter-branch>summary.filter-summary-wrapped { align-items:start; }
 .filter-range { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px; }
 .filter-range label { display:block; min-width:0; font-size:.875rem; }
 .filter-range input { display:block; width:100%; }
@@ -127,7 +200,6 @@ details[open]>.filter-group-heading>.filter-arrow,details[open]>summary>.filter-
 .symbol-svg svg { width:16px; height:16px; }
 .filter-ui [hidden] { display:none !important; }
 @media(min-width:901px) { .filter-ui { --filter-row:32px; } }
-@media(min-width:1200px) { .filter-grid { grid-template-columns:340px minmax(0,1fr); } }
 @media(max-width:900px) {
 	.filter-grid { display:flex; flex-direction:column; gap:16px; }
 	.filter-result-header,.filter-results-home { width:100%; }

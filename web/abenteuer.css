@@ -511,20 +511,15 @@
 .welt-gebiete { list-style: none; margin: 0; padding: 0; max-height: 430px; overflow: auto; }
 .welt-gebiete li { border-top: 1px solid var(--rand); }
 .welt-gebiete li:first-child { border-top: 0; }
-.welt-gebiet {
-	display: block;
-	width: 100%;
-	padding: 7px 0;
-	border: 0;
-	background: transparent;
-	color: var(--text);
-	font: inherit;
-	text-align: left;
-	cursor: pointer;
-}
+.welt-gebiet { display: block; width: 100%; padding: 7px 0; }
 .welt-gebiet:hover { background: var(--fläche-hell); }
-.welt-gebiet[aria-pressed="true"] { border-left: 2px solid var(--gold); padding-left: 6px; }
-.wg-kopf { display: flex; gap: 8px; align-items: baseline; }
+.welt-gebiet[data-selected="true"] { border-left: 2px solid var(--gold); padding-left: 6px; }
+.wg-kopf { display: flex; width: 100%; gap: 8px; align-items: baseline; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.wg-kopf:hover .wg-name, .wg-kopf:focus-visible .wg-name { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
+.wg-kopf:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.wg-fuss { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+.wg-details { border: 0; background: none; color: var(--gold); font: inherit; font-size: .75rem; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.wg-details:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .wg-name { flex: 1; min-width: 0; font-size: .9rem; overflow-wrap: anywhere; }
 .wg-prozent { color: var(--gold); font-size: .78rem; font-variant-numeric: tabular-nums; }
 .wg-balken { display: block; height: 3px; margin: 4px 0 3px; background: var(--rand); border-radius: 2px; overflow: hidden; }

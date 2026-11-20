@@ -2,7 +2,7 @@
 
 **Status:** teilweise umgesetzt; technischer URL-Audit bestanden (16.11.2026)
 **Erstellt:** 15. November 2026
-**Audit:** `docs/entitaeten-link-audit-2026-11-15.md`
+**Audit:** `docs/archiv/entitaeten-link-audit-2026-11-15.md`
 
 ## Ziel
 

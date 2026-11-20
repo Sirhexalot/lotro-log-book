@@ -3,18 +3,17 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-marke { grid-area: marke; color: var(--gold); text-decoration: none; white-space: nowrap; letter-spacing: .04em; }
 .katalog-inhalt { display: block; width: 100%; max-width: var(--huelle); margin: 0 auto; padding: 24px 16px 48px; }
 .katalog-inhalt article { max-width: 960px; }
-.katalog-inhalt article.item-seite-mit-filter { max-width: none; }
 .katalog-inhalt h1 { font-size: var(--text-titel); line-height: 1.3; overflow-wrap: anywhere; }
 .katalog-inhalt h2 { font-size: var(--text-abschnitt); margin-top: 28px; }
 .katalog-inhalt h3 { font-size: var(--text-normal); }
 .katalog-inhalt article { font-size: var(--text-normal); line-height: 1.6; }
-.katalog-inhalt a:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .gebiet-tab)) {
+.katalog-inhalt a:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .gebiet-tab, .mql-row-hit)) {
 	color: var(--gold);
 	text-decoration-line: underline;
 	text-decoration-thickness: .08em;
 	text-underline-offset: .16em;
 }
-.katalog-inhalt a:visited:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .gebiet-tab)) {
+.katalog-inhalt a:visited:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .gebiet-tab, .mql-row-hit)) {
 	color: var(--gold);
 }
 .katalog-inhalt a:focus-visible {
@@ -22,12 +21,14 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	outline-offset: 3px;
 	border-radius: 2px;
 }
-.katalog-inhalt > .katalog-pfad a {
+.katalog-orientierung { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:4px 16px; }
+.entity-feedback-link { font-size:var(--text-bedienung); }
+.katalog-orientierung .katalog-pfad a {
 	color: var(--schwach);
 	text-decoration: none;
 }
-.katalog-inhalt > .katalog-pfad a:hover,
-.katalog-inhalt > .katalog-pfad a:focus-visible {
+.katalog-orientierung .katalog-pfad a:hover,
+.katalog-orientierung .katalog-pfad a:focus-visible {
 	color: var(--gold);
 	text-decoration: underline;
 }
@@ -74,6 +75,8 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 
 /* Entity page: a short chip row under the title, then the sections. */
 .katalog-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; }
+.entity-filter-link { margin: 4px 0 10px; font-size: var(--text-bedienung); }
+.katalog-inhalt .katalog-varianten { padding: 0; list-style: none; }
 
 .katalog-reiter { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 8px;
     border-bottom: 1px solid var(--rand); }
@@ -84,6 +87,46 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
     background: var(--fläche-hell); }
 .katalog-reiter button:hover, .katalog-reiter button:focus-visible {
     color: var(--gold); }
+.item-bezugsreiter {
+	--item-reiter-flaeche: var(--llb-flaechen-ton);
+	--item-reiter-rand: var(--llb-flaechen-rand);
+	--item-feld-rand: #84745f;
+	--item-zweittext: #c9bdab;
+	margin-top: 22px;
+}
+.item-bezugsreiter > .katalog-reiter {
+	position: relative; gap: 4px; margin: 0; padding-inline-start: 8px; border: 0;
+}
+.item-bezugsreiter > .katalog-reiter button {
+	padding: 8px 15px; border-radius: 6px 6px 0 0;
+	background: var(--grund); color: var(--item-zweittext); border-color: var(--item-reiter-rand);
+}
+.item-bezugsreiter > .katalog-reiter button[aria-selected="true"] {
+	background: var(--item-reiter-flaeche); color: var(--gold);
+	box-shadow: 0 1px 0 var(--item-reiter-flaeche);
+}
+.item-bezugsreiter > .katalog-reiter button:hover { color: var(--gold); }
+.item-bezugsreiter > .katalog-reiter button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+:is(.item-bezugsreiter > [role="tabpanel"], .entity-detail-reading > :is(section, details), .entity-detail-place > section, .entity-detail-layout > section, .item-seite .entity-detail-grid > section) {
+	box-sizing: border-box; min-width: 0; padding: var(--llb-flaechen-innen);
+	border: 1px solid var(--llb-flaechen-rand); border-radius: var(--llb-flaechen-radius); background: var(--llb-flaechen-ton);
+}
+.item-bezugsreiter .filter-ui .filter-toolbar input[type="search"],
+.item-bezugsreiter .filter-ui .filter-result-toolbar select {
+	background-color: var(--grund); border-color: var(--item-feld-rand);
+}
+.item-bezugsreiter .filter-ui .filter-toolbar input[type="search"]::placeholder {
+	color: var(--item-zweittext); opacity: 1;
+}
+.item-bezugsreiter .filter-ui .filter-toolbar button {
+	background-color: #3a3023; border-color: var(--item-feld-rand);
+}
+.item-bezugsreiter > [role="tabpanel"][hidden] { display: none; }
+.item-bezugsreiter [role="tabpanel"] > section > h3 { margin: 0 0 6px; }
+.item-bezugsreiter [role="tabpanel"] > section + section {
+	margin-top: 15px; padding-top: 13px; border-top: 1px solid var(--rand);
+}
+.item-bezugsreiter [role="tabpanel"] .related-list { margin-top: 8px; padding-top: 0; border-top: 0; }
 .katalog-detail-filter { display: flex; flex-wrap: wrap; gap: .6rem; margin: .4rem 0; }
 .katalog-detail-filter label { display: inline-flex; align-items: center; gap: .35rem; }
 .katalog-detail-filter input, .katalog-detail-filter select {
@@ -107,9 +150,68 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	.katalog-gaben { grid-template-columns: 1fr; }
 }
 
-/* Quest page header: title and actions on one line, facts as chips under it. */
+/* Overview headings and the shared detail heading. */
 .katalog-kopf { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
 .katalog-kopf h1 { flex: 1 1 320px; margin: 0; }
+.katalog-kopf.katalog-detailkopf { display: block; }
+.katalog-titelzeile { display: flex; align-items: flex-start; gap: 11px; }
+.katalog-titelzeile h1 { min-width: 0; padding-top: 2px; }
+.katalog-titelzeile > .mql-row-icon { flex-shrink: 0; }
+.katalog-inhalt article.katalog-detailraster { max-width: none; }
+.katalog-detailraster .katalog-text { max-width: 68ch; }
+.katalog-detailraster > .katalog-text { margin-top: 16px; }
+.katalog-metazeile { margin: 0; color: var(--schwach); font-size: var(--text-bedienung); }
+.item-seite .katalog-metazeile { color: #c9bdab; }
+.katalog-kompaktleiste { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; }
+.katalog-kompaktleiste > p { margin: 0; }
+.katalog-kompaktleiste #katalog-status { margin-inline-start: auto; }
+.katalog-flaeche { min-width: 0; background: var(--fläche); border-radius: 4px; padding: 14px 16px; }
+.katalog-inhalt .katalog-abschnitt.katalog-flaeche > h2 { margin: 0 0 8px; }
+.katalog-werteflaeche { max-width: 52rem; }
+.katalog-werteflaeche .katalog-metazeile { margin: 0 0 8px; }
+.katalog-werte-raster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; margin: 10px 0 0; }
+.katalog-werte-raster > div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid var(--rand); }
+.katalog-werte-raster dt { color: var(--schwach); }
+.katalog-werte-raster dd { margin: 0; text-align: end; font-variant-numeric: tabular-nums; }
+.katalog-detailspalten { display: grid; grid-template-columns: minmax(0,1fr); gap: 18px; align-items: start; max-width: 60rem; }
+.katalog-detailspalten:has(> section + section) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.entity-detail-grid { margin-block-start: 18px; row-gap: 12px; }
+.entity-detail-grid:not(:has(> :not(script))) { display: none; }
+.entity-detail-grid > * { grid-column: 1 / -1; min-width: 0; }
+.entity-detail-reading { display: grid; gap: 12px; }
+.entity-detail-layout :is(.entity-detail-reading, .entity-detail-place, .entity-detail-grid) > :is(section, details, .item-bezugsreiter) { margin: 0; max-width: none; }
+.entity-detail-layout :is(section, .entity-detail-reading) > h2:first-child { margin-block: 0 8px; }
+.entity-detail-layout .katalog-kompaktleiste { justify-content: start; }
+.entity-detail-layout .katalog-kompaktleiste #katalog-status { margin-inline-start: 0; }
+.entity-detail-layout .katalog-ziele > summary { padding: 0; }
+.entity-detail-layout .katalog-ziele > ol { margin-block-end: 0; }
+@media (min-width: 768px) {
+	.entity-detail-split > .entity-detail-reading { grid-column: span 7; }
+	.entity-detail-split > .entity-detail-place { grid-column: span 5; }
+	.item-seite .entity-detail-overview-pair > :is(.entity-item-description, .katalog-werteflaeche) { grid-column: span 6; }
+}
+.quest-herkunft > h2, .quest-detail-ort > h2 { margin: 0 0 8px; font-size: var(--text-abschnitt); font-weight: 500; }
+.quest-herkunft .katalog-fakten { margin: 0; }
+.entity-detail-layout .entity-detail-place > .quest-detail-ort { max-width: none; }
+.entity-detail-place .katalog-ort { max-width: none; }
+.quest-detail-ort .katalog-ort { margin: 0 0 6px; }
+.quest-detail-ort .katalog-ort img { width: 100%; height: auto; }
+.quest-detail-ort .katalog-hinweis, .quest-detail-ort .katalog-aktionen { margin-block: 6px; }
+.quest-ort-nebenlinks { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-block: 6px 0; font-size: var(--text-bedienung); }
+.katalog-abschnitt .mql-row-list { padding-inline-start: 0; }
+.item-quellen-kompakt .mql-row { display: flex; flex-wrap: wrap; justify-content: start; gap: 6px 14px; padding: 4px 0; border: 0; }
+.item-quellen-kompakt .mql-row-hit { display: flex; align-items: center; gap: 8px; }
+.item-quellen-kompakt .mql-row-icon { flex: none; }
+.item-quellen-kompakt .mql-row-meta { margin-block-start: 0; }
+.entity-item-description > p:first-child { margin-block-start: 0; }
+.entity-item-description > p:last-child { margin-block-end: 0; }
+.katalog-detailraster > .katalog-ziele { margin-block: 22px; }
+.katalog-beziehungen, .katalog-detailraster .related-list { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--rand); }
+.katalog-flaeche .katalog-gabe svg { width: 30px; height: 30px; margin-inline: 3px; }
+@media (max-width: 700px) {
+	.katalog-detailspalten:has(> section + section), .katalog-werte-raster { grid-template-columns: minmax(0, 1fr); }
+	.katalog-kompaktleiste #katalog-status { margin-inline-start: 0; }
+}
 .katalog-kopf .katalog-aktionen { margin: 0; display: flex; gap: 8px; align-items: center; white-space: nowrap; }
 .katalog-kopf .katalog-aktionen .katalog-link { color: var(--gold); }
 .katalog-abschnitt { margin-top: 26px; }
@@ -130,15 +232,13 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-geben { display: block; }
 .katalog-geben + .katalog-geben { margin-top: 10px; }
 .katalog-geben-art { color: var(--schwach); font-size: var(--text-bedienung); margin-bottom: 2px; }
-.katalog-gabe { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--rand); font-size: var(--text-bedienung); }
+.katalog-gabe { display: flex; align-items: flex-start; gap: 12px; padding: 9px 0; border-bottom: 1px dashed var(--rand); font-size: var(--text-bedienung); }
 /* A link must look like one, but the quality colour carries information. */
 .katalog-gabe a { color: inherit; text-decoration: underline; text-underline-offset: 2px;
 	text-decoration-color: color-mix(in srgb, currentColor 45%, transparent); }
 .katalog-gabe a:hover { color: var(--gold); text-decoration-color: currentColor; }
-/* The picture reads as an item, not as a bullet: framed, twice the old size. */
-.katalog-gabe .symbol { width: 36px; height: 36px; flex: 0 0 auto; border-radius: 4px;
-	background: radial-gradient(circle at 50% 35%, #2a251f, #14110e 70%);
-	box-shadow: inset 0 0 0 1px var(--rand), 0 1px 2px rgba(0, 0, 0, .5); }
+/* Reward tiles use the shared 64/54 px result-row icon, not a smaller variant. */
+.katalog-gabe .mql-row-icon { flex: 0 0 auto; }
 /* Context: two blocks of label/value pairs side by side. */
 .katalog-zwei { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 44px; }
 @media (max-width: 760px) {
@@ -146,10 +246,6 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	.katalog-ort-flex .katalog-ort { flex: 1 1 100%; max-width: 100%; }
 }
 
-/* Item page: the entity symbol is small, the item's own symbol is the picture. */
-.katalog-inhalt h1 img.symbol-gross {
-	width: 38px; height: 38px; object-fit: contain; vertical-align: -8px; margin-right: 10px;
-}
 .katalog-werte { grid-template-columns: 1fr auto; max-width: 420px; }
 .katalog-werte dd { text-align: right; font-variant-numeric: tabular-nums; }
 .katalog-chips a.katalog-chip { color: var(--gold); text-decoration: none; }
@@ -191,8 +287,6 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-augenbraue {
 	margin: 0 0 2px; color: var(--schwach); font-size: var(--text-bedienung); line-height: 1.5;
 	letter-spacing: normal;
-	/* Its own line: side by side with the title left a wide empty gap. */
-	flex: 1 1 100%;
 }
 body[data-art="i"] .katalog-kopf h1 { font-size: 1.9rem; line-height: 1.2; }
 body[data-art="i"] .katalog-kopf h1.q1 { color: #d8d2c4; }
@@ -200,12 +294,6 @@ body[data-art="i"] .katalog-kopf h1.q2 { color: #e0c15c; }
 body[data-art="i"] .katalog-kopf h1.q3 { color: #b98cd6; }
 body[data-art="i"] .katalog-kopf h1.q4 { color: #6fc3c3; }
 body[data-art="i"] .katalog-kopf h1.q5 { color: #e6a94d; }
-body[data-art="i"] .katalog-kopf .symbol-gross {
-	width: 64px; height: 64px; padding: 8px; margin-right: 14px;
-	background: var(--fläche); border: 1px solid var(--rand); border-radius: 4px;
-	vertical-align: middle;
-}
-body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 
 .katalog-grundwert {
 	display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
@@ -221,7 +309,6 @@ body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 
 @media (max-width: 640px) {
 	body[data-art="i"] .katalog-kopf h1 { font-size: 1.55rem; }
-	body[data-art="i"] .katalog-kopf .symbol-gross { width: 54px; height: 54px; }
 	.katalog-grundwert b { font-size: 1.4rem; }
 }
 
@@ -262,5 +349,4 @@ body[data-art="i"] .katalog-kopf h1 .symbol-gross { float: left; }
 .quellen-liste { list-style: none; padding-left: 0; columns: auto; }
 /* The entries are inline text ("Name · Art · Stufe 130 · Region"), so the mark
  * sits beside the text instead of turning every text node into a grid cell. */
-.katalog-art { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; color: var(--gold); font-size: var(--text-bedienung); }
-.katalog-art .symbol { width: 20px; height: 20px; }
+.katalog-art { margin: 0 0 7px; color: var(--gold); font-size: var(--text-bedienung); }

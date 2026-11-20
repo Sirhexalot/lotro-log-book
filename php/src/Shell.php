@@ -89,7 +89,10 @@ final class Shell
             $this->scriptTag('filtergedaechtnis.js'), $this->scriptTag('katalog.js'),
             $this->scriptTag('filterzustand.js'), $this->scriptTag('filteradapter.js'),
              $this->scriptTag('filter-ui.js'), $this->scriptTag('filter-server.js'),
-             $this->scriptTag('zutaten.js'), $this->scriptTag('sets.js'),
+              $this->scriptTag('zutaten.js'), $this->scriptTag('sets.js'),
+              $this->scriptTag('symbole.js'),
+              $this->scriptTag('treffer-zeile.js'),
+              $this->scriptTag('treffer-fortschritt.js'),
              $this->scriptTag('auftraggeber.js'), $this->scriptTag('aufgaben-filter.js'),
               $this->scriptTag('karten-aufgabenfilter.js'),
               $this->scriptTag('gegenstaende-filter.js'),
@@ -154,7 +157,9 @@ final class Shell
                 ['ruf', $app('ruf'), $w['menue_ruf'], $w['d_ruf']],
                 ['f', $this->catalogue->route($lang, 'f'), $w['menue_fraktionen'], $w['d_fraktionen']],
             ]],
-            ['key' => 'charakter', 'text' => $w['familie_charakter'], 'tabs' => [
+             ['key' => 'charakter', 'text' => $w['familie_charakter'], 'tabs' => [
+                ['klassen', $app('klassen'), ['de' => 'Klassen & Völker', 'en' => 'Classes & races', 'fr' => 'Classes et races'][$lang],
+                    ['de' => 'Spielbare Kombinationen und Klassenprofile', 'en' => 'Playable combinations and class profiles', 'fr' => 'Combinaisons jouables et profils de classe'][$lang]],
                 ['spielstand', $app('spielstand'), $w['menue_fortschritt'], $w['d_fortschritt']],
             ]],
         ];
@@ -166,6 +171,7 @@ final class Shell
         return match ($kind) {
             'set' => 'gegenstaende',
             'questfinder' => 'welt',
+            'klassen' => 'charakter',
             'giver', 'instances' => 'welt',
             'vendor' => 'gegenstaende',
             default => $this->catalogue->famille()[$kind] ?? null,
@@ -262,6 +268,12 @@ final class Shell
     {
         $w = $this->words;
         $lang = $this->lang;
+        if ($page === 'feedback') {
+            return [
+                ['text' => $w['home'], 'url' => $this->startPage()],
+                ['text' => ['de' => 'Feedback', 'en' => 'Feedback', 'fr' => 'Retour'][$lang], 'url' => null],
+            ];
+        }
         $zuordnung = [
             'karte' => ['welt', $w['menue_karte']],
             'questfinder' => ['welt', ['de' => 'Aufgabenfinder', 'en' => 'Quest finder', 'fr' => 'Recherche de quêtes'][$lang]],
@@ -280,6 +292,7 @@ final class Shell
             'belohnungen' => ['erfolge', $w['menue_belohnungen']],
             'ruf' => ['erfolge', $w['menue_ruf']],
             'spielstand' => ['charakter', $w['menue_fortschritt']],
+            'klassen' => ['charakter', ['de' => 'Klassen & Völker', 'en' => 'Classes & races', 'fr' => 'Classes et races'][$lang]],
             'companion' => ['charakter', null],
             'plugin' => ['charakter', null],
         ];
@@ -334,6 +347,10 @@ final class Shell
     public function entitySymbol(?string $art): string
     {
         $path = $art !== null ? ($this->catalogue->symbols()[$art] ?? null) : null;
+        if (!$path && $art === 'haendler') {
+            $path = '<path d="M3 10h18"/><path d="m5 10 1-6h12l1 6"/>'
+                . '<path d="M4 10v10h16V10"/><path d="M9 20v-6h6v6"/>';
+        }
         if (!$path) {
             return '';
         }
@@ -345,5 +362,17 @@ final class Shell
     public function icon(string $icon): string
     {
         return $this->entitySymbol($icon);
+    }
+
+    public function gameItemIcon(int|string|null $id): string
+    {
+        if ($id === null || !ctype_digit((string) $id)) {
+            return '';
+        }
+        $path = '/bild/items/' . $id . '.webp';
+        if (!is_file($this->webRoot . $path)) {
+            return '';
+        }
+        return '<img class="symbol" src="' . $path . '" alt="" width="38" height="38" decoding="async">';
     }
 }

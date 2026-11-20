@@ -53,7 +53,8 @@
 			ab_map_ready_areas: '%s Gebiete mit nächster Aufgabe',
 			ab_map_group_one: '1 Gebiet',
 			ab_map_group: '%s Gebiete',
-			ab_map_all_areas: 'Alle Gebiete'
+			ab_map_all_areas: 'Alle Gebiete',
+			ab_map_details: 'Details ↓'
 		},
 		en: {
 			ab_map_approx: 'Approximate area centre',
@@ -106,7 +107,8 @@
 			ab_map_ready_areas: '%s areas with a next quest',
 			ab_map_group_one: '1 area',
 			ab_map_group: '%s areas',
-			ab_map_all_areas: 'All areas'
+			ab_map_all_areas: 'All areas',
+			ab_map_details: 'Details ↓'
 		},
 		fr: {
 			ab_map_approx: 'Centre de la zone',
@@ -159,7 +161,8 @@
 			ab_map_ready_areas: '%s zones où poursuivre une quête',
 			ab_map_group_one: '1 zone',
 			ab_map_group: '%s zones',
-			ab_map_all_areas: 'Toutes les zones'
+			ab_map_all_areas: 'Toutes les zones',
+			ab_map_details: 'Détails ↓'
 		}
 	};
 	var sprache = (document.documentElement.getAttribute('lang') || 'de').slice(0, 2);
