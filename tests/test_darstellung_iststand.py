@@ -95,6 +95,12 @@ class DarstellungIststandTest(unittest.TestCase):
         self.assertIn('geoLabel', js)
         self.assertIn("replace(/^[^:]{2,32}:", js)
 
+    def test_local_preview_has_one_fixed_port(self):
+        script = read('tools/lokalserver.py')
+        self.assertIn('PORT = 8817', script)
+        self.assertIn("PHP_CLI_SERVER_WORKERS", script)
+        self.assertIn('Kein zweiter Server', script)
+
 
 if __name__ == '__main__':
     unittest.main()
