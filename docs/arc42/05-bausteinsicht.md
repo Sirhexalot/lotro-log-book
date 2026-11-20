@@ -234,6 +234,8 @@ Diese Matrix beschreibt den **gegenwärtigen Code**, nicht einen Sollzustand. �
 - Die gemeinsame Filteroberfläche ersetzt ihr GET-Fallback erst nach erfolgreichem Laden; bei Fehler bleibt „Als Seite öffnen“/Fallback sichtbar. Mobile Filter werden als Dialog geöffnet; Desktop zeigt Filterspalte neben Treffern. Filter-Chips zeigen auch den nicht entfernbaren Standardwert einer Einfachauswahl als Zustandschip.
 - Fortschrittsfilter und Statusfarben existieren nur bei Entitäten mit importierbarem Status und belegter Importgrundlage. Ein fehlender Status wird nicht als erledigt, offen, verfügbar oder 0 % interpretiert.
 
+Der Belohnungsbrowser nutzt dieselbe Gegenstandszeile wie die Gegenstandssuche. Je Vertrags-Entität sind Listen- und Detailadresse in `tests/entitaeten_matrix.json` hinterlegt; der Browser-Test `tests/browser_entitaeten_matrix.js` prüft sie.
+
 Belege für diese Ist-Matrix: `docs/datenraum/lotro-datenraum-entitaeten.json`, `php/templates/entity/`, `php/templates/{sets,givers,vendors,landmarks,titles,factions,instances}/`, `php/src/{RelatedLists,FilterRegeln,Sets,Givers,Vendors,Landmarks,Titles,Factions,Instances}.php`, `web/{entitaeten-listen,filter-ui,filteradapter,filterzustand,filtergedaechtnis,aufgaben-filter,gegenstaende-filter,handwerk-filter}.js`, `tests/test_entitaeten_vertrag.py`, `tests/browser_related_lists.js`.
 
 ### 5.10 Darstellungsraster, Flächen und Zeilenvertrag (Iststand 20.11.2026)

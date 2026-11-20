@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "base": "/de",
+  "entities": [
+    {
+      "kind": "q",
+      "list": "/de/aufgabenfinder/",
+      "row": ".mql-row",
+      "detail": "/de/aufgabe/70000003/"
+    },
+    {
+      "kind": "d",
+      "list": "/de/tat/",
+      "row": ".mql-row",
+      "detail": "/de/tat/70045CB1/"
+    },
+    {
+      "kind": "i",
+      "list": "/de/gegenstandssuche/",
+      "row": ".mql-row",
+      "detail": "/de/gegenstand/70002568/"
+    },
+    {
+      "kind": "recipe",
+      "list": "/de/handwerk/rezepte/",
+      "row": ".rezept-tabelle tbody tr",
+      "detail": "/de/rezept/7000386B/"
+    },
+    {
+      "kind": "set",
+      "list": "/de/set/",
+      "row": ".mql-row",
+      "detail": "/de/set/7005D82B/"
+    },
+    {
+      "kind": "giver",
+      "list": "/de/auftraggeber/",
+      "row": ".mql-row",
+      "detail": "/de/auftraggeber/7000838B/"
+    },
+    {
+      "kind": "vendor",
+      "list": "/de/haendler/",
+      "row": ".mql-row",
+      "detail": "/de/haendler/7001F05B/"
+    },
+    {
+      "kind": "title",
+      "list": "/de/titel/",
+      "row": ".mql-row",
+      "detail": "/de/titel/700182F4/"
+    },
+    {
+      "kind": "virtue",
+      "list": "/de/tugend/",
+      "row": ".katalog-liste li",
+      "detail": "/de/tugend/268437601/"
+    },
+    {
+      "kind": "f",
+      "list": "/de/fraktion/",
+      "row": ".mql-row",
+      "detail": "/de/fraktion/700694C4/"
+    },
+    {
+      "kind": "l",
+      "list": "/de/landmarke/",
+      "row": ".mql-row",
+      "detail": "/de/landmarke/7000EE27/"
+    },
+    {
+      "kind": "area",
+      "list": null,
+      "row": null,
+      "detail": "/de/gebiet/268437678/"
+    },
+    {
+      "kind": "region",
+      "list": null,
+      "row": null,
+      "detail": "/de/region/268437557/"
+    }
+  ]
+}
