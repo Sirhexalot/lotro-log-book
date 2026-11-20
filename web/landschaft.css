@@ -35,7 +35,6 @@ main.landschaft-start > :not(#landschaften) { display: none; }
 .landschaft-gruppe h3 { font-size: var(--text-abschnitt); margin-top: 30px; }
 .landschaft-kacheln { display: grid; grid-template-columns: repeat(auto-fill,minmax(235px,1fr)); grid-auto-rows: auto; align-items:stretch; gap: 16px; }
 .landschaft-kachelgruppe { grid-column: 1 / -1; margin: 8px 0 -6px; padding: 7px 10px; border-left: 3px solid var(--gold); background: var(--fläche); color: var(--gold); font-size: var(--text-normal); font-weight: 600; }
-.landschaft-uebersicht-link { margin-left: 12px; padding: 0; border: 0; background: transparent; color: var(--link); font: inherit; font-weight: 500; text-decoration: underline; cursor: pointer; }
 .landschaft-kachelgruppe[data-gebietgruppe="east-rohan"] { border-left-color: #7eb6c6; color: #9ac9d4; }
 .landschaft-kachelgruppe[data-gebietgruppe="west-rohan"] { border-left-color: #c5a56b; color: #d6b982; }
 .landschaft-kachelgruppe[data-gebietgruppe="dunland"] { border-left-color: #83a276; color: #a6c096; }
@@ -82,18 +81,3 @@ main.landschaft-start > :not(#landschaften) { display: none; }
 }
 .landschaft-spruenge a.sprung-gruppe::before { content: '› '; color: var(--gold); }
 .landschaft-spruenge a.sprung-themen { margin-left: 6px; }
-.landschaft-gruppeorte {
-	grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 10px;
-	margin: 0 0 6px; padding: 0 2px;
-}
-.landschaft-gruppeorte a {
-	display: inline-flex; gap: 7px; align-items: baseline;
-	padding: 4px 9px; border: 1px solid var(--rand); border-radius: 3px;
-	color: var(--text); text-decoration: none; font-size: var(--text-bedienung);
-}
-.landschaft-gruppeorte a:hover, .landschaft-gruppeorte a:focus-visible {
-	border-color: var(--gold); color: var(--gold);
-}
-.landschaft-gruppeorte .zahl { color: var(--gold); font-variant-numeric: tabular-nums; }
-.landschaft-gruppeorte + .landschaft-mit-orten,
-.landschaft-gruppeorte + .landschaft-kachel { margin-top: 0; }

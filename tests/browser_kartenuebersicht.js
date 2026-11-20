@@ -19,11 +19,16 @@ const base = process.argv[2] || 'http://127.0.0.1:8814';
 		for (const label of ['Eriador', 'Dunland', 'Ost-Rohan', 'West-Rohan', 'Weitere Inhalte']) {
 			assert.ok(jumps.some(text => text.includes(label)), 'Sprungmarke fehlt: ' + label);
 		}
-		const dunland = await page.locator('.landschaft-gruppeorte').first().locator('a').allTextContents();
-		assert.ok(dunland.length >= 7, 'Dunland zeigt nicht alle Gebiete');
-		assert.ok(dunland.some(text => text.startsWith('Isengart')), 'Isengart fehlt in der Gebietszeile');
+		const dunland = await page.evaluate(() => {
+			const head = document.getElementById('gruppe-dunland');
+			const cards = [...head.parentElement.children].filter(node => node.classList.contains('landschaft-mit-orten'));
+			const start = cards.findIndex(node => node.textContent.includes('Übersichtskarte'));
+			return cards.slice(start).filter(node => node.querySelector('img')).map(node => node.querySelector('strong')?.textContent || '');
+		});
+		assert.ok(dunland.length >= 8, 'Dunland zeigt nicht alle Gebiete als Karten: ' + dunland.join(', '));
+		assert.ok(dunland.includes('Isengart'), 'Isengart fehlt in den Dunland-Karten');
 
-		await page.locator('.landschaft-gruppeorte a').filter({ hasText: /^Isengart/ }).first().click();
+		await page.locator('.landschaft-kachel').filter({ hasText: /^Isengart/ }).first().click();
 		await page.waitForFunction(() => location.hash === '#map-268446985');
 		assert.equal(await page.locator('#liste-titel, #listen-titel').first().textContent(), 'Isengart');
 

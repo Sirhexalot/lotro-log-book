@@ -3727,6 +3727,8 @@
 		function zeichnen() {
 			gruppen.textContent = ''; spruenge.textContent = ''; var nachRegion = {};
 			var sichtbareGruppen = {};
+			var gruppenFertig = {};
+			var uebersichtGerendert = {};
 			// Groups are their own jump targets; remember where their region chip sits.
 			var sprungNach = {};
 			/** All maps of an overview group, including its named sub-areas. */
@@ -3763,122 +3765,49 @@
 			}
 			var rest = eltern('section'); rest.className = 'landschaft-rest landschaft-gruppe';
 			var restBox = eltern('div'); restBox.className = 'landschaft-kacheln'; rest.appendChild(restBox);
-			landschaften.forEach(function (e) {
-				if (falten(e.knoten.name + ' ' + e.region).indexOf(falten(eingabe.value)) < 0) { return; }
-				var box = e.rest ? restBox : nachRegion[e.region];
-				if (!box) {
-					var s = eltern('section'); s.className = 'landschaft-gruppe'; s.id = 'region-' + Object.keys(nachRegion).length;
-					var titel = eltern('h3', e.region); titel.tabIndex = -1; s.appendChild(titel);
-					var sprung = eltern('a', e.region); sprung.href = '#' + s.id;
-					// Region jumps scroll this view, not the landscape routing hash.
-					sprung.onclick = function (event) { event.preventDefault(); s.scrollIntoView({ block: 'start' }); titel.focus({ preventScroll: true }); };
-					spruenge.appendChild(sprung);
-					sprungNach[e.region] = sprung;
-					box = eltern('div'); box.className = 'landschaft-kacheln'; s.appendChild(box); gruppen.appendChild(s); nachRegion[e.region] = box;
-				}
-				if (e.anzeigeGruppe) {
-					var gruppenId = e.region + '|' + e.anzeigeGruppe.id;
-					if (!sichtbareGruppen[gruppenId]) {
-						var gruppenKopf = eltern('h4', e.anzeigeGruppe.label);
-						gruppenKopf.className = 'landschaft-kachelgruppe';
-						gruppenKopf.dataset.gebietgruppe = e.anzeigeGruppe.id;
-						gruppenKopf.id = 'gruppe-' + e.anzeigeGruppe.id;
-						if (e.anzeigeGruppe.id === 'dunland') {
-							var overview = landschaften.find(function (eintrag) { return eintrag.showOverviewLink; });
-							if (overview && falten(e.anzeigeGruppe.label + ' ' + overview.knoten.name).indexOf(falten(eingabe.value)) >= 0) {
-								var overviewLink = eltern('button', {
-									de:'Übersichtskarte öffnen',en:'Open overview map',fr:'Ouvrir la carte générale'
-								}[sprache] || '');
-								overviewLink.type = 'button';
-								overviewLink.className = 'landschaft-uebersicht-link';
-								overviewLink.onclick = function () { landschaftOeffnen(overview); };
-								gruppenKopf.appendChild(overviewLink);
-							}
-						}
-						box.appendChild(gruppenKopf);
-						// A group chip next to its region, plus direct links to every
-						// map it contains (overview cards keep their previews).
-						var kurz = e.anzeigeGruppe.label.replace(/^Aperçu du\s+/i, '').replace(/\s*[-–]?\s*(Überblick|Overview|Vue d[’']ensemble)\s*$/i, '').trim() || e.anzeigeGruppe.label;
-						var gruppenSprung = eltern('a', kurz);
-						gruppenSprung.className = 'sprung-gruppe';
-						sprungZiel(gruppenSprung, gruppenKopf, gruppenKopf);
-						var vor = sprungNach[e.region];
-						if (vor && vor.parentNode) { spruenge.insertBefore(gruppenSprung, vor.nextSibling); sprungNach[e.region] = gruppenSprung; }
-						else { spruenge.appendChild(gruppenSprung); }
-						var gruppe = (gebietsAnzeige.groups || []).find(function (g) { return g.id === e.anzeigeGruppe.id; });
-						if (gruppe) {
-							var orte = gruppenKarten(gruppe, e);
-							if (orte.length) {
-								var leiste = eltern('nav');
-								leiste.className = 'landschaft-gruppeorte';
-								leiste.setAttribute('aria-label', gruppenKopf.textContent);
-								orte.forEach(function (ort) {
-									var z = zaehle(zaehlEintraege(ort.knoten));
-									var link = eltern('a');
-									link.href = '#' + landschaftSlug(e) + '/' + ort.karte;
-									link.dataset.karte = String(ort.karte);
-									link.appendChild(eltern('span', ort.name));
-									var stand = eltern('span', zahl(z.erledigt, z.gesamt));
-									stand.className = 'zahl';
-									link.appendChild(stand);
-									leiste.appendChild(link);
-								});
-								leiste.addEventListener('click', function (event) {
-									var link = event.target.closest && event.target.closest('a[data-karte]');
-									if (!link) { return; }
-									event.preventDefault();
-									var id = Number(link.dataset.karte);
-									var eintrag = landschaften.find(function (x) { return Number(x.karte) === id; }) ||
-										{ knoten: knotenFuerKarte(WURZEL, id), region: e.region, karte: id };
-									landschaftOeffnen(eintrag, id);
-								});
-								box.appendChild(leiste);
-							}
-						}
-						sichtbareGruppen[gruppenId] = true;
-					}
-				}
-				// The Dunland overview has no entries of its own. Keep its map
-				// reachable from the group heading, not as an empty landscape card.
-				if (e.showOverviewLink) { return; }
-				var knopf = eltern('button'); knopf.className = 'landschaft-kachel'; knopf.dataset.landschaft = landschaftSlug(e);
-				var karte = karteNachIndex[e.karte];
-				if (karte) { knopf.dataset.karte = karte.idx; }
-				if (e.promoted) { knopf.dataset.gebietgruppe = 'dunland'; }
-				else if (e.anzeigeGruppe) { knopf.dataset.gebietgruppe = e.anzeigeGruppe.id; }
-				var platzhalter = eltern('span'); platzhalter.className = 'landschaft-bild-leer'; platzhalter.setAttribute('aria-hidden', 'true');
-				if (karte) {
-					var img = eltern('img');
-					img.loading = 'lazy'; img.decoding = 'async'; img.width = 320; img.height = 240; img.alt = '';
-					var vorschau = (gelaende && gelaende.thumbnail(karte)) || kartenVorschau(karte);
-					var spielBild = webpOrdner + karte.bild.replace(/\.png$/i, '.webp');
-					img.dataset.vorschau = vorschau;
-					img.onerror = function () {
-						if (this.getAttribute('src') !== spielBild && !this.dataset.spielVersucht) {
-							this.dataset.spielVersucht = '1'; this.src = spielBild;
-						} else if (!this.dataset.pngVersucht) {
-							this.dataset.pngVersucht = '1'; this.src = bildOrdner + karte.bild;
-						} else { this.replaceWith(platzhalter); }
-					};
-					beobachteKartenVorschau(img);
-					knopf.appendChild(img);
-				}
-				else { knopf.appendChild(platzhalter); }
-				var inhalt = eltern('span'); inhalt.className = 'inhalt'; inhalt.appendChild(eltern('strong', e.knoten.name));
-				if (e.showOverviewLink) {
-					inhalt.appendChild(eltern('small', {
-						de:'Übersichtskarte · Gebiete einzeln darunter',
-						en:'Overview map · areas listed separately below',
-						fr:'Carte générale · zones détaillées ci-dessous'
-					}[sprache] || ''));
-				}
-				inhalt.appendChild(eltern('small', stufenSpanne(zaehlEintraege(e.knoten))));
-				var z = zaehle(zaehlEintraege(e.knoten));
-				inhalt.appendChild(eltern('small', zahl(z.erledigt, z.gesamt) + ' ' + t('aufgaben')));
-				if (hatFortschritt) { var p = eltern('progress'); p.max = z.gesamt || 1; p.value = z.erledigt; inhalt.appendChild(p); }
-				knopf.appendChild(inhalt); knopf.onclick = function () { landschaftOeffnen(e); };
-				var kachel = eltern('div'); kachel.className = 'landschaft-mit-orten'; kachel.appendChild(knopf);
-				var untergebiete = eltern('nav'); untergebiete.className = 'landschaft-untergebiete'; untergebiete.setAttribute('aria-label', e.knoten.name);
+			/** One landscape card; groups build these for all their maps. */
+			function zeichneKachel(e, box) {
+			// The Dunland overview has no entries of its own. Keep its map
+			// reachable from the group heading, not as an empty landscape card.
+			var knopf = eltern('button'); knopf.className = 'landschaft-kachel'; knopf.dataset.landschaft = landschaftSlug(e);
+			var karte = karteNachIndex[e.karte];
+			if (karte) { knopf.dataset.karte = karte.idx; }
+			if (e.promoted) { knopf.dataset.gebietgruppe = 'dunland'; }
+			else if (e.anzeigeGruppe) { knopf.dataset.gebietgruppe = e.anzeigeGruppe.id; }
+			var platzhalter = eltern('span'); platzhalter.className = 'landschaft-bild-leer'; platzhalter.setAttribute('aria-hidden', 'true');
+			if (karte) {
+				var img = eltern('img');
+				img.loading = 'lazy'; img.decoding = 'async'; img.width = 320; img.height = 240; img.alt = '';
+				var vorschau = (gelaende && gelaende.thumbnail(karte)) || kartenVorschau(karte);
+				var spielBild = webpOrdner + karte.bild.replace(/\.png$/i, '.webp');
+				img.dataset.vorschau = vorschau;
+				img.onerror = function () {
+					if (this.getAttribute('src') !== spielBild && !this.dataset.spielVersucht) {
+						this.dataset.spielVersucht = '1'; this.src = spielBild;
+					} else if (!this.dataset.pngVersucht) {
+						this.dataset.pngVersucht = '1'; this.src = bildOrdner + karte.bild;
+					} else { this.replaceWith(platzhalter); }
+				};
+				beobachteKartenVorschau(img);
+				knopf.appendChild(img);
+			}
+			else { knopf.appendChild(platzhalter); }
+			var inhalt = eltern('span'); inhalt.className = 'inhalt'; inhalt.appendChild(eltern('strong', e.knoten.name));
+			if (e.showOverviewLink) {
+				inhalt.appendChild(eltern('small', {
+					de:'Übersichtskarte · Gebiete einzeln darunter',
+					en:'Overview map · areas listed separately below',
+					fr:'Carte générale · zones détaillées ci-dessous'
+				}[sprache] || ''));
+			}
+			inhalt.appendChild(eltern('small', stufenSpanne(zaehlEintraege(e.knoten))));
+			var z = zaehle(zaehlEintraege(e.knoten));
+			inhalt.appendChild(eltern('small', zahl(z.erledigt, z.gesamt) + ' ' + t('aufgaben')));
+			if (hatFortschritt) { var p = eltern('progress'); p.max = z.gesamt || 1; p.value = z.erledigt; inhalt.appendChild(p); }
+			knopf.appendChild(inhalt); knopf.onclick = function () { landschaftOeffnen(e); };
+			var kachel = eltern('div'); kachel.className = 'landschaft-mit-orten'; kachel.appendChild(knopf);
+			var untergebiete = eltern('nav'); untergebiete.className = 'landschaft-untergebiete'; untergebiete.setAttribute('aria-label', e.knoten.name);
+			if (!e.groupCard) {
 				function unterorte(knoten) {
 					knoten.reihenfolge.forEach(function (kind) {
 						if (kind.karte != null && kind.karte !== e.karte) {
@@ -3901,7 +3830,60 @@
 					});
 				} else { unterorte(e.knoten); }
 				if (untergebiete.childElementCount) { kachel.appendChild(untergebiete); }
-				box.appendChild(kachel);
+			}
+			box.appendChild(kachel);
+			}
+
+			landschaften.forEach(function (e) {
+				if (falten(e.knoten.name + ' ' + e.region).indexOf(falten(eingabe.value)) < 0) { return; }
+				var box = e.rest ? restBox : nachRegion[e.region];
+				if (!box) {
+					var s = eltern('section'); s.className = 'landschaft-gruppe'; s.id = 'region-' + Object.keys(nachRegion).length;
+					var titel = eltern('h3', e.region); titel.tabIndex = -1; s.appendChild(titel);
+					var sprung = eltern('a', e.region); sprung.href = '#' + s.id;
+					// Region jumps scroll this view, not the landscape routing hash.
+					sprung.onclick = function (event) { event.preventDefault(); s.scrollIntoView({ block: 'start' }); titel.focus({ preventScroll: true }); };
+					spruenge.appendChild(sprung);
+					sprungNach[e.region] = sprung;
+					box = eltern('div'); box.className = 'landschaft-kacheln'; s.appendChild(box); gruppen.appendChild(s); nachRegion[e.region] = box;
+				}
+				if (e.anzeigeGruppe) {
+					var gruppenId = e.region + '|' + e.anzeigeGruppe.id;
+					if (!sichtbareGruppen[gruppenId]) {
+						var kurz = e.anzeigeGruppe.label.replace(/^Aperçu du\s+/i, '').replace(/\s*[-–]?\s*(Überblick|Overview|Vue d[’']ensemble)\s*$/i, '').trim() || e.anzeigeGruppe.label;
+						var gruppenKopf = eltern('h4', kurz);
+						gruppenKopf.className = 'landschaft-kachelgruppe';
+						gruppenKopf.dataset.gebietgruppe = e.anzeigeGruppe.id;
+						gruppenKopf.id = 'gruppe-' + e.anzeigeGruppe.id;
+						box.appendChild(gruppenKopf);
+						var gruppenSprung = eltern('a', kurz);
+						gruppenSprung.className = 'sprung-gruppe';
+						sprungZiel(gruppenSprung, gruppenKopf, gruppenKopf);
+						var vor = sprungNach[e.region];
+						if (vor && vor.parentNode) { spruenge.insertBefore(gruppenSprung, vor.nextSibling); sprungNach[e.region] = gruppenSprung; }
+						else { spruenge.appendChild(gruppenSprung); }
+						var gruppe = (gebietsAnzeige.groups || []).find(function (g) { return g.id === e.anzeigeGruppe.id; });
+						if (gruppe) {
+							var orte = gruppenKarten(gruppe, e);
+							var uebersicht = e.sourceParent ? landschaften.find(function (x) { return x.showOverviewLink; }) : null;
+							if (uebersicht) {
+								uebersichtGerendert[String(uebersicht.karte)] = true;
+								zeichneKachel(uebersicht, box);
+							}
+							orte.forEach(function (ort) {
+								if (falten(ort.name + ' ' + e.region).indexOf(falten(eingabe.value)) < 0) { return; }
+								zeichneKachel({ knoten: ort.knoten, region: e.region, karte: ort.karte,
+									anzeigeGruppe: e.anzeigeGruppe, groupCard: true,
+									showOverviewLink: ort.uebersicht === true }, box);
+							});
+						}
+						sichtbareGruppen[gruppenId] = true;
+						gruppenFertig[gruppenId] = true;
+					}
+				}
+				if (e.anzeigeGruppe && gruppenFertig[e.region + '|' + e.anzeigeGruppe.id]) { return; }
+				if (e.showOverviewLink) { return; }
+				zeichneKachel(e, box);
 			});
 			if (restBox.childElementCount) { gruppen.appendChild(rest); }
 			if (themen.childElementCount) {

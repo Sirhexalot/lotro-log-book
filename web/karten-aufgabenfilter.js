@@ -50,22 +50,53 @@
 			return known.has(currentId(id)) || manualStatus(id) === 'fertig';
 		}
 		refreshProgress();
-		var regions = Array.from(new Set(quests.map(function (q) { return q.r; }).filter(Boolean))).sort(function (a,b) { return a.localeCompare(b,lang); });
-		var geoMap = {};
-		regions.forEach(function (region) {
-			geoMap[region] = Array.from(new Set(quests.filter(function (q) { return q.r === region; })
-				.map(function (q) { return q.z || q.u; }).filter(function (area) { return area && !/^karte\s+\d+/i.test(area); }))).sort(function (a,b) { return a.localeCompare(b,lang); });
+		// The filter tree mirrors the map hierarchy: region → area → sub-area.
+		// Labels come from the catalogue path (`f`), which is built from the game
+		// maps. The map view and the finder therefore show the same levels.
+		var geoTree = {};
+		quests.forEach(function (q) {
+			var labels = (q.f && q.f.length ? q.f : [q.r, q.z || q.u]).filter(function (name) {
+				return name && !/^karte\s+\d+/i.test(name);
+			});
+			if (!labels.length || !labels[0]) { return; }
+			var region = labels[0];
+			var node = geoTree[region] || (geoTree[region] = { label: region, children: {} });
+			labels.slice(1).forEach(function (name) {
+				node.children[name] = node.children[name] || { label: name, children: {} };
+				node = node.children[name];
+			});
 		});
+		var regions = Object.keys(geoTree).sort(function (a, b) { return a.localeCompare(b, lang); });
+		function geoKinder(node, region, path, tiefe) {
+			return Object.keys(node.children).sort(function (a, b) { return a.localeCompare(b, lang); }).map(function (name) {
+				var kind = node.children[name];
+				var next = Object.assign({}, path);
+				if (tiefe === 1) { next.area = name; } else { next.teil = (next.teil ? next.teil + ' › ' : '') + name; }
+				var option = { path: next, label: name };
+				var kinder = geoKinder(kind, region, next, tiefe + 1);
+				if (kinder.length) { option.children = kinder; }
+				return option;
+			});
+		}
 		var geoOptions = regions.map(function (region) {
-			var path = {region:region};
-			return {path:path,label:region,children:geoMap[region].map(function (area) {
-				return {path:{region:region,area:area},label:area};
-			})};
+			var path = { region: region };
+			return { path: path, label: region, children: geoKinder(geoTree[region], region, path, 1) };
 		});
 		function validPath(path) {
-			return !!(path && geoMap[path.region] && (!path.area || geoMap[path.region].indexOf(path.area) >= 0));
+			var node = path && geoTree[path.region];
+			if (!node) { return false; }
+			if (!path.area) { return true; }
+			node = node.children[path.area];
+			if (!node) { return false; }
+			if (!path.teil) { return true; }
+			return path.teil.split(' › ').every(function (teil) {
+				node = node.children[teil];
+				return !!node;
+			});
 		}
-		function pathLabel(path) { return path.region + (path.area ? ' › ' + path.area : ''); }
+		function pathLabel(path) {
+			return path.region + (path.area ? ' › ' + path.area : '') + (path.teil ? ' › ' + path.teil : '');
+		}
 		var topicOptions = Object.keys(topics).filter(function (key) {
 			return key === 'board'
 				? quests.some(function (q) { return q.a === boardValue; })
@@ -166,7 +197,14 @@
 					return !value.length || (row.th === 'origin' && row.f && row.f[0] === originMarker && value.indexOf(row.f[1]) >= 0);
 				}
 				if (group.id === 'geography') {
-					return !value.length || value.some(function (path) { return path.region === row.r && (!path.area || path.area === (row.z || row.u)); });
+					return !value.length || value.some(function (path) {
+						if (path.region !== row.r) { return false; }
+						var labels = row.f || [];
+						if (path.area && path.area !== (labels[1] || row.z || row.u)) { return false; }
+						if (!path.teil) { return true; }
+						var rest = labels.slice(2).join(' › ');
+						return rest === path.teil || rest.indexOf(path.teil + ' › ') === 0;
+					});
 				}
 				if (group.id === 'flag') {
 					var selected = value || [], sizes = selected.filter(function (x) { return x === 'small' || x === 'fellowship'; });

@@ -58,7 +58,7 @@ class DarstellungIststandTest(unittest.TestCase):
         self.assertIn('MQL_GEBIETE', read('web/app.js'))
         self.assertIn('knotenFuerKarte', block)
         self.assertNotIn('fetch(', block)
-        for needle in ("'sprung-gruppe'", "'landschaft-gruppeorte'", "themenTitel.id = 'themen'"):
+        for needle in ("'sprung-gruppe'", 'groupCard', 'zeichneKachel', "themenTitel.id = 'themen'"):
             self.assertIn(needle, js)
 
     def test_class_tabs_share_the_item_surface(self):
