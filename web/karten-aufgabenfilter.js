@@ -55,7 +55,8 @@
 		// maps. The map view and the finder therefore show the same levels.
 		var geoTree = {};
 		quests.forEach(function (q) {
-			var labels = (q.f && q.f.length ? q.f : [q.r, q.z || q.u]).filter(function (name) {
+			var path = q.f && q.f.length && q.f[0] === q.r ? q.f : [q.r, q.z || q.u];
+			var labels = path.filter(function (name) {
 				return name && !/^karte\s+\d+/i.test(name);
 			});
 			if (!labels.length || !labels[0]) { return; }
@@ -199,7 +200,7 @@
 				if (group.id === 'geography') {
 					return !value.length || value.some(function (path) {
 						if (path.region !== row.r) { return false; }
-						var labels = row.f || [];
+						var labels = row.f && row.f.length && row.f[0] === row.r ? row.f : [];
 						if (path.area && path.area !== (labels[1] || row.z || row.u)) { return false; }
 						if (!path.teil) { return true; }
 						var rest = labels.slice(2).join(' › ');

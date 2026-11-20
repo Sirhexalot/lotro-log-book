@@ -209,3 +209,9 @@ details[open]>.filter-group-heading>.filter-arrow,details[open]>summary>.filter-
 	.filter-toolbar button,.filter-chips button { min-height:44px; }
 	.filter-panel .filter-option { font-size:1rem; }
 }
+
+/* One separator per result row. Container lists already draw a line above or
+   below their entries; the shared row must not add a second one. */
+:is(.sets-list, .gs-ergebnis, .finder-ergebnisse, .related-results, .mql-row-list)
+	> li:is(.mql-row, .mql-row-heading) { border-bottom: 0; }
+.gs-ergebnis > li:first-child.mql-row, .finder-ergebnisse > li:first-child.mql-row { border-top: 0; }

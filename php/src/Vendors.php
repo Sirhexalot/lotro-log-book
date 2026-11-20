@@ -232,6 +232,11 @@ final class Vendors
                 if ($name !== '' && !in_array($name, $names, true)) $names[] = $name;
             }
             $meta = $names ? [implode(' · ', $names)] : [];
+            $total = (int) ($row['count'] ?? 0);
+            if ($total > 0) {
+                $meta[] = str_replace('%s', (string) $total,
+                    $total === 1 ? $words['items_count_one'] : $words['items_count']);
+            }
             $row['meta'] = implode(' · ', $meta);
         }
         unset($row);

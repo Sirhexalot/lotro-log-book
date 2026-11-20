@@ -67,6 +67,25 @@ class DarstellungIststandTest(unittest.TestCase):
         self.assertIn('.klassen-katalog [role="tabpanel"]', css)
         twig = read('php/templates/app/klassen.twig')
         self.assertIn('klassen-reiter katalog-reiter', twig)
+    def test_lists_use_one_separator_and_large_icons(self):
+        css = read('web/filter-ui.css')
+        self.assertIn('> li:is(.mql-row, .mql-row-heading) { border-bottom: 0; }', css)
+        quest = read('php/templates/entity/quest.twig')
+        self.assertIn('mql-row-icon mql-row-icon-item', quest)
+        self.assertIn('width="48"', quest)
+
+    def test_overview_jumps_and_cards_are_uniform(self):
+        css = read('web/landschaft.css')
+        self.assertNotIn('a.sprung-gruppe', css)
+        self.assertNotIn('border-top: 3px solid #83a276', css)
+        self.assertNotIn('border-top: 3px solid #7eb6c6', css)
+        self.assertNotIn('border-top: 3px solid #c5a56b', css)
+
+    def test_crafting_browser_hides_profession_tab(self):
+        twig = read('php/templates/app/handwerk.twig')
+        self.assertRegex(twig, r'data-hw="berufe"[^>]*hidden')
+        self.assertRegex(twig, r'data-hw="rezepte" aria-pressed="true"')
+        self.assertIn('<section id="hw-berufe" hidden>', twig)
 
 
 if __name__ == '__main__':

@@ -19,10 +19,10 @@ class VendorFilterLabelsTest(unittest.TestCase):
         self.assertIn("barter:lang==='de'?'Tauschhändler'", code)
         self.assertIn("lang==='fr'?'Marchand troqueur':'Barterer'", code)
 
-    def test_vendor_list_does_not_append_unlabelled_stock_count(self):
+    def test_vendor_list_shows_stock_count_with_label(self):
         code = (ROOT / 'php/src/Vendors.php').read_text(encoding='utf-8')
-        self.assertNotIn("$words['items_count_one']", code)
-        self.assertNotIn("$words['items_count']", code)
+        self.assertIn("$words['items_count_one']", code)
+        self.assertIn("$words['items_count']", code)
 
 
 if __name__ == '__main__':
