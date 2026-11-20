@@ -46,6 +46,12 @@ import os
 import sys
 import threading
 import uuid
+
+# Release logs are followed with `tail -f`; Python buffers redirected stdout by
+# default, so the uploader would appear stalled for long stretches. Line
+# buffering makes every file report visible immediately.
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(line_buffering=True)
 from datetime import datetime, timezone
 from collections import deque
 from pathlib import Path

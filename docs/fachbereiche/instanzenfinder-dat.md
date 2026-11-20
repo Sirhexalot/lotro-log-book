@@ -78,3 +78,47 @@ Keine automatischen Links auf möglicherweise nicht veröffentlichte Aufgaben.
 
 Der Build muss nach dem Finder-Export in dieser Reihenfolge laufen:
 `tools/build_instanzen.py`, `tools/build_php_data.py`, `tools/build_release.py`.
+
+## Texte und Innenkarten (Prüfung am 20.11.2026)
+
+**Texte sind vollständig vorhanden, aber nirgends sichtbar.** Alle 167
+Finder-Einträge tragen `PrivateEncounterTemplate_Description` in DE, EN und FR
+(je rund 50.000 Zeichen Deutsch, Median 276, längster 769 Zeichen). Der
+Instanzenfinder ist jedoch eine reine Liste (`php/templates/instances/list.twig`);
+eine Detailseite und damit eine Stelle für den Text gibt es nicht.
+
+Ebenfalls ungenutzt: `PrivateEncounterTemplate_QuestToBestow_Array` (163 der 167
+Einträge, 552 Aufgaben). **Alle 552 Aufgaben stehen im eigenen Katalog**
+(`daten/quests-<sprache>.json`), sind also ohne Fremddaten verlinkbar.
+`PrivateEncounterTemplate_InstanceQuest` (Hauptaufgabe) haben nur 25 Einträge.
+Über diese Aufgaben ergeben sich für 46 Instanzen ein Kartenort mit Koordinaten
+auf einer Landschaftskarte – der Einstieg, nicht der Innenraum.
+
+**Innenkarten gibt es im Client.** Klasse 691 (Dungeon, 1.324 Datensätze) trägt
+`Dungeon_MapData`/`Dungeon_MiniMapData`; 1.319 verschiedene Karten. Der
+Auflösungspfad ist `Dungeon_MapData` → Eigenschaften → `UI_Map_GameMap` →
+`UI_Map_MapImage`; erst dieser letzte Wert ist die Bild-ID im Raum der
+Basemap-Bilder (`0x41…`), die `dat/MapExport.java` direkt aus dem Client holt.
+Probe mit vier bekannten Ids ergab echte Grundrisse (Glinghant, Schule und
+Bibliothek von Tham Mírdain, Wasserwerke von Nalâ-dûm, Fil Gashan); sie liegen
+nicht in den 226 Landschaftskarten aus `daten/karten.json`.
+
+Offen ist nur die Zuordnung Instanz → Dungeon. Der Namensabgleich reicht nicht:
+nur 45 der 167 Namen treffen exakt, die Dungeon-Namen sind außerdem oft
+gebietstief („The Great Barrow“, „Ost Dunhoth“) statt flügelgenau. Companions
+`InstanceMapDataBuilder` löst das über Marker je Content-Layer
+(`PrivateEncounterTemplate_ContentLayer`); mit den eigenen Landblock-Listen und
+`did-positions-2026-11-03/positions.jsonl` (618.138 Positionen, 1.549 Layer)
+ist derselbe Weg ohne Companion-Daten möglich. Die `0x78…`-Kartendatensätze
+selbst liegen nicht in `client_gamelogic.dat`; `export_sources.py` liest sie
+deshalb nicht, die Bild-IDs müssen aus einer anderen Archivdatei kommen.
+
+## Abgleich mit LotroCompanion
+
+`lore/instancesTree.xml` ist eine reine Liste (166 Einträge in fünf Kategorien;
+166 der 167 Finder-IDs stimmen, eine fehlt). `lore/privateEncounters.xml` (989)
+führt Karte und Zone je Instanz, aber die IDs passen nicht zu unseren 167; auch
+über die Instanz-Aufgaben ergab sich kein Treffer. `lore/instanceLoots.xml` hat
+192 Instanzen und 5.099 Loot-Regeln, davon 63 mit passender Finder-ID.
+Companion speichert Instanz-Beschreibungen nur als Übersetzungsschlüssel
+(`description="key:…"`), nicht als Klartext – als Textquelle taugt es nicht.
