@@ -835,7 +835,8 @@ class ItemContext:
 
     def __init__(self, builder: ViewBuilder, details: dict, sets: dict, labels: dict,
                  typen: dict, vorkommen: dict, boni: dict, boni_labels: dict,
-                 referenz: dict, full: dict | None = None, damage_types: dict | None = None):
+                 referenz: dict, full: dict | None = None, damage_types: dict | None = None,
+                 vendor_ids: set | None = None):
         self.builder = builder
         self.details = details
         self.sets = sets
@@ -847,6 +848,8 @@ class ItemContext:
         self.referenz = referenz
         self.full = full or {}
         self.damage_types = damage_types or {}
+        # Only an id with a vendor page may become a link on an item page.
+        self.vendor_ids = {str(v).upper() for v in (vendor_ids or ())}
         self.by_name = {}
         for ident, item in builder.items.items():
             name = sauber(builder_name(builder, item))
@@ -1160,16 +1163,25 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
     if vendor_entries:
         where_groups.append({'label': w['source_vendors'], 'filter': None,
                              'vendor_filter': True, 'entries': vendor_entries})
+    def vendor_key(raw):
+        """The item export writes NPC keys in decimal; vendor pages use 8 hex digits."""
+        text = str(raw or '').strip()
+        return '%08X' % (int(text) & 0xffffffff) if text.isdigit() else text.upper()
+
     barter_entries = []
     for source in item.get('tausch') or []:
-        extra = ' · '.join(part for part in (source.get('title'), source.get('area')) if part)
+        ident = vendor_key(source.get('id'))
+        # The barterer's occupation is English-only in the client; the area is
+        # what the row can name on a German page.
+        extra = source.get('area') or ''
         barter_entries.append({
-            'id': source.get('id'),
-            'name': source.get('name') or source.get('id'),
+            'id': ident,
+            'name': source.get('name') or ident,
             'title': source.get('title'),
             'area': source.get('area'),
-            'text': source.get('name') or source.get('id'),
+            'text': source.get('name') or ident,
             'extra': extra,
+            'url': vendor_url(lang, ident) if ident in ctx.vendor_ids else '',
         })
     if barter_entries:
         where_groups.append({'label': w['source_barters'], 'filter': None,

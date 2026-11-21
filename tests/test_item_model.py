@@ -1,5 +1,6 @@
 """Loss-sensitive checks for the shared item model and item detail relations."""
 import json
+import os
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -8,6 +9,8 @@ from instanzbeute_items import lade_beute, truhen_ids
 
 
 ROOT = Path(__file__).resolve().parents[1]
+# Der gebaute Datenstand, nicht ein alter Ordner im Arbeitsbaum.
+DATEN = Path(os.environ.get('LLB_DATA') or Path.home() / '.cache' / 'llb-php' / 'phpdata')
 ITEMS = json.loads((ROOT / 'daten/items.json').read_text(encoding='utf-8'))['items']
 DETAILS = json.loads(
     (ROOT / 'daten/gegenstand-details.json').read_text(encoding='utf-8')
@@ -77,7 +80,7 @@ class ItemModelTests(unittest.TestCase):
 
     def test_php_item_page_has_separate_where_and_used_for_models(self):
         shard = __import__('hashlib').md5(b'7001C51E').hexdigest()[:2]
-        page_file = ROOT / ('phpdata/de/page-i/%s.json' % shard)
+        page_file = DATEN / ('de/page-i/%s.json' % shard)
         self.assertTrue(page_file.is_file())
         page = json.loads(page_file.read_text(encoding='utf-8'))['entities']['7001C51E']
         self.assertTrue(page['has_where_from'])
@@ -92,7 +95,7 @@ class ItemModelTests(unittest.TestCase):
 
     def test_large_item_source_gets_task_finder_rows(self):
         shard = __import__('hashlib').md5(b'7002E28D').hexdigest()[:2]
-        page_file = ROOT / ('phpdata/de/page-i/%s.json' % shard)
+        page_file = DATEN / ('de/page-i/%s.json' % shard)
         page = json.loads(page_file.read_text(encoding='utf-8'))['entities']['7002E28D']
         self.assertEqual(len(page['task_filter']['q']), 428)
 
@@ -107,11 +110,51 @@ class ItemModelTests(unittest.TestCase):
         self.assertEqual(vendor['name']['de'], 'Karlo Schwarzhain')
         shard = __import__('hashlib').md5(b'70000D75').hexdigest()[:2]
         page = json.loads(
-            (ROOT / ('phpdata/de/page-i/%s.json' % shard)).read_text(encoding='utf-8')
+            (DATEN / ('de/page-i/%s.json' % shard)).read_text(encoding='utf-8')
         )['entities']['70000D75']
         groups = {group['label']: group['entries'] for group in page['where_groups']}
         self.assertIn('Händler', groups)
         self.assertEqual(groups['Händler'][0]['text'], 'Karlo Schwarzhain')
+
+
+    def test_barterers_have_a_page_and_link_from_the_item(self):
+        """Pure barterers live in barters.xml, not in the vendor export.
+
+        Before they existed as pages, their name stood as plain text under
+        "Woher" and could not be opened.
+        """
+        ident = '7001F07E'
+        for lang, name in (('de', 'Heilziest Gruber'), ('en', 'Betony Diggins'),
+                           ('fr', 'Trèfle Picquet')):
+            shard = __import__('hashlib').md5(ident.encode()).hexdigest()[:2]
+            page = json.loads((DATEN / ('%s/page-vendor/%s.json'
+                                       % (lang, shard))).read_text(encoding='utf-8'))[
+                'entities'][ident]
+            self.assertEqual(page['type'], 'barter')
+            self.assertEqual(page['name'], name)
+            self.assertTrue(page['items'])
+            self.assertEqual(page['id'], ident)
+
+        item = '70001B7E'
+        shard = __import__('hashlib').md5(item.encode()).hexdigest()[:2]
+        page = json.loads((DATEN / ('de/page-i/%s.json' % shard)).read_text(
+            encoding='utf-8'))['entities'][item]
+        group = next(group for group in page['where_groups'] if group.get('barter_filter'))
+        self.assertTrue(group['entries'])
+        self.assertTrue(all(entry.get('url') for entry in group['entries']))
+        self.assertTrue(all('/de/haendler/' in entry['url'] for entry in group['entries']))
+        # The client's occupation is English-only; the row must not repeat it.
+        self.assertTrue(all(entry.get('extra') == '' for entry in group['entries']))
+
+    def test_barter_vendor_page_names_its_goods(self):
+        source = (ROOT / 'php/src/Vendors.php').read_text(encoding='utf-8')
+        for needle in ("'barter_items' => 'Tauschgegenstände'",
+                       "'barter_items' => 'Barter goods'",
+                       "'barter_items' => 'Objets de troc'",
+                       "'type_filter_barter'"):
+            self.assertIn(needle, source)
+        template = (ROOT / 'php/templates/vendors/detail.twig').read_text(encoding='utf-8')
+        self.assertIn('{{ vendor.items_label }}', template)
 
     def test_vendor_entity_has_map_and_item_links_in_all_languages(self):
         for lang, name, path in (
@@ -121,7 +164,7 @@ class ItemModelTests(unittest.TestCase):
         ):
             shard = __import__('hashlib').md5(b'70000002').hexdigest()[:2]
             page = json.loads(
-                (ROOT / ('phpdata/%s/page-vendor/%s.json' % (lang, shard))).read_text()
+                (DATEN / ('%s/page-vendor/%s.json' % (lang, shard))).read_text()
             )['entities']['70000002']
             self.assertEqual(page['name'], name)
             self.assertTrue(page['places'][0]['map_url'])

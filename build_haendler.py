@@ -6,6 +6,7 @@ import argparse
 import json
 import re
 import sys
+import xml.etree.ElementTree as ET
 from collections import defaultdict
 from pathlib import Path
 
@@ -14,7 +15,8 @@ EXPORT = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exp
 VENDORS = EXPORT / 'vendor-items-2026-11-08/vendor-items.json'
 POSITIONS = EXPORT / 'did-positions-2026-11-03/positions.jsonl'
 NPCS = EXPORT / 'npcs-2026-11-03/raw.jsonl'
-BARTERS = Path('/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/barters.xml')
+LORE = Path('/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore')
+BARTERS = LORE / 'barters.xml'
 ITEMS = ROOT / 'daten/items.json'
 MAPS = ROOT / 'daten/karten.json'
 LANGS = ('de', 'en', 'fr')
@@ -68,6 +70,35 @@ def main() -> int:
             if vendor in item_rows:
                 item_rows[vendor].append(str(item).upper())
 
+    # A pure barterer has no vendor entry: the item export names it, and only
+    # the NPC labels carry its localized name. Its goods come from the same
+    # reverse relation as a vendor's.
+    items_data = json.loads(ITEMS.read_text(encoding='utf-8'))['items']
+    barter_items = defaultdict(set)
+    # Pages use the same 8-digit uppercase ids as every other vendor; the item
+    # export writes the NPC key in decimal, the labels file keys it that way too.
+    barter_key = {}
+    for item_id, item in items_data.items():
+        for source in item.get('tausch') or []:
+            raw = str(source.get('id') or '').strip()
+            if not raw.isdigit():
+                continue
+            ident = '%08X' % (int(raw) & 0xffffffff)
+            barter_key[ident] = raw
+            barter_items[ident].add(str(item_id).upper())
+    nur_barter = set(barter_key) - set(vendors)
+    gesuchte = {barter_key[ident] for ident in nur_barter}
+    barter_names = {}
+    for lang in LANGS:
+        datei = LORE / 'labels' / lang / 'npc.xml'
+        namen = {}
+        if datei.is_file() and gesuchte:
+            for _, row in ET.iterparse(datei, events=('end',)):
+                if row.tag == 'label' and row.get('key') in gesuchte and row.get('value'):
+                    namen[row.get('key')] = row.get('value').strip()
+                row.clear()
+        barter_names[lang] = {ident: namen.get(barter_key[ident], '') for ident in nur_barter}
+
     raw = {}
     if NPCS.is_file():
         with NPCS.open(encoding='utf-8') as handle:
@@ -95,6 +126,26 @@ def main() -> int:
                        for spot in spots[ident]],
             'items': sorted(set(item_rows[ident])),
         }
+    # Vendors that also barter already have a page; their offer must show the
+    # bartered goods too, not only what they sell.
+    for ident in sorted(set(barter_key) & set(vendors)):
+        if ident in output:
+            output[ident]['items'] = sorted(
+                set(output[ident]['items']) | {item for item in barter_items[ident]
+                                               if item in public_items})
+    for ident in sorted(nur_barter):
+        namen = {lang: barter_names[lang].get(ident, '') for lang in LANGS}
+        if not any(namen.values()):
+            continue
+        output[ident] = {
+            'id': ident,
+            'name': namen,
+            'type': 'barter',
+            # No localized occupation in the client; empty instead of English.
+            'title': {lang: '' for lang in LANGS},
+            'places': [],
+            'items': sorted(item for item in barter_items[ident] if item in public_items),
+        }
     payload = {'schema': 1, 'vendors': output}
     (ROOT / 'daten/haendler.json').write_text(
         json.dumps(payload, ensure_ascii=False, separators=(',', ':'), sort_keys=True),
@@ -104,7 +155,8 @@ def main() -> int:
               'mit Standort:', sum(bool(row['places']) for row in output.values()),
               'mit Karte:', sum(any(place['map'] is not None for place in row['places'])
                                 for row in output.values()),
-              'mit Web-Items:', sum(bool(row['items']) for row in output.values()))
+              'mit Web-Items:', sum(bool(row['items']) for row in output.values()),
+              'davon Tauschhändler:', sum(row['type'] == 'barter' for row in output.values()))
     return 0
 
 

@@ -1,4 +1,5 @@
 {% extends 'layout.twig' %}
+{% import 'components/karte.twig' as karte %}
 {% block inhalt %}
 <article class="giver-detail vendor-detail">
 {% import 'entity/_header.twig' as heading %}
@@ -7,21 +8,21 @@
 <p class="giver-art">{{ vendor.type_label }}</p>
 {% if vendor.places %}<section class="katalog-abschnitt"><h2>{{ gw.places }}</h2>
 {% for place in vendor.places %}<div class="katalog-ort-flex">
-{% if place.image %}<a class="katalog-ortlink" href="{{ place.map_url }}"><figure class="katalog-ort"><img src="/karten/{{ lang }}/{{ place.image|replace({'.png': '.webp'}) }}" alt="" width="320" height="240" loading="lazy" decoding="async"><i class="katalog-pin" style="left:{{ place.pin_x|pin }}%;top:{{ place.pin_y|pin }}%"></i></figure></a>{% endif %}
-<div>{% if place.chain %}<p class="katalog-hinweis giver-weg">{% for part in place.chain %}{% if not loop.first %} › {% endif %}<a href="{{ part.url }}">{{ part.name }}</a>{% endfor %}</p>{% endif %}
-{% if place.coords %}<p class="katalog-hinweis">{{ place.coords }}</p>{% endif %}
-<p class="katalog-aktionen">{% if place.map_url %}<a href="{{ place.map_url }}" class="katalog-knopf">{{ gw.map }}</a> {% endif %}<a href="{{ place.travel_url }}" class="katalog-link">{{ gw.route }}</a></p>
+{% if place.image %}{{ karte.karte(lang, place.image, place.map_url, place.pin_x, place.pin_y) }}{% endif %}
+<div>{% if place.chain %}<p class="llb-hinweis giver-weg">{% for part in place.chain %}{% if not loop.first %} › {% endif %}<a href="{{ part.url }}">{{ part.name }}</a>{% endfor %}</p>{% endif %}
+{% if place.coords %}<p class="llb-hinweis">{{ place.coords }}</p>{% endif %}
+<p class="llb-aktionen">{% if place.map_url %}<a href="{{ place.map_url }}" class="llb-knopf">{{ gw.map }}</a> {% endif %}<a href="{{ place.travel_url }}" class="katalog-link">{{ gw.route }}</a></p>
 </div></div>{% endfor %}</section>{% endif %}
 <section class="katalog-abschnitt vendor-items gs"{% if vendor.item_total > 5 %} data-item-filter-root data-item-ids="{{ vendor.item_ids }}"{% endif %}>
-<h2>{{ gw.items }}</h2>
+<h2>{{ vendor.items_label }}</h2>
 {% if vendor.item_total <= 5 %}<ul class="gs-ergebnis">{% for item in vendor.items %}<li><a class="gs-zeile" href="{{ item.url }}"><span class="gs-name">{{ item.name }}</span><span class="gs-meta">{% if item.level %}{{ gw.level }} {{ item.level }}{% endif %}</span></a></li>{% endfor %}</ul>
 {% else %}
 <div class="gs-kopf">
-<form class="gs-suche" id="gs-suche" role="search"><input type="search" id="gs-feld" autocomplete="off" aria-label="{{ gw.items }}"><button type="submit" class="knopf">{{ gw.filter_items }}</button></form></div>
+<form class="gs-suche" id="gs-suche" role="search"><input type="search" id="gs-feld" autocomplete="off" aria-label="{{ vendor.items_label }}"><button type="submit" class="llb-knopf" data-art="haupt" data-groesse="gross">{{ gw.filter_items }}</button></form></div>
 <div class="gs-raster"><button type="button" class="gs-filter-knopf" id="gs-filter-knopf" aria-expanded="false" aria-controls="gs-filter">{{ gw.filter }}</button><aside class="gs-filter" id="gs-filter" aria-label="{{ gw.filter }}"></aside>
-<section class="gs-liste"><div class="gs-sortierung"><label for="gs-sort">{{ gw.items }}</label><select id="gs-sort"><option value="name">Name</option><option value="stufe">{{ gw.level }}</option></select></div>
+<section class="gs-liste"><div class="gs-sortierung"><label for="gs-sort">{{ vendor.items_label }}</label><select id="gs-sort"><option value="name">Name</option><option value="stufe">{{ gw.level }}</option></select></div>
 <p class="gs-stand" id="gs-stand" role="status">{{ (vendor.item_total == 1 ? gw.items_count_one : gw.items_count)|replace({'%s': vendor.item_total}) }}</p>
-<ul class="gs-ergebnis" id="gs-ergebnis">{% for item in vendor.items %}<li><a class="gs-zeile" href="{{ item.url }}"><span class="gs-name">{{ item.name }}</span><span class="gs-meta">{% if item.level %}{{ gw.level }} {{ item.level }}{% endif %}</span></a></li>{% endfor %}</ul><p class="gs-mehr-feld"><button type="button" id="gs-mehr" class="knopf sekundaer" hidden></button></p></section></div>
+<ul class="gs-ergebnis" id="gs-ergebnis">{% for item in vendor.items %}<li><a class="gs-zeile" href="{{ item.url }}"><span class="gs-name">{{ item.name }}</span><span class="gs-meta">{% if item.level %}{{ gw.level }} {{ item.level }}{% endif %}</span></a></li>{% endfor %}</ul><p class="gs-mehr-feld"><button type="button" id="gs-mehr" class="llb-knopf" hidden></button></p></section></div>
 </section>
 {% endif %}
 <script src="/texte.js?v={{ asset_stand }}" defer></script>

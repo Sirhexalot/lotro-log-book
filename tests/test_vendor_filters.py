@@ -10,7 +10,10 @@ class VendorFilterLabelsTest(unittest.TestCase):
     def test_php_filter_labels_are_separate_from_detail_labels(self):
         code = (ROOT / 'php/src/Vendors.php').read_text(encoding='utf-8')
         self.assertIn("'type_filter_vendor' => 'Normaler Händler'", code)
-        self.assertIn("'type_filter_both' => 'Tauschhändler'", code)
+        # Since barterers have pages of their own, "both" is its own type and
+        # the filter needs a label for each of the three.
+        self.assertIn("'type_filter_barter' => 'Tauschhändler'", code)
+        self.assertIn("'type_filter_both' => 'Händler und Tauschhändler'", code)
         self.assertIn("$words['type_filter_' . $value]", code)
         self.assertIn("'type_both' => 'Händler und Tauschhändler'", code)
 

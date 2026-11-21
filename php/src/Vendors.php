@@ -24,12 +24,14 @@ final class Vendors
                      'reset' => 'Zurücksetzen', 'region' => 'Region', 'area' => 'Landschaft',
                      'type' => 'Art', 'type_vendor' => 'Normaler Händler',
                      'type_barter' => 'Tauschhändler', 'type_both' => 'Händler und Tauschhändler',
-                     'type_filter_vendor' => 'Normaler Händler', 'type_filter_both' => 'Tauschhändler',
+                     'type_filter_vendor' => 'Normaler Händler', 'type_filter_barter' => 'Tauschhändler',
+                     'type_filter_both' => 'Händler und Tauschhändler',
                      'level' => 'Gegenstandsstufe', 'from' => 'von', 'to' => 'bis',
                      'filter_items' => 'Anwenden', 'reset_items' => 'Alle Gegenstände',
                      'wo' => 'Region und Landschaft', 'empty' => 'Keinen passenden Händler gefunden.',
                      'previous' => 'Zurück', 'next' => 'Weiter', 'page' => 'Seite %s von %s',
                       'items' => 'Warenangebot', 'vendor_items' => 'Warenangebot',
+                     'barter_items' => 'Tauschgegenstände',
                      'items_count' => '%s Gegenstände', 'items_count_one' => '1 Gegenstand',
                      'places' => 'Standort', 'map' => 'Auf Karte zeigen', 'route' => 'Route planen',
                      'no_place' => 'Kein Standort in den Spieldaten belegt.', 'back' => 'Alle Händler',
@@ -39,12 +41,14 @@ final class Vendors
                      'reset' => 'Reset', 'region' => 'Region', 'area' => 'Landscape',
                       'type' => 'Type', 'type_vendor' => 'Regular vendor',
                       'type_barter' => 'Barterer', 'type_both' => 'Vendor and barterer',
-                      'type_filter_vendor' => 'Regular vendor', 'type_filter_both' => 'Barterer',
+                      'type_filter_vendor' => 'Regular vendor', 'type_filter_barter' => 'Barterer',
+                     'type_filter_both' => 'Vendor and barterer',
                      'level' => 'Item level', 'from' => 'from', 'to' => 'to',
                      'filter_items' => 'Apply', 'reset_items' => 'All items',
                      'wo' => 'Region and landscape', 'empty' => 'No matching vendor found.',
                      'previous' => 'Previous', 'next' => 'Next', 'page' => 'Page %s of %s',
                       'items' => 'Stock', 'vendor_items' => 'Stock',
+                     'barter_items' => 'Barter goods',
                      'items_count' => '%s items', 'items_count_one' => '1 item',
                      'places' => 'Location', 'map' => 'Show on map', 'route' => 'Plan a route',
                      'no_place' => 'No location is recorded in the game data.', 'back' => 'All vendors',
@@ -54,12 +58,14 @@ final class Vendors
                      'reset' => 'Réinitialiser', 'region' => 'Région', 'area' => 'Pays',
                       'type' => 'Type', 'type_vendor' => 'Marchand normal',
                       'type_barter' => 'Marchand troqueur', 'type_both' => 'Marchand et troqueur',
-                      'type_filter_vendor' => 'Marchand normal', 'type_filter_both' => 'Marchand troqueur',
+                      'type_filter_vendor' => 'Marchand normal', 'type_filter_barter' => 'Marchand troqueur',
+                     'type_filter_both' => 'Marchand et troqueur',
                      'level' => 'Niveau des objets', 'from' => 'de', 'to' => 'à',
                      'filter_items' => 'Appliquer', 'reset_items' => 'Tous les objets',
                      'wo' => 'Région et pays', 'empty' => 'Aucun marchand correspondant.',
                      'previous' => 'Précédent', 'next' => 'Suivant', 'page' => 'Page %s sur %s',
                       'items' => 'Marchandises', 'vendor_items' => 'Marchandises',
+                     'barter_items' => 'Objets de troc',
                      'items_count' => '%s objets', 'items_count_one' => '1 objet',
                      'places' => 'Lieu', 'map' => 'Voir sur la carte', 'route' => 'Planifier un trajet',
                      'no_place' => 'Aucun emplacement n’est attesté dans les données du jeu.', 'back' => 'Tous les marchands',
@@ -171,7 +177,9 @@ final class Vendors
         }
         $context = $this->context($vendor['name'], $vendor['seo']['description'],
             $this->catalogue->route($this->lang, 'vendor', $id), $alternates);
-        $vendor['type_label'] = self::words($this->lang)['type_' . ($vendor['type'] ?? 'vendor')];
+        $words = self::words($this->lang);
+        $vendor['type_label'] = $words['type_' . ($vendor['type'] ?? 'vendor')];
+        $vendor['items_label'] = $vendor['type'] === 'barter' ? $words['barter_items'] : $words['items'];
         $vendor['item_ids'] = implode(',', array_column($vendor['items'], 'id'));
         $vendor['item_total'] = count($vendor['items']);
         $vendor['total'] = $vendor['item_total'];
