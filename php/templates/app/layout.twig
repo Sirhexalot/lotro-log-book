@@ -11,6 +11,7 @@
    They used to sit at the site root; the base keeps them there. #}
 <base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){var t='dark';try{var s=localStorage.getItem('mql.theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;})();</script>
 <title>{% block seite_titel %}{{ seo_title }}{% endblock %}</title>
 <meta name="description" content="{{ page_seo.description }}">
 <link rel="canonical" href="{{ base }}{{ canonical_url }}">
@@ -28,6 +29,7 @@
 <meta name="twitter:card" content="summary_large_image">
 {{ tracking|raw }}
 {% block stile %}{% endblock %}
+<link rel="stylesheet" href="/theme-light.css?v={{ asset_stand }}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
 <body{{ block('koerper_attribute') }}>
@@ -62,5 +64,6 @@
 <script src="/sprachwahl.js?v={{ asset_stand }}" defer></script>
 <script src="/status.js?v={{ asset_stand }}" defer></script>
 {% block skripte %}{% endblock %}
+<script src="/theme.js?v={{ asset_stand }}" defer></script>
 </body>
 </html>

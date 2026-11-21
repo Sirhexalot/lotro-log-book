@@ -27,7 +27,7 @@ class DarstellungIststandTest(unittest.TestCase):
         self.assertIn('justify-self:end', css)
         self.assertIn('padding-inline-start:8px', css)
         self.assertIn('input[type=number]', css)
-        self.assertIn('color-scheme: dark', css)
+        self.assertIn('color-scheme: inherit', css)
 
     def test_detail_grid_uses_seven_five_and_full_place(self):
         css = read('web/katalog.css')

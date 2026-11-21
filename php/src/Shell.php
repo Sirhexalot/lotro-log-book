@@ -77,13 +77,14 @@ final class Shell
              $this->assetTag('gegenstaende.css'),
              $this->assetTag('filter-ui.css'),
              $this->assetTag('aufgabenfinder.css'),
-             $this->assetTag('auftraggeber.css'),
+            $this->assetTag('auftraggeber.css'),
+            $this->assetTag('theme-light.css'),
         ]);
     }
 
     public function scripts(): string
     {
-        return implode("\n", [$this->scriptTag('sprachwahl.js'), $this->scriptTag('familienmenue.js'),
+        return implode("\n", [$this->scriptTag('theme.js'), $this->scriptTag('sprachwahl.js'), $this->scriptTag('familienmenue.js'),
             $this->scriptTag('speicher.js'), $this->scriptTag('status.js'),
             $this->scriptTag('ersetzt-' . $this->lang . '.js'),
             $this->scriptTag('filtergedaechtnis.js'), $this->scriptTag('katalog.js'),

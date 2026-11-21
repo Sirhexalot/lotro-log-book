@@ -2,10 +2,42 @@
 :root {
 	--schrift: Verdana, "Segoe UI", sans-serif;
 	--mono: "SF Mono", Menlo, Consolas, monospace;
+	/* Site palette. Dark remains the default for existing visitors. */
+	--grund: #14110e;
+	--fläche: #1e1a16;
+	--fläche-hell: #2a251f;
+	--rand: #3a332b;
+	--text: #e8e1d5;
+	--schwach: #a89c8a;
+	--gold: #d6b35a;
+	--offen: #f0a63c;
+	--fertig: #7fbb72;
+	--laufend: #7fa6c9;
+	--marke-aktiv: #e8e1d5;
+	--auswahl: #3a3226;
 	--text-normal: 1rem;
 	--text-bedienung: .875rem;
 	--text-abschnitt: 1.25rem;
 	--text-titel: 1.75rem;
+}
+
+html { color-scheme: dark; }
+html[data-theme="light"] {
+	color-scheme: light;
+	--grund: #f3f0e8;
+	--fläche: #fffdf8;
+	--fläche-hell: #eee9dd;
+	--rand: #d7d0c1;
+	--text: #29261f;
+	--schwach: #655e52;
+	--gold: #76560c;
+	--offen: #a65300;
+	--fertig: #367344;
+	--laufend: #386a91;
+	--marke-aktiv: #29261f;
+	--auswahl: #f2e7c7;
+	--llb-flaechen-ton: #f4f0e6;
+	--llb-flaechen-rand: #d7d0c1;
 }
 /* Reserve the scrollbar's space on every page, so the centred column does not
  * shift by its width when a short page becomes a long one. */
@@ -23,8 +55,28 @@ small { font-size: var(--text-bedienung); }
 	--llb-flaechen-rand: #605343;
 	--llb-flaechen-radius: 5px;
 }
+html[data-theme="light"] {
+	--llb-flaechen-ton: #f4f0e6;
+	--llb-flaechen-rand: #d7d0c1;
+}
 .llb-raster { display: grid; grid-template-columns: var(--llb-raster); gap: var(--llb-raster-abstand); align-items: start; }
 .kopf { background: var(--fläche); border-bottom: 1px solid var(--rand); }
+.theme-toggle {
+	align-self: center;
+	flex: 0 0 auto;
+	padding: 4px 9px;
+	border: 1px solid var(--rand);
+	border-radius: 16px;
+	background: var(--fläche);
+	color: var(--text);
+	font: inherit;
+	font-size: var(--text-bedienung);
+	line-height: 1.4;
+	cursor: pointer;
+	white-space: nowrap;
+}
+.theme-toggle:hover { background: var(--fläche-hell); }
+.theme-toggle:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .kopf h1 { margin: 0; font-size: 16px; font-weight: normal; letter-spacing: .04em; }
 .kopf h1 a.logo {
 	display: inline-flex;
@@ -413,6 +465,43 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 	.kopf .charakterwahl { margin-left: 0; }
 	.kopf .charakterwahl select { max-width: none; }
 }
+
+html[data-theme="light"] body,
+html[data-theme="light"] body[data-seite] {
+	background-color: var(--grund);
+	color: var(--text);
+}
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea,
+html[data-theme="light"] button {
+	color-scheme: light;
+}
+html[data-theme="light"] .familie-flieger {
+	background: rgba(255, 253, 248, .99);
+	box-shadow: 0 8px 20px rgba(40, 33, 20, .16);
+}
+html[data-theme="light"] .symbol {
+	background: rgba(118, 86, 12, .06);
+	box-shadow: inset 0 0 0 1px rgba(118, 86, 12, .2);
+	filter: none;
+}
+html[data-theme="light"] .footer-statistik img {
+	filter: brightness(0) saturate(100%) invert(34%) sepia(24%) saturate(659%)
+		hue-rotate(5deg) brightness(91%) contrast(88%);
+}
+html[data-theme="light"] .manueller-status-auswahl { color-scheme: light; }
+html[data-theme="light"] .manueller-status-auswahl option { color: var(--text); background: var(--fläche); }
+html[data-theme="light"] .kopf .standsalter.alt { color: #a33f32; border-color: #a33f32; }
+html[data-theme="light"] .kopf .menue,
+html[data-theme="light"] .menue a,
+html[data-theme="light"] .menue .familie-knopf { color: var(--schwach); }
+html[data-theme="light"] .menue a[aria-current="page"],
+html[data-theme="light"] .menue .familie-knopf[aria-current="true"] { color: var(--text); }
+html[data-theme="light"] * { scrollbar-color: #c7bda9 transparent; }
+html[data-theme="light"] *:hover { scrollbar-color: #a8956d transparent; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #c7bda9; background-clip: padding-box; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: var(--gold); background-clip: padding-box; }
 
 /* Item symbols: one 32×32 client image per symbol ID, shared by all languages.
    They are decoration next to the name, so they never replace the text. */

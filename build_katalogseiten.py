@@ -390,11 +390,11 @@ class Renderer:
         self.selected = self.model['selected']
         self.paths = []
         self.asset_tags = []
-        for asset in ('style.css', 'gemeinsam.css', 'katalog.css'):
+        for asset in ('style.css', 'gemeinsam.css', 'katalog.css', 'theme-light.css'):
             digest = hashlib.sha256((target / asset).read_bytes()).hexdigest()[:10]
             self.asset_tags.append('<link rel="stylesheet" href="/%s?v=%s">' % (asset, digest))
         self.scripts = '\n'.join('<script src="/%s?v=%s" defer></script>' % (
-            asset, hashlib.sha256((target / asset).read_bytes()).hexdigest()[:10]) for asset in ('speicher.js', 'katalog.js'))
+            asset, hashlib.sha256((target / asset).read_bytes()).hexdigest()[:10]) for asset in ('theme.js', 'speicher.js', 'katalog.js'))
         app = (target / 'index.html').read_text(encoding='utf-8')
         self.tracking = '\n'.join(script for script in re.findall(r'<script\b[^>]*>.*?</script>', app, re.S)
                                   if 'gtm.start' in script or 'data-goatcounter=' in script)
@@ -620,6 +620,7 @@ class Renderer:
         config = escape(json.dumps({key: w[key] for key in ('status_done', 'status_unknown', 'status_running', 'none', 'known', 'foreign', 'recipe_unknown', 'recipe_missing')}, ensure_ascii=False), quote=True)
         html = '''<!doctype html>
 <html lang="%s"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){var t='dark';try{var s=localStorage.getItem('mql.theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;})();</script>
 <title>%s – LOTRO Log Book</title>%s<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <noscript><style>.kopf .menue,.kopf .charakter{display:flex}.menue-knopf{display:none}</style></noscript>
 </head><body class="seite-text katalog-seite" data-art="%s" data-katalog-texte="%s">
@@ -1028,7 +1029,7 @@ def build(target, source=None, pilot=False):
         ids = [set(models[lang]['selected'][kind]) for lang in LANGS]
         if not all(ids[0] == other for other in ids[1:]):
             raise ValueError('Catalogue IDs differ between languages: ' + kind)
-    for asset in ('katalog.css', 'katalog.js'):
+    for asset in ('katalog.css', 'katalog.js', 'theme-light.css', 'theme.js'):
         (target / asset).write_bytes((Path(__file__).parent / 'web' / asset).read_bytes())
     from build_aufgaben import pages as aufgabenseiten
     from build_taten import pages as tatenseiten

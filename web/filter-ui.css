@@ -17,11 +17,10 @@
 	background:var(--fläche,#202c3c); border:1px solid var(--rand,#526078); border-radius:.35rem; padding:8px 12px;
 }
 .filter-ui button { cursor:pointer; }
-/* The native number spinners render black on the dark field; lift them to the
-   text colour instead of hiding them. */
+/* Let native number controls and their spinners follow the active site theme. */
 .filter-ui input[type=number]::-webkit-inner-spin-button,
-.filter-ui input[type=number]::-webkit-outer-spin-button { filter: invert(1) brightness(1.4); opacity: .85; }
-.filter-ui input[type=number] { color-scheme: dark; }
+.filter-ui input[type=number]::-webkit-outer-spin-button { opacity: .85; }
+.filter-ui input[type=number] { color-scheme: inherit; }
 .filter-ui button:focus-visible,.filter-ui input:focus-visible,.filter-ui select:focus-visible,.filter-ui summary:focus-visible { outline:2px solid var(--gold,#d9b96f); outline-offset:3px; }
 
 /* One result-row contract for filter-backed entity lists. */

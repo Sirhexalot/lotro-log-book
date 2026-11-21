@@ -30,7 +30,7 @@ class QuestPageTests(unittest.TestCase):
         cls.aufgaben = lade('build_aufgaben')
         cls.ordner = Path(tempfile.mkdtemp())
         for name in ('index.html', 'style.css', 'gemeinsam.css', 'katalog.css',
-                     'speicher.js', 'katalog.js'):
+                     'theme-light.css', 'theme.js', 'speicher.js', 'katalog.js'):
             shutil.copy2(WEB / name, cls.ordner / name)
         # All three up front: every page carries hreflang links to the others.
         cls.models = {lang: cls.katalog.load_model(WEB, lang) for lang in cls.katalog.LANGS}

@@ -137,7 +137,8 @@ class CatalogueTest(unittest.TestCase):
         models = {lang: load_model(ROOT / 'web', lang) for lang in LANGS}
         with tempfile.TemporaryDirectory() as temp:
             target = Path(temp)
-            for name in ('style.css', 'gemeinsam.css', 'katalog.css', 'speicher.js', 'katalog.js', 'index.html'):
+            for name in ('style.css', 'gemeinsam.css', 'katalog.css', 'theme-light.css',
+                         'theme.js', 'speicher.js', 'katalog.js', 'index.html'):
                 shutil.copy2(self.target / name, target / name)
             for lang in LANGS:
                 renderer = Renderer(target, lang, models)
@@ -203,4 +204,3 @@ class CatalogueTest(unittest.TestCase):
         self.assertIn('RewriteRule ^ https://llb.sirhexalot.de%{REQUEST_URI} [R=301,L]', block)
         # A TLS-terminating proxy would report HTTPS=off and loop forever.
         self.assertNotIn('%{HTTPS}', block.split('# BEGIN')[0])
-

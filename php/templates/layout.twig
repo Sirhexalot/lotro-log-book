@@ -9,6 +9,7 @@
 <title>{{ seo_title }}</title><meta name="description" content="{{ page_seo.description }}">
 {% if noindex|default(false) %}<meta name="robots" content="noindex,follow">{% endif %}
 <link rel="canonical" href="{{ base }}{{ canonical_url }}">
+<script>(function(){var t='dark';try{var s=localStorage.getItem('mql.theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;})();</script>
 {% if entity_id|default('') %}<link rel="stylesheet" href="/feedback.css?v={{ asset_stand }}">{% endif %}
 {% for alt in alternates %}<link rel="alternate" hreflang="{{ alt.lang }}" href="{{ base }}{{ alt.url }}">
 {% endfor %}<meta property="og:type" content="website">

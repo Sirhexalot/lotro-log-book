@@ -28,9 +28,11 @@ Twig-Cache, HTTP-Cache-Header und Versionsparameter von Assets sind getrennte Me
 
 Das sichtbare Layout folgt einem 12-Spalten-Raster (`--llb-raster` in `web/gemeinsam.css`). Dieselben Abstands- und Flächen-Token gelten für Detailseiten, Filter und die Karten-Detailspalte. Eine Sektion ist eine Fläche mit Rahmen, Radius und Innenabstand; Trennlinien ersetzen keine Gliederung. Der aktive Tab geht in die Fläche über (gleicher Hintergrund, 1 px Überlappung). Ergebniszeilen (`web/filter-ui.css`) halten Icon, Name, Stufe und Fortschritt auf einer Oberkante; das Icon sitzt linksbündig, der Fortschritt rechtsbündig. Kurze Relationslisten behalten die volle Fläche, auch mit nur einem Eintrag. Belohnungen und Quellen nutzen dieselben 64/54-px-Icon-Kacheln wie die Listen. Details: arc42 5.10.
 
+Die gemeinsame Palette in `web/gemeinsam.css` stellt Dark und Light bereit. Dark bleibt der Standard; `data-theme="light"` wählt die warme helle Palette. `theme-init.js` beziehungsweise die inline Initialisierung der PHP-Hüllen liest `mql.theme` vor dem ersten Paint, `theme.js` stellt den barrierefrei beschrifteten Umschalter bereit und speichert die Auswahl lokal. `theme-light.css` ergänzt nur die Oberflächen, die aus Spielkarten- oder Statusgründen feste Farben benötigen. Neue Flächen sollen die gemeinsamen Farbvariablen verwenden und dürfen nicht von einem Modus ausgehen.
+
 ### Filterlogik und Darstellung
 
-Filterzustand, Facettenzählung und Kontextbindung sind in 5.9 beschrieben. Darstellungsseitig gilt zusätzlich: Der Fortschritt steht bei Aufgaben/Taten oben in der Filterspalte; Einfachauswahlen zeigen immer einen Chip, auch den Standardwert; der Fortschritt ist pro Eintrag ein Feld, kein zweiter Statuschip. Die Kartenliste kennzeichnet belegte Zustände mit farbigen Symbolen; unbekannter Fortschritt bleibt neutral. Das Filterraster ist 3/9 am Desktop und einspaltig mit Dialog mobil; Range-Felder nutzen `color-scheme: dark` und helle native Spindeln.
+Filterzustand, Facettenzählung und Kontextbindung sind in 5.9 beschrieben. Darstellungsseitig gilt zusätzlich: Der Fortschritt steht bei Aufgaben/Taten oben in der Filterspalte; Einfachauswahlen zeigen immer einen Chip, auch den Standardwert; der Fortschritt ist pro Eintrag ein Feld, kein zweiter Statuschip. Die Kartenliste kennzeichnet belegte Zustände mit farbigen Symbolen; unbekannter Fortschritt bleibt neutral. Das Filterraster ist 3/9 am Desktop und einspaltig mit Dialog mobil; native Bedienelemente folgen dem aktiven `color-scheme`.
 
 ### Performance-Budget der Übersichten
 

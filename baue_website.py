@@ -30,7 +30,7 @@ SPRACHEN = ('de', 'en', 'fr')
 DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'sets.css', 'landschaft.css', 'aufgabenfinder.css', 'aufgabenfinder.js', 'filter-ui.css', 'filterzustand.js',
            'filtergedaechtnis.js', 'filteradapter.js', 'filter-ui.js', 'karten-aufgabenfilter.js', 'favicon.svg', 'texte.js', 'texte-spielstand.js',
            'texte-logbuch.js', 'texte-site.js', 'texte-plugin.js', 'texte-companion.js', 'texte-reise.js',
-           'sprache.js', 'speicher.js', 'menue.js', 'symbole.js', 'companion.js', 'reise.js', 'reise.css', 'reise.html',
+           'sprache.js', 'speicher.js', 'menue.js', 'theme.js', 'theme-init.js', 'theme-light.css', 'symbole.js', 'companion.js', 'reise.js', 'reise.css', 'reise.html',
            'spielstand.js', 'plugin.js', 'anleitung.js', 'referenz.js', 'ruf.js', 'belohnungen.js', 'gegenstand.js', 'rezepte.js',
             'gegenstaende.html', 'gegenstaende.js', 'gegenstaende.css',
             'suche.js', 'suche.html', 'ruf-quellen-de.js',
