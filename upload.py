@@ -442,7 +442,9 @@ def hochladen_manifest(daten, basis, manifest, komponenten, workers=1,
             'completed': [],
         }
         journal_schreiben(ftp, ziel, journal)
-        for relative, _, entry in plan:
+        print('Upload läuft: %d Dateien; Fortschritt alle 25 Dateien.' %
+              len(plan), flush=True)
+        for nummer, (relative, _, entry) in enumerate(plan, start=1):
             verify_manifest_files(basis, {
                 'files': {relative: entry},
             }, komponenten)
@@ -467,6 +469,9 @@ def hochladen_manifest(daten, basis, manifest, komponenten, workers=1,
                 raise RuntimeError('Falsche Remotegröße nach Upload: ' + relative)
             journal['completed'].append(relative)
             journal_schreiben(ftp, ziel, journal)
+            if nummer % 25 == 0 or nummer == len(plan):
+                print('  Fortschritt: %d/%d Dateien (%s)' %
+                      (nummer, len(plan), relative), flush=True)
 
         verify_manifest_files(basis, manifest, komponenten)
         deployment_schreiben(
