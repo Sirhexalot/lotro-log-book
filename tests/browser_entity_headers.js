@@ -65,6 +65,20 @@ const seiten = [
 			console.log(breite + 'px: ' + seiten.length + ' Entitätstypen mit Pfad, Icon und Abschnittsgröße ok');
 			await page.close();
 		}
+		// Die Ziele-Klappe sitzt auf ihrer Fläche und ist eingerückt wie der Text.
+		const klappeSeite = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+		await klappeSeite.goto(basis + '/de/aufgabe/70000003/', { waitUntil: 'networkidle' });
+		const klappe = await klappeSeite.locator('.katalog-ziele').evaluate((el) => {
+			const summary = el.querySelector('summary');
+			const box = el.getBoundingClientRect();
+			const sum = summary.getBoundingClientRect();
+			return { list: getComputedStyle(summary).listStylePosition,
+				inset: Math.round(sum.left - box.left) };
+		});
+		assert.equal(klappe.list, 'inside', 'Ziele-Marker außerhalb des Textflusses');
+		assert.ok(klappe.inset >= 15, 'Ziele-Klappe nicht eingerückt (' + klappe.inset + ' px)');
+		await klappeSeite.close();
+
 		// The map frame of an area page must not stay empty.
 		const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 		await page.goto(basis + '/de/gebiet/268437634/', { waitUntil: 'networkidle' });
