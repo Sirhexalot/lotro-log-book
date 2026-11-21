@@ -21,6 +21,8 @@ class ReleaseComponentTests(unittest.TestCase):
             "daten-de.js": "data",
             "phpdata/manifest.json": '{"schema": 4}',
             "bild/item.svg": "asset",
+            "fonts/OFL.txt": "font license",
+            "fonts/roboto-latin.woff2": "font",
             "karten/de/map.webp": "map",
             "phptmp/twig/cache.php": "runtime",
             "release-2026-11-16/old.js": "old",
@@ -39,6 +41,8 @@ class ReleaseComponentTests(unittest.TestCase):
         self.assertEqual(manifest["files"]["abenteuer-karte.js"]["component"], "programm")
         self.assertEqual(manifest["files"]["daten-de.js"]["component"], "daten")
         self.assertEqual(manifest["files"]["bild/item.svg"]["component"], "assets")
+        self.assertEqual(manifest["files"]["fonts/OFL.txt"]["component"], "assets")
+        self.assertEqual(manifest["files"]["fonts/roboto-latin.woff2"]["component"], "assets")
         self.assertNotIn("release-manifest.json", manifest["files"])
         self.assertNotIn("phptmp/twig/cache.php", manifest["files"])
         self.assertNotIn("release-2026-11-16/old.js", manifest["files"])

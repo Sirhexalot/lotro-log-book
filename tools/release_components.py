@@ -23,8 +23,8 @@ _PROGRAM_EXTENSIONS = {
     ".css", ".html", ".htaccess", ".js", ".json", ".php", ".txt", ".xml",
 }
 _KNOWN_DIRS = {
-    "bild", "gelaende", "karten", "karten-daten", "notizen", "php", "phpdata", "vendor",
-    "vorkommen",
+    "bild", "fonts", "gelaende", "karten", "karten-daten", "notizen", "php",
+    "phpdata", "vendor", "vorkommen",
 }
 _EXCLUDED_DIRS = {"phptmp", ".git", "__pycache__", "tests"}
 _CONFLICT_COPY = re.compile(r" \d+\.[^/]+$")
@@ -71,7 +71,7 @@ def classify(relative: str | Path) -> str | None:
     top = parts[0]
     if top not in _KNOWN_DIRS and len(parts) > 1:
         raise ReleaseError(f"Unbekannter Releaseordner: {path}")
-    if top in {"bild", "gelaende", "karten"}:
+    if top in {"bild", "fonts", "gelaende", "karten"}:
         return "assets"
     if top in {"phpdata", "karten-daten", "notizen", "vorkommen"}:
         return "daten"
