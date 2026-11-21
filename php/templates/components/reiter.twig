@@ -1,0 +1,16 @@
+{# One tab bar for every page. The look lives in `reiter.css`, the behaviour in
+   `reiter.js`; a page only supplies the entries and what happens on a switch.
+
+   eintraege: [{key, label, panel, zahl}] — `panel` is the id of the tabpanel,
+   `zahl` is optional and only rendered when it is greater than zero. #}
+{% macro reiter(kennung, titel, eintraege, aktiv, versteckt) %}
+<div class="llb-reiter" role="tablist" aria-label="{{ titel }}"{% if versteckt %} hidden{% endif %}>
+{% for eintrag in eintraege %}
+<button type="button" role="tab" id="{{ kennung }}-{{ eintrag.key }}"
+    aria-controls="{{ eintrag.panel }}"
+    aria-selected="{{ eintrag.key == aktiv ? 'true' : 'false' }}"
+    tabindex="{{ eintrag.key == aktiv ? '0' : '-1' }}"
+    data-reiter-knopf="{{ eintrag.key }}">{{ eintrag.label }}{% if eintrag.zahl|default(0) > 0 %}<span class="llb-reiter-zahl">{{ eintrag.zahl }}</span>{% endif %}</button>
+{% endfor %}
+</div>
+{% endmacro %}

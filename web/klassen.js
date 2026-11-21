@@ -81,9 +81,9 @@
 		history.replaceState(history.state, '', url.pathname + url.search);
 	}
 	var tabs = {
-		quests: { list: 'klassen-aufgaben', panel: 'liste-aufgaben', tab: 'reiter-aufgaben', segment: { de: 'aufgabe', en: 'quest', fr: 'quete' } },
-		deeds: { list: 'klassen-taten', panel: 'liste-taten', tab: 'reiter-taten', segment: { de: 'tat', en: 'deed', fr: 'prouesse' } },
-		items: { list: 'klassen-gegenstaende', panel: 'liste-gegenstaende', tab: 'reiter-gegenstaende', segment: { de: 'gegenstand', en: 'item', fr: 'objet' } }
+		quests: { list: 'klassen-aufgaben', panel: 'liste-aufgaben', segment: { de: 'aufgabe', en: 'quest', fr: 'quete' } },
+		deeds: { list: 'klassen-taten', panel: 'liste-taten', segment: { de: 'tat', en: 'deed', fr: 'prouesse' } },
+		items: { list: 'klassen-gegenstaende', panel: 'liste-gegenstaende', segment: { de: 'gegenstand', en: 'item', fr: 'objet' } }
 	};
 	var chosenTab = 'quests';
 	var itemDataPromise = null, cataloguePromise = null;
@@ -181,11 +181,6 @@
 	}
 	function renderCatalogue(classKey, raceKey, level) {
 		var ready = profileChanged(classKey, raceKey, level);
-		Object.keys(tabs).forEach(function (name) {
-			var info = tabs[name], selected = name === chosenTab;
-			$(info.panel).hidden = !selected;
-			$(info.tab).setAttribute('aria-selected', selected ? 'true' : 'false'); $(info.tab).tabIndex = selected ? 0 : -1;
-		});
 		if (chosenTab === 'items') {
 			var itemSignature = classKey + ':' + raceKey + ':' + level;
 			ready.then(function () { return ensureItems(); }).then(function () {
@@ -245,9 +240,6 @@
 		'klassen-mein-charakter': { text: text.mine }
 	};
 	Object.keys(tx).forEach(function (id) { $(id).textContent = tx[id].text; });
-	$('reiter-aufgaben').textContent = text.quests;
-	$('reiter-taten').textContent = text.deeds;
-	$('reiter-gegenstaende').textContent = text.items;
 	document.querySelector('.klassen-katalog').setAttribute('aria-label', text.catalogue);
 	var classKeys = Object.keys(data.classes).sort(function (a, b) {
 		return data.classes[a].names[lang].localeCompare(data.classes[b].names[lang], lang);
@@ -272,18 +264,15 @@
 	});
 	$('klassen-volk').addEventListener('change', render);
 	$('klassen-stufe').addEventListener('input', render);
-		Object.keys(tabs).forEach(function (kind) {
-			$(tabs[kind].tab).addEventListener('click', function () {
-				chosenTab = kind;
-				render();
-			});
+	var tabHost = document.querySelector('.klassen-katalog .llb-reiter');
+	if (tabHost && window.MQL_REITER) {
+		window.MQL_REITER.mount(tabHost, {
+			aktiv: 'quests',
+			onShow: function (kind) { chosenTab = kind; render(); }
 		});
-	$('reiter-aufgaben').setAttribute('aria-selected', 'true');
-	$('reiter-aufgaben').tabIndex = 0;
-	$('reiter-taten').setAttribute('aria-selected', 'false');
-	$('reiter-taten').tabIndex = -1;
-	$('reiter-gegenstaende').setAttribute('aria-selected', 'false');
-	$('reiter-gegenstaende').tabIndex = -1;
+	} else {
+		render();
+	}
 	$('klassen-mein-charakter').addEventListener('click', function () {
 		var character = activeCharacter();
 		if (character) {
@@ -295,5 +284,4 @@
 			$('klassen-charakter-status').textContent = text.noCharacter;
 		}
 	});
-	render();
 }());

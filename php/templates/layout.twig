@@ -47,6 +47,7 @@
 <footer class="seitenfuss"><div class="seitenfuss-innen"><div class="footer-links-links"><p class="footer-statistik"><span data-statistik-aktiv hidden><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-aktiv-text></span></span></p></div><nav aria-label="Languages" class="sprachen">{{ languages|raw }}</nav><p class="footer-rechts">{% include '_feedback_footer.twig' %} · <a href="/{{ lang }}/plugin/">Plugin</a> · {{ legal|raw }} · {{ privacy|raw }}</p></div></footer>
 <script src="/statistik.js?v={{ asset_stand }}" defer></script>
 <script src="/status.js?v={{ asset_stand }}" defer></script>
+<script src="/reiter.js?v={{ asset_stand }}" defer></script>
 {{ scripts|raw }}
 {% if related_lists|default([]) %}
 <script type="application/json" id="related-lists">{{ related_json|raw }}</script>

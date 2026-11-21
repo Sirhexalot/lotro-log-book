@@ -33,7 +33,7 @@ async function bereit(page, type) {
 					reiter: [...document.querySelectorAll('[data-related-type]')]
 						.map((b) => b.getAttribute('data-related-type')),
 					gewaehlt: document.querySelector('[aria-selected="true"]')?.getAttribute('data-related-type'),
-					zeilen: document.querySelectorAll('.related-results > li').length,
+					zeilen: document.querySelectorAll('.related-results > li.mql-row').length,
 					mehr: !document.querySelector('.filter-results-home > button')?.hidden,
 					ueberlauf: document.documentElement.scrollWidth > innerWidth
 				}));
@@ -79,7 +79,10 @@ async function bereit(page, type) {
 		const stand = await page.evaluate(() => ({
 			anzahl: document.querySelector('.filter-result-toolbar [role=status]')?.textContent,
 			filter: document.querySelectorAll('.filter-group-single').length,
-			marken: [...document.querySelectorAll('.related-symbol')].slice(0, 1).map((e) => e.classList.contains('fertig'))
+			/* The shared result row marks completion on its status control; the
+			 * old .related-symbol only exists in the fallback renderer. */
+			marken: [...document.querySelectorAll('.related-results .manueller-status')].slice(0, 1)
+				.map((e) => e.classList.contains('status-fertig'))
 		}));
 		const expectedCount = await page.evaluate(() =>
 			JSON.parse(document.getElementById('related-lists').textContent).q.rows.length);
@@ -87,15 +90,15 @@ async function bereit(page, type) {
 		assert.equal(stand.filter, 1, 'Abschlussfilter fehlt');
 		assert.deepEqual(stand.marken, [true], 'erledigter Nachweis fehlt am Symbol');
 
-		await page.locator('.filter-group-single label', { hasText: /Nicht als erledigt importiert/ }).first().click();
-		await page.waitForFunction(() => window.MQL_RELATED_FILTER.getState().filters.status === 'rest');
-		const offen = await page.$$eval('.related-results a', (as) => as.map((a) => a.textContent));
+		await page.locator('.filter-group-single label', { hasText: /Nicht begonnen/ }).first().click();
+		await page.waitForFunction(() => window.MQL_RELATED_FILTER.getState().filters.status === 'open');
+		const offen = await page.$$eval('.related-results .mql-row a', (as) => as.map((a) => a.textContent));
 		assert.ok(!offen.includes('Abstumpfen des Speers'), 'erledigter Eintrag bleibt im Offen-Filter');
 		assert.ok(offen.length > 0);
 
 		await page.locator('.filter-group-single label', { hasText: /^Erledigt/ }).first().click();
 		await page.waitForFunction(() => window.MQL_RELATED_FILTER.getState().filters.status === 'done');
-		const erledigt = await page.$$eval('.related-results a', (as) => as.map((a) => a.textContent));
+		const erledigt = await page.$$eval('.related-results .mql-row a', (as) => as.map((a) => a.textContent));
 		assert.ok(erledigt.length === 1 && erledigt[0].includes('Abstumpfen des Speers'), 'Erledigt-Filter: ' + erledigt.join(' | '));
 		await page.close();
 	} finally {

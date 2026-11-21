@@ -208,6 +208,7 @@ def pruefen(ziel: Path) -> list[str]:
                   'instanzen.css', 'php/templates/instances/detail.twig',
                   'php/templates/instances/list.twig',
                   'klassen.css', 'klassen.js', 'php/templates/app/klassen.twig',
+                 'flaeche.css', 'php/templates/components/flaeche.twig', 'fakten.css',
                   'phpdata/manifest.json', 'sets.css', 'sets.js', 'php/src/Sets.php',
                  'php/templates/sets/list.twig', 'php/templates/sets/detail.twig',
                  'auftraggeber.css', 'auftraggeber.js', 'php/src/Givers.php',

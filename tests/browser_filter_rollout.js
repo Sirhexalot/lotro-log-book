@@ -41,7 +41,7 @@ async function ready(p){await p.waitForSelector('.filter-ui');await p.waitForFun
 			const context=await browser.newContext(),p=await context.newPage(),errors=[];p.on('pageerror',e=>errors.push(String(e)));
 			await p.goto(base+'/'+lang+'/'+routes[lang][4]+'/',{waitUntil:'domcontentloaded'});await ready(p);
 			for(const tab of ['rezepte','rohstoffe','berufe']){
-				await p.locator('[data-hw="'+tab+'"]').click();await p.waitForFunction(t=>location.hash==='#'+t,tab);await ready(p);
+				await p.locator('[data-reiter-knopf="'+tab+'"]').click();await p.waitForFunction(t=>location.hash==='#'+t,tab);await ready(p);
 				assert.equal(await p.locator('.filter-ui').count(),1);
 				if(tab==='rohstoffe'){
 					const resourceGroups=await p.evaluate(()=>MQL_CRAFT_FILTER.config.groups.map(g=>g.id));

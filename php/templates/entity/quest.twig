@@ -9,13 +9,13 @@
 {% set progress_chips = page.chips|default([])|filter(chip => chip != page.giver.text|default('') and chip != area_name and not (chip ends with (' ' ~ w.steps_label) or chip ends with (' ' ~ w.rewards))) %}
 {{ include('entity/_progress.twig') }}
 {% set introductory_sections %}
-{% if page.description %}<section class="katalog-abschnitt"><h2>{{ w.description }}</h2><p class="katalog-text">{{ page.description }}</p></section>{% endif %}
+{% if page.description %}<section class="katalog-abschnitt llb-flaeche"><h2>{{ w.description }}</h2><p class="katalog-text">{{ page.description }}</p></section>{% endif %}
 {% set has_requirements = page.requirements.level or page.requirements.all or page.requirements.one or page.requirements.extra %}
 {% set show_area_trail = page.area_trail and not page.place.map_name|default('') %}
 {% if page.giver or show_area_trail or has_requirements %}
 <section class="quest-herkunft" aria-labelledby="quest-herkunft">
 <h2 id="quest-herkunft">{{ w.where_from }}</h2>
-{% if page.giver or show_area_trail %}<dl class="katalog-fakten">
+{% if page.giver or show_area_trail %}<dl class="llb-fakten">
 {% if page.giver %}<dt>{{ w.giver }}</dt><dd><a href="{{ page.giver.url }}">{{ page.giver.text }}</a></dd>{% endif %}
 {% if show_area_trail %}<dt>{{ w.area_label }}</dt><dd>{% for part in page.area_trail %}{% if not loop.first %} › {% endif %}{% if part.url %}<a href="{{ part.url }}">{{ part.text }}</a>{% else %}{{ part.text }}{% endif %}{% endfor %}</dd>{% endif %}
 </dl>{% endif %}
@@ -43,6 +43,6 @@
 {% endset %}
 {{ include('entity/_detail_grid.twig') }}
 {% for group in related_lists|default([]) %}{% if group.fallback is defined %}<section class="katalog-abschnitt"><h2>{{ {de: 'Aufgaben, die diese Aufgabe voraussetzen', en: 'Quests that require this quest', fr: 'Quêtes qui nécessitent cette quête'}[lang] }}</h2><ul data-quellen-liste>{% for entry in group.fallback %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul><ul class="related-results" data-filter-results hidden></ul></section>{% endif %}{% endfor %}
-{% if page.context_columns %}<section class="katalog-abschnitt"><h2>{{ {de: 'Weitere Aufgabenbezüge', en: 'Other quest connections', fr: 'Autres liens entre quêtes'}[lang] }}</h2><div class="katalog-zwei">{% for column in page.context_columns %}<dl class="katalog-fakten">{% for row in column %}<dt>{{ row.label }}</dt><dd>{% for item in row['items'] %}{% if not loop.first %}{{ row.separator }}{% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}{% endfor %}</dd>{% endfor %}</dl>{% endfor %}</div></section>{% endif %}
+{% if page.context_columns %}<section class="katalog-abschnitt"><h2>{{ {de: 'Weitere Aufgabenbezüge', en: 'Other quest connections', fr: 'Autres liens entre quêtes'}[lang] }}</h2><div class="katalog-zwei">{% for column in page.context_columns %}<dl class="llb-fakten">{% for row in column %}<dt>{{ row.label }}</dt><dd>{% for item in row['items'] %}{% if not loop.first %}{{ row.separator }}{% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}{% endfor %}</dd>{% endfor %}</dl>{% endfor %}</div></section>{% endif %}
 </article>
 {% endblock %}

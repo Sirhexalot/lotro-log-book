@@ -12,8 +12,8 @@
 </section>{% endif %}
 {% endset %}
 {% set reading_panel %}
-{% if page.description %}<section class="katalog-abschnitt"><h2>{{ w.description }}</h2><p class="katalog-text">{{ page.description }}</p></section>{% endif %}
-{% if page.facts %}<section class="katalog-abschnitt"><h2>{{ w.where_from }}</h2><dl class="katalog-fakten">{% for fact in page.facts %}<dt>{{ fact.label }}</dt><dd>{{ fact.text }}</dd>{% endfor %}</dl></section>{% endif %}
+{% if page.description %}<section class="katalog-abschnitt llb-flaeche"><h2>{{ w.description }}</h2><p class="katalog-text">{{ page.description }}</p></section>{% endif %}
+{% if page.facts %}<section class="katalog-abschnitt"><h2>{{ w.where_from }}</h2><dl class="llb-fakten">{% for fact in page.facts %}<dt>{{ fact.label }}</dt><dd>{{ fact.text }}</dd>{% endfor %}</dl></section>{% endif %}
 {% if page.rewards_fixed or page.rewards_choice %}<section class="katalog-abschnitt katalog-flaeche"><h2>{{ w.rewards }}</h2>
 {% for item in page.rewards_fixed %}{% include 'entity/reward.twig' with {'item': item} only %}{% endfor %}
 {% if page.rewards_choice %}<h3>{{ w.choice }}</h3>{% for item in page.rewards_choice %}{% include 'entity/reward.twig' with {'item': item} only %}{% endfor %}{% endif %}

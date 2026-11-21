@@ -1,0 +1,16 @@
+{# One framed section: heading plus content. The look lives in `flaeche.css`,
+   so catalogue pages and the map's detail panel cannot drift apart.
+
+   titel    section heading; empty means no heading (content only)
+   ebene    heading level, 2 on a catalogue page, 3 inside the map panel
+   klasse   extra classes for the section
+   kennung  id, when something links to this section
+
+   Use it with a content block:
+   {% call flaeche.flaeche('Beschreibung') %}…{% endcall %} #}
+{% macro flaeche(titel, ebene = 2, klasse = '', kennung = '') %}
+<section class="llb-flaeche{{ klasse ? ' ' ~ klasse : '' }}"{% if kennung %} id="{{ kennung }}"{% endif %}>
+{% if titel %}<h{{ ebene }}>{{ titel }}</h{{ ebene }}>{% endif %}
+{{ caller() }}
+</section>
+{% endmacro %}

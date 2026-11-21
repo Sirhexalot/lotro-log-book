@@ -1,5 +1,6 @@
 # Oberflächenregeln
 
+- [Gemeinsame Bausteine](bausteine.md)
 - [Eingebettete Entitätenlisten](entitaeten-listen.md)
 - [Gemeinsame Filterkomponente](filter-komponente.md)
 - [Filtergedächtnis und Sortierung](filter-sortierung.md)

@@ -21,20 +21,17 @@
 	// --- Windows / macOS tabs, remembered ---------------------------------
 	var system = /Mac/i.test(navigator.platform || navigator.userAgent) ? 'mac' : 'windows';
 	try { system = window.localStorage.getItem('mql.system') || system; } catch (fehler) {}
-	function zeigeSystem(wahl) {
-		system = wahl;
-		try { window.localStorage.setItem('mql.system', wahl); } catch (fehler) {}
-		document.querySelectorAll('[data-reiter]').forEach(function (knopf) {
-			knopf.setAttribute('aria-pressed', String(knopf.getAttribute('data-reiter') === wahl));
-		});
-		document.querySelectorAll('[data-inhalt]').forEach(function (block) {
-			block.hidden = block.getAttribute('data-inhalt') !== wahl;
+	/* The Windows/macOS switch is the shared tab bar; only the choice is ours. */
+	var reiter = document.querySelector('.llb-reiter');
+	if (reiter && window.MQL_REITER) {
+		window.MQL_REITER.mount(reiter, {
+			aktiv: system,
+			onShow: function (wahl) {
+				system = wahl;
+				try { window.localStorage.setItem('mql.system', wahl); } catch (fehler) {}
+			}
 		});
 	}
-	document.querySelectorAll('[data-reiter]').forEach(function (knopf) {
-		knopf.addEventListener('click', function () { zeigeSystem(knopf.getAttribute('data-reiter')); });
-	});
-	zeigeSystem(system);
 
 	// --- Character table ----------------------------------------------------
 	function zahl(wert) { return Number(wert).toLocaleString(t('locale')); }

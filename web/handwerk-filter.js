@@ -258,10 +258,8 @@
 	function refresh(tab,navigate){
 		queue=queue.then(async function(){
 			if(controller){tabStates[activeTab]=controller.getState();await controller.destroy();controller=null;}
-			if(navigate){var u=new URL(location.href);var shared={};['beruf','beruf[]','stufe','stufe[]','eigene'].forEach(function(k){if(u.searchParams.has(k)){shared[k]=u.searchParams.getAll(k);}});params.forEach(function(k){u.searchParams.delete(k);u.searchParams.delete(k+'[]');});Object.keys(shared).forEach(function(k){shared[k].forEach(function(v){u.searchParams.append(k,v);});});if(tabStates[tab]&&tabStates[tab].q){u.searchParams.set('q',tabStates[tab].q);}u.hash=tab;history.pushState(null,'',u);}
-			activeTab=tab;document.querySelectorAll('[data-hw]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.hw===tab));});
+			activeTab=tab;
 			setIntro(tab);
-			['berufe','rezepte','rohstoffe'].forEach(function(key){document.getElementById('hw-'+key).hidden=key!==tab;});
 			var host=document.getElementById(tab==='berufe'?'berufe':tab==='rezepte'?'rezepte-liste':'rohstoffe-liste');host.replaceChildren();
 			if(tab==='rezepte'&&!recipeRows.length||tab==='rohstoffe'&&!resources){host.appendChild(text('p',words[8]));return;}
 			var c=character(), meta=c&&c.importMeta;
@@ -274,10 +272,13 @@
 	}
 	window.MQL_HANDWERK_FILTER={recipes:function(rows,renderer){recipeRows=rows;recipeRenderer=renderer;return refresh(tabFromUrl(),false);}};
 	window.MQL_ROHSTOFFE_ZEICHNEN=function(){resources=window.MQL_VORKOMMEN;return refresh(tabFromUrl(),false);};
-	document.querySelectorAll('[data-hw]').forEach(function(b){b.addEventListener('click',function(){refresh(b.dataset.hw,true);});});
-	window.addEventListener('popstate',function(){if(tabFromUrl()!==activeTab){refresh(tabFromUrl(),false);}});
+	var reiter=document.querySelector('#hw-reiter .llb-reiter');
+	if(reiter&&window.MQL_REITER){
+		window.MQL_REITER.mount(reiter,{aktiv:tabFromUrl(),hash:true,verlauf:true,onShow:function(tab){refresh(tab);}});
+	}else{
+		refresh(tabFromUrl(),false);
+	}
 	window.addEventListener('storage',function(e){if(e.key==='mql.charaktere'){refresh(tabFromUrl(),false);}});
 	document.addEventListener('mql:characterchange',function(){refresh(tabFromUrl(),false);});
-	refresh(tabFromUrl(),false);
 	if(window.MQL_VORKOMMEN){window.MQL_ROHSTOFFE_ZEICHNEN();}
 })();

@@ -390,7 +390,7 @@ class Renderer:
         self.selected = self.model['selected']
         self.paths = []
         self.asset_tags = []
-        for asset in ('style.css', 'gemeinsam.css', 'katalog.css', 'theme-light.css'):
+        for asset in ('style.css', 'gemeinsam.css', 'katalog.css', 'flaeche.css', 'fakten.css', 'theme-light.css'):
             digest = hashlib.sha256((target / asset).read_bytes()).hexdigest()[:10]
             self.asset_tags.append('<link rel="stylesheet" href="/%s?v=%s">' % (asset, digest))
         self.scripts = '\n'.join('<script src="/%s?v=%s" defer></script>' % (
@@ -1030,7 +1030,7 @@ def build(target, source=None, pilot=False):
         ids = [set(models[lang]['selected'][kind]) for lang in LANGS]
         if not all(ids[0] == other for other in ids[1:]):
             raise ValueError('Catalogue IDs differ between languages: ' + kind)
-    for asset in ('katalog.css', 'katalog.js', 'theme-light.css', 'theme.js'):
+    for asset in ('katalog.css', 'flaeche.css', 'fakten.css', 'katalog.js', 'theme-light.css', 'theme.js'):
         (target / asset).write_bytes((Path(__file__).parent / 'web' / asset).read_bytes())
     from build_aufgaben import pages as aufgabenseiten
     from build_taten import pages as tatenseiten

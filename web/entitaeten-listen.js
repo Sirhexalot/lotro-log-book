@@ -24,6 +24,7 @@
 	var controller=null,active='',queue=Promise.resolve();
 	var types=Object.keys(lists).filter(function(k){return ORDER.includes(k)&&k!=='vendor'&&k!=='recipe_made'&&(!isItem||(k!=='q'&&k!=='d'));})
 		.sort(function(a,b){return ORDER.indexOf(a)-ORDER.indexOf(b);});
+	active=types[0]||'';
 	// The tab panel exists only where a relation list has a host section.
 	// Pages with just group-level relations (an item's crafting list) keep
 	// their article untouched and mount those groups separately below.
@@ -33,7 +34,7 @@
 	// describe the replaced server list, so they move there too; a single list
 	// keeps its section heading above the filter.
 	var fallback=document.createElement('div');fallback.dataset.filterFallback='';
-	var tablist=document.createElement('div');tablist.className='gebiet-reiter';tablist.setAttribute('role','tablist');
+	var tablist=document.createElement('div');tablist.className='llb-reiter';tablist.setAttribute('role','tablist');
 	var root=document.createElement('div');root.className='related-list';root.id='related-panel';root.setAttribute('role','tabpanel');
 	if(hasTabs){
 		Array.from(host.children).forEach(function(n){
@@ -42,13 +43,24 @@
 		});host.appendChild(fallback);
 		tablist.setAttribute('aria-label',host.querySelector('h2')?.textContent||document.querySelector('h1')?.textContent||'');
 		types.forEach(function(type){
-			var b=document.createElement('button');b.type='button';b.id='related-tab-'+type;b.className='gebiet-tab';
-			b.setAttribute('role','tab');b.setAttribute('aria-controls',root.id);b.dataset.relatedType=type;
-			b.textContent=labels[type]+' ('+lists[type].rows.length.toLocaleString(lang)+')';
-			b.addEventListener('click',function(){var u=new URL(location.href);u.hash=type;history.pushState(null,'',u);refresh();});
+			var b=document.createElement('button');b.type='button';b.id='related-tab-'+type;
+			b.setAttribute('role','tab');b.setAttribute('aria-controls',root.id);
+			b.setAttribute('aria-selected','false');b.tabIndex=-1;
+			b.dataset.reiterKnopf=type;b.dataset.relatedType=type;
+			b.appendChild(document.createTextNode(labels[type]));
+			var zahl=document.createElement('span');zahl.className='llb-reiter-zahl';
+			zahl.textContent=lists[type].rows.length.toLocaleString(lang);b.appendChild(zahl);
 			tablist.appendChild(b);
 		});
-		if(types.length>1){host.appendChild(tablist);}else{root.removeAttribute('role');root.removeAttribute('aria-labelledby');}
+		if(types.length>1){
+			host.appendChild(tablist);
+			if(window.MQL_REITER){
+				window.MQL_REITER.mount(tablist,{aktiv:typeFromUrl(),hash:true,verlauf:true,
+					onShow:function(type){active=type;refresh();}});
+			}else{
+				tablist.hidden=true;refresh();
+			}
+		}else{root.removeAttribute('role');root.removeAttribute('aria-labelledby');}
 		host.appendChild(root);
 	}else{
 		root.removeAttribute('role');
@@ -182,7 +194,7 @@
 		if(!hasTabs){return queue;}
 		queue=queue.then(async function(){
 			if(controller){await controller.destroy();controller=null;}
-			active=typeFromUrl();root.replaceChildren();
+			root.replaceChildren();
 			var target=document.createElement(active==='recipe'?'div':'ul');
 			target.className='related-results';target.dataset.filterResults='';root.appendChild(target);
 			var setup=active==='recipe'
@@ -190,9 +202,6 @@
 				: active==='i' ? window.MQL_ITEM_FILTER_SETUP(lists.i.index,{area:'context'})
 				: active==='vendor' ? vendorSetup(lists.vendor.rows)
 				: window.MQL_TASK_FILTER_SETUP(lists[active].rows,active);
-			Array.from(tablist.children).forEach(function(b){
-				var selected=b.dataset.relatedType===active;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1;
-			});
 			if(types.length>1){root.setAttribute('aria-labelledby','related-tab-'+active);}
 			setup=contextual(setup,active);
 			if(!needsFilter(lists[active].rows.length)){
@@ -274,10 +283,9 @@
 		var next=e.key==='Home'?0:e.key==='End'?types.length-1:(at+(e.key==='ArrowRight'?1:-1)+types.length)%types.length;
 		tablist.children[next].click();tablist.children[next].focus();
 	});
-	window.addEventListener('hashchange',refresh);
-	window.addEventListener('popstate',function(){if(typeFromUrl()!==active){refresh();}});
+
 	window.addEventListener('storage',function(e){if(e.key==='mql.charaktere'){refresh();}});
 	document.addEventListener('mql:characterchange',refresh);
 	document.addEventListener('change',function(e){if(e.target.id==='katalog-charakter'){refresh();}});
-	refresh();
+	if(!hasTabs||types.length<2){refresh();}
 })();

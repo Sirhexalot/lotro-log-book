@@ -1,6 +1,7 @@
 {% extends 'layout.twig' %}
 {% import 'entity/_header.twig' as heading %}
 {% import 'entity/_result_row.twig' as result %}
+{% import 'components/reiter.twig' as reiter %}
 
 {% block inhalt %}
 <article class="instanz-detail katalog-detailraster entity-detail-layout">
@@ -44,20 +45,19 @@
     </div>
     {% endif %}
     {% set sections = {
-        aufgaben: {tab: iw.task_tab, heading: iw.tasks, rows: task_fallback},
-        aufgabenbelohnungen: {tab: iw.reward_tab, heading: iw.quest_rewards, rows: page.quest_rewards},
-        truhenbeute: {tab: iw.loot_tab, heading: iw.loot, rows: page.chest_loot}
+        aufgaben: {tab: iw.task_tab, heading: iw.tasks, rows: task_fallback, zahl: page.tasks|length},
+        aufgabenbelohnungen: {tab: iw.reward_tab, heading: iw.quest_rewards, rows: page.quest_rewards, zahl: page.quest_rewards|length},
+        truhenbeute: {tab: iw.loot_tab, heading: iw.loot, rows: page.chest_loot, zahl: page.chest_loot|length}
     }|filter(section => section.rows) %}
     {% if sections %}
     <div class="item-bezugsreiter instanz-reiter" data-instance-lists>
         {% if sections|length > 1 %}
-        <div class="katalog-reiter" role="tablist" aria-label="{{ iw.tabs }}" hidden>
-            {% for key, section in sections %}
-            <button type="button" role="tab" id="instanz-reiter-{{ key }}" data-instance-tab="{{ key }}"
-                aria-selected="{{ loop.first ? 'true' : 'false' }}" aria-controls="{{ key }}"
-                tabindex="{{ loop.first ? '0' : '-1' }}">{{ section.tab }}</button>
-            {% endfor %}
-        </div>
+        {% set eintraege = [
+            {key: 'aufgaben', label: iw.task_tab, panel: 'aufgaben', zahl: sections.aufgaben.zahl|default(0)},
+            {key: 'aufgabenbelohnungen', label: iw.reward_tab, panel: 'aufgabenbelohnungen', zahl: sections.aufgabenbelohnungen.zahl|default(0)},
+            {key: 'truhenbeute', label: iw.loot_tab, panel: 'truhenbeute', zahl: sections.truhenbeute.zahl|default(0)}
+        ]|filter(e => sections[e.key] is defined) %}
+        {{ reiter.reiter('instanz', iw.tabs, eintraege, (eintraege|first).key, true) }}
         {% endif %}
         {% for key, section in sections %}
         <section id="{{ key }}" class="instanz-listenflaeche" data-instance-panel>

@@ -1,0 +1,27 @@
+/* Fact grid: label and value pairs of an entity. Catalogue pages and the map's
+ * detail panel share one shape — <dl><dt>Label</dt><dd>Value</dd>… — so the
+ * layout lives here and not in a page stylesheet.
+ *
+ * The map's side column uses `data-dichte="kompakt"`: smaller type, tighter
+ * gap, and two columns even on a phone, because there the labels are short. */
+.llb-fakten {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 4px 20px;
+	margin: 0 0 10px;
+}
+.llb-fakten dt { color: var(--schwach); }
+.llb-fakten dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.llb-fakten a,
+.llb-fakten .gebietsprung { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
+
+.llb-fakten[data-dichte="kompakt"] {
+	grid-template-columns: max-content minmax(0, 1fr);
+	gap: 3px 12px;
+	font-size: var(--text-kompakt);
+}
+
+@media (max-width: 640px) {
+	.llb-fakten:not([data-dichte="kompakt"]) { grid-template-columns: 1fr; gap: 0; }
+	.llb-fakten:not([data-dichte="kompakt"]) dd { margin-bottom: 10px; }
+}

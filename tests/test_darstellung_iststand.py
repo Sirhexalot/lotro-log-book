@@ -21,6 +21,43 @@ class DarstellungIststandTest(unittest.TestCase):
         self.assertIn('--llb-flaechen-ton', css)
         self.assertIn('.llb-raster', css)
 
+    def test_framed_section_is_one_component(self):
+        """Catalogue pages and the map panel must not get their own surfaces."""
+        css = read('web/flaeche.css')
+        self.assertIn('.llb-flaeche {', css)
+        for token in ('--llb-flaechen-innen', '--llb-flaechen-rand',
+                      '--llb-flaechen-radius', '--llb-flaechen-ton'):
+            self.assertIn(token, css)
+        self.assertIn('[data-dichte="kompakt"]', css)
+        makro = read('php/templates/components/flaeche.twig')
+        self.assertIn('{% macro flaeche(', makro)
+        self.assertIn('caller()', makro)
+        # Loaded by the catalogue shell and by the map application.
+        self.assertIn("assetTag('flaeche.css')", read('php/src/Shell.php'))
+        self.assertIn('flaeche.css', read('php/templates/app/karte.twig'))
+        self.assertIn("'detail-abschnitt llb-flaeche'", read('web/app.js'))
+        # The tab panel keeps its own surface until tabs map onto the component.
+        self.assertIn('.item-bezugsreiter > [role="tabpanel"]', read('web/katalog.css'))
+
+    def test_fact_grid_is_one_component(self):
+        """Label/value facts look the same on catalogue pages and in the panel."""
+        css = read('web/fakten.css')
+        self.assertIn('.llb-fakten {', css)
+        self.assertIn('grid-template-columns: auto minmax(0, 1fr)', css)
+        self.assertIn('[data-dichte="kompakt"]', css)
+        self.assertIn("'llb-fakten'", read('web/app.js'))
+        self.assertIn("fakten.dataset.dichte = 'kompakt'", read('web/app.js'))
+        self.assertIn("assetTag('fakten.css')", read('php/src/Shell.php'))
+        self.assertIn('fakten.css', read('php/templates/app/karte.twig'))
+        for page in ('php/templates/entity/quest.twig', 'php/templates/entity/deed.twig',
+                     'php/templates/entity/recipe.twig'):
+            text = read(page)
+            self.assertIn('llb-fakten', text, page)
+            self.assertNotIn('katalog-fakten', text, page)
+        for page in ('web/katalog.css', 'web/style.css'):
+            self.assertNotIn('.katalog-fakten', read(page), page)
+            self.assertNotIn('.detail-fakten', read(page), page)
+
     def test_result_rows_align_icon_left_and_progress_right(self):
         css = read('web/filter-ui.css')
         self.assertIn('padding:9px 0', css)
@@ -46,7 +83,7 @@ class DarstellungIststandTest(unittest.TestCase):
 
     def test_map_detail_panel_has_labelled_facts_and_sections(self):
         js = read('web/app.js')
-        for needle in ('detail-fakten', 'detail-fortschritt', 'detail-abschnitt',
+        for needle in ('llb-fakten', 'detail-fortschritt', 'detail-abschnitt',
                        'detail_was_tun', 'detail_ziele_karte', 'questNachId'):
             self.assertIn(needle, js)
         self.assertIn('Object.keys(questNachId).forEach', js)
@@ -67,7 +104,8 @@ class DarstellungIststandTest(unittest.TestCase):
         self.assertIn('background: var(--llb-flaechen-ton)', css)
         self.assertIn('.klassen-katalog [role="tabpanel"]', css)
         twig = read('php/templates/app/klassen.twig')
-        self.assertIn('klassen-reiter katalog-reiter', twig)
+        self.assertIn("reiter.reiter('klassen'", twig)
+        self.assertNotIn('klassen-reiter', twig)
     def test_lists_use_one_separator_and_large_icons(self):
         css = read('web/filter-ui.css')
         self.assertIn('> li:is(.mql-row, .mql-row-heading) { border-bottom: 0; }', css)
@@ -84,8 +122,8 @@ class DarstellungIststandTest(unittest.TestCase):
 
     def test_crafting_browser_hides_profession_tab(self):
         twig = read('php/templates/app/handwerk.twig')
-        self.assertRegex(twig, r'data-hw="berufe"[^>]*hidden')
-        self.assertRegex(twig, r'data-hw="rezepte" aria-pressed="true"')
+        self.assertIn("reiter.reiter('handwerk'", twig)
+        self.assertNotIn('data-hw=', twig)
         self.assertIn('<section id="hw-berufe" hidden>', twig)
 
     def test_deep_filter_tree_keeps_its_hierarchy(self):

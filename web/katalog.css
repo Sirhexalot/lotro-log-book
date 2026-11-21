@@ -6,13 +6,13 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-inhalt h2 { font-size: var(--text-abschnitt); margin-top: 28px; }
 .katalog-inhalt h3 { font-size: var(--text-normal); }
 .katalog-inhalt article { font-size: var(--text-normal); line-height: var(--zeile-lesetext); }
-.katalog-inhalt a:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .gebiet-tab, .mql-row-hit)) {
+.katalog-inhalt a:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .mql-row-hit)) {
 	color: var(--gold);
 	text-decoration-line: underline;
 	text-decoration-thickness: .08em;
 	text-underline-offset: .16em;
 }
-.katalog-inhalt a:visited:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .gebiet-tab, .mql-row-hit)) {
+.katalog-inhalt a:visited:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .mql-row-hit)) {
 	color: var(--gold);
 }
 .katalog-inhalt a:focus-visible {
@@ -38,9 +38,6 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-inhalt a.katalog-chip,
 .katalog-inhalt a.katalog-ortlink { text-decoration: none; }
 .katalog-pfad { font-size: var(--text-bedienung); color: var(--schwach); overflow-wrap: anywhere; }
-.katalog-fakten { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 20px; }
-.katalog-fakten dt { color: var(--schwach); }
-.katalog-fakten dd { margin: 0; overflow-wrap: anywhere; }
 .katalog-text { white-space: pre-line; }
 .katalog-liste { columns: 2 300px; padding-left: 22px; }
 .katalog-liste li { break-inside: avoid; margin-bottom: 10px; }
@@ -53,8 +50,6 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 #katalog-status[data-done="true"] { color: var(--fertig); }
 @media (max-width: 640px) {
     .katalog-inhalt { padding-inline: 12px; }
-    .katalog-fakten { grid-template-columns: 1fr; gap: 0; }
-    .katalog-fakten dd { margin-bottom: 10px; }
     .katalog-ziele ol { padding-left: 20px; }
 }
 
@@ -77,19 +72,12 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .entity-filter-link { margin: 4px 0 10px; font-size: var(--text-bedienung); }
 .katalog-inhalt .katalog-varianten { padding: 0; list-style: none; }
 
-.katalog-reiter { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 8px;
-    border-bottom: 1px solid var(--llb-flaechen-rand); }
-.katalog-reiter button { padding: 7px 12px; border: 1px solid var(--llb-flaechen-rand);
-    border-bottom: 0; border-radius: 4px 4px 0 0; color: var(--text);
-    background: var(--fläche); font: inherit; cursor: pointer; }
-.katalog-reiter button[aria-selected="true"] { color: var(--gold);
-    background: var(--fläche-hell); }
-.katalog-reiter button:hover, .katalog-reiter button:focus-visible {
-    color: var(--gold); }
 .item-bezugsreiter {
 	margin-top: 22px;
 }
-:is(.item-bezugsreiter > [role="tabpanel"], .entity-detail-reading > :is(section, details), .entity-detail-place > section, .entity-detail-layout > section, .item-seite .entity-detail-grid > section) {
+/* The tab panel keeps its look from here (tabs own their panel surface). Every
+   other framed section uses `.llb-flaeche` from flaeche.css. */
+.item-bezugsreiter > [role="tabpanel"] {
 	box-sizing: border-box; min-width: 0; padding: var(--llb-flaechen-innen);
 	border: 1px solid var(--llb-flaechen-rand); border-radius: var(--llb-flaechen-radius); background: var(--llb-flaechen-ton);
 }
@@ -163,7 +151,7 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	.item-seite .entity-detail-overview-pair > :is(.entity-item-description, .katalog-werteflaeche) { grid-column: span 6; }
 }
 .quest-herkunft > h2, .quest-detail-ort > h2 { margin: 0 0 8px; font-size: var(--text-abschnitt); font-weight: var(--gewicht-medium); }
-.quest-herkunft .katalog-fakten { margin: 0; }
+.quest-herkunft .llb-fakten { margin-bottom: 0; }
 .entity-detail-layout .entity-detail-place > .quest-detail-ort { max-width: none; }
 .entity-detail-place .katalog-ort { max-width: none; }
 .quest-detail-ort .katalog-ort { margin: 0 0 6px; }
@@ -283,23 +271,11 @@ body[data-art="i"] .katalog-kopf h1.q5 { color: var(--llb-palette-e6a94d); }
 	display: flex; gap: 6px; margin: 24px 0 0; padding: 0 0 10px;
 	border-bottom: 2px solid var(--rand); overflow-x: auto; white-space: nowrap;
 }
-.gebiet-tab {
-	flex: 0 0 auto; min-height: 44px; display: inline-flex; align-items: center; gap: 8px;
-	padding: 10px 14px; font-size: var(--text-normal); color: var(--schwach);
-	background: var(--fläche); border: 1px solid var(--rand); border-radius: 4px;
-}
-.gebiet-tab:hover, .gebiet-tab:focus-visible { color: var(--gold); border-color: var(--gold); }
-.gebiet-tab[aria-selected="true"] {
-	color: var(--llb-palette-19150f); background: var(--gold); border-color: var(--gold);
-	font-weight: var(--gewicht-bold); box-shadow: inset 0 -3px 0 var(--llb-palette-fff0b9);
-}
-.gebiet-zahl { font-size: var(--text-klein); font-variant-numeric: tabular-nums; padding: 1px 6px; border-radius: 10px; background: var(--llb-palette-rgba-255-255-255-p08); }
-.gebiet-tab[aria-selected="true"] .gebiet-zahl { background: var(--llb-palette-rgba-25-21-15-p16); }
 
 .gebiet-buehne { padding-top: 18px; }
 @media (max-width: 640px) {
 	.gebiet-reiter { gap: 4px; }
-	.gebiet-tab { font-size: var(--text-bedienung); padding: 9px 8px; gap: 5px; }
+
 }
 
 /* --- Quest-giver and faction details (12.11.2026): the lists are complete,

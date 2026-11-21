@@ -11,8 +11,8 @@ const base = process.argv[2] || 'http://127.0.0.1:8813';
 		page.on('pageerror', e => errors.push(e.message));
 		for (const route of ['/de/handwerk/rezepte/', '/en/crafting/recipes/', '/fr/artisanat/recettes/']) {
 			await page.goto(base + route + '?beruf=COOK', {waitUntil: 'networkidle'});
-			for (const tab of ['berufe', 'rezepte', 'rohstoffe']) {
-				await page.click('[data-hw="' + tab + '"]');
+			for (const tab of ['rezepte', 'rohstoffe']) {
+				await page.click('[data-reiter-knopf="' + tab + '"]');
 				let url = new URL(page.url());
 				assert.equal(url.pathname, route);
 				// The shared filter writes array parameters as beruf[]=COOK;
@@ -25,7 +25,7 @@ const base = process.argv[2] || 'http://127.0.0.1:8813';
 				assert.equal(url.hash, '#' + tab);
 				assert.equal(await page.locator('#hw-' + tab).isVisible(), true);
 			}
-			console.log(route + ': all three tabs survive reload with query intact');
+			console.log(route + ': both tabs survive reload with query intact');
 		}
 		assert.deepEqual(errors, []);
 	} finally { await browser.close(); }

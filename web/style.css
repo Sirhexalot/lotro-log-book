@@ -666,8 +666,6 @@ main.seite {
 }
 .kasten.hinweis-gut { border-color: var(--llb-palette-4d6b49); }
 .kasten.hinweis-warn { border-color: var(--llb-palette-7a6233); }
-.reiter { display: flex; gap: 4px; margin-top: 8px; }
-.reiter button[aria-pressed="true"] { background: var(--llb-palette-342d25); border-color: var(--gold); color: var(--text); }
 .reiter-inhalt[hidden] { display: none; }
 .befehl {
 	display: block;
@@ -1407,18 +1405,15 @@ body main { grid-template-columns: clamp(280px, var(--listenbreite, 390px), calc
 .detail-symbol { width: 54px; height: 54px; flex: none; display: grid; place-items: center; box-sizing: border-box;
 	border: 1px solid var(--llb-icon-tile-border); border-radius: 5px; background: var(--llb-icon-tile-bg); color: var(--gold); }
 .detail-symbol svg { width: 24px; height: 24px; }
-.detail-fakten { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 12px; margin: 0 0 10px; font-size: var(--text-kompakt); }
-.detail-fakten dt { color: var(--schwach); }
-.detail-fakten dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
-.detail-fakten a, .detail-fakten .gebietsprung { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
+/* Fact grid from `.llb-fakten` (fakten.css). */
 .detail-fortschritt { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0 0 10px;
 	padding: 8px 10px; background: var(--fläche-hell); border: 1px solid var(--rand); border-radius: 5px; }
 .detail-fortschritt > span:first-child { color: var(--schwach); font-size: var(--text-kompakt); }
 .detail-lage { color: var(--schwach); font-size: var(--text-klein); }
 .detail-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 0 0 12px; font-size: var(--text-kompakt); }
 .detail-aktionen a { color: var(--gold); }
-.detail-abschnitt { margin: 0 0 10px; padding: 10px 12px; background: var(--fläche-hell);
-	border: 1px solid var(--rand); border-radius: 5px; }
+/* Surface from `.llb-flaeche` (flaeche.css), only the tick here. */
+.detail-abschnitt { margin: 0 0 10px; }
 .detail-abschnitt > h3 { margin: 0 0 7px; font-size: var(--text-fliesstext-kompakt); font-weight: var(--gewicht-semibold); letter-spacing: normal;
 	text-transform: none; color: var(--text); }
 .detail-abschnitt .text { margin: 0 0 7px; font-size: var(--text-bedienung); line-height: var(--zeile-detail); }

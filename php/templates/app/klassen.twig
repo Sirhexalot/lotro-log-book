@@ -1,4 +1,5 @@
 {% extends 'app/layout.twig' %}
+{% import 'components/reiter.twig' as reiter %}
 
 {% block koerper_attribute %} data-seite="klassen" class="seite-text"{% endblock %}
 
@@ -31,20 +32,23 @@
 		</div>
 	</section>
 	<section class="klassen-katalog" aria-label="Aufgaben, Taten und Gegenstände">
-		<div class="klassen-reiter katalog-reiter" role="tablist">
-			<button type="button" role="tab" id="reiter-aufgaben" aria-controls="liste-aufgaben">Aufgaben</button>
-			<button type="button" role="tab" id="reiter-taten" aria-controls="liste-taten">Taten</button>
-			<button type="button" role="tab" id="reiter-gegenstaende" aria-controls="liste-gegenstaende">Gegenstände</button>
-		</div>
-		<div id="liste-aufgaben" class="klassen-filter related-list" role="tabpanel" aria-labelledby="reiter-aufgaben">
+		{% set kt = {de: {q: 'Aufgaben', d: 'Taten', i: 'Gegenstände', label: 'Aufgaben, Taten und Gegenstände'},
+		             en: {q: 'Quests', d: 'Deeds', i: 'Items', label: 'Quests, deeds and items'},
+		             fr: {q: 'Quêtes', d: 'Prouesses', i: 'Objets', label: 'Quêtes, prouesses et objets'}}[lang] %}
+		{{ reiter.reiter('klassen', kt.label, [
+			{key: 'quests', label: kt.q, panel: 'liste-aufgaben'},
+			{key: 'deeds', label: kt.d, panel: 'liste-taten'},
+			{key: 'items', label: kt.i, panel: 'liste-gegenstaende'}
+		], 'quests') }}
+		<div id="liste-aufgaben" class="klassen-filter related-list" role="tabpanel" aria-labelledby="klassen-quests">
 			<p class="klassen-filter-fehler" data-filter-error hidden></p>
 			<ol id="klassen-aufgaben" class="related-results" data-filter-results></ol>
 		</div>
-		<div id="liste-taten" class="klassen-filter related-list" role="tabpanel" aria-labelledby="reiter-taten" hidden>
+		<div id="liste-taten" class="klassen-filter related-list" role="tabpanel" aria-labelledby="klassen-deeds" hidden>
 			<p class="klassen-filter-fehler" data-filter-error hidden></p>
 			<ol id="klassen-taten" class="related-results" data-filter-results></ol>
 		</div>
-		<div id="liste-gegenstaende" role="tabpanel" aria-labelledby="reiter-gegenstaende" hidden>
+		<div id="liste-gegenstaende" role="tabpanel" aria-labelledby="klassen-items" hidden>
 			<div id="filter-gegenstaende" class="klassen-filter related-list">
 				<p class="klassen-filter-fehler" data-filter-error hidden></p>
 				<ol id="klassen-gegenstaende" class="related-results" data-filter-results></ol>

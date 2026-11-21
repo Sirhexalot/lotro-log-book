@@ -1,40 +1,12 @@
 /* Small, optional filters for related sections on item pages. */
 (function () {
     'use strict';
-    var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-item-tab]'));
-    var panels = Array.prototype.slice.call(document.querySelectorAll('[data-item-tab-panel]'));
-    function showTab(name) {
-        tabs.forEach(function (tab) {
-            var active = tab.getAttribute('data-item-tab') === name;
-            tab.setAttribute('aria-selected', String(active));
-            tab.tabIndex = active ? 0 : -1;
-        });
-        panels.forEach(function (panel) {
-            panel.hidden = panel.getAttribute('data-item-tab-panel') !== name;
-        });
-    }
-    if (tabs.length) {
-        tabs.forEach(function (tab, index) {
-            tab.addEventListener('click', function () {
-                showTab(tab.getAttribute('data-item-tab'));
-            });
-            tab.addEventListener('keydown', function (event) {
-                if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) { return; }
-                event.preventDefault();
-                var next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
-                    : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-                showTab(tabs[next].getAttribute('data-item-tab'));
-                tabs[next].focus();
-            });
-        });
+    var tabHost = document.querySelector('.item-bezugsreiter .llb-reiter');
+    if (tabHost && window.MQL_REITER) {
+        /* A link from a recipe filter opens the usage tab directly. */
         var recipeQuery = Array.from(new URL(location.href).searchParams.keys())
             .some(function (key) { return key.indexOf('recipe.') === 0; });
-        var initial = recipeQuery ? tabs.filter(function (tab) {
-            return tab.getAttribute('data-item-tab') === 'wofuer';
-        })[0] : tabs.filter(function (tab) {
-            return tab.getAttribute('aria-selected') === 'true';
-        })[0];
-        showTab(initial ? initial.getAttribute('data-item-tab') : tabs[0].getAttribute('data-item-tab'));
+        window.MQL_REITER.mount(tabHost, { aktiv: recipeQuery ? 'wofuer' : null });
     }
     function taskReference(row) {
         var link = row.querySelector('a[href]');

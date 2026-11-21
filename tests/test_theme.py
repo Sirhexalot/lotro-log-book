@@ -169,13 +169,13 @@ class ThemeTest(unittest.TestCase):
         self.assertIn('color-scheme: inherit', css)
         self.assertNotIn('color-scheme: dark', css)
 
-    def test_inactive_class_tabs_use_readable_secondary_text(self):
-        css = read('web/klassen.css')
-        tabs = css.split('.klassen-reiter button {', 1)[1].split('}', 1)[0]
+    def test_inactive_tabs_use_readable_secondary_text(self):
+        css = read('web/reiter.css')
+        tabs = css.split('.llb-reiter button {', 1)[1].split('}', 1)[0]
         self.assertIn('color: var(--schwach)', tabs)
         self.assertIn('border: 1px solid var(--llb-flaechen-rand)', tabs)
-        self.assertIn('.klassen-reiter button[aria-selected="true"]', css)
-        self.assertIn('color: var(--gold)', css.split('.klassen-reiter button[aria-selected="true"]', 1)[1].split('}', 1)[0])
+        aktiv = css.split('.llb-reiter button[aria-selected="true"] {', 1)[1].split('}', 1)[0]
+        self.assertIn('color: var(--gold)', aktiv)
 
     def test_light_theme_gold_buttons_have_contrasting_text(self):
         css = read('web/theme-light.css')
@@ -187,10 +187,10 @@ class ThemeTest(unittest.TestCase):
         self.assertIn('color: var(--text)', hover)
 
     def test_entity_tabs_use_shared_surface_border(self):
-        css = read('web/katalog.css')
-        tablist = css.split('.katalog-reiter {', 1)[1].split('}', 1)[0]
-        tabs = css.split('.katalog-reiter button {', 1)[1].split('}', 1)[0]
-        self.assertIn('border-bottom: 1px solid var(--llb-flaechen-rand)', tablist)
+        css = read('web/reiter.css')
+        tablist = css.split('.llb-reiter {', 1)[1].split('}', 1)[0]
+        tabs = css.split('.llb-reiter button {', 1)[1].split('}', 1)[0]
+        self.assertIn('margin-bottom: -1px', tablist)
         self.assertIn('border: 1px solid var(--llb-flaechen-rand)', tabs)
 
 

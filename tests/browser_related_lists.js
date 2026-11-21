@@ -21,10 +21,14 @@ const artifacts = path.join(require('node:os').homedir(), '.cache/llb-related-te
 				async function open(segment, id, hash = '') {
 					const response = await page.goto(`${base}/${lang}/${segment}/${id}/${hash}`, { waitUntil: 'domcontentloaded' });
 					assert.equal(response.status(), 200);
+					/* A few entities carry no related list at all; nothing to measure. */
+					if (await page.locator('#related-lists').count() === 0) { return false; }
 					assert.equal(await page.locator('.katalog-inhalt').getAttribute('data-related-filter-limit'), '5');
 					await page.waitForFunction(() => window.MQL_RELATED_FILTER ||
 						document.querySelector('.related-results'));
-					const hasFilter = await page.locator('.filter-ui').count() === 1;
+					/* A page may carry more than one relation filter (item pages add a
+					 * barter list); the related list is the one under #related-panel. */
+					const hasFilter = await page.locator('.filter-ui').count() >= 1;
 					if (!hasFilter) {
 						assert.equal(await page.locator('.related-results').count(), 1);
 						return false;
@@ -32,25 +36,34 @@ const artifacts = path.join(require('node:os').homedir(), '.cache/llb-related-te
 					// A relation may live in a tab panel that starts hidden; reveal
 					// its tab before measuring the filter's width.
 					await page.evaluate(() => {
-						const filter = document.querySelector('.filter-ui');
-						const panel = filter.closest('[data-item-tab-panel]');
+						/* The related list may sit in a hidden tab panel; open it first. */
+						const panel = document.getElementById('related-panel');
 						if (panel && panel.hidden) {
-							const tab = document.querySelector('[data-item-tab][aria-controls="' + panel.id + '"]');
+							const tab = document.querySelector('[data-reiter-knopf][aria-controls="related-panel"]');
 							if (tab) { tab.click(); }
 						}
 					});
 					await page.waitForFunction(() => document.querySelector('.filter-result-toolbar [role=status]')?.textContent.match(/\d/));
 					const widths = await page.evaluate(() => {
-						const filter = document.querySelector('.filter-ui');
-						const article = filter.closest('article');
+						/* Measure the filter the visitor actually sees, not one in a
+						 * hidden tab panel (a hidden element has width zero). */
+						const filter = [...document.querySelectorAll('.filter-ui')]
+							.find((f) => f.getBoundingClientRect().width > 0)
+							|| document.querySelector('.filter-ui');
+						/* Inside a tab the filter fills the panel's content box. */
+						const article = filter.closest('[role="tabpanel"]') || filter.closest('article');
+						const rahmen = getComputedStyle(article);
+						const innen = article.getBoundingClientRect().width
+							- parseFloat(rahmen.paddingLeft) - parseFloat(rahmen.paddingRight)
+							- parseFloat(rahmen.borderLeftWidth) - parseFloat(rahmen.borderRightWidth);
 						const search = filter.querySelector('.filter-toolbar');
 						const input = search && search.querySelector('input');
 						const resultBar = filter.querySelector('.filter-result-toolbar');
-						return { filter: filter.getBoundingClientRect().width, article: article.getBoundingClientRect().width,
+						return { filter: filter.getBoundingClientRect().width, article: innen,
 							search: search && search.getBoundingClientRect().width,
 							input: input && input.getBoundingClientRect().width,
 							resultBar: resultBar && resultBar.getBoundingClientRect().width,
-							maxWidth: getComputedStyle(article).maxWidth,
+							maxWidth: getComputedStyle(filter.closest('article')).maxWidth,
 							overflow: document.documentElement.scrollWidth > innerWidth };
 					});
 					assert.ok(Math.abs(widths.filter - widths.article) <= 1, `${lang}/${segment} filter is not full width at ${width}px`);
@@ -69,8 +82,8 @@ const artifacts = path.join(require('node:os').homedir(), '.cache/llb-related-te
 					window.MQL_RELATED_NEEDS_FILTER(6),
 					window.MQL_RELATED_FILTER_LIMIT
 				]), [false, true, 5], 'globale 5/6-Schwelle');
-				assert.match(await page.locator('.filter-result-toolbar').innerText(), /91/);
-				assert.equal(await page.locator('.related-results tbody tr').count(), 50);
+				assert.match(await page.locator('#related-panel .filter-result-toolbar').first().innerText(), /91/);
+				assert.equal(await page.locator('#related-panel .related-results .mql-row').count(), 50);
 				assert.deepEqual(await page.evaluate(() => {
 					const lists = JSON.parse(document.getElementById('related-lists').textContent);
 					return [lists.recipe.rows.length, lists.recipe_made.rows.length];
@@ -78,14 +91,14 @@ const artifacts = path.join(require('node:os').homedir(), '.cache/llb-related-te
 				const recipeIds = await page.evaluate(() => JSON.parse(document.getElementById('related-lists').textContent).recipe.rows.map(r => r[10]));
 				assert.equal(recipeIds.length, 91);
 				await page.evaluate(() => window.MQL_RELATED_FILTER.dispatch({ type: 'more' }));
-				assert.equal(await page.locator('.related-results tbody tr').count(), 91);
+				assert.equal(await page.locator('#related-panel .related-results .mql-row').count(), 91);
 				const tail = await page.evaluate(() => JSON.parse(document.getElementById('related-lists').textContent).recipe.rows.at(-1)[0]);
 				await page.evaluate(value => window.MQL_RELATED_FILTER.dispatch({ type: 'searchSubmit', value }), tail);
-				assert.ok(await page.locator('.related-results tbody tr').count() > 0, 'search beyond first 50');
+				assert.ok(await page.locator('#related-panel .related-results .mql-row').count() > 0, 'search beyond first 50');
 				await page.reload({ waitUntil: 'networkidle' });
 				assert.equal(await page.evaluate(() => window.MQL_RELATED_FILTER.getState().q), tail);
 				await page.evaluate(() => window.MQL_RELATED_FILTER.dispatch({ type: 'reset' }));
-				assert.match(await page.locator('.filter-result-toolbar').innerText(), /91/);
+				assert.match(await page.locator('#related-panel .filter-result-toolbar').first().innerText(), /91/);
 				assert.equal(new URL(page.url()).pathname, `/${lang}/${segments[0]}/70001B7E/`);
 				await page.screenshot({ path: path.join(artifacts, `item-${lang}-${width}.png`), fullPage: false });
 
@@ -133,7 +146,7 @@ const artifacts = path.join(require('node:os').homedir(), '.cache/llb-related-te
 		assert.equal(await made.locator('h1').evaluate((n) => n.getBoundingClientRect().width > 0), true,
 			'item heading stays visible');
 		assert.equal(await made.locator('.filter-ui').count(), 1, 'one crafting filter');
-		assert.ok(await made.locator('#recipe-made-panel tbody tr').count() > 0, 'crafting rows mounted');
+		assert.ok(await made.locator('#recipe-made-panel .mql-row').count() > 0, 'crafting rows mounted');
 		assert.deepEqual(await made.evaluate(() =>
 			Object.keys(JSON.parse(document.getElementById('related-lists').textContent))), ['recipe_made']);
 		await made.close();

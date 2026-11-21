@@ -1,4 +1,5 @@
 {% extends 'app/layout.twig' %}
+{% import 'components/reiter.twig' as reiter %}
 
 {% block koerper_attribute %} data-seite="spielstand" class="seite-text"{% endblock %}
 
@@ -22,16 +23,16 @@
 	<p data-t-html="sp_hilfe_companion"></p>
 	<details class="import-ordnerhilfe">
 		<summary data-t="sp_ordner_hilfe">Wo finde ich den Ordner?</summary>
-		<p data-t="sp_laden"></p>
-		<div class="reiter" role="tablist">
-			<button type="button" data-reiter="windows" aria-pressed="true">Windows</button>
-			<button type="button" data-reiter="mac" aria-pressed="false">macOS</button>
-		</div>
-		<div data-inhalt="windows">
+		<p data-t-html="sp_laden"></p>
+		{{ reiter.reiter('ordner', 'Betriebssystem', [
+			{key: 'windows', label: 'Windows', panel: 'ordner-panel-windows'},
+			{key: 'mac', label: 'macOS', panel: 'ordner-panel-mac'}
+		], 'windows') }}
+		<div id="ordner-panel-windows" role="tabpanel" aria-labelledby="ordner-windows">
 			<p data-t="sp_ordner_windows"></p>
 			<code>%USERPROFILE%\.lotrocompanion\data\characters</code>
 		</div>
-		<div data-inhalt="mac" hidden>
+		<div id="ordner-panel-mac" role="tabpanel" aria-labelledby="ordner-mac" hidden>
 			<p data-t="sp_ordner_mac"></p>
 			<code>~/Applications/The Lord of the Rings Online.app/Contents/SharedSupport/prefix/drive_c/users/Wineskin/.lotrocompanion/data/characters</code>
 		</div>

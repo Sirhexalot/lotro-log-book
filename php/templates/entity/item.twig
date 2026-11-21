@@ -1,5 +1,6 @@
 {% extends 'layout.twig' %}
 {% import 'entity/_result_row.twig' as result %}
+{% import 'components/reiter.twig' as reiter %}
 
 {# Item page: descriptive item content first, related sources/usages as tabs. #}
 {% block inhalt %}
@@ -9,7 +10,7 @@
 {% if page.eyebrow %}<p class="katalog-augenbraue">{{ page.eyebrow }}</p>{% endif %}
 {% if page.chips and not page.has_values %}<p class="katalog-metazeile">{{ page.chips|map(chip => chip.text)|join(' · ') }}</p>{% endif %}
 <div class="entity-detail-grid llb-raster{% if page.description and page.has_values %} entity-detail-overview-pair{% endif %}">
-{% if page.description %}<section class="entity-item-description" aria-label="{{ w.description }}"><p class="katalog-text">{{ page.description }}</p></section>{% endif %}
+{% if page.description %}<section class="entity-item-description llb-flaeche" aria-label="{{ w.description }}"><p class="katalog-text">{{ page.description }}</p></section>{% endif %}
 {% if page.has_values %}<section class="katalog-abschnitt katalog-flaeche katalog-werteflaeche">
 <h2>{{ w.values }}</h2>
 {% if page.chips %}<p class="katalog-metazeile">{% for chip in page.chips %}{% if not loop.first %} · {% endif %}<span class="{{ chip.cls }}">{{ chip.text }}</span>{% endfor %}</p>{% endif %}
@@ -32,13 +33,14 @@
 
 {% set both_relations = page.has_where_from|default(false) and page.has_used_for|default(false) %}
 {% if both_relations %}<div class="item-bezugsreiter">
-<div class="katalog-reiter" role="tablist" aria-label="{{ w.ilabel }}">
-<button type="button" role="tab" id="item-reiter-woher" aria-selected="true" aria-controls="item-tab-woher" data-item-tab="woher">{{ w.tab_where_from }}</button>
-<button type="button" role="tab" id="item-reiter-wofuer" aria-selected="false" aria-controls="item-tab-wofuer" tabindex="-1" data-item-tab="wofuer">{{ w.tab_used_for }}</button>
+{{ reiter.reiter('item', w.ilabel, [
+    {key: 'woher', label: w.tab_where_from, panel: 'item-tab-woher', zahl: page.where_from_count|default(0)},
+    {key: 'wofuer', label: w.tab_used_for, panel: 'item-tab-wofuer', zahl: page.used_for_count|default(0)}
+], 'woher') }}
 </div>{% endif %}
 {% if page.task_filter|default(false) %}<script type="application/json" id="item-task-filter-data">{{ page.task_filter|json_encode|raw }}</script>{% endif %}
 
-{% if page.has_where_from|default(false) %}<section id="item-tab-woher" data-item-tab-panel="woher"{% if both_relations %} role="tabpanel" aria-labelledby="item-reiter-woher" tabindex="0"{% else %} class="katalog-abschnitt katalog-beziehungen"{% endif %}>
+{% if page.has_where_from|default(false) %}<section id="item-tab-woher"{% if both_relations %} role="tabpanel" aria-labelledby="item-woher" tabindex="0"{% else %} class="katalog-abschnitt katalog-beziehungen"{% endif %}>
 {% if not both_relations %}<h2>{{ w.tab_where_from }}</h2>{% endif %}
 {% for group in page.where_groups %}
 {% if group.instance_chests|default(false) %}
@@ -76,7 +78,7 @@
 </section>{% endif %}{% endfor %}
 </section>{% endif %}
 
-{% if page.has_used_for|default(false) %}<section id="item-tab-wofuer" data-item-tab-panel="wofuer"{% if both_relations %} role="tabpanel" aria-labelledby="item-reiter-wofuer" tabindex="0" hidden{% else %} class="katalog-abschnitt katalog-beziehungen"{% endif %}{% if page.used_in|length > direct_list_max %} data-item-filter-group{% endif %}>
+{% if page.has_used_for|default(false) %}<section id="item-tab-wofuer"{% if both_relations %} role="tabpanel" aria-labelledby="item-wofuer" tabindex="0" hidden{% else %} class="katalog-abschnitt katalog-beziehungen"{% endif %}{% if page.used_in|length > direct_list_max %} data-item-filter-group{% endif %}>
 {% if not both_relations %}<h2>{{ w.tab_used_for }}</h2>{% endif %}
 {% if page.used_in|length > direct_list_max %}<p class="katalog-detail-filter"><label>{{ w.search }} <input type="search" data-item-filter-search></label><label><select data-item-filter-role><option value="">{{ w.all }}</option><option value="{{ w.normal_ingredient }}">{{ w.normal_ingredient }}</option><option value="{{ w.optional_ingredient }}">{{ w.optional_ingredient }}</option></select></label></p>{% endif %}
 <ul class="quellen-liste" data-quellen-liste>{% for entry in page.used_in %}<li data-url="{{ entry.url }}"{% if page.used_in|length > direct_list_max %} data-item-filter-row{% endif %}{% if entry.role|default('') %} data-role="{{ entry.role }}"{% endif %}><a href="{{ entry.url }}">{{ entry.text }}</a>{% if entry.role|default('') %} · {{ entry.role }}{% endif %}{% if entry.quantity|default(0) %} · {{ w.quantity }}: {{ entry.quantity }}{% endif %}</li>{% endfor %}</ul>

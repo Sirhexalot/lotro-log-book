@@ -36,7 +36,7 @@
 		fr: {loot:'Chercher du butin', rewards:'Chercher une récompense', level:'Niveau de l’instance', tier:'Difficulté', players:'Taille du groupe', name:'Nom', chance:'Chance par coffre', quest:'Quête', empty:'Aucun objet correspondant.'}
 	}[lang];
 	var A = window.MQL_FILTERADAPTER, rowsUI = window.MQL_TREFFERZEILE;
-	var tabs = Array.from(host.querySelectorAll('[data-instance-tab]'));
+	var tabHost = host.querySelector('.llb-reiter');
 	var panels = Array.from(host.querySelectorAll('[data-instance-panel]'));
 	var filterLimit = Number(document.querySelector('main').dataset.relatedFilterLimit);
 	var active, controller, queue = Promise.resolve();
@@ -148,17 +148,13 @@
 	function wanted() {
 		return panels.find(function (panel) { return '#'+panel.id === location.hash; }) || panels[0];
 	}
-	function show(panel, force) {
+	function show(key, force) {
 		queue = queue.then(async function () {
-			if (active === panel && !force) { return; }
+			if (active === key && !force) { return; }
 			if (controller) { await controller.destroy(); controller = null; }
-			active = panel;
-			tabs.forEach(function (b) {
-				var on = b.dataset.instanceTab === panel.id;
-				b.setAttribute('aria-selected',String(on)); b.tabIndex = on ? 0 : -1;
-			});
-			panels.forEach(function (p) { p.hidden = p !== panel; });
-			var key = panel.id, root = panel.querySelector('[data-instance-list]');
+			active = key;
+			var panel = panels.find(function (p) { return p.id === key; }) || panels[0];
+			var root = panel.querySelector('[data-instance-list]');
 			var setup = contextual(key === QUESTS ? window.MQL_TASK_FILTER_SETUP(lists[key], 'q') : itemSetup(key),key);
 			if (key === LOOT || lists[key].length > filterLimit) {
 				controller = window.MQL_FILTER_UI.mount(root,setup);
@@ -170,35 +166,22 @@
 		}).catch(function (e) { console.error(e); });
 	}
 
-	if (tabs.length) {
-		tabs[0].parentElement.hidden = false;
-		panels.forEach(function (p) {
-			p.setAttribute('role','tabpanel'); p.setAttribute('aria-labelledby','instanz-reiter-'+p.id); p.tabIndex = 0;
+	panels.forEach(function (p) { p.tabIndex = 0; });
+	if (tabHost && window.MQL_REITER) {
+		window.MQL_REITER.mount(tabHost, {
+			aktiv: wanted().id, hash: true, verlauf: true,
+			onShow: function (key) { show(key); }
 		});
-		tabs.forEach(function (button,index) {
-			button.addEventListener('click',function () {
-				var u = new URL(location.href); u.hash = button.dataset.instanceTab;
-				if (u.href !== location.href) { history.pushState(null,'',u); }
-				show(wanted());
-			});
-			button.addEventListener('keydown',function (e) {
-				if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) { return; }
-				e.preventDefault();
-				var next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length-1
-					: (index + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-				tabs[next].click(); tabs[next].focus();
-			});
-		});
-		window.addEventListener('hashchange',function () { show(wanted()); });
-		window.addEventListener('popstate',function () { show(wanted()); });
+	} else {
+		/* Without the shared tab bar every section stays visible. */
+		show(wanted().id, true);
 	}
 	function refreshQuests() {
-		if (active && active.id === QUESTS) { show(active,true); }
+		if (active === QUESTS) { show(QUESTS, true); }
 	}
 	document.addEventListener('mql:characterchange',refreshQuests);
 	document.addEventListener('change',function (e) {
 		if (e.target.id === 'katalog-charakter') { refreshQuests(); }
 	});
 	window.addEventListener('mql-status',refreshQuests);
-	show(wanted());
 })();

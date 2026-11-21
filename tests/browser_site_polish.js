@@ -56,7 +56,7 @@ async page => {
         await page.selectOption('#bl-art', '');
       }
       if (name === 'handwerk') {
-        await page.locator('[data-hw="rezepte"]').click();
+        await page.locator('[data-reiter-knopf="rezepte"]').click();
         await page.waitForSelector('.rezept-knopf');
         const recipe = await page.evaluate(() => ({
           rows: document.querySelectorAll('#rezept-inhalt tbody tr').length,

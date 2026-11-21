@@ -1,4 +1,5 @@
 {% extends 'app/layout.twig' %}
+{% import 'components/reiter.twig' as reiter %}
 
 {% block koerper_attribute %} data-seite="companion" class="seite-text"{% endblock %}
 
@@ -16,14 +17,14 @@
 	<ul data-t-html="cp_brauchst"></ul>
 
 	<h2 data-t="cp_schritt1">1. Companion starten</h2>
-	<div class="reiter" role="tablist">
-		<button type="button" data-reiter="windows" aria-pressed="true">Windows</button>
-		<button type="button" data-reiter="mac" aria-pressed="false">macOS</button>
-	</div>
-	<div class="kasten reiter-inhalt" data-inhalt="windows">
+	{{ reiter.reiter('companion', 'Betriebssystem', [
+		{key: 'windows', label: 'Windows', panel: 'cp-panel-windows'},
+		{key: 'mac', label: 'macOS', panel: 'cp-panel-mac'}
+	], 'windows') }}
+	<div class="kasten reiter-inhalt" id="cp-panel-windows" role="tabpanel" aria-labelledby="companion-windows">
 		<ol data-t-html="cp_windows"></ol>
 	</div>
-	<div class="kasten reiter-inhalt" data-inhalt="mac" hidden>
+	<div class="kasten reiter-inhalt" id="cp-panel-mac" role="tabpanel" aria-labelledby="companion-mac" hidden>
 		<ol data-t-html="cp_mac"></ol>
 		<code class="befehl" id="mac-befehl">for A in "$HOME/Applications" "/Applications"; do
   S="$A/The Lord of the Rings Online.app/Contents/SharedSupport"; [ -d "$S" ] &amp;&amp; break

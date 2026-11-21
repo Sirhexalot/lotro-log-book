@@ -13,7 +13,6 @@
 .instanz-art-name { color: var(--gold); font-size: var(--text-kompakt); font-weight: var(--gewicht-medium); margin-right: .45rem; }
 .instanz-art-namen { color: var(--schwach); font-size: var(--text-kompakt); line-height: var(--zeile-detail); }
 .instanz-detail > .katalog-abschnitt { max-width: 960px; }
-.instanz-reiter > .katalog-reiter[hidden] { display: none; }
 .instanz-reiter > [role="tabpanel"] > h2 { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
 .instanz-listenflaeche:not([role="tabpanel"]) {
 	box-sizing:border-box; min-width:0; padding:var(--llb-flaechen-innen);

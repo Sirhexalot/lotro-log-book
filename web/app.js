@@ -2466,7 +2466,9 @@
 		/** One framed section; the body is where the content goes. */
 		function abschnitt(klasse, titelText) {
 			var box = eltern('section', null);
-			box.className = 'detail-abschnitt' + (klasse ? ' ' + klasse : '');
+			box.className = 'detail-abschnitt llb-flaeche' + (klasse ? ' ' + klasse : '');
+			// Same surface as the catalogue, narrower padding for the side column.
+			box.dataset.dichte = 'kompakt';
 			if (titelText) {
 				var kopf = eltern('h3', titelText);
 				box.appendChild(kopf);
@@ -2507,7 +2509,8 @@
 
 		// --- Facts: labels, not a run-on line ---------------------------
 		var fakten = eltern('dl', null);
-		fakten.className = 'detail-fakten';
+		fakten.className = 'llb-fakten';
+		fakten.dataset.dichte = 'kompakt';
 		function faktum(label, inhalt) {
 			fakten.appendChild(eltern('dt', label));
 			var wert = eltern('dd', null);

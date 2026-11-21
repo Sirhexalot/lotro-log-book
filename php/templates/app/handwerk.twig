@@ -1,4 +1,5 @@
 {% extends 'app/layout.twig' %}
+{% import 'components/reiter.twig' as reiter %}
 
 {% block koerper_attribute %} data-seite="handwerk" class="seite-text"{% endblock %}
 
@@ -14,24 +15,25 @@
 {% block haupt %}
 <main class="seite handwerk-seite">
 <h2 data-t="hw_titel">Handwerk</h2>
-	<div class="reiter" role="tablist" id="hw-reiter">
-		<button type="button" data-hw="berufe" aria-pressed="false" data-t="hw_berufe" hidden>Berufe</button>
-		<button type="button" data-hw="rezepte" aria-pressed="true" data-t="hw_rezepte">Rezepte</button>
-		<button type="button" data-hw="rohstoffe" aria-pressed="false" data-t="hw_rohstoffe">Rohstoffe</button>
-	</div>
 	<p class="handwerk-einleitung" id="hw-einleitung" data-t="hw_text"></p>
+	<div id="hw-reiter">
+		{{ reiter.reiter('handwerk', 'Handwerk', [
+			{key: 'rezepte', label: 'Rezepte', panel: 'hw-rezepte'},
+			{key: 'rohstoffe', label: 'Rohstoffe', panel: 'hw-rohstoffe'}
+		], 'rezepte') }}
+	</div>
 
 	<section id="hw-berufe" hidden>
 		<p class="meldung" id="hinweis"></p>
 		<div id="berufe"></div>
 	</section>
 
-	<section id="hw-rezepte">
+	<section id="hw-rezepte" role="tabpanel" aria-labelledby="handwerk-rezepte">
 		<span id="rezepte" class="handwerk-anker" aria-hidden="true"></span>
 		<div id="rezepte-liste"></div>
 	</section>
 
-	<section id="hw-rohstoffe" hidden>
+	<section id="hw-rohstoffe" role="tabpanel" aria-labelledby="handwerk-rohstoffe" hidden>
 		<span id="rohstoffe" class="handwerk-anker" aria-hidden="true"></span>
 		<div id="rohstoffe-liste"></div>
 	</section>

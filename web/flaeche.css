@@ -1,0 +1,34 @@
+/* One framed section: the surface behind a heading and its content.
+ *
+ * Catalogue pages and the map's detail panel must show the same thing the same
+ * way, so the surface lives here and not in a page stylesheet. The heading size
+ * stays with the page: h2 on a catalogue page, h3 inside the map panel, because
+ * the panel already carries the entity title.
+ *
+ * Aliases at the bottom keep sections that still rely on their page structure.
+ * They go away as each page adds `llb-flaeche` itself (see AGENTS.md). */
+.llb-flaeche {
+	box-sizing: border-box;
+	min-width: 0;
+	padding: var(--llb-flaechen-innen);
+	border: 1px solid var(--llb-flaechen-rand);
+	border-radius: var(--llb-flaechen-radius);
+	background: var(--llb-flaechen-ton);
+}
+
+/* The map's detail column is about 360 px wide; the catalogue's generous
+ * padding would dwarf its content. */
+.llb-flaeche[data-dichte="kompakt"] { padding: 10px 12px; }
+
+/* Aliases: sections whose surface came from their page structure until now. */
+.entity-detail-reading > :is(section, details),
+.entity-detail-place > section,
+.entity-detail-layout > section,
+.item-seite .entity-detail-grid > section {
+	box-sizing: border-box;
+	min-width: 0;
+	padding: var(--llb-flaechen-innen);
+	border: 1px solid var(--llb-flaechen-rand);
+	border-radius: var(--llb-flaechen-radius);
+	background: var(--llb-flaechen-ton);
+}

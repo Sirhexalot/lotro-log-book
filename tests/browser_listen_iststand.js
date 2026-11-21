@@ -39,9 +39,9 @@ const base = process.argv[2] || 'http://127.0.0.1:8817';
 		assert.equal(groupBorder, '0px', 'Gruppenkarte hat einen farbigen Oberrand');
 
 		await page.goto(base + '/de/handwerk/rezepte/', { waitUntil: 'load' });
-		await page.locator('[data-hw]').first().waitFor();
-		assert.equal(await page.locator('[data-hw="berufe"]').isHidden(), true, 'Berufe-Reiter ist sichtbar');
-		assert.equal(await page.locator('[data-hw="rezepte"]').getAttribute('aria-pressed'), 'true');
+		await page.locator('[data-reiter-knopf]').first().waitFor();
+		assert.equal(await page.locator('[data-reiter-knopf]').count(), 2, 'Handwerk hat zwei Reiter');
+		assert.equal(await page.locator('[data-reiter-knopf="rezepte"]').getAttribute('aria-selected'), 'true');
 		console.log('Listen-Iststand: Trennlinien, Icons, Sprungmarken und Handwerk ok');
 	} finally {
 		await browser.close();
