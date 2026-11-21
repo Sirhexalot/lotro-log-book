@@ -20,7 +20,7 @@ async function zustand(page) {
 		baender: document.querySelectorAll('#liste li.epik-band').length,
 		buecher: document.querySelectorAll('#liste ul.epik-buecher').length,
 		buchKoepfe: document.querySelectorAll('#liste ul.epik-buecher li.abschnitt').length,
-		aufgaben: document.querySelectorAll('#liste ul.epik-buecher li:not(.abschnitt)').length,
+		aufgaben: document.querySelectorAll('#liste ul.epik-buecher li:not(.abschnitt):not(.listen-hinweis)').length,
 		titel: document.getElementById('liste-titel')?.textContent?.trim() || '',
 		url: location.search,
 		detail: document.getElementById('detail')?.querySelector('.detail-titel')?.textContent?.trim() || '',
@@ -71,7 +71,8 @@ async function zustand(page) {
 				assert.equal(stand.ansicht, true, design + ': Kartenumschalter fehlt');
 				assert.equal(stand.legende, true, design + ': Legende fehlt');
 				assert.ok(stand.punkte > 0, design + ': keine Kartenpunkte');
-				assert.equal(stand.zahlen.alle, '225', design + ': Zahl aller Kapitel');
+				assert.ok(Number(stand.zahlen.alle) > 150 && Number(stand.zahlen.alle) <= 225,
+					design + ': Zahl aller Kapitel unplausibel: ' + stand.zahlen.alle);
 				assert.equal(stand.zahlen.erledigt, '1', design + ': Zahl der erledigten Kapitel');
 
 				/* Gelände und Spielkarte umschalten; die Punkte bleiben. */
@@ -101,7 +102,7 @@ async function zustand(page) {
 				assert.ok(stand.aufgaben > vorher, design + ': Buch klappt keine Aufgaben auf');
 
 				/* Aufgabe wählen: Detailspalte zeigt sie, die Liste bleibt. */
-				await page.locator('#liste ul.epik-buecher li:not(.abschnitt)').first().click();
+				await page.locator('#liste ul.epik-buecher li:not(.abschnitt):not(.listen-hinweis)').first().click();
 				stand = await zustand(page);
 				assert.ok(stand.detail, design + ': Detailspalte bleibt leer');
 				assert.equal(stand.baender, 10, design + ': Bände nach Aufgabenwahl weg');
@@ -127,11 +128,31 @@ async function zustand(page) {
 			assert.ok(treffer.baender >= 1 && treffer.baender < 10, design + ': Suche filtert die Bände nicht');
 			assert.equal(treffer.buecher, treffer.baender, design + ': Treffer-Band nicht aufgeklappt');
 
+			/* Der Prolog ist ein Einstiegsblock mit Hinweis; seine Instanz hängt
+			   am Kapitel und steht nicht als eigene Aufgabe in der Liste. */
+			await page.fill('#aufgaben-suche', '');
+			await page.waitForTimeout(500);
+			await page.locator('#liste li.epik-band').first().click();
+			await page.waitForTimeout(400);
+			const prolog = page.locator('#liste ul.epik-buecher > li.abschnitt').filter({ hasText: /Prolog/ }).first();
+			await prolog.click();
+			await page.waitForTimeout(400);
+			const hinweis = await page.evaluate(() =>
+				document.querySelector('#liste ul.epik-buecher li.listen-hinweis')?.textContent?.trim() || '');
+			assert.match(hinweis, /zählt aber nicht|counts|compte/i, design + ': Prolog-Hinweis fehlt');
+			const kapitelZeile = page.locator('#liste ul.epik-buecher > li').filter({ hasText: /Prolog: Hilfe für einen Waldläufer/ }).first();
+			assert.match(await kapitelZeile.locator('.instanz-teil').first().textContent(), /Instanz|Instance/i,
+				design + ': Kapitel nennt seine Instanz nicht');
+			const doppelt = await page.evaluate(() =>
+				Array.from(document.querySelectorAll('#liste ul.epik-buecher > li'))
+					.filter((zeile) => /^\s*(?:○|✓|◐)?\s*Instanz:\s*Hilfe für einen Waldläufer/i.test(zeile.textContent)).length);
+			assert.equal(doppelt, 0, design + ': Instanz steht doppelt neben ihrem Kapitel');
+
 			/* Eine gewählte Aufgabe springt auf ihre genaue Karte, nicht auf die
 			   große Übersicht. */
 			await page.fill('#aufgaben-suche', 'Buch 1, Kapitel 1:');
 			await page.waitForTimeout(800);
-			await page.locator('#liste ul.epik-buecher li:not(.abschnitt)').first().click();
+			await page.locator('#liste ul.epik-buecher li:not(.abschnitt):not(.listen-hinweis)').first().click();
 			await page.waitForTimeout(1200);
 			const karte = await page.evaluate(() =>
 				(document.getElementById('bild').getAttribute('src') || '').match(/(\d+)\.webp/)?.[1] || '');

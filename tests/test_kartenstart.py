@@ -158,7 +158,9 @@ class KartenstartTest(unittest.TestCase):
     def test_epic_special_case_is_encapsulated(self):
         code = (ROOT / 'web/app.js').read_text(encoding='utf-8')
         self.assertIn('var Epik = (function () {', code)
-        self.assertIn('return { istWurzel: istWurzel, karte: karte, basis: basis, zeichneListe: zeichne };', code)
+        for name in ('istInstanz', 'istKapitel', 'istTeil', 'istVerwaist', 'istProlog', 'istWurzel'):
+            self.assertIn('%s: %s' % (name, name), code)
+        self.assertIn('zeichneListe: zeichne }', code)
         # Nothing outside the block tests the theme itself.
         self.assertNotIn('istEpikWurzel', code)
         self.assertNotIn('zeichneEpikListe', code)

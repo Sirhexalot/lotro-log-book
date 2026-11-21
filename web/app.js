@@ -284,8 +284,9 @@
 
 	function gezaehlt(quest) {
 		var zustand = zustandVon(quest);
-		// An instance row of the epic story is a part of its chapter, not a task of
-		// its own: the chapter decides whether the step is done.
+		// An instance row of an old story section is a part of its chapter, not a
+		// task of its own: the chapter decides whether the step is done. The epic
+		// theme applies the same rule to its own entries in Epik.zaehlbar().
 		if (quest.z === 'story' && quest.ie) { return false; }
 		return zustand !== 'sitzung' && zustand !== 'ausgeschlossen' && zustand !== 'monster';
 	}
@@ -2062,7 +2063,15 @@
 		detail.appendChild(ul);
 	}
 
-	function zeigeListeIn(ziel, titel, eintraege, abschnittPrefix) {
+	/** A prologue opens a book and an epilogue closes it; neither belongs in the
+	 * numbered sequence of its chapters. */
+	function abschnittRang(name) {
+		if (/prolog|vorwort|introduction|prologue/i.test(name)) { return -1; }
+		if (/epilog|nachwort|afterword|épilogue/i.test(name)) { return 1; }
+		return 0;
+	}
+
+	function zeigeListeIn(ziel, titel, eintraege, abschnittPrefix, abschnittHinweise) {
 		abschnittPrefix = abschnittPrefix || '';
 		if (ziel === liste) {
 			zustand.treffer = eintraege;
@@ -2099,6 +2108,8 @@
 				return 0;
 			}
 			if (reihe[ax] !== reihe[ay]) { return reihe[ax] - reihe[ay]; }
+			var rangX = abschnittRang(ax), rangY = abschnittRang(ay);
+			if (rangX !== rangY) { return rangX - rangY; }
 			return MQL_SORT.compare(ax, ay);
 		});
 		// Only the main list feeds the map; a nested book list must not replace
@@ -2152,9 +2163,16 @@
 				kopf.appendChild(zahlKopf);
 				kopf.addEventListener('click', function () {
 					zu[abschnittPrefix + abschnitt] = !zu[abschnittPrefix + abschnitt];
-					zeigeListeIn(ziel, titel, eintraege, abschnittPrefix);
+					zeigeListeIn(ziel, titel, eintraege, abschnittPrefix, abschnittHinweise);
 				});
 				ziel.appendChild(kopf);
+				if (!zu[abschnittPrefix + abschnitt] && abschnittHinweise &&
+					abschnittHinweise[abschnitt]) {
+					var hinweisZeile = eltern('li', null);
+					hinweisZeile.className = 'listen-hinweis schwach';
+					hinweisZeile.textContent = abschnittHinweise[abschnitt];
+					ziel.appendChild(hinweisZeile);
+				}
 			}
 			if (mitAbschnitten && zu[abschnittPrefix + abschnitt]) { return; }
 			var zeile = eltern('li', null);
@@ -2188,7 +2206,7 @@
 				questName.appendChild(geber);
 			}
 			zeile.appendChild(questName);
-			if (quest.z === 'story' && !quest.ie) {
+			if (Epik.istKapitel(quest)) {
 				var instanzen = instanzenVon(quest.i);
 				if (instanzen.length) {
 					var teile = instanzen.map(function (eintrag) {
@@ -2237,6 +2255,7 @@
 	// the theme itself, so the special case stays in one place.
 	var Epik = (function () {
 		var offen = {};  // folded volumes
+		var PROLOG = /prolog|vorwort|introduction|prologue/i;
 
 		/** The theme root itself, not a volume below it. */
 		function istWurzel(knoten) {
@@ -2244,12 +2263,68 @@
 				(knoten.quests[0] || {}).th === 'epic';
 		}
 
+		/** An instance row is a part of its chapter, not a task of its own
+		 * (`ie` names the chapter). The chapter stands for it. */
+		function istInstanz(quest) {
+			return !!quest && quest.th === 'epic' && !!quest.ie;
+		}
+
+		/** A chapter row: the epic entry that counts and carries its instances. */
+		function istKapitel(quest) {
+			return !!quest && quest.th === 'epic' && !quest.ie;
+		}
+
+		/** Chapters known in the loaded data; the loaded set changes with the
+		 * shards, so the index follows its size. */
+		var kapitelIndex = null, kapitelStand = -1;
+		function kapitel() {
+			if (kapitelIndex && kapitelStand === quests.length) { return kapitelIndex; }
+			kapitelIndex = {};
+			quests.forEach(function (quest) {
+				if (istKapitel(quest)) { kapitelIndex[quest.i] = true; }
+			});
+			kapitelStand = quests.length;
+			return kapitelIndex;
+		}
+
+		/** A part whose chapter is not in the list has nothing to hang on; it
+		 * stays a row of its own rather than disappearing. */
+		function istVerwaist(quest) {
+			return istInstanz(quest) && !kapitel()[quest.ie];
+		}
+
+		/** A part that its chapter represents: hidden from the list and the count. */
+		function istTeil(quest) {
+			return istInstanz(quest) && !istVerwaist(quest);
+		}
+
+		/** A prologue chain is the introduction to a book and never counts
+		 * towards its progress. */
+		function istProlog(quest) {
+			return !!quest && quest.th === 'epic' && PROLOG.test(quest.a || '');
+		}
+
+		/** Sections that open a book, with the hint that they do not count. */
+		function hinweise(eintraege) {
+			var karten = {};
+			eintraege.forEach(function (quest) {
+				if (istProlog(quest) && quest.a) { karten[quest.a] = t('prolog_hinweis'); }
+			});
+			return karten;
+		}
+
 		/** The epic spans all of Middle-earth; its chapters open on the large
 		 * overview map, a chosen chapter still jumps to its own region. */
 		function karte() { return WELTKARTE; }
 
-		/** The list base for the whole theme, also for the filter numbers. */
-		function basis(knoten) { return knoten.quests; }
+		/** The list base for the theme, also for the filter numbers: chapters,
+		 * orphan parts and prologue chains, never a part its chapter carries. */
+		function basis(knoten) {
+			return knoten.quests.filter(function (quest) { return !istTeil(quest); });
+		}
+
+		/** What the theme counts: no parts, no prologue chains. */
+		function zaehlbar(quest) { return !istTeil(quest) && !istProlog(quest); }
 
 		/** The ten volumes stay; opening one shows its books and chapters
 		 * underneath, so the volume list never disappears. */
@@ -2260,14 +2335,21 @@
 			liste.textContent = '';
 			zeilen = {};
 			knoten.reihenfolge.forEach(function (band) {
-				var eigene = gefiltert(band.quests);
+				var eigene = gefiltert(basis(band));
 				if (!eigene.length) { return; }
 				// A search opens the volumes with a hit, otherwise the hit stays hidden.
 				var aufgeklappt = offen[band.schluessel] === true || !!zustand.q;
+				if (zustand.q) {
+					var abschnitte = {};
+					eigene.forEach(function (quest) { abschnitte[quest.a || ''] = true; });
+					Object.keys(abschnitte).forEach(function (name) {
+						zu[band.schluessel + '|' + name] = false;
+					});
+				}
 				var kopf = eltern('li', null);
 				kopf.className = 'abschnitt epik-band' + (aufgeklappt ? '' : ' zu');
 				kopf.appendChild(eltern('span', (aufgeklappt ? '▾ ' : '▸ ') + band.name));
-				var kz = zaehle(zaehlEintraege(band));
+				var kz = zaehle(zaehlEintraege(band).filter(zaehlbar));
 				var stand = eltern('span', zahl(kz.erledigt, kz.gesamt));
 				stand.className = 'stufe';
 				kopf.appendChild(stand);
@@ -2280,14 +2362,17 @@
 				var buecher = eltern('ul', null);
 				buecher.className = 'epik-buecher';
 				liste.appendChild(buecher);
-				zeigeListeIn(buecher, band.name, eigene, band.schluessel + '|');
+				zeigeListeIn(buecher, band.name, eigene, band.schluessel + '|', hinweise(eigene));
 			});
 			zeichneKartenBreadcrumb();
 			zeichneMarker();
 			aktualisiereFilterZahlen();
 		}
 
-		return { istWurzel: istWurzel, karte: karte, basis: basis, zeichneListe: zeichne };
+		return { istWurzel: istWurzel, istInstanz: istInstanz, istKapitel: istKapitel,
+			istTeil: istTeil, istVerwaist: istVerwaist, istProlog: istProlog,
+			zaehlbar: zaehlbar, karte: karte, basis: basis, hinweise: hinweise,
+			zeichneListe: zeichne };
 	})();
 
 	/**
@@ -2557,11 +2642,15 @@
 					unter.className = 'kennung';
 					detail.appendChild(unter);
 				}
-				var z = zaehle(zaehlEintraege(k));
+				var zaehlquelle = Epik.istWurzel(k)
+					? zaehlEintraege(k).filter(Epik.zaehlbar) : zaehlEintraege(k);
+				var z = zaehle(zaehlquelle);
 				var werte = [[t('detail_gesamt'), z.gesamt]];
 				if (hatFortschritt) {
 					var nOffen = 0, nLauf = 0, nAnn = 0;
 					k.quests.forEach(function (q) {
+						if (!gezaehlt(q)) { return; }
+						if (Epik.istWurzel(k) && !Epik.zaehlbar(q)) { return; }
 						var lage = zustandVon(q);
 						if (lage === 'offen') { nOffen += 1; }
 						if (lage === 'laufend') { nLauf += 1; }
