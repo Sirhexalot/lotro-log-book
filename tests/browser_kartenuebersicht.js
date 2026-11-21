@@ -32,6 +32,18 @@ const base = process.argv[2] || 'http://127.0.0.1:8814';
 		assert.ok(dunland.length >= 8, 'Dunland zeigt nicht alle Gebiete als Karten: ' + dunland.join(', '));
 		assert.ok(dunland.includes('Isengart'), 'Isengart fehlt in den Dunland-Karten');
 
+		/* Every topic stays in "Weitere Inhalte", also after a visit to an area:
+		   the loaded shard of one area must not decide which topics exist. */
+		const themen = await page.locator('.aufgaben-thema strong').allTextContents();
+		assert.equal(themen.length, 9, 'Weitere Inhalte unvollständig: ' + themen.join(', '));
+		assert.ok(themen.includes('Handwerk'), 'Handwerk fehlt in Weitere Inhalte');
+		await page.locator('.landschaft-kachel').filter({ hasText: /^Breeland/ }).first().click();
+		await page.waitForFunction(() => location.hash === '#map-268437653');
+		await page.locator('.karten-pfad a').first().click();
+		await page.waitForTimeout(1500);
+		assert.deepEqual(await page.locator('.aufgaben-thema strong').allTextContents(), themen,
+			'Weitere Inhalte verliert Themen nach dem Gebietsbesuch');
+
 		for (const path of ['/de/karte/', '/de/karte/taten/']) {
 			await page.goto(base + path, { waitUntil: 'load' });
 			const search = page.locator('.landschaft-suche');

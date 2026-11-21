@@ -10,9 +10,15 @@ const { chromium } = require('playwright');
 const base = (process.argv[2] || process.env.LLB_URL || 'http://127.0.0.1:8817').replace(/\/$/, '');
 const START = '/de/karte/?gebiet=Epische+Geschichte';
 
-async function bereit(page) {
+async function bereit(page, breite) {
 	await page.waitForFunction(() => document.querySelectorAll('#liste li.epik-band').length === 10,
 		null, { timeout: 30000 });
+	/* On desktop the special view opens in the terrain; its tiles load after the
+	   map. On a phone the list tab is in front, so the stage is not drawn yet. */
+	if (breite > 700) {
+		await page.waitForFunction(() => document.querySelectorAll('.gelaende-kacheln img').length > 0,
+			null, { timeout: 20000 });
+	}
 }
 
 async function zustand(page) {
@@ -60,7 +66,7 @@ async function zustand(page) {
 			for (const breite of [1280, 390]) {
 				await page.setViewportSize({ width: breite, height: breite > 700 ? 900 : 844 });
 				await page.goto(base + START, { waitUntil: 'load' });
-				await bereit(page);
+				await bereit(page, breite);
 
 				let stand = await zustand(page);
 				assert.equal(stand.baender, 10, design + ': nicht zehn Bände');
@@ -75,16 +81,18 @@ async function zustand(page) {
 					design + ': Zahl aller Kapitel unplausibel: ' + stand.zahlen.alle);
 				assert.equal(stand.zahlen.erledigt, '1', design + ': Zahl der erledigten Kapitel');
 
-				/* Gelände und Spielkarte umschalten; die Punkte bleiben. */
+				/* Die Epik ist eine Sonderansicht: sie startet im Gelände, die
+				   Spielkarte bleibt umschaltbar, die Punkte bleiben. */
+				assert.equal(stand.lage, 'gelaende', design + ': Epik startet nicht im Gelände');
+				if (breite > 700) { assert.ok(stand.kacheln > 0, design + ': keine Geländekacheln'); }
 				if (breite > 700) {
-					await page.locator('[data-kartenansicht="gelaende"]').click();
-					await page.waitForTimeout(1200);
-					stand = await zustand(page);
-					assert.equal(stand.lage, 'gelaende', design + ': Gelände schaltet nicht um');
-					assert.ok(stand.kacheln > 0, design + ': keine Geländekacheln');
-					assert.ok(stand.punkte > 0, design + ': Punkte verschwinden im Gelände');
 					await page.locator('[data-kartenansicht="karte"]').click();
-					await page.waitForTimeout(600);
+					await page.waitForTimeout(800);
+					stand = await zustand(page);
+					assert.equal(stand.lage, 'karte', design + ': Spielkarte schaltet nicht um');
+					assert.ok(stand.punkte > 0, design + ': Punkte verschwinden auf der Spielkarte');
+					await page.locator('[data-kartenansicht="gelaende"]').click();
+					await page.waitForTimeout(900);
 				}
 
 				/* Band aufklappen: die Bände bleiben, die Bücher kommen darunter. */

@@ -1069,6 +1069,9 @@
 		zustand.sichtbar = ANSICHT_JE_SEITE;
 		var index = karteFuerKnoten(knoten);
 		zustand.gebietsKarte = index;
+		// The epic story is a special view: it shows the terrain map, without
+		// changing the stored map view of the other pages.
+		if (gelaende) { gelaende.setView(Epik.istWurzel(knoten) ? 'gelaende' : null); }
 		if (index != null) {
 			zeigeKarte(index);
 		} else {
@@ -4024,9 +4027,10 @@
 		var finderBase = ({de:'/de/aufgabenfinder/',en:'/en/quest-finder/',fr:'/fr/recherche-quetes/'}[sprache] || '/de/aufgabenfinder/');
 		['epic','class','origin','festivals','missions','instances','craft','board','other'].forEach(function (key) {
 			var boardValue = {de:'Auftrag',en:'Task',fr:'Tâche'}[sprache] || 'Task';
-			// Before any area is opened the catalogue entries are not loaded yet;
-			// the compact start metadata knows every topic as well.
-			var quelle = quests.length ? quests : (window.MQL_KARTEN_SUMMARY || []);
+			// The compact start metadata knows every topic. The loaded entries are
+			// only one area's shard, so they must not decide which topics exist.
+			var quelle = (window.MQL_KARTEN_SUMMARY && window.MQL_KARTEN_SUMMARY.length)
+				? window.MQL_KARTEN_SUMMARY : quests;
 			var vorhanden = key === 'board'
 				? quelle.some(function (q) { return q.a === boardValue; })
 				: quelle.some(function (q) { return q.th === key; });

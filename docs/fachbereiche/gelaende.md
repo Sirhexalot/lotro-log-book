@@ -5,6 +5,11 @@
 Die Kartenanwendung bietet **Gelände | Spielkarte** als Umschalter über der
 Karte. Die Spielkarte ist die Vorgabe. Ein manueller Wechsel wird unter
 `mql.kartenansicht` für alle Karten und Sprachen im selben Browser gespeichert.
+Eine Ausnahme ist die **Epische Geschichte**: Sie ist eine Sonderansicht und
+öffnet im Gelände (`MQL_GELAENDE.setView('gelaende')`). Der Wechsel gilt nur für
+diese Ansicht und ändert die gespeicherte Wahl der übrigen Seiten nicht; beim
+Verlassen fällt die Karte auf `mql.kartenansicht` zurück. Der Umschalter bleibt
+auch dort bedienbar und wirkt dann nur auf die Sonderansicht.
 Der Umschalter steht auch in den Aufgaben- und Tatenübersichten; dort wechseln
 die Landschaftsvorschauen gemeinsam mit der Kartenbühne zwischen Gelände und
 Spielkarte. Er gilt auch nach einem Reload. Eine einmalige Migration setzt die bisherige

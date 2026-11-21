@@ -96,6 +96,8 @@
 		frameMatches: frameMatches,
 		frameForViewport: frameForViewport,
 		create: function (options) {
+			// A special view may pin one mode (the epic story shows terrain) without
+			// touching the stored preference of the other views.
 			var world = options.world, stage = options.stage, image = options.image;
 			var controls = document.getElementById('kartenansicht');
 			if (!controls) { return null; }
@@ -108,7 +110,8 @@
 			plus.setAttribute('aria-label', words[3]); minus.setAttribute('aria-label', words[4]); fit.setAttribute('aria-label', words[5]); fit.title = words[5];
 			var status = document.getElementById('gelaende-status');
 			var storage; try { storage = window.localStorage; } catch (_) { storage = null; }
-			var wanted = preference(storage), current = null, manifest = null, active = false, failed = false, settled = false;
+			var wanted = preference(storage), override = null, current = null, manifest = null, active = false, failed = false, settled = false;
+			function ziel() { return override || wanted; }
 			var scale = 1, tx = 0, ty = 0, dragging = null, moved = false, suppressClick = false;
 			var pending = 0, tiles = new Map(), kachelMerk = {};
 			var layer = document.createElement('div'); layer.className = 'gelaende-kacheln'; layer.hidden = true; layer.setAttribute('aria-hidden', 'true');
@@ -165,7 +168,7 @@
 				if (options.onView) { options.onView(); }
 			}
 			function apply() {
-				active = wanted === 'gelaende' && usable();
+				active = ziel() === 'gelaende' && usable();
 				world.dataset.kartenansicht=active?'gelaende':'karte';
 				layer.hidden = !active;
 				world.classList.toggle('gelaende-aktiv', active);
@@ -191,8 +194,10 @@
 				}
 			}
 			function select(mode) {
-				if (wanted === mode) { return; }
-				scale=1;tx=0;ty=0; setPreference(mode);
+				if (ziel() === mode) { return; }
+				scale=1;tx=0;ty=0;
+				if (override) { override = mode; apply(); return; }
+				setPreference(mode);
 			}
 			terrainButton.addEventListener('click',function(){select('gelaende');});
 			gameButton.addEventListener('click',function(){select('karte');});
@@ -252,9 +257,11 @@
 				hasResources:function(id){return !settled?undefined:manifest&&Array.isArray(manifest.resourceMaps)?manifest.resourceMaps.indexOf(String(id))>=0:null;},
 				setMap:function(map){clear();current=map;world.dataset.karte=String(map.idx);failed=false;scale=1;tx=0;ty=0;apply();},
 				active:function(){return active;},
+				view:function(){return ziel();},
+				setView:function(mode){var next=mode==='gelaende'||mode==='karte'?mode:null;if(override===next){return;}override=next;scale=1;tx=0;ty=0;apply();},
 				scale:function(){return current?scale:1;},
 				layout:function(){if(current){view();}},
-				thumbnail:function(map){var e=kurz(manifest&&map&&manifest.maps[String(map.idx)]);return wanted==='gelaende'&&e&&e.thumb?'/gelaende/'+manifest.version+'/thumb/'+map.idx+'.webp':null;},
+				thumbnail:function(map){var e=kurz(manifest&&map&&manifest.maps[String(map.idx)]);return ziel()==='gelaende'&&e&&e.thumb?'/gelaende/'+manifest.version+'/thumb/'+map.idx+'.webp':null;},
 				frame:function(map){if(active&&current&&map&&map.idx===current.idx){return Object.assign({},map,effectiveFrame(),{rahmen:'gelaende',eigen:entry().overview?false:map.eigen});}return map;},
 				clear:function(){current=null;failed=false;delete world.dataset.karte;apply();}
 			};
