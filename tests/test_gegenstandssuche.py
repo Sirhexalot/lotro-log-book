@@ -12,6 +12,7 @@ import json
 import unittest
 from pathlib import Path
 from instanzbeute_items import lade_beute, truhen_ids
+from tools.sortierung import schluessel
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / 'web'
@@ -82,9 +83,11 @@ class GegenstandssucheTests(unittest.TestCase):
                             [z[1] for z in lies('en')['e'][:400]])
 
     def test_sorted_by_name(self):
+        # Die gemeinsame Sortierung ignoriert führende Satzzeichen und vergleicht
+        # Zahlenreihen nach Wert; die Datei muss genau so sortiert sein.
         for sprache in SPRACHEN:
-            namen = [z[1].casefold() for z in lies(sprache)['e']]
-            self.assertEqual(namen, sorted(namen), sprache)
+            namen = [z[1] for z in lies(sprache)['e']]
+            self.assertEqual(namen, sorted(namen, key=schluessel), sprache)
 
     def test_catalogue_links_use_stable_keys(self):
         # A catalogue page links "same slot, same type" by key, not by a label:
