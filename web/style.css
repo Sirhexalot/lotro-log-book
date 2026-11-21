@@ -579,14 +579,6 @@ main {
 
 .detail .kennung { color: var(--schwach); font-size: var(--text-klein); margin-bottom: 12px; }
 .detail .text { white-space: pre-wrap; margin: 0 0 14px; }
-.detail h3 {
-	margin: 16px 0 6px;
-	font-size: var(--text-klein);
-	text-transform: uppercase;
-	letter-spacing: .08em;
-	color: var(--schwach);
-	font-weight: var(--gewicht-normal);
-}
 .detail ul { margin: 0; padding-left: 18px; }
 .detail li { margin-bottom: 4px; }
 .detail .leer { color: var(--schwach); }
@@ -680,13 +672,6 @@ main.seite {
 	color: var(--text);
 }
 .zeile-knoepfe { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
-.knopf-gold { background: var(--llb-palette-3a2f1c); border-color: var(--gold); color: var(--gold); }
-.knopf-gold:hover { background: var(--gold-knopf-hover); }
-/* Links that should look like a button on the plain pages (import, plugin). */
-a.knopf-gold {
-	display: inline-block; padding: 5px 12px; border: 1px solid var(--gold);
-	border-radius: 3px; text-decoration: none;
-}
 .ablage {
 	border: 2px dashed var(--rand);
 	border-radius: 8px;
@@ -1010,12 +995,12 @@ td.haken-zelle.teil { color: var(--laufend); }
 /* The button keeps its space whether it is needed or not, so the legend's own
    width never changes while it is being measured. */
 .legende-mehr.aus { visibility: hidden; }
+/* Frame from `.llb-klappe-feld` (klappe.css); this is the entry list itself. */
 .legende-voll {
-	position: absolute; right: 10px; bottom: calc(100% + 6px); z-index: 30;
+	right: 10px; bottom: calc(100% + 6px);
 	display: flex; flex-wrap: wrap; gap: 4px 16px;
 	max-width: min(560px, calc(100% - 20px));
-	padding: 8px 10px; background: var(--fläche); border: 1px solid var(--rand);
-	box-shadow: 0 4px 14px var(--llb-palette-rgba-0-0-0-p5); color: var(--schwach); font-size: var(--text-klein);
+	padding: 8px 10px; color: var(--schwach); font-size: var(--text-klein);
 }
 .leiste-aktionen { display: flex; align-items: center; flex: 0 0 auto; flex-wrap: nowrap; gap: 6px 10px; min-width: 0; margin-left: auto; white-space: nowrap; font-size: inherit; }
 .leiste-rechts { display: inline-flex; align-items: center; gap: 8px; }
@@ -1108,15 +1093,17 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 #liste li.abschnitt { background: var(--fläche-hell); color: var(--gold); font-size: var(--text-klein); padding: 5px 12px; position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--rand); }
 #liste li.abschnitt span:first-child { flex: 1 1 auto; }
 #liste li.abschnitt.zu { color: var(--schwach); }
+/* Epic story: volumes open in place; their books sit indented underneath and
+   keep no sticky header of their own. */
+#liste ul.epik-buecher { list-style: none; margin: 0; padding: 0 0 0 18px; }
+#liste ul.epik-buecher > li.abschnitt { position: static; padding-left: 4px; }
+#liste ul.epik-buecher > li { border-bottom: 0; }
 #liste li.listenhinweis { color: var(--schwach); font-size: var(--text-mikro); font-style: italic; cursor: default; }
 .gebietsliste { list-style: none; padding: 0; margin: 10px 0; }
 .gebietsliste li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--rand); cursor: pointer; font-size: var(--text-kompakt); }
 .gebietsliste li:hover { color: var(--gold); }
 .gebietsliste .stufe { color: var(--schwach); font-size: var(--text-klein); white-space: nowrap; }
 
-/* One line under the description folds a quest's objectives */
-.ziele-schalter { display: block; width: 100%; text-align: left; margin: 10px 0 6px; padding: 6px 10px; background: var(--fläche-hell); border: 1px solid var(--rand); color: var(--gold); font-size: var(--text-kompakt); }
-.ziele-schalter[aria-expanded="true"] { color: var(--text); }
 .detail ul { margin: 4px 0 12px; }
 .detail p.text + ul { margin-top: 2px; }
 
@@ -1124,7 +1111,8 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .notizen { position: relative; }
 .notizen > button { font-size: var(--text-klein); padding: 2px 8px; }
 .gebietskarte { font-size: var(--text-klein); padding: 2px 8px; }
-.notizen-feld { position: absolute; bottom: calc(100% + 6px); left: 0; z-index: 30; width: 280px; max-height: 60vh; overflow-y: auto; background: var(--fläche); border: 1px solid var(--rand); padding: 6px; box-shadow: 0 4px 14px var(--llb-palette-rgba-0-0-0-p5); }
+/* Frame, scrolling and shadow from `.llb-klappe-feld` (klappe.css). */
+.notizen-feld { bottom: calc(100% + 6px); left: 0; width: 280px; padding: 6px; }
 .notizen-alle { display: flex; gap: 6px; margin-bottom: 6px; }
 .notizen-alle button { flex: 1; font-size: var(--text-klein); padding: 2px 6px; }
 .notizen-feld ul { list-style: none; margin: 0; padding: 0; }
@@ -1254,12 +1242,47 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 	.karte-stufe { min-width: 0; font-size: inherit; padding: 2px 6px; }
 	.kartenkopf { top: 6px; left: 6px; right: 6px; }
 	.kartenkopf-rechts { gap: 4px; }
+	/* One bar under the map: the level, the legend behind "?", and the moved
+	   view/zoom group. The legend never shares the row, so it is never cut. */
+	.kartenleiste { height: 48px; flex: 0 0 48px; gap: 8px; }
+	.kartenleiste .legende { display: none; }
+	.kartenleiste .legende-mehr {
+		visibility: visible; margin-left: 0; width: 34px; height: 34px; padding: 0;
+		font-size: var(--text-normal); line-height: 1;
+	}
+	.kartenleiste .legende-mehr.aus { visibility: visible; }
+	.kartenleiste .legende-voll {
+		left: 8px; right: 8px; bottom: calc(100% + 6px);
+		display: block; max-width: none; max-height: 60vh; overflow-y: auto;
+		padding: 10px 12px; border-radius: 6px;
+		font-size: var(--text-normal); line-height: var(--zeile-normal);
+	}
+	.kartenleiste .legende-voll .legende-eintrag,
+	.kartenleiste .legende-voll .legende-fortschritt {
+		display: flex; align-items: center; gap: 8px; padding: 5px 0;
+		border-bottom: 1px solid var(--llb-palette-rgba-0-0-0-p3);
+	}
+	.kartenleiste .legende-voll > :last-child { border-bottom: 0; }
+	.kartenleiste .leiste-aktionen { margin-left: 0; }
+	.kartenleiste .kartenkopf-rechts { margin-left: auto; gap: 4px; flex: 0 0 auto; }
+	.kartenleiste .karte-stufe { font-size: var(--text-klein); }
+	.kartenleiste .kartenansicht button,
+	.kartenleiste .gelaende-zoom button {
+		min-height: 32px; padding: 2px 6px; font-size: var(--text-klein); white-space: nowrap;
+	}
+	.kartenleiste .gelaende-zoom button { min-width: 32px; }
 }
+
+/* The narrowest phones give up the level text in the bar; the "?" panel then
+   starts with it, so the value stays reachable (app.js). */
+@media (max-width: 359px) {
+	.kartenleiste .karte-stufe { display: none; }
+}
+/* The toolbar stays one row at every width. View and zoom move into the lower
+   bar on a phone (app.js), so nothing here may wrap. */
 @container (max-width: 560px) {
-	.kartenkopf { align-items: stretch; flex-wrap: wrap; gap: 4px; }
-	.kartenkopf-links, .kartenkopf-rechts { flex: 1 0 100%; }
-	.kartenkopf-links { flex-wrap: wrap; gap: 4px; }
-	.kartenkopf-rechts { margin-left: 0; justify-content: flex-end; }
+	.kartenkopf { align-items: center; gap: 4px; }
+	.kartenkopf-links { flex-wrap: nowrap; gap: 4px; }
 	.kartenleiste { gap: 6px; padding: 4px 6px; }
 }
 @media (max-width: 1000px) {
@@ -1293,7 +1316,6 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .spalte.detail h2 { font-size: var(--text-normal); margin-bottom: 8px; }
 .spalte.detail .kennung { margin-bottom: 10px; }
 .spalte.detail .text { margin-bottom: 12px; }
-.spalte.detail h3 { margin: 18px 0 8px; }
 .spalte.detail .belohnungen {
 	padding: 12px 0 10px;
 	margin: 16px 0;
@@ -1402,23 +1424,35 @@ body main { grid-template-columns: clamp(280px, var(--listenbreite, 390px), calc
 .detail-art { margin: 0 0 3px; color: var(--gold); font-size: var(--text-mikro); letter-spacing: .06em; text-transform: uppercase; }
 .detail-titel { display: flex; align-items: flex-start; gap: 10px; }
 .detail-titel h2 { margin: 0; font-size: var(--text-zwischen); line-height: var(--zeile-label); font-weight: var(--gewicht-semibold); color: var(--text); }
-.detail-symbol { width: 54px; height: 54px; flex: none; display: grid; place-items: center; box-sizing: border-box;
-	border: 1px solid var(--llb-icon-tile-border); border-radius: 5px; background: var(--llb-icon-tile-bg); color: var(--gold); }
-.detail-symbol svg { width: 24px; height: 24px; }
+/* Tile frame and size from kachel.css; only the layout hook stays here. */
+.detail-symbol { flex: none; }
 /* Fact grid from `.llb-fakten` (fakten.css). */
 .detail-fortschritt { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0 0 10px;
 	padding: 8px 10px; background: var(--fläche-hell); border: 1px solid var(--rand); border-radius: 5px; }
 .detail-fortschritt > span:first-child { color: var(--schwach); font-size: var(--text-kompakt); }
-.detail-lage { color: var(--schwach); font-size: var(--text-klein); }
-.detail-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 0 0 12px; font-size: var(--text-kompakt); }
-.detail-aktionen a { color: var(--gold); }
+
 /* Surface from `.llb-flaeche` (flaeche.css), only the tick here. */
-.detail-abschnitt { margin: 0 0 10px; }
-.detail-abschnitt > h3 { margin: 0 0 7px; font-size: var(--text-fliesstext-kompakt); font-weight: var(--gewicht-semibold); letter-spacing: normal;
-	text-transform: none; color: var(--text); }
+.detail-abschnitt { margin: 0 0 var(--llb-flaechen-abstand); }
 .detail-abschnitt .text { margin: 0 0 7px; font-size: var(--text-bedienung); line-height: var(--zeile-detail); }
 .detail-abschnitt .text:last-child { margin-bottom: 0; }
-.detail-abschnitt .ziele-schalter { width: 100%; margin: 0; }
+/* The objectives surface has one label: a heading that opens the steps. */
+.ziele-kopf {
+	display: flex; align-items: baseline; gap: 6px; width: 100%;
+	margin: 0; padding: 0; border: 0; background: none; text-align: left;
+	color: var(--text); font-size: var(--text-abschnitt); font-weight: var(--gewicht-medium);
+	line-height: var(--zeile-kompakt); cursor: pointer;
+}
+.ziele-kopf::after { content: '▸'; margin-left: auto; font-size: var(--text-bedienung); color: var(--gold); }
+.ziele-kopf[aria-expanded="true"]::after { content: '▾'; }
+.ziele-kopf:hover, .ziele-kopf:focus-visible { color: var(--gold); }
+.ziele-kopf:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.ziele-anzahl { color: var(--schwach); font-size: var(--text-bedienung); font-weight: var(--gewicht-normal); }
+.ziele-inhalt { margin-top: 8px; }
+.ziele-inhalt[hidden] { display: none; }
+/* Inside the objectives surface the map button sits at its end. */
+.detail-ziele .detail-kartenaktion { margin: 12px 0; }
+/* Actions are the panel's last surface. */
+.detail-aktionen .llb-aktionen { margin: 0; }
 .detail-schritt + .detail-schritt { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--rand); }
 .detail-ziele-liste { margin: 6px 0 0; padding-left: 1.4em; }
 .detail-ziele-liste li { margin-bottom: 3px; font-size: var(--text-bedienung); }
@@ -1427,22 +1461,17 @@ body main { grid-template-columns: clamp(280px, var(--listenbreite, 390px), calc
 .detail-abschnitt .zielorte h4 { margin: 6px 0 3px; font-size: var(--text-klein); color: var(--schwach); font-weight: var(--gewicht-semibold); }
 .detail-reward-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .detail-reward-liste li { display: flex; align-items: flex-start; gap: 9px; margin: 0; font-size: var(--text-bedienung); }
-.detail-reward-symbol { width: 54px; height: 54px; flex: none; display: grid; place-items: center; box-sizing: border-box;
-	border: 1px solid var(--llb-icon-tile-border); border-radius: 4px; background: var(--llb-icon-tile-bg); }
-.detail-reward-symbol img { width: 78%; height: 78%; object-fit: contain; filter: var(--llb-icon-item-filter); }
+.detail-reward-symbol { flex: none; }
 .detail-reward-text { min-width: 0; overflow-wrap: anywhere; }
 .detail-reward-text a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .detail-reward-text .stufe { margin-left: 6px; color: var(--schwach); }
 .detail-reward-liste .merkmal { color: var(--schwach); }
 .detail-abschnitt .auswahl { margin-top: 8px; }
 .detail-abschnitt .auswahl > strong { display: block; margin-bottom: 4px; font-size: var(--text-kompakt); }
-.detail-abschnitt .auswahl ul { list-style: none; margin: 0; padding: 0; }
-.detail-abschnitt .auswahl li { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 4px 0; font-size: var(--text-kompakt); }
 .detail-bedingungen, .detail-kette-liste { list-style: none; margin: 0; padding: 0; }
 .detail-bedingungen li, .detail-kette-liste li { font-size: var(--text-kompakt); padding: 2px 0; }
 .detail-bedingungen .zeichen, .detail-kette-liste .zeichen { display: inline-block; width: 1em; color: var(--schwach); }
 .detail-bedingungen .zeichen.ok, .detail-kette-liste .zeichen.ok { color: var(--fertig); }
 .detail-bedingungen li.sprung, .detail-kette-liste li.sprung { cursor: pointer; }
 .detail-bedingungen li.sprung:hover, .detail-kette-liste li.sprung:hover { color: var(--gold); text-decoration: underline; }
-.detail-kartenaktion { margin: 12px 0 0; }
-.detail-kartenaktion .katalog-knopf { color: var(--gold); background: var(--fläche-hell); border: 1px solid var(--rand); border-radius: 4px; padding: 6px 10px; font-size: var(--text-kompakt); cursor: pointer; }
+.detail-kartenaktion { margin: 12px 0; }

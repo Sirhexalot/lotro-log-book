@@ -143,6 +143,7 @@
 	var legende = document.getElementById('legende');
 	var legendeMehr = document.getElementById('legende-mehr');
 	var legendeVoll = document.getElementById('legende-voll');
+	var legendeKlappe = null;
 	var detail = document.getElementById('detail');
 	var kartenBreadcrumb = document.getElementById('karten-breadcrumb');
 	var filterLeiste = document.getElementById('filter');
@@ -152,6 +153,23 @@
 	var filterMobil = window.matchMedia('(max-width: 1000px)');
 	var aufgabenSuche = document.getElementById('aufgaben-suche');
 	var zuklappen = document.getElementById('zuklappen');
+
+	/* On a phone the lower bar carries view and zoom, so the overlay above the
+	   map stays one row with the filters. The nodes themselves only change
+	   parents, which keeps the references and listeners of gelaende.js valid. */
+	var kartenKopf = document.querySelector('.kartenkopf');
+	var kartenKopfRechts = document.querySelector('.kartenkopf-rechts');
+	var kartenLeiste = document.querySelector('.kartenleiste');
+	function ordneKartenwerkzeuge() {
+		if (!kartenKopf || !kartenKopfRechts || !kartenLeiste) { return; }
+		var ziel = filterMobil.matches ? kartenLeiste : kartenKopf;
+		if (kartenKopfRechts.parentElement !== ziel) { ziel.appendChild(kartenKopfRechts); }
+	}
+	ordneKartenwerkzeuge();
+	filterMobil.addEventListener('change', function () {
+		ordneKartenwerkzeuge();
+		legendeNeuMessen();
+	});
 
 	var ANSICHT_JE_SEITE = 200;
 
@@ -452,9 +470,9 @@
 
 	function sortiere(knoten) {
 		knoten.reihenfolge.sort(function (a, b) {
-			return a.name.localeCompare(b.name, t('locale'));
+			return MQL_SORT.compare(a.name, b.name);
 		});
-		knoten.quests.sort(function (a, b) { return a.n.localeCompare(b.n, t('locale')); });
+		knoten.quests.sort(function (a, b) { return MQL_SORT.compare(a.n, b.n); });
 		knoten.reihenfolge.forEach(sortiere);
 	}
 
@@ -1340,27 +1358,6 @@
 	notizenEbene.className = 'notizen-ebene';
 	marker.parentNode.insertBefore(notizenEbene, marker);
 
-	function kartenFlyout(knopf, feld, beimOeffnen) {
-		var rahmen = knopf.parentElement;
-		function setzeOffen(offen) {
-			feld.hidden = !offen;
-			knopf.setAttribute('aria-expanded', String(offen));
-		}
-		knopf.addEventListener('click', function () {
-			var offen = feld.hidden;
-			setzeOffen(offen);
-			if (offen) { beimOeffnen(); }
-		});
-		// Map markers can stop bubbling; close the flyout without consuming their click.
-		document.addEventListener('click', function (ereignis) {
-			if (!feld.hidden && !rahmen.contains(ereignis.target)) { setzeOffen(false); }
-		}, true);
-		document.addEventListener('keydown', function (ereignis) {
-			if (ereignis.key !== 'Escape' || feld.hidden || ereignis.defaultPrevented) { return; }
-			setzeOffen(false);
-			if (rahmen.contains(document.activeElement)) { knopf.focus(); }
-		});
-	}
 
 	function notizBild(code) { return 'notizen/lesbar/' + code + '.png?v=' + (window.MQL_STAND || '0'); }
 	function merkeNotizen() {
@@ -1443,12 +1440,14 @@
 		});
 	}
 	if (notizenKnopf) {
-		kartenFlyout(notizenKnopf, notizenFeld, function () {
-			if (!notizen) {
-				notizenListe.textContent = '';
-				notizenListe.appendChild(eltern('li', t('notizen_lade')));
+		window.MQL_KLAPPE.bind(notizenKnopf, notizenFeld, {
+			vorOeffnen: function () {
+				if (!notizen) {
+					notizenListe.textContent = '';
+					notizenListe.appendChild(eltern('li', t('notizen_lade')));
+				}
+				ladeNotizen(function () { zeichneNotizListe(); zeichneNotizen(); });
 			}
-			ladeNotizen(function () { zeichneNotizListe(); zeichneNotizen(); });
 		});
 		document.getElementById('notizen-alle').addEventListener('click', function () { if (notizen) { alleNotizen(true); } });
 		document.getElementById('notizen-keine').addEventListener('click', function () { if (notizen) { alleNotizen(false); } });
@@ -1775,12 +1774,14 @@
 	}
 
 	if (vorkKnopf) {
-		kartenFlyout(vorkKnopf, vorkFeld, function () {
-			if (!vorkommen) {
-				vorkListe.textContent = '';
-				vorkListe.appendChild(eltern('li', t('vorkommen_lade')));
+		window.MQL_KLAPPE.bind(vorkKnopf, vorkFeld, {
+			vorOeffnen: function () {
+				if (!vorkommen) {
+					vorkListe.textContent = '';
+					vorkListe.appendChild(eltern('li', t('vorkommen_lade')));
+				}
+				ladeVorkommen(function () { vorkBaueListe(); zeichneVorkommen(); });
 			}
-			ladeVorkommen(function () { vorkBaueListe(); zeichneVorkommen(); });
 		});
 		document.getElementById('vorkommen-alle').addEventListener('click', function () {
 			if (!vorkommen) { return; }
@@ -1919,9 +1920,11 @@
 		if (!legende) { return; }
 		var kinder = Array.prototype.slice.call(legende.children);
 		kinder.forEach(function (kind) { kind.classList.remove('zu-breit'); });
-		if (legende.hidden) {
-			if (legendeMehr) { legendeMehr.classList.add('aus'); }
-			schliesseLegendeVoll();
+		/* On a phone the row shows no legend at all: everything lives in the "?"
+		   panel, so there is nothing to measure and nothing to drop. */
+		if (legende.hidden || legende.offsetParent === null) {
+			if (legendeMehr) { legendeMehr.classList.toggle('aus', legende.hidden); }
+			if (legendeKlappe) { legendeKlappe.schliessen(); }
 			return;
 		}
 		// Measure against the row, not against the legend itself: the legend is a
@@ -1953,7 +1956,7 @@
 			kind.classList.add('zu-breit');
 		});
 		if (legendeMehr) { legendeMehr.classList.toggle('aus', !ueber); }
-		if (!ueber) { schliesseLegendeVoll(); }
+		if (!ueber && legendeKlappe) { legendeKlappe.schliessen(); }
 	}
 
 	// First paint measures before the three columns have their final width; a
@@ -1968,16 +1971,18 @@
 		new ResizeObserver(legendeNeuMessen).observe(legende.parentElement);
 	}
 
-	function schliesseLegendeVoll() {
-		if (!legendeVoll) { return; }
-		legendeVoll.hidden = true;
-		if (legendeMehr) { legendeMehr.setAttribute('aria-expanded', 'false'); }
-	}
-
-	/** Everything the one-line legend shows here, wrapped, as a panel. */
-	function oeffneLegendeVoll() {
+	/** Everything the legend explains, wrapped, as a panel. On the narrowest
+	 * phones the bar drops the level text; it opens here instead of vanishing. */
+	function fuellLegendeVoll() {
 		if (!legendeVoll || !legende) { return; }
 		legendeVoll.textContent = '';
+		var stufe = document.getElementById('karte-stufe');
+		if (stufe && stufe.offsetParent === null && stufe.textContent.trim()) {
+			var zeile = document.createElement('span');
+			zeile.className = 'legende-eintrag';
+			zeile.textContent = stufe.textContent;
+			legendeVoll.appendChild(zeile);
+		}
 		legende.querySelectorAll('.legende-eintrag, .legende-fortschritt').forEach(function (eintrag) {
 			if (eintrag.hidden) { return; }
 			var kopie = eintrag.cloneNode(true);
@@ -1986,17 +1991,13 @@
 			kopie.querySelectorAll('[id]').forEach(function (teil) { teil.removeAttribute('id'); });
 			legendeVoll.appendChild(kopie);
 		});
-		legendeVoll.hidden = false;
-		if (legendeMehr) { legendeMehr.setAttribute('aria-expanded', 'true'); }
 	}
 
 	if (legendeMehr && legendeVoll) {
-		legendeMehr.addEventListener('click', function (ereignis) {
-			ereignis.stopPropagation();
-			if (legendeVoll.hidden) { oeffneLegendeVoll(); } else { schliesseLegendeVoll(); }
-		});
-		document.addEventListener('click', function (ereignis) {
-			if (!legendeVoll.hidden && !legendeVoll.contains(ereignis.target)) { schliesseLegendeVoll(); }
+		legendeKlappe = window.MQL_KLAPPE.bind(legendeMehr, legendeVoll, {
+			vorOeffnen: fuellLegendeVoll,
+			// The panel sits in the bar next to the button, not inside a wrapper.
+			rahmen: legendeMehr.parentElement
 		});
 	}
 
@@ -2049,10 +2050,13 @@
 		detail.appendChild(ul);
 	}
 
-	function zeigeListe(titel, eintraege) {
-		zustand.treffer = eintraege;
-		listeTitel.textContent = titel;
-		liste.textContent = '';
+	function zeigeListeIn(ziel, titel, eintraege, abschnittPrefix) {
+		abschnittPrefix = abschnittPrefix || '';
+		if (ziel === liste) {
+			zustand.treffer = eintraege;
+			listeTitel.textContent = titel;
+		}
+		ziel.textContent = '';
 		zeilen = {};
 		// Names that occur more than once in this list get their quest giver
 		// beside them, so "Abgetragen" from two givers can be told apart.
@@ -2078,12 +2082,12 @@
 					function rang(q, k) { return /prolog|vorwort|foreword|avant-propos/i.test(q.n) ? -1 : k ? 0 : /epilog|nachwort|afterword|épilogue/i.test(q.n) ? 2 : 1; }
 					var rx = rang(x, kx), ry = rang(y, ky);
 					if (rx !== ry) { return rx - ry; }
-					if (kx && ky) { return kx[1].localeCompare(ky[1], sprache, { numeric: true }); }
+					if (kx && ky) { return MQL_SORT.compare(kx[1], ky[1]); }
 				}
 				return 0;
 			}
 			if (reihe[ax] !== reihe[ay]) { return reihe[ax] - reihe[ay]; }
-			return ax.localeCompare(ay, t('locale'), { numeric: true });
+			return MQL_SORT.compare(ax, ay);
 		});
 		zustand.treffer = nachAbschnitt;
 		var mitAbschnitten = Object.keys(reihe).length > 1 && !zustand.suchliste;
@@ -2094,11 +2098,11 @@
 		// Sections start folded; one that is alone stays open.
 		var abschnittZahl = Object.keys(jeAbschnitt).length;
 		Object.keys(jeAbschnitt).forEach(function (name) {
-			if (zu[name] === undefined) { zu[name] = abschnittZahl > 1; }
+			if (zu[abschnittPrefix + name] === undefined) { zu[abschnittPrefix + name] = abschnittZahl > 1; }
 		});
 		// Places on this map (Bree, Archet … on Bree-land) lead to their own list.
 		var hier = zustand.knoten;
-		if (hier && !zustand.suchliste && hier.reihenfolge && hier.reihenfolge.length && hier.eigene) {
+		if (ziel === liste && hier && !zustand.suchliste && hier.reihenfolge && hier.reihenfolge.length && hier.eigene) {
 			hier.reihenfolge.forEach(function (kind) {
 				var ort = eltern('li', null);
 				ort.className = 'unterkarte';
@@ -2108,7 +2112,7 @@
 				zahlOrt.className = 'stufe';
 				ort.appendChild(zahlOrt);
 				ort.addEventListener('click', function () { waehleKnoten(kind, true); });
-				liste.appendChild(ort);
+				ziel.appendChild(ort);
 			});
 		}
 		// A prologue chain is the introduction to a book, not a part of its progress.
@@ -2118,27 +2122,27 @@
 			var hinweis = eltern('li', null);
 			hinweis.className = 'listen-hinweis schwach';
 			hinweis.textContent = t('prolog_hinweis');
-			liste.appendChild(hinweis);
+			ziel.appendChild(hinweis);
 		}
 		var letzter = null;
-		nachAbschnitt.slice(0, zustand.sichtbar).forEach(function (quest) {
+		nachAbschnitt.slice(0, ziel === liste ? zustand.sichtbar : nachAbschnitt.length).forEach(function (quest) {
 			var abschnitt = quest.a || '';
 			if (mitAbschnitten && abschnitt !== letzter) {
 				letzter = abschnitt;
 				var kopf = eltern('li', null);
-				kopf.className = 'abschnitt' + (zu[abschnitt] ? ' zu' : '');
-				kopf.appendChild(eltern('span', (zu[abschnitt] ? '▸ ' : '▾ ') +
+				kopf.className = 'abschnitt' + (zu[abschnittPrefix + abschnitt] ? ' zu' : '');
+				kopf.appendChild(eltern('span', (zu[abschnittPrefix + abschnitt] ? '▸ ' : '▾ ') +
 					(abschnitt === '' ? t('allgemein') : abschnitt)));
 				var zahlKopf = eltern('span', String(jeAbschnitt[abschnitt]));
 				zahlKopf.className = 'stufe';
 				kopf.appendChild(zahlKopf);
 				kopf.addEventListener('click', function () {
-					zu[abschnitt] = !zu[abschnitt];
-					zeigeListe(listeTitel.textContent, eintraege);
+					zu[abschnittPrefix + abschnitt] = !zu[abschnittPrefix + abschnitt];
+					zeigeListeIn(ziel, titel, eintraege, abschnittPrefix);
 				});
-				liste.appendChild(kopf);
+				ziel.appendChild(kopf);
 			}
-			if (mitAbschnitten && zu[abschnitt]) { return; }
+			if (mitAbschnitten && zu[abschnittPrefix + abschnitt]) { return; }
 			var zeile = eltern('li', null);
 			var lage = zustandVon(quest);
 			var erledigt = lage === 'fertig';
@@ -2204,10 +2208,56 @@
 				var punkt = markerVon[quest.i];
 				if (punkt) { punkt.classList.remove('hervor'); }
 			});
-			liste.appendChild(zeile);
+			ziel.appendChild(zeile);
 			zeilen[quest.i] = zeile;
 		});
 
+	}
+	function zeigeListe(titel, eintraege) {
+		zeigeListeIn(liste, titel, eintraege, '');
+	}
+
+	// --- Epic story: the list opens by volume, not by replacing the view -----
+	var epikOffen = {};  // folded volumes of the epic list
+
+	function istEpikWurzel(knoten) {
+		return !!knoten && istThemenWurzel(knoten) &&
+			(knoten.quests[0] || {}).th === 'epic';
+	}
+
+	/** The epic theme lists its ten volumes; opening one shows its books and
+	 * chapters underneath, so the volume list never disappears. */
+	function zeichneEpikListe(knoten) {
+		var alle = gefiltert(knoten.quests);
+		zustand.treffer = alle;
+		listeTitel.textContent = knoten.name;
+		liste.textContent = '';
+		zeilen = {};
+		knoten.reihenfolge.forEach(function (band) {
+			var eigene = gefiltert(band.quests);
+			if (!eigene.length) { return; }
+			// A search opens the volumes with a hit, otherwise the hit stays hidden.
+			var offen = epikOffen[band.schluessel] === true || !!zustand.q;
+			var kopf = eltern('li', null);
+			kopf.className = 'abschnitt epik-band' + (offen ? '' : ' zu');
+			kopf.appendChild(eltern('span', (offen ? '▾ ' : '▸ ') + band.name));
+			var kz = zaehle(zaehlEintraege(band));
+			var stand = eltern('span', zahl(kz.erledigt, kz.gesamt));
+			stand.className = 'stufe';
+			kopf.appendChild(stand);
+			kopf.addEventListener('click', function () {
+				epikOffen[band.schluessel] = !offen;
+				zeichneListe();
+			});
+			liste.appendChild(kopf);
+			if (!offen) { return; }
+			var buecher = eltern('ul', null);
+			buecher.className = 'epik-buecher';
+			liste.appendChild(buecher);
+			zeigeListeIn(buecher, band.name, eigene, band.schluessel + '|');
+		});
+		zeichneKartenBreadcrumb();
+		zeichneMarker();
 	}
 
 	/**
@@ -2327,6 +2377,10 @@
 		} else {
 			zeigeListe(t('aufgaben'), []);
 			zeichneMarker();
+			return;
+		}
+		if (istEpikWurzel(zustand.knoten) && !zustand.suchliste) {
+			zeichneEpikListe(zustand.knoten);
 			return;
 		}
 		var listeGefiltert = gefiltert(quelle);
@@ -2467,8 +2521,6 @@
 		function abschnitt(klasse, titelText) {
 			var box = eltern('section', null);
 			box.className = 'detail-abschnitt llb-flaeche' + (klasse ? ' ' + klasse : '');
-			// Same surface as the catalogue, narrower padding for the side column.
-			box.dataset.dichte = 'kompakt';
 			if (titelText) {
 				var kopf = eltern('h3', titelText);
 				box.appendChild(kopf);
@@ -2575,7 +2627,7 @@
 		fortschrittZeile.className = 'detail-fortschritt';
 		fortschrittZeile.appendChild(eltern('span', t('detail_fortschritt')));
 		var status = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(
-			loesung ? 'deeds' : 'quests', quest.i, null, loesung ? 'deed' : 'quest');
+			loesung ? 'deeds' : 'quests', quest.i, null, 'panel');
 		if (status) {
 			status.addEventListener('click', function (event) { event.stopPropagation(); });
 			fortschrittZeile.appendChild(status);
@@ -2585,27 +2637,11 @@
 			: lage === 'ausgeschlossen' ? t('nicht_moeglich') : '';
 		if (lageHinweis) {
 			var lageText = eltern('span', lageHinweis);
-			lageText.className = 'detail-lage';
+			lageText.className = 'llb-hinweis';
+			lageText.dataset.groesse = 'klein';
 			fortschrittZeile.appendChild(lageText);
 		}
 		detail.appendChild(fortschrittZeile);
-
-		// --- Actions ----------------------------------------------------
-		var aktionen = eltern('div', null);
-		aktionen.className = 'detail-aktionen';
-		var segment = {'q': {'de': 'aufgabe', 'en': 'quest', 'fr': 'quete'},
-			'd': {'de': 'tat', 'en': 'deed', 'fr': 'prouesse'}}[loesung ? 'd' : 'q'][sprache];
-		var gross = eltern('a', t('ganze_seite') + ' →');
-		gross.href = '/' + sprache + '/' + segment + '/' + quest.i + '/';
-		aktionen.appendChild(gross);
-		var punkt = quest.gt || (quest.t && quest.t[0]);
-		if (punkt) {
-			var reise = eltern('a', t('hin_reise'));
-			reise.href = 'reise.html?lang=' + sprache + '&nach=' +
-				encodeURIComponent(koordinatenText(punkt[1], punkt[2]));
-			aktionen.appendChild(reise);
-		}
-		detail.appendChild(aktionen);
 
 		// --- Description -------------------------------------------------
 		if (quest.d) {
@@ -2620,15 +2656,26 @@
 			// requirements get their own section below
 		}
 		if ((quest.s || []).length) {
-			var zielBox = abschnitt('detail-ziele', t('detail_was_tun'));
-			var schalter = eltern('button', (zieleOffen ? '▾ ' + t('ziele_aus') : '▸ ' + t('ziele_ein')) +
-				(zielAnzahl ? ' (' + zielAnzahl + ')' : ''));
-			schalter.className = 'ziele-schalter';
-			schalter.type = 'button';
-			schalter.setAttribute('aria-expanded', String(zieleOffen));
-			schalter.addEventListener('click', function () { setzeZiele(!zieleOffen); });
-			zielBox.appendChild(schalter);
-			if (zieleOffen) {
+			var zielBox = abschnitt('detail-ziele');
+			var zielKopf = eltern('button', null);
+			zielKopf.type = 'button';
+			zielKopf.className = 'ziele-kopf';
+			zielKopf.setAttribute('aria-expanded', String(zieleOffen));
+			zielKopf.setAttribute('aria-controls', 'detail-ziele-inhalt');
+			zielKopf.setAttribute('aria-label', t('detail_was_tun') + (zielAnzahl ? ' (' + zielAnzahl + ')' : ''));
+			zielKopf.appendChild(eltern('span', t('detail_was_tun')));
+			if (zielAnzahl) {
+				var zielZahl = eltern('span', '(' + zielAnzahl + ')');
+				zielZahl.className = 'ziele-anzahl';
+				zielKopf.appendChild(zielZahl);
+			}
+			zielKopf.addEventListener('click', function () { setzeZiele(!zieleOffen); });
+			zielBox.appendChild(zielKopf);
+			var zielInhalt = eltern('div', null);
+			zielInhalt.id = 'detail-ziele-inhalt';
+			zielInhalt.className = 'ziele-inhalt';
+			zielInhalt.hidden = !zieleOffen;
+			zielBox.appendChild(zielInhalt);
 				(quest.s || []).forEach(function (schritt) {
 					var block = eltern('div', null);
 					block.className = 'detail-schritt';
@@ -2709,9 +2756,8 @@
 						});
 						block.appendChild(hinweis);
 					});
-					zielBox.appendChild(block);
+					zielInhalt.appendChild(block);
 				});
-			}
 		}
 
 		// --- Rewards -----------------------------------------------------
@@ -2720,6 +2766,8 @@
 		}
 		if ((quest.rw || []).length) {
 			var belohnung = abschnitt('detail-belohnungen', t('belohnungen'));
+			// Same lighter ground as the rewards section on catalogue pages.
+			belohnung.dataset.ton = 'hell';
 			var liste = null, auswahl = [];
 			quest.rw.forEach(function (eintrag) {
 				var art3 = eintrag[0], name = eintrag[1], kennung = eintrag[6];
@@ -2758,18 +2806,29 @@
 				wahl.className = 'auswahl';
 				wahl.appendChild(eltern('strong', t('auswahl') + ': '));
 				var wahlListe = eltern('ul', null);
+				// Choice rewards use the same row as fixed rewards: tile, name,
+				// level. The quality sits on the row, so the link inherits it.
+				wahlListe.className = 'detail-reward-liste';
 				auswahl.forEach(function (eintrag) {
 					var wahlZeile = eltern('li', null);
-					var stueck = eltern('span', null);
-					stueck.className = 'q' + (eintrag[2] || 0);
+					wahlZeile.className = 'q' + (eintrag[2] || 0);
 					var kennung = eintrag[6];
 					var beschriftung = (eintrag[4] > 1 ? eintrag[4] + ' × ' : '') + eintrag[1];
-					if (kennung) { stueck.appendChild(symbolBild(kennung)); }
-					stueck.appendChild(kennung ? gegenstandLink(kennung, beschriftung) : document.createTextNode(beschriftung));
-					wahlZeile.appendChild(stueck);
-					if (eintrag[3]) {
-						wahlZeile.appendChild(eltern('span', '· ' + t('stufe') + ' ' + eintrag[3]));
+					if (kennung) {
+						var wahlBild = eltern('span', null);
+						wahlBild.className = 'detail-reward-symbol';
+						wahlBild.appendChild(symbolBild(kennung));
+						wahlZeile.appendChild(wahlBild);
 					}
+					var stueck = eltern('span', null);
+					stueck.className = 'detail-reward-text';
+					stueck.appendChild(kennung ? gegenstandLink(kennung, beschriftung) : document.createTextNode(beschriftung));
+					if (eintrag[3]) {
+						var wahlStufe = eltern('span', '· ' + t('stufe') + ' ' + eintrag[3]);
+						wahlStufe.className = 'stufe';
+						stueck.appendChild(wahlStufe);
+					}
+					wahlZeile.appendChild(stueck);
 					wahlListe.appendChild(wahlZeile);
 				});
 				wahl.appendChild(wahlListe);
@@ -2858,10 +2917,12 @@
 		// --- Where the recorded objectives lie ---------------------------
 		if (quest.t && quest.t.length) {
 			var kartenZeile = eltern('div', null);
-			kartenZeile.className = 'detail-aktionen detail-kartenaktion';
+			kartenZeile.className = 'llb-aktionen detail-kartenaktion';
+			kartenZeile.dataset.dichte = 'kompakt';
 			var kartenKnopf = eltern('button', t('detail_ziele_karte'));
 			kartenKnopf.type = 'button';
-			kartenKnopf.className = 'katalog-knopf';
+			kartenKnopf.className = 'llb-knopf';
+			kartenKnopf.dataset.groesse = 'klein';
 			kartenKnopf.addEventListener('click', function () {
 				var knoten = zustand.knoten;
 				zeigeKarte(Number(quest.t[0][0]));
@@ -2871,7 +2932,8 @@
 				if (window.MQL_MOBIL) { window.MQL_MOBIL.zeige('karte'); }
 			});
 			kartenZeile.appendChild(kartenKnopf);
-			detail.appendChild(kartenZeile);
+			if (typeof zielBox !== 'undefined' && zielBox) { zielBox.appendChild(kartenZeile); }
+			else { detail.appendChild(kartenZeile); }
 		}
 
 		if (lage === 'monster') {
@@ -2898,6 +2960,26 @@
 			hinweisOhne.className = 'leer';
 			detail.appendChild(hinweisOhne);
 		}
+
+		// --- Actions: the last surface of the panel ---------------------
+		var aktionenBox = abschnitt('detail-aktionen');
+		var aktionen = eltern('div', null);
+		aktionen.className = 'llb-aktionen';
+		var segment = {'q': {'de': 'aufgabe', 'en': 'quest', 'fr': 'quete'},
+			'd': {'de': 'tat', 'en': 'deed', 'fr': 'prouesse'}}[loesung ? 'd' : 'q'][sprache];
+		var gross = eltern('a', t('ganze_seite') + ' →');
+		gross.className = 'llb-knopf';
+		gross.dataset.groesse = 'klein';
+		gross.href = '/' + sprache + '/' + segment + '/' + quest.i + '/';
+		aktionen.appendChild(gross);
+		var punkt = quest.gt || (quest.t && quest.t[0]);
+		if (punkt) {
+			var reise = eltern('a', t('hin_reise'));
+			reise.href = 'reise.html?lang=' + sprache + '&nach=' +
+				encodeURIComponent(koordinatenText(punkt[1], punkt[2]));
+			aktionen.appendChild(reise);
+		}
+		aktionenBox.appendChild(aktionen);
 
 		// The compact map payload has no description; the detail shard does.
 		if (!hatDetails(quest)) {
@@ -3133,7 +3215,7 @@
 			.map(function (eintrag) { return eintrag.knoten; });
 		var eintraege = eintragsSuchindex.filter(function (eintrag) { return eintrag.text.indexOf(begriff) >= 0; })
 			.map(function (eintrag) { return eintrag.quest; });
-		eintraege.sort(function (a, b) { return a.n.localeCompare(b.n, t('locale')); });
+		eintraege.sort(function (a, b) { return MQL_SORT.compare(a.n, b.n); });
 		return { gebiete: gebiete, eintraege: eintraege };
 	}
 
@@ -3551,7 +3633,7 @@
 			var n = 0, vorher = 0, werte = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
 			m[1].toUpperCase().split('').reverse().forEach(function (c) { var w = werte[c]; n += w < vorher ? -w : w; vorher = Math.max(vorher, w); }); return n;
 		}
-		kinder.sort(function (a,b) { return ordnung(a.name) - ordnung(b.name) || a.name.localeCompare(b.name, sprache, { numeric: true }); });
+		kinder.sort(function (a,b) { return ordnung(a.name) - ordnung(b.name) || MQL_SORT.compare(a.name, b.name); });
 		inhaltsGruppen[knoten.schluessel] = kinder.length > 1 ? kinder : [];
 		return inhaltsGruppen[knoten.schluessel];
 	}
@@ -3654,7 +3736,7 @@
 	landschaften.sort(function (a,b) {
 		if ((a.region === ltexte[7]) !== (b.region === ltexte[7])) { return a.region === ltexte[7] ? 1 : -1; }
 		var ra = regionSortierung.indexOf(a.region), rb = regionSortierung.indexOf(b.region);
-		var regionVergleich = (ra < 0 ? 99 : ra) - (rb < 0 ? 99 : rb) || a.region.localeCompare(b.region, sprache);
+		var regionVergleich = (ra < 0 ? 99 : ra) - (rb < 0 ? 99 : rb) || MQL_SORT.compare(a.region, b.region);
 		if (regionVergleich) { return regionVergleich; }
 		var ga = a.anzeigeGruppe, gb = b.anzeigeGruppe;
 		if (ga && gb && ga.id !== gb.id) {
@@ -3663,7 +3745,7 @@
 		}
 		if (ga && !gb) { return 1; }
 		if (!ga && gb) { return -1; }
-		return a.knoten.name.localeCompare(b.knoten.name, sprache);
+		return MQL_SORT.compare(a.knoten.name, b.knoten.name);
 	});
 	function landschaftSlug(eintrag) {
 		// Game map IDs survive language changes; no English names are guessed.
@@ -3745,7 +3827,9 @@
 		} : {
 			de:'Alle Aufgaben im Finder →',en:'All quests in the finder →',fr:'Toutes les quêtes dans le moteur de recherche →'
 		})[sprache] || '');
-		finder.className = 'aufgabenfinder-knopf';
+		finder.className = 'llb-knopf';
+		finder.dataset.art = 'haupt';
+		finder.dataset.groesse = 'gross';
 		finder.href = (tatenFinder ? {
 			de:'/de/tat/',en:'/en/deed/',fr:'/fr/prouesse/'
 		} : {
@@ -3841,7 +3925,7 @@
 						(k.reihenfolge || []).forEach(sammle);
 					})(knoten);
 				});
-				return gefunden.sort(function (a, b) { return a.name.localeCompare(b.name, sprache, { numeric: true }); });
+				return gefunden.sort(function (a, b) { return MQL_SORT.compare(a.name, b.name); });
 			}
 			function sprungZiel(link, ziel, titel) {
 				link.href = '#' + ziel.id;
@@ -4040,7 +4124,7 @@
 		}
 		var anzahlOrte = Object.keys(kartenSet).filter(function (id) { return Number(id) !== landschaftBereich.karte; }).length;
 		erklaerung.textContent = sprache === 'de' ? 'Gebietskarte und ' + anzahlOrte + ' Untergebiete' : sprache === 'fr' ? 'Carte de la région et ' + anzahlOrte + ' sous-régions' : 'Landscape map and ' + anzahlOrte + ' sub-areas';
-		Object.keys(kartenSet).sort(function (a,b) { return (Number(a) === landschaftBereich.karte ? -1 : Number(b) === landschaftBereich.karte ? 1 : kartenSet[a].name.localeCompare(kartenSet[b].name)); }).forEach(function (id) {
+		Object.keys(kartenSet).sort(function (a,b) { return (Number(a) === landschaftBereich.karte ? -1 : Number(b) === landschaftBereich.karte ? 1 : MQL_SORT.compare(kartenSet[a].name, kartenSet[b].name)); }).forEach(function (id) {
 			var istGebiet = Number(id) === landschaftBereich.karte;
 			var name = istGebiet ? (sprache === 'de' ? 'Ganz ' : sprache === 'fr' ? 'Toute la région : ' : 'All of ') + landschaftBereich.knoten.name : kartenSet[id].name;
 			var knopf = eltern('button'); knopf.appendChild(eltern('span', name));

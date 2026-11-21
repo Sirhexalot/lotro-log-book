@@ -1,55 +1,100 @@
-/* Epic story list: instance rows fold into their chapter, session replays of an
- * interlude are no second row, and a prologue says it is no book progress.
+'use strict';
+/* Epische Geschichte: Bände klappen in der Liste auf, statt die Ansicht zu
+ * ersetzen. Die zehn Bände bleiben sichtbar, Bücher und Kapitel wachsen darunter.
  *
- * Run against a local preview:
- *   LLB_URL=http://127.0.0.1:8914 NODE_PATH=<global node_modules> node tests/browser_epik.js
+ *   node tests/browser_epik.js http://127.0.0.1:8817
  */
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
-const BASE = process.env.LLB_URL || 'http://127.0.0.1:8914';
-/* Der Einstieg ist seit dem Startseiten-Umbau ein Link mit ?gebiet=. */
+const base = (process.argv[2] || process.env.LLB_URL || 'http://127.0.0.1:8817').replace(/\/$/, '');
 const START = '/de/karte/?gebiet=Epische+Geschichte';
 
+async function bereit(page) {
+	await page.waitForFunction(() => document.querySelectorAll('#liste li.epik-band').length === 10,
+		null, { timeout: 30000 });
+}
+
+async function zustand(page) {
+	return page.evaluate(() => ({
+		baender: document.querySelectorAll('#liste li.epik-band').length,
+		buecher: document.querySelectorAll('#liste ul.epik-buecher').length,
+		buchKoepfe: document.querySelectorAll('#liste ul.epik-buecher li.abschnitt').length,
+		aufgaben: document.querySelectorAll('#liste ul.epik-buecher li:not(.abschnitt)').length,
+		titel: document.getElementById('liste-titel')?.textContent?.trim() || '',
+		url: location.search,
+		detail: document.getElementById('detail')?.querySelector('.detail-titel')?.textContent?.trim() || '',
+	}));
+}
+
 (async () => {
-	const browser = await chromium.launch({headless: true});
+	const browser = await chromium.launch({ channel: 'chrome' });
 	try {
-		const page = await browser.newPage({viewport: {width: 1500, height: 1000}});
-		await page.goto(BASE + START);
-		await page.waitForSelector('#liste li');
-		const total = await page.locator('#liste-titel').textContent();
-		assert.match(total, /Epische Geschichte · \d+ · Stufe/);
-		const counted = Number(total.match(/· (\d+) ·/)[1]);
-		assert.ok(counted > 1200 && counted < 1551, total);
+		for (const design of ['dark', 'light']) {
+			const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+			const page = await context.newPage();
+			const fehler = [];
+			page.on('pageerror', (e) => fehler.push(design + ': ' + e.message));
+			await page.addInitScript((wert) => {
+				try { localStorage.setItem('mql.theme', wert); } catch (e) { /* egal */ }
+			}, design);
 
-		// Book 1: twelve chapters plus the foreword, no separate instance rows.
-		await page.getByRole('button', {name: /^Band I › Buch 1: Aufruhr/}).click();
-		await page.waitForTimeout(400);
-		const book = await page.locator('#liste-titel').textContent();
-		assert.match(book, /· 13 ·/, book);
-		assert.equal(await page.locator('#liste li [data-artikel], #liste li .qname').filter({hasText: '^Instanz:'}).count(), 0);
-		assert.ok(await page.locator('#liste li .instanz-teil').count() >= 3, 'instance note on the chapter');
+			for (const breite of [1280, 390]) {
+				await page.setViewportSize({ width: breite, height: breite > 700 ? 900 : 844 });
+				await page.goto(base + START, { waitUntil: 'load' });
+				await bereit(page);
 
-		// A prologue explains itself and keeps no instance row.
-		await page.getByRole('button', {name: /^Band I › Prolog/}).click();
-		await page.waitForTimeout(400);
-		const hint = page.locator('#liste li.listen-hinweis');
-		assert.equal(await hint.count(), 1);
-		assert.match(await hint.textContent(), /Einstieg/);
-		assert.equal(await page.getByText('^Instanz:', {exact: false}).count(), 0);
+				let stand = await zustand(page);
+				assert.equal(stand.baender, 10, design + ': nicht zehn Bände');
+				assert.equal(stand.buecher, 0, design + ': ein Band startet offen');
+				assert.equal(stand.titel, 'Epische Geschichte', design + ': Listentitel');
 
-		// Interludes: one row per story, the replay is folded away.
-		await page.getByRole('button', {name: /^Band III › Zwischenspiel/}).click();
-		await page.waitForTimeout(400);
-		assert.match(await page.locator('#liste-titel').textContent(), /· 8 ·/);
-		const names = await page.locator('#liste li .qname').evaluateAll(rows => rows.map(r => r.firstChild.textContent));
-		assert.equal(names.length, 8);
-		assert.equal(names.filter(name => name.startsWith('Zwischenspiel:')).length, 0, names.join(' | '));
-		assert.equal(new Set(names).size, names.length - 1, 'only the two Halros variants share a title');
+				/* Band aufklappen: die Bände bleiben, die Bücher kommen darunter. */
+				await page.locator('#liste li.epik-band').nth(2).click();
+				stand = await zustand(page);
+				assert.equal(stand.baender, 10, design + ': Bände verschwinden beim Aufklappen');
+				assert.equal(stand.buecher, 1, design + ': Band klappt nicht auf');
+				assert.equal(stand.buchKoepfe > 0, true, design + ': keine Bücher im Band');
+				assert.equal(stand.url, '?gebiet=Epische+Geschichte', design + ': Adresse springt beim Aufklappen');
 
-		await page.close();
-		console.log('epic story: instance folding, interlude rows and prologue note OK');
+				/* Buch aufklappen: Kapitel/Aufgaben erscheinen darunter. */
+				const vorher = stand.aufgaben;
+				await page.locator('#liste ul.epik-buecher li.abschnitt').first().click();
+				stand = await zustand(page);
+				assert.ok(stand.aufgaben > vorher, design + ': Buch klappt keine Aufgaben auf');
+
+				/* Aufgabe wählen: Detailspalte zeigt sie, die Liste bleibt. */
+				await page.locator('#liste ul.epik-buecher li:not(.abschnitt)').first().click();
+				stand = await zustand(page);
+				assert.ok(stand.detail, design + ': Detailspalte bleibt leer');
+				assert.equal(stand.baender, 10, design + ': Bände nach Aufgabenwahl weg');
+				/* Auf dem Handy schaltet die Aufgabenwahl auf die Detailspalte um. */
+				if (breite < 1000) {
+					await page.locator('#mobil-reiter [data-pane="liste"]').click();
+				}
+
+				/* Band wieder zuklappen. */
+				await page.locator('#liste li.epik-band').nth(2).click();
+				stand = await zustand(page);
+				assert.equal(stand.buecher, 0, design + ': Band klappt nicht zu');
+				assert.equal(stand.baender, 10, design + ': Bände nach Zuklappen weg');
+			}
+
+			/* Suche öffnet die passenden Bände und blendet den Rest aus. */
+			await page.setViewportSize({ width: 1280, height: 900 });
+			await page.goto(base + START, { waitUntil: 'load' });
+			await bereit(page);
+			await page.fill('#aufgaben-suche', 'Schlüssel');
+			await page.waitForTimeout(600);
+			const treffer = await zustand(page);
+			assert.ok(treffer.baender >= 1 && treffer.baender < 10, design + ': Suche filtert die Bände nicht');
+			assert.equal(treffer.buecher, treffer.baender, design + ': Treffer-Band nicht aufgeklappt');
+
+			assert.deepEqual(fehler, [], 'JS-Fehler: ' + fehler.join(' | '));
+			await context.close();
+		}
+		console.log('Epische Geschichte: Bände klappen auf, Suche öffnet Treffer, dunkel und hell');
 	} finally {
 		await browser.close();
 	}
-})().catch(error => { console.error(error); process.exitCode = 1; });
+})().catch((error) => { console.error(error); process.exitCode = 1; });
