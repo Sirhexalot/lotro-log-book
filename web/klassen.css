@@ -17,11 +17,6 @@
 .klassen-proficienzen { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
 .klassen-proficienzen section { padding: 12px 14px; background: var(--fläche); border-radius: 4px; }
 .klassen-katalog { margin-top: 28px; }
-/* The tab panels share the surface of the item pages: the filter sits on it. */
-.klassen-katalog [role="tabpanel"] {
-	box-sizing: border-box; margin: 0; border: 1px solid var(--llb-flaechen-rand); border-radius: 0 6px 6px 6px;
-	background: var(--llb-flaechen-ton); padding: clamp(13px, 3vw, 20px);
-}
 .klassen-katalog li { padding: 5px 0; }
 .klassen-katalog a { color: var(--gold); }
 .klassen-katalog [hidden] { display: none; }

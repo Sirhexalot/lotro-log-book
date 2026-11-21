@@ -16,17 +16,10 @@
 <main class="seite handwerk-seite">
 <h2 data-t="hw_titel">Handwerk</h2>
 	<p class="handwerk-einleitung" id="hw-einleitung" data-t="hw_text"></p>
-	<div id="hw-reiter">
-		{{ reiter.reiter('handwerk', 'Handwerk', [
-			{key: 'rezepte', label: 'Rezepte', panel: 'hw-rezepte'},
-			{key: 'rohstoffe', label: 'Rohstoffe', panel: 'hw-rohstoffe'}
-		], 'rezepte') }}
-	</div>
-
-	<section id="hw-berufe" hidden>
-		<p class="meldung" id="hinweis"></p>
-		<div id="berufe"></div>
-	</section>
+	{{ reiter.reiter('handwerk', 'Handwerk', [
+		{key: 'rezepte', label: 'Rezepte', panel: 'hw-rezepte'},
+		{key: 'rohstoffe', label: 'Rohstoffe', panel: 'hw-rohstoffe'}
+	], 'rezepte') }}
 
 	<section id="hw-rezepte" role="tabpanel" aria-labelledby="handwerk-rezepte">
 		<span id="rezepte" class="handwerk-anker" aria-hidden="true"></span>
@@ -36,6 +29,11 @@
 	<section id="hw-rohstoffe" role="tabpanel" aria-labelledby="handwerk-rohstoffe" hidden>
 		<span id="rohstoffe" class="handwerk-anker" aria-hidden="true"></span>
 		<div id="rohstoffe-liste"></div>
+	</section>
+
+	<section id="hw-berufe" hidden>
+		<p class="meldung" id="hinweis"></p>
+		<div id="berufe"></div>
 	</section>
 </main>
 {% endblock %}

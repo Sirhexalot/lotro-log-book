@@ -25,7 +25,8 @@
 	box-shadow: inset 0 2px 0 var(--gold);
 }
 .llb-reiter button:hover { color: var(--gold); }
-.llb-reiter button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+/* The ring stays inside the tab: an outer offset ring reads as a second frame. */
+.llb-reiter button:focus-visible { outline: 2px solid var(--gold); outline-offset: -3px; }
 .llb-reiter button[hidden] { display: none; }
 .llb-reiter-zahl {
 	font-size: var(--text-mikro); font-variant-numeric: tabular-nums;
@@ -35,5 +36,15 @@
 .llb-reiter button[aria-selected="true"] .llb-reiter-zahl {
 	color: inherit; border-color: currentColor;
 }
-/* The panel sits flush under the bar, whatever element carries the role. */
-.llb-reiter + [role="tabpanel"] { margin-top: 0; }
+/* The panel belongs to the component, not to the page: every tabbed area gets
+ * the same frame and surface, whether it holds a filter, a list or prose.
+ * The general sibling selector keeps working when a hidden panel sits between
+ * the bar and the visible one. */
+.llb-reiter ~ [role="tabpanel"] {
+	box-sizing: border-box; min-width: 0;
+	margin-top: 0;
+	padding: var(--llb-flaechen-innen);
+	border: 1px solid var(--llb-flaechen-rand);
+	border-radius: 0 6px 6px 6px;
+	background: var(--llb-flaechen-ton);
+}

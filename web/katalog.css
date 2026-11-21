@@ -6,13 +6,13 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-inhalt h2 { font-size: var(--text-abschnitt); margin-top: 28px; }
 .katalog-inhalt h3 { font-size: var(--text-normal); }
 .katalog-inhalt article { font-size: var(--text-normal); line-height: var(--zeile-lesetext); }
-.katalog-inhalt a:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .mql-row-hit)) {
+.katalog-inhalt a:not(:where(.llb-knopf, .katalog-chip, .katalog-ortlink, .mql-row-hit)) {
 	color: var(--gold);
 	text-decoration-line: underline;
 	text-decoration-thickness: .08em;
 	text-underline-offset: .16em;
 }
-.katalog-inhalt a:visited:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .mql-row-hit)) {
+.katalog-inhalt a:visited:not(:where(.llb-knopf, .katalog-chip, .katalog-ortlink, .mql-row-hit)) {
 	color: var(--gold);
 }
 .katalog-inhalt a:focus-visible {
@@ -31,20 +31,17 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	color: var(--gold);
 	text-decoration: underline;
 }
-.katalog-inhalt a.katalog-knopf {
+.katalog-inhalt a.llb-knopf {
 	color: var(--gold);
 }
-.katalog-inhalt a.katalog-knopf,
+.katalog-inhalt a.llb-knopf,
 .katalog-inhalt a.katalog-chip,
 .katalog-inhalt a.katalog-ortlink { text-decoration: none; }
 .katalog-pfad { font-size: var(--text-bedienung); color: var(--schwach); overflow-wrap: anywhere; }
 .katalog-text { white-space: pre-line; }
 .katalog-liste { columns: 2 300px; padding-left: 22px; }
 .katalog-liste li { break-inside: avoid; margin-bottom: 10px; }
-.katalog-knopf { display: inline-block; background: var(--fläche-hell); border: 1px solid var(--rand); border-radius: 3px; padding: 8px 14px; text-decoration: none; }
-.katalog-hinweis { color: var(--schwach); }
-.katalog-ziele { margin-top: 28px; padding: 14px; background: var(--fläche); border-radius: 4px; }
-.katalog-ziele summary { cursor: pointer; color: var(--gold); }
+
 .katalog-seite footer { padding: 16px; }
 #katalog-status { color: var(--schwach); }
 #katalog-status[data-done="true"] { color: var(--fertig); }
@@ -54,15 +51,7 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 }
 
 /* Quest page: one place gets a map cut with a pin, many places only the count. */
-.katalog-karte-gross { margin: 0 0 14px; max-width: 640px; aspect-ratio: 4 / 3;
-  border: 1px solid var(--rand); border-radius: 4px; overflow: hidden; background: var(--llb-palette-14110e); }
-.katalog-karte-gross img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.katalog-ort { position: relative; margin: 12px 0; max-width: 320px; aspect-ratio: 4 / 3;
-	border: 1px solid var(--rand); border-radius: 4px; overflow: hidden; background: var(--llb-palette-14110e); }
-.katalog-ort img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.katalog-pin { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%;
-	background: var(--llb-palette-f0a63c); border: 2px solid var(--llb-palette-14110e); box-shadow: 0 0 0 3px var(--llb-palette-rgba-240-166-60-p25); }
-.katalog-marken { color: var(--schwach); font-size: var(--text-bedienung); }
+
 .katalog-inhalt h1 svg.symbol { width: 26px; height: 26px; vertical-align: -3px; margin-right: 10px; color: var(--gold); }
 /* The item's own picture stays bigger than the entity mark. */
 .katalog-inhalt h1 img.symbol { width: 34px; height: 34px; vertical-align: -6px; margin-right: 10px; }
@@ -75,12 +64,8 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .item-bezugsreiter {
 	margin-top: 22px;
 }
-/* The tab panel keeps its look from here (tabs own their panel surface). Every
-   other framed section uses `.llb-flaeche` from flaeche.css. */
-.item-bezugsreiter > [role="tabpanel"] {
-	box-sizing: border-box; min-width: 0; padding: var(--llb-flaechen-innen);
-	border: 1px solid var(--llb-flaechen-rand); border-radius: var(--llb-flaechen-radius); background: var(--llb-flaechen-ton);
-}
+/* The tab panel surface lives in reiter.css: it belongs to the tab component.
+   Every other framed section uses `.llb-flaeche` from flaeche.css. */
 .item-bezugsreiter > [role="tabpanel"][hidden] { display: none; }
 .item-bezugsreiter [role="tabpanel"] > section > h3 { margin: 0 0 6px; }
 .item-bezugsreiter [role="tabpanel"] > section + section {
@@ -125,8 +110,6 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-kompaktleiste { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; }
 .katalog-kompaktleiste > p { margin: 0; }
 .katalog-kompaktleiste #katalog-status { margin-inline-start: auto; }
-.katalog-flaeche { min-width: 0; background: var(--fläche); border-radius: 4px; padding: 14px 16px; }
-.katalog-inhalt .katalog-abschnitt.katalog-flaeche > h2 { margin: 0 0 8px; }
 .katalog-werteflaeche { max-width: 52rem; }
 .katalog-werteflaeche .katalog-metazeile { margin: 0 0 8px; }
 .katalog-werte-raster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; margin: 10px 0 0; }
@@ -138,9 +121,8 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .entity-detail-grid { margin-block-start: 18px; row-gap: 12px; }
 .entity-detail-grid:not(:has(> :not(script))) { display: none; }
 .entity-detail-grid > * { grid-column: 1 / -1; min-width: 0; }
-.entity-detail-reading { display: grid; gap: 12px; }
+.entity-detail-reading { display: grid; gap: var(--llb-flaechen-abstand); }
 .entity-detail-layout :is(.entity-detail-reading, .entity-detail-place, .entity-detail-grid) > :is(section, details, .item-bezugsreiter) { margin: 0; max-width: none; }
-.entity-detail-layout :is(section, .entity-detail-reading) > h2:first-child { margin-block: 0 8px; }
 .entity-detail-layout .katalog-kompaktleiste { justify-content: start; }
 .entity-detail-layout .katalog-kompaktleiste #katalog-status { margin-inline-start: 0; }
 .entity-detail-layout .katalog-ziele > summary { padding: 0; }
@@ -150,26 +132,24 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	.entity-detail-split > .entity-detail-place { grid-column: span 5; }
 	.item-seite .entity-detail-overview-pair > :is(.entity-item-description, .katalog-werteflaeche) { grid-column: span 6; }
 }
-.quest-herkunft > h2, .quest-detail-ort > h2 { margin: 0 0 8px; font-size: var(--text-abschnitt); font-weight: var(--gewicht-medium); }
 .quest-herkunft .llb-fakten { margin-bottom: 0; }
 .entity-detail-layout .entity-detail-place > .quest-detail-ort { max-width: none; }
-.entity-detail-place .katalog-ort { max-width: none; }
-.quest-detail-ort .katalog-ort { margin: 0 0 6px; }
-.quest-detail-ort .katalog-ort img { width: 100%; height: auto; }
-.quest-detail-ort .katalog-hinweis, .quest-detail-ort .katalog-aktionen { margin-block: 6px; }
+.entity-detail-place .llb-karte { max-width: none; }
+.quest-detail-ort .llb-karte { margin: 0 0 6px; }
+.quest-detail-ort .llb-karte img { width: 100%; height: auto; }
+.quest-detail-ort .llb-hinweis, .quest-detail-ort .llb-aktionen { margin-block: 6px; }
 .quest-ort-nebenlinks { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-block: 6px 0; font-size: var(--text-bedienung); }
 .katalog-abschnitt .mql-row-list { padding-inline-start: 0; }
 .entity-item-description > p:first-child { margin-block-start: 0; }
 .entity-item-description > p:last-child { margin-block-end: 0; }
-.katalog-detailraster > .katalog-ziele { margin-block: 22px; }
 .katalog-beziehungen, .katalog-detailraster .related-list { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--rand); }
-.katalog-flaeche .katalog-gabe svg { width: 30px; height: 30px; margin-inline: 3px; }
+.llb-flaeche .katalog-gabe svg { width: 30px; height: 30px; margin-inline: 3px; }
 @media (max-width: 700px) {
 	.katalog-detailspalten:has(> section + section), .katalog-werte-raster { grid-template-columns: minmax(0, 1fr); }
 	.katalog-kompaktleiste #katalog-status { margin-inline-start: 0; }
 }
-.katalog-kopf .katalog-aktionen { margin: 0; display: flex; gap: 8px; align-items: center; white-space: nowrap; }
-.katalog-kopf .katalog-aktionen .katalog-link { color: var(--gold); }
+.katalog-kopf .llb-aktionen { margin: 0; display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+.katalog-kopf .llb-aktionen .katalog-link { color: var(--gold); }
 .katalog-abschnitt { margin-top: 26px; }
 /* Section headings read as sections on every entity page, not as fine print. */
 .katalog-abschnitt > h2 {
@@ -180,7 +160,7 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-abschnitt ul { margin: 0; padding-left: 20px; }
 /* Place: the map cut beside its description, not above it. */
 .katalog-ort-flex { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
-.katalog-ort-flex .katalog-ort { margin: 0; flex: 0 0 240px; }
+.katalog-ort-flex .llb-karte { margin: 0; flex: 0 0 240px; }
 .katalog-ort-flex > div { flex: 1 1 260px; }
 .katalog-ort-flex p { margin: 0 0 6px; }
 /* Rewards in two columns; each row is a line with the item symbol. */
@@ -199,7 +179,7 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-zwei { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 44px; }
 @media (max-width: 760px) {
 	.katalog-gaben, .katalog-zwei { grid-template-columns: 1fr; }
-	.katalog-ort-flex .katalog-ort { flex: 1 1 100%; max-width: 100%; }
+	.katalog-ort-flex .llb-karte { flex: 1 1 100%; max-width: 100%; }
 }
 
 .katalog-werte { grid-template-columns: 1fr auto; max-width: 420px; }
@@ -224,7 +204,6 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-gabe { padding: 9px 0; }
 
 /* Action row under the chips on quest pages. */
-.katalog-aktionen { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 0; }
 
 /* Item index: two jumping-off selects above the list. */
 .katalog-filter { display: flex; flex-wrap: wrap; gap: 12px 20px; margin: 6px 0 14px; }
@@ -267,16 +246,7 @@ body[data-art="i"] .katalog-kopf h1.q5 { color: var(--llb-palette-e6a94d); }
  * The three groups were stacked lists; long areas buried everything after the
  * first section. The tabs read as real tabs, the list below holds search,
  * completion filter and the complete member index. */
-.gebiet-reiter {
-	display: flex; gap: 6px; margin: 24px 0 0; padding: 0 0 10px;
-	border-bottom: 2px solid var(--rand); overflow-x: auto; white-space: nowrap;
-}
-
 .gebiet-buehne { padding-top: 18px; }
-@media (max-width: 640px) {
-	.gebiet-reiter { gap: 4px; }
-
-}
 
 /* --- Quest-giver and faction details (12.11.2026): the lists are complete,
  * so they can be searched; the own reputation only appears when imported. */

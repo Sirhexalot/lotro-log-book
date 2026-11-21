@@ -34,7 +34,14 @@ async function zustand(page) {
 				const panel = document.getElementById(id);
 				return panel && !panel.hidden;
 			}));
+		/* The panel of the selected tab must read as a panel, not as loose text. */
+		const gewaehltBtn = document.querySelector('.llb-reiter [aria-selected="true"]');
+		const panel = gewaehltBtn && document.getElementById(gewaehltBtn.getAttribute('aria-controls'));
+		const stil = panel ? getComputedStyle(panel) : null;
 		return { bars: bars.length, gewaehlt, sichtbar,
+			panelRand: stil ? stil.borderTopWidth : null,
+			panelFlaeche: stil ? stil.backgroundColor : null,
+			seite: getComputedStyle(document.body).backgroundColor,
 			ueberlauf: document.documentElement.scrollWidth > innerWidth + 1 };
 	});
 }
@@ -59,6 +66,9 @@ async function zustand(page) {
 				assert.equal(vorher.sichtbar[0].length, 1, 'genau ein sichtbares Panel in ' + pfad);
 				assert.equal(vorher.sichtbar[0][0], await page.evaluate(() => document.querySelector('.llb-reiter [aria-selected="true"]').getAttribute('aria-controls')),
 					'sichtbares Panel gehört zum Reiter in ' + pfad);
+				assert.equal(vorher.panelRand, '1px', 'Panel ohne Rahmen in ' + pfad);
+				assert.notEqual(vorher.panelFlaeche, 'rgba(0, 0, 0, 0)', 'Panel ohne Fläche in ' + pfad);
+				assert.notEqual(vorher.panelFlaeche, vorher.seite, 'Panel hebt sich nicht ab in ' + pfad);
 				assert.equal(vorher.ueberlauf, false, 'Überbreite in ' + pfad);
 
 				// The last tab switches, and only its panel stays open.

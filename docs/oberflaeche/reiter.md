@@ -74,6 +74,12 @@ Sie liefern nur Inhalte und sagen, was beim Wechsel passiert.
 
 - Der aktive Reiter geht in die Fläche darunter über: gleiche Hintergrundfarbe,
   keine untere Kante, goldene Oberkante, `margin-bottom: -1px`.
+- **Das Panel gehört zur Komponente.** `.llb-reiter ~ [role="tabpanel"]` trägt
+  Rahmen, Fläche, Innenabstand und den Radius `0 6px 6px 6px`. Eine Seite, die
+  ihr Panel selbst rahmt, erzeugt einen zweiten Rahmen; solche Regeln gehören
+  hierher, nicht in die Seiten-CSS.
+- Der Fokusring liegt **innen** (`outline-offset: -3px`). Ein außen liegender
+  Ring lässt den Reiter wie ein anderes Bauteil aussehen.
 - Inaktive Reiter stehen auf `--fläche` mit `--schwach`; Hover und Fokus nutzen
   `--gold`.
 - Farben ausschließlich über Theme-Tokens. Keine festen Palettenwerte: genau
@@ -85,7 +91,8 @@ Sie liefern nur Inhalte und sagen, was beim Wechsel passiert.
 ## Was nicht
 
 - Kein zweites Reiter-Markup „nur für diese Seite“, auch nicht als Kopie.
-- Keine Reiterfarbe in einer Seiten-CSS; Änderungen gehören in `reiter.css`.
+- Keine Reiterfarbe und kein Panel-Rahmen in einer Seiten-CSS; Änderungen
+  gehören in `reiter.css`.
 - Keine `aria-pressed`-Knopfgruppe als Reiterersatz — das ist ein Schalter, kein
   Reiter, und wird von Screenreadern anders angekündigt.
 - Kein Zähler, der aus dem DOM gezählt wird. Die Seite liefert die Zahl; die

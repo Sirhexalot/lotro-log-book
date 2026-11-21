@@ -37,7 +37,12 @@
 		intro.textContent=T(key);
 	}
 	function own(c){return Object.keys(c&&c.handwerk||{}).filter(function(k){return c.handwerk[k]&&c.handwerk[k].length;});}
-	function complete(c){return !!(c&&c.importMeta&&c.importMeta.datasets&&c.importMeta.datasets.recipes&&c.importMeta.datasets.recipes.status==='complete');}
+	/* The Companion import marks the recipe file with `importMeta.recipes`;
+	   without it an old backup stays conservative about missing recipes. */
+	function complete(c){
+		var meta=c&&c.importMeta||{}, dataset=meta.datasets&&meta.datasets.recipes;
+		return !!((dataset&&dataset.status==='complete')||meta.recipes===true);
+	}
 	function craftProgress(c,profession){
 		var rows=c&&c.handwerk&&c.handwerk[profession]||[], current=0, mastered=new Set();
 		rows.forEach(function(row){
@@ -253,7 +258,8 @@
 	}
 	// The exact same recipe configuration and predicates serve contextual lists.
 	window.MQL_RECIPE_FILTER={create:function(settings){return make('rezepte',settings);}};
-	if(!document.getElementById('hw-reiter')){return;}
+	/* Only the crafting page has these hosts; other pages carry a tab bar too. */
+	if(!document.getElementById('rezepte-liste')||!document.querySelector('.llb-reiter')){return;}
 	function tabFromUrl(){return /#(berufe|rohstoffe|rezepte)$/.test(location.hash)?location.hash.slice(1):'rezepte';}
 	function refresh(tab,navigate){
 		queue=queue.then(async function(){
@@ -272,7 +278,7 @@
 	}
 	window.MQL_HANDWERK_FILTER={recipes:function(rows,renderer){recipeRows=rows;recipeRenderer=renderer;return refresh(tabFromUrl(),false);}};
 	window.MQL_ROHSTOFFE_ZEICHNEN=function(){resources=window.MQL_VORKOMMEN;return refresh(tabFromUrl(),false);};
-	var reiter=document.querySelector('#hw-reiter .llb-reiter');
+	var reiter=document.querySelector('.llb-reiter');
 	if(reiter&&window.MQL_REITER){
 		window.MQL_REITER.mount(reiter,{aktiv:tabFromUrl(),hash:true,verlauf:true,onShow:function(tab){refresh(tab);}});
 	}else{
