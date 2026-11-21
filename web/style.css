@@ -128,28 +128,17 @@ main {
 .spalten-kopf button { font-size: var(--text-mikro); padding: 2px 6px; }
 
 /* Task list tools: filter button, active state and local search in one row. */
-.listenwerkzeuge { flex: 0 0 auto; border-bottom: 1px solid var(--rand); }
+.listenwerkzeuge { position: relative; flex: 0 0 auto; border-bottom: 1px solid var(--rand); }
 .filter-kopf { display: flex; align-items: center; flex-wrap: nowrap; gap: 6px; padding: 6px 10px; min-height: 34px; }
 .filter-knopf { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-klein); padding: 3px 8px; flex: 0 0 auto; }
 .filter-knopf svg { width: 14px; height: 14px; }
 .filter-knopf.aktiv { border-color: var(--gold); color: var(--gold); }
-.filter-status { flex: 0 1 auto; min-width: 44px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--schwach); font-size: var(--text-mikro); }
-.filter-status:empty { display: none; }
-.filter-status.aktiv { color: var(--gold); }
+#filter-anzahl { font-weight: var(--gewicht-medium); white-space: nowrap; }
 /* A word would take 92px of a 380px list column; the cross keeps the search
    next to the filter. The full wording stays for screen readers. */
 .filter-reset { flex: 0 0 auto; width: 22px; height: 24px; padding: 0; border: 0; background: none;
 	color: var(--schwach); font-size: var(--text-normal); line-height: var(--zeile-einfach); cursor: pointer; }
 .filter-reset:hover { color: var(--gold); }
-.filter[hidden] { display: none; }
-.filter {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 4px;
-	padding: 4px 10px 6px;
-	border-top: 1px solid var(--rand);
-	flex: 0 0 auto;
-}
 .aufgaben-suche {
 	display: flex; align-items: center; gap: 6px; flex: 1 1 0; min-width: 90px;
 	padding: 0 6px; border: 1px solid var(--rand); border-radius: 3px;
@@ -162,28 +151,25 @@ main {
 }
 .visuell-versteckt { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-/* all / open / done */
-.filter {
-	display: flex;
-	gap: 4px;
-	flex: 0 0 auto;
-	flex-wrap: wrap;
+.kartenfilter {
+	position: absolute; inset: 100% auto auto 10px; z-index: 5; margin: 0; padding: 8px;
+	box-sizing: border-box; width: min(310px, calc(100% - 20px)); max-width: none;
+	max-height: min(55vh, 380px); border: 1px solid var(--rand); border-radius: 4px;
+	background: var(--grund); color: var(--text); box-shadow: 0 5px 15px var(--llb-palette-0003);
+	font-size: var(--text-bedienung);
 }
-
-.filter button {
-	flex: 1;
-	font-size: var(--text-klein);
-	padding: 3px 4px;
-	background: var(--llb-palette-transparent);
-	border-color: var(--rand);
-	color: var(--schwach);
-}
-
-.filter button[aria-pressed="true"] {
-	background: var(--llb-palette-3a3226);
-	border-color: var(--gold);
-	color: var(--text);
-}
+.kartenfilter[open] { display: flex; flex-direction: column; }
+.kartenfilter-inhalt { overflow: auto; min-height: 0; overscroll-behavior: contain; }
+.kartenfilter-status { display: grid; min-width: 0; margin: 0; padding: 0; border: 0; gap: 2px; }
+.kartenfilter-status legend { color: var(--gold); font-weight: var(--gewicht-bold); margin: 0 0 4px; padding: 0 6px; }
+.kartenfilter-status label { display: flex; align-items: baseline; gap: 8px; padding: 5px 6px; border-radius: 3px; cursor: pointer; }
+.kartenfilter-status label:has(input:checked) { background: var(--auswahl); }
+.kartenfilter-status input { width: auto; align-self: flex-start; flex: none; margin: .28em 0 0; accent-color: var(--gold); }
+.kartenfilter-status label > span { min-width: 0; overflow-wrap: anywhere; }
+.kartenfilter-status small { display: block; margin-top: 2px; color: var(--schwach); font-size: var(--text-klein); }
+#filter-machbar { border-top: 1px solid var(--rand); margin-top: 3px; }
+.kartenfilter-kopf, .kartenfilter-fuss { display: none; }
+.kartenfilter-status[hidden], .kartenfilter-status label[hidden], .filter-knopf[hidden], #filter-anzahl[hidden] { display: none; }
 
 
 
@@ -811,8 +797,9 @@ a.knopf-gold {
 .rezept-kritisch { margin-top: 3px; color: var(--schwach); }
 
 /* Search page and item page. */
-.suche-feld { display: flex; align-items: center; gap: 12px; margin: 12px 0 4px; }
-.suche-feld input { flex: 1 1 auto; }
+.suche-feld { display: block; margin: 12px 0 4px; }
+.suche-feld input { display: block; box-sizing: border-box; width: 100%; }
+.suche-anzahl { margin: 6px 0 0; color: var(--schwach); font-size: var(--text-bedienung); }
 .su-gruppe { margin-top: 20px; }
 .su-gruppe h3 {
 	display: flex; align-items: center; gap: 7px;
@@ -1279,6 +1266,27 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 }
 @media (max-width: 1000px) {
 	.kartenkopf button { min-height: 44px; }
+	.filter-kopf button, .aufgaben-suche input { min-height: 44px; }
+	.filter-reset { width: 44px; }
+	.kartenfilter {
+		position: fixed; inset: auto 0 0; width: 100%; margin: 0; padding: 0 10px env(safe-area-inset-bottom);
+		max-height: 85vh; max-height: 85dvh; border-radius: 12px 12px 0 0;
+	}
+	.kartenfilter::backdrop { background: var(--llb-palette-rgba-0-0-0-p35); }
+	.kartenfilter-kopf, .kartenfilter-fuss {
+		display: flex; flex: none; align-items: center; justify-content: space-between;
+		gap: 6px; color: var(--gold);
+	}
+	.kartenfilter-fuss { border-top: 1px solid var(--rand); margin-top: 4px; }
+	.kartenfilter-kopf button, .kartenfilter-fuss button {
+		min-width: 44px; min-height: 44px; background: none; border: 0; color: var(--gold);
+	}
+	.kartenfilter-fuss button:last-child { font-weight: var(--gewicht-bold); }
+	.kartenfilter-status { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.kartenfilter-status label { min-height: 44px; align-items: center; }
+	.kartenfilter-status input { align-self: center; margin: 0; }
+	#filter-machbar { grid-column: 1 / -1; align-items: flex-start; }
+	#filter-machbar input { align-self: flex-start; margin-top: .28em; }
 }
 
 /* Detail column: same reading size as the quest list, and a little wider than

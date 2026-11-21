@@ -16,7 +16,12 @@
 	}
 	function mount(root, quests, selectQuest) {
 		var lang = document.documentElement.lang, w = labels[lang] || labels.de, topics = topicNames[lang] || topicNames.de;
-		var progress = window.MQL_STATUS_UI?.words?.(lang) || Object.assign({unset:'Nicht gesetzt',available:w.machbar},w,{progress:w.status});
+		var progressFallback = {
+			de:{progress:'Fortschritt',all:'Alle',open:'Nicht begonnen',running:'Begonnen',done:'Erledigt',available:'Voraussetzungen erfüllt'},
+			en:{progress:'Progress',all:'All',open:'Not started',running:'In progress',done:'Completed',available:'Requirements met'},
+			fr:{progress:'Progression',all:'Toutes',open:'Non commencée',running:'En cours',done:'Terminée',available:'Conditions remplies'}
+		};
+		var progress = window.MQL_STATUS_UI?.words?.(lang) || progressFallback[lang] || progressFallback.de;
 		var boardValue = {de:'Auftrag',en:'Task',fr:'Tâche'}[lang] || 'Task';
 		var classMarker = 'themeClass', originMarker = 'themeOrigin';
 		var classValues = Array.from(new Set(quests.filter(function (q) {
@@ -27,6 +32,10 @@
 		}).map(function (q) { return q.f[1]; }).filter(Boolean))).sort(function (a,b) { return a.localeCompare(b,lang); });
 		var replaced = window.MQL_REPLACED || {}, store = window.MQL_SPEICHER;
 		var known, manual, hasQuestProgress, hasMachbar, laufend, characterLevel, progressCache;
+		var searchIndex = new Map(), searchQuery = null, searchNeedle = '';
+		quests.forEach(function (q) {
+			searchIndex.set(q, fold([q.n,q.i,q.g,q.r,q.z,q.u].join(' ')));
+		});
 		function currentId(id) { id = String(id || '').toUpperCase(); return replaced[id] || id; }
 		function refreshProgress() {
 			// Facet counting visits the same rows repeatedly. Never read and parse
@@ -37,7 +46,7 @@
 			manual = character && character.manuell && character.manuell.quests || {};
 			laufend = character && character.laufend || {};
 			characterLevel = Number(character && character.level) || 0;
-			hasMachbar = !!(character && ((character.importMeta && character.importMeta.quests === true) || questIds.length > 0));
+			hasMachbar = character?.importMeta?.quests ?? (questIds.length > 0);
 			hasQuestProgress = hasMachbar || !!Object.keys(laufend).length
 				|| !!(Object.keys(manual).length && quests.some(function (q) { return manualStatus(q.i); }));
 			progressCache = new Map();
@@ -127,7 +136,7 @@
 		function statusOptions() {
 			var options = [{value:'all',label:progress.all,keepVisible:true}];
 			if (hasQuestProgress) {
-				['open','running','done','unset'].forEach(function (key) {
+				['open','running','done'].forEach(function (key) {
 					options.push({value:key,label:progress[key],keepVisible:true});
 				});
 			}
@@ -184,16 +193,14 @@
 			return hasMachbar ? 'open' : 'unknown';
 		}
 		function machbar(row) {
-			if (!hasQuestProgress || progressState(row) !== 'open' || row.vb) { return false; }
+			if (!hasQuestProgress || progressState(row) !== 'open' || row.vb || row.x === 1 || row.mp === 1 ||
+				(row.e && row.e.some(function (id) { return completed(id); }))) { return false; }
 			if (characterLevel && row.vl && row.vl > characterLevel) { return false; }
 			if (row.v && !row.v.every(function (id) { return completed(id); })) { return false; }
 			if (row.vo && !row.vo.some(function (id) { return completed(id); })) { return false; }
 			return true;
 		}
-		function matches(row,state) {
-			if (state.q && !fold([row.n,row.i,row.g,row.r,row.z,row.u].join(' ')).includes(fold(state.q))) { return false; }
-			return groups.every(function (group) {
-				var value = state.filters[group.id];
+		function matchesGroup(row,group,value) {
 				if (group.id === 'topic') {
 					return !value.length || value.some(function (topic) {
 						return topic === 'board' ? row.a === boardValue : topic === (row.th || '');
@@ -230,10 +237,17 @@
 					if (value === 'done') { return progressState(row) === 'done'; }
 					if (value === 'open') { return progressState(row) === 'open'; }
 					if (value === 'running') { return progressState(row) === 'running'; }
-					if (value === 'unset') { return ['unknown','excluded'].includes(progressState(row)); }
 					return value === 'machbar' && hasMachbar && machbar(row);
 				}
 				return true;
+		}
+		function matches(row,state,skipGroup) {
+			if (state.q) {
+				if (state.q !== searchQuery) { searchQuery = state.q; searchNeedle = fold(state.q); }
+				if (!searchIndex.get(row).includes(searchNeedle)) { return false; }
+			}
+			return groups.every(function (group) {
+				return group.id === skipGroup || matchesGroup(row,group,state.filters[group.id]);
 			});
 		}
 		var adapter = window.MQL_FILTERADAPTER.client({
@@ -251,11 +265,12 @@
 						});
 					}
 					collect(group.options);
+					var candidates = all.filter(function (row) { return matches(row,state,group.id); });
 					result[group.id]=options.map(function (option) {
 						var value = group.kind === 'tree' ? option.path : option.value;
-						var candidate=JSON.parse(JSON.stringify(state));
-						candidate.filters[group.id]=group.kind==='single'?value:[value];
-						return {value:value,count:all.filter(function (q) { return matches(q,candidate); }).length};
+						return {value:value,count:candidates.filter(function (row) {
+							return matchesGroup(row,group,group.kind === 'single' ? value : [value]);
+						}).length};
 					});
 				});
 				return result;
@@ -291,7 +306,7 @@
 					button.type='button';button.className='finder-treffer';name.textContent=q.n;
 					var stand=progressState(q);
 					status.className='questfinder-status questfinder-status-'+stand;
-					status.textContent={done:'✓ '+w.done,open:'● '+w.open,running:'◒ '+w.running,unknown:'○ '+w.unknown,excluded:'– '+w.excluded}[stand];
+					status.textContent={done:'✓ '+progress.done,open:'● '+progress.open,running:'◒ '+progress.running,unknown:'○ '+w.unknown,excluded:'– '+w.excluded}[stand];
 					var rewardCount = Array.isArray(q.rw) ? q.rw.length : 0;
 					var details=[q.l?w.level+' '+q.l:'',q.a===boardValue?w.task:'',q.g||(counts[q.n]>1?w.name+' · '+q.i:''),rewardCount ? ((window.MQL_T && window.MQL_T('belohnungen')) || 'Belohnungen')+' '+rewardCount:''].filter(Boolean);
 					meta.textContent=details.join(' · ');

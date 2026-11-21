@@ -11,6 +11,19 @@ html[data-theme="light"] .knopf-gold:focus-visible {
 	color: var(--text);
 }
 html[data-theme="light"] .buehne { background: var(--llb-palette-e9e4d7); }
+html[data-theme="light"] body.landing .hero::before {
+	filter: saturate(.9);
+	opacity: .78;
+}
+html[data-theme="light"] body.landing .hero::after {
+	background: linear-gradient(90deg,
+		var(--llb-palette-rgba-255-253-248-p98) 0%,
+		var(--llb-palette-rgba-255-253-248-p96) 38%,
+		var(--llb-palette-rgba-255-253-248-p84) 50%,
+		var(--llb-palette-rgba-255-253-248-p42) 63%,
+		var(--llb-palette-rgba-255-253-248-p12) 78%,
+		var(--llb-palette-transparent) 100%);
+}
 html[data-theme="light"] .buehne.keinbild .raster {
 	background-color: var(--llb-palette-f3f0e8);
 	background-image:

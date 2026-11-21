@@ -136,21 +136,24 @@
 				if(s.pagination.page>1)u.searchParams.set('page',String(s.pagination.page));
 				return u;
 			}};
+		var nameIndex=new Map(),lastQuery=null,queryNeedle='';
+		rows.forEach(function(r){nameIndex.set(r,r.name.toLocaleLowerCase(lang));});
+		function nameMatches(r,q){if(!q){return true;}if(q!==lastQuery){lastQuery=q;queryNeedle=q.toLocaleLowerCase(lang);}return nameIndex.get(r).includes(queryNeedle);}
 		var adapter=A.client({rows:rows,size:30,id:function(r){return r.id;},
 			matches:function(r,s,skip){
-				var name=r.name.toLocaleLowerCase(lang), location=s.filters.location||[];
+				var location=s.filters.location||[];
 				var locationMatch=!location.length||location.some(function(path){
 					return (r.regions||[]).map(String).includes(String(path.region)) &&
 						(!path.area||(r.areas||[]).map(String).includes(String(path.area)));});
-				return (!s.q||name.includes(s.q.toLocaleLowerCase(lang))) &&
+				return nameMatches(r,s.q) &&
 					(skip==='location'||locationMatch) &&
 					(skip==='type'||!s.filters.type.length||s.filters.type.includes(r.type));
 			},
 			compare:function(a,b){return a.name.localeCompare(b.name,lang)||a.id.localeCompare(b.id);},
 			facets:function(all,s){
-				var locationRows=all.filter(function(r){return (!s.q||r.name.toLocaleLowerCase(lang).includes(s.q.toLocaleLowerCase(lang))) &&
+				var locationRows=all.filter(function(r){return nameMatches(r,s.q) &&
 					(!s.filters.type.length||s.filters.type.includes(r.type));});
-				var typeRows=all.filter(function(r){return (!s.q||r.name.toLocaleLowerCase(lang).includes(s.q.toLocaleLowerCase(lang))) &&
+				var typeRows=all.filter(function(r){return nameMatches(r,s.q) &&
 					(!s.filters.location.length||s.filters.location.some(function(p){return (r.regions||[]).map(String).includes(String(p.region))&&(!p.area||(r.areas||[]).map(String).includes(String(p.area)));}));});
 				var paths=[];
 				Object.keys(regionLabels).forEach(function(id){paths.push({value:{region:String(id)},count:locationRows.filter(function(r){return (r.regions||[]).map(String).includes(String(id));}).length});});

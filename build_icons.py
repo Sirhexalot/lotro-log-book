@@ -21,6 +21,7 @@ import sys
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
+from instanzbeute_items import lade_beute, truhen_ids
 
 HIER = Path(__file__).resolve().parent
 DATEN = HIER / 'daten'
@@ -46,6 +47,8 @@ def main():
     optionen.add_argument('--ziel', type=Path, default=ZIEL)
     optionen.add_argument('--pruefen', action='store_true',
                           help='write nothing, only compare the needed IDs with the source')
+    optionen.add_argument('--nur-instanzbeute', action='store_true',
+                          help='export chest loot icons only, without changing the catalogue manifest')
     args = optionen.parse_args()
 
     try:
@@ -57,8 +60,16 @@ def main():
         print('MISSING: %s' % args.quelle, file=sys.stderr)
         return 2
 
-    benoetigt, items = symbole()
-    args.ziel.mkdir(parents=True, exist_ok=True)
+    if args.nur_instanzbeute:
+        from build_gegenstandssuche import roh_export
+        ids = truhen_ids(lade_beute())
+        benoetigt = {str(row['ic']): iid for iid, row in roh_export().items()
+                     if iid in ids and row.get('ic')}
+        items = ids
+    else:
+        benoetigt, items = symbole()
+    if not args.pruefen:
+        args.ziel.mkdir(parents=True, exist_ok=True)
 
     vorhanden, geschrieben, fehlend = set(), 0, []
     gesamt = 0
@@ -96,6 +107,12 @@ def main():
               (len(benoetigt), len(vorhanden), len(fehlend)))
         return 1 if fehlend else 0
 
+    print('Symbols: %d needed, %d present, %d new, %d missing' %
+          (len(benoetigt), len(vorhanden), geschrieben, len(fehlend)))
+    print('  %.1f MB in %s' % (gesamt / 1048576, args.ziel))
+    if args.nur_instanzbeute:
+        return 1 if fehlend else 0
+
     manifest = {
         'created_utc': datetime.now(timezone.utc).isoformat(timespec='seconds'),
         'source': str(args.quelle),
@@ -108,10 +125,7 @@ def main():
         'missing': fehlend,
     }
     (DATEN / 'icons.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + '\n',
-                                      encoding='utf-8')
-    print('Symbols: %d needed, %d present, %d new, %d missing' %
-          (len(benoetigt), len(vorhanden), geschrieben, len(fehlend)))
-    print('  %.1f MB in %s' % (gesamt / 1048576, args.ziel))
+                                     encoding='utf-8')
     return 1 if fehlend else 0
 
 

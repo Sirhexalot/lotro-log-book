@@ -16,15 +16,18 @@ final class Catalogue
         'de' => ['q' => 'aufgabe', 'd' => 'tat', 'i' => 'gegenstand', 'area' => 'gebiet',
                  'region' => 'region', 'catalog' => 'katalog', 'p' => 'beruf', 'recipe' => 'rezept',
                   'craft' => 'handwerk', 'title' => 'titel', 'virtue' => 'tugend', 'set' => 'set',
-                  'giver' => 'auftraggeber', 'vendor' => 'haendler', 'f' => 'fraktion', 'l' => 'landmarke'],
+                   'giver' => 'auftraggeber', 'vendor' => 'haendler', 'f' => 'fraktion', 'l' => 'landmarke',
+                   'instance' => 'instanz'],
         'en' => ['q' => 'quest', 'd' => 'deed', 'i' => 'item', 'area' => 'area',
                  'region' => 'region', 'catalog' => 'catalogue', 'p' => 'profession', 'recipe' => 'recipe',
                   'craft' => 'crafting', 'title' => 'title', 'virtue' => 'virtue', 'set' => 'set',
-                   'giver' => 'quest-giver', 'vendor' => 'vendor', 'f' => 'faction', 'l' => 'landmark'],
+                    'giver' => 'quest-giver', 'vendor' => 'vendor', 'f' => 'faction', 'l' => 'landmark',
+                    'instance' => 'instance'],
         'fr' => ['q' => 'quete', 'd' => 'prouesse', 'i' => 'objet', 'area' => 'zone',
                  'region' => 'region', 'catalog' => 'catalogue', 'p' => 'metier', 'recipe' => 'recette',
                   'craft' => 'artisanat', 'title' => 'titre', 'virtue' => 'vertu', 'set' => 'ensemble',
-                   'giver' => 'donneur-de-quete', 'vendor' => 'marchand', 'f' => 'faction', 'l' => 'site'],
+                    'giver' => 'donneur-de-quete', 'vendor' => 'marchand', 'f' => 'faction', 'l' => 'site',
+                    'instance' => 'instance'],
     ];
 
     /**
@@ -189,7 +192,7 @@ final class Catalogue
 
     public static function validId(string $kind, string $identifier): bool
     {
-        if ($kind === 'set' || $kind === 'giver' || $kind === 'vendor') {
+        if ($kind === 'set' || $kind === 'giver' || $kind === 'vendor' || $kind === 'instance') {
             return preg_match('/^[0-9A-Fa-f]{8}$/', $identifier) === 1;
         }
         $pattern = $kind === 'p' ? '/^[A-Z][A-Z_]*$/' : '/^[0-9A-Fa-f]+$/';

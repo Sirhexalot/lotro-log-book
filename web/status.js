@@ -2,11 +2,11 @@
 (function (root) {
 	'use strict';
 	var labels = {
-		de: { progress: 'Fortschritt', all: 'Alle', available: 'Annehmbar', open: 'Offen', running: 'In Arbeit', done: 'Erledigt', unset: 'Nicht gesetzt', status: 'Fortschritt:', questStatus: 'Fortschritt der Aufgabe:', deedStatus: 'Fortschritt der Tat:', reset: 'Importstatus verwenden', manual: 'manuell gesetzt',
+		de: { progress: 'Fortschritt', all: 'Alle', available: 'Voraussetzungen erfüllt', open: 'Nicht begonnen', running: 'Begonnen', done: 'Erledigt', unset: 'Kein Status', status: 'Fortschritt:', questStatus: 'Fortschritt der Aufgabe:', deedStatus: 'Fortschritt der Tat:', reset: 'Importstatus verwenden', manual: 'manuell gesetzt',
 			info: 'Manuelle Angaben gelten bis zum nächsten passenden Companion-Import. Der Import kann sie ersetzen.' },
-		en: { progress: 'Progress', all: 'All', available: 'Available', open: 'Open', running: 'In progress', done: 'Completed', unset: 'Not set', status: 'Progress:', questStatus: 'Quest progress:', deedStatus: 'Deed progress:', reset: 'Use imported status', manual: 'set manually',
+		en: { progress: 'Progress', all: 'All', available: 'Requirements met', open: 'Not started', running: 'In progress', done: 'Completed', unset: 'No status', status: 'Progress:', questStatus: 'Quest progress:', deedStatus: 'Deed progress:', reset: 'Use imported status', manual: 'set manually',
 			info: 'Manual entries apply until the next matching Companion import. The import can replace them.' },
-		fr: { progress: 'Progression', all: 'Toutes', available: 'Disponible', open: 'Ouverte', running: 'En cours', done: 'Terminée', unset: 'Non défini', status: 'Progression :', questStatus: 'Progression de la quête :', deedStatus: 'Progression de la prouesse :', reset: 'Utiliser le statut importé', manual: 'défini manuellement',
+		fr: { progress: 'Progression', all: 'Toutes', available: 'Conditions remplies', open: 'Non commencée', running: 'En cours', done: 'Terminée', unset: 'Sans statut', status: 'Progression :', questStatus: 'Progression de la quête :', deedStatus: 'Progression de la prouesse :', reset: 'Utiliser le statut importé', manual: 'défini manuellement',
 			info: 'Les indications manuelles restent valables jusqu’au prochain import Companion correspondant. Celui-ci peut les remplacer.' }
 	};
 	var symbols = { offen: '·', laufend: '◐', fertig: '✓' };

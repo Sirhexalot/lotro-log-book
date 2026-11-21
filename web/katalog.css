@@ -198,10 +198,6 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .quest-detail-ort .katalog-hinweis, .quest-detail-ort .katalog-aktionen { margin-block: 6px; }
 .quest-ort-nebenlinks { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-block: 6px 0; font-size: var(--text-bedienung); }
 .katalog-abschnitt .mql-row-list { padding-inline-start: 0; }
-.item-quellen-kompakt .mql-row { display: flex; flex-wrap: wrap; justify-content: start; gap: 6px 14px; padding: 4px 0; border: 0; }
-.item-quellen-kompakt .mql-row-hit { display: flex; align-items: center; gap: 8px; }
-.item-quellen-kompakt .mql-row-icon { flex: none; }
-.item-quellen-kompakt .mql-row-meta { margin-block-start: 0; }
 .entity-item-description > p:first-child { margin-block-start: 0; }
 .entity-item-description > p:last-child { margin-block-end: 0; }
 .katalog-detailraster > .katalog-ziele { margin-block: 22px; }

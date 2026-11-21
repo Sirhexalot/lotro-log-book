@@ -10,6 +10,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CSS = (ROOT / 'web' / 'start.css').read_text()
+LIGHT_CSS = (ROOT / 'web' / 'theme-light.css').read_text()
 
 
 class ZahlenTest(unittest.TestCase):
@@ -56,6 +57,18 @@ class HeroTest(unittest.TestCase):
         # A readable page needs an overlay over the picture.
         self.assertIn('body.landing .hero::after', CSS)
         self.assertIn('linear-gradient(90deg, var(--llb-palette-14110e) 0%', CSS)
+
+    def test_hero_stays_inside_main_content(self):
+        hero = CSS.split('body.landing .hero {', 1)[1].split('}', 1)[0]
+        self.assertNotIn('margin: 0 -20px', hero)
+        self.assertNotIn('margin: 0 -16px', CSS)
+
+    def test_light_theme_uses_a_light_overlay_for_readable_text(self):
+        self.assertIn('html[data-theme="light"] body.landing .hero::after', LIGHT_CSS)
+        self.assertIn('--llb-palette-rgba-255-253-248-p98', LIGHT_CSS)
+        self.assertIn('opacity: .78;', LIGHT_CSS)
+        self.assertIn('--llb-palette-rgba-255-253-248-p12) 78%', LIGHT_CSS)
+        self.assertIn('--llb-palette-transparent) 100%', LIGHT_CSS)
 
 
 if __name__ == '__main__':

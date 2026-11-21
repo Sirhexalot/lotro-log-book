@@ -38,6 +38,7 @@ sys.path.insert(0, str(HIER))
 sys.path.insert(0, str(HIER / 'tools'))
 from itemnamen import sauberer_name  # noqa: E402
 from gebietssicht import display_name, group_for, map_tree  # noqa: E402
+from instanzbeute_items import beute_ergaenzen, lade_beute, truhen_ids  # noqa: E402
 
 SPRACHEN = ('de', 'en', 'fr')
 SCHEMA = 1
@@ -82,7 +83,7 @@ def klarer_name(text) -> str:
     return re.sub(r'\s{2,}', ' ', text).strip()
 
 
-def load_language(lang: str) -> dict:
+def load_language(lang: str, chest_items=None) -> dict:
     quests = read_assignment(WEB / ('daten-%s.js' % lang), 'MQL_QUESTS')
     deeds = read_assignment(WEB / ('daten-taten-%s.js' % lang), 'MQL_QUESTS')
     try:
@@ -93,6 +94,8 @@ def load_language(lang: str) -> dict:
     recipes = read_assignment(WEB / ('rezepte-%s.js' % lang), 'MQL_REZEPTE')['r']
     referenz = read_assignment(WEB / 'referenz.js', 'MQL_REFERENZ')
     items = json.loads((DATEN / 'items.json').read_text(encoding='utf-8'))['items']
+    if chest_items is not None:
+        items = items | {ident: row for ident, row in chest_items.items() if ident not in items}
     titles = json.loads((DATEN / 'titel.json').read_text(encoding='utf-8'))['eintraege']
     virtues = json.loads((DATEN / 'tugenden.json').read_text(encoding='utf-8'))['eintraege']
     return dict(quests=quests, deeds=deeds, replaced=replaced, maps=maps, recipes=recipes,
@@ -426,8 +429,8 @@ def write_instance_index(target: Path, lang: str, instanzen: dict, maps: dict) -
                       'level_max': eintrag.get('level_max'),
                       'cluster_id': cluster_id, 'cluster': cluster,
                       'group': (eintrag.get('group') or {}).get(lang) or '',
-                      'group_sizes': eintrag.get('group_sizes') or [],
-                      'difficulties': eintrag.get('difficulties') or [],
+                      'group_sizes': sorted(eintrag.get('group_sizes') or []),
+                      'difficulties': sorted(eintrag.get('difficulties') or []),
                      'region': region, 'area': area,
                      'players': eintrag.get('players'),
                      'type': eintrag.get('type') or 'sonst',
@@ -438,6 +441,188 @@ def write_instance_index(target: Path, lang: str, instanzen: dict, maps: dict) -
     payload = {'schema': 2, 'lang': lang, 'labels': labels, 'instances': rows}
     (target / lang / 'instances-index.json').write_text(
         json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+
+
+def chest_chance(chance, lang):
+    value = '%g' % (chance * 100)
+    return value + '%' if lang == 'en' else value.replace('.', ',') + '\u00a0%'
+
+
+def chest_source_rows(sources, lang, item_id):
+    """Merge only one condition dimension at a time, keeping valid combinations."""
+    by_instance = {}
+    for source in sources:
+        name, url, conditions = by_instance.setdefault(
+            source['instance'], (source['name'], source['url'], defaultdict(set)))
+        axes = tuple(tuple(range(span[0], span[-1] + 1)) if span else ()
+                     for span in (source['level'], source['tier'], source['group']))
+        conditions[axes].add(source['chance'])
+
+    def span_label(values, prefix=''):
+        bands = []
+        for value in values:
+            if bands and bands[-1][-1] + 1 == value:
+                bands[-1].append(value)
+            else:
+                bands.append([value])
+        return ' / '.join(f'{prefix}{band[0]}' +
+                          (f'–{prefix}{band[-1]}' if len(band) > 1 else '') for band in bands)
+
+    labels = {
+        'de': ('Stufe %s', '%s Spieler', '%s Spieler', 'Chance je Truhe'),
+        'en': ('Level %s', '%s player', '%s players', 'Chance per chest'),
+        'fr': ('Niveau %s', '%s joueur', '%s joueurs', 'Chance par coffre'),
+    }[lang]
+    result = []
+    from urllib.parse import urlencode
+    for name, url, conditions in by_instance.values():
+        rows = [(*axes, tuple(sorted(chances, reverse=True))) for axes, chances in conditions.items()]
+        for axis in (0, 1, 2):
+            merged = defaultdict(set)
+            for row in rows:
+                merged[row[:axis] + row[axis+1:]].update(row[axis])
+            rows = [key[:axis] + (tuple(sorted(values)),) + key[axis:] for key, values in merged.items()]
+        lines = []
+        for level, tier, players, chances in sorted(rows):
+            lines.append(' · '.join(filter(None, (
+                labels[0] % span_label(level) if level else '',
+                span_label(tier, 'T'),
+                labels[1 if players == (1,) else 2] % span_label(players) if players else '',
+                labels[3] + ': ' + ' / '.join(chest_chance(p, lang).replace('\u00a0', ' ') for p in chances),
+            ))))
+        href = url + '?' + urlencode({'truhenbeute.q': item_id}) + '#truhenbeute'
+        result.append({'text': name, 'url': href, 'conditions': lines})
+    return sorted(result, key=lambda row: (row['text'].casefold(), row['url']))
+
+
+def write_instance_details(target: Path, lang: str, instanzen: dict, quests: dict,
+                           maps: dict, items: dict, quest_pages: dict, loot_data: dict,
+                           map_previews: dict, instance_data: dict) -> dict:
+    """Localized instance pages from the finder, quest catalogue and loot audit."""
+    from php_viewmodel import route
+    loot_instances = loot_data.get('instanzen') or {}
+    pools = loot_data.get('pools') or []
+    labels = {
+        'de': {'level': 'Stufe', 'players': 'Spieler', 'tiers': 'Schwierigkeit',
+               'cluster': 'Instanzgruppe'},
+        'en': {'level': 'Level', 'players': 'Players', 'tiers': 'Difficulty',
+               'cluster': 'Instance group'},
+        'fr': {'level': 'Niveau', 'players': 'Joueurs', 'tiers': 'Difficulté',
+               'cluster': 'Groupe d’instances'},
+    }[lang]
+    quest_segment = {'de': 'aufgabe', 'en': 'quest', 'fr': 'quete'}[lang]
+    area_segment = {'de': 'gebiet', 'en': 'area', 'fr': 'zone'}[lang]
+    details = {}
+    item_sources: dict[str, dict[str, dict]] = {}
+    instance_segment = {'de': 'instanz', 'en': 'instance', 'fr': 'instance'}[lang]
+    for ident, entry in instanzen.items():
+        name = (entry.get('name') or {}).get(lang) or ''
+        if not name:
+            continue
+        desc = (entry.get('description') or {}).get(lang) or ''
+        heading = re.match(r'<u>(.*?)</u>', desc, flags=re.S)
+        if heading and heading.group(1).strip().casefold() == name.strip().casefold():
+            desc = desc[heading.end():]
+        desc = re.sub(r'<[^>]*>', '', desc).replace('\\n', '\n').replace('\\q', '').strip()
+        import seo
+        description_seo = seo.fit(' '.join(desc.split()), seo.DESC_MAX) if desc else ''
+        facts = []
+        if entry.get('level') is not None:
+            end = entry.get('level_max') or entry['level']
+            facts.append({'label': labels['level'],
+                          'value': str(entry['level']) + ('–' + str(end) if end != entry['level'] else '')})
+        if entry.get('group_sizes'):
+            facts.append({'label': labels['players'], 'value': ' / '.join(map(str, entry['group_sizes']))})
+        if entry.get('difficulties'):
+            facts.append({'label': labels['tiers'], 'value': ' / '.join('T' + str(x) for x in entry['difficulties'])})
+        if entry.get('cluster', {}).get(lang):
+            facts.append({'label': labels['cluster'], 'value': entry['cluster'][lang]})
+        for field, label in (('area', {'de': 'Landschaft', 'en': 'Area', 'fr': 'Zone'}[lang]),
+                             ('region', {'de': 'Region', 'en': 'Region', 'fr': 'Région'}[lang])):
+            place_id = entry.get(field)
+            place = maps.get(str(place_id), maps.get(place_id)) if place_id is not None else None
+            if place and place.get('name'):
+                facts.append({'label': label, 'value': place['name'],
+                              'url': '/%s/%s/%s/' % (lang, area_segment, place_id)})
+        task_rows = []
+        for qid in entry.get('quests') or ([entry['quest']] if entry.get('quest') else []):
+            quest = quests.get(str(qid))
+            if quest:
+                task_rows.append({'id': str(qid), 'name': quest.get('n') or quest.get('name') or str(qid),
+                                  'url': '/%s/%s/%s/' % (lang, quest_segment, qid)})
+        map_record = loot_instances.get(ident, {}).get('karte') or {}
+        image_id = map_record.get('bild')
+        preview = map_previews.get(str(image_id))
+        map_url = '/karten/instanzen/%s' % preview[0].name if preview else ''
+        quest_rewards = []
+        for task in task_rows:
+            for group in quest_pages.get(task['id'], {}).get('reward_groups') or []:
+                for item in group['items']:
+                    quest_rewards.append({
+                        'id': str(len(quest_rewards)), 'name': item['text'], 'url': item['url'],
+                        'image': item['icon'], 'icon': item['symbol'] or 'gegenstand',
+                        'meta': ' · '.join(filter(None, (
+                            '%s ×' % item['qty'] if item['qty'] > 1 else '', group['label']))),
+                        'quest_id': task['id'], 'quest': task['name'], 'quest_url': task['url'],
+                    })
+        details[ident] = {
+            'id': ident, 'name': name, 'description': desc,
+            'description_seo': description_seo, 'facts': facts,
+            'cluster': entry.get('cluster', {}).get(lang) or '',
+            'tasks': task_rows,
+            'map': map_url,
+            'map_size': list(preview[1:]) if preview else [],
+            'enemies': instance_data['gegner'][lang].get(ident, []),
+            'enemy_groups': instance_data['gruppen'][lang].get(ident, []),
+            'bosses': instance_data['bosse'][lang].get(ident, []),
+            'enemy_count': len(instance_data['gegner'][lang].get(ident, [])),
+            'species_count': sum(len(group['arten'])
+                                 for group in instance_data['gruppen'][lang].get(ident, [])),
+            'quest_rewards': quest_rewards,
+        }
+        loot_items = {}
+        for condition in loot_instances.get(ident, {}).get('beute') or []:
+            pool_id = condition.get('pool')
+            pool = pools[pool_id] if isinstance(pool_id, int) and 0 <= pool_id < len(pools) else []
+            band = tuple(condition.get('stufe') or [])
+            tier = tuple(condition.get('tier') or [])
+            group = tuple(condition.get('gruppe') or [])
+            for item in pool:
+                iid = str(item.get('i') or '').upper()
+                p = float(item.get('p') or 0)
+                if p <= 0:
+                    continue
+                item_name = sauberer_name((item.get('namen') or {}).get(lang) or '', lang)
+                if iid and item_name:
+                    drop = loot_items.setdefault(iid, {
+                        'id': iid, 'name': item_name, 'url': route(lang, 'i', iid) if iid in items else '',
+                        'image': (items.get(iid) or {}).get('ic'), 'conditions': {},
+                    })
+                    drop['conditions'].setdefault((band, tier, group), set()).add(p)
+                if iid not in items:
+                    continue
+                key = (ident, band, tier, group, p)
+                item_sources.setdefault(iid, {})[key] = {
+                    'instance': ident, 'name': name,
+                    'url': '/%s/%s/%s/' % (lang, instance_segment, ident),
+                    'level': list(band), 'tier': list(tier), 'group': list(group),
+                     'chance': p,
+                }
+        chest_loot = []
+        for drop in sorted(loot_items.values(), key=lambda row: (row['name'].casefold(), row['id'])):
+            conditions = drop.pop('conditions')
+            chances = sorted(set().union(*conditions.values()), reverse=True)
+            chest_loot.append(dict(drop, chance=' / '.join(chest_chance(p, lang) for p in chances),
+                                  conditions=[
+                                      {'level': band, 'tier': tier, 'players': group,
+                                       'chances': sorted(values, reverse=True)}
+                                      for (band, tier, group), values in sorted(conditions.items())
+                                  ]))
+        details[ident]['chest_loot'] = chest_loot
+    (target / lang / 'instance-details.json').write_text(
+        json.dumps({'instances': details}, ensure_ascii=False, separators=(',', ':')),
+        encoding='utf-8')
+    return item_sources
 
 
 def write_pages(target: Path, lang: str, kind: str, pages: dict) -> int:
@@ -474,8 +659,11 @@ def language_data(model: dict, lang: str, fraktionen: dict, landmarken: dict) ->
         out['d'][deed['i']] = record
 
     for ident, item in model['items'].items():
-        name = klarer_name((item.get('n') or {}).get(lang)
-                           or (item.get('n') or {}).get('en') or '')
+        if item.get('instanztruhe_neu'):
+            name = sauberer_name((item.get('n') or {}).get(lang), lang)
+        else:
+            name = klarer_name((item.get('n') or {}).get(lang)
+                               or (item.get('n') or {}).get('en') or '')
         if not name:
             continue
         record = dict(item)
@@ -673,6 +861,14 @@ def main() -> int:
     fraktion_source = json.loads((DATEN / 'fraktionen.json').read_text(encoding='utf-8'))['fraktionen']
     landmark_source = json.loads((DATEN / 'landmarken.json').read_text(encoding='utf-8'))['landmarken']
     instanz_source = json.loads((DATEN / 'instanzen.json').read_text(encoding='utf-8'))['instanzen']
+    from instanzgegner import instanzdaten
+    from instanzkarten import instanzkarten
+    from build_gegenstandssuche import roh_export
+    instance_loot = lade_beute()
+    chest_ids = truhen_ids(instance_loot)
+    chest_items = beute_ergaenzen({}, roh_export(), chest_ids) if chest_ids else {}
+    instance_maps = instanzkarten(instance_loot.get('instanzen') or {})
+    instance_data = instanzdaten(instanz_source, DATEN / 'instanzen-roh.jsonl')
     from set_viewmodel import set_pages, link_items
 
     global GIVER_SOURCE, QUEST_GIVERS, VENDOR_SOURCE
@@ -706,7 +902,7 @@ def main() -> int:
     listen: dict = {}
     detail_routes: dict = {}
     for lang in languages:
-        model = load_language(lang)
+        model = load_language(lang, chest_items)
         data = language_data(model, lang, fraktion_source, landmark_source)
         maps = {str(m['idx']): m for m in model['maps']}
         folder = target / lang
@@ -792,10 +988,25 @@ def main() -> int:
         write_title_index(target, lang, data['title'], builder.quests, builder.deeds, maps)
         write_faction_index(target, lang, data['f'], builder.quests, builder.deeds, maps)
         write_instance_index(target, lang, instanz_source, maps)
+        loot_sources = write_instance_details(
+            target, lang, instanz_source, data['q'], maps, data['i'], quest_pages, instance_loot,
+            instance_maps, instance_data)
 
         item_ctx = load_item_context(builder, model, lang)
         item_pages = {ident: item_view(builder, item_ctx, ident, item)
                        for ident, item in data['i'].items()}
+        instance_label = {'de': 'Truhenbeute aus Instanzen',
+                          'en': 'Instance chest loot',
+                          'fr': 'Butin des coffres d’instances'}[lang]
+        for item_id, sources in loot_sources.items():
+            page = item_pages.get(item_id)
+            if page is None:
+                continue
+            rows = chest_source_rows(sources.values(), lang, item_id)
+            page['where_groups'].append({'label': instance_label, 'filter': None,
+                                         'entries': rows, 'instance_chests': True})
+            page['has_where_from'] = True
+            page['where_from_count'] = page.get('where_from_count', 0) + len(rows)
         # Large item source lists reuse the task finder's complete filter
         # schema, but only receive the tasks that award this item.
         for ident, item in data['i'].items():
@@ -889,6 +1100,11 @@ def main() -> int:
         listen.update(lists)
         from php_viewmodel import route as _route
         detail_routes[lang] = {}
+        instance_segment = {'de': 'instanz', 'en': 'instance', 'fr': 'instance'}[lang]
+        detail_routes[lang][instance_segment] = [
+            '/%s/%s/%s/' % (lang, instance_segment, ident)
+            for ident, entry in instanz_source.items()
+            if (entry.get('name') or {}).get(lang)]
         for kind in SITEMAP_KINDS:
             ids = data[kind].keys()
             if kind == 'set':

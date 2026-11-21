@@ -4,6 +4,8 @@ import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from instanzbeute_items import lade_beute, truhen_ids
+
 
 ROOT = Path(__file__).resolve().parents[1]
 ITEMS = json.loads((ROOT / 'daten/items.json').read_text(encoding='utf-8'))['items']
@@ -56,9 +58,13 @@ class ItemModelTests(unittest.TestCase):
 
     def test_filter_page_keeps_same_ids_and_existing_dimensions(self):
         ids = set(ITEMS)
+        chest_ids = truhen_ids(lade_beute())
         for lang in ('de', 'en', 'fr'):
             data = search_data(lang)
-            self.assertEqual({row[0] for row in data['e']}, ids)
+            indexed_ids = {row[0] for row in data['e']}
+            self.assertEqual(indexed_ids - ids, chest_ids - ids)
+            self.assertEqual(ids - indexed_ids, set())
+            self.assertEqual(set(data['instanceChest']), chest_ids)
             self.assertEqual(
                 data['katKey'],
                 ['ARMOUR', 'WEAPON', 'LEGENDARY_WEAPON', 'LEGENDARY_ITEM',
@@ -94,7 +100,8 @@ class ItemModelTests(unittest.TestCase):
         # The item export is allowed to grow when a newly discovered source
         # points at an item that was not present in the previous catalogue.
         # The search-data test above is the loss-sensitive check for parity.
-        self.assertEqual(len(ITEMS), len(search_data('de')['e']))
+        self.assertEqual(len(search_data('de')['e']) - len(ITEMS),
+                         len(truhen_ids(lade_beute()) - set(ITEMS)))
         self.assertEqual(sum(bool(item.get('haendler')) for item in ITEMS.values()), 2693)
         vendor = ITEMS['70000D75']['haendler'][0]
         self.assertEqual(vendor['name']['de'], 'Karlo Schwarzhain')

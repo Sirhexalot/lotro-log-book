@@ -41,13 +41,34 @@
 {% if page.has_where_from|default(false) %}<section id="item-tab-woher" data-item-tab-panel="woher"{% if both_relations %} role="tabpanel" aria-labelledby="item-reiter-woher" tabindex="0"{% else %} class="katalog-abschnitt katalog-beziehungen"{% endif %}>
 {% if not both_relations %}<h2>{{ w.tab_where_from }}</h2>{% endif %}
 {% for group in page.where_groups %}
-{% if group.source_kind|default('') and group.entries|length <= direct_list_max %}
-{% set source_type = group.source_kind == 'q' ? {de: 'Aufgabe', en: 'Quest', fr: 'Quête'}[lang] : {de: 'Tat', en: 'Deed', fr: 'Prouesse'}[lang] %}
-<ul class="mql-row-list item-quellen-kompakt" data-item-task-direct>
+{% if group.instance_chests|default(false) %}
+<section>
+<h3>{{ group.label }}</h3>
+{% set conditions = {de: 'Truhenbedingungen', en: 'Chest conditions', fr: 'Conditions du coffre'}[lang] %}
+<div{% if group.entries|length > direct_list_max %} data-item-chest-sources{% endif %}>
+    <ul class="mql-row-list" data-filter-results>
+    {{ result.heading(lang, conditions) }}
+    {% for entry in group.entries %}
+        {{ result.row(lang, entry.url, entry.text, '', symbol('instance'), '', conditions, entry.conditions) }}
+    {% endfor %}
+    </ul>
+</div>
+</section>
+{% elseif group.source_kind|default('') and group.entries|length <= direct_list_max %}
+{# Direct task sources use the same result rows as every other list. The
+   progress column is announced only once the browser adds the status control,
+   so no empty column appears without JavaScript. #}
+{% set level_label = group.source_kind == 'q' ? {de: 'Aufgabenstufe', en: 'Quest level', fr: 'Niveau de quête'}[lang] : {de: 'Tatstufe', en: 'Deed level', fr: 'Niveau de prouesse'}[lang] %}
+{% set with_levels = group.entries|filter(entry => entry.level|default(''))|length == group.entries|length %}
+<section>
+<h3>{{ group.label }}</h3>
+<ul class="mql-row-list" data-item-task-direct>
+{{ result.heading(lang, with_levels ? level_label : '', true, true) }}
 {% for entry in group.entries %}
-    {{ result.row(lang, entry.url|default(''), entry.text, source_type, symbol(group.source_kind == 'q' ? 'aufgabe' : 'tat')) }}
+    {{ result.row(lang, entry.url|default(''), entry.text, entry.extra|default(''), symbol(group.source_kind == 'q' ? 'aufgabe' : 'tat'), '', with_levels ? level_label : '', with_levels ? entry.level : '') }}
 {% endfor %}
 </ul>
+</section>
 {% else %}
 <section{% if group.barter_filter|default(false) and group.entries|length > direct_list_max %} data-barter-filter-group{% elseif group.vendor_filter|default(false) and group.entries|length > direct_list_max %} data-vendor-filter-group{% elseif group.filter|default('') == 'recipes' and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-recipe-filter-group{% elseif group.filter|default('') and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-item-filter-group{% endif %}>
 <h3>{{ group.label }}</h3>

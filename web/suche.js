@@ -26,10 +26,19 @@
 	};
 	var geoeffnet = {};
 	var daten = [];
+	var suchIndex = [];
+	var datenQuelle = null;
 
 	function falten(text) {
 		return String(text).toLowerCase()
 			.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+	}
+	function indexiere() {
+		if (datenQuelle === daten) { return; }
+		datenQuelle = daten;
+		suchIndex = daten.map(function (row) {
+			return {row:row,text:falten(row[2] + ' ' + (row[3] || ''))};
+		});
 	}
 
 	function eltern(tag, text) {
@@ -82,6 +91,21 @@
 	}
 
 	function zeile(art, id, name, kontext, stufe, ziel) {
+		var rowUI = window.MQL_TREFFERZEILE;
+		if (rowUI && rowUI.searchRow) {
+			if (art === 'g' && ART_TEXT[kontext]) { kontext = ART_TEXT[kontext][sprache] || kontext; }
+			var progress = (art === 'q' || art === 'd') && window.MQL_STATUS_UI
+				? window.MQL_STATUS_UI.create(art === 'q' ? 'quests' : 'deeds', id, null, art === 'q' ? 'quest' : 'deed', null)
+				: null;
+			var container = ziel || liste;
+			container.appendChild(rowUI.searchRow(container, {
+				kind:art, id:id, name:name, meta:kontext,
+				level:['q','d','g','r'].includes(art) ? stufe : null,
+				progress:progress, progressColumn:!!progress,
+				href:zielFuer(art,id,name)
+			}));
+			return;
+		}
 		var a = eltern('a');
 		a.className = 'su-zeile';
 		a.href = zielFuer(art, id, name);
@@ -107,19 +131,24 @@
 		hinweis.hidden = begriff.length >= 2;
 		anzahl.textContent = '';
 		if (begriff.length < 2) { return; }
-		var treffer = daten.filter(function (row) {
-			return falten(row[2]).indexOf(begriff) >= 0 ||
-				(row[3] && falten(row[3]).indexOf(begriff) >= 0);
+		indexiere();
+		var treffer = 0;
+		var gruppen = {};
+		ARTEN.forEach(function (paar) { gruppen[paar[0]] = []; });
+		suchIndex.forEach(function (entry) {
+			if (entry.text.indexOf(begriff) < 0) { return; }
+			treffer += 1;
+			if (gruppen[entry.row[0]]) { gruppen[entry.row[0]].push(entry.row); }
 		});
-		if (!treffer.length) {
+		if (!treffer) {
 			anzahl.textContent = '';
 			liste.appendChild(eltern('p', t('su_keine')));
 			return;
 		}
-		anzahl.textContent = ersetze(t('su_anzahl'), [treffer.length]);
+		anzahl.textContent = ersetze(t('su_anzahl'), [treffer]);
 		ARTEN.forEach(function (paar) {
 			var art = paar[0];
-			var eigene = treffer.filter(function (row) { return row[0] === art; });
+			var eigene = gruppen[art];
 			if (!eigene.length) { return; }
 			var block = eltern('section');
 			block.className = 'su-gruppe';
@@ -127,10 +156,13 @@
 			kopf.appendChild(zeichen(art));
 			kopf.appendChild(eltern('span', t(paar[1]) + ' (' + eigene.length + ')'));
 			block.appendChild(kopf);
+			var results = eltern('ul');
+			results.className = 'mql-row-list su-ergebnisse';
+			block.appendChild(results);
 			var offen = geoeffnet[art] || eigene.length <= 10;
 			var grenze = offen ? Math.min(eigene.length, 300) : 10;
 			eigene.slice(0, grenze).forEach(function (row) {
-				zeile(row[0], row[1], row[2], row[3], row[4], block);
+				zeile(row[0], row[1], row[2], row[3], row[4], results);
 			});
 			if (eigene.length > 10) {
 				var knopf = eltern('button', offen

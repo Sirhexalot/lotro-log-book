@@ -242,11 +242,6 @@ final class Landmarks
                 $teile[] = $labels['region'][(string) $row['region']] ?? '';
             }
             $teile = array_values(array_filter($teile));
-            $quests = (int) ($row['quests'] ?? 0);
-            if ($quests > 0) {
-                $teile[] = str_replace('%s', (string) $quests,
-                    $quests === 1 ? $words['quests_one'] : $words['quests']);
-            }
             $row['meta'] = implode(' · ', $teile);
         }
         unset($row);

@@ -1,0 +1,94 @@
+{% extends 'layout.twig' %}
+{% import 'entity/_header.twig' as heading %}
+{% import 'entity/_result_row.twig' as result %}
+
+{% block inhalt %}
+<article class="instanz-detail katalog-detailraster entity-detail-layout">
+    {{ heading.detail('instance', lang, w, page.name, symbol('instance'), '', '', '', '') }}
+    {% if page.facts %}
+    <dl class="katalog-werte-raster instanz-fakten">{% for fact in page.facts %}
+        <div><dt>{{ fact.label }}</dt><dd>{% if fact.url|default('') %}<a href="{{ fact.url }}">{{ fact.value }}</a>{% else %}{{ fact.value }}{% endif %}</dd></div>
+    {% endfor %}</dl>
+    {% endif %}
+    {% if page.description %}<section class="katalog-abschnitt">
+        <h2>{{ iw.description_label }}</h2><p class="katalog-text">{{ page.description|nl2br }}</p>
+    </section>{% endif %}
+    {% if page.bosses or page.enemy_groups or page.enemies or page.map %}
+    <div class="entity-detail-grid llb-raster{% if page.map and (page.bosses or page.enemy_groups or page.enemies) %} entity-detail-split{% endif %}">
+    {% if page.bosses or page.enemy_groups or page.enemies %}<div class="entity-detail-reading">
+    {% if page.bosses %}<section id="bosse" class="katalog-abschnitt">
+        <details data-nosnippet><summary>{{ iw.bosses }} · {{ page.bosses|length }}</summary>
+            <ul class="instanz-bosse">{% for boss in page.bosses %}<li>{{ boss }}</li>{% endfor %}</ul>
+        </details>
+    </section>{% endif %}
+    {% if page.enemy_groups %}<section id="gegner" class="katalog-abschnitt">
+        <details data-nosnippet><summary>{{ iw.enemies }} · {{ iw.enemies_count|format(page.enemy_count) }} · {{ iw.species_count|format(page.species_count) }}</summary>
+            <div class="instanz-gegner-gruppen">{% for group in page.enemy_groups %}
+                <div class="instanz-gattung">{% if group.gattung %}<h3>{{ group.gattung }}</h3>{% endif %}
+                    {% for art in group.arten %}<p class="instanz-art">{% if art.art %}<span class="instanz-art-name">{{ art.art }}</span>{% endif %}<span class="instanz-art-namen">{{ art.namen|join(' · ') }}</span></p>{% endfor %}
+                </div>{% endfor %}
+            </div>
+        </details>
+    </section>{% elseif page.enemies %}<section id="gegner" class="katalog-abschnitt">
+        <details data-nosnippet><summary>{{ iw.enemies }}</summary>
+            <ul class="instanz-gegner">{% for enemy in page.enemies %}<li>{{ enemy }}</li>{% endfor %}</ul>
+        </details>
+    </section>{% endif %}
+    </div>{% endif %}
+    {% if page.map %}<div class="entity-detail-place"><section class="katalog-abschnitt">
+        <h2>{{ iw.map }}</h2>
+        <figure class="instanz-karte{% if page.map_size[0] < 320 %} instanz-karte-klein{% endif %}"><img src="{{ page.map }}" alt="{{ iw.map }}"
+            width="{{ page.map_size[0] }}" height="{{ page.map_size[1] }}"
+            loading="lazy" decoding="async"></figure>
+    </section></div>{% endif %}
+    </div>
+    {% endif %}
+    {% set sections = {
+        aufgaben: {tab: iw.task_tab, heading: iw.tasks, rows: task_fallback},
+        aufgabenbelohnungen: {tab: iw.reward_tab, heading: iw.quest_rewards, rows: page.quest_rewards},
+        truhenbeute: {tab: iw.loot_tab, heading: iw.loot, rows: page.chest_loot}
+    }|filter(section => section.rows) %}
+    {% if sections %}
+    <div class="item-bezugsreiter instanz-reiter" data-instance-lists>
+        {% if sections|length > 1 %}
+        <div class="katalog-reiter" role="tablist" aria-label="{{ iw.tabs }}" hidden>
+            {% for key, section in sections %}
+            <button type="button" role="tab" id="instanz-reiter-{{ key }}" data-instance-tab="{{ key }}"
+                aria-selected="{{ loop.first ? 'true' : 'false' }}" aria-controls="{{ key }}"
+                tabindex="{{ loop.first ? '0' : '-1' }}">{{ section.tab }}</button>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% for key, section in sections %}
+        <section id="{{ key }}" class="instanz-listenflaeche" data-instance-panel>
+            <h2>{{ section.heading }}</h2>
+            <div data-instance-list>
+                <ul class="mql-row-list" data-filter-results>
+                    {% if key == 'aufgaben' %}
+                        {{ result.heading(lang) }}
+                        {% for row in section.rows %}{{ result.row(lang, row.url, row.text, '', symbol('aufgabe')) }}{% endfor %}
+                    {% elseif key == 'aufgabenbelohnungen' %}
+                        {{ result.heading(lang, iw.reward_quest) }}
+                        {% for row in section.rows %}
+                        {{ result.row(lang, row.url, row.name, row.meta, symbol(row.icon), row.image, iw.reward_quest, row.quest, '', '', '', row.quest_url) }}
+                        {% endfor %}
+                    {% else %}
+                        {{ result.heading(lang, iw.loot_chance) }}
+                        {% for row in section.rows %}
+                        {{ result.row(lang, row.url, row.name, '', symbol('gegenstand'), row.image, iw.loot_chance, row.chance) }}
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <p><a href="{{ instance_list_url }}">{{ iw.title }}</a></p>
+</article>
+{% endblock %}
+
+{% block page_scripts %}
+    <script type="application/json" id="instance-list-data">{{ instance_list_data|raw }}</script>
+    <script src="/instanz-detail.js?v={{ asset_stand }}" defer></script>
+{% endblock %}

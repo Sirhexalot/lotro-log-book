@@ -86,6 +86,20 @@ class RouterTest(unittest.TestCase):
         for pfad in pfade:
             self.assertEqual(antworten[pfad][0], 200, pfad)
 
+    def test_instance_details_have_canonical_routes_in_every_language(self):
+        paths = ['/de/instanz/700331AB/', '/en/instance/700331AB/', '/fr/instance/700331AB/']
+        answers = self.aufloesen(paths + [
+            '/de/instanz/700331ab/', '/de/instanz/700331AB.html',
+            '/en/instance/700331AB'])
+        for path in paths:
+            self.assertEqual(answers[path][0], 200, path)
+        self.assertEqual(answers['/de/instanz/700331ab/'],
+                         [301, '/de/instanz/700331AB/'])
+        self.assertEqual(answers['/de/instanz/700331AB.html'],
+                         [301, '/de/instanz/700331AB/'])
+        self.assertEqual(answers['/en/instance/700331AB'],
+                         [301, '/en/instance/700331AB/'])
+
     def test_replaced_deed_ids_redirect_to_the_current_page(self):
         datei = DATEN / 'de' / 'deed-redirects.json'
         if not datei.is_file():

@@ -948,6 +948,9 @@ class ItemContext:
 
 def builder_name(builder: ViewBuilder, item: dict) -> str:
     names = item.get('n') or {}
+    if item.get('instanztruhe_neu'):
+        from itemnamen import sauberer_name
+        return sauberer_name(names.get(builder.lang), builder.lang)
     return klarer_name(names.get(builder.lang) or names.get('en') or '')
 
 
@@ -967,7 +970,7 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         chips.append({'cls': 'q%d' % QUALITY_NUMBER.get(quality, 0), 'text': ctx.label('quality', quality)})
     if min_level:
         chips.append({'cls': '', 'text': '%s %s' % (w['min_level'], min_level)})
-    if item_level and item_level != min_level:
+    if item_level and (item_level != min_level or item.get('instanztruhe_neu')):
         chips.append({'cls': '', 'text': '%s %s' % (w['item_level'], item_level)})
     binding = (details or {}).get('binding')
     binding_mode = item.get('bm')
@@ -1062,9 +1065,10 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
             reference = app_url(lang, 'taten', id=qid)
         else:
             reference = app_url(lang, 'karte', id=qid)
+        task = (builder.quests if kind == 'q' else builder.deeds if kind == 'd' else {}).get(qid) or {}
         sources.append({'url': reference, 'text': qname,
                         'extra': ' › '.join(part for part in (region, zone) if part),
-                        'kind': kind})
+                        'kind': kind, 'level': str(task.get('l') or '')})
 
     result_links = item.get('herstellung') or []
     if not result_links:
@@ -1205,6 +1209,8 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
     description = (details or {}).get('description')
     if isinstance(description, dict):
         description = description.get(lang) or description.get('en') or description.get('de')
+    if not description and item.get('instanztruhe_neu'):
+        description = ((ctx.full.get(ident) or {}).get('d') or {}).get(lang)
     description = (description or '').strip()
 
     category = ((details or {}).get('category') or item.get('kat') or '').upper()

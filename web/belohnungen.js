@@ -180,20 +180,19 @@
 				row.sources.length > 0;
 		}
 		function facets(rowsToCount, state) {
-			function count(group, value) {
-				var candidate = {q: state.q, filters: JSON.parse(JSON.stringify(state.filters))};
-				return rowsToCount.filter(function (row) {
-					if (group === 'art') { candidate.filters.art = [value]; }
-					if (group === 'geo') { candidate.filters.geo = [value]; }
-					return matches(row, candidate);
-				}).length;
-			}
+			var artCandidates = rowsToCount.filter(function (row) { return matches(row, state, 'art'); });
+			var geoCandidates = rowsToCount.filter(function (row) { return matches(row, state, 'geo'); });
 			var geoFacets = [];
 			allGeoPaths.forEach(function (path, key) {
-				geoFacets.push({value: {geo: JSON.parse(key)}, count: count('geo', {geo: JSON.parse(key)})});
+				var value = {geo: JSON.parse(key)};
+				geoFacets.push({value: value, count: geoCandidates.filter(function (row) { return pathMatches(row, value); }).length});
 			});
 			return {
-				art: typeValues.map(function (option) { return {value: option.value, count: count('art', option.value)}; }),
+				art: typeValues.map(function (option) {
+					return {value: option.value, count: artCandidates.filter(function (row) {
+						return row.sources.some(function (source) { return source[5] === option.value; });
+					}).length};
+				}),
 				geo: geoFacets
 			};
 		}

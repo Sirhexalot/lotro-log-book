@@ -112,10 +112,9 @@ auf einen Dungeon und damit auf eine `basemapId` auf. Die 72 übrigen haben kein
 Innenblöcke (Kopien einer Landschaft, etwa Scharmützel) und bekommen keine
 Innenkarte.
 
-Hinweis zur Projektentscheidung: Innenkarten wurden am 08.11.2026 erprobt und
-**verworfen** („keine Freigabe, namenlose Innenräume wieder einzubauen“). Die
-neue Auflösung liefert benannte Dungeons; ob Innenkarten zurückkommen, ist eine
-Entscheidung von Adrian, keine stille Folge dieses Datenbaus.
+Namenlose Innenräume blieben nach der Erprobung am 08.11.2026 ausgeblendet.
+Die heutige Detailseite nutzt nur zugeordnete Innenkarten der Finder-Instanzen
+und zeigt keine Innenraum-Karten im Landschaftsbaum.
 
 ## Truhenbeute (20.11.2026)
 
@@ -142,15 +141,72 @@ klassischen Instanzen steht nicht in diesen Tabellen.
 
 `lore/items.xml` ist nicht im Repository (zu groß). Der eigene Client-Export
 `items-2026-11-08/items.json` enthält alle 82 Items samt lokalisierten Namen und
-Icon-ID. Unser Katalog enthält nur 4 davon (die vier Erebor-Legendaries), weil
-er Bounties und Schriften filtert. Die Beute-Anzeige kann die übrigen mit Name
-und Icon ohne Kataloglink darstellen; Companion-Labels sind dafür nicht nötig.
+Icon-ID, Beschreibung, Seltenheit und Stufen. Der sonst gefilterte
+Gegenstandskatalog nimmt diese Gegenstände über ihre belegte Truhenquelle auf,
+nicht pauschal alle Bounties oder Schriften. `build_icons.py --nur-instanzbeute`
+exportiert die belegten Client-Symbole aus dem vorhandenen Icon-Archiv für
+Vorschau und Release.
 
 **Nicht ableitbar: Boss-Beute.** Die Truhentabellen sind Scharmützel- und
 Skalierungsbeute. Gegnerpools hängen an der Spezies (`mobs.xml` →
 `mobLoots.xml`, 73 Spezies, 11.680 Stufenzeilen); ein Boss teilt seinen Pool mit
 normalen Gegnern derselben Spezies. Marker (`parentZoneId` = Dungeon) nennen die
-Gegner einer Instanz, z. B. Glinghant mit 86 Markern und 22 Namen.
+eines Dungeons. Dabei sind nicht alle Marker Gegner: Es zählen nur gegnerische
+Marker (Kategorie 71), und der Dungeon muss über die Instanzblöcke eindeutig
+genau einer Finder-Instanz zugeordnet sein. Ergänzend liefert der eigene
+Quest-DAT-Export direkte Kampfziele (`QuestEvent_ID=22`, `QuestEvent_MonsterDID`,
+ohne Rollenbedingung) aus eindeutig verknüpften Aufgaben. Die Mob-Labels
+liefern die Namen je Sprache. Keine Namen aus Aufgabentexten herausraten.
+
+**Bosse nur über Truhen belegt (21.11.2026).** Der Client kennt keinen Boss-Rang:
+`mobs.xml` trägt Gattung, Art, Gesinnung und Klasse, aber weder Schwierigkeit
+noch Moral; `lore/` und die Repos `LotroCompanion/lotro-data` und
+`lotro-data-extractor` liefern dafür nichts. Belastbar ist die Position:
+Truhenmarker (Kategorie 72) stehen exakt auf dem Gegner, der sie fallen lässt,
+86 davon tragen seinen Namen (`Dolguzigir's Chest`). `tools/instanzgegner.py`
+akzeptiert einen Boss deshalb nur, wenn (a) der Truhenname auf einen Gegner an
+derselben Position passt (Abstand < 0,05) oder (b) dort genau ein Gegner steht,
+der in dieser Instanz nur einmal platziert ist und in keiner anderen Instanz
+vorkommt. Alles andere bleibt ohne Boss. Ergebnis: **52 Bosse in 34 der 67
+Instanzen mit Gegnerdaten**, Namen in DE/EN/FR aus den Mob-Labels. Instanzen
+ohne Truhenmarker (Scharmützel wie Gondamon) und mehrdeutige Truhen bekommen
+keinen Boss-Bereich; es wird nicht geraten. Boss-Beute bleibt weiterhin nicht
+ableitbar.
+
+## Seiten und Nutzung
+
+Der Finder ist flach und alphabetisch sortiert. Jede Zeile zeigt dasselbe
+Lucide-Instanzsymbol, den Link zur Detailseite und eine kompakte Faktenzeile;
+Cluster bleiben ein Filter und erzeugen keine Abschnittsüberschriften. Die
+Detailseite zeigt nur vorhandene Beschreibung, Fakten, Aufgaben und Innenkarte.
+Aufgaben bis fünf Einträge stehen direkt, ab sechs wird die bestehende
+Aufgabenfilterliste verwendet. Innenkarten werden im Release aus den
+Client-Exporten unter `~/.cache/llb-instance-map-export/` erzeugt, sofern
+die referenzierte Bilddatei vorhanden ist. Vorschau und Release nutzen denselben
+Zuschnitt: ausschließlich den einfarbig grauen Außenrand entfernen, schwarze
+Hintergründe und die Originaldateien unverändert lassen. Die Vorschau-PNGs
+liegen unter `~/.cache/llb-instance-map-preview/`. Der Zuschnitt ist eine
+statische Ansicht ohne Koordinaten oder Marker.
+
+Die Instanzseite zeigt belegte Bosse und die Gegner eingeklappt neben der
+Innenkarte: links die beiden Bereiche, rechts die Karte, wie auf der
+Aufgabenseite. Bosse erscheinen
+nur, wenn eine Truhe ihre Position belegt; die Gegnerliste ist nach Gattung und
+Art gruppiert und nennt in der Zusammenfassung Anzahl und Artenzahl. Darunter folgen
+Aufgaben, Belohnungen und Beute in den Standardreitern. Leere Bereiche
+entfallen; ein einzelner Bereich hat nur eine Überschrift. Aufgaben und
+Aufgabenbelohnungen stehen bis fünf Einträge direkt, danach im Standardfilter.
+Belohnungszeilen verlinken die jeweilige Aufgabe und nennen feste oder
+wählbare Belohnungen. Der Beutefilter zeigt jeden Gegenstand nur einmal:
+Namenssuche, Stufe, Schwierigkeit und Gruppengröße prüfen die Bedingungen
+derselben Truhe. Gleiche passende Chancen erscheinen nur einmal, verschiedene
+werden nicht addiert. Gegenstandsseiten nennen unter „Woher?“ eine Zeile pro
+belegter Instanz mit den jeweiligen Truhenbedingungen. Zusammengefasst werden
+nur Bedingungen mit denselben Chancen, bei denen die übrigen Bedingungen
+übereinstimmen. Die Zeile springt zur passenden Beute auf der Instanzseite.
+Die Gegenstandssuche grenzt diese Einträge über „Quelle → Instanztruhe“ ein
+(`?quelle=instanztruhe`); der Belohnungsfinder bleibt davon getrennt.
+Keine Boss-Beute ableiten.
 
 ## Abgleich mit LotroCompanion
 

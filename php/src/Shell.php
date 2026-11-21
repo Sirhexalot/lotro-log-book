@@ -77,7 +77,8 @@ final class Shell
              $this->assetTag('gegenstaende.css'),
              $this->assetTag('filter-ui.css'),
              $this->assetTag('aufgabenfinder.css'),
-            $this->assetTag('auftraggeber.css'),
+             $this->assetTag('auftraggeber.css'),
+             $this->assetTag('instanzen.css'),
             $this->assetTag('theme-light.css'),
         ]);
     }

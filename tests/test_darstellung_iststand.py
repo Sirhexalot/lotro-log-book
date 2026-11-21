@@ -40,7 +40,8 @@ class DarstellungIststandTest(unittest.TestCase):
         item = read('php/templates/entity/item.twig')
         quest = read('php/templates/entity/quest.twig')
         self.assertIn('entity-detail-grid', grid)
-        self.assertIn('item-quellen-kompakt', item)
+        self.assertIn('data-item-task-direct', item)
+        self.assertIn('result.heading', item)
         self.assertIn("include('entity/_detail_grid.twig')", quest)
 
     def test_map_detail_panel_has_labelled_facts_and_sections(self):

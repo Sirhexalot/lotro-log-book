@@ -104,6 +104,8 @@ def baue(quelle: Path, finder: Path | None = None) -> dict:
         for sprache in SPRACHEN:
             namen[sprache] = sauberer_name(definition['name'][sprache], sprache)
         quest = hex_id(eigenschaften.get('PrivateEncounterTemplate_InstanceQuest'))
+        bestow = eigenschaften.get('PrivateEncounterTemplate_QuestToBestow_Array') or []
+        quests = [hex_id(value) for value in bestow if value]
         record = katalog.get(quest) if quest else None
         fk = (record or {}).get('fk') or []
         seiten[eintrag['id']] = {
@@ -118,6 +120,7 @@ def baue(quelle: Path, finder: Path | None = None) -> dict:
             'group_id': definition['group'],
             'group': definition['group_label'],
             'quest': quest,
+            'quests': quests,
             'level': definition['level_min'],
             'level_max': definition['level_max'],
             'region': int(fk[0]) if fk else None,

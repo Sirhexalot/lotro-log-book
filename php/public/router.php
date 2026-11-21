@@ -25,6 +25,28 @@ if (preg_match('~^/gelaende/(manifest\.json|[a-f0-9]{12}/r[0-9]+/[0-8]/[0-9]+_[0
     }
 }
 
+// Cropped interior previews are generated outside the checkout; release serves
+// the same paths directly.
+if (preg_match('~^/karten/instanzen/([0-9]+-crop-v1\.png)$~', $path, $interior)) {
+    $file = getenv('HOME') . '/.cache/llb-instance-map-preview/' . $interior[1];
+    if (is_file($file)) {
+        header('Content-Type: image/png');
+        header('Cache-Control: no-cache');
+        readfile($file);
+        return true;
+    }
+}
+
+// Generated chest icons are outside the checkout in the local preview.
+if (preg_match('~^/bild/items/([0-9]+\.webp)$~', $path, $icon) && !is_file($webRoot . $path)) {
+    $file = getenv('HOME') . '/.cache/llb-instance-icons/' . $icon[1];
+    if (is_file($file)) {
+        header('Content-Type: image/webp');
+        readfile($file);
+        return true;
+    }
+}
+
 // Apache serves the map application at "/" through its directory index.
 if ($path === '/') {
     $index = $webRoot . '/index.html';

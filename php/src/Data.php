@@ -108,6 +108,12 @@ final class Data
         return $this->read($this->root . '/' . $lang . '/instances-index.json');
     }
 
+    public function instanceDetail(string $lang, string $identifier): ?array
+    {
+        $details = $this->read($this->root . '/' . $lang . '/instance-details.json')['instances'] ?? [];
+        return $details[$identifier] ?? null;
+    }
+
     /** Adventure overview: packs, their areas and the one-time quests. */
     public function adventureIndex(string $lang): array
     {

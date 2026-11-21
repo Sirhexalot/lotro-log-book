@@ -54,6 +54,7 @@
 	/* Raw colour values live here; components and themes reference these tokens. */
 	--llb-palette-000: #000;
 	--llb-palette-0009: #0009;
+	--llb-palette-0003: #0003;
 	--llb-palette-0b0908: #0b0908;
 	--llb-palette-0d0b09: #0d0b09;
 	--llb-palette-0f0d0b: #0f0d0b;
@@ -223,6 +224,9 @@
 	--llb-palette-rgba-255-244-214-p72: rgba(255, 244, 214, .72);
 	--llb-palette-rgba-255-244-214-p8: rgba(255, 244, 214, .8);
 	--llb-palette-rgba-255-253-248-p9: rgba(255, 253, 248, .9);
+	--llb-palette-rgba-255-253-248-p84: rgba(255, 253, 248, .84);
+	--llb-palette-rgba-255-253-248-p42: rgba(255, 253, 248, .42);
+	--llb-palette-rgba-255-253-248-p12: rgba(255, 253, 248, .12);
 	--llb-palette-rgba-255-253-248-p95: rgba(255, 253, 248, .95);
 	--llb-palette-rgba-255-253-248-p96: rgba(255, 253, 248, .96);
 	--llb-palette-rgba-255-253-248-p98: rgba(255, 253, 248, .98);

@@ -3,6 +3,7 @@
 {% block koerper_attribute %} data-seite="suche" class="seite-text"{% endblock %}
 
 {% block stile %}<link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">{% endblock %}
 
 {% block kopf_extra %}{% endblock %}
@@ -15,8 +16,8 @@
 	<p data-t="su_text">Aufgaben, Taten, Titel, Gegenstände und Rezepte in einem Feld.</p>
 	<div class="suche-feld">
 		<input type="search" id="su-feld" data-t-ph="su_platzhalter" autocomplete="off" autofocus>
-		<span class="stufe-klein" id="su-anzahl" role="status"></span>
 	</div>
+	<p class="suche-anzahl" id="su-anzahl" role="status"></p>
 	<p class="schwach" id="su-hinweis" data-t="su_min">Mindestens zwei Zeichen.</p>
 	<div id="su-liste"></div>
 </main>
@@ -30,6 +31,7 @@
 <script src="/texte-logbuch.js?v={{ asset_stand }}" defer></script>
 <script src="/texte-site.js?v={{ asset_stand }}" defer></script>
 <script src="/symbole.js?v={{ asset_stand }}" defer></script>
+<script src="/treffer-zeile.js?v={{ asset_stand }}" defer></script>
 <script src="/sprache.js?v={{ asset_stand }}" defer></script>
 <script src="/speicher.js?v={{ asset_stand }}" defer></script>
 <script src="/menue.js?v={{ asset_stand }}" defer></script>

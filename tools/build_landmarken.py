@@ -6,6 +6,12 @@ stands (region, longitude, latitude); the location export knows which quests and
 deeds target it. The map is the most detailed one of the same game region whose
 bounds hold the point - the same rule the map application uses for quest pins.
 
+Not every landmark appears on the world layer: caves and interiors are content
+layers of the same coordinate space. Those positions are used as well, but a
+map is only assigned when every recorded point fits one map of the landmark's
+game region. Several points spread over different maps stay without a pin
+instead of choosing one of them.
+
 Output is `daten/landmarken.json`; `tools/build_php_data.py` turns it into
 shards and page models. A landmark without a position keeps its page but gets no
 pin, instead of an invented one.
@@ -32,16 +38,26 @@ def texte(wert) -> dict:
     return {sprache: str(texts.get(sprache) or '') for sprache in SPRACHEN}
 
 
-def lade_positionen(pfad: Path) -> dict[str, dict]:
-    """One place per landmark: the world layer, not an instance copy."""
-    orte: dict[str, dict] = {}
+def lade_positionen(pfad: Path) -> tuple[dict[str, dict], dict[str, list[dict]]]:
+    """World position first, then every other placement of the same landmark.
+
+    The world layer is the ordinary place and keeps its old behaviour. Caves,
+    interiors and similar surfaces live on content layers; their points are kept
+    as candidates so a landmark the world layer does not carry still gets its
+    place. Copies inside an instance are dropped: they repeat a place that is
+    already described in the open world.
+    """
+    welt: dict[str, dict] = {}
+    alle: dict[str, list[dict]] = defaultdict(list)
     with pfad.open(encoding='utf-8') as strom:
         for zeile in strom:
             eintrag = json.loads(zeile)
-            if eintrag.get('layer') not in (0, None) or eintrag.get('instance') not in (0, None):
+            if eintrag.get('instance') not in (0, None):
                 continue
-            orte.setdefault(eintrag['did'], eintrag)
-    return orte
+            alle[eintrag['did']].append(eintrag)
+            if eintrag.get('layer') in (0, None):
+                welt.setdefault(eintrag['did'], eintrag)
+    return welt, alle
 
 
 def karten_je_region(karten: list[dict]) -> dict:
@@ -64,6 +80,49 @@ def passende_karte(gruppen: dict, region, lat: float, lon: float):
     return max(treffer, key=lambda k: (k.get('tier') or 0, k['north'] - k['south']))
 
 
+def karten_um_punkt(gruppen: dict, punkt: dict) -> dict:
+    """The maps of the point's game region that hold it, by map id."""
+    return {karte['idx']: karte for karte in gruppen.get(punkt.get('region')) or []
+            if karte['south'] <= float(punkt['latitude']) <= karte['north']
+            and karte['west'] <= float(punkt['longitude']) <= karte['east']}
+
+
+def tiefste_karten(karten: dict) -> dict:
+    """Only the most detailed maps of a candidate set."""
+    stufe = max((karte.get('tier') or 0) for karte in karten.values())
+    return {idx: karte for idx, karte in karten.items()
+            if (karte.get('tier') or 0) == stufe}
+
+
+def gemeinsame_karte(gruppen: dict, punkte: list[dict]):
+    """One map for a landmark that the world layer does not carry.
+
+    A map is only taken when it holds every recorded point: either it is the
+    single common map, or every point's most detailed map is the same one. A
+    continent overview alone is no answer - it puts the pin nowhere useful.
+    Otherwise the landmark keeps its coordinates but gets no pin.
+    """
+    gemeinsam = None
+    tiefste = None
+    for punkt in punkte:
+        eigene = karten_um_punkt(gruppen, punkt)
+        if not eigene:
+            return None
+        gemeinsam = eigene if gemeinsam is None else {
+            idx: karte for idx, karte in eigene.items() if idx in gemeinsam}
+        eigen_tief = tiefste_karten(eigene)
+        tiefste = eigen_tief if tiefste is None else {
+            idx: karte for idx, karte in eigen_tief.items() if idx in tiefste}
+        if not gemeinsam or not tiefste:
+            return None
+    if len(gemeinsam) == 1:
+        karte = next(iter(gemeinsam.values()))
+        return karte if (karte.get('tier') or 0) > 1 else None
+    if len(tiefste) == 1:
+        return next(iter(tiefste.values()))
+    return None
+
+
 def region_von(karte: dict, nach_kennung: dict) -> int:
     """Walk up to the region map: parents can be areas as well."""
     aktuell = karte
@@ -80,7 +139,7 @@ def region_von(karte: dict, nach_kennung: dict) -> int:
 def baue(export: Path) -> dict:
     quellen = export / 'full-dat-en-de-fr-2026-11-03'
     landmarken = json.loads((quellen / 'landmarks.json').read_text(encoding='utf-8'))
-    orte = lade_positionen(export / 'did-positions-2026-11-03' / 'positions.jsonl')
+    orte, plaetze = lade_positionen(export / 'did-positions-2026-11-03' / 'positions.jsonl')
     karten = json.loads((DATEN / 'karten.json').read_text(encoding='utf-8'))
     nach_kennung = {int(karte['idx']): karte for karte in karten}
     gruppen = karten_je_region(karten)
@@ -98,13 +157,20 @@ def baue(export: Path) -> dict:
         name = texte(eintrag.get('title'))
         if not name['de'] and not name['en']:
             continue
-        ort = orte.get(ident)
         seite = {'name': name, 'targets': sorted(set(ziele.get(ident, [])))}
+        ort = orte.get(ident)
+        karte = None
         if ort:
-            region = ort.get('region')
             lat, lon = float(ort['latitude']), float(ort['longitude'])
-            karte = passende_karte(gruppen, region, lat, lon)
-            seite['lat'], seite['lon'], seite['game_region'] = lat, lon, region
+            karte = passende_karte(gruppen, ort.get('region'), lat, lon)
+        elif plaetze.get(ident):
+            # Caves and interiors: the first recorded point is the position,
+            # the map has to hold all of them.
+            ort = plaetze[ident][0]
+            lat, lon = float(ort['latitude']), float(ort['longitude'])
+            karte = gemeinsame_karte(gruppen, plaetze[ident])
+        if ort:
+            seite['lat'], seite['lon'], seite['game_region'] = lat, lon, ort.get('region')
             if karte:
                 breite = karte['east'] - karte['west']
                 hoehe = karte['north'] - karte['south']

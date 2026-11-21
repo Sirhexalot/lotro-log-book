@@ -128,6 +128,23 @@
 		}
 		return li;
 	}
+	function searchRow(target, options) {
+		var levelLabels = {
+			q: w.questLevel, d: w.deedLevel, g: w.itemLevel, r: w.resultLevel
+		};
+		var hasLevel = options.level !== null && options.level !== undefined &&
+			options.level !== '' && options.level !== 0 && options.level !== '0';
+		return row(target, {
+			href: options.href, onActivate: options.onActivate,
+			icon: ({q:'aufgabe',d:'tat',g:'gegenstand',r:'rezept',t:'titel',v:'tugend',
+				s:'gegenstand',n:'auftraggeber',l:'landmarke',f:'fraktion'})[options.kind] || 'gebiet',
+			image: options.kind === 'g' ? options.id : null,
+			name: options.name, meta: options.meta || '',
+			levels: hasLevel,
+			values: hasLevel ? [{label:levelLabels[options.kind] || w.name,value:options.level}] : [],
+			progress: options.progress, progressColumn: options.progressColumn
+		});
+	}
 	function characterKnowsRecipes() {
 		var store = window.MQL_SPEICHER, character = store && store.aktiv && store.aktiv();
 		if (!character) { return { character: null, known: false, complete: false }; }
@@ -167,6 +184,7 @@
 		row: row,
 		entityIcon: entityIcon,
 		itemIcon: itemIcon,
+		searchRow: searchRow,
 		recipeProgress: recipeProgress,
 		recipeHelp: recipeProgressHelp,
 		recipeHasProgressData: recipeHasProgressData,

@@ -128,12 +128,21 @@ class KartenstartTest(unittest.TestCase):
             self.assertTrue(rows, datei)
             self.assertTrue(all(row.get('th') == 'epic' for row in rows), datei)
 
-    def test_running_filter_has_dropdown_labels_in_all_languages(self):
+    def test_progress_filter_labels_match_the_status_dropdown_in_all_languages(self):
         code = (ROOT / 'web' / 'app.js').read_text(encoding='utf-8')
         template = (ROOT / 'php/templates/app/karte.twig').read_text(encoding='utf-8')
         labels = (ROOT / 'web/texte-logbuch.js').read_text(encoding='utf-8')
+        base_labels = (ROOT / 'web/texte.js').read_text(encoding='utf-8')
+        dropdown = (ROOT / 'web/status.js').read_text(encoding='utf-8')
         self.assertIn("zustand.filter === 'laufend'", code)
-        self.assertIn('data-filter="laufend" aria-pressed="false" data-t="filter_laufend"', template)
-        for label in ("filter_laufend: 'In Arbeit'", "filter_laufend: 'In progress'",
-                      "filter_laufend: 'En cours'"):
-            self.assertIn(label, labels)
+        self.assertIn('name="kartenfortschritt" value="laufend"', template)
+        self.assertNotIn('nicht_gesetzt', template)
+        for unstarted, running, available in (('Nicht begonnen', 'Begonnen', 'Voraussetzungen erfüllt'),
+                                              ('Not started', 'In progress', 'Requirements met'),
+                                              ('Non commencée', 'En cours', 'Conditions remplies')):
+            self.assertIn(f"filter_offen: '{unstarted}'", base_labels)
+            self.assertIn(f"open: '{unstarted}'", dropdown)
+            self.assertIn(f"filter_laufend: '{running}'", labels)
+            self.assertIn(f"running: '{running}'", dropdown)
+            self.assertIn(f"filter_machbar: '{available}'", labels)
+            self.assertIn(f"available: '{available}'", dropdown)

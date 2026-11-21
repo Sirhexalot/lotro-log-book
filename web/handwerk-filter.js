@@ -173,9 +173,11 @@
 			if(parsed.state.filters.beruf.length&&parsed.state.filters.beruf.some(function(k){return !mine.includes(k);})){parsed.state.filters.eigene=false;}
 			return parsed;
 		},encode:function(s,u){u=codec.encode(s,u);u.searchParams.delete('fehlend');if(!settings.area){u.hash=tab;}return u;}};
+		var searchIndex=new Map(),searchQuery=null,searchNeedle='';
+		rows.forEach(function(r){searchIndex.set(r,[r.name,r.id,isRecipe?r.raw[6].map(function(z){return z[0];}).join(' '):''].join(' ').toLocaleLowerCase(lang));});
 		function matches(r,s,skip){var f=s.filters;
-			return (!s.q||[r.name,r.id,isRecipe?r.raw[6].map(function(z){return z[0];}).join(' '):''].join(' ').toLocaleLowerCase().includes(s.q.toLocaleLowerCase()))&&
-				r.uses.some(function(u){var progress=craftProgress(c,u.profession),tier=Number(u.tier)||0;return (skip==='beruf'||!f.beruf.length||f.beruf.includes(u.profession))&&(skip==='stufe'||!f.stufe||!f.stufe.length||f.stufe.includes(u.tier))&&(skip==='eigene'||!f.eigene||!mine.length||mine.includes(u.profession))&&(!isMaterial||skip==='optional'||f.optional||!u.optional)&&(!isMaterial||skip==='aktuell'||!f.aktuell||tier<=progress.current)&&(!isMaterial||skip==='gemeistert'||!f.gemeistert||!progress.mastered.has(String(tier)));})&&
+			if(s.q){if(s.q!==searchQuery){searchQuery=s.q;searchNeedle=s.q.toLocaleLowerCase(lang);}if(!searchIndex.get(r).includes(searchNeedle)){return false;}}
+			return r.uses.some(function(u){var progress=craftProgress(c,u.profession),tier=Number(u.tier)||0;return (skip==='beruf'||!f.beruf.length||f.beruf.includes(u.profession))&&(skip==='stufe'||!f.stufe||!f.stufe.length||f.stufe.includes(u.tier))&&(skip==='eigene'||!f.eigene||!mine.length||mine.includes(u.profession))&&(!isMaterial||skip==='optional'||f.optional||!u.optional)&&(!isMaterial||skip==='aktuell'||!f.aktuell||tier<=progress.current)&&(!isMaterial||skip==='gemeistert'||!progress.mastered.has(String(tier)));})&&
 				(!isRecipe||((skip==='kategorie'||!f.kategorie.length||f.kategorie.includes(r.category))&&(skip==='lernstand'||f.lernstand==='alle'||(f.lernstand==='gelernt'?known.has(r.id):!known.has(r.id)))))&&
 				(!isMaterial||((skip==='quelle'||!f.quelle.length||f.quelle.includes(r.source))&&
 					((!f.gebiet.length&&!f.region.length&&!f.landschaft.length)||r.areas.some(function(a){

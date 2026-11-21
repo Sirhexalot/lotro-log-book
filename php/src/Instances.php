@@ -43,6 +43,19 @@ final class Instances
                 'type_privat' => 'Privat-Instanz', 'type_zwischenspiel' => 'Zwischenspiel',
                 'type_schlachtzug' => 'Schlachtzug', 'type_solo' => 'Solo-Instanz',
                 'type_sonst' => 'Ohne Artangabe',
+                'detail_type' => 'Instanz', 'cluster_label' => 'Instanzgruppe',
+                'description_label' => 'Beschreibung', 'tasks' => 'Aufgaben in dieser Instanz',
+                'loot' => 'Beute aus Truhen', 'map' => 'Innenkarte', 'no_tasks' => '',
+                'enemies' => 'Gegner einblenden', 'bosses' => 'Bosse einblenden',
+                'boss_chest' => 'Boss-Truhe',
+                'enemies_count' => '%s Gegner',
+                'species_count' => '%s Arten', 'quest_rewards' => 'Belohnungen aus Aufgaben',
+                'loot_item' => 'Gegenstand', 'loot_chance' => 'Chance je Truhe',
+                'tabs' => 'Inhalte der Instanz', 'task_tab' => 'Aufgaben',
+                'reward_tab' => 'Belohnungen', 'loot_tab' => 'Beute', 'reward_quest' => 'Aufgabe',
+                'level_range' => 'Stufe %s–%s', 'tier_range' => 'T%s–T%s',
+                'group_range' => '%s Spieler',
+                'condition_level' => 'Stufe %s', 'condition_tier' => 'T%s',
             ],
             'en' => [
                 'title' => 'Instance Finder', 'intro' => 'Find instances, raids, skirmishes and epic battles for your level and group size.',
@@ -63,6 +76,19 @@ final class Instances
                 'type_privat' => 'Private instance', 'type_zwischenspiel' => 'Interlude',
                 'type_schlachtzug' => 'Raid', 'type_solo' => 'Solo instance',
                 'type_sonst' => 'No type',
+                'detail_type' => 'Instance', 'cluster_label' => 'Instance group',
+                'description_label' => 'Description', 'tasks' => 'Quests in this instance',
+                'loot' => 'Chest loot', 'map' => 'Interior map', 'no_tasks' => '',
+                'enemies' => 'Show enemies', 'bosses' => 'Show bosses',
+                'boss_chest' => 'Boss chest',
+                'enemies_count' => '%s enemies',
+                'species_count' => '%s species', 'quest_rewards' => 'Quest rewards',
+                'loot_item' => 'Item', 'loot_chance' => 'Chance per chest',
+                'tabs' => 'Instance contents', 'task_tab' => 'Quests',
+                'reward_tab' => 'Rewards', 'loot_tab' => 'Loot', 'reward_quest' => 'Quest',
+                'level_range' => 'Level %s–%s', 'tier_range' => 'T%s–T%s',
+                'group_range' => '%s players',
+                'condition_level' => 'Level %s', 'condition_tier' => 'T%s',
             ],
             'fr' => [
                 'title' => 'Recherche d’instances', 'intro' => 'Trouvez des instances, raids, escarmouches et batailles épiques selon votre niveau et la taille de votre groupe.',
@@ -83,6 +109,19 @@ final class Instances
                 'type_privat' => 'Instance privée', 'type_zwischenspiel' => 'Interlude',
                 'type_schlachtzug' => 'Raid', 'type_solo' => 'Instance solo',
                 'type_sonst' => 'Sans type',
+                'detail_type' => 'Instance', 'cluster_label' => 'Groupe d’instances',
+                'description_label' => 'Description', 'tasks' => 'Quêtes de cette instance',
+                'loot' => 'Butin des coffres', 'map' => 'Carte intérieure', 'no_tasks' => '',
+                'enemies' => 'Afficher les ennemis', 'bosses' => 'Afficher les boss',
+                'boss_chest' => 'Coffre de boss',
+                'enemies_count' => '%s ennemis',
+                'species_count' => '%s espèces', 'quest_rewards' => 'Récompenses de quête',
+                'loot_item' => 'Objet', 'loot_chance' => 'Chance par coffre',
+                'tabs' => 'Contenu de l’instance', 'task_tab' => 'Quêtes',
+                'reward_tab' => 'Récompenses', 'loot_tab' => 'Butin', 'reward_quest' => 'Quête',
+                'level_range' => 'Niveau %s–%s', 'tier_range' => 'T%s–T%s',
+                'group_range' => '%s joueurs',
+                'condition_level' => 'Niveau %s', 'condition_tier' => 'T%s',
             ],
         ][$lang];
     }
@@ -130,14 +169,11 @@ final class Instances
         return true;
     }
 
-    /** Name, then the id so equal names keep a stable order. */
+    /** Flat alphabetical list; cluster is already an explicit filter. */
     public static function sorted(array $rows): array
     {
         usort($rows, static fn (array $a, array $b): int =>
-            (($a['cluster_id'] === 0) <=> ($b['cluster_id'] === 0))
-            ?: strnatcasecmp($a['cluster'] ?? '', $b['cluster'] ?? '')
-            ?: strnatcasecmp($a['group'] ?: $a['name'], $b['group'] ?: $b['name'])
-            ?: strnatcasecmp($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
+            strnatcasecmp($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
         return $rows;
     }
 
@@ -275,8 +311,10 @@ final class Instances
         }
         $page_rows = array_slice($selected, ($page - 1) * self::PAGE_SIZE, self::PAGE_SIZE);
         foreach ($page_rows as &$row) {
-            $row['url'] = $row['quest']
-                ? $this->catalogue->route($this->lang, 'q', $row['quest']) : null;
+            $row['url'] = $this->catalogue->route($this->lang, 'instance', $row['id']);
+            $row['icon'] = 'instance';
+            $row['cluster_url'] = $row['cluster_id']
+                ? $this->url(array_merge($filters, ['cluster' => [$row['cluster_id']]])) : null;
             $teile = $row['type'] === 'sonst' ? [] : [$words['type_' . $row['type']] ?? $row['type']];
             $range = (string) $row['level'];
             if ($row['level_max'] !== null && $row['level_max'] !== $row['level']) {
@@ -293,15 +331,6 @@ final class Instances
             $row['meta'] = implode(' · ', $teile);
         }
         unset($row);
-        $groups = [];
-        foreach ($page_rows as $row) {
-            $cluster = $row['cluster_id'];
-            if (!isset($groups[$cluster])) {
-                $groups[$cluster] = ['name' => $row['cluster'], 'rows' => []];
-            }
-            $groups[$cluster]['rows'][] = $row;
-        }
-
         $alternates = array_map(
             fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang)],
             Catalogue::LANGS);
@@ -313,10 +342,48 @@ final class Instances
             (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
         ) + [
             'filters' => $filters, 'facets' => $facets, 'instances' => $page_rows,
-            'instance_groups' => array_values($groups),
+            'instance_groups' => [['name' => '', 'rows' => $page_rows]],
             'count' => count($selected), 'page_label' => sprintf($words['page'], $page, $pages),
             'previous_url' => $page > 1 ? $this->url($filters, $page - 1) : null,
             'next_url' => $page < $pages ? $this->url($filters, $page + 1) : null,
+        ]);
+    }
+
+    public function detail(string $identifier): ?string
+    {
+        $page = $this->data->instanceDetail($this->lang, $identifier);
+        if ($page === null) {
+            return null;
+        }
+        $words = self::words($this->lang);
+        $alternates = array_map(fn ($lang) => [
+            'lang' => $lang, 'url' => $this->catalogue->route($lang, 'instance', $identifier),
+        ], Catalogue::LANGS);
+        $base = $this->catalogue->appRoute($this->lang, 'instances');
+        $related = (new RelatedLists($this->data, $this->lang, $this->catalogue))
+            ->forPage('instance', [
+                'related_quests' => array_column($page['tasks'], 'id'),
+                'related_label' => $words['tasks'],
+            ]);
+        $baseContext = $this->context(
+            $page['name'], $page['description_seo'] ?: $words['intro'],
+            $this->catalogue->route($this->lang, 'instance', $identifier), $alternates
+        );
+        $lists = [
+            'aufgaben' => $related['q']['rows'] ?? [],
+            'aufgabenbelohnungen' => $page['quest_rewards'],
+            'truhenbeute' => $page['chest_loot'],
+        ];
+        return $this->view->render('instances/detail.twig', $baseContext + [
+            'iw' => $words, 'page' => $page, 'icon' => 'instance',
+            'canonical_url' => $this->catalogue->route($this->lang, 'instance', $identifier),
+            'crumbs' => $this->shell->crumbHtml($this->shell->appCrumbs('instances')),
+            'languages' => implode(' · ', array_map(
+                static fn ($row) => link_tag($row['url'], strtoupper($row['lang'])), $alternates)),
+            'instance_list_url' => $base,
+            'task_fallback' => $related['q']['fallback'] ?? [],
+            'related_direct_list_max' => FilterRegeln::MAX_DIREKTLISTE,
+            'instance_list_data' => json_encode($lists, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR),
         ]);
     }
 }

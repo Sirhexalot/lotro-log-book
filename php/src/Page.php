@@ -26,6 +26,10 @@ final class Page
 
     public function render(string $kind, string $identifier): ?string
     {
+        if ($kind === 'instance') {
+            return (new Instances($this->catalogue, $this->data, $this->shell, $this->view, $this->lang))
+                ->detail($identifier);
+        }
         if ($kind === 'set') {
             return (new Sets($this->catalogue, $this->data, $this->shell, $this->view, $this->lang))->detail($identifier);
         }

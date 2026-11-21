@@ -11,6 +11,7 @@ stands above children that do not add up.
 import json
 import unittest
 from pathlib import Path
+from instanzbeute_items import lade_beute, truhen_ids
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / 'web'
@@ -40,10 +41,19 @@ class GegenstandssucheTests(unittest.TestCase):
         # Only items without any name may be missing.
         ohne_name = {k for k, v in items.items()
                      if not ((v.get('n') or {}).get('de') or (v.get('n') or {}).get('en'))}
-        self.assertEqual(set(kennungen), set(items) - ohne_name)
+        self.assertEqual(set(kennungen), (set(items) - ohne_name) | set(daten['instanceChest']))
         for zeile in daten['e'][:200]:
             self.assertRegex(zeile[0], r'^[0-9A-F]{8}$')
             self.assertTrue(zeile[1].strip())
+
+    def test_chest_source_is_positive_evidence_not_an_item_name(self):
+        audit = lade_beute()
+        if not audit:
+            self.skipTest('instance loot data not built')
+        for lang in SPRACHEN:
+            index = lies(lang)
+            self.assertEqual(set(index['instanceChest']), truhen_ids(audit))
+            self.assertIn('70020830', index['instanceChest'])
 
     def test_indices_point_into_the_label_arrays(self):
         for sprache in SPRACHEN:

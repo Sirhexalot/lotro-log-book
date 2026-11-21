@@ -95,6 +95,8 @@ const state = filters => ({ q:'', filters:Object.assign({
 }, filters) });
 const rows = unimported.adapter.rows;
 assert.equal(unimported.adapter.matches(rows[0], state({class:['Jäger']})), true);
+assert.equal(unimported.adapter.matches(rows[0], Object.assign(state({}), {q:'KLASSENAUFGABE'})), true,
+	'search remains case-insensitive with the prepared search index');
 assert.equal(unimported.adapter.matches(rows[1], state({origin:['Hobbit']})), true);
 assert.equal(unimported.adapter.matches(rows[2], state({topic:['board']})), true);
 assert.equal(unimported.adapter.matches(rows[2], state({topic:['board'],origin:['Hobbit']})), false);
@@ -124,7 +126,10 @@ assert.match(target.children[0].children[0].children[1].className, /questfinder-
 
 const imported = finder(true);
 const importedGroups = Object.fromEntries(imported.config.groups.map(group => [group.id, group]));
-assert.deepEqual(Array.from(importedGroups.status.options, option => option.value), ['all', 'open', 'running', 'done', 'unset', 'machbar']);
+assert.deepEqual(Array.from(importedGroups.status.options, option => option.value), ['all', 'open', 'running', 'done', 'machbar']);
+assert.deepEqual(Array.from(importedGroups.status.options, option => option.label), ['Alle', 'Nicht begonnen', 'Begonnen', 'Erledigt', 'Voraussetzungen erfüllt']);
+assert.equal(filterState.normalize(imported.config, {filters:{status:'unset'}}, null).state.filters.status, 'all',
+	'the former unset filter falls back to all');
 const importedRows = imported.adapter.rows;
 const importedState = status => state({status});
 assert.equal(imported.adapter.matches(importedRows[3], importedState('done')), true);
@@ -141,6 +146,9 @@ assert.match(statuses[2], /questfinder-status-open/);
 assert.equal(imported.adapter.matches({...importedRows[5], v:['DONE0001']}, importedState('machbar')), true);
 assert.equal(imported.adapter.matches({...importedRows[5], v:['MISSING1']}, importedState('machbar')), false);
 assert.equal(imported.adapter.matches({...importedRows[5], e:['DONE0001']}, importedState('open')), false);
+assert.equal(imported.adapter.matches({...importedRows[5], mp:1}, importedState('all')), true);
+assert.equal(imported.adapter.matches({...importedRows[5], mp:1}, importedState('open')), false);
+assert.equal(imported.adapter.matches({...importedRows[5], mp:1}, importedState('machbar')), false);
 imported.adapter.facets(importedRows, importedState('machbar'));
 assert.equal(imported.reads(), 1, 'all progress facets share one character snapshot');
 imported.setCharacter({quests:['DONE0001'], manuell:{quests:{OPEN0001:'fertig'}}});
@@ -179,7 +187,10 @@ const statusContext = {
 vm.runInNewContext(fs.readFileSync('web/status.js', 'utf8'), statusContext);
 const control = statusContext.MQL_STATUS_UI.create('quests', '700005C0', null, 'questfinder', null);
 const choice = control.children[1];
-assert.equal(choice.children[0].textContent, 'Nicht gesetzt');
+assert.equal(choice.children[0].textContent, 'Kein Status');
+assert.equal(choice.children[0].disabled, true);
+assert.equal(choice.children[1].textContent, '· Nicht begonnen');
+assert.equal(choice.children[2].textContent, '◐ Begonnen');
 assert.equal(choice.value, '');
 assert.equal(manualProfile, null, 'rendering must not create a manual profile');
 choice.value = 'fertig';

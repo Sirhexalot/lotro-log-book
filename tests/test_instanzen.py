@@ -7,11 +7,18 @@ filters working.
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import shutil
 import subprocess
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
+
+from PIL import Image
+
+from tools.instanzgegner import LORE, boss_dids, eindeutige_dungeons, kampfziele
+from tools.instanzkarten import instanzkarten, zuschnitt
 
 ROOT = Path(__file__).resolve().parents[1]
 DATEN = Path(os.environ.get('LLB_DATA') or Path.home() / '.cache' / 'llb-php' / 'phpdata')
@@ -83,6 +90,167 @@ class InstanceIndexTest(unittest.TestCase):
         self.assertEqual(elendil['group_sizes'], [6])
         self.assertEqual(elendil['level'], 40)
         self.assertGreaterEqual(elendil['level_max'], 100)
+
+    def test_detail_data_is_localized_and_only_uses_catalogued_tasks(self):
+        for lang in SPRACHEN:
+            details = json.loads((DATEN / lang / 'instance-details.json').read_text())['instances']
+            self.assertEqual(set(details), {row['id'] for row in self.rows})
+            self.assertEqual(sum(len(row['tasks']) for row in details.values()), 553)
+            for row in details.values():
+                self.assertTrue(row['name'])
+                self.assertTrue(all(task['url'].startswith('/%s/' % lang)
+                                    for task in row['tasks']))
+
+    def test_interior_preview_and_empty_map_section(self):
+        details = json.loads((DATEN / 'de' / 'instance-details.json').read_text())['instances']
+        if not (Path.home() / '.cache/llb-instance-map-export/1091572673.png').is_file():
+            self.skipTest('Thangúlhad client export not present')
+        self.assertEqual(details['7001B630']['map_size'], [192, 184])
+        self.assertTrue(details['7001B630']['map'].endswith('1091572673-crop-v1.png'))
+        self.assertFalse(details['7001A78B']['map'])
+
+    def test_erebor_shows_chest_loot_separately_from_quest_rewards(self):
+        expected = {'de': '17,5\u00a0%', 'en': '17.5%', 'fr': '17,5\u00a0%'}
+        for lang, chance in expected.items():
+            details = json.loads((DATEN / lang / 'instance-details.json').read_text())['instances']
+            row = details['700331AB']
+            drops = row['chest_loot']
+            self.assertEqual(len(drops), len({d['id'] for d in drops}))
+            item = next(d for d in drops if d['url'].endswith('/70034442/'))
+            self.assertIn(chance, item['chance'])
+            self.assertEqual(item['conditions'], [{
+                'level': [85, 85], 'tier': [1, 3], 'players': [12, 12],
+                'chances': [0.25, 0.175, 0.0625],
+            }])
+            self.assertTrue(all(d['url'] and d['image'] for d in drops))
+            self.assertTrue(any(d['quest_rewards'] for d in details.values()))
+            for entry in details.values():
+                self.assertTrue({q['quest_id'] for q in entry['quest_rewards']} <=
+                                {q['id'] for q in entry['tasks']})
+
+    @unittest.skipUnless((LORE / 'maps' / 'markers').is_dir(), 'local enemy markers not present')
+    def test_glinghant_has_localized_enemies_but_no_doors_or_allies(self):
+        expected = {'de': 'Angmarim-Späher', 'en': 'Angmarim Look-out', 'fr': 'Vigie angmarim'}
+        for lang, name in expected.items():
+            details = json.loads((DATEN / lang / 'instance-details.json').read_text())['instances']
+            names = details['7002148D']['enemies']
+            self.assertIn('Nengon', names)
+            self.assertIn(name, names)
+            self.assertNotIn('Theodore Gorse', names)
+            self.assertNotIn('Door', names)
+            self.assertEqual(len(names), len(set(names)))
+
+    @unittest.skipUnless((LORE / 'maps' / 'markers').is_dir(), 'local enemy markers not present')
+    def test_chest_bosses_are_localized_and_part_of_the_enemy_list(self):
+        erwartet = {'de': 'Dolguzigir, der Dunkle Archivar',
+                    'en': 'Dolguzigir, the Dark Archivist',
+                    'fr': "Dolguzigir, l'Archiviste Noir"}
+        for lang, name in erwartet.items():
+            details = json.loads((DATEN / lang / 'instance-details.json').read_text())['instances']
+            bosse = details['70054899']['bosses']
+            self.assertEqual(bosse, [name])
+            self.assertIn(name, details['70054899']['enemies'])
+            self.assertEqual(details['70024280']['bosses'], ['Brogur'])
+            for entry in details.values():
+                self.assertTrue(set(entry['bosses']) <= set(entry['enemies']))
+                self.assertEqual(entry['enemy_count'], len(entry['enemies']))
+                self.assertEqual(entry['species_count'],
+                                 sum(len(group['arten']) for group in entry['enemy_groups']))
+
+    def test_confirmed_chest_loot_is_an_item_source_with_conditions(self):
+        shard = hashlib.md5(b'70034442').hexdigest()[:2]
+        page = json.loads((DATEN / 'de' / 'page-i' / (shard + '.json')).read_text())[
+            'entities']['70034442']
+        groups = [group for group in page['where_groups']
+                  if group['label'] == 'Truhenbeute aus Instanzen']
+        self.assertEqual(len(groups), 1)
+        entries = groups[0]['entries']
+        self.assertEqual(len(entries), 3)
+        self.assertTrue(all('/de/instanz/' in entry['url'] and entry['url'].endswith('#truhenbeute')
+                            and len(entry['conditions']) == 1 for entry in entries))
+        self.assertTrue(all('Stufe 85' in entry['conditions'][0] and 'Chance je Truhe' in entry['conditions'][0]
+                            and '17,5 %' in entry['conditions'][0] and '25 %' in entry['conditions'][0]
+                            and '6,25 %' in entry['conditions'][0] for entry in entries))
+
+    def test_chest_item_page_search_and_instance_share_one_identity(self):
+        ident = '70020830'
+        shard = hashlib.md5(ident.encode()).hexdigest()[:2]
+        segments = {'de': ('gegenstand', 'instanz'), 'en': ('item', 'instance'),
+                    'fr': ('objet', 'instance')}
+        for lang, (item_segment, instance_segment) in segments.items():
+            base = DATEN / lang
+            page = json.loads((base / 'page-i' / (shard + '.json')).read_text())['entities'][ident]
+            self.assertEqual(page['symbol'], 1090537025)
+            self.assertTrue(page['description'])
+            groups = [group for group in page['where_groups'] if group.get('instance_chests')]
+            self.assertEqual(len(groups), 1)
+            self.assertEqual(len(groups[0]['entries']), 51)
+            source = next(row for row in groups[0]['entries'] if '7001A78B' in row['url'])
+            self.assertTrue(source['url'].startswith(f'/{lang}/{instance_segment}/7001A78B/'))
+            self.assertEqual(len(source['conditions']), 1)
+            self.assertIn('50–59 · T1–T3 · 1–3 / 6 / 12', source['conditions'][0])
+            details = json.loads((base / 'instance-details.json').read_text())['instances']
+            drop = next(row for row in details['7001A78B']['chest_loot'] if row['id'] == ident)
+            self.assertEqual(drop['url'], f'/{lang}/{item_segment}/{ident}/')
+            self.assertEqual(drop['image'], page['symbol'])
+            index = json.loads((base / 'filter-items.json').read_text())
+            self.assertEqual(len(index['instanceChest']), 82)
+            self.assertIn(ident, index['instanceChest'])
+
+    def test_finder_rows_are_flat_and_link_to_instance_details(self):
+        template = (ROOT / 'php/templates/instances/list.twig').read_text(encoding='utf-8')
+        self.assertNotIn('<h2>{{ group.name }}</h2>', template)
+        self.assertIn('href="{{ row.url }}"', template)
+        sitemaps = json.loads((DATEN / 'sitemaps.json').read_text(encoding='utf-8'))
+        urls = sitemaps['sections']['/de/instanz/sitemap.xml']
+        self.assertEqual(len(urls), len(self.rows))
+        self.assertTrue(all('/de/instanz/' in url for url in urls))
+
+
+class InstanceDetailSourcesTest(unittest.TestCase):
+    def test_crop_removes_grey_border_only_and_keeps_original(self):
+        with TemporaryDirectory() as folder:
+            base = Path(folder)
+            bild = Image.new('RGB', (40, 30), '#7f7f7f')
+            bild.paste((0, 0, 0), (10, 4, 30, 26))
+            bild.save(base / '123.png')
+            path, width, height = instanzkarten({'a': {'karte': {'bild': 123}},
+                                                  'b': {'karte': {'bild': 456}}},
+                                                 base, base / 'preview')['123']
+            self.assertEqual((width, height), (20, 22))
+            with Image.open(path) as cropped, Image.open(base / '123.png') as original:
+                self.assertEqual(cropped.getpixel((0, 0)), (0, 0, 0))
+                self.assertEqual(original.size, (40, 30))
+            schwarz = Image.new('RGB', (30, 40))
+            schwarz.putpixel((15, 20), (127, 127, 127))
+            self.assertEqual(zuschnitt(schwarz).size, schwarz.size)
+
+    def test_bosses_need_a_chest_at_their_position(self):
+        namen = {'1': 'Dolguzigir, the Dark Archivist', '2': 'Bound Protector',
+                 '3': 'Brogur'}
+        # A named chest proves its boss even among stacked markers.
+        self.assertEqual(boss_dids({'a': [('1', (0.0, 0.0)), ('2', (0.01, 0.0))]},
+                                   {'a': [("Dolguzigir's Chest", (0.0, 0.0))]}, namen),
+                         {'a': ['1']})
+        # An unnamed chest with one single-placed enemy is accepted.
+        self.assertEqual(boss_dids({'a': [('3', (0.0, 0.0))]},
+                                   {'a': [('Fancy Wood Chest', (0.0, 0.0))]}, namen),
+                         {'a': ['3']})
+        # Two ordinary enemies at one chest prove nothing.
+        self.assertEqual(boss_dids({'a': [('2', (0.0, 0.0)), ('3', (0.01, 0.0))]},
+                                   {'a': [('Chest', (0.0, 0.0))]}, namen), {})
+        # A chest without an enemy at its position stays silent.
+        self.assertEqual(boss_dids({'a': [('3', (1.0, 1.0))]},
+                                   {'a': [('Chest', (0.0, 0.0))]}, namen), {})
+
+    def test_enemies_require_a_direct_combat_event_or_unshared_dungeon(self):
+        self.assertEqual(list(kampfziele([[{'QuestEvent_ID': 22, 'QuestEvent_MonsterDID': 123},
+                                           {'QuestEvent_ID': 11, 'QuestEvent_MonsterDID': 234},
+                                           {'QuestEvent_ID': 22, 'QuestEvent_MonsterDID': 345,
+                                            'QuestEvent_RoleConstraint': 1}]])), ['123'])
+        self.assertEqual(eindeutige_dungeons(
+            {'a': ['x'], 'b': ['y'], 'c': ['y'], 'd': ['z', 'w'], 'e': ['w']},
+            {'x': 1, 'y': 2, 'z': 3, 'w': 4}), {1: 'a'})
 
 
 @unittest.skipUnless(shutil.which('php'), 'PHP required')

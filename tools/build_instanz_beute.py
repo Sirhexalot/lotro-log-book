@@ -209,7 +209,7 @@ def baue(verzeichnis: Path | None) -> dict:
 
     def item_eintrag(kennung: str) -> dict:
         texte = {sprache: namen[sprache].get(kennung, '') for sprache in SPRACHEN}
-        eintrag = {'i': '%08X' % int(kennung)}
+        eintrag = {'i': '%08X' % int(kennung), 'namen': texte}
         if texte['de']:
             eintrag['n'] = texte['de']
         if texte['en'] and texte['en'] != texte['de']:

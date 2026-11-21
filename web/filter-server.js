@@ -33,7 +33,6 @@
 		var number=container.querySelector('.sets-filters input[type=number]');
 		if(number){var title=number.closest('fieldset').querySelector('legend').textContent;groups.push({id:'level',kind:'range',label:title,max:999,rangeLabel:function(r){return title+' '+(r.min===null?'…':r.min)+'–'+(r.max===null?'…':r.max);}});}
 		groups.forEach(function(g){
-			if(g.kind==='boolean'){g.label=({de:'Auswahl',en:'Options',fr:'Options'})[lang];}
 			if(g.id==='cluster'||g.id==='tier'){g.initialOpen=false;}
 		});
 		return groups;

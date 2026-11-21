@@ -140,6 +140,16 @@ def kopiere_karten(ziel: Path) -> None:
         shutil.copytree(quelle, ziel / 'karten' / sprache)
 
 
+def kopiere_instanzkarten(ziel: Path) -> None:
+    """Ship only the client-exported interiors referenced by the loot audit."""
+    from instanzkarten import instanzkarten
+    audit = HIER / 'daten' / 'instanz-beute.json'
+    if not audit.is_file():
+        return
+    instanzkarten(json.loads(audit.read_text(encoding='utf-8')).get('instanzen') or {},
+                  ziel=ziel / 'karten' / 'instanzen')
+
+
 def baue_karten_vorschauen(ziel: Path) -> None:
     """Create card-sized fallbacks before the terrain manifest is ready."""
     from PIL import Image
@@ -195,6 +205,8 @@ def pruefen(ziel: Path) -> list[str]:
                  'php/public/index.php', 'phpdata/labels.json',
                   'php/src/Feedback.php', 'php/templates/app/feedback.twig',
                   'feedback.js', 'feedback.css',
+                  'instanzen.css', 'php/templates/instances/detail.twig',
+                  'php/templates/instances/list.twig',
                   'klassen.css', 'klassen.js', 'php/templates/app/klassen.twig',
                   'phpdata/manifest.json', 'sets.css', 'sets.js', 'php/src/Sets.php',
                  'php/templates/sets/list.twig', 'php/templates/sets/detail.twig',
@@ -217,6 +229,8 @@ def pruefen(ziel: Path) -> list[str]:
             fehler.append('fehlt: phpdata/' + sprache + '/givers-index.json')
         if not (ziel / 'phpdata' / sprache / 'abenteuer.json').is_file():
             fehler.append('fehlt: phpdata/' + sprache + '/abenteuer.json')
+        if not (ziel / 'phpdata' / sprache / 'instance-details.json').is_file():
+            fehler.append('fehlt: phpdata/' + sprache + '/instance-details.json')
         if not (ziel / ('abenteuer-%s.js' % sprache)).is_file():
             fehler.append('fehlt: abenteuer-%s.js' % sprache)
         if not (ziel / 'karten' / sprache).is_dir():
@@ -261,6 +275,9 @@ def main() -> int:
     baue_gegenstandssuche()
     baue_klassen()
     kopiere_web(ziel)
+    if (HIER / 'daten' / 'instanz-beute.json').is_file():
+        subprocess.run([sys.executable, str(HIER / 'build_icons.py'), '--nur-instanzbeute',
+                        '--ziel', str(ziel / 'bild' / 'items')], cwd=str(HIER), check=True)
     tracking_schreiben(ziel)
     # A visitor-imported progress file never ships; the app writes it locally.
     (ziel / 'fortschritt.js').write_text(
@@ -268,6 +285,7 @@ def main() -> int:
         encoding='utf-8')
     seo_dateien(ziel)
     kopiere_karten(ziel)
+    kopiere_instanzkarten(ziel)
     baue_karten_vorschauen(ziel)
     kopiere_gelaende(ziel, optionen.gelaende)
     kopiere_app(ziel, optionen.daten)

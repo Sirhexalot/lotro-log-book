@@ -11,6 +11,10 @@
 			data = Object.assign({}, data, {e: data.e.filter(function (row) { return erlaubt.has(row[0]); })});
 		}
 		var A = window.MQL_FILTERADAPTER, fields = {kat:3,art:6,platz:5,klasse:8,gattung:9};
+		var chestIds=new Set(data.instanceChest||[]), sourceLabels={
+			de:['Quelle','Instanztruhe'],en:['Source','Instance chest'],fr:['Source','Coffre d’instance']
+		}[lang];
+		var showSource=chestIds.size>0&&(!settings.area||settings.area==='gegenstaende');
 		function key(dim,index) { return String(data[dim+'Key'][index]); }
 		function label(dim,value) { var i=data[dim+'Key'].indexOf(value); return data[dim][i] || T('gs_kat_ohne'); }
 		function levels(cat) {
@@ -41,10 +45,15 @@
 				{id:'quality',kind:'multi',label:T('gs_qualitaet'),options:[0,1,2,3,4,5].map(function (v) { return {value:v,label:T('gs_qual_'+v)}; })},
 				{id:'level',kind:'range',label:extra[6],rangeLabel:function (r) { return extra[6]+' '+(r.min===null?'…':r.min)+'–'+(r.max===null?'…':r.max); }}],
 			sort:{options:[{value:'name',label:T('gs_sort_name')},{value:'itemLevel',label:extra[6]}]},pagination:{kind:'limit',size:50},
-			defaults:function () { return {q:'',filters:{tree:[],quality:[],level:{min:null,max:null}},sort:'name',pagination:{kind:'limit',limit:50}}; }};
-		var baseCodec=A.codec([{param:'q',path:['q']},{param:'qual',path:['filters','quality'],type:'csv'},
+			defaults:function () { return {q:'',filters:{tree:[],quality:[],level:{min:null,max:null},source:[]},sort:'name',pagination:{kind:'limit',limit:50}}; }};
+		if(showSource){config.groups.push({id:'source',kind:'multi',label:sourceLabels[0],
+			options:[{value:'instanztruhe',label:sourceLabels[1]}]});}
+		var codecFields=[{param:'q',path:['q']},{param:'qual',path:['filters','quality'],type:'csv'},
 			{param:'von',path:['filters','level','min'],type:'number'},{param:'bis',path:['filters','level','max'],type:'number'},
-			{param:'sort',path:['sort'],omit:'name',decode:function (v) { return v==='stufe'?'itemLevel':'name'; },encode:function (v) { return v==='itemLevel'?'stufe':null; }}],config.defaults);
+			{param:'sort',path:['sort'],omit:'name',decode:function (v) { return v==='stufe'?'itemLevel':'name'; },encode:function (v) { return v==='itemLevel'?'stufe':null; }}];
+		if(showSource){codecFields.push({param:'quelle',path:['filters','source'],
+			decode:function (v) { return [v]; },encode:function (v) { return v[0]||null; }});}
+		var baseCodec=A.codec(codecFields,config.defaults);
 		function readValue(dim,value) {
 			if (data[dim+'Key'].includes(value)) { return value; }
 			if (!['klasse','gattung'].includes(dim) && /^\d+$/.test(value) && data[dim+'Key'][Number(value)]!==undefined) { return key(dim,Number(value)); }
@@ -78,19 +87,21 @@
 		var lastQuery=null,words=[];
 		function searchMatches(row,q){if(q!==lastQuery){lastQuery=q;words=fold(q).split(/\s+/).filter(Boolean);}var name=searchIndex.get(row[0]);return words.every(function(w){return name.includes(w);});}
 		function matches(row,s,skip){return (skip==='tree'||!s.filters.tree.length||s.filters.tree.some(function(p){return matchesPath(row,p);})) &&
+			(skip==='source'||!(s.filters.source||[]).length||chestIds.has(row[0])) &&
 			(skip==='quality'||!s.filters.quality.length||s.filters.quality.includes(row[4])) &&
 			(skip==='level'||(s.filters.level.min===null&&s.filters.level.max===null)||(row[7]>0&&(s.filters.level.min===null||row[7]>=s.filters.level.min)&&(s.filters.level.max===null||row[7]<=s.filters.level.max))) &&
 			searchMatches(row,s.q);}
 		var adapter=A.client({rows:data.e,id:function(r){return r[0];},matches:matches,
 			compare:function(a,b,sort){return (sort==='itemLevel'?(a[7]||Infinity)-(b[7]||Infinity):0)||a[1].localeCompare(b[1],lang)||a[0].localeCompare(b[0]);},
 			facets:function(rows,s){
-				var counts=new Map(),qualityCounts=[0,0,0,0,0,0];
-				// Two eligibility checks per item, instead of one full scan per node.
+				var counts=new Map(),qualityCounts=[0,0,0,0,0,0],chestCount=0;
 				rows.forEach(function(row){
 					if(matches(row,s,'tree')){rowBranches.get(row[0]).forEach(function(id){counts.set(id,(counts.get(id)||0)+1);});}
 					if(matches(row,s,'quality')){qualityCounts[row[4]]++;}
+					if(showSource&&chestIds.has(row[0])&&matches(row,s,'source')){chestCount++;}
 				});
-				return {tree:Array.from(branchIndex,function(pair){return {value:pair[1],count:counts.get(pair[0])||0};}),quality:qualityCounts.map(function(count,value){return {value:value,count:count};})};
+				return {tree:Array.from(branchIndex,function(pair){return {value:pair[1],count:counts.get(pair[0])||0};}),quality:qualityCounts.map(function(count,value){return {value:value,count:count};}),
+					source:showSource?[{value:'instanztruhe',count:chestCount}]:[]};
 			},renderResults:function(r,target){
 				target.replaceChildren();
 				var rowUI=window.MQL_TREFFERZEILE;

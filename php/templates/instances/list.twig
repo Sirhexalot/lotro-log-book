@@ -32,11 +32,15 @@
         </details>
         <section class="sets-results" data-filter-results aria-label="{{ iw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? iw.count_one : iw.count)|replace({'%s': count}) }}</p>
-            {% for group in instance_groups %}
-            <section>{% if group.name %}<h2>{{ group.name }}</h2>{% endif %}
-                <ul class="sets-list">{% for row in group.rows %}<li><span class="sets-preview"><strong>{{ row.name }}</strong></span>{% if row.meta %}<span class="sets-meta">{{ row.meta }}</span>{% endif %}</li>{% endfor %}</ul>
-            </section>
-            {% else %}<p>{{ iw.empty }}</p>{% endfor %}
+            {% if instances %}
+            <ul class="sets-list mql-row-list">{% for row in instances %}
+                <li><a class="mql-row mql-row-no-progress" href="{{ row.url }}">
+                    <span class="mql-row-icon">{{ symbol('instance') }}</span>
+                    <span class="mql-row-main"><strong class="mql-row-name">{{ row.name }}</strong>
+                    {% if row.meta %}<span class="mql-row-extra">{{ row.meta }}</span>{% endif %}</span>
+                </a></li>
+            {% endfor %}</ul>
+            {% else %}<p>{{ iw.empty }}</p>{% endif %}
             {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ iw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ iw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>

@@ -32,6 +32,18 @@ $sorted = \\Llb\\Landmarks::sorted($rows);
 echo json_encode([$out, $sorted[0]['name'] ?? null, $sorted[count($sorted) - 1]['name'] ?? null]);
 '''
 
+class LandmarkListPresentationTest(unittest.TestCase):
+    def test_rows_show_geographic_context_without_counts_or_generic_heading(self):
+        source = (ROOT / 'php' / 'src' / 'Landmarks.php').read_text(encoding='utf-8')
+        template = (ROOT / 'php' / 'templates' / 'landmarks' / 'list.twig').read_text(encoding='utf-8')
+        self.assertIn("$row['meta'] = implode(' · ', $teile);", source)
+        self.assertNotIn("$words['quests_one']", source)
+        self.assertNotIn('result.heading(lang)', template)
+
+    def test_boolean_filter_keeps_its_specific_label(self):
+        source = (ROOT / 'web' / 'filter-server.js').read_text(encoding='utf-8')
+        self.assertNotIn("g.label=({de:'Auswahl'", source)
+
 
 @unittest.skipUnless((DATEN / 'de' / 'landmarks-index.json').is_file(),
                      'landmarks-index.json fehlt (tools/build_php_data.py)')
@@ -109,7 +121,7 @@ class LandmarkFilterTest(unittest.TestCase):
         alle, treffer, region, gebiet, mit, nichts, ost_rohan, west_rohan = zahlen
         self.assertEqual(alle, len(rows))
         self.assertEqual(treffer, 1)          # „Alter Süßgrashof“ in Breeland
-        self.assertEqual(region, 813)         # Eriador
+        self.assertEqual(region, 863)         # Eriador
         self.assertEqual(gebiet, 51)          # Breeland
         self.assertEqual(mit, 1874)
         self.assertEqual(nichts, 0)

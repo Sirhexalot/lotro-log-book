@@ -199,6 +199,11 @@ final class Router
             && $neu !== $canonical) {
             return ['status' => 301, 'redirect' => $this->catalogue->route($lang, 'd', $neu)];
         }
+        if ($kind === 'instance') {
+            return $this->data->instanceDetail($lang, $canonical) !== null
+                ? ['status' => 200, 'kind' => $kind, 'id' => $canonical]
+                : ['status' => 404];
+        }
         if (($kind === 'set' || $kind === 'giver')
             && !$this->data->has($lang, $kind, $canonical)) {
             return ['status' => 404];
@@ -228,8 +233,10 @@ final class Router
             return null;
         }
         $gross = Catalogue::canonicalId($identifier);
-        if ($gross === $identifier || !Catalogue::validId($kind, $gross)
-            || !$this->data->has($lang, $kind, $gross)) {
+        $exists = $kind === 'instance'
+            ? $this->data->instanceDetail($lang, $gross) !== null
+            : $this->data->has($lang, $kind, $gross);
+        if ($gross === $identifier || !Catalogue::validId($kind, $gross) || !$exists) {
             return null;
         }
         if ($kind === 'p') {
@@ -266,7 +273,10 @@ final class Router
             && $neu !== $canonical) {
             return ['status' => 301, 'redirect' => $this->catalogue->route($lang, 'd', $neu)];
         }
-        if (!$this->data->has($lang, $kind, $canonical)) {
+        $exists = $kind === 'instance'
+            ? $this->data->instanceDetail($lang, $canonical) !== null
+            : $this->data->has($lang, $kind, $canonical);
+        if (!$exists) {
             return ['status' => 404];
         }
         return ['status' => 301, 'redirect' => $this->catalogue->route($lang, $kind, $canonical)];

@@ -215,7 +215,7 @@ body.landing .hero {
 	position: relative;
 	isolation: isolate;
 	overflow: hidden;
-	margin: 0 -20px;
+	margin: 0;
 	padding: 44px 20px 34px;
 	background: radial-gradient(120% 140% at 50% -20%, var(--llb-palette-rgba-214-179-90-p10), var(--llb-palette-transparent) 60%);
 }
@@ -386,7 +386,7 @@ body.landing .bild { margin: 36px 0 4px; }
 body.landing section { margin-top: 34px; }
 
 @media (max-width: 700px) {
-	body.landing .hero { padding: 28px 16px 24px; margin: 0 -16px; }
+	body.landing .hero { padding: 28px 16px 24px; margin: 0; }
 	body.landing .hero h2 { font-size: var(--text-hero-mobil); }
 	body.landing .lead { font-size: var(--text-fliesstext-kompakt); }
 	.suche-start { flex-wrap: wrap; }

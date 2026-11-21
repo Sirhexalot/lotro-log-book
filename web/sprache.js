@@ -117,7 +117,7 @@
 	// with a generic client-side label after the page has loaded.
 	var attribute = [
 		['.menue', 'aria-label', 'nav_menu'], ['.sprachen', 'aria-label', 'nav_sprache'],
-		['#baum', 'aria-label', 'gebiete'], ['#filter', 'aria-label', 'nav_filter'],
+		['#baum', 'aria-label', 'gebiete'],
 		['#landschaft-orte', 'aria-label', 'nav_karten'],
 		['#legende-mehr', 'title', 'legende_mehr'],
 		['#legende-mehr', 'aria-label', 'legende_mehr'],

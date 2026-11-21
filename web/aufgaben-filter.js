@@ -50,7 +50,7 @@
 
 	window.MQL_TASK_FILTER_SETUP = function (rows, kind) {
 		var lang = document.documentElement.lang, A = window.MQL_FILTERADAPTER, w = WORDS[lang] || WORDS.de;
-		var progress = window.MQL_STATUS_UI?.words?.(lang) || {progress:'Fortschritt',all:'Alle',open:'Offen',running:'In Arbeit',done:'Erledigt',unset:'Nicht gesetzt'};
+		var progress = window.MQL_STATUS_UI?.words?.(lang) || {progress:'Fortschritt',all:'Alle',open:'Nicht begonnen',running:'Begonnen',done:'Erledigt'};
 		var labels = {};
 		['search', 'filter', 'close', 'sort', 'reset', 'more', 'count', 'show', 'loading', 'error',
 			'retry', 'fallback', 'invalidRange', 'min', 'max', 'placeholder'].forEach(function (key) { labels[key] = w[key]; });
@@ -136,10 +136,13 @@
 		} : null;
 		if (geography) { groups.push(geography); }
 		var levels = new Set(rows.map(function (r) { return r.level; }).filter(function (v) { return v !== null; }));
-		if (levels.size > 1) { groups.push({ id: 'level', kind: 'range', label: w.level }); }
+		if (levels.size > 1) {
+			groups.push({id: 'level', kind: 'range', label: w.level,
+				rangeLabel: function (r) { return w.level+' '+(r.min ?? '…')+'–'+(r.max ?? '…'); }});
+		}
 		groups.unshift({ id: 'status', kind: 'single', label: progress.progress,
 				available: function () { return hasStatus; },
-				options: ['all', 'open', 'running', 'done', 'unset'].map(function (key) {
+				options: ['all', 'open', 'running', 'done'].map(function (key) {
 					return {value:key,label:progress[key],keepVisible:true};
 				}) });
 
@@ -180,15 +183,12 @@
 		});
 		config.urlCodec = A.codec(fields, config.defaults);
 
-		function searchable(row) {
-			return [row.name, row.id, row.type].concat(row.flags.map(function (key) { return w[key]; }))
-				.join(' ').toLocaleLowerCase(lang);
-		}
-		function matches(row, state, skip) {
-			if (state.q && !searchable(row).includes(state.q.toLocaleLowerCase(lang))) { return false; }
-			return groups.every(function (g) {
-				if (skip === g.id) { return true; }
-				var value = state.filters[g.id];
+		var searchIndex = new Map(), searchQuery = null, searchNeedle = '';
+		rows.forEach(function (row) {
+			searchIndex.set(row, [row.name, row.id, row.type].concat(row.flags.map(function (key) { return w[key]; }))
+				.join(' ').toLocaleLowerCase(lang));
+		});
+		function matchesGroup(row, g, value) {
 				if (g.id === 'level') {
 					return (value.min === null && value.max === null)
 						|| (row.level !== null && (value.min === null || row.level >= value.min)
@@ -201,7 +201,7 @@
 					});
 				}
 				if (g.id === 'status') {
-					return value === 'all' || (status(row) || null) === {open:'offen',running:'laufend',done:'fertig',unset:null}[value];
+					return value === 'all' || status(row) === {open:'offen',running:'laufend',done:'fertig'}[value];
 				}
 				if (g.id === 'reward') {
 					return !value.length || value.some(function (key) {
@@ -224,6 +224,14 @@
 					return rest.every(function (key) { return row.flags.includes(key); });
 				}
 				return !value.length || value.includes(row[g.id]);
+		}
+		function matches(row, state, skip) {
+			if (state.q) {
+				if (state.q !== searchQuery) { searchQuery = state.q; searchNeedle = state.q.toLocaleLowerCase(lang); }
+				if (!searchIndex.get(row).includes(searchNeedle)) { return false; }
+			}
+			return groups.every(function (g) {
+				return skip === g.id || matchesGroup(row, g, state.filters[g.id]);
 			});
 		}
 
@@ -247,11 +255,11 @@
 						});
 					}
 					collect(g.options);
+					var candidates = all.filter(function (row) { return matches(row, state, g.id); });
 					facets[g.id] = options.map(function (option) {
-						var candidate = JSON.parse(JSON.stringify(state));
 						var value = g.kind === 'tree' ? option.path : option.value;
-						candidate.filters[g.id] = g.kind === 'single' ? value : [value];
-						return { value: value, count: all.filter(function (row) { return matches(row, candidate); }).length };
+						var selected = g.kind === 'single' ? value : [value];
+						return { value: value, count: candidates.filter(function (row) { return matchesGroup(row, g, selected); }).length };
 					});
 				});
 				return facets;
