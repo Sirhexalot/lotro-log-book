@@ -172,6 +172,10 @@
 	});
 
 	var ANSICHT_JE_SEITE = 200;
+	// The epic story spans all of Middle-earth and has no map of its own. Its
+	// chapters open on the largest game map; a chosen chapter still jumps to its
+	// own region, because every region has its own coordinate space.
+	var WELTKARTE = 268437557;
 
 	// Catalogue rooms without geography get a readable name.
 	var ABSCHNITTE = (window.MQL_TEXTE && window.MQL_TEXTE[sprache] &&
@@ -1037,6 +1041,14 @@
 		starte();
 	}
 
+	/** The map a node opens on. A node's own map wins; the epic story spans all
+	 * of Middle-earth without a map of its own, so it opens on the large one. */
+	function karteFuerKnoten(knoten) {
+		if (knoten.karte != null && karteNachIndex[knoten.karte]) { return knoten.karte; }
+		if (Epik.istWurzel(knoten) && karteNachIndex[Epik.karte()]) { return Epik.karte(); }
+		return besteKarte(knoten.quests, knoten.name);
+	}
+
 	function waehleKnotenSofort(knoten, alsListe, ohneVerlauf) {
 		zustand.knoten = knoten;
 		zu = {};
@@ -1054,7 +1066,7 @@
 		}
 		zustand.auswahl = null;
 		zustand.sichtbar = ANSICHT_JE_SEITE;
-		var index = knoten.karte != null ? knoten.karte : besteKarte(knoten.quests, knoten.name);
+		var index = karteFuerKnoten(knoten);
 		zustand.gebietsKarte = index;
 		if (index != null) {
 			zeigeKarte(index);
@@ -2089,7 +2101,9 @@
 			if (reihe[ax] !== reihe[ay]) { return reihe[ax] - reihe[ay]; }
 			return MQL_SORT.compare(ax, ay);
 		});
-		zustand.treffer = nachAbschnitt;
+		// Only the main list feeds the map; a nested book list must not replace
+		// the markers of the whole topic.
+		if (ziel === liste) { zustand.treffer = nachAbschnitt; }
 		var mitAbschnitten = Object.keys(reihe).length > 1 && !zustand.suchliste;
 		var jeAbschnitt = {};
 		nachAbschnitt.forEach(function (quest) {
@@ -2217,48 +2231,64 @@
 		zeigeListeIn(liste, titel, eintraege, '');
 	}
 
-	// --- Epic story: the list opens by volume, not by replacing the view -----
-	var epikOffen = {};  // folded volumes of the epic list
+	// --- Epic story: one topic with its own list and map rules ---------------
+	// Everything that treats the epic differently from a landscape lives in this
+	// block. The generic list, filter and map code asks it instead of testing
+	// the theme itself, so the special case stays in one place.
+	var Epik = (function () {
+		var offen = {};  // folded volumes
 
-	function istEpikWurzel(knoten) {
-		return !!knoten && istThemenWurzel(knoten) &&
-			(knoten.quests[0] || {}).th === 'epic';
-	}
+		/** The theme root itself, not a volume below it. */
+		function istWurzel(knoten) {
+			return !!knoten && istThemenWurzel(knoten) &&
+				(knoten.quests[0] || {}).th === 'epic';
+		}
 
-	/** The epic theme lists its ten volumes; opening one shows its books and
-	 * chapters underneath, so the volume list never disappears. */
-	function zeichneEpikListe(knoten) {
-		var alle = gefiltert(knoten.quests);
-		zustand.treffer = alle;
-		listeTitel.textContent = knoten.name;
-		liste.textContent = '';
-		zeilen = {};
-		knoten.reihenfolge.forEach(function (band) {
-			var eigene = gefiltert(band.quests);
-			if (!eigene.length) { return; }
-			// A search opens the volumes with a hit, otherwise the hit stays hidden.
-			var offen = epikOffen[band.schluessel] === true || !!zustand.q;
-			var kopf = eltern('li', null);
-			kopf.className = 'abschnitt epik-band' + (offen ? '' : ' zu');
-			kopf.appendChild(eltern('span', (offen ? '▾ ' : '▸ ') + band.name));
-			var kz = zaehle(zaehlEintraege(band));
-			var stand = eltern('span', zahl(kz.erledigt, kz.gesamt));
-			stand.className = 'stufe';
-			kopf.appendChild(stand);
-			kopf.addEventListener('click', function () {
-				epikOffen[band.schluessel] = !offen;
-				zeichneListe();
+		/** The epic spans all of Middle-earth; its chapters open on the large
+		 * overview map, a chosen chapter still jumps to its own region. */
+		function karte() { return WELTKARTE; }
+
+		/** The list base for the whole theme, also for the filter numbers. */
+		function basis(knoten) { return knoten.quests; }
+
+		/** The ten volumes stay; opening one shows its books and chapters
+		 * underneath, so the volume list never disappears. */
+		function zeichne(knoten) {
+			var alle = gefiltert(basis(knoten));
+			zustand.treffer = alle;
+			listeTitel.textContent = knoten.name;
+			liste.textContent = '';
+			zeilen = {};
+			knoten.reihenfolge.forEach(function (band) {
+				var eigene = gefiltert(band.quests);
+				if (!eigene.length) { return; }
+				// A search opens the volumes with a hit, otherwise the hit stays hidden.
+				var aufgeklappt = offen[band.schluessel] === true || !!zustand.q;
+				var kopf = eltern('li', null);
+				kopf.className = 'abschnitt epik-band' + (aufgeklappt ? '' : ' zu');
+				kopf.appendChild(eltern('span', (aufgeklappt ? '▾ ' : '▸ ') + band.name));
+				var kz = zaehle(zaehlEintraege(band));
+				var stand = eltern('span', zahl(kz.erledigt, kz.gesamt));
+				stand.className = 'stufe';
+				kopf.appendChild(stand);
+				kopf.addEventListener('click', function () {
+					offen[band.schluessel] = !aufgeklappt;
+					zeichneListe();
+				});
+				liste.appendChild(kopf);
+				if (!aufgeklappt) { return; }
+				var buecher = eltern('ul', null);
+				buecher.className = 'epik-buecher';
+				liste.appendChild(buecher);
+				zeigeListeIn(buecher, band.name, eigene, band.schluessel + '|');
 			});
-			liste.appendChild(kopf);
-			if (!offen) { return; }
-			var buecher = eltern('ul', null);
-			buecher.className = 'epik-buecher';
-			liste.appendChild(buecher);
-			zeigeListeIn(buecher, band.name, eigene, band.schluessel + '|');
-		});
-		zeichneKartenBreadcrumb();
-		zeichneMarker();
-	}
+			zeichneKartenBreadcrumb();
+			zeichneMarker();
+			aktualisiereFilterZahlen();
+		}
+
+		return { istWurzel: istWurzel, karte: karte, basis: basis, zeichneListe: zeichne };
+	})();
 
 	/**
 	 * Can the active character take this now, as far as the data says? Open, not
@@ -2352,6 +2382,43 @@
 		filterLeiste.querySelectorAll('input[name="kartenfortschritt"]').forEach(function (wahl) {
 			wahl.checked = wahl.value === zustand.filter;
 		});
+		aktualisiereFilterZahlen();
+	}
+
+	/**
+	 * Numbers beside the progress options, counted like the finder's facets: the
+	 * search and the reward filter narrow the base, the progress filter itself
+	 * does not, so a chosen state keeps its number after selecting it. Without
+	 * imported progress only the total is a fact; the states stay unnumbered.
+	 */
+	function aktualisiereFilterZahlen() {
+		var felder = filterLeiste.querySelectorAll('[data-filterzahl]');
+		if (!felder.length) { return; }
+		var anzeigen = function (werte) {
+			felder.forEach(function (feld) {
+				var wert = werte[feld.dataset.filterzahl];
+				feld.textContent = wert == null ? '' : String(wert);
+				feld.hidden = wert == null;
+			});
+		};
+		if (!zustand.knoten) { anzeigen({}); return; }
+		var alt = zustand.filter;
+		zustand.filter = 'alle';
+		var liste = gefiltert(Epik.istWurzel(zustand.knoten) && !zustand.suchliste
+			? Epik.basis(zustand.knoten) : listeVon(zustand.knoten));
+		zustand.filter = alt;
+		var werte = { alle: liste.length };
+		if (hatFortschritt) {
+			werte.offen = werte.laufend = werte.erledigt = werte.machbar = 0;
+			liste.forEach(function (quest) {
+				var lage = zustandVon(quest);
+				if (listenStatus(lage, quest) === 'offen') { werte.offen += 1; }
+				if (lage === 'laufend') { werte.laufend += 1; }
+				if (fertig[quest.i] === true) { werte.erledigt += 1; }
+				if (machbar(quest)) { werte.machbar += 1; }
+			});
+		}
+		anzeigen(werte);
 	}
 
 	function kartenfilterAnwenden() {
@@ -2377,10 +2444,11 @@
 		} else {
 			zeigeListe(t('aufgaben'), []);
 			zeichneMarker();
+			aktualisiereFilterZahlen();
 			return;
 		}
-		if (istEpikWurzel(zustand.knoten) && !zustand.suchliste) {
-			zeichneEpikListe(zustand.knoten);
+		if (Epik.istWurzel(zustand.knoten) && !zustand.suchliste) {
+			Epik.zeichneListe(zustand.knoten);
 			return;
 		}
 		var listeGefiltert = gefiltert(quelle);
@@ -2389,6 +2457,7 @@
 		zeigeListe(titel, listeGefiltert);
 		zeichneKartenBreadcrumb();
 		zeichneMarker();
+		aktualisiereFilterZahlen();
 	}
 
 	// --- Detail --------------------------------------------------------
@@ -4230,7 +4299,14 @@
 				moegliche.slice().forEach(function (k) { if (k !== e.knoten) { moegliche = moegliche.concat(inhaltsKinder(k)); } });
 				teil = moegliche.find(function (k) { return k.schluessel === schluessel; }) || null;
 				inhaltsAuswahl = teil;
-			} else if (ort != null) {
+			} else {
+				// A card without entries of its own (a story map such as Besieged
+				// Mordor) still has a list: the entries on its map.
+				if (ort == null && e.knoten.karte != null && !(e.knoten.quests || []).length) {
+					ort = e.knoten.karte;
+				}
+			}
+			if (ort != null) {
 				finden(e.knoten);
 				var globales = kartenKnoten(ort);
 				if (globales && (globales.quests || []).length > (teil && teil.quests || []).length) {
@@ -4276,8 +4352,20 @@
 		var e = landschaften.find(function (e) { return landschaftSlug(e) === hash[0]; });
 		if (!e && /^map-\d+$/.test(hash[0])) {
 			var index = Number(hash[0].slice(4));
-			function hatKarte(k) { return k.karte === index || k.reihenfolge.some(hatKarte); }
-			e = landschaften.find(function (e) { return hatKarte(e.knoten); });
+			// A map ID alone names its group map too: the landscape that carries
+			// the parent map loads the shards below it, including this one. The
+			// parent chain can skip unnamed maps, so walk it up to the card.
+			var karte = karteNachIndex[index];
+			var oben = karte ? Number(karte.eltern) : 0;
+			for (var tiefe = 0; karte && tiefe < 8 && !e; tiefe += 1) {
+				e = landschaften.find(function (x) { return Number(x.karte) === oben; }) || null;
+				karte = karteNachIndex[oben];
+				oben = karte ? Number(karte.eltern) : 0;
+			}
+			if (!e) {
+				function hatKarte(k) { return k.karte === index || k.reihenfolge.some(hatKarte); }
+				e = landschaften.find(function (e) { return hatKarte(e.knoten); });
+			}
 			if (e && !hash[1]) { hash[1] = String(index); }
 		}
 		if (e) { landschaftOeffnen(e, hash[1] ? (hash[1].indexOf('group-') === 0 ? hash[1] : Number(hash[1])) : null, true); }

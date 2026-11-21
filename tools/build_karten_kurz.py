@@ -9,6 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / 'web'
+DATEN = ROOT / 'daten'
 LANGS = ('de', 'en', 'fr')
 KEEP = {
     'i', 'n', 'gt', 'a', 'ak', 'g', 'l', 'r', 'z', 'v', 'vo', 'vl', 'vb',
@@ -36,6 +37,99 @@ def assignment(text: str, name: str):
     return json.JSONDecoder().raw_decode(text[match.end():])[0]
 
 
+def giver_spots() -> dict:
+    """Quest ID → the quest giver's first recorded place on a game map."""
+    pfad = DATEN / 'auftraggeber.json'
+    if not pfad.exists():
+        return {}
+    daten = json.loads(pfad.read_text(encoding='utf-8'))
+    givers = daten.get('givers') or {}
+    zuordnung = daten.get('quest_giver') or {}
+    orte = {}
+    for kennung, geber in zuordnung.items():
+        for eines in (geber if isinstance(geber, list) else [geber]):
+            for platz in (givers.get(str(eines)) or {}).get('places') or []:
+                if platz.get('map') is None or platz.get('lat') is None or platz.get('lon') is None:
+                    continue
+                orte[str(kennung).upper()] = [int(platz['map']),
+                                              round(float(platz['lat']), 5),
+                                              round(float(platz['lon']), 5)]
+                break
+            if str(kennung).upper() in orte:
+                break
+    return orte
+
+
+def step_targets(quests: list, label: str) -> dict:
+    """Chapter ID → objectives of the steps that name it as their predecessor."""
+    ziele = {}
+    for quest in quests:
+        if quest.get('th') != 'epic' or (quest.get('f') or [''])[0] == label:
+            continue
+        eigene = quest.get('t') or []
+        if not eigene:
+            continue
+        for vorher in quest.get('v') or []:
+            ziele.setdefault(str(vorher).upper(), []).extend(eigene)
+    return ziele
+
+
+def epic_places(quests: list, label: str) -> int:
+    """Give epic chapters a place where the game data proves one.
+
+    Chapter entries carry no map of their own: the client keeps map and giver
+    with the step, not with the chapter. Three proofs are used, never a guess:
+    the quest giver's recorded spot, the objectives of the steps that name the
+    chapter as their predecessor, and for instance parts the place of the
+    chapter they belong to. All of them stay real places on real maps.
+    """
+    geber = giver_spots()
+    ziele = step_targets(quests, label)
+    kapitel = [quest for quest in quests if (quest.get('f') or [''])[0] == label]
+    nach_id = {str(quest['i']).upper(): quest for quest in quests}
+
+    def mit_ort(quest) -> bool:
+        return bool(quest.get('gt') or quest.get('t'))
+
+    def eigene_ziele(quest) -> list:
+        eigene, gesehen = [], set()
+        for ziel in ziele.get(str(quest['i']).upper(), []):
+            schluessel = (int(ziel[0]), round(float(ziel[1]), 5), round(float(ziel[2]), 5))
+            if schluessel in gesehen:
+                continue
+            gesehen.add(schluessel)
+            eigene.append([schluessel[0], schluessel[1], schluessel[2],
+                           ziel[3] if len(ziel) > 3 else ''])
+        return eigene[:12]
+
+    # 1. Own proof: the giver's spot, else the objectives of the linked steps.
+    for quest in kapitel:
+        if mit_ort(quest):
+            continue
+        ort = geber.get(str(quest['i']).upper())
+        if ort:
+            quest['gt'] = ort
+            continue
+        eigene = eigene_ziele(quest)
+        if eigene:
+            quest['t'] = eigene
+
+    # 2. An instance part happens where its chapter happens; the chapter's place
+    #    is shown as a place marker, not claimed as the part's own giver.
+    for quest in kapitel:
+        if mit_ort(quest):
+            continue
+        eltern = nach_id.get(str(quest.get('ie') or '').upper())
+        if not eltern:
+            continue
+        if eltern.get('t'):
+            quest['t'] = [list(ziel) for ziel in eltern['t'][:12]]
+        elif eltern.get('gt'):
+            quest['t'] = [[eltern['gt'][0], eltern['gt'][1], eltern['gt'][2], '']]
+
+    return sum(1 for quest in kapitel if mit_ort(quest))
+
+
 def build(lang: str, deeds: bool = False) -> None:
     quelle = 'daten-taten-%s.js' if deeds else 'daten-%s.js'
     ziel = 'karten-kurz-taten-%s.js' if deeds else 'karten-kurz-%s.js'
@@ -43,6 +137,8 @@ def build(lang: str, deeds: bool = False) -> None:
     quests = assignment(text, 'MQL_QUESTS')
     maps = assignment(text, 'MQL_KARTEN')
     replaced = assignment(text, 'MQL_REPLACED') if deeds else None
+    if not deeds:
+        epic_places(quests, THEMA_EPIK[lang])
     compact = []
     summary = [
         {key: value for key, value in quest.items() if key in SUMMARY_KEEP}

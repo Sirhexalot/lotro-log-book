@@ -61,11 +61,11 @@
 					<div class="kartenfilter-inhalt">
 					<fieldset class="kartenfilter-status" id="kartenfilter-status">
 						<legend data-t="kartenfilter_fortschritt">Fortschritt</legend>
-						<label><input type="radio" name="kartenfortschritt" value="alle" checked><span data-t="filter_alle">Alle</span></label>
-						<label><input type="radio" name="kartenfortschritt" value="offen"><span data-t="filter_offen">Nicht begonnen</span></label>
-						<label><input type="radio" name="kartenfortschritt" value="laufend"><span data-t="filter_laufend">Begonnen</span></label>
-						<label><input type="radio" name="kartenfortschritt" value="erledigt"><span data-t="filter_erledigt">Erledigt</span></label>
-						<label id="filter-machbar" hidden><input type="radio" name="kartenfortschritt" value="machbar" aria-labelledby="kartenfilter-machbar-titel" aria-describedby="kartenfilter-machbar-hilfe"><span><span id="kartenfilter-machbar-titel" data-t="filter_machbar">Voraussetzungen erfüllt</span><small id="kartenfilter-machbar-hilfe" data-t="kartenfilter_machbar_hilfe">Aufgaben, die du noch nicht begonnen hast und deren bekannte Voraussetzungen du erfüllst.</small></span></label>
+						<label><input type="radio" name="kartenfortschritt" value="alle" checked><span data-t="filter_alle">Alle</span><small class="kartenfilter-zahl" data-filterzahl="alle" hidden></small></label>
+						<label><input type="radio" name="kartenfortschritt" value="offen"><span data-t="filter_offen">Nicht begonnen</span><small class="kartenfilter-zahl" data-filterzahl="offen" hidden></small></label>
+						<label><input type="radio" name="kartenfortschritt" value="laufend"><span data-t="filter_laufend">Begonnen</span><small class="kartenfilter-zahl" data-filterzahl="laufend" hidden></small></label>
+						<label><input type="radio" name="kartenfortschritt" value="erledigt"><span data-t="filter_erledigt">Erledigt</span><small class="kartenfilter-zahl" data-filterzahl="erledigt" hidden></small></label>
+						<label id="filter-machbar" hidden><input type="radio" name="kartenfortschritt" value="machbar" aria-labelledby="kartenfilter-machbar-titel" aria-describedby="kartenfilter-machbar-hilfe"><span><span id="kartenfilter-machbar-titel" data-t="filter_machbar">Voraussetzungen erfüllt</span><small id="kartenfilter-machbar-hilfe" data-t="kartenfilter_machbar_hilfe">Aufgaben, die du noch nicht begonnen hast und deren bekannte Voraussetzungen du erfüllst.</small></span><small class="kartenfilter-zahl" data-filterzahl="machbar" hidden></small></label>
 					</fieldset>
 					<label class="belohnungsfilter" id="belohnungsfilter-feld" hidden>
 						<span data-t="belohnung">Belohnung</span>

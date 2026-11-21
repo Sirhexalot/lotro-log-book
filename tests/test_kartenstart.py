@@ -128,6 +128,51 @@ class KartenstartTest(unittest.TestCase):
             self.assertTrue(rows, datei)
             self.assertTrue(all(row.get('th') == 'epic' for row in rows), datei)
 
+    def test_epic_chapters_only_carry_proven_places(self):
+        """Chapter rows get a giver spot or the objectives of their linked step,
+        never an estimated position; every place names an existing game map."""
+        for lang in ('de', 'en', 'fr'):
+            start = (ROOT / 'web' / ('karten-start-%s.js' % lang)).read_text(encoding='utf-8')
+            maps = json.JSONDecoder().raw_decode(
+                start.split('window.MQL_KARTEN = ', 1)[1])[0]
+            bekannt = {int(karte['idx']) for karte in maps}
+            text = (ROOT / 'web' / ('thema-epic-%s.js' % lang)).read_text(encoding='utf-8')
+            rows = json.JSONDecoder().raw_decode(text.split('window.MQL_THEMA_DATEN = ', 1)[1])[0]
+            mit_ort = [row for row in rows if row.get('gt') or row.get('t')]
+            self.assertGreater(len(mit_ort), 130, lang)
+            for row in rows:
+                orte = ([row['gt']] if row.get('gt') else []) + (row.get('t') or [])
+                for ort in orte:
+                    self.assertIn(int(ort[0]), bekannt, (lang, row['n']))
+                    self.assertIsInstance(float(ort[1]), float, (lang, row['n']))
+                    self.assertIsInstance(float(ort[2]), float, (lang, row['n']))
+            # A chapter without proof keeps no invented dot.
+            self.assertTrue(any(not (row.get('gt') or row.get('t')) for row in rows), lang)
+
+    def test_epic_opens_on_the_large_map(self):
+        code = (ROOT / 'web/app.js').read_text(encoding='utf-8')
+        self.assertIn('var WELTKARTE = 268437557;', code)
+        self.assertIn('function karteFuerKnoten(knoten)', code)
+        self.assertIn('if (Epik.istWurzel(knoten) && karteNachIndex[Epik.karte()])', code)
+
+    def test_epic_special_case_is_encapsulated(self):
+        code = (ROOT / 'web/app.js').read_text(encoding='utf-8')
+        self.assertIn('var Epik = (function () {', code)
+        self.assertIn('return { istWurzel: istWurzel, karte: karte, basis: basis, zeichneListe: zeichne };', code)
+        # Nothing outside the block tests the theme itself.
+        self.assertNotIn('istEpikWurzel', code)
+        self.assertNotIn('zeichneEpikListe', code)
+
+    def test_map_filter_shows_a_number_per_progress_option(self):
+        template = (ROOT / 'php/templates/app/karte.twig').read_text(encoding='utf-8')
+        code = (ROOT / 'web/app.js').read_text(encoding='utf-8')
+        for wert in ('alle', 'offen', 'laufend', 'erledigt', 'machbar'):
+            self.assertIn('data-filterzahl="%s"' % wert, template)
+        self.assertIn('function aktualisiereFilterZahlen()', code)
+        self.assertIn('aktualisiereFilterZahlen();', code)
+        # Counts are facets: the progress filter itself must not narrow them.
+        self.assertIn("zustand.filter = 'alle';", code)
+
     def test_progress_filter_labels_match_the_status_dropdown_in_all_languages(self):
         code = (ROOT / 'web' / 'app.js').read_text(encoding='utf-8')
         template = (ROOT / 'php/templates/app/karte.twig').read_text(encoding='utf-8')

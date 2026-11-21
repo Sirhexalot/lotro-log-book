@@ -24,6 +24,14 @@ async function zustand(page) {
 		titel: document.getElementById('liste-titel')?.textContent?.trim() || '',
 		url: location.search,
 		detail: document.getElementById('detail')?.querySelector('.detail-titel')?.textContent?.trim() || '',
+		bild: document.getElementById('bild')?.getAttribute('src') || '',
+		ansicht: !document.getElementById('kartenansicht')?.hidden,
+		legende: !document.getElementById('legende')?.hidden,
+		punkte: document.querySelectorAll('#marker .punkt').length,
+		kacheln: document.querySelectorAll('.gelaende-kacheln > *').length,
+		lage: document.getElementById('welt')?.dataset.kartenansicht || '',
+		zahlen: Object.fromEntries(Array.from(document.querySelectorAll('[data-filterzahl]'))
+			.map((feld) => [feld.dataset.filterzahl, feld.hidden ? null : feld.textContent])),
 	}));
 }
 
@@ -37,6 +45,16 @@ async function zustand(page) {
 			page.on('pageerror', (e) => fehler.push(design + ': ' + e.message));
 			await page.addInitScript((wert) => {
 				try { localStorage.setItem('mql.theme', wert); } catch (e) { /* egal */ }
+				/* One chapter as done, so the progress filter has numbers. */
+				try {
+					localStorage.setItem('mql.charaktere', JSON.stringify({
+						aktiv: 'epik', liste: { epik: {
+							key: 'epik', name: 'Epikprobe', server: 'Test', level: '128',
+							quests: ['700000A8'], deeds: [], rezepte: [], handwerk: {}, ruf: [],
+							importMeta: { quests: true },
+						} },
+					}));
+				} catch (e) { /* egal */ }
 			}, design);
 
 			for (const breite of [1280, 390]) {
@@ -48,6 +66,25 @@ async function zustand(page) {
 				assert.equal(stand.baender, 10, design + ': nicht zehn Bände');
 				assert.equal(stand.buecher, 0, design + ': ein Band startet offen');
 				assert.equal(stand.titel, 'Epische Geschichte', design + ': Listentitel');
+				/* Die Epik öffnet auf der großen Karte, mit Umschalter und Punkten. */
+				assert.match(stand.bild, /268437557/, design + ': falsche Karte');
+				assert.equal(stand.ansicht, true, design + ': Kartenumschalter fehlt');
+				assert.equal(stand.legende, true, design + ': Legende fehlt');
+				assert.ok(stand.punkte > 0, design + ': keine Kartenpunkte');
+				assert.equal(stand.zahlen.alle, '225', design + ': Zahl aller Kapitel');
+				assert.equal(stand.zahlen.erledigt, '1', design + ': Zahl der erledigten Kapitel');
+
+				/* Gelände und Spielkarte umschalten; die Punkte bleiben. */
+				if (breite > 700) {
+					await page.locator('[data-kartenansicht="gelaende"]').click();
+					await page.waitForTimeout(1200);
+					stand = await zustand(page);
+					assert.equal(stand.lage, 'gelaende', design + ': Gelände schaltet nicht um');
+					assert.ok(stand.kacheln > 0, design + ': keine Geländekacheln');
+					assert.ok(stand.punkte > 0, design + ': Punkte verschwinden im Gelände');
+					await page.locator('[data-kartenansicht="karte"]').click();
+					await page.waitForTimeout(600);
+				}
 
 				/* Band aufklappen: die Bände bleiben, die Bücher kommen darunter. */
 				await page.locator('#liste li.epik-band').nth(2).click();
@@ -89,6 +126,17 @@ async function zustand(page) {
 			const treffer = await zustand(page);
 			assert.ok(treffer.baender >= 1 && treffer.baender < 10, design + ': Suche filtert die Bände nicht');
 			assert.equal(treffer.buecher, treffer.baender, design + ': Treffer-Band nicht aufgeklappt');
+
+			/* Eine gewählte Aufgabe springt auf ihre genaue Karte, nicht auf die
+			   große Übersicht. */
+			await page.fill('#aufgaben-suche', 'Buch 1, Kapitel 1:');
+			await page.waitForTimeout(800);
+			await page.locator('#liste ul.epik-buecher li:not(.abschnitt)').first().click();
+			await page.waitForTimeout(1200);
+			const karte = await page.evaluate(() =>
+				(document.getElementById('bild').getAttribute('src') || '').match(/(\d+)\.webp/)?.[1] || '');
+			assert.notEqual(karte, '268437557', design + ': Epik-Aufgabe springt nicht auf ihre Karte');
+			assert.ok(karte, design + ': Epik-Aufgabe ohne Karte');
 
 			assert.deepEqual(fehler, [], 'JS-Fehler: ' + fehler.join(' | '));
 			await context.close();

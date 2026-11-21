@@ -50,6 +50,14 @@ const base = process.argv[2] || 'http://127.0.0.1:8814';
 
 		await page.goto(base + '/de/karte/', { waitUntil: 'load' });
 		await page.locator('.landschaft-suche').waitFor();
+		/* Lazy previews may still arrive; wait until the count stays put, else the
+		   budget below measures the tail of the page load instead of the search. */
+		await page.waitForFunction(() => {
+			const anzahl = performance.getEntriesByType('resource').length;
+			if (window.__ruhig === anzahl) { return true; }
+			window.__ruhig = anzahl;
+			return false;
+		}, null, { polling: 300, timeout: 15000 });
 		const before = await page.evaluate(() => performance.getEntriesByType('resource').length);
 		const budget = await page.evaluate(() => {
 			const input = document.querySelector('.landschaft-suche');
