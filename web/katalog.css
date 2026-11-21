@@ -87,38 +87,11 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-reiter button:hover, .katalog-reiter button:focus-visible {
     color: var(--gold); }
 .item-bezugsreiter {
-	--item-reiter-flaeche: var(--llb-flaechen-ton);
-	--item-reiter-rand: var(--llb-flaechen-rand);
-	--item-feld-rand: var(--llb-palette-84745f);
-	--item-zweittext: var(--llb-palette-c9bdab);
 	margin-top: 22px;
 }
-.item-bezugsreiter > .katalog-reiter {
-	position: relative; gap: 4px; margin: 0; padding-inline-start: 8px; border: 0;
-}
-.item-bezugsreiter > .katalog-reiter button {
-	padding: 8px 15px; border-radius: 6px 6px 0 0;
-	background: var(--grund); color: var(--item-zweittext); border-color: var(--item-reiter-rand);
-}
-.item-bezugsreiter > .katalog-reiter button[aria-selected="true"] {
-	background: var(--item-reiter-flaeche); color: var(--gold);
-	box-shadow: 0 1px 0 var(--item-reiter-flaeche);
-}
-.item-bezugsreiter > .katalog-reiter button:hover { color: var(--gold); }
-.item-bezugsreiter > .katalog-reiter button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 :is(.item-bezugsreiter > [role="tabpanel"], .entity-detail-reading > :is(section, details), .entity-detail-place > section, .entity-detail-layout > section, .item-seite .entity-detail-grid > section) {
 	box-sizing: border-box; min-width: 0; padding: var(--llb-flaechen-innen);
 	border: 1px solid var(--llb-flaechen-rand); border-radius: var(--llb-flaechen-radius); background: var(--llb-flaechen-ton);
-}
-.item-bezugsreiter .filter-ui .filter-toolbar input[type="search"],
-.item-bezugsreiter .filter-ui .filter-result-toolbar select {
-	background-color: var(--grund); border-color: var(--item-feld-rand);
-}
-.item-bezugsreiter .filter-ui .filter-toolbar input[type="search"]::placeholder {
-	color: var(--item-zweittext); opacity: 1;
-}
-.item-bezugsreiter .filter-ui .filter-toolbar button {
-	background-color: var(--llb-palette-3a3023); border-color: var(--item-feld-rand);
 }
 .item-bezugsreiter > [role="tabpanel"][hidden] { display: none; }
 .item-bezugsreiter [role="tabpanel"] > section > h3 { margin: 0 0 6px; }
