@@ -156,7 +156,9 @@
 	function mountTask(kind, classKey, raceKey, level, signature) {
 		var name = kind === 'q' ? 'quests' : 'deeds';
 		if (filterControllers[name]) { return; }
-		var setup = window.MQL_TASK_FILTER_SETUP(filteredTaskRows(kind === 'q' ? 'quests' : 'deeds', classKey, raceKey, level), kind);
+		var rows = filteredTaskRows(kind === 'q' ? 'quests' : 'deeds', classKey, raceKey, level);
+		if (reiter) { reiter.zahl(name, rows.length); }
+		var setup = window.MQL_TASK_FILTER_SETUP(rows, kind);
 		mountFilter(name, filterRoots[name], scopedSetup(setup, name, signature));
 	}
 	function ensureCatalogue() {
@@ -191,8 +193,27 @@
 			return;
 		}
 		ready.then(function () { return ensureCatalogue(); }).then(function () {
-			if (profileSignature !== classKey + ':' + raceKey + ':' + level || chosenTab === 'items') { return; }
+			if (profileSignature !== classKey + ':' + raceKey + ':' + level) { return; }
+			/* Both task tabs get their number up front; only the chosen one mounts
+			 * a filter. The item tab follows when its data is loaded. */
+			if (reiter) {
+				reiter.zahl('quests', filteredTaskRows('quests', classKey, raceKey, level).length);
+				reiter.zahl('deeds', filteredTaskRows('deeds', classKey, raceKey, level).length);
+			}
+			if (chosenTab === 'items') { return; }
 			mountTask(chosenTab === 'deeds' ? 'd' : 'q', classKey, raceKey, level, profileSignature.replace(/[^a-zA-Z0-9_-]/g, '-'));
+			/* The item tab's number needs its catalogue. Load it once the page is
+			 * idle, but never on a metered or slow connection. */
+			var spaeter = window.requestIdleCallback || function (fn) { return setTimeout(fn, 1500); };
+			var merk = classKey + ':' + raceKey + ':' + level;
+			spaeter(function () {
+				var netz = navigator.connection || {};
+				if (netz.saveData || /(^|-)2g$/.test(netz.effectiveType || '')) { return; }
+				ensureItems().then(function () {
+					if (profileSignature !== merk || !reiter) { return; }
+					reiter.zahl('items', itemRowsFor(classKey, raceKey, level).rows.length);
+				}).catch(function () {});
+			});
 		}).catch(function (error) {
 			console.error(error);
 			var root = $(tabRoots[chosenTab]), message = root.querySelector('[data-filter-error]');
@@ -200,8 +221,7 @@
 			message.hidden = false;
 		});
 	}
-	function renderItems(classKey, raceKey, level, expectedSignature) {
-		if (profileSignature !== expectedSignature || chosenTab !== 'items') { return; }
+	function itemRowsFor(classKey, raceKey, level) {
 		var equipment = window.MQL_GEGENSTAENDE, cls = data.classes[classKey], playerClasses = Object.keys(data.classes);
 		var armour = {}, weapons = {};
 		cls.armour.forEach(function (x) { armour[x.type] = x.level; }); cls.weapons.forEach(function (x) { weapons[x.type] = x.level; });
@@ -215,7 +235,13 @@
 				if (category === 'WEAPON' || category === 'LEGENDARY_WEAPON') { return Object.prototype.hasOwnProperty.call(weapons, row[13]) && weapons[row[13]] <= level && row[14] <= level; }
 				return false;
 			});
-		var rows = classItems.concat(gear);
+		return { rows: classItems.concat(gear), requirements: requirements };
+	}
+	function renderItems(classKey, raceKey, level, expectedSignature) {
+		if (profileSignature !== expectedSignature || chosenTab !== 'items') { return; }
+		var equipment = window.MQL_GEGENSTAENDE;
+		var gebaut = itemRowsFor(classKey, raceKey, level), rows = gebaut.rows, requirements = gebaut.requirements;
+		if (reiter) { reiter.zahl('items', rows.length); }
 		var signature = profileSignature.replace(/[^a-zA-Z0-9_-]/g, '-');
 		if (!rows.length || filterControllers.items) { return; }
 		var setup = window.MQL_ITEM_FILTER_SETUP(equipment, {area:'klassen-items', ids:rows.map(function (row) { return row[0]; })});
@@ -265,8 +291,9 @@
 	$('klassen-volk').addEventListener('change', render);
 	$('klassen-stufe').addEventListener('input', render);
 	var tabHost = document.querySelector('.klassen-katalog .llb-reiter');
+	var reiter = null;
 	if (tabHost && window.MQL_REITER) {
-		window.MQL_REITER.mount(tabHost, {
+		reiter = window.MQL_REITER.mount(tabHost, {
 			aktiv: 'quests',
 			onShow: function (kind) { chosenTab = kind; render(); }
 		});

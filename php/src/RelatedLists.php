@@ -107,14 +107,17 @@ final class RelatedLists
                     if (!$entry) {
                         continue;
                     }
-                    $extra = implode(' · ', array_filter([
-                        $entry['title'] ?? '',
-                        $entry['area'] ?? '',
-                    ], static fn ($value): bool => $value !== ''));
+                    // The occupation is English-only in the client; the row names
+                    // what the barterer does through its type and area instead.
+                    $extra = (string) ($entry['area'] ?? '');
+                    $vendorPath = ['de' => 'haendler', 'en' => 'vendor', 'fr' => 'marchand'][$this->lang];
+                    $hasPage = $this->data->has($this->lang, 'vendor', (string) $member);
                     $rows[] = [
                         'id' => (string) $member,
                         'name' => (string) ($entry['name'] ?? $member),
-                        'url' => '',
+                        'url' => $hasPage
+                            ? '/' . $this->lang . '/' . $vendorPath . '/' . $member . '/'
+                            : '',
                         'type' => 'barter',
                         'extra' => $extra,
                         'regions' => [],

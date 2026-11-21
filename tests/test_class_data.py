@@ -45,7 +45,9 @@ class ClassDataTest(unittest.TestCase):
         self.assertNotIn('gruppe-exklusiv', template)
         self.assertNotIn('gruppe-geteilt', template)
         self.assertNotIn('gruppe-ausrustung', template)
-        self.assertIn('var rows = classItems.concat(gear);', script)
+        # One helper builds the rows so the tab count and the list never drift.
+        self.assertIn('rows: classItems.concat(gear)', script)
+        self.assertIn('itemRowsFor(classKey, raceKey, level)', script)
         self.assertIn("mountFilter('items', filterRoots.items", script)
 
 

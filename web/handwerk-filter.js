@@ -266,6 +266,12 @@
 			if(controller){tabStates[activeTab]=controller.getState();await controller.destroy();controller=null;}
 			activeTab=tab;
 			setIntro(tab);
+			/* Both badges count what the tabs hold, not what a filter leaves over;
+			 * the inactive tab must show its number before it is opened. */
+			if(reiter){
+				if(recipeRows.length){reiter.zahl('rezepte',recipeRows.length);}
+				if(resources){reiter.zahl('rohstoffe',materialRows().length);}
+			}
 			var host=document.getElementById(tab==='berufe'?'berufe':tab==='rezepte'?'rezepte-liste':'rohstoffe-liste');host.replaceChildren();
 			if(tab==='rezepte'&&!recipeRows.length||tab==='rohstoffe'&&!resources){host.appendChild(text('p',words[8]));return;}
 			var c=character(), meta=c&&c.importMeta;
@@ -278,9 +284,9 @@
 	}
 	window.MQL_HANDWERK_FILTER={recipes:function(rows,renderer){recipeRows=rows;recipeRenderer=renderer;return refresh(tabFromUrl(),false);}};
 	window.MQL_ROHSTOFFE_ZEICHNEN=function(){resources=window.MQL_VORKOMMEN;return refresh(tabFromUrl(),false);};
-	var reiter=document.querySelector('.llb-reiter');
-	if(reiter&&window.MQL_REITER){
-		window.MQL_REITER.mount(reiter,{aktiv:tabFromUrl(),hash:true,verlauf:true,onShow:function(tab){refresh(tab);}});
+	var reiterHost=document.querySelector('.llb-reiter'), reiter=null;
+	if(reiterHost&&window.MQL_REITER){
+		reiter=window.MQL_REITER.mount(reiterHost,{aktiv:tabFromUrl(),hash:true,verlauf:true,onShow:function(tab){refresh(tab);}});
 	}else{
 		refresh(tabFromUrl(),false);
 	}

@@ -103,7 +103,22 @@
 				|| key(liste.filter(sichtbar)[0] || liste[0]);
 			waehlen(start, true);
 
-			return { waehlen: waehlen, aktuell: function () { return aktiv; } };
+			return { waehlen: waehlen, aktuell: function () { return aktiv; },
+				/* A page that learns a tab's size later sets it here. Zero or
+				 * nothing removes the badge instead of showing a zero. */
+				zahl: function (key, wert) {
+					var knopf = liste.filter(function (b) { return b.getAttribute('data-reiter-knopf') === key; })[0];
+					if (!knopf) { return; }
+					var zahl = knopf.querySelector('.llb-reiter-zahl');
+					var n = Number(wert);
+					if (!isFinite(n) || n <= 0) { if (zahl) { zahl.remove(); } return; }
+					if (!zahl) {
+						zahl = document.createElement('span');
+						zahl.className = 'llb-reiter-zahl';
+						knopf.appendChild(zahl);
+					}
+					zahl.textContent = n.toLocaleString(document.documentElement.lang || 'de');
+				} };
 		}
 	};
 }());

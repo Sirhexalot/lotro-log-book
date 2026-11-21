@@ -11,79 +11,58 @@
 {% if page.chips and not page.has_values %}<p class="katalog-metazeile">{{ page.chips|map(chip => chip.text)|join(' · ') }}</p>{% endif %}
 <div class="entity-detail-grid llb-raster{% if page.description and page.has_values %} entity-detail-overview-pair{% endif %}">
 {% if page.description %}<section class="entity-item-description llb-flaeche" aria-label="{{ w.description }}"><p class="katalog-text">{{ page.description }}</p></section>{% endif %}
-{% if page.has_values %}<section class="katalog-abschnitt katalog-flaeche katalog-werteflaeche">
+{% if page.has_values %}<section class="katalog-abschnitt katalog-werteflaeche llb-flaeche" data-ton="hell">
 <h2>{{ w.values }}</h2>
 {% if page.chips %}<p class="katalog-metazeile">{% for chip in page.chips %}{% if not loop.first %} · {% endif %}<span class="{{ chip.cls }}">{{ chip.text }}</span>{% endfor %}</p>{% endif %}
 {% if page.required_class|default(false) %}<p class="katalog-metazeile">{{ w.required_class }}: {{ page.required_class }}</p>{% endif %}
 {% if page.armour %}<p class="katalog-grundwert"><span>{{ w.armour }}</span><b>{{ page.armour }}</b></p>{% endif %}
 {% if page.values %}<dl class="katalog-werte-raster">{% for row in page.values %}<div><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>{% endfor %}</dl>{% endif %}
 {% if page.bonuses %}<ul class="katalog-boni">{% for row in page.bonuses %}<li><b>{{ row.display }}</b><span>{{ row.label }}</span></li>{% endfor %}</ul>{% endif %}
-{% if page.scale %}<p class="katalog-hinweis">{{ w.scalable }} {{ page.scale }}</p>{% endif %}
+{% if page.scale %}<p class="llb-hinweis">{{ w.scalable }} {{ page.scale }}</p>{% endif %}
 </section>{% endif %}
 {% set variants = page.variants|default([])|filter(variant => variant.label|default('')) %}
-{% if variants %}<section><h2>{{ w.variants }}</h2><ul class="katalog-chips katalog-varianten">
+{% if variants %}<section class="llb-flaeche"><h2>{{ w.variants }}</h2><ul class="katalog-chips katalog-varianten">
 {% for variant in variants %}
 <li>{% if variant.active %}<span class="katalog-chip aktiv" aria-current="page">{{ variant.label }}</span>{% else %}<a class="katalog-chip" href="{{ variant.url }}">{{ variant.label }}</a>{% endif %}</li>
 {% endfor %}
 </ul></section>{% endif %}
-{% if page.set_links|default([]) %}<section><h2>{{ lang == 'fr' ? 'Ensemble' : 'Set' }}</h2><ul>{% for entry in page.set_links %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul></section>{% endif %}
-{% if page.set|default(false) %}<section><h2>{{ w.context }}</h2><h3>{{ w.set_members }}</h3><p>{{ page.set.head }}</p>{% if page.set.members %}<ul>{% for member in page.set.members %}<li>{% if member.url %}<a href="{{ member.url }}">{{ member.text }}</a>{% else %}{{ member.text }}{% endif %}</li>{% endfor %}</ul>{% endif %}{% if page.set.bonuses %}<h3>{{ w.set_bonus }}</h3><ul>{% for bonus in page.set.bonuses %}<li>{{ bonus.amount }} {{ w.set_members }}: {{ bonus.text }}</li>{% endfor %}</ul>{% endif %}</section>{% endif %}
+{% if page.set_links|default([]) %}<section class="llb-flaeche"><h2>{{ lang == 'fr' ? 'Ensemble' : 'Set' }}</h2><ul>{% for entry in page.set_links %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul></section>{% endif %}
+{% if page.set|default(false) %}<section class="llb-flaeche"><h2>{{ w.context }}</h2><h3>{{ w.set_members }}</h3><p>{{ page.set.head }}</p>{% if page.set.members %}<ul>{% for member in page.set.members %}<li>{% if member.url %}<a href="{{ member.url }}">{{ member.text }}</a>{% else %}{{ member.text }}{% endif %}</li>{% endfor %}</ul>{% endif %}{% if page.set.bonuses %}<h3>{{ w.set_bonus }}</h3><ul>{% for bonus in page.set.bonuses %}<li>{{ bonus.amount }} {{ w.set_members }}: {{ bonus.text }}</li>{% endfor %}</ul>{% endif %}</section>{% endif %}
 {% if not page.has_values and page.required_class|default(false) %}<p class="katalog-metazeile">{{ w.required_class }}: {{ page.required_class }}</p>{% endif %}
-{% if page.browse|default(false) %}<section><h2>{{ w.browse }}</h2><p>{{ page.browse.note }}</p><p><a href="{{ page.browse.url }}" class="katalog-knopf">{{ page.browse.text }}</a></p></section>{% endif %}
+{% if page.browse|default(false) %}<section class="llb-flaeche"><h2>{{ w.browse }}</h2><p>{{ page.browse.note }}</p><p><a href="{{ page.browse.url }}" class="llb-knopf">{{ page.browse.text }}</a></p></section>{% endif %}
 
-{% set both_relations = page.has_where_from|default(false) and page.has_used_for|default(false) %}
-{% if both_relations %}<div class="item-bezugsreiter">
-{{ reiter.reiter('item', w.ilabel, [
-    {key: 'woher', label: w.tab_where_from, panel: 'item-tab-woher', zahl: page.where_from_count|default(0)},
-    {key: 'wofuer', label: w.tab_used_for, panel: 'item-tab-wofuer', zahl: page.used_for_count|default(0)}
-], 'woher') }}
-</div>{% endif %}
+{% set barter_count = page.barter_sources|default([])|length %}
+{% set item_tabs = [{key: 'woher', label: w.tab_where_from, panel: 'item-tab-woher',
+                     zahl: page.where_from_count|default(0) - barter_count}] %}
+{% if page.has_used_for|default(false) %}{% set item_tabs = item_tabs|merge([
+    {key: 'wofuer', label: w.tab_used_for, panel: 'item-tab-wofuer', zahl: page.used_for_count|default(0)}]) %}{% endif %}
+{% if barter_count %}{% set item_tabs = item_tabs|merge([
+    {key: 'barter', label: w.source_barters, panel: 'item-tab-barter', zahl: barter_count}]) %}{% endif %}
+{% set has_tabs = item_tabs|length > 1 %}
+{% if has_tabs %}<div class="item-bezugsreiter">{% endif %}
+{{ reiter.reiter('item', w.ilabel, item_tabs, 'woher') }}
 {% if page.task_filter|default(false) %}<script type="application/json" id="item-task-filter-data">{{ page.task_filter|json_encode|raw }}</script>{% endif %}
 
-{% if page.has_where_from|default(false) %}<section id="item-tab-woher"{% if both_relations %} role="tabpanel" aria-labelledby="item-woher" tabindex="0"{% else %} class="katalog-abschnitt katalog-beziehungen"{% endif %}>
-{% if not both_relations %}<h2>{{ w.tab_where_from }}</h2>{% endif %}
-{% for group in page.where_groups %}
-{% if group.instance_chests|default(false) %}
-<section>
-<h3>{{ group.label }}</h3>
-{% set conditions = {de: 'Truhenbedingungen', en: 'Chest conditions', fr: 'Conditions du coffre'}[lang] %}
-<div{% if group.entries|length > direct_list_max %} data-item-chest-sources{% endif %}>
-    <ul class="mql-row-list" data-filter-results>
-    {{ result.heading(lang, conditions) }}
-    {% for entry in group.entries %}
-        {{ result.row(lang, entry.url, entry.text, '', symbol('instance'), '', conditions, entry.conditions) }}
-    {% endfor %}
-    </ul>
-</div>
-</section>
-{% elseif group.source_kind|default('') and group.entries|length <= direct_list_max %}
-{# Direct task sources use the same result rows as every other list. The
-   progress column is announced only once the browser adds the status control,
-   so no empty column appears without JavaScript. #}
-{% set level_label = group.source_kind == 'q' ? {de: 'Aufgabenstufe', en: 'Quest level', fr: 'Niveau de quête'}[lang] : {de: 'Tatstufe', en: 'Deed level', fr: 'Niveau de prouesse'}[lang] %}
-{% set with_levels = group.entries|filter(entry => entry.level|default(''))|length == group.entries|length %}
-<section>
-<h3>{{ group.label }}</h3>
-<ul class="mql-row-list" data-item-task-direct>
-{{ result.heading(lang, with_levels ? level_label : '', true, true) }}
-{% for entry in group.entries %}
-    {{ result.row(lang, entry.url|default(''), entry.text, entry.extra|default(''), symbol(group.source_kind == 'q' ? 'aufgabe' : 'tat'), '', with_levels ? level_label : '', with_levels ? entry.level : '') }}
+{% if page.has_where_from|default(false) %}<section id="item-tab-woher"{% if has_tabs %} role="tabpanel" aria-labelledby="item-woher" tabindex="0"{% else %} class="katalog-abschnitt katalog-beziehungen llb-flaeche"{% endif %}>
+{% if not has_tabs %}<h2>{{ w.tab_where_from }}</h2>{% endif %}
+{% for group in page.where_groups|filter(g => not g.barter_filter|default(false)) %}
+{% include 'entity/_item_group.twig' %}
 {% endfor %}
-</ul>
-</section>
-{% else %}
-<section{% if group.barter_filter|default(false) and group.entries|length > direct_list_max %} data-barter-filter-group{% elseif group.vendor_filter|default(false) and group.entries|length > direct_list_max %} data-vendor-filter-group{% elseif group.filter|default('') == 'recipes' and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-recipe-filter-group{% elseif group.filter|default('') and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-item-filter-group{% endif %}>
-<h3>{{ group.label }}</h3>
-{% if group.source_kind|default('') and group.entries|length > direct_list_max %}<div class="questfinder item-task-filter" data-item-task-filter="{{ group.source_kind }}"><div data-item-task-fallback><ul>{% for entry in group.entries %}<li>{% if entry.url|default('') %}<a href="{{ entry.url }}">{{ entry.text }}</a>{% else %}{{ entry.text }}{% endif %}{% if entry.extra|default('') %} · {{ entry.extra }}{% endif %}</li>{% endfor %}</ul></div><ul class="finder-ergebnisse" data-filter-results hidden></ul></div>{% else %}{% if group.filter|default('') and group.filter != 'recipes' and group.entries|length > direct_list_max %}<p class="katalog-detail-filter"><label>{{ w.search }} <input type="search" data-item-filter-search></label>{% if group.filter|default('') == 'recipes' %}<label><select data-item-filter-role><option value="">{{ w.all }}</option><option value="{{ w.regular_result }}">{{ w.regular_result }}</option><option value="{{ w.critical_result }}">{{ w.critical_result }}</option></select></label>{% endif %}</p>{% endif %}<ul>{% for entry in group.entries %}<li{% if group.filter|default('') and group.entries|length > direct_list_max %} data-item-filter-row{% endif %}{% if entry.role|default('') %} data-role="{{ entry.role }}"{% endif %}>{% if entry.places is defined %}<strong>{{ entry.text }}</strong>{% if entry.extra|default('') %} <span class="katalog-gabe-art">{{ entry.extra }}</span>{% endif %}<br><span class="schwach">{% for place in entry.places %}{% if not loop.first %}, {% endif %}<a href="{{ place.url }}">{{ place.name }}</a> ({{ place.count }}){% endfor %}</span>{% else %}{% if entry.url|default('') %}<a href="{{ entry.url }}">{{ entry.text }}</a>{% else %}{{ entry.text }}{% endif %}{% if group.filter|default('') == 'recipes' %}{% if entry.role|default('') and entry.role != w.regular_result %} · {{ entry.role }}{% endif %}{% else %}{% if entry.role|default('') %} · {{ entry.role }}{% endif %}{% if entry.quantity|default(0) %} · {{ w.quantity }}: {{ entry.quantity }}{% endif %}{% if entry.recipe_level|default(0) %} · {{ w.level }}: {{ entry.recipe_level }}{% endif %}{% if entry.result is defined and entry.result %} · {{ entry.result.name }}{% if entry.result.level %} ({{ w.level }} {{ entry.result.level }}){% endif %}{% endif %}{% endif %}{% if group.filter|default('') != 'recipes' %}{% if entry.other_result is defined and entry.other_result %} · {{ entry.other_result.name }}{% endif %}{% endif %}{% if entry.extra|default('') %} · {{ entry.extra }}{% endif %}{% endif %}</li>{% endfor %}</ul>{% endif %}
-</section>{% endif %}{% endfor %}
 </section>{% endif %}
 
-{% if page.has_used_for|default(false) %}<section id="item-tab-wofuer"{% if both_relations %} role="tabpanel" aria-labelledby="item-wofuer" tabindex="0" hidden{% else %} class="katalog-abschnitt katalog-beziehungen"{% endif %}{% if page.used_in|length > direct_list_max %} data-item-filter-group{% endif %}>
-{% if not both_relations %}<h2>{{ w.tab_used_for }}</h2>{% endif %}
+{% if page.has_used_for|default(false) %}<section id="item-tab-wofuer"{% if has_tabs %} role="tabpanel" aria-labelledby="item-wofuer" tabindex="0" hidden{% else %} class="katalog-abschnitt katalog-beziehungen llb-flaeche"{% endif %}{% if page.used_in|length > direct_list_max %} data-item-filter-group{% endif %}>
+{% if not has_tabs %}<h2>{{ w.tab_used_for }}</h2>{% endif %}
 {% if page.used_in|length > direct_list_max %}<p class="katalog-detail-filter"><label>{{ w.search }} <input type="search" data-item-filter-search></label><label><select data-item-filter-role><option value="">{{ w.all }}</option><option value="{{ w.normal_ingredient }}">{{ w.normal_ingredient }}</option><option value="{{ w.optional_ingredient }}">{{ w.optional_ingredient }}</option></select></label></p>{% endif %}
 <ul class="quellen-liste" data-quellen-liste>{% for entry in page.used_in %}<li data-url="{{ entry.url }}"{% if page.used_in|length > direct_list_max %} data-item-filter-row{% endif %}{% if entry.role|default('') %} data-role="{{ entry.role }}"{% endif %}><a href="{{ entry.url }}">{{ entry.text }}</a>{% if entry.role|default('') %} · {{ entry.role }}{% endif %}{% if entry.quantity|default(0) %} · {{ w.quantity }}: {{ entry.quantity }}{% endif %}</li>{% endfor %}</ul>
 </section>{% endif %}
-{% if both_relations %}</div>{% endif %}
+
+{% if barter_count %}<section id="item-tab-barter"{% if has_tabs %} role="tabpanel" aria-labelledby="item-barter" tabindex="0" hidden{% else %} class="katalog-abschnitt katalog-beziehungen llb-flaeche"{% endif %}>
+{% if not has_tabs %}<h2>{{ w.source_barters }}</h2>{% endif %}
+{% for group in page.where_groups|filter(g => g.barter_filter|default(false)) %}
+{% include 'entity/_item_group.twig' %}
+{% endfor %}
+</section>{% endif %}
+{% if has_tabs %}</div>{% endif %}
 </div>
 </article>
 {% endblock %}

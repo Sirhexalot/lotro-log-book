@@ -1,0 +1,35 @@
+{# One source group of an item page: chest loot, direct tasks or a plain list.
+   Included by both the "Woher" and the "Tauschhändler" panel. #}
+{% if group.instance_chests|default(false) %}
+<section>
+<h3>{{ group.label }}</h3>
+{% set conditions = {de: 'Truhenbedingungen', en: 'Chest conditions', fr: 'Conditions du coffre'}[lang] %}
+<div{% if group.entries|length > direct_list_max %} data-item-chest-sources{% endif %}>
+    <ul class="mql-row-list" data-filter-results>
+    {{ result.heading(lang, conditions) }}
+    {% for entry in group.entries %}
+        {{ result.row(lang, entry.url, entry.text, '', symbol('instance'), '', conditions, entry.conditions) }}
+    {% endfor %}
+    </ul>
+</div>
+</section>
+{% elseif group.source_kind|default('') and group.entries|length <= direct_list_max %}
+{# Direct task sources use the same result rows as every other list. The
+   progress column is announced only once the browser adds the status control,
+   so no empty column appears without JavaScript. #}
+{% set level_label = group.source_kind == 'q' ? {de: 'Aufgabenstufe', en: 'Quest level', fr: 'Niveau de quête'}[lang] : {de: 'Tatstufe', en: 'Deed level', fr: 'Niveau de prouesse'}[lang] %}
+{% set with_levels = group.entries|filter(entry => entry.level|default(''))|length == group.entries|length %}
+<section>
+<h3>{{ group.label }}</h3>
+<ul class="mql-row-list" data-item-task-direct>
+{{ result.heading(lang, with_levels ? level_label : '', true, true) }}
+{% for entry in group.entries %}
+    {{ result.row(lang, entry.url|default(''), entry.text, entry.extra|default(''), symbol(group.source_kind == 'q' ? 'aufgabe' : 'tat'), '', with_levels ? level_label : '', with_levels ? entry.level : '') }}
+{% endfor %}
+</ul>
+</section>
+{% else %}
+<section{% if group.barter_filter|default(false) and group.entries|length > direct_list_max %} data-barter-filter-group{% elseif group.vendor_filter|default(false) and group.entries|length > direct_list_max %} data-vendor-filter-group{% elseif group.filter|default('') == 'recipes' and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-recipe-filter-group{% elseif group.filter|default('') and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-item-filter-group{% endif %}>
+<h3>{{ group.label }}</h3>
+{% if group.source_kind|default('') and group.entries|length > direct_list_max %}<div class="questfinder item-task-filter" data-item-task-filter="{{ group.source_kind }}"><div data-item-task-fallback><ul>{% for entry in group.entries %}<li>{% if entry.url|default('') %}<a href="{{ entry.url }}">{{ entry.text }}</a>{% else %}{{ entry.text }}{% endif %}{% if entry.extra|default('') %} · {{ entry.extra }}{% endif %}</li>{% endfor %}</ul></div><ul class="finder-ergebnisse" data-filter-results hidden></ul></div>{% else %}{% if group.filter|default('') and group.filter != 'recipes' and group.entries|length > direct_list_max %}<p class="katalog-detail-filter"><label>{{ w.search }} <input type="search" data-item-filter-search></label>{% if group.filter|default('') == 'recipes' %}<label><select data-item-filter-role><option value="">{{ w.all }}</option><option value="{{ w.regular_result }}">{{ w.regular_result }}</option><option value="{{ w.critical_result }}">{{ w.critical_result }}</option></select></label>{% endif %}</p>{% endif %}<ul>{% for entry in group.entries %}<li{% if group.filter|default('') and group.entries|length > direct_list_max %} data-item-filter-row{% endif %}{% if entry.role|default('') %} data-role="{{ entry.role }}"{% endif %}>{% if entry.places is defined %}<strong>{{ entry.text }}</strong>{% if entry.extra|default('') %} <span class="katalog-gabe-art">{{ entry.extra }}</span>{% endif %}<br><span class="schwach">{% for place in entry.places %}{% if not loop.first %}, {% endif %}<a href="{{ place.url }}">{{ place.name }}</a> ({{ place.count }}){% endfor %}</span>{% else %}{% if entry.url|default('') %}<a href="{{ entry.url }}">{{ entry.text }}</a>{% else %}{{ entry.text }}{% endif %}{% if group.filter|default('') == 'recipes' %}{% if entry.role|default('') and entry.role != w.regular_result %} · {{ entry.role }}{% endif %}{% else %}{% if entry.role|default('') %} · {{ entry.role }}{% endif %}{% if entry.quantity|default(0) %} · {{ w.quantity }}: {{ entry.quantity }}{% endif %}{% if entry.recipe_level|default(0) %} · {{ w.level }}: {{ entry.recipe_level }}{% endif %}{% if entry.result is defined and entry.result %} · {{ entry.result.name }}{% if entry.result.level %} ({{ w.level }} {{ entry.result.level }}){% endif %}{% endif %}{% endif %}{% if group.filter|default('') != 'recipes' %}{% if entry.other_result is defined and entry.other_result %} · {{ entry.other_result.name }}{% endif %}{% endif %}{% if entry.extra|default('') %} · {{ entry.extra }}{% endif %}{% endif %}</li>{% endfor %}</ul>{% endif %}
+</section>{% endif %}
