@@ -81,7 +81,7 @@ def sichern(text: str) -> Path:
 def pruefen() -> int:
     """Which URLs must answer after the switch, and with what."""
     proben = [
-        ('/', {301}),
+        ('/', {302}),
         ('/de/', {200}),
         ('/de/karte/', {200}),
         ('/de/feedback/', {200}),
