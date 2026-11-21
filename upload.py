@@ -71,6 +71,7 @@ LOCK_NAME = '.llb-upload.lock'
 SCHONEN = ('.htaccess', '.user.ini', '.well-known', 'cgi-bin', 'error_log', 'logs')
 # Deleting more than this many files at once needs --force.
 GRENZE = 2000
+MAX_WORKERS = 4
 
 # iCloud Drive recreates conflict copies of files it is syncing; they are no
 # part of the site and must not reach the server ("app 2.js", "123 2.webp").
@@ -713,8 +714,8 @@ def main():
                         help='with --verwaiste: delete those files')
     parser.add_argument('--force', action='store_true',
                         help='with --verwaiste --loeschen: allow more than %d deletions' % GRENZE)
-    parser.add_argument('--workers', type=int, choices=range(1, 9), default=4,
-                        help='parallel FTPS connections (default 4); 1 keeps one connection')
+    parser.add_argument('--workers', type=int, choices=range(1, MAX_WORKERS + 1), default=4,
+                        help='parallel FTPS connections (maximum 4; default 4)')
     parser.add_argument('--nur', default='',
                         help='only these top-level folders, comma separated (e.g. de,en,fr)')
     parser.add_argument('--ohne', default='',

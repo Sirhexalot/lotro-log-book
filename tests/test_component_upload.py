@@ -92,6 +92,9 @@ class FakeFTP:
 
 
 class ComponentUploadTests(unittest.TestCase):
+    def test_worker_limit_never_exceeds_four(self):
+        self.assertEqual(UPLOAD.MAX_WORKERS, 4)
+
     def setUp(self):
         FakeFTP.instances.clear()
         self.temp = tempfile.TemporaryDirectory()
