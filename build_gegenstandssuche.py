@@ -18,6 +18,7 @@ import html
 import json
 import xml.etree.ElementTree as ElementTree
 from pathlib import Path
+from tools.sortierung import schluessel
 
 from itemnamen import sauberer_name
 from instanzbeute_items import beute_ergaenzen, lade_beute, truhen_ids
@@ -152,11 +153,11 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
     KAT = {name: KATEGORIEN.index(name) for name in KATEGORIEN}
     schmuck = klasse_index.get(SCHMUCK_KLASSE, -1)
     kategorien = []
-    for schluessel in KATEGORIEN:
-        if schluessel == 'JEWELLERY':
+    for kategorie in KATEGORIEN:
+        if kategorie == 'JEWELLERY':
             kategorien.append(klasse_liste[schmuck] if schmuck >= 0 else '')
         else:
-            kategorien.append(KATEGORIE_LABEL[sprache].get(schluessel, schluessel))
+            kategorien.append(KATEGORIE_LABEL[sprache].get(kategorie, kategorie))
 
     plaetze, platz_index = [], {}
     arten, art_index = [], {}
@@ -242,7 +243,7 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
                           int(klassen.get(ident, {}).get('minLevel') or 0),
                           bool(klassen.get(ident, {}).get('hasExtraRequirement'))])
 
-    eintraege.sort(key=lambda zeile: (zeile[1].casefold(), zeile[0]))
+    eintraege.sort(key=lambda zeile: (schluessel(zeile[1]), zeile[0]))
     daten = {
         'sprache': sprache,
         'kat': kategorien,
