@@ -61,6 +61,22 @@ class ReiterComponentTest(unittest.TestCase):
         twig = COMPONENT.read_text(encoding='utf-8')
         self.assertIn('eintrag.zahl|default(0) > 0', twig)
 
+    def test_the_rule_is_documented_and_linked(self):
+        """A component without its rule drifts again; the docs are the contract."""
+        doc = ROOT / 'docs' / 'oberflaeche' / 'reiter.md'
+        self.assertTrue(doc.is_file(), 'docs/oberflaeche/reiter.md fehlt')
+        text = doc.read_text(encoding='utf-8')
+        for needle in ('**Regel:**', 'MQL_REITER.mount', 'onShow', 'tests/test_reiter.py',
+                       'tests/browser_reiter.js', '## Neue Seite mit Reitern'):
+            self.assertIn(needle, text)
+        index = (ROOT / 'docs' / 'oberflaeche' / 'README.md').read_text(encoding='utf-8')
+        self.assertIn('(reiter.md)', index)
+        bausteine = (ROOT / 'docs' / 'oberflaeche' / 'bausteine.md').read_text(encoding='utf-8')
+        self.assertIn('(reiter.md)', bausteine)
+        agents = (ROOT / 'AGENTS.md').read_text(encoding='utf-8')
+        self.assertIn('**Reiter – ein Baustein', agents)
+        self.assertIn('docs/oberflaeche/reiter.md', agents)
+
 
 if __name__ == '__main__':
     unittest.main()

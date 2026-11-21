@@ -1,10 +1,26 @@
 # Reiter
 
-Eine Reiterleiste für die ganze Seite. Sie steht auf der Gegenstandsseite
-(Woher / Wofür), der Instanzseite (Aufgaben / Belohnungen / Beute), der
-Klassenseite (Aufgaben / Taten / Gegenstände), der Gebietsseite (verwandte
-Listen), bei Companion und Spielstand (Windows / macOS) und im Handwerk
-(Rezepte / Rohstoffe).
+**Regel:** Eine Reiterleiste für die ganze Seite. Jede Seite mit Reitern benutzt
+`components/reiter.twig`, `web/reiter.css` und `web/reiter.js`. Keine Seite
+schreibt eigenes `role="tablist"`-Markup, keine Seite bringt eigene
+Reiterfarben mit. Ein neuer Reiter auf einer bestehenden Seite ist ein Eintrag
+in der Liste, kein neuer Baustein.
+
+Wer eine neue Reiterstelle baut, prüft danach `tests/test_reiter.py` und
+`tests/browser_reiter.js`; beide schlagen fehl, sobald eine Seite wieder eigene
+Reiter mitbringt.
+
+## Wo sie steht
+
+| Seite | Kennung | Reiter |
+|---|---|---|
+| Gegenstand (`entity/item.twig`) | `item` | Woher · Wofür |
+| Instanz (`instances/detail.twig`) | `instanz` | Aufgaben · Belohnungen · Beute |
+| Klasse (`app/klassen.twig`) | `klassen` | Aufgaben · Taten · Gegenstände |
+| Gebiet (`entity/area.twig` + `entitaeten-listen.js`) | `related` | Aufgaben · Taten · Gegenstände |
+| Companion (`app/companion.twig`) | `companion` | Windows · macOS |
+| Spielstand (`app/spielstand.twig`) | `ordner` | Windows · macOS |
+| Handwerk (`app/handwerk.twig`) | `handwerk` | Rezepte · Rohstoffe |
 
 ## Dateien
 
@@ -30,10 +46,13 @@ selbst.
 - `kennung` wird Präfix der Reiter-IDs (`item-woher`).
 - `panel` ist die ID des `[role="tabpanel"]`; mehrere Reiter dürfen auf dasselbe
   Panel zeigen (Gebietsseite rendert es neu).
-- `zahl` ist optional. Gerendert wird sie nur bei Werten größer null.
+- `zahl` ist optional. Gerendert wird sie nur bei Werten größer null, als
+  gedämpftes Badge ohne Gold.
 - `versteckt` (fünfter Parameter) liefert die Leiste mit `hidden` aus, damit
   Besucher ohne JavaScript alle Bereiche untereinander sehen. `mount` blendet
   sie ein.
+- Das Panel selbst bleibt Aufgabe der Seite: es trägt `role="tabpanel"` und
+  `aria-labelledby` auf die Reiter-ID (`<kennung>-<key>`).
 
 ## Verhalten
 
@@ -43,7 +62,8 @@ selbst.
 - `aria-selected` und wanderndes `tabindex`;
 - Pfeiltasten, Home und End wechseln Auswahl und Fokus zusammen;
 - `hash: true` liest den Startreiter aus der Adresse und schreibt ihn beim
-  Wechsel (`verlauf: true` für einen Eintrag im Zurück-Verlauf);
+  Wechsel (`verlauf: true` für einen Eintrag im Zurück-Verlauf); `popstate` und
+  `hashchange` bringen den Reiter auch beim Zurück-Knopf zurück;
 - `onShow(key)` läuft bei jedem Wechsel, auch beim ersten, und ist der Ort für
   nachgeladene Listen (Instanzfilter, Handwerksrezepte, Gebietslisten).
 
@@ -59,14 +79,38 @@ Sie liefern nur Inhalte und sagen, was beim Wechsel passiert.
 - Farben ausschließlich über Theme-Tokens. Keine festen Palettenwerte: genau
   daran sind die alten Reiter im hellen Design gescheitert (schwarzer
   Suchen-Knopf, unlesbare inaktive Reiter).
-- Zähler: kleine Zahl mit Rahmen, kein Gold, damit der aktive Reiter die
-  Aufmerksamkeit behält.
+- Die Leiste ist eine Zeile und bricht bei Bedarf um; auf dem Handy darf sie
+  waagerecht nicht überlaufen.
+
+## Was nicht
+
+- Kein zweites Reiter-Markup „nur für diese Seite“, auch nicht als Kopie.
+- Keine Reiterfarbe in einer Seiten-CSS; Änderungen gehören in `reiter.css`.
+- Keine `aria-pressed`-Knopfgruppe als Reiterersatz — das ist ein Schalter, kein
+  Reiter, und wird von Screenreadern anders angekündigt.
+- Kein Zähler, der aus dem DOM gezählt wird. Die Seite liefert die Zahl; die
+  Komponente zeigt sie nur.
+- Keine Inhalte im Reiter selbst verstecken: was nicht sichtbar sein soll, ist
+  ein anderes Panel, kein `display:none` im Panel.
 
 ## Prüfungen
 
 - `python3 -m unittest tests.test_reiter` – nur die Komponente enthält
-  `role="tablist"`, keine Seite bringt Altmarkup oder Altstile mit.
+  `role="tablist"`, keine Seite bringt Altmarkup oder Altstile mit, beide
+  Layouts laden CSS und Skript.
 - `node tests/browser_reiter.js http://127.0.0.1:8817` – alle sieben Seiten,
-  beide Breiten, Tastatur, helles Design, kein waagerechter Überlauf.
+  beide Breiten, Klick, Pfeiltasten, helles Design, kein waagerechter Überlauf.
+  Dasselbe Skript läuft gegen die veröffentlichte Adresse.
 - `tests/browser_area_tabs.js`, `tests/browser_related_lists.js` und
-  `tests/browser_handwerk_reload.js` decken die Inhalte hinter den Reitern ab.
+  `tests/browser_handwerk_reload.js` decken die Inhalte hinter den Reitern ab
+  (Suche, Filter, Hash über einen Reload).
+
+## Neue Seite mit Reitern
+
+1. Im Template `{% import 'components/reiter.twig' as reiter %}` ergänzen.
+2. Panels als `<section id="…" role="tabpanel" aria-labelledby="<kennung>-<key>">`
+   anlegen; nur das Startpanel bleibt sichtbar.
+3. `reiter.reiter('<kennung>', '<Titel>', [ … ], '<startkey>')` einsetzen.
+4. `MQL_REITER.mount` im Seitenskript aufrufen, `onShow` für nachgeladene Inhalte.
+5. `tests/test_reiter.py` um die Seite ergänzen, `tests/browser_reiter.js` um
+   Pfad und Reiterzahl.
