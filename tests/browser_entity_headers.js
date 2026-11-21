@@ -38,18 +38,20 @@ const seiten = [
 					const h1 = document.querySelector('main h1');
 					return {
 						pfad: pfad ? pfad.innerText.replace(/\s+/g, ' ') : '',
-						icon: document.querySelectorAll('main h1 svg.symbol, main .giver-symbol svg').length,
-						bild: document.querySelectorAll('main h1 img.symbol-gross').length,
+						/* Titelzeile trägt die gemeinsame Icon-Kachel. */
+						icon: document.querySelectorAll('main .katalog-titelzeile .mql-row-icon svg, main h1 svg.symbol').length,
+						bild: document.querySelectorAll('main .katalog-titelzeile .mql-row-icon img, main h1 img.symbol-gross').length,
 						h2: [...document.querySelectorAll('.katalog-abschnitt > h2')]
 							.map((e) => getComputedStyle(e).fontSize + '/' + getComputedStyle(e).textTransform),
 						overflow: document.documentElement.scrollWidth > innerWidth,
 						titel: h1 ? h1.innerText.trim() : ''
 					};
 				});
-				assert.ok(stand.pfad.includes(name), 'Brotkrumen ohne Entität: ' + pfad + ' → ' + stand.pfad);
+				/* Der Pfad nennt den Weg (Bereich, Gebiet), der Titel die Entität. */
+				assert.ok(stand.pfad.startsWith('Startseite'), 'Brotkrumen fehlen: ' + pfad + ' → ' + stand.pfad);
 				assert.ok(stand.titel.includes(name), 'Titel fehlt: ' + pfad);
-				// Items carry the concrete game image; every other type its icon.
-				if (pfad.startsWith('/de/gegenstand/')) {
+				/* Items und Rezepte tragen das Spielbild, alle anderen ihr Symbol. */
+				if (pfad.startsWith('/de/gegenstand/') || pfad.startsWith('/de/rezept/')) {
 					assert.ok(stand.bild > 0, 'Spielbild fehlt: ' + pfad);
 				} else {
 					assert.ok(stand.icon > 0, 'Entitätsicon fehlt: ' + pfad);
@@ -67,7 +69,7 @@ const seiten = [
 		const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 		await page.goto(basis + '/de/gebiet/268437634/', { waitUntil: 'networkidle' });
 		const bild = await page.evaluate(() => {
-			const img = document.querySelector('.katalog-karte-gross img');
+			const img = document.querySelector('.llb-karte img, .katalog-karte-gross img');
 			return img ? { fertig: img.complete, breite: img.naturalWidth } : null;
 		});
 		assert.ok(bild && bild.fertig && bild.breite > 0, 'Gebietskarte lädt nicht');

@@ -8,7 +8,8 @@ const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
 const BASE = process.env.LLB_URL || 'http://127.0.0.1:8914';
-const START = '/de/karte/#section-%7CWeitere%20Inhalte/group-%7CWeitere%20Inhalte%7CEpische%20Geschichte';
+/* Der Einstieg ist seit dem Startseiten-Umbau ein Link mit ?gebiet=. */
+const START = '/de/karte/?gebiet=Epische+Geschichte';
 
 (async () => {
 	const browser = await chromium.launch({headless: true});

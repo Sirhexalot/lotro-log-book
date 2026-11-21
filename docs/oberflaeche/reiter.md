@@ -48,6 +48,9 @@ selbst.
   Panel zeigen (Gebietsseite rendert es neu).
 - `zahl` ist optional. Gerendert wird sie nur bei Werten größer null, als
   gedämpftes Badge ohne Gold.
+- Seiten, die ihre Zahl erst später kennen, setzen sie über
+  `reiter.zahl(key, wert)`; `0` oder `null` entfernt das Badge wieder. Ein
+  Zähler steht nie auf einem Reiter, der noch keine Daten geladen hat.
 - `versteckt` (fünfter Parameter) liefert die Leiste mit `hidden` aus, damit
   Besucher ohne JavaScript alle Bereiche untereinander sehen. `mount` blendet
   sie ein.

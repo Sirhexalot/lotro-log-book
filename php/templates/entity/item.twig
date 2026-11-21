@@ -39,8 +39,9 @@
 {% if barter_count %}{% set item_tabs = item_tabs|merge([
     {key: 'barter', label: w.source_barters, panel: 'item-tab-barter', zahl: barter_count}]) %}{% endif %}
 {% set has_tabs = item_tabs|length > 1 %}
-{% if has_tabs %}<div class="item-bezugsreiter">{% endif %}
+{% if has_tabs %}<div class="item-bezugsreiter">
 {{ reiter.reiter('item', w.ilabel, item_tabs, 'woher') }}
+{% endif %}
 {% if page.task_filter|default(false) %}<script type="application/json" id="item-task-filter-data">{{ page.task_filter|json_encode|raw }}</script>{% endif %}
 
 {% if page.has_where_from|default(false) %}<section id="item-tab-woher"{% if has_tabs %} role="tabpanel" aria-labelledby="item-woher" tabindex="0"{% else %} class="katalog-abschnitt katalog-beziehungen llb-flaeche"{% endif %}>

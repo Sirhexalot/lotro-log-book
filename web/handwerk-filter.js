@@ -63,7 +63,7 @@
 	// In the filter an unrecorded tier needs a word; in a row it stays silent.
 	function tierLabel(tier){var key=String(tier);if(key===''||key==='0'){return ({de:'Ohne Stufenangabe',en:'Without a crafting tier',fr:'Sans palier'})[lang];}return tierNames.get(key)||key;}
 	function tierText(tier){var key=String(tier);if(key===''||key==='0'){return '';}return tierNames.get(key)||key;}
-	function multi(id,label,values){return {id:id,kind:'multi',label:label,options:Array.from(new Set(values.filter(function(v){return v!=='';}))).sort(function(a,b){return String(a).localeCompare(String(b),lang,{numeric:true});}).map(function(v){return {value:String(v),label:id==='beruf'?profession(v):id==='stufe'?tierLabel(v):String(v)};})};}
+	function multi(id,label,values){return {id:id,kind:'multi',label:label,options:Array.from(new Set(values.filter(function(v){return v!=='';}))).sort(function(a,b){return MQL_SORT.compare(String(a),String(b));}).map(function(v){return {value:String(v),label:id==='beruf'?profession(v):id==='stufe'?tierLabel(v):String(v)};})};}
 	function materialRows(){
 		var items=new Map(),producers=new Map();
 		merkeStufen(recipeRows);
@@ -155,7 +155,7 @@
 				if(!landscapes.has(a.landscape)){var landscape={value:a.landscape,label:p.landscape.name,groupId:'landschaft',children:[]};landscapes.set(a.landscape,landscape);regions.get(a.region).children.push(landscape);}
 				if(!zones.has(a.id)){var zone={value:a.id,label:a.name,groupId:'gebiet'};zones.set(a.id,zone);landscapes.get(a.landscape).children.push(zone);}
 			});});
-			function sorted(options){return Array.from(options).sort(function(a,b){return a.label.localeCompare(b.label,lang);});}
+			function sorted(options){return Array.from(options).sort(function(a,b){return MQL_SORT.compare(a.label,b.label);});}
 			landscapes.forEach(function(l){l.children=sorted(l.children);});regions.forEach(function(r){r.children=sorted(r.children);});
 			groups.push({id:'region',kind:'multi',label:words[28],options:sorted(regions.values())},
 				{id:'landschaft',kind:'multi',label:words[28],nestedOnly:true,options:sorted(landscapes.values())},
@@ -189,7 +189,7 @@
 						return (skip==='gebiet'||!f.gebiet.length||f.gebiet.includes(a.id))&&(skip==='region'||!f.region.length||f.region.includes(a.region))&&(skip==='landschaft'||!f.landschaft.length||f.landschaft.includes(a.landscape));
 					})))) ;
 		}
-		var adapter=A.client({rows:rows,id:function(r){return r.id;},matches:matches,compare:function(a,b,sort){return (sort==='stufe'?(a.raw[2]||Infinity)-(b.raw[2]||Infinity):sort==='tier'?Math.min.apply(null,a.uses.map(function(u){return Number(u.tier)||Infinity;}))-Math.min.apply(null,b.uses.map(function(u){return Number(u.tier)||Infinity;})):0)||a.name.localeCompare(b.name,lang)||a.id.localeCompare(b.id);},
+		var adapter=A.client({rows:rows,id:function(r){return r.id;},matches:matches,compare:function(a,b,sort){return (sort==='stufe'?(a.raw[2]||Infinity)-(b.raw[2]||Infinity):sort==='tier'?Math.min.apply(null,a.uses.map(function(u){return Number(u.tier)||Infinity;}))-Math.min.apply(null,b.uses.map(function(u){return Number(u.tier)||Infinity;})):0)||MQL_SORT.compare(a.name,b.name)||a.id.localeCompare(b.id);},
 			facets:function(all,s){var out={};groups.forEach(function(g){if(g.kind==='multi'||g.kind==='single'){out[g.id]=g.options.map(function(o){var candidate=JSON.parse(JSON.stringify(s));candidate.filters[g.id]=g.kind==='multi'?[o.value]:o.value;return {value:o.value,count:all.filter(function(r){return matches(r,candidate);}).length};});}});return out;},
 			renderResults:function(result,target){target.replaceChildren();
 				if(isRecipe&&recipeRenderer){target.appendChild(recipeRenderer(result.payload.map(function(r){return r.raw;})));return;}

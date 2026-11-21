@@ -25,7 +25,13 @@ const base = process.argv[2] || 'http://127.0.0.1:8817';
 		const reward = page.locator('.katalog-gabe .mql-row-icon').first();
 		await reward.waitFor();
 		assert.equal(Math.round((await reward.boundingBox()).width), 64, 'Belohnungsicon ist zu klein');
-		assert.equal(Math.round((await reward.locator('img').boundingBox()).width), 48);
+		/* Die Kachel ist 64 px; das Bild füllt 75 % ihrer Innenfläche (48 minus
+		 * Rahmen). Geprüft wird das Verhältnis, nicht ein runder Pixelwert. */
+		const kachelBreite = (await reward.boundingBox()).width;
+		const bildBreite = (await reward.locator('img').boundingBox()).width;
+		assert.equal(Math.round(kachelBreite), 64, 'Belohnungskachel ist ' + kachelBreite + ' px');
+		assert.ok(bildBreite / kachelBreite > 0.7 && bildBreite / kachelBreite < 0.78,
+			'Belohnungsbild füllt ' + Math.round(bildBreite / kachelBreite * 100) + ' % der Kachel');
 
 		await page.goto(base + '/de/karte/', { waitUntil: 'load' });
 		await page.locator('.landschaft-spruenge a').first().waitFor();

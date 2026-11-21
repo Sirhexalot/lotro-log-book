@@ -36,10 +36,11 @@ const artifacts = path.join(require('node:os').homedir(), '.cache/llb-related-te
 					// A relation may live in a tab panel that starts hidden; reveal
 					// its tab before measuring the filter's width.
 					await page.evaluate(() => {
-						/* The related list may sit in a hidden tab panel; open it first. */
+						/* The related list may sit inside a hidden tab panel; open its tab. */
 						const panel = document.getElementById('related-panel');
-						if (panel && panel.hidden) {
-							const tab = document.querySelector('[data-reiter-knopf][aria-controls="related-panel"]');
+						const huelle = panel && (panel.closest('[role="tabpanel"]') || panel);
+						if (huelle && huelle.hidden) {
+							const tab = document.querySelector('[data-reiter-knopf][aria-controls="' + huelle.id + '"]');
 							if (tab) { tab.click(); }
 						}
 					});

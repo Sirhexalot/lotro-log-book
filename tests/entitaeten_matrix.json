@@ -6,24 +6,26 @@
       "kind": "q",
       "list": "/de/aufgabenfinder/",
       "row": ".mql-row",
-      "detail": "/de/aufgabe/70000003/"
+      "detail": "/de/aufgabe/70000003/",
+      "map": "/de/karte/"
     },
     {
       "kind": "d",
       "list": "/de/tat/",
       "row": ".mql-row",
-      "detail": "/de/tat/70045CB1/"
+      "detail": "/de/tat/70045CB1/",
+      "map": "/de/karte/taten/"
     },
     {
       "kind": "i",
       "list": "/de/gegenstandssuche/",
       "row": ".mql-row",
-      "detail": "/de/gegenstand/70002568/"
+      "detail": "/de/gegenstand/70001B7E/"
     },
     {
       "kind": "recipe",
       "list": "/de/handwerk/rezepte/",
-      "row": ".rezept-tabelle tbody tr",
+      "row": ".mql-row",
       "detail": "/de/rezept/7000386B/"
     },
     {

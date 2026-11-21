@@ -268,7 +268,7 @@
 	Object.keys(tx).forEach(function (id) { $(id).textContent = tx[id].text; });
 	document.querySelector('.klassen-katalog').setAttribute('aria-label', text.catalogue);
 	var classKeys = Object.keys(data.classes).sort(function (a, b) {
-		return data.classes[a].names[lang].localeCompare(data.classes[b].names[lang], lang);
+		return MQL_SORT.compare(data.classes[a].names[lang], data.classes[b].names[lang]);
 	});
 	var params = new URLSearchParams(location.search), active = activeCharacter();
 	var classKey = params.get('klasse') || (active && active.klasse) || 'Hunter';
@@ -279,7 +279,7 @@
 	options($('klassen-klasse'), classKeys, classKey, 'class');
 	function raceOptions(selected) {
 		var keys = data.classes[$('klassen-klasse').value].races.slice().sort(function (a, b) {
-			return data.races[a].names[lang].localeCompare(data.races[b].names[lang], lang);
+			return MQL_SORT.compare(data.races[a].names[lang], data.races[b].names[lang]);
 		});
 		options($('klassen-volk'), keys, selected, 'race');
 	}

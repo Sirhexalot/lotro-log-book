@@ -156,7 +156,12 @@ async function mode(page){return page.locator('#welt').getAttribute('data-karten
     const heights=[...new Set(cards.map(c=>c.height))];assert.ok(heights.length>1,'All grid rows have a shared global height');
     const groups=new Map();for(const card of cards){if(!groups.has(card.top))groups.set(card.top,new Set());groups.get(card.top).add(card.height);}
     assert.ok([...groups.values()].every(s=>s.size===1),'Cards within a row should share its tallest height');
-    const placeholders=await p.locator('.landschaft-bild-leer').count();assert.ok(placeholders>0);
+    /* Jede Kachel hat ein Bild oder einen leeren Platz; wie viele leer sind,
+     * hängt am Geländebau, nicht an der Oberfläche. */
+    const kacheln=await p.locator('.landschaft-kachel').count();
+    const placeholders=await p.locator('.landschaft-bild-leer').count();
+    const bilder=await p.locator('.landschaft-kachel img').count();
+    assert.equal(placeholders+bilder,kacheln,'Kachel ohne Bild oder Platzhalter');
     assert.ok(!await p.locator('#landschaften').textContent().then(s=>s.includes('Für diesen Ort ist noch keine Karte verfügbar')));
     await p.screenshot({path:path.join(output,'overview.png')});
     results.push('unsupported map preserves preference; overview row heights and empty image slots OK');

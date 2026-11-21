@@ -37,10 +37,10 @@ async function bereit(page, area) {
 		// The quests span several areas, so geography appears as its own group;
 		// what separates them is the quest property, never the mixed quest
 		// category. Filter groups follow the data, not a fixed list.
-		assert.deepEqual(await page.$$eval('.filter-group', (gs) => gs.map((g) => g.dataset.key)), ['flag', 'geography', 'status']);
+		assert.deepEqual(await page.$$eval('.filter-group', (gs) => gs.map((g) => g.dataset.key)), ['status', 'flag', 'geography']);
 		assert.equal(await page.locator('.filter-group-multi').count(), 1, 'Merkmalsfilter in der Landmarke');
 		assert.equal(await page.locator('.filter-ui input[type=search]').count(), 1, 'Suche in der Landmarke');
-		assert.ok(await page.locator('.related-symbol.fertig').count() > 0, 'Landmarke ohne erledigten Nachweis');
+		assert.ok(await page.locator('.manueller-status.status-fertig').count() > 0, 'Landmarke ohne erledigten Nachweis');
 		assert.equal(await page.locator('.related-results').evaluate((n) => n.classList.contains('related-results')), true);
 
 		// Title: the awarding quests. Titles never reach the five-entry
@@ -65,10 +65,10 @@ async function bereit(page, area) {
 		// Item: type line, whole usage list in the recipe adapter, no ownership.
 		await page.goto(basis + '/de/gegenstand/70001B7E/', { waitUntil: 'networkidle' });
 		await bereit(page, 'related-recipe');
-		assert.equal(await page.locator('.katalog-art .symbol').count(), 1, 'Gegenstandsart ohne Icon');
+		assert.equal(await page.locator('.katalog-titelzeile .mql-row-icon').count(), 1, 'Gegenstandsart ohne Icon');
 		// 91 usages plus 4 crafting recipes; the two directions stay apart.
-		assert.match(await page.locator('.filter-result-toolbar').innerText(), /91/);
-		assert.equal(await page.locator('.related-results tbody tr').count(), 50);
+		assert.match(await page.locator('#related-panel .filter-result-toolbar').first().innerText(), /91/);
+		assert.equal(await page.locator('#related-panel .mql-row').count(), 50);
 		assert.equal(await page.locator('.related-symbol').count(), 0, 'Besitzstatus auf der Gegenstandsseite');
 
 		// Recipe: critical result links to its own item page.
