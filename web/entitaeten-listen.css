@@ -29,7 +29,7 @@
 .related-results .sets-zeile { display: block; padding: .75rem .25rem; text-decoration: none; }
 .related-results .sets-zeile:hover { background: var(--fläche); }
 .related-results .sets-zeile .sets-preview { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem; }
-.related-results .sets-zeile strong { font-weight: 400; }
+.related-results .sets-zeile strong { font-weight: var(--gewicht-normal); }
 .related-results .sets-zeile .sets-meta { display: block; color: var(--schwach); font-size: var(--text-bedienung); margin-top: .25rem; }
 @media (max-width: 600px) {
 	.related-results > li { grid-template-columns: minmax(0, 1fr); }

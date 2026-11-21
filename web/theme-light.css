@@ -1,28 +1,36 @@
 /* Light-theme adaptations for the handful of surfaces that intentionally use
  * fixed dark-map and game-art colours in the default theme. */
-html[data-theme="light"] .buehne { background: #e9e4d7; }
+html[data-theme="light"] .knopf-gold {
+	background: var(--gold);
+	border-color: var(--gold);
+	color: var(--fläche);
+}
+html[data-theme="light"] .knopf-gold:hover,
+html[data-theme="light"] .knopf-gold:focus-visible {
+	background: var(--gold-knopf-hover);
+	color: var(--text);
+}
+html[data-theme="light"] .buehne { background: var(--llb-palette-e9e4d7); }
 html[data-theme="light"] .buehne.keinbild .raster {
-	background-color: #f3f0e8;
+	background-color: var(--llb-palette-f3f0e8);
 	background-image:
-		linear-gradient(to right, #ded7c8 1px, transparent 1px),
-		linear-gradient(to bottom, #ded7c8 1px, transparent 1px);
+		linear-gradient(to right, var(--llb-palette-ded7c8) 1px, var(--llb-palette-transparent) 1px),
+		linear-gradient(to bottom, var(--llb-palette-ded7c8) 1px, var(--llb-palette-transparent) 1px);
 }
 html[data-theme="light"] .kartenhinweis,
 html[data-theme="light"] .hinweis,
 html[data-theme="light"] .bedienung .stand,
-html[data-theme="light"] .karte-stufe,
-html[data-theme="light"] .kartenkopf .kartenansicht,
-html[data-theme="light"] .kartenkopf .gelaende-zoom {
-	background: rgba(255, 253, 248, .96);
+html[data-theme="light"] .kartenkopf {
+	background: var(--llb-palette-rgba-255-253-248-p96);
 	color: var(--text);
 	border-color: var(--rand);
 }
 html[data-theme="light"] .haufen,
 html[data-theme="light"] .vorkommen-tip,
 html[data-theme="light"] .notizen-feld {
-	background: rgba(255, 253, 248, .99);
+	background: var(--llb-palette-rgba-255-253-248-p99);
 	color: var(--text);
-	box-shadow: 0 5px 18px rgba(40, 33, 20, .18);
+	box-shadow: 0 5px 18px var(--llb-palette-rgba-40-33-20-p18);
 }
 html[data-theme="light"] .detail h2,
 html[data-theme="light"] .detail .wechseln,
@@ -42,31 +50,34 @@ html[data-theme="light"] .roh-tabelle tr.hervor td {
 	background: var(--auswahl);
 	color: var(--text);
 }
-html[data-theme="light"] #liste li { border-bottom-color: #e5dfd3; }
-html[data-theme="light"] #tabelle tr.quellen td { background: #f6f2e9; }
+html[data-theme="light"] #liste li { border-bottom-color: var(--llb-palette-e5dfd3); }
+html[data-theme="light"] #tabelle tr.quellen td { background: var(--llb-palette-f6f2e9); }
 html[data-theme="light"] .lader {
-	background: rgba(255, 253, 248, .98);
+	background: var(--llb-palette-rgba-255-253-248-p98);
 	border-color: var(--rand);
-	box-shadow: 0 8px 24px rgba(40, 33, 20, .18);
+	box-shadow: 0 8px 24px var(--llb-palette-rgba-40-33-20-p18);
 }
 html[data-theme="light"] .lader-kreis { border-color: var(--fläche-hell); border-top-color: var(--gold); }
 html[data-theme="light"] .punkt {
-	border-color: #fffdf8;
-	box-shadow: 0 0 0 2px rgba(255, 253, 248, .9), 0 0 0 3px rgba(70, 58, 35, .6), 0 2px 5px rgba(0, 0, 0, .3);
+	border-color: var(--llb-palette-fffdf8);
+	box-shadow: 0 0 0 2px var(--llb-palette-rgba-255-253-248-p9), 0 0 0 3px var(--llb-palette-rgba-70-58-35-p6), 0 2px 5px var(--llb-palette-rgba-0-0-0-p3);
 }
-html[data-theme="light"] .punkt.zielort { box-shadow: 0 0 0 2px rgba(255, 253, 248, .95), 0 0 0 3px rgba(70, 58, 35, .65), 0 2px 5px rgba(0, 0, 0, .3); }
-html[data-theme="light"] .punkt.stapel { color: #29261f; }
+html[data-theme="light"] .punkt.zielort {
+	background: var(--llb-palette-rgba-255-253-248-p9);
+	box-shadow: 0 0 0 2px var(--llb-palette-rgba-255-253-248-p95), 0 0 0 4px var(--llb-palette-rgba-70-58-35-p65), 0 2px 6px var(--llb-palette-rgba-0-0-0-p3);
+}
+html[data-theme="light"] .punkt.stapel { color: var(--llb-palette-29261f); }
 html[data-theme="light"] .schritt {
-	border-color: #fffdf8;
-	box-shadow: 0 0 0 2px #6b5d45, inset 0 0 0 1px #6b5d45;
+	border-color: var(--llb-palette-fffdf8);
+	box-shadow: 0 0 0 2px var(--llb-palette-6b5d45), inset 0 0 0 1px var(--llb-palette-6b5d45);
 }
-html[data-theme="light"] .schritt.nummer::after { color: #29261f; }
-html[data-theme="light"] .legende-symbol.gestrichelt { color: #8a570d; border-color: #8a570d; }
+html[data-theme="light"] .schritt.nummer::after { color: var(--llb-palette-29261f); }
+html[data-theme="light"] .legende-symbol.gestrichelt { color: var(--llb-palette-8a570d); border-color: var(--llb-palette-8a570d); }
 html[data-theme="light"] .vorkommen-farbe,
-html[data-theme="light"] .vorkommen-feld label i { box-shadow: 0 0 0 1px rgba(0, 0, 0, .35); }
-html[data-theme="light"] .gegenstand-symbol { background: #fffdf8; }
-html[data-theme="light"] .jagdpunkt { background: #f3e2c6; color: #473313; }
-html[data-theme="light"] .hinweispunkt { background: #f3e9cc; color: #473313; }
+html[data-theme="light"] .vorkommen-feld label i { box-shadow: 0 0 0 1px var(--llb-palette-rgba-0-0-0-p35); }
+html[data-theme="light"] .gegenstand-symbol { background: var(--llb-icon-tile-bg); }
+html[data-theme="light"] .jagdpunkt { background: var(--llb-palette-f3e2c6); color: var(--llb-palette-473313); }
+html[data-theme="light"] .hinweispunkt { background: var(--llb-palette-f3e9cc); color: var(--llb-palette-473313); }
 html[data-theme="light"] .seite code,
 html[data-theme="light"] .seite kbd,
 html[data-theme="light"] code,

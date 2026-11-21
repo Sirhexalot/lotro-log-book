@@ -46,5 +46,24 @@
       "maps": [268449746, 268449749, 268449752, 268449755, 268449758, 268449767],
       "cards": true
     }
-  ]
+  ],
+  "map_overrides": {
+    "268450268": {"area": "Helm's Deep", "merge_into": 268449767},
+    "268450269": {"area": "Helm's Deep", "merge_into": 268449767},
+    "268450270": {"area": "Helm's Deep", "merge_into": 268449767},
+    "268450272": {"area": "Helm's Deep", "merge_into": 268449767},
+    "268450273": {"area": "Helm's Deep", "merge_into": 268449767},
+    "268450274": {"area": "Helm's Deep", "merge_into": 268449767},
+    "268453919": {"area": "The Glittering Caves"},
+    "268451976": {"area": "Battle of the Morannon"},
+    "268451156": {"area": "Minas Tirith Besieged"},
+    "268451023": {"area": "Osgiliath"},
+    "268451074": {"area": "The Sundering of Osgiliath"},
+    "268451575": {"area": "Pelennor"},
+    "268451286": {"area": "Field of Onslaught"},
+    "268452359": {"area": "Cormallen"},
+    "268450899": {"area": "Pelargir"},
+    "268454943": {"area": "The Gnawnshore"},
+    "268455287": {"area": "Bâr Guruthos"}
+  }
 }

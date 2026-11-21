@@ -229,6 +229,11 @@ Stelle ebenfalls nicht pro Variante in die Itemrelation geschrieben.
 - Die Detailseite verbirgt eine Sammelstellenzeile ohne bekannte
   Kartenfundstelle; dies ist sinnvoll, sagt aber nicht „Rohstoff kommt
   nirgends vor“.
+- **Tausch, Behälter und Zerlegung fehlen ganz.** Die Quellen sind vorhanden
+  und modelliert in [Tausch, Behälter, Zerlegung und
+  schlanker Gegenstandsbestand](tausch-behaelter-zerlegung.md); die Itemseite zeigt sie noch
+  nicht. 36.096 Tauschgaben und 10.315 zerlegbare Quellen hängen damit ohne
+  Anzeige im Datenraum.
 
 ### Filterseite
 

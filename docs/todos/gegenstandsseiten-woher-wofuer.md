@@ -1,9 +1,10 @@
 # Konzept: Gegenstandsseiten mit „Woher“ und „Wofür“
 
-Stand: 17.11.2026
+Stand: 20.11.2026
 Projekt: LOTRO Log Book
-Status: Gegenstandsseiten umgesetzt; Tauschquellen bleiben mangels
-Zuordnung zu öffentlichen Gegenstandsseiten offen
+Status: Gegenstandsseiten umgesetzt; Tauschhändler, Behälter und Zerlegung
+sind modelliert und warten auf die Anzeige (Datenmodell:
+[tausch-behaelter-zerlegung.md](../datenraum/tausch-behaelter-zerlegung.md))
 
 ## 1. Anlass
 
@@ -397,6 +398,8 @@ bleiben für die Übergangszeit erhalten.
 - [x] Händlerbeziehungen auf die bestehenden 52.798 Web-Item-IDs begrenzen
 - [x] Händler als eigene kartenfähige Entität mit Itemlinks
 - [ ] Tauschhändler und Barterquellen für direkt sichtbare Gegenstandsseiten
+- [ ] Behälter als Quelle (Felder, Kisten, Reliktbehälter)
+- [ ] Zerlegungsergebnis am Gegenstand
 - Gebiet/Region
 - Kartenlink nur bei eindeutigem Standort
 - gegebenenfalls Filter nach Gebiet und Quellart
@@ -447,3 +450,56 @@ zeigen ihrerseits den Kartenstandort sowie das belegte Warenangebot.
 - Filter, Zurücklinks und URL-Zustände bleiben erhalten.
 - Keine Änderung an bestehenden Karten-, Aufgaben- oder Gegenstandssuchfiltern
   ohne eigenen Abnahmetest.
+
+## 12. Datenstand 20.11.2026: drei Quellen und ergänzende Client-Items
+
+Modell, Schemata und Grenzen stehen in
+[`docs/datenraum/tausch-behaelter-zerlegung.md`](../datenraum/tausch-behaelter-zerlegung.md);
+der Entitätenvertrag führt die Gruppen bereits als `open`.
+
+### Tausch (`barters.xml`)
+
+- 1.096 Tauschhändler, 3.469 Angebotsprofile (12.360 Verweise), 42.594
+  Angebote mit 58.933 Abgaben und 42.590 Gaben.
+- 36.096 verschiedene Gaben; **11.586** davon haben eine Katalogseite. Die
+  übrigen 24.510 bleiben Namen ohne Link.
+- 1.095 Händler haben eine Weltposition; 159 sind klassenbeschränkt, 565
+  Profile verlangen eine Fraktion (`"<id>;<stufe>"`), 505 eine Aufgabe.
+- Die bisherigen `tausch`-Einträge in `daten/items.json` stammen aus dem
+  Rezeptquellen-Export und werden additiv zusammengeführt, nicht ersetzt.
+
+### Behälter (`containers.xml`)
+
+- 6.262 Behälter, davon 5.735 gewöhnliche und 527 Reliktbehälter.
+- 4.626 mit Trophy-Liste, 926 mit Treasure-Liste, 494 mit beiden, 1.204 ohne
+  Liste (bleiben ohne Pool).
+- Auflösung über denselben Loot-Graphen wie die Instanz-Truhen
+  (`tools/build_instanz_beute.py`, künftig `tools/lootgraph.py`).
+
+### Zerlegung (`disenchantments.xml`)
+
+- 27.333 Zeilen, 10.315 Quellen mit Katalogseite.
+- 26.341 mit Ergebnis, 992 ohne; nur **45 verschiedene** Ergebnisse, sämtlich
+  Umtauschgutscheine („Receipt of …“), 22 davon im Katalog.
+- Zerlegen ist damit kein Beute-Ersatz und wird als eigene Gruppe geführt.
+
+### Ergänzende Items aus dem eigenen Client-Export
+
+- `items-2026-11-08/items.json` enthält 152.088 Gegenstände. Alle geprüften
+  Tausch-, Zerlegungs- und Instanzbeute-IDs sind darin vorhanden.
+- 27.652 dieser IDs fehlen im kuratierten Webkatalog. Ein geplanter schlanker
+  Zusatzbestand liefert Name, Qualität, Stufe und Icon, ohne Suchtreffer oder
+  Katalogseiten dafür zu erzeugen.
+- Der Katalogeintrag gewinnt immer. Companion-Labels sind dafür nicht nötig.
+
+### Ergänzte Abnahmekriterien
+
+- Tauschangebote zeigen Abgaben mit Menge und Gaben mit Menge; fehlende Menge
+  gilt als 1.
+- Ein Gegenstand ohne Katalogseite wird genannt, aber nicht verlinkt.
+- Behälter und Zerlegung erscheinen nur als Quelle bzw. Ergebnis, nie als
+  eigene Entität.
+- Behältnisse ohne Loot-Liste und Zerlegungen ohne Ergebnis erzeugen keine
+  Zeile.
+- Die Händlerseite trennt „Warenangebot“ (Silber) und „Tauschware“
+  (Gegenstände).

@@ -20,7 +20,21 @@ bleiben beim Ansichtswechsel erhalten. Quest-, Ziel-, Hinweis- und Notizzeichen
 zoomen mit der Karte; in der Geländeansicht bleiben sie lesbar. Ressourcen
 werden in passender Canvasauflösung gezeichnet. Popups verwenden weiterhin ihre
 vorhandenen Auswahl- und Detailfunktionen. Die Spielkarte bleibt unverzerrt in
-4:3. Die Geländeansicht verwendet den tatsächlichen geografischen Rahmen.
+4:3. Die Geländeansicht verwendet den tatsächlichen geografischen Rahmen und
+erweitert ihn bei Bedarf an das Seitenverhältnis der Kartenbühne. Die Erweiterung
+reicht nur in zusätzliche Kacheln hinein, wenn dort überwiegend Gelände aus dem
+Client verfügbar ist; fehlende Kacheln werden nicht ergänzt oder gestreckt.
+Marker und Koordinaten verwenden denselben erweiterten Rahmen.
+
+Über der Kartenbühne liegt eine transparente Bedienleiste: links Filter und
+Vorkommen und – in der Aufgabenansicht – ein Questgeber-Ein/Aus-Knopf, rechts Gelände/Spielkarte sowie
+Zoom und Gebiet einpassen. Der Questgeber-Knopf zeigt seinen Zustand direkt an.
+Er blendet nur reine Questgeberpunkte aus; Orte auf Tatenkarten bleiben sichtbar.
+Filtermenüs bleiben innerhalb des Kartenrahmens.
+Die rahmenlose Stufenspanne steht in der unteren Leiste. Deren Legende und
+Statuswörter verwenden dieselbe Schriftstufe. Auf Mobilgeräten bleibt die
+Kartenanwendung frei vom globalen Footer; auf den übrigen Seiten sitzt er auch
+bei kurzem Inhalt am unteren Rand.
 
 Die Übersicht nutzt Gelände-Vorschaubilder, wenn Gelände gewählt wurde. Ohne
 verfügbares Bild bleibt ein leerer Bildplatz gleicher Höhe. Kartenzeilen richten

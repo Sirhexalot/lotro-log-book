@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d6b35a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><!-- Lucide "mop-sparkles" (ISC licence, lucide.dev), as in the Magic Quest Log plugin --><path d="M10 22a3 3 0 01-3-3"/><path d="M10 22c2.761 0 5-1.79 5-4-4.42 0-4.08-5-8.5-5a4.501 4.501 0 000 9z"/><path d="M10 3H8"/><path d="M12.5 11.5 22 2"/><path d="M20 13v4"/><path d="M22 15h-4"/><path d="M4 5v4"/><path d="M6 7H2"/><path d="m6.98 13.02 2.665-2.664a1.21 1.21 0 011.71 0l2.29 2.288a1.21 1.21 0 010 1.712l-2.088 2.087"/><path d="M9 2v2"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="#d6b35a" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+	<path d="M18 22 48 14q5-1 5 4v53q0 4-4 5l-29 9q-5 1-5-4V28q0-4 3-6Z"/>
+	<path d="M22 29v49m5-45 20-6M27 39l19-6M27 49l18-6M27 59l18-6M25 70l20-6M20 80l27-8"/>
+	<path d="M56 84c4-22 17-55 36-70 0 23-11 47-34 65"/>
+	<path d="M55 87 91 14M63 70l-1-15m8 4 1-16m7 5 4-16m-13 35 15-3m-9-12 15-4m-8-10 10-4"/>
+</svg>

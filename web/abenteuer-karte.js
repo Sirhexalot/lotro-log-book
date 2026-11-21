@@ -125,7 +125,9 @@
 		svg.setAttribute('aria-hidden', 'true');
 		var bg = document.createElementNS(ns, 'circle');
 		bg.setAttribute('cx', '13'); bg.setAttribute('cy', '13'); bg.setAttribute('r', '10');
-		bg.setAttribute('fill', 'none'); bg.setAttribute('stroke', '#3a332b'); bg.setAttribute('stroke-width', '3');
+		bg.setAttribute('fill', 'none');
+		bg.setAttribute('stroke', getComputedStyle(document.documentElement).getPropertyValue('--rand').trim());
+		bg.setAttribute('stroke-width', '3');
 		var fg = document.createElementNS(ns, 'circle');
 		fg.setAttribute('cx', '13'); fg.setAttribute('cy', '13'); fg.setAttribute('r', '10');
 		fg.setAttribute('fill', 'none'); fg.setAttribute('stroke', 'currentColor');

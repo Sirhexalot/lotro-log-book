@@ -96,7 +96,23 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 			</div>
 			<p class="kartenhinweis" id="hinweis" role="status"></p>
 			<div class="kartenkopf">
-				<div class="kartenkopf-links"><span id="karte-stufe" class="karte-stufe" hidden></span></div>
+				<div class="kartenkopf-links">
+					<div class="notizen" id="notizen">
+						<button type="button" id="notizen-knopf" aria-expanded="false" data-t="notizen">Filter</button>
+						<div class="notizen-feld" id="notizen-feld" hidden>
+							<div class="notizen-alle"><button type="button" id="notizen-alle" data-t="notizen_alle">Alle auswählen</button><button type="button" id="notizen-keine" data-t="notizen_keine">Alles löschen</button></div>
+							<ul id="notizen-liste"></ul>
+						</div>
+					</div>
+					<div class="notizen" id="vorkommen">
+						<button type="button" id="vorkommen-knopf" aria-expanded="false" data-t="vorkommen">Vorkommen</button>
+						<div class="notizen-feld vorkommen-feld" id="vorkommen-feld" hidden>
+							<div class="notizen-alle"><button type="button" id="vorkommen-alle" data-t="notizen_alle">Alle auswählen</button><button type="button" id="vorkommen-keine" data-t="notizen_keine">Alles löschen</button></div>
+							<div id="vorkommen-liste" class="vorkommen-zeilen"></div>
+						</div>
+					</div>
+					<button type="button" class="geber-schalter" id="geber-schalter" aria-pressed="true" data-t="aufgabenfuehrer">Questgeber anzeigen</button>
+				</div>
 				<div class="kartenkopf-rechts">
 					<div class="kartenansicht" id="kartenansicht" role="group" aria-label="Kartenansicht" hidden>
 						<button type="button" data-kartenansicht="gelaende" aria-pressed="false">Gelände</button>
@@ -109,6 +125,7 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 			</div>
 		</div>
 		<div class="kartenleiste">
+			<span id="karte-stufe" class="karte-stufe" hidden></span>
 			<div class="legende-zeile">
 				<div class="legende" id="legende" hidden>
 					<span class="legende-eintrag"><i class="legende-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></i><span data-t="legende_auftraggeber">Kreis: Auftraggeber</span></span>
@@ -126,21 +143,6 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 				<div class="legende-voll" id="legende-voll" hidden></div>
 			</div>
 			<div class="leiste-aktionen">
-				<div class="notizen" id="notizen">
-					<button type="button" id="notizen-knopf" aria-expanded="false" data-t="notizen">Filter</button>
-					<div class="notizen-feld" id="notizen-feld" hidden>
-						<div class="notizen-alle"><button type="button" id="notizen-alle" data-t="notizen_alle">Alle auswählen</button><button type="button" id="notizen-keine" data-t="notizen_keine">Alles löschen</button></div>
-						<ul id="notizen-liste"></ul>
-					</div>
-				</div>
-				<div class="notizen" id="vorkommen">
-					<button type="button" id="vorkommen-knopf" aria-expanded="false" data-t="vorkommen">Vorkommen</button>
-					<div class="notizen-feld vorkommen-feld" id="vorkommen-feld" hidden>
-						<div class="notizen-alle"><button type="button" id="vorkommen-alle" data-t="notizen_alle">Alle auswählen</button><button type="button" id="vorkommen-keine" data-t="notizen_keine">Alles löschen</button></div>
-						<div id="vorkommen-liste" class="vorkommen-zeilen"></div>
-					</div>
-				</div>
-				<label class="geber-schalter"><input type="checkbox" id="geber-schalter" checked> <span data-t="aufgabenfuehrer">Questgeber anzeigen</span></label>
 				<button type="button" id="gebietskarte" class="gebietskarte" hidden></button>
 				<span class="leiste-rechts"><span id="koordinate" class="koordinate"></span></span>
 			</div>

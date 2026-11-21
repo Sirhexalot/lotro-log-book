@@ -16,3 +16,11 @@ Ein formales ADR-Verzeichnis oder ein automatischer Abgleich dieser Tabelle mit 
 ### Fehlende Entscheidungsnachweise
 
 Für die obigen Entscheidungen sind Zeitpunkt, verantwortliche Person, betrachtete Alternativen, explizite Qualitätsabwägung und Kriterien zur Neubewertung überwiegend nicht dokumentiert. Diese Tabelle ist daher ein Architektur-Iststand, kein nachträglich erzeugtes Freigabeprotokoll. Künftige wichtige Entscheidungen sollten diese Angaben in einem ADR festhalten.
+
+### Beschlossene, noch nicht umgesetzte Entscheidungen
+
+Diese Punkte sind entschieden, aber noch nicht im Code wirksam. Sie stehen hier, damit die Dokumentation den Stand nicht als umgesetzt ausgibt.
+
+| Entscheidung | Begründung | Stand und Beleg |
+|---|---|---|
+| Unbenannte Karten werden über ihre zugeordneten Gebiete benannt, nicht über ihre ID | `parchmentMaps.xml` führt zu jeder Karte Gebiete mit belegten Namen in DE/EN/FR; eine technische ID ist keine Spielbezeichnung. Die Ableitungskette endet damit auf einem geprüften Namen statt auf `Karte <ID>`. | Beschlossen am 20.11.2026; Umsetzung offen. Plan und Abnahmekriterien: `docs/todos/kartenbenennung-hierarchie.md`. Nach der Umsetzung wandert der Punkt in die Tabelle oben. |

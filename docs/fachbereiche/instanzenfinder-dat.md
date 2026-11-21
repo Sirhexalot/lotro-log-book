@@ -105,20 +105,64 @@ nicht in den 226 Landschaftskarten aus `daten/karten.json`.
 
 Offen ist nur die Zuordnung Instanz → Dungeon. Der Namensabgleich reicht nicht:
 nur 45 der 167 Namen treffen exakt, die Dungeon-Namen sind außerdem oft
-gebietstief („The Great Barrow“, „Ost Dunhoth“) statt flügelgenau. Companions
-`InstanceMapDataBuilder` löst das über Marker je Content-Layer
-(`PrivateEncounterTemplate_ContentLayer`); mit den eigenen Landblock-Listen und
-`did-positions-2026-11-03/positions.jsonl` (618.138 Positionen, 1.549 Layer)
-ist derselbe Weg ohne Companion-Daten möglich. Die `0x78…`-Kartendatensätze
-selbst liegen nicht in `client_gamelogic.dat`; `export_sources.py` liest sie
-deshalb nicht, die Bild-IDs müssen aus einer anderen Archivdatei kommen.
+gebietstief („The Great Barrow“, „Ost Dunhoth“) statt flügelgenau. Über
+`landblocks.xml` (51.018 Blöcke mit `dungeonId`) und die
+`ContainedLandBlockArray` der Vorlage lösen sich **95 der 167** Instanzen direkt
+auf einen Dungeon und damit auf eine `basemapId` auf. Die 72 übrigen haben keine
+Innenblöcke (Kopien einer Landschaft, etwa Scharmützel) und bekommen keine
+Innenkarte.
+
+Hinweis zur Projektentscheidung: Innenkarten wurden am 08.11.2026 erprobt und
+**verworfen** („keine Freigabe, namenlose Innenräume wieder einzubauen“). Die
+neue Auflösung liefert benannte Dungeons; ob Innenkarten zurückkommen, ist eine
+Entscheidung von Adrian, keine stille Folge dieses Datenbaus.
+
+## Truhenbeute (20.11.2026)
+
+`lore/loots.xml` enthält den vollständigen Loot-Graphen, nicht nur Item-Tabellen:
+14.268 `trophyList`, 5.094 `itemsTable`, 779 `treasureList`, 739
+`weightedTreasureTable`, 807 `filteredTrophyTable`, 115 `relicsList`. Alle 3.801
+Trophy-IDs aus Instanz- und Gegnerbeute sind darin auflösbar.
+
+`tools/build_instanz_beute.py` verbindet `instanceLoots.xml` (5 Tabellen, 192
+Zeilen, 63 Instanzen, 5.099 Bedingungssätze, 330 Trophy-Listen) mit dem Graphen
+und schreibt `daten/instanz-beute.json` (lokal, 350 KiB, alle 167 Fundstellen):
+63 Einträge haben Truhenbeute, 95 eine Innenkarte. Je Zeile stehen Tier,
+Gruppengröße und Stufenband; jeder Pool nennt Item-ID, Namen in DE/EN/FR und die
+Chance. `dropFrequency` bleibt eine Chance je Truhe, Gewichte werden innerhalb
+ihres Pools zur Wahrscheinlichkeit. Mehrere unabhängige Würfe dürfen zusammen
+über 100 % liegen (Truhe enthält immer die Beute und zusätzlich eventuell eine
+Schrift). `tests/test_instanz_beute.py` prüft Pools, Namen, das Glinghant-Band
+50–59 und die Kartenauflösung.
+
+Ergebnis: **82 verschiedene Gegenstände** über alle 63 Instanzen. Der Inhalt ist
+mager – je Stufenband eine sichere „Beute: …“ (Bounty) und Stat-Schriften mit
+0,07–0,1 %, bei Erebor zusätzlich vier Legendaries mit 17,5–25 %. Ausrüstung aus
+klassischen Instanzen steht nicht in diesen Tabellen.
+
+`lore/items.xml` ist nicht im Repository (zu groß). Der eigene Client-Export
+`items-2026-11-08/items.json` enthält alle 82 Items samt lokalisierten Namen und
+Icon-ID. Unser Katalog enthält nur 4 davon (die vier Erebor-Legendaries), weil
+er Bounties und Schriften filtert. Die Beute-Anzeige kann die übrigen mit Name
+und Icon ohne Kataloglink darstellen; Companion-Labels sind dafür nicht nötig.
+
+**Nicht ableitbar: Boss-Beute.** Die Truhentabellen sind Scharmützel- und
+Skalierungsbeute. Gegnerpools hängen an der Spezies (`mobs.xml` →
+`mobLoots.xml`, 73 Spezies, 11.680 Stufenzeilen); ein Boss teilt seinen Pool mit
+normalen Gegnern derselben Spezies. Marker (`parentZoneId` = Dungeon) nennen die
+Gegner einer Instanz, z. B. Glinghant mit 86 Markern und 22 Namen.
 
 ## Abgleich mit LotroCompanion
 
 `lore/instancesTree.xml` ist eine reine Liste (166 Einträge in fünf Kategorien;
 166 der 167 Finder-IDs stimmen, eine fehlt). `lore/privateEncounters.xml` (989)
 führt Karte und Zone je Instanz, aber die IDs passen nicht zu unseren 167; auch
-über die Instanz-Aufgaben ergab sich kein Treffer. `lore/instanceLoots.xml` hat
-192 Instanzen und 5.099 Loot-Regeln, davon 63 mit passender Finder-ID.
-Companion speichert Instanz-Beschreibungen nur als Übersetzungsschlüssel
-(`description="key:…"`), nicht als Klartext – als Textquelle taugt es nicht.
+über die Instanz-Aufgaben ergab sich kein Treffer. Companion speichert
+Instanz-Beschreibungen nur als Übersetzungsschlüssel (`description="key:…"`),
+nicht als Klartext – als Textquelle taugt es nicht.
+
+Die Beutedaten sind ein Client-Dump, keine erfundene Liste; der Loot-Graph ist
+auch aus dem eigenen Client lesbar (Probe: `LootGen_TrophyList` und
+`TreasureGroupProfile_ItemTable` über `export_sources.py` gelesen). Für
+`landblocks.xml` fehlt dieser Weg noch – die Blöcke liegen in eigenen
+DAT-Dateien, nicht in `client_gamelogic.dat`.

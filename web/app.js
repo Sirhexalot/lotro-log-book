@@ -1177,6 +1177,10 @@
 			var laufendEiner = stelle.quests.some(function (quest) { return laufend[quest.i] && !fertig[quest.i]; });
 			var dot = eltern('div', mehrfach ? String(stelle.quests.length) : '');
 			dot.className = 'punkt' + (mehrfach ? ' stapel' : '');
+			var nurQuestgeber = stelle.quests.every(function (quest) {
+				return !!quest.gt && !zeigtZiele(quest);
+			});
+			if (nurQuestgeber) { dot.classList.add('questgeber'); }
 			if (fertigAlle) { dot.classList.add('fertig'); }
 			// A pile with some of its quests done would otherwise look untouched.
 			else if (erledigtHier > 0) { dot.classList.add('teils'); }
@@ -1441,9 +1445,15 @@
 	// "Questgeber anzeigen": the quest dots, on by default as in the game.
 	var geberSchalter = document.getElementById('geber-schalter');
 	if (geberSchalter) {
-		geberSchalter.addEventListener('change', function () {
-			marker.classList.toggle('ohne-geber', !geberSchalter.checked);
-		});
+		if (loesung) {
+			geberSchalter.hidden = true;
+		} else {
+			geberSchalter.addEventListener('click', function () {
+				var sichtbar = geberSchalter.getAttribute('aria-pressed') !== 'true';
+				geberSchalter.setAttribute('aria-pressed', sichtbar ? 'true' : 'false');
+				marker.classList.toggle('ohne-geber', !sichtbar);
+			});
+		}
 	}
 
 	function koordinatenText(lat, lon) {
@@ -1458,7 +1468,7 @@
 	// one map in vorkommen/<map>.js and load when the layer is first used.
 	var vorkommen = null, vorkWahl = {}, vorkKarten = {}, vorkLaeuft = {};
 	var vorkBild = null, vorkTip = null, vorkStellen = [];
-	var VORK_FARBE = { PROSPECTOR: '#e2a34e', FORESTER: '#86c268', SCHOLAR: '#b8a6f0', COOK: '#d9b64a' };
+	var VORK_BERUFE = ['PROSPECTOR', 'FORESTER', 'SCHOLAR', 'COOK'];
 	var VORK_TEXT = { PROSPECTOR: 'vorkommen_erz', FORESTER: 'vorkommen_holz',
 		SCHOLAR: 'vorkommen_gelehrte', COOK: 'vorkommen_anbau' };
 	var vorkKnopf = document.getElementById('vorkommen-knopf');
@@ -1470,7 +1480,7 @@
 	var vorkGespeichert = null;
 	try { vorkGespeichert = window.localStorage.getItem('mql.vorkommen'); } catch (fehler) { vorkGespeichert = null; }
 	if (vorkGespeichert === null) {
-		Object.keys(VORK_FARBE).forEach(function (beruf) { vorkWahl[beruf] = ''; });
+		VORK_BERUFE.forEach(function (beruf) { vorkWahl[beruf] = ''; });
 	} else {
 		try {
 			var vorkAlt = JSON.parse(vorkGespeichert) || {};
@@ -1490,7 +1500,12 @@
 				JSON.stringify({ wahl: vorkWahl }));
 		} catch (fehler) { /* private mode */ }
 	}
-	function vorkFarbe(beruf) { return VORK_FARBE[beruf] || '#c48a3c'; }
+	function vorkFarbe(beruf) {
+		var token = '--beruf-' + String(beruf || '').toLowerCase();
+		var rootStyle = getComputedStyle(document.documentElement);
+		return rootStyle.getPropertyValue(token).trim()
+			|| rootStyle.getPropertyValue('--beruf-standard').trim();
+	}
 	function vorkTypen() { return (vorkommen && vorkommen.k) || []; }
 	function vorkAnzahl() {
 		var zahl = 0;
@@ -1500,7 +1515,7 @@
 	/** Type numbers the layer shows: per trade either nothing, all or one kind. */
 	function vorkErlaubt() {
 		var erlaubt = {};
-		Object.keys(VORK_FARBE).forEach(function (beruf) {
+		VORK_BERUFE.forEach(function (beruf) {
 			var wahl = vorkWahl[beruf] || '';
 			if (!wahl) { return; }
 			vorkTypen().forEach(function (typ, nummer) {
@@ -1732,7 +1747,8 @@
 			var x = stelle.x * breite, y = stelle.y * hoehe;
 			var beruf = (vorkTypen()[typen[0]] || [])[2];
 			// A dark rim keeps a dot readable on parchment and under quest dots.
-			strich.fillStyle = '#1b1206';
+			strich.fillStyle = getComputedStyle(document.documentElement)
+				.getPropertyValue('--vorkommen-umriss').trim();
 			strich.fillRect(x - 3/zoom, y - 3/zoom, 6/zoom, 6/zoom);
 			strich.fillStyle = vorkFarbe(beruf);
 			strich.fillRect(x - 2/zoom, y - 2/zoom, 4/zoom, 4/zoom);
@@ -1757,14 +1773,14 @@
 		});
 		document.getElementById('vorkommen-alle').addEventListener('click', function () {
 			if (!vorkommen) { return; }
-			Object.keys(VORK_FARBE).forEach(function (beruf) { vorkWahl[beruf] = '*'; });
+			VORK_BERUFE.forEach(function (beruf) { vorkWahl[beruf] = '*'; });
 			vorkMerken();
 			vorkBaueListe();
 			zeichneMarker();
 		});
 		document.getElementById('vorkommen-keine').addEventListener('click', function () {
 			if (!vorkommen) { return; }
-			Object.keys(VORK_FARBE).forEach(function (beruf) { vorkWahl[beruf] = ''; });
+			VORK_BERUFE.forEach(function (beruf) { vorkWahl[beruf] = ''; });
 			vorkMerken();
 			vorkBaueListe();
 			zeichneMarker();
@@ -3834,8 +3850,21 @@
 			box.appendChild(kachel);
 			}
 
+			var suchbegriff = falten(eingabe.value);
 			landschaften.forEach(function (e) {
-				if (falten(e.knoten.name + ' ' + e.region).indexOf(falten(eingabe.value)) < 0) { return; }
+				var treffer = falten(e.knoten.name + ' ' + e.region).indexOf(suchbegriff) >= 0;
+				var gruppenKartenTreffer = false;
+				// Group cards have searchable child maps. Check them before
+				// discarding a non-matching overview (e.g. Isengart in Dunland).
+				if (!treffer && suchbegriff && e.anzeigeGruppe) {
+					var suchGruppe = (gebietsAnzeige.groups || []).find(function (g) {
+						return g.id === e.anzeigeGruppe.id;
+					});
+					gruppenKartenTreffer = !!suchGruppe && gruppenKarten(suchGruppe, e).some(function (ort) {
+						return falten(ort.name + ' ' + e.region).indexOf(suchbegriff) >= 0;
+					});
+				}
+				if (suchbegriff && !treffer && !gruppenKartenTreffer) { return; }
 				var box = e.rest ? restBox : nachRegion[e.region];
 				if (!box) {
 					var s = eltern('section'); s.className = 'landschaft-gruppe'; s.id = 'region-' + Object.keys(nachRegion).length;
@@ -3856,22 +3885,27 @@
 						gruppenKopf.dataset.gebietgruppe = e.anzeigeGruppe.id;
 						gruppenKopf.id = 'gruppe-' + e.anzeigeGruppe.id;
 						box.appendChild(gruppenKopf);
-						var gruppenSprung = eltern('a', kurz);
-						gruppenSprung.className = 'sprung-gruppe';
-						sprungZiel(gruppenSprung, gruppenKopf, gruppenKopf);
-						var vor = sprungNach[e.region];
-						if (vor && vor.parentNode) { spruenge.insertBefore(gruppenSprung, vor.nextSibling); sprungNach[e.region] = gruppenSprung; }
-						else { spruenge.appendChild(gruppenSprung); }
+						// Rohan already has one region jump; East/West remain visual
+						// card groups, but do not add two more jump marks.
+						if (e.anzeigeGruppe.id !== 'east-rohan' && e.anzeigeGruppe.id !== 'west-rohan') {
+							var gruppenSprung = eltern('a', kurz);
+							gruppenSprung.className = 'sprung-gruppe';
+							sprungZiel(gruppenSprung, gruppenKopf, gruppenKopf);
+							var vor = sprungNach[e.region];
+							if (vor && vor.parentNode) { spruenge.insertBefore(gruppenSprung, vor.nextSibling); sprungNach[e.region] = gruppenSprung; }
+							else { spruenge.appendChild(gruppenSprung); }
+						}
 						var gruppe = (gebietsAnzeige.groups || []).find(function (g) { return g.id === e.anzeigeGruppe.id; });
 						if (gruppe) {
 							var orte = gruppenKarten(gruppe, e);
 							var uebersicht = e.sourceParent ? landschaften.find(function (x) { return x.showOverviewLink; }) : null;
-							if (uebersicht) {
+							if (uebersicht && (!suchbegriff ||
+								falten(uebersicht.knoten.name + ' ' + e.region).indexOf(suchbegriff) >= 0)) {
 								uebersichtGerendert[String(uebersicht.karte)] = true;
 								zeichneKachel(uebersicht, box);
 							}
 							orte.forEach(function (ort) {
-								if (falten(ort.name + ' ' + e.region).indexOf(falten(eingabe.value)) < 0) { return; }
+								if (falten(ort.name + ' ' + e.region).indexOf(suchbegriff) < 0) { return; }
 								zeichneKachel({ knoten: ort.knoten, region: e.region, karte: ort.karte,
 									anzeigeGruppe: e.anzeigeGruppe, groupCard: true,
 									showOverviewLink: ort.uebersicht === true }, box);

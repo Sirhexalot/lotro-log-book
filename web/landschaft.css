@@ -20,7 +20,7 @@ main.landschaft-start > :not(#landschaften) { display: none; }
 .aufgaben-einstieg-kopf { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px; margin:0 0 8px; }
 .aufgaben-einstieg-kopf h2 { margin:0; }
 .aufgaben-einstieg p { margin:0 0 22px; color:var(--schwach); }
-.aufgabenfinder-knopf { display:inline-flex; align-items:center; min-height:44px; padding:9px 15px; border:1px solid var(--gold); border-radius:3px; background:var(--gold); color:var(--grund); font-weight:700; text-decoration:none; }
+.aufgabenfinder-knopf { display:inline-flex; align-items:center; min-height:44px; padding:9px 15px; border:1px solid var(--gold); border-radius:3px; background:var(--gold); color:var(--grund); font-weight: var(--gewicht-bold); text-decoration:none; }
 .aufgabenfinder-knopf:hover,.aufgabenfinder-knopf:focus-visible { filter:brightness(1.08); }
 .landschaft-ansicht { margin-left:auto; }
 .landschaft-ansicht button { min-height:44px; }
@@ -34,10 +34,10 @@ main.landschaft-start > :not(#landschaften) { display: none; }
 .landschaft-gruppe { scroll-margin-top: 90px; }
 .landschaft-gruppe h3 { font-size: var(--text-abschnitt); margin-top: 30px; }
 .landschaft-kacheln { display: grid; grid-template-columns: repeat(auto-fill,minmax(235px,1fr)); grid-auto-rows: auto; align-items:stretch; gap: 16px; }
-.landschaft-kachelgruppe { grid-column: 1 / -1; margin: 8px 0 -6px; padding: 7px 10px; border-left: 3px solid var(--gold); background: var(--fläche); color: var(--gold); font-size: var(--text-normal); font-weight: 600; }
-.landschaft-kachelgruppe[data-gebietgruppe="east-rohan"] { border-left-color: #7eb6c6; color: #9ac9d4; }
-.landschaft-kachelgruppe[data-gebietgruppe="west-rohan"] { border-left-color: #c5a56b; color: #d6b982; }
-.landschaft-kachelgruppe[data-gebietgruppe="dunland"] { border-left-color: #83a276; color: #a6c096; }
+.landschaft-kachelgruppe { grid-column: 1 / -1; margin: 8px 0 -6px; padding: 7px 10px; border-left: 3px solid var(--gold); background: var(--fläche); color: var(--gold); font-size: var(--text-normal); font-weight: var(--gewicht-semibold); }
+.landschaft-kachelgruppe[data-gebietgruppe="east-rohan"] { border-left-color: var(--llb-palette-7eb6c6); color: var(--llb-palette-9ac9d4); }
+.landschaft-kachelgruppe[data-gebietgruppe="west-rohan"] { border-left-color: var(--llb-palette-c5a56b); color: var(--llb-palette-d6b982); }
+.landschaft-kachelgruppe[data-gebietgruppe="dunland"] { border-left-color: var(--llb-palette-83a276); color: var(--llb-palette-a6c096); }
 .landschaft-kachelgruppe + .landschaft-mit-orten,
 .landschaft-kachelgruppe + .landschaft-kachel { margin-top: 0; }
 .landschaft-mit-orten { background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; overflow: hidden; align-self: stretch; }
@@ -50,24 +50,39 @@ main.landschaft-start > :not(#landschaften) { display: none; }
 .landschaft-kachel .inhalt { display: block; padding: 13px; }
 .landschaft-kachel strong { display: block; color: var(--gold); font-size: var(--text-normal); }
 .landschaft-kachel small { display: block; color: var(--schwach); margin-top: 5px; }
-.landschaft-kachel progress { width: 100%; height: 5px; accent-color: var(--fertig); }
-.aufgaben-themen-titel { margin-top:34px; font-size:var(--text-abschnitt); }
+.landschaft-kachel progress {
+	width: 100%;
+	height: 9px;
+	display: block;
+	margin: 12px 0 2px;
+	appearance: none;
+	-webkit-appearance: none;
+	border: 1px solid color-mix(in srgb, var(--rand) 75%, var(--llb-palette-transparent));
+	border-radius: 999px;
+	overflow: hidden;
+	background: var(--grund);
+	accent-color: var(--gold);
+}
+.landschaft-kachel progress::-webkit-progress-bar { border-radius: inherit; background: var(--grund); }
+.landschaft-kachel progress::-webkit-progress-value { border-radius: inherit; background: linear-gradient(90deg, var(--gold), color-mix(in srgb, var(--gold) 72%, var(--llb-palette-white))); }
+.landschaft-kachel progress::-moz-progress-bar { border-radius: inherit; background: linear-gradient(90deg, var(--gold), color-mix(in srgb, var(--gold) 72%, var(--llb-palette-white))); }
+.aufgaben-themen-titel { margin-top:34px; font-size: var(--text-abschnitt); }
 .aufgaben-themen { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
 .aufgaben-thema { display:flex; flex-direction:column; gap:5px; min-width:0; padding:13px; border:1px solid var(--rand); border-radius:3px; background:var(--fläche); text-decoration:none; }
 .aufgaben-thema:hover,.aufgaben-thema:focus-visible { border-color:var(--gold); }
-.aufgaben-thema strong { color:var(--gold); font-size:var(--text-normal); font-weight:400; }
+.aufgaben-thema strong { color:var(--gold); font-size: var(--text-normal); font-weight: var(--gewicht-normal); }
 .aufgaben-thema small { color:var(--schwach); }
-.aufgaben-thema span { margin-top:auto; padding-top:5px; color:var(--text); font-size:var(--text-bedienung); }
+.aufgaben-thema span { margin-top:auto; padding-top:5px; color:var(--text); font-size: var(--text-bedienung); }
 .landschaft-orte { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 6px 10px; flex-shrink: 0; background: var(--fläche); border-bottom: 1px solid var(--rand); }
 .landschaft-orte-kopf { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0; }
-.landschaft-orte-kopf strong { font-size: 1rem; color: var(--gold); }
+.landschaft-orte-kopf strong { font-size: var(--text-normal); color: var(--gold); }
 .landschaft-orte-kopf > span { display: none; }
 .landschaft-orte-auswahl { display: flex; flex: 1 1 300px; min-width: 0; gap: 4px; overflow-x: auto; }
 .landschaft-orte-auswahl > button { flex: 0 0 auto; white-space: nowrap; }
 .inhalts-auswahl { margin-top: 10px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
 .landschaft-orte button { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 32px; padding: 4px 8px; font-size: var(--text-bedienung); text-align: left; }
 .landschaft-orte button small { color: var(--schwach); font-size: var(--text-bedienung); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.landschaft-orte button[aria-pressed="true"] { border-color: var(--gold); background: var(--gold); color: var(--grund); font-weight: bold; }
+.landschaft-orte button[aria-pressed="true"] { border-color: var(--gold); background: var(--gold); color: var(--grund); font-weight: var(--gewicht-bold); }
 .landschaft-orte button[aria-pressed="true"] small { color: var(--grund); }
 
 /* Group chip next to its region, and the direct links to every map of a

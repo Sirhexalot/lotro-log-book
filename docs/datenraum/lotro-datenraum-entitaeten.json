@@ -165,6 +165,27 @@
           "oberflaeche": "detail",
           "status": "component",
           "hinweis": "Händler- und Tauschgruppen nutzen die gemeinsame Filterkomponente."
+        },
+        {
+          "id": "where_barter",
+          "label": "Woher: Tausch",
+          "oberflaeche": "detail",
+          "status": "open",
+          "grund": "Quelle barters.xml und Modell stehen (docs/datenraum/tausch-behaelter-zerlegung.md); die Seite baut die Gruppe noch nicht."
+        },
+        {
+          "id": "where_containers",
+          "label": "Woher: Behälter",
+          "oberflaeche": "detail",
+          "status": "open",
+          "grund": "Quelle containers.xml und Loot-Graph stehen; die Seite baut die Gruppe noch nicht."
+        },
+        {
+          "id": "disenchants_into",
+          "label": "Zerlegen ergibt",
+          "oberflaeche": "detail",
+          "status": "open",
+          "grund": "Quelle disenchantments.xml und Modell stehen; die Seite baut die Gruppe noch nicht."
         }
       ]
     },
@@ -300,6 +321,13 @@
           "label": "Warenangebot",
           "oberflaeche": "detail",
           "status": "component"
+        },
+        {
+          "id": "barter",
+          "label": "Tauschware",
+          "oberflaeche": "detail",
+          "status": "open",
+          "grund": "Quelle barters.xml und Modell stehen; die Händlerseite zeigt noch kein Tauschsortiment."
         }
       ]
     },

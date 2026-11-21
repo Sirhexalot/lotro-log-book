@@ -12,7 +12,7 @@
 .abenteuer-kopf .dach {
 	margin: 0 0 4px;
 	color: var(--schwach);
-	font-size: 12px;
+	font-size: var(--text-klein);
 	letter-spacing: .1em;
 	text-transform: uppercase;
 }
@@ -68,7 +68,7 @@
 	margin: 0 0 6px;
 	color: var(--text);
 	font-size: var(--text-abschnitt, 1.25rem);
-	font-weight: normal;
+	font-weight: var(--gewicht-normal);
 	overflow-wrap: anywhere;
 }
 
@@ -104,7 +104,7 @@
 	margin: 0 0 2px;
 	color: var(--text);
 	font-size: var(--text-abschnitt, 1.25rem);
-	font-weight: normal;
+	font-weight: var(--gewicht-normal);
 }
 
 .seite details.abenteuer-inhalte {
@@ -177,7 +177,7 @@
 }
 
 .inhalte-liste li.frisch-gewaehlt {
-	background: rgba(214, 179, 90, .13);
+	background: var(--llb-palette-rgba-214-179-90-p13);
 }
 
 .inhalt-name {
@@ -255,15 +255,15 @@
 .abenteuer-karte.hervorgehoben,
 .abenteuer-karte.frisch-gewaehlt {
 	border-color: var(--gold);
-	box-shadow: 0 0 0 2px rgba(214, 179, 90, .25);
+	box-shadow: 0 0 0 2px var(--llb-palette-rgba-214-179-90-p25);
 }
 
 .karte-oben h3 {
 	margin: 0 0 4px;
 	color: var(--text);
 	font-size: var(--text-normal, 1rem);
-	font-weight: normal;
-	line-height: 1.4;
+	font-weight: var(--gewicht-normal);
+	line-height: var(--zeile-kompakt);
 	overflow-wrap: anywhere;
 }
 
@@ -321,7 +321,7 @@
 	margin-top: auto;
 	padding: 6px 0 0;
 	border: 0;
-	border-bottom: 1px solid transparent;
+	border-bottom: 1px solid var(--llb-palette-transparent);
 	background: none;
 	color: var(--gold);
 	font: inherit;
@@ -343,7 +343,7 @@
 	margin: 0 0 6px;
 	color: var(--schwach);
 	font-size: var(--text-bedienung, .875rem);
-	font-weight: normal;
+	font-weight: var(--gewicht-normal);
 	letter-spacing: .04em;
 	text-transform: uppercase;
 }
@@ -358,7 +358,7 @@
 
 .karte-gebiete li {
 	padding: 3px 0;
-	border-bottom: 1px solid rgba(58, 51, 43, .6);
+	border-bottom: 1px solid var(--llb-palette-rgba-58-51-43-p6);
 	font-size: var(--text-bedienung, .875rem);
 }
 
@@ -380,7 +380,7 @@
 
 .karte-gebiete li a:hover,
 .karte-gebiete li a:focus-visible {
-	background: rgba(214, 179, 90, .10);
+	background: var(--llb-palette-rgba-214-179-90-p10);
 }
 
 .karte-gebiete li a:hover span,
@@ -394,8 +394,8 @@
 }
 
 .karte-gebiete li.gebiet-hervorgehoben {
-	background: rgba(214, 179, 90, .12);
-	outline: 1px solid rgba(214, 179, 90, .45);
+	background: var(--llb-palette-rgba-214-179-90-p12);
+	outline: 1px solid var(--llb-palette-rgba-214-179-90-p45);
 }
 
 .karte-gebiete li .gebiet-name {
@@ -436,7 +436,7 @@
 	padding: 5px 12px;
 	border: 0;
 	border-left: 1px solid var(--rand);
-	background: transparent;
+	background: var(--llb-palette-transparent);
 	color: var(--schwach);
 	font: inherit;
 	font-size: var(--text-bedienung, .875rem);
@@ -444,7 +444,7 @@
 }
 .abenteuer-ansicht button[aria-pressed="true"] {
 	background: var(--gold);
-	color: #14110e;
+	color: var(--llb-palette-14110e);
 }
 .abenteuer-ansicht button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 
@@ -467,7 +467,7 @@
 	border: 1px solid var(--rand);
 	border-radius: 3px;
 	overflow: hidden;
-	background: #0d0b09;
+	background: var(--llb-palette-0d0b09);
 }
 .weltkarte img { display: block; width: 100%; height: auto; }
 .welt-marken { position: absolute; inset: 0; }
@@ -481,24 +481,24 @@
 	padding: 3px 8px 3px 3px;
 	border: 1px solid var(--rand);
 	border-radius: 20px;
-	background: rgba(20, 17, 14, .86);
+	background: var(--llb-palette-rgba-20-17-14-p86);
 	color: var(--text);
 	font: inherit;
-	line-height: 1.15;
+	line-height: var(--zeile-eng);
 	text-align: left;
 	cursor: pointer;
-	box-shadow: 0 1px 6px rgba(0, 0, 0, .45);
+	box-shadow: 0 1px 6px var(--llb-palette-rgba-0-0-0-p45);
 }
-.welt-marke:hover { background: rgba(42, 37, 31, .95); }
-.welt-marke[aria-pressed="true"] { background: var(--fläche-hell); box-shadow: 0 0 0 1px var(--gold), 0 2px 10px rgba(0,0,0,.55); }
+.welt-marke:hover { background: var(--llb-palette-rgba-42-37-31-p95); }
+.welt-marke[aria-pressed="true"] { background: var(--fläche-hell); box-shadow: 0 0 0 1px var(--gold), 0 2px 10px var(--llb-palette-rgba-0-0-0-p55); }
 .welt-marke.passt { border-color: var(--gold); color: var(--gold); }
-.welt-marke.drunter { border-color: #5b5348; }
+.welt-marke.drunter { border-color: var(--llb-palette-5b5348); }
 .welt-marke.drueber { border-color: var(--offen); color: var(--offen); }
 .welt-marke.unklar { border-color: var(--rand); }
 .welt-ring { flex: 0 0 26px; width: 26px; height: 26px; }
 .welt-text { min-width: 0; }
-.welt-text strong { display: block; font-weight: normal; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.welt-text small { display: block; color: var(--schwach); font-size: .68rem; white-space: nowrap; }
+.welt-text strong { display: block; font-weight: var(--gewicht-normal); font-size: var(--text-klein); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.welt-text small { display: block; color: var(--schwach); font-size: var(--text-mikro); white-space: nowrap; }
 
 .welt-seite {
 	border: 1px solid var(--rand);
@@ -506,8 +506,8 @@
 	background: var(--fläche);
 	padding: 10px;
 }
-.welt-seite h3 { margin: 0; font-size: 1.1rem; }
-.welt-seite [data-seite-summe] { margin: 2px 0 10px; font-size: .8rem; }
+.welt-seite h3 { margin: 0; font-size: var(--text-zwischen); }
+.welt-seite [data-seite-summe] { margin: 2px 0 10px; font-size: var(--text-klein); }
 .welt-gebiete { list-style: none; margin: 0; padding: 0; max-height: 430px; overflow: auto; }
 .welt-gebiete li { border-top: 1px solid var(--rand); }
 .welt-gebiete li:first-child { border-top: 0; }
@@ -518,13 +518,13 @@
 .wg-kopf:hover .wg-name, .wg-kopf:focus-visible .wg-name { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
 .wg-kopf:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .wg-fuss { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
-.wg-details { border: 0; background: none; color: var(--gold); font: inherit; font-size: .75rem; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.wg-details { border: 0; background: none; color: var(--gold); font: inherit; font-size: var(--text-klein); padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .wg-details:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.wg-name { flex: 1; min-width: 0; font-size: .9rem; overflow-wrap: anywhere; }
-.wg-prozent { color: var(--gold); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.wg-name { flex: 1; min-width: 0; font-size: var(--text-fliesstext-kompakt); overflow-wrap: anywhere; }
+.wg-prozent { color: var(--gold); font-size: var(--text-klein); font-variant-numeric: tabular-nums; }
 .wg-balken { display: block; height: 3px; margin: 4px 0 3px; background: var(--rand); border-radius: 2px; overflow: hidden; }
 .wg-balken i { display: block; height: 100%; background: var(--gold); }
-.wg-meta { display: block; color: var(--schwach); font-size: .72rem; }
+.wg-meta { display: block; color: var(--schwach); font-size: var(--text-mikro); }
 
 .welt-vorschau {
 	display: grid;
@@ -538,12 +538,12 @@
 	border-radius: 3px;
 	background: var(--fläche);
 }
-.welt-bild { position: relative; margin: 0; border: 1px solid var(--rand); border-radius: 2px; overflow: hidden; background: #0d0b09; }
+.welt-bild { position: relative; margin: 0; border: 1px solid var(--rand); border-radius: 2px; overflow: hidden; background: var(--llb-palette-0d0b09); }
 .welt-bild img { display: block; width: 100%; height: auto; }
-.welt-bild figcaption { padding: 3px 7px; color: var(--schwach); font-size: .72rem; }
-.welt-detail h3 { margin: 0; font-size: 1.15rem; }
+.welt-bild figcaption { padding: 3px 7px; color: var(--schwach); font-size: var(--text-mikro); }
+.welt-detail h3 { margin: 0; font-size: var(--text-zwischen); }
 .welt-detail [data-vorschau-meta] { margin: 2px 0 8px; }
-.welt-detail p { font-size: .9rem; }
+.welt-detail p { font-size: var(--text-fliesstext-kompakt); }
 .welt-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
 .welt-knopf {
 	display: inline-block;
@@ -551,19 +551,19 @@
 	border: 1px solid var(--gold);
 	border-radius: 3px;
 	background: var(--gold);
-	color: #14110e;
+	color: var(--llb-palette-14110e);
 	font-size: var(--text-bedienung, .875rem);
 	text-decoration: none;
 }
-.welt-knopf.zweit { background: transparent; color: var(--gold); border-color: var(--rand); }
+.welt-knopf.zweit { background: var(--llb-palette-transparent); color: var(--gold); border-color: var(--rand); }
 .welt-knopf:hover { text-decoration: none; }
-.welt-legende { margin: 8px 0 0; font-size: .74rem; }
+.welt-legende { margin: 8px 0 0; font-size: var(--text-mikro); }
 
 @media (max-width: 900px) {
 	.welt-raster { grid-template-columns: minmax(0, 1fr); }
 	.welt-vorschau { grid-template-columns: minmax(0, 1fr); }
 	.welt-gebiete { max-height: none; }
-	.welt-marke { font-size: .9em; }
+	.welt-marke { font-size: var(--text-bedienung); }
 }
 
 /* On a phone the drawn labels are too close for floating badges: the map stays
@@ -595,7 +595,7 @@
 .region-zurueck-knopf {
 	padding: 0;
 	border: 0;
-	background: transparent;
+	background: var(--llb-palette-transparent);
 	color: var(--gold);
 	font: inherit;
 	font-size: var(--text-bedienung, .875rem);
@@ -614,7 +614,7 @@
 	border: 1px solid var(--rand);
 	border-radius: 3px;
 	overflow: hidden;
-	background: #0d0b09;
+	background: var(--llb-palette-0d0b09);
 }
 .region-karte img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .region-marken { position: absolute; inset: 0; }
@@ -624,30 +624,30 @@
 	height: 44px;
 	padding: 0;
 	transform: translate(-50%, -50%);
-	border: 2px solid #8b8174;
+	border: 2px solid var(--llb-palette-8b8174);
 	border-radius: 50%;
-	background: #494640;
-	color: #fff;
-	font-size: .75rem;
-	font-weight: 600;
-	box-shadow: 0 1px 4px #14110e;
+	background: var(--llb-palette-494640);
+	color: var(--llb-palette-fff);
+	font-size: var(--text-klein);
+	font-weight: var(--gewicht-semibold);
+	box-shadow: 0 1px 4px var(--llb-palette-14110e);
 	cursor: pointer;
 }
 .region-punkt.passt { border-color: var(--gold); }
 .region-punkt.drueber { border-color: var(--offen); }
 /* Several areas under one linked sub-map: the number opens their list. */
 .region-punkt.sammel {
-	border-color: #8bb6ce;
-	background: #304f63;
-	color: #fff;
-	font-size: .82rem;
+	border-color: var(--llb-palette-8bb6ce);
+	background: var(--llb-palette-304f63);
+	color: var(--llb-palette-fff);
+	font-size: var(--text-kompakt);
 	font-variant-numeric: tabular-nums;
 }
-.region-punkt.sammel[aria-pressed="true"] { background: #416c85; }
+.region-punkt.sammel[aria-pressed="true"] { background: var(--llb-palette-416c85); }
 .region-punkt:hover { transform: translate(-50%, -50%) scale(1.15); }
 .region-punkt[aria-pressed="true"] {
 	transform: translate(-50%, -50%) scale(1.25);
-	filter: drop-shadow(0 0 2px #14110e) drop-shadow(0 0 4px var(--gold));
+	filter: drop-shadow(0 0 2px var(--llb-palette-14110e)) drop-shadow(0 0 4px var(--gold));
 	z-index: 2;
 }
 .region-punkt:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
@@ -668,7 +668,7 @@
 	border-bottom: 1px solid var(--rand);
 }
 .cluster-zeile { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
-.cluster-titel { color: var(--gold); font-size: 1rem; }
+.cluster-titel { color: var(--gold); font-size: var(--text-normal); }
 .cluster-meta { font-size: var(--text-bedienung, .875rem); }
 .gebiet-sortierung { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
 .gebiet-sortierung button { padding: 6px 9px; border: 1px solid var(--rand); border-radius: 3px; background: var(--fläche); color: var(--text); font: inherit; font-size: var(--text-bedienung, .875rem); cursor: pointer; }
@@ -686,7 +686,7 @@
 .region-liste li { border-top: 1px solid var(--rand); }
 .region-liste li:first-child { border-top: 0; }
 /* A link inside the detail panel must not take the page's gold link colour. */
-.abenteuer-welt a.welt-knopf { color: #14110e; }
+.abenteuer-welt a.welt-knopf { color: var(--llb-palette-14110e); }
 .abenteuer-welt a.welt-knopf.zweit { color: var(--gold); }
-.abenteuer-welt a.welt-knopf:hover { color: #14110e; }
+.abenteuer-welt a.welt-knopf:hover { color: var(--llb-palette-14110e); }
 .abenteuer-welt a.welt-knopf.zweit:hover { color: var(--gold); }

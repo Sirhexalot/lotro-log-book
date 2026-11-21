@@ -30,12 +30,12 @@
 <noscript><style>.kopf .menue,.kopf .charakter{display:flex}.menue-knopf{display:none}</style></noscript>
 </head><body class="seite-text katalog-seite" data-art="{{ kind }}" data-entity-id="{{ entity_id|default('') }}" data-katalog-texte="{{ katalog_texte }}">
 <header class="kopf"><div class="kopf-innen">
-<a class="katalog-marke" href="{{ start_page }}">LOTRO Log Book</a>
-<a class="suchen-knopf" href="{{ suche_pfad }}">{{ w.search }}</a>
+<a class="katalog-marke" href="{{ start_page }}"><svg class="marken-zeichen" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><use href="/lotro-log-book-mark.svg#marke"></use></svg><span class="marken-text">LOTRO Log Book</span></a>
+<form class="kopf-suche" action="{{ suche_pfad }}" method="get" role="search"><input type="search" name="q" placeholder="{{ w.search }}" aria-label="{{ w.search }}" autocomplete="off"></form>
 <button class="menue-knopf" type="button" aria-label="{{ w.menu }}" aria-controls="menue" aria-expanded="false">☰</button>
 <nav class="menue" id="menue">{{ menu|raw }}</nav>
 
- <div class="charakter"><label class="charakterwahl" hidden><select id="katalog-charakter" aria-label="{{ w.none }}"></select></label><a href="{{ spielstand_pfad }}" class="importieren">{{ w.import_ }}</a><a class="feedback-global" href="/{{ lang }}/{{ lang == 'fr' ? 'retour' : 'feedback' }}/" data-feedback-link>{% if lang == 'de' %}Feedback senden{% elseif lang == 'fr' %}Envoyer un retour{% else %}Send feedback{% endif %}</a></div>
+ <div class="charakter"><label class="charakterwahl" hidden><select id="katalog-charakter" aria-label="{{ w.none }}"></select></label><a href="{{ spielstand_pfad }}" class="importieren">{{ w.import_ }}</a></div>
 </div></header>
 <main class="katalog-inhalt" data-related-filter-limit="{{ related_direct_list_max|default(5) }}">
 <div class="katalog-orientierung">
@@ -44,7 +44,7 @@
 </div>
 {% block inhalt %}{% endblock %}
 </main>
-<footer class="seitenfuss"><div class="seitenfuss-innen"><div class="footer-links-links"><p class="footer-statistik"><span data-statistik-aktiv hidden><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-aktiv-text></span></span></p></div><nav aria-label="Languages" class="sprachen">{{ languages|raw }}</nav><p class="footer-rechts"><a href="/{{ lang }}/plugin/">Plugin</a> · {{ legal|raw }} · {{ privacy|raw }}</p></div></footer>
+<footer class="seitenfuss"><div class="seitenfuss-innen"><div class="footer-links-links"><p class="footer-statistik"><span data-statistik-aktiv hidden><a class="unterwegs-symbol" href="https://icons8.com/icon/TZNgFj31O74L/gandalf" target="_blank" rel="noopener" aria-label="Gandalf icon by Icons8"><img src="/bild/gandalf.png" alt=""></a><span data-statistik-aktiv-text></span></span></p></div><nav aria-label="Languages" class="sprachen">{{ languages|raw }}</nav><p class="footer-rechts">{% include '_feedback_footer.twig' %} · <a href="/{{ lang }}/plugin/">Plugin</a> · {{ legal|raw }} · {{ privacy|raw }}</p></div></footer>
 <script src="/statistik.js?v={{ asset_stand }}" defer></script>
 <script src="/status.js?v={{ asset_stand }}" defer></script>
 {{ scripts|raw }}

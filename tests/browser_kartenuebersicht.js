@@ -16,9 +16,13 @@ const base = process.argv[2] || 'http://127.0.0.1:8814';
 		await page.goto(base + '/de/karte/', { waitUntil: 'load' });
 		await page.locator('.landschaft-spruenge a').first().waitFor();
 		const jumps = await page.locator('.landschaft-spruenge a').allTextContents();
-		for (const label of ['Eriador', 'Dunland', 'Ost-Rohan', 'West-Rohan', 'Weitere Inhalte']) {
+		for (const label of ['Eriador', 'Dunland', 'Rohan', 'Weitere Inhalte']) {
 			assert.ok(jumps.some(text => text.includes(label)), 'Sprungmarke fehlt: ' + label);
 		}
+		assert.equal(jumps.some(text => /Ost-Rohan|West-Rohan|East Rohan|West Rohan|Rohan oriental|Rohan occidental/.test(text)), false,
+			'Ost- oder West-Rohan hat eine eigene Sprungmarke');
+		assert.ok(await page.locator('#gruppe-east-rohan').count(), 'Ost-Rohan-Gruppe fehlt');
+		assert.ok(await page.locator('#gruppe-west-rohan').count(), 'West-Rohan-Gruppe fehlt');
 		const dunland = await page.evaluate(() => {
 			const head = document.getElementById('gruppe-dunland');
 			const cards = [...head.parentElement.children].filter(node => node.classList.contains('landschaft-mit-orten'));
@@ -28,6 +32,18 @@ const base = process.argv[2] || 'http://127.0.0.1:8814';
 		assert.ok(dunland.length >= 8, 'Dunland zeigt nicht alle Gebiete als Karten: ' + dunland.join(', '));
 		assert.ok(dunland.includes('Isengart'), 'Isengart fehlt in den Dunland-Karten');
 
+		for (const path of ['/de/karte/', '/de/karte/taten/']) {
+			await page.goto(base + path, { waitUntil: 'load' });
+			const search = page.locator('.landschaft-suche');
+			await search.waitFor();
+			await search.fill('Isengart');
+			const matches = await page.locator('.landschaft-kachel:visible strong').allTextContents();
+			assert.ok(matches.includes('Isengart'), 'Isengart-Suche findet die Karte nicht: ' + path);
+			await page.locator('.landschaft-kachel').filter({ hasText: /^Isengart/ }).first().click();
+			await page.waitForFunction(() => location.hash === '#map-268446985');
+		}
+
+		await page.goto(base + '/de/karte/', { waitUntil: 'load' });
 		await page.locator('.landschaft-kachel').filter({ hasText: /^Isengart/ }).first().click();
 		await page.waitForFunction(() => location.hash === '#map-268446985');
 		assert.equal(await page.locator('#liste-titel, #listen-titel').first().textContent(), 'Isengart');

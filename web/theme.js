@@ -22,7 +22,7 @@
 		}
 	}
 
-	var header = document.querySelector('.kopf .charakter') ||
+	var header = document.querySelector('.kopf .menue') ||
 		document.querySelector('.kopf-innen') || document.querySelector('.kopf');
 	if (!header) { return; }
 	var button = document.createElement('button');

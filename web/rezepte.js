@@ -561,6 +561,7 @@
 
 	window.MQL_RECIPE_RESULTS = function(rows) {
 		bekannt = {}; meineBerufe = {}; charakter();
+		if (window.MQL_TREFFERZEILE) { return filterTreffer(rows); }
 		return tabelle([{name:'',zeilen:rows}],{mitBeruf:true,mitStufe:true});
 	};
 	window.MQL_RECIPE_CONTEXT_RESULTS = function(rows) {
@@ -575,12 +576,11 @@
 		var hinweis=ui.recipeHelp();
 		if (hinweis) { ui.help(list,hinweis); }
 		rows.forEach(function(wert) {
-			var meta={de:'Rezept für '+wert[3],en:'Recipe for '+wert[3],fr:'Recette pour '+wert[3]}[sprache];
 			var stufen=[];
 			if (wert[4]) { stufen.push({label:ui.words.professionLevel,value:wert[4]}); }
 			if (wert[2]) { stufen.push({label:ui.words.resultLevel,value:wert[2]}); }
 			list.appendChild(ui.row(list,{
-				image:wert[16],icon:'rezept',name:wert[0],meta:meta,
+				image:wert[16],icon:'rezept',name:wert[0],meta:wert[3],
 				href:recipeUrl(wert[10]),
 				values:stufen,
 				progress:progress ? ui.recipeProgress(wert[10]) : null

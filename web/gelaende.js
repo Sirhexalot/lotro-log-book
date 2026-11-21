@@ -51,6 +51,42 @@
 			&& entry.frame[2] > entry.frame[0] && entry.frame[1] > entry.frame[3]
 			&& (entry.overview || ['west', 'north', 'east', 'south'].every(function (key, i) { return Math.abs(map[key] - entry.frame[i]) < .0001; })));
 	}
+	function frameForViewport(frame, aspect, present) {
+		var spanX = frame.east - frame.west, spanY = frame.north - frame.south;
+		if (!(aspect > 0) || !(spanX > 0) || !(spanY > 0)) { return frame; }
+		var wantedX = spanX, wantedY = spanY;
+		if (spanX / spanY > aspect) { wantedY = spanX / aspect; }
+		else if (spanX / spanY < aspect) { wantedX = spanY * aspect; }
+		if (wantedX <= spanX + 1e-6 && wantedY <= spanY + 1e-6) { return frame; }
+		var candidate = {
+			west: frame.west + (spanX - wantedX) / 2,
+			east: frame.east + (wantedX - spanX) / 2,
+			north: frame.north + (wantedY - spanY) / 2,
+			south: frame.south - (wantedY - spanY) / 2
+		};
+		function range(bounds) {
+			return {
+				x0: Math.max(0, Math.floor((bounds.west + 146.8) / .8)),
+				x1: Math.min(256, Math.ceil((bounds.east + 146.8) / .8)),
+				y0: Math.max(0, Math.floor((bounds.south + 124.4) / .8)),
+				y1: Math.min(256, Math.ceil((bounds.north + 124.4) / .8))
+			};
+		}
+		var base = range(frame), expanded = range(candidate), added = 0, covered = 0;
+		for (var y = expanded.y0; y < expanded.y1; y += 1) {
+			for (var x = expanded.x0; x < expanded.x1; x += 1) {
+				var alreadyCovered = x >= base.x0 && x < base.x1 && y >= base.y0 && y < base.y1;
+				if (!alreadyCovered) {
+					added += 1;
+					if (present.has(y + '_' + x)) { covered += 1; }
+				}
+			}
+		}
+		// A few unavailable edge tiles are normal at coastlines. Expand only
+		// when the added area is mostly real terrain; small unavailable gaps keep
+		// the neutral terrain-stage background rather than fabricated imagery.
+		return added && covered / added >= .85 ? candidate : frame;
+	}
 	window.MQL_GELAENDE = {
 		preference: preference,
 		setPreference: setPreference,
@@ -58,6 +94,7 @@
 		words: function (language) { return WORDS[language] || WORDS.en; },
 		migratePreferences: migratePreferences,
 		frameMatches: frameMatches,
+		frameForViewport: frameForViewport,
 		create: function (options) {
 			var world = options.world, stage = options.stage, image = options.image;
 			var controls = document.getElementById('kartenansicht');
@@ -104,7 +141,9 @@
 			}
 			function effectiveFrame() {
 				var e = entry();
-				return active && e ? { west:e.frame[0], north:e.frame[1], east:e.frame[2], south:e.frame[3] } : current;
+				if (!active || !e || !stage.clientWidth || !stage.clientHeight) { return current; }
+				var f = { west:e.frame[0], north:e.frame[1], east:e.frame[2], south:e.frame[3] };
+				return frameForViewport(f, stage.clientWidth / stage.clientHeight, kacheln(current.mr, 0));
 			}
 			function maximum() {
 				if (!active) { return current ? 4 : 1; }

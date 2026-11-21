@@ -16,8 +16,8 @@
 	var ziel = document.getElementById('menue');
 	if (!ziel) { return; }
 
-	// One fixed column inside the full-width bar: .kopf carries background and
-	// line, .kopf-innen the content. Created here where the page has none, so
+	// One fixed column inside the full-width bar: .kopf carries the background,
+	// .kopf-innen the content. Created here where the page has none, so
 	// every page has the same header structure.
 	var kopf = document.querySelector('.kopf');
 	var behaelter = kopf;
@@ -54,20 +54,15 @@
 	}
 	var startseite = app('start');
 
-	// The name in the header is the way home, with the plugin's icon (Lucide
-	// "mop-sparkles", ISC) in front.
+	// The shared mark is the field journal and quill supplied for the site.
 	var titel = document.querySelector('.kopf h1');
 	if (titel) {
 		var logo = document.createElement('a');
 		logo.className = 'logo';
 		logo.href = startseite;
-		logo.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
-			'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-			'<path d="M10 22a3 3 0 01-3-3"/><path d="M10 22c2.761 0 5-1.79 5-4-4.42 0-4.08-5-8.5-5a4.501 4.501 0 000 9z"/>' +
-			'<path d="M10 3H8"/><path d="M12.5 11.5 22 2"/><path d="M20 13v4"/><path d="M22 15h-4"/>' +
-			'<path d="M4 5v4"/><path d="M6 7H2"/><path d="m6.98 13.02 2.665-2.664a1.21 1.21 0 011.71 0l2.29 2.288a1.21 1.21 0 010 1.712l-2.088 2.087"/>' +
-			'<path d="M9 2v2"/></svg>';
-		logo.appendChild(document.createTextNode('LOTRO Log Book'));
+		logo.innerHTML = '<svg class="marken-zeichen" viewBox="0 0 100 100" aria-hidden="true" focusable="false">' +
+			'<use href="/lotro-log-book-mark.svg#marke"></use></svg>' +
+			'<span class="marken-text">LOTRO Log Book</span>';
 		titel.textContent = '';
 		titel.appendChild(logo);
 	}
@@ -165,17 +160,23 @@
 		return window.MQL_FAMILIENMENUE || { setze: function () {}, schliesseAlle: function () {} };
 	}
 
-	// Search: the map page has its own field with results, every other page gets
-	// the way there. The search page itself needs neither.
-	// The start page carries its own wide search field; a second one in the
-	// header would only compete with it.
+	// Keep the global search field beside the brand. The map has its own
+	// suggestion-enabled field; the search and start pages already have one.
 	if (behaelter && !document.getElementById('suche') && seite !== 'suche'
 			&& seite !== 'start' && !document.querySelector('.suche-start')) {
-		var suchlink = document.createElement('a');
-		suchlink.className = 'suchen-knopf';
-		suchlink.href = app('suche');
-		suchlink.textContent = t('menue_suche_kurz');
-		behaelter.appendChild(suchlink);
+		var suchformular = document.createElement('form');
+		suchformular.className = 'kopf-suche';
+		suchformular.action = app('suche');
+		suchformular.method = 'get';
+		suchformular.setAttribute('role', 'search');
+		var suchfeld = document.createElement('input');
+		suchfeld.type = 'search';
+		suchfeld.name = 'q';
+		suchfeld.placeholder = t('menue_suche_kurz');
+		suchfeld.setAttribute('aria-label', t('suche_global'));
+		suchfeld.autocomplete = 'off';
+		suchformular.appendChild(suchfeld);
+		behaelter.appendChild(suchformular);
 	}
 
 	// Character: a state, not a page. It goes first in the top row next to the
@@ -185,10 +186,9 @@
 	if (speicher) {
 		var feld = document.createElement('label');
 		feld.className = 'charakterwahl';
-		var beschriftung = document.createElement('span');
-		beschriftung.textContent = t('charakter');
 		var auswahl = document.createElement('select');
 		auswahl.id = 'charakter';
+		auswahl.setAttribute('aria-label', t('charakter'));
 		var ohne = document.createElement('option');
 		var alle = speicher.alle();
 		var aktiv = speicher.aktiv();
@@ -206,12 +206,14 @@
 			speicher.setzeAktiv(auswahl.value || null);
 			window.location.reload();
 		});
-		feld.appendChild(beschriftung);
 		feld.appendChild(auswahl);
+		if (aktiv) {
+			var alter = standsalter(aktiv);
+			feld.classList.add('mit-standsalter');
+			feld.appendChild(alter);
+			auswahl.setAttribute('aria-description', alter.title);
+		}
 		charakter.appendChild(feld);
-		// How old is the imported progress? A clock next to the character says it
-		// without opening the import page; the colour is the whole message.
-		if (aktiv) { charakter.appendChild(standsalter(aktiv)); }
 	}
 	/** Lucide "clock", coloured by the age of the imported progress. */
 	function tageSeit(datum) {
@@ -242,22 +244,15 @@
 			'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
 	}
 
-	/** Small link to the import page, showing when the progress was read. */
+	/** Status indicator within the character field; Import remains its own link. */
 	function standsalter(eintrag) {
 		var tage = tageSeit(eintrag.date);
-		var link = document.createElement('a');
-		link.className = 'standsalter' + (tage === null ? ' unbekannt' : ' ' + standsalterFarbe(tage));
-		link.href = app('spielstand');
-		link.innerHTML = standsalterSvg();
-		if (tage === null) {
-			link.title = t('alter_unbekannt');
-			link.setAttribute('aria-label', t('alter_unbekannt'));
-		} else {
-			var text = t('alter_import') + ': ' + eintrag.date + ' · ' + standsalterText(tage);
-			link.title = text;
-			link.setAttribute('aria-label', text);
-		}
-		return link;
+		var symbol = document.createElement('span');
+		symbol.className = 'standsalter' + (tage === null ? ' unbekannt' : ' ' + standsalterFarbe(tage));
+		symbol.innerHTML = standsalterSvg();
+		symbol.title = tage === null ? t('alter_unbekannt')
+			: t('alter_import') + ': ' + eintrag.date + ' · ' + standsalterText(tage);
+		return symbol;
 	}
 
 	var importieren = document.createElement('a');
@@ -272,7 +267,6 @@
 	feedbackLink.textContent = t('feedback_nav');
 	feedbackLink.setAttribute('data-feedback-link', '');
 	if (seite === 'feedback') { feedbackLink.setAttribute('aria-current', 'page'); }
-	charakter.appendChild(feedbackLink);
 	if (behaelter) { behaelter.appendChild(charakter); }
 
 	// Keep the current deep link and entity context locally for the feedback form.
@@ -305,6 +299,7 @@
 			if (ereignis.key !== 'Escape' || !kopf.classList.contains('menue-offen')) { return; }
 			kopf.classList.remove('menue-offen');
 			knopf.setAttribute('aria-expanded', 'false');
+			familieMenue().schliesseAlle(null);
 			knopf.focus();
 		});
 		knopf.addEventListener('click', function () {
@@ -358,8 +353,10 @@
 	footerInnen.className = 'seitenfuss-innen';
 	footer.appendChild(footerInnen);
 	var recht = document.createElement('p');
-	[['/impressum.html', 'footer_recht'], ['/datenschutz.html', 'footer_datenschutz']].forEach(function (item, index) {
-		if (index) { recht.appendChild(document.createTextNode(' · ')); }
+	recht.className = 'footer-rechts';
+	recht.appendChild(feedbackLink);
+	[['/impressum.html', 'footer_recht'], ['/datenschutz.html', 'footer_datenschutz']].forEach(function (item) {
+		recht.appendChild(document.createTextNode(' · '));
 		var link = document.createElement('a'); link.href = item[0] + '?lang=' + sprache;
 		link.textContent = t(item[1]); recht.appendChild(link);
 	});

@@ -1,16 +1,3 @@
-:root {
-	--grund: #14110e;
-	--fläche: #1e1a16;
-	--fläche-hell: #2a251f;
-	--rand: #3a332b;
-	--text: #e8e1d5;
-	--schwach: #a89c8a;
-	--gold: #d6b35a;
-	--offen: #f0a63c;
-	--fertig: #7fbb72;
-	--marke-aktiv: #e8e1d5;
-}
-
 * { box-sizing: border-box; }
 
 html, body {
@@ -18,7 +5,7 @@ html, body {
 	height: 100%;
 	background: var(--grund);
 	color: var(--text);
-	font: 15px/1.5 "Verdana", "Segoe UI", sans-serif;
+	font: var(--text-fliesstext-kompakt)/var(--zeile-normal) var(--schrift);
 }
 
 body {
@@ -30,21 +17,21 @@ body {
 /* Header layout and background live in gemeinsam.css. */
 .kopf h1 {
 	margin: 0;
-	font-size: 16px;
-	font-weight: normal;
+	font-size: var(--text-normal);
+	font-weight: var(--gewicht-normal);
 	letter-spacing: .04em;
 	color: var(--gold);
 }
 
 .feld { display: flex; align-items: center; gap: 8px; }
 .feld.breit { flex: 1 1 260px; }
-.feld > span { color: var(--schwach); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.feld > span { color: var(--schwach); font-size: var(--text-klein); text-transform: uppercase; letter-spacing: .08em; }
 
 input, button {
 	font: inherit;
 	color: var(--text);
 	background: var(--fläche-hell);
-	border: 1px solid var(--rand);
+	border: 1px solid var(--rand-bedienung);
 	border-radius: 3px;
 	padding: 5px 8px;
 }
@@ -52,24 +39,24 @@ input, button {
 input { width: 100%; }
 input:focus, button:focus { outline: 1px solid var(--gold); }
 button { cursor: pointer; }
-button:hover { background: #342d25; }
+button:hover { background: var(--hover-flaeche); }
 
-.stand { color: var(--schwach); font-size: 12px; }
+.stand { color: var(--schwach); font-size: var(--text-klein); }
 
 .stand-klein {
 	color: var(--schwach);
-	font-size: 11px;
+	font-size: var(--text-mikro);
 	white-space: nowrap;
 }
 
 .sprachen { display: flex; gap: 3px; margin-left: auto; }
 
 .sprachen button {
-	font-size: 11px;
+	font-size: var(--text-mikro);
 	letter-spacing: .08em;
 	color: var(--schwach);
-	background: transparent;
-	border: 1px solid transparent;
+	background: var(--llb-palette-transparent);
+	border: 1px solid var(--llb-palette-transparent);
 	padding: 2px 6px;
 }
 
@@ -83,18 +70,18 @@ button:hover { background: #342d25; }
 .menue { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .menue a {
 	color: var(--schwach);
-	font-size: 13px;
+	font-size: var(--text-kompakt);
 	text-decoration: none;
 	padding: 2px 0;
-	border-bottom: 2px solid transparent;
+	border-bottom: 2px solid var(--llb-palette-transparent);
 }
 .menue a:hover { color: var(--gold); }
 .menue a[aria-current="page"] { color: var(--text); border-bottom-color: var(--gold); }
 .charakterwahl { display: flex; align-items: center; gap: 6px; margin-left: 6px; }
-.charakterwahl span { color: var(--schwach); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.charakterwahl span { color: var(--schwach); font-size: var(--text-klein); text-transform: uppercase; letter-spacing: .08em; }
 select {
 	font: inherit;
-	font-size: 13px;
+	font-size: var(--text-kompakt);
 	color: var(--text);
 	background: var(--fläche-hell);
 	border: 1px solid var(--rand);
@@ -133,26 +120,26 @@ main {
 	gap: 8px;
 	padding: 8px 10px;
 	border-bottom: 1px solid var(--rand);
-	font-size: 12px;
+	font-size: var(--text-klein);
 	color: var(--schwach);
 	flex: 0 0 auto;
 }
 
-.spalten-kopf button { font-size: 11px; padding: 2px 6px; }
+.spalten-kopf button { font-size: var(--text-mikro); padding: 2px 6px; }
 
 /* Task list tools: filter button, active state and local search in one row. */
 .listenwerkzeuge { flex: 0 0 auto; border-bottom: 1px solid var(--rand); }
 .filter-kopf { display: flex; align-items: center; flex-wrap: nowrap; gap: 6px; padding: 6px 10px; min-height: 34px; }
-.filter-knopf { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 3px 8px; flex: 0 0 auto; }
+.filter-knopf { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-klein); padding: 3px 8px; flex: 0 0 auto; }
 .filter-knopf svg { width: 14px; height: 14px; }
 .filter-knopf.aktiv { border-color: var(--gold); color: var(--gold); }
-.filter-status { flex: 0 1 auto; min-width: 44px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--schwach); font-size: 11px; }
+.filter-status { flex: 0 1 auto; min-width: 44px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--schwach); font-size: var(--text-mikro); }
 .filter-status:empty { display: none; }
 .filter-status.aktiv { color: var(--gold); }
 /* A word would take 92px of a 380px list column; the cross keeps the search
    next to the filter. The full wording stays for screen readers. */
 .filter-reset { flex: 0 0 auto; width: 22px; height: 24px; padding: 0; border: 0; background: none;
-	color: var(--schwach); font-size: 16px; line-height: 1; cursor: pointer; }
+	color: var(--schwach); font-size: var(--text-normal); line-height: var(--zeile-einfach); cursor: pointer; }
 .filter-reset:hover { color: var(--gold); }
 .filter[hidden] { display: none; }
 .filter {
@@ -170,8 +157,8 @@ main {
 }
 .aufgaben-suche svg { width: 15px; height: 15px; flex: 0 0 auto; }
 .aufgaben-suche input {
-	width: 100%; min-width: 0; border: 0; background: transparent;
-	font-size: 12px; padding: 5px 2px; color: var(--text); outline: 0;
+	width: 100%; min-width: 0; border: 0; background: var(--llb-palette-transparent);
+	font-size: var(--text-klein); padding: 5px 2px; color: var(--text); outline: 0;
 }
 .visuell-versteckt { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
@@ -185,15 +172,15 @@ main {
 
 .filter button {
 	flex: 1;
-	font-size: 12px;
+	font-size: var(--text-klein);
 	padding: 3px 4px;
-	background: transparent;
+	background: var(--llb-palette-transparent);
 	border-color: var(--rand);
 	color: var(--schwach);
 }
 
 .filter button[aria-pressed="true"] {
-	background: #3a3226;
+	background: var(--llb-palette-3a3226);
 	border-color: var(--gold);
 	color: var(--text);
 }
@@ -213,14 +200,14 @@ main {
 	border-radius: 0;
 	padding: 5px 10px;
 	text-align: left;
-	font-size: 13px;
+	font-size: var(--text-kompakt);
 	color: var(--text);
 }
 
 .zweig .pfeil {
 	flex: 0 0 12px;
 	color: var(--schwach);
-	font-size: 10px;
+	font-size: var(--text-mikro);
 	cursor: pointer;
 }
 
@@ -238,7 +225,7 @@ main {
 	right: 0;
 	bottom: 0;
 	height: 2px;
-	background: rgba(255, 255, 255, .06);
+	background: var(--llb-palette-rgba-255-255-255-p06);
 }
 
 .fortschritt .balken {
@@ -252,13 +239,13 @@ main {
 
 /* Three levels: parent region, region, sub-region */
 .ast.tiefe2 > .zweig { padding-left: 22px; }
-.ast.tiefe3 > .zweig { padding-left: 36px; font-size: 12px; }
-.ast.tiefe4 > .zweig { padding-left: 50px; font-size: 12px; color: var(--schwach); }
+.ast.tiefe3 > .zweig { padding-left: 36px; font-size: var(--text-klein); }
+.ast.tiefe4 > .zweig { padding-left: 50px; font-size: var(--text-klein); color: var(--schwach); }
 
-.zweig.aktiv { background: #3a3226; color: #fff; }
+.zweig.aktiv { background: var(--llb-palette-3a3226); color: var(--llb-palette-fff); }
 .zweig.aktiv .ohneziel {
 	color: var(--schwach);
-	font-size: 10px;
+	font-size: var(--text-mikro);
 	opacity: .8;
 	white-space: nowrap;
 }
@@ -267,25 +254,25 @@ main {
 
 .zweig.einzeln { padding-left: 18px; }
 .zweig.einzeln::before { content: '·'; }
-.zweig.einzeln.aktiv { background: #3a3226; color: #fff; }
+.zweig.einzeln.aktiv { background: var(--llb-palette-3a3226); color: var(--llb-palette-fff); }
 
 .ohneziel {
 	color: var(--schwach);
-	font-size: 10px;
+	font-size: var(--text-mikro);
 	opacity: .8;
 	white-space: nowrap;
 }
 
 .zahl {
 	color: var(--schwach);
-	font-size: 11px;
+	font-size: var(--text-mikro);
 	font-variant-numeric: tabular-nums;
 	white-space: nowrap;
 }
 
 .blatt.aktiv .ohneziel {
 	color: var(--schwach);
-	font-size: 10px;
+	font-size: var(--text-mikro);
 	opacity: .8;
 	white-space: nowrap;
 }
@@ -299,12 +286,12 @@ main {
 	gap: 8px;
 	padding: 8px 12px;
 	border-bottom: 1px solid var(--rand);
-	font-size: 13px;
+	font-size: var(--text-kompakt);
 	color: var(--schwach);
 	flex: 0 0 auto;
 }
 
-.liste-kopf button { font-size: 12px; padding: 2px 6px; }
+.liste-kopf button { font-size: var(--text-klein); padding: 2px 6px; }
 
 #liste {
 	margin: 0;
@@ -319,39 +306,40 @@ main {
 	align-items: baseline;
 	gap: 4px;
 	padding: 6px 12px;
-	border-bottom: 1px solid #241f1a;
+	border-bottom: 1px solid var(--llb-palette-241f1a);
 	cursor: pointer;
-	font-size: 13px;
+	font-size: var(--text-kompakt);
 }
 
 #liste li:hover { background: var(--fläche-hell); }
-#liste li.aktiv { background: #3a3226; color: #fff; }
+#liste li.aktiv { background: var(--llb-palette-3a3226); color: var(--llb-palette-fff); }
 /* Not counted: a session play the game never records, or an entry a finished
    alternative rules out. Dimmed, with a short note instead of a check mark. */
 #liste li.nicht-gezaehlt { opacity: 0.55; }
-#liste li .vermerk { color: var(--schwach); font-size: 11px; margin-left: 6px; font-style: italic; }
+#liste li .vermerk { color: var(--schwach); font-size: var(--text-mikro); margin-left: 6px; font-style: italic; }
 .vermerk-text { color: var(--schwach); font-style: italic; margin: 4px 0 8px; }
 #liste li .qname { flex: 1 1 auto; min-width: 0; }
-#liste .listen-status { flex: 0 0 1em; text-align: center; font-weight: 600; }
+#liste .listen-status { flex: 0 0 1em; text-align: center; font-weight: var(--gewicht-semibold); }
 #liste .listen-status.status-fertig { color: var(--fertig); }
 #liste .listen-status.status-laufend { color: var(--laufend); }
 #liste .listen-status.status-offen { color: var(--offen); }
 #liste li > .manueller-status { margin-left: auto; flex: 0 0 auto; }
-#liste li .stufe { color: var(--schwach); font-size: 11px; margin-left: auto; padding-left: 8px; white-space: nowrap; flex: 0 0 auto; }
+#liste li .stufe { color: var(--schwach); font-size: var(--text-mikro); margin-left: auto; padding-left: 8px; white-space: nowrap; flex: 0 0 auto; }
 #liste li .vermerk, #liste li .laufstand { flex: 0 0 auto; }
 /* The instance that belongs to a chapter: a quiet note under the name, not a row
    of its own (folded in from the client's "contains instance" flag). */
 #liste li .vermerk.instanz-teil { display: block; margin: 1px 0 0; flex: 1 1 100%; }
 /* A one-line explanation above a list, e.g. that a prologue is no book progress. */
-#liste li.listen-hinweis { font-size: 12px; line-height: 1.35; padding: 6px 2px 8px; border-bottom: 1px solid var(--rand); }
+#liste li.listen-hinweis { font-size: var(--text-klein); line-height: var(--zeile-zusatz); padding: 6px 2px 8px; border-bottom: 1px solid var(--rand); }
 /* Level range of a region, on its own small line under the name. */
-.zweig .name .bereich { display: block; color: var(--schwach); font-size: 11px; line-height: 1.3; }
+.zweig .name .bereich { display: block; color: var(--schwach); font-size: var(--text-mikro); line-height: var(--zeile-titel); }
 
 /* Map area */
 .buehne {
 	position: relative;
 	overflow: hidden;
-	background: #0d0b09;
+	background: var(--llb-palette-0d0b09);
+	container-type: inline-size;
 	min-height: 0;
 	cursor: grab;
 }
@@ -383,10 +371,10 @@ main {
 .buehne.keinbild .raster {
 	display: block;
 	background-image:
-		linear-gradient(to right, #221d18 1px, transparent 1px),
-		linear-gradient(to bottom, #221d18 1px, transparent 1px);
+		linear-gradient(to right, var(--llb-palette-221d18) 1px, var(--llb-palette-transparent) 1px),
+		linear-gradient(to bottom, var(--llb-palette-221d18) 1px, var(--llb-palette-transparent) 1px);
 	background-size: 10% 10%;
-	background-color: #0f0d0b;
+	background-color: var(--llb-palette-0f0d0b);
 }
 .buehne.keinbild img { display: none; }
 
@@ -395,8 +383,8 @@ main {
 .kartenhinweis {
 	position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
 	margin: 0; padding: 3px 10px; max-width: calc(100% - 24px);
-	background: rgba(13, 11, 9, .86); border: 1px solid var(--rand); border-radius: 3px;
-	font-size: 12px; color: var(--offen); text-align: center; pointer-events: none;
+	background: var(--llb-palette-rgba-13-11-9-p86); border: 1px solid var(--rand); border-radius: 3px;
+	font-size: var(--text-klein); color: var(--offen); text-align: center; pointer-events: none;
 }
 .kartenhinweis:empty { display: none; }
 
@@ -409,8 +397,8 @@ main {
 	margin: -9px 0 0 -9px;
 	border-radius: 50%;
 	background: var(--offen);
-	border: 2px solid #14100b;
-	box-shadow: 0 0 0 2px rgba(13, 11, 9, .85), 0 0 0 3px rgba(255, 244, 214, .72), 0 2px 5px rgba(0, 0, 0, .7);
+	border: 2px solid var(--llb-palette-14100b);
+	box-shadow: 0 0 0 2px var(--llb-palette-rgba-13-11-9-p85), 0 0 0 3px var(--llb-palette-rgba-255-244-214-p72), 0 2px 5px var(--llb-palette-rgba-0-0-0-p7);
 	cursor: pointer;
 	transition: transform .08s;
 }
@@ -429,29 +417,29 @@ main {
 .punkt.aktiv.fertig { box-shadow: 0 0 0 2px var(--fertig); }
 
 /* Place of a quest without a known giver: its first objective, drawn hollow. */
-.punkt.zielort { background: transparent; border: 2px solid var(--offen); }
+.punkt.zielort { width: 22px; height: 22px; margin: -11px 0 0 -11px; background: var(--llb-palette-rgba-13-11-9-p9); border: 3px solid var(--offen); }
 .punkt.zielort.fertig { border-color: var(--fertig); }
 .punkt.zielort.laufend { border-color: var(--laufend); }
 .punkt.zielort.aktiv { background: var(--marke-aktiv); }
-.punkt.zielort { box-shadow: 0 0 0 2px rgba(13, 11, 9, .9), 0 0 0 3px rgba(255, 244, 214, .8), 0 2px 5px rgba(0, 0, 0, .7); }
+.punkt.zielort { box-shadow: 0 0 0 2px var(--llb-palette-rgba-13-11-9-p9), 0 0 0 4px var(--llb-palette-rgba-255-244-214-p8), 0 2px 6px var(--llb-palette-rgba-0-0-0-p7); }
 
 /* A pile with some quests done: half green, so the progress is visible inside it. */
 .punkt.teils { background: linear-gradient(to right, var(--fertig) 50%, var(--offen) 50%); }
-.punkt.zielort.teils { background: linear-gradient(to right, var(--fertig) 50%, transparent 50%); }
+.punkt.zielort.teils { background: linear-gradient(to right, var(--fertig) 50%, var(--llb-palette-transparent) 50%); }
 
 /* Several quests on one spot: one dot, the number says how many. */
 .punkt.stapel {
 	width: 26px;
 	height: 26px;
 	margin: -13px 0 0 -13px;
-	font: bold 12px/24px sans-serif;
-	color: #1b1611;
+	font: var(--gewicht-bold) var(--text-klein)/24px var(--schrift);
+	color: var(--llb-palette-1b1611);
 	text-align: center;
 	border-width: 2px;
-	box-shadow: 0 0 0 2px rgba(13, 11, 9, .9), 0 0 0 3px rgba(255, 244, 214, .8), 0 2px 5px rgba(0, 0, 0, .75);
+	box-shadow: 0 0 0 2px var(--llb-palette-rgba-13-11-9-p9), 0 0 0 3px var(--llb-palette-rgba-255-244-214-p8), 0 2px 5px var(--llb-palette-rgba-0-0-0-p75);
 }
-.punkt.hervor { transform: scale(1.9); z-index: 7; box-shadow: 0 0 0 3px rgba(240, 166, 60, .55); }
-#liste li.hervor { background: rgba(240, 166, 60, .16); }
+.punkt.hervor { transform: scale(1.9); z-index: 7; box-shadow: 0 0 0 3px var(--llb-palette-rgba-240-166-60-p55); }
+#liste li.hervor { background: var(--llb-palette-rgba-240-166-60-p16); }
 
 /* The list behind a stack, right at its dot (a child of the marker layer, so the
  * dot's hover scale does not enlarge it). */
@@ -463,18 +451,18 @@ main {
 	max-height: 260px;
 	overflow: auto;
 	padding: 6px;
-	background: rgba(20, 17, 14, .97);
+	background: var(--llb-palette-rgba-20-17-14-p97);
 	border: 1px solid var(--rand);
 	border-radius: 3px;
-	box-shadow: 0 6px 20px rgba(0, 0, 0, .5);
+	box-shadow: 0 6px 20px var(--llb-palette-rgba-0-0-0-p5);
 	cursor: default;
 }
-.haufen p { margin: 0 0 4px; font-size: 12px; color: var(--schwach); }
+.haufen p { margin: 0 0 4px; font-size: var(--text-klein); color: var(--schwach); }
 .haufen button {
 	display: block;
 	width: 100%;
 	text-align: left;
-	font-size: 12px;
+	font-size: var(--text-klein);
 	padding: 4px 6px;
 	background: none;
 	border: 0;
@@ -514,9 +502,9 @@ main {
 	height: 26px;
 	margin: -13px 0 0 -13px;
 	border-radius: 50%;
-	border: 3px solid #fff5d6;
-	box-shadow: 0 0 0 2px #211a12, inset 0 0 0 1px #211a12;
-	background: transparent;
+	border: 3px solid var(--llb-palette-fff5d6);
+	box-shadow: 0 0 0 2px var(--llb-palette-211a12), inset 0 0 0 1px var(--llb-palette-211a12);
+	background: var(--llb-palette-transparent);
 	pointer-events: none;
 	display: flex;
 	align-items: center;
@@ -527,9 +515,9 @@ main {
    became an unreadable string of digits. */
 .schritt.nummer::after {
 	content: attr(data-n);
-	font-size: 10px;
-	line-height: 1;
-	color: #fff;
+	font-size: var(--text-mikro);
+	line-height: var(--zeile-einfach);
+	color: var(--llb-palette-fff);
 }
 
 /* Unzoomed the ring stays empty, otherwise the digits overlap. */
@@ -546,7 +534,7 @@ main {
 	background: none;
 	border: 0;
 	padding: 0;
-	font-size: 12px;
+	font-size: var(--text-klein);
 	color: var(--schwach);
 }
 .legende-eintrag { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
@@ -556,8 +544,8 @@ main {
 }
 .legende-symbol svg { width: 15px; height: 15px; }
 .legende-symbol.hohl { color: var(--schwach); }
-.legende-symbol.ring { border: 2px solid var(--offen); border-radius: 50%; color: transparent; }
-.legende-symbol.gestrichelt { border: 2px dashed #f3bc65; border-radius: 50%; color: #f3bc65; padding: 1px; }
+.legende-symbol.ring { border: 2px solid var(--offen); border-radius: 50%; color: var(--llb-palette-transparent); }
+.legende-symbol.gestrichelt { border: 2px dashed var(--llb-palette-f3bc65); border-radius: 50%; color: var(--llb-palette-f3bc65); padding: 1px; }
 .legende-symbol.gepunktet { border: 2px dotted var(--gold); border-radius: 50%; color: var(--gold); padding: 1px; }
 
 .tupfen {
@@ -581,44 +569,44 @@ main {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	font-size: 12px;
+	font-size: var(--text-klein);
 	color: var(--schwach);
 }
 
-.bedienung button { font-size: 12px; padding: 2px 8px; }
-.hinweis { background: rgba(13, 11, 9, .8); padding: 2px 8px; border-radius: 3px; }
+.bedienung button { font-size: var(--text-klein); padding: 2px 8px; }
+.hinweis { background: var(--llb-palette-rgba-13-11-9-p8); padding: 2px 8px; border-radius: 3px; }
 
 /* Detail panel on the right */
 .detail {
 	overflow-y: auto;
 	padding: 14px 16px;
 	background: var(--fläche);
-	font-size: 13px;
+	font-size: var(--text-kompakt);
 }
 
 .detail h2 {
 	margin: 0 0 4px;
-	font-size: 15px;
-	font-weight: normal;
+	font-size: var(--text-fliesstext-kompakt);
+	font-weight: var(--gewicht-normal);
 	color: var(--gold);
 }
 
-.detail .kennung { color: var(--schwach); font-size: 12px; margin-bottom: 12px; }
+.detail .kennung { color: var(--schwach); font-size: var(--text-klein); margin-bottom: 12px; }
 .detail .text { white-space: pre-wrap; margin: 0 0 14px; }
 .detail h3 {
 	margin: 16px 0 6px;
-	font-size: 12px;
+	font-size: var(--text-klein);
 	text-transform: uppercase;
 	letter-spacing: .08em;
 	color: var(--schwach);
-	font-weight: normal;
+	font-weight: var(--gewicht-normal);
 }
 .detail ul { margin: 0; padding-left: 18px; }
 .detail li { margin-bottom: 4px; }
 .detail .leer { color: var(--schwach); }
 .detail .ohneziel {
 	color: var(--schwach);
-	font-size: 10px;
+	font-size: var(--text-mikro);
 	opacity: .8;
 	white-space: nowrap;
 }
@@ -627,7 +615,7 @@ main {
 
 .detail .wechseln {
 	margin: 0 0 14px;
-	font-size: 12px;
+	font-size: var(--text-klein);
 	padding: 4px 10px;
 	border-color: var(--gold);
 	color: var(--gold);
@@ -666,15 +654,15 @@ main.seite {
 .seite .bild { margin: 18px 0 6px; max-width: 100%; }
 .seite .bild img { max-width: 100%; height: auto; border: 1px solid var(--rand); border-radius: 3px; }
 .seite .bild figcaption { color: var(--schwach); margin-top: 6px; }
-.seite h2 { color: var(--gold); font-size: 20px; font-weight: normal; margin: 32px 0 10px; letter-spacing: .03em; }
+.seite h2 { color: var(--gold); font-size: var(--text-abschnitt); font-weight: var(--gewicht-normal); margin: 32px 0 10px; letter-spacing: .03em; }
 .seite h2:first-child { margin-top: 8px; }
-.seite h3 { font-size: 15px; margin: 18px 0 6px; color: var(--text); }
+.seite h3 { font-size: var(--text-fliesstext-kompakt); margin: 18px 0 6px; color: var(--text); }
 .seite p, .seite li { color: var(--text); }
-.seite .schwach { color: var(--schwach); font-size: 13px; }
+.seite .schwach { color: var(--schwach); font-size: var(--text-kompakt); }
 .seite a { color: var(--gold); }
 .seite code, .seite kbd {
-	font-family: Menlo, Consolas, monospace;
-	font-size: 12.5px;
+	font-family: var(--mono);
+	font-size: var(--text-klein);
 	background: var(--fläche-hell);
 	border: 1px solid var(--rand);
 	border-radius: 3px;
@@ -690,17 +678,17 @@ main.seite {
 	padding: 14px 18px;
 	margin: 12px 0;
 }
-.kasten.hinweis-gut { border-color: #4d6b49; }
-.kasten.hinweis-warn { border-color: #7a6233; }
+.kasten.hinweis-gut { border-color: var(--llb-palette-4d6b49); }
+.kasten.hinweis-warn { border-color: var(--llb-palette-7a6233); }
 .reiter { display: flex; gap: 4px; margin-top: 8px; }
-.reiter button[aria-pressed="true"] { background: #342d25; border-color: var(--gold); color: var(--text); }
+.reiter button[aria-pressed="true"] { background: var(--llb-palette-342d25); border-color: var(--gold); color: var(--text); }
 .reiter-inhalt[hidden] { display: none; }
 .befehl {
 	display: block;
 	white-space: pre-wrap;
-	font-family: Menlo, Consolas, monospace;
-	font-size: 12px;
-	background: #0f0d0b;
+	font-family: var(--mono);
+	font-size: var(--text-klein);
+	background: var(--llb-palette-0f0d0b);
 	border: 1px solid var(--rand);
 	border-radius: 4px;
 	padding: 10px 12px;
@@ -708,8 +696,8 @@ main.seite {
 	color: var(--text);
 }
 .zeile-knoepfe { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
-.knopf-gold { background: #3a2f1c; border-color: var(--gold); color: var(--gold); }
-.knopf-gold:hover { background: #4a3c22; }
+.knopf-gold { background: var(--llb-palette-3a2f1c); border-color: var(--gold); color: var(--gold); }
+.knopf-gold:hover { background: var(--gold-knopf-hover); }
 /* Links that should look like a button on the plain pages (import, plugin). */
 a.knopf-gold {
 	display: inline-block; padding: 5px 12px; border: 1px solid var(--gold);
@@ -725,15 +713,15 @@ a.knopf-gold {
 }
 .ablage.ueber { border-color: var(--gold); color: var(--text); background: var(--fläche); }
 .meldung { margin: 8px 0; min-height: 1.5em; }
-.meldung.fehler { color: #d9826b; }
+.meldung.fehler { color: var(--llb-palette-d9826b); }
 .meldung.gut { color: var(--fertig); }
-.tabelle { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13.5px; }
-.tabelle th { text-align: left; color: var(--schwach); font-weight: normal; font-size: 12px;
+.tabelle { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: var(--text-kompakt); }
+.tabelle th { text-align: left; color: var(--schwach); font-weight: var(--gewicht-normal); font-size: var(--text-klein);
 	text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--rand); padding: 6px 8px; }
 .tabelle td { border-bottom: 1px solid var(--rand); padding: 7px 8px; vertical-align: middle; }
 .tabelle td.zahl { text-align: right; font-variant-numeric: tabular-nums; }
-.tabelle tr.aktiv td { background: #2a2419; }
-.tabelle td button { font-size: 12px; padding: 2px 8px; margin: 2px 4px 2px 0; white-space: nowrap; }
+.tabelle tr.aktiv td { background: var(--llb-palette-2a2419); }
+.tabelle td button { font-size: var(--text-klein); padding: 2px 8px; margin: 2px 4px 2px 0; white-space: nowrap; }
 .tabelle td:last-child { white-space: nowrap; }
 .tabelle th, .tabelle td:nth-child(7) { white-space: nowrap; }
 .tabellen-rahmen { overflow-x: auto; }
@@ -743,9 +731,9 @@ a.knopf-gold {
 .seite details p { margin: 8px 0 4px 16px; color: var(--schwach); }
 
 /* Reward index and recipe browser (own pages). */
-.belohnungsfilter { display: flex; align-items: center; gap: 8px; flex: 1 0 100%; padding: 2px 0 0; color: var(--schwach); font-size: 12px; }
+.belohnungsfilter { display: flex; align-items: center; gap: 8px; flex: 1 0 100%; padding: 2px 0 0; color: var(--schwach); font-size: var(--text-klein); }
 .belohnungsfilter[hidden] { display: none; }
-.belohnungsfilter select { flex: 1 1 auto; min-width: 0; font-size: 12px; padding: 3px 6px; }
+.belohnungsfilter select { flex: 1 1 auto; min-width: 0; font-size: var(--text-klein); padding: 3px 6px; }
 .bl-liste { margin: 10px 0 0; }
 .bl-karte {
 	border: 1px solid var(--rand); border-radius: 4px; padding: 12px 14px;
@@ -756,7 +744,7 @@ a.knopf-gold {
 .bl-zahl { color: var(--schwach); white-space: nowrap; }
 .bl-art h4 { margin: 6px 0 4px; font-size: var(--text-normal); }
 .bl-region h5 { margin: 8px 0 2px; font-size: var(--text-bedienung); color: var(--gold); }
-.bl-zone h6 { margin: 4px 0 2px; font-size: var(--text-bedienung); color: var(--schwach); font-weight: normal; }
+.bl-zone h6 { margin: 4px 0 2px; font-size: var(--text-bedienung); color: var(--schwach); font-weight: var(--gewicht-normal); }
 .bl-quellen { margin: 0 0 6px; }
 .bl-quellen td { padding: 2px 6px; border-bottom: none; }
 .bl-lvl { white-space: nowrap; color: var(--schwach); }
@@ -784,8 +772,8 @@ a.knopf-gold {
 .rezept-filter-text > span:first-child { color: var(--text); font-size: var(--text-bedienung); }
 .rezept-filter .schwach { font-size: var(--text-bedienung); }
 .seite h3.rezept-ueberschrift {
-	font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em;
-	color: var(--schwach); font-weight: normal; margin: 16px 0 2px;
+	font-size: var(--text-mikro); text-transform: uppercase; letter-spacing: .06em;
+	color: var(--schwach); font-weight: var(--gewicht-normal); margin: 16px 0 2px;
 }
 .rezept-zeile-kopf .rezept-ueberschrift { margin: 0; }
 .seite h3.rezept-ueberschrift[hidden] { display: none; }
@@ -804,17 +792,17 @@ a.knopf-gold {
 .tabelle td.rezept-zutaten { white-space: normal; }
 .roh-tabelle td:last-child { white-space: normal; }
 .roh-farbe { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
-.roh-tabelle tr.hervor td { background: #2a2419; }
-.roh-tabelle td.roh-gebiete { font-size: .875rem; line-height: 1.5; }
+.roh-tabelle tr.hervor td { background: var(--llb-palette-2a2419); }
+.roh-tabelle td.roh-gebiete { font-size: var(--text-bedienung); line-height: var(--zeile-normal); }
 .roh-tabelle td.roh-gebiete a { color: var(--gold); }
-.roh-ohne { margin: 2px 0 12px; color: var(--text); font-size: .9375rem; line-height: 1.5; }
+.roh-ohne { margin: 2px 0 12px; color: var(--text); font-size: var(--text-fliesstext-kompakt); line-height: var(--zeile-normal); }
 .rezept-tabelle tr.rezept-gruppe th {
-	text-transform: uppercase; letter-spacing: .06em; font-size: 11.5px; font-weight: normal;
+	text-transform: uppercase; letter-spacing: .06em; font-size: var(--text-mikro); font-weight: var(--gewicht-normal);
 	color: var(--schwach); padding: 16px 0 5px; border-top: 1px solid var(--rand); border-bottom: none;
 }
 .rezept-tabelle tbody:first-of-type tr.rezept-gruppe th { border-top: none; padding-top: 4px; }
 .rezept-tabelle tr.rezept-stufe th {
-	text-transform: none; letter-spacing: 0; font-size: 15px; font-weight: normal;
+	text-transform: none; letter-spacing: 0; font-size: var(--text-fliesstext-kompakt); font-weight: var(--gewicht-normal);
 	color: var(--text); padding: 24px 0 5px; border-top: 1px solid var(--rand); border-bottom: none;
 }
 .rezept-tabelle tbody:first-of-type tr.rezept-stufe th { border-top: none; padding-top: 4px; }
@@ -828,8 +816,8 @@ a.knopf-gold {
 .su-gruppe { margin-top: 20px; }
 .su-gruppe h3 {
 	display: flex; align-items: center; gap: 7px;
-	font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em;
-	color: var(--schwach); font-weight: normal; margin: 0 0 4px;
+	font-size: var(--text-mikro); text-transform: uppercase; letter-spacing: .06em;
+	color: var(--schwach); font-weight: var(--gewicht-normal); margin: 0 0 4px;
 }
 .su-zeile {
 	display: flex; justify-content: space-between; gap: 14px; align-items: center;
@@ -852,9 +840,8 @@ a.knopf-gold {
 #rezept-tabelle .schwach { margin-top: 2px; }
 
 /* Running: started, not finished – LOTRO Companion recorded its counters. */
-:root { --laufend: #7fa6c9; }
 #liste li.laufend .haken { color: var(--laufend); }
-#liste li .laufstand { color: var(--laufend); font-size: 11px; margin-left: 6px; white-space: nowrap; }
+#liste li .laufstand { color: var(--laufend); font-size: var(--text-mikro); margin-left: 6px; white-space: nowrap; }
 .punkt.laufend { background: var(--laufend); }
 li.ziel-fertig { color: var(--fertig); }
 .zielbalken {
@@ -882,14 +869,14 @@ li.ziel-fertig { color: var(--fertig); }
 .balken > span { display: block; height: 100%; background: var(--fertig); }
 .balken.teil > span { background: var(--laufend); }
 .stufe-name { color: var(--text); }
-.stufe-klein { color: var(--schwach); font-size: 12px; }
+.stufe-klein { color: var(--schwach); font-size: var(--text-klein); }
 .kopf-zeile { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
 .kopf-zeile input[type="search"] { width: auto; flex: 1 1 220px; }
-.kopf-zeile label { display: flex; gap: 6px; align-items: center; color: var(--schwach); font-size: 13px; }
+.kopf-zeile label { display: flex; gap: 6px; align-items: center; color: var(--schwach); font-size: var(--text-kompakt); }
 .kopf-zeile label input { width: auto; }
 /* The filter is on and it hides nothing: every faction is already begun.
    Without the emphasis the unchanged table looks like a broken filter. */
-.kopf-zeile #anzahl.alle-begonnen { color: var(--fertig); font-weight: 600; }
+.kopf-zeile #anzahl.alle-begonnen { color: var(--fertig); font-weight: var(--gewicht-semibold); }
 .beruf { margin: 18px 0 26px; }
 .beruf h3 { margin-bottom: 4px; }
 .beruf .naechste { color: var(--gold); margin: 4px 0 8px; }
@@ -908,8 +895,8 @@ td.haken-zelle.teil { color: var(--laufend); }
 	align-items: center;
 	gap: 12px;
 	padding: 14px 20px;
-	background: rgba(13, 11, 9, .92);
-	border: 1px solid #3a3226;
+	background: var(--llb-palette-rgba-13-11-9-p92);
+	border: 1px solid var(--llb-palette-3a3226);
 	border-radius: 6px;
 	color: var(--text);
 	z-index: 50;
@@ -926,12 +913,12 @@ td.haken-zelle.teil { color: var(--laufend); }
 }
 @keyframes lader-dreht { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .lader-kreis { animation: none; } }
-#liste li .qname .geber { display: block; color: var(--schwach); font-size: 11px; }
+#liste li .qname .geber { display: block; color: var(--schwach); font-size: var(--text-mikro); }
 
 /* Requirements in the detail view */
-.bedingungen h3 { font-size: 13px; color: var(--gold); margin: 10px 0 4px; }
+.bedingungen h3 { font-size: var(--text-kompakt); color: var(--gold); margin: 10px 0 4px; }
 .bedingungen ul { list-style: none; padding: 0; margin: 0 0 8px; }
-.bedingungen li { font-size: 13px; padding: 1px 0; }
+.bedingungen li { font-size: var(--text-kompakt); padding: 1px 0; }
 .bedingungen li .zeichen { display: inline-block; width: 1em; color: var(--schwach); }
 .bedingungen li .zeichen.ok { color: var(--fertig); }
 .bedingungen li.sprung { cursor: pointer; }
@@ -940,61 +927,73 @@ td.haken-zelle.teil { color: var(--laufend); }
 /* Reputation: sources under a faction */
 #tabelle tr.klickbar { cursor: pointer; }
 #tabelle tr.klickbar:hover td { background: var(--fläche-hell); }
-#tabelle tr.quellen td { background: #1b1813; padding: 8px 14px 12px; white-space: normal; }
+#tabelle tr.quellen td { background: var(--llb-palette-1b1813); padding: 8px 14px 12px; white-space: normal; }
 #tabelle tr.quellen ul { margin: 6px 0 0; padding-left: 18px; columns: 2 320px; column-gap: 28px; }
-#tabelle tr.quellen li { font-size: 13px; break-inside: avoid; padding: 1px 0; }
+#tabelle tr.quellen li { font-size: var(--text-kompakt); break-inside: avoid; padding: 1px 0; }
 #tabelle tr.quellen a { color: var(--text); }
 
 /* Area search above the tree */
 .baumsuche { padding: 6px 10px; border-bottom: 1px solid var(--rand); }
-.baumsuche input { font-size: 13px; padding: 4px 8px; }
+.baumsuche input { font-size: var(--text-kompakt); padding: 4px 8px; }
 .zweig.treffer .name { color: var(--gold); }
 
 /* Legend: the rings of a selected quest */
-.tupfen.ring { background: transparent; border: 2px solid #fff5d6; box-shadow: 0 0 0 1px #211a12; }
+.tupfen.ring { background: var(--llb-palette-transparent); border: 2px solid var(--llb-palette-fff5d6); box-shadow: 0 0 0 1px var(--llb-palette-211a12); }
 
 /* Status line under the map, beside "reset" */
 .bedienung { right: 10px; flex-wrap: wrap; }
-.bedienung .stand { background: rgba(13, 11, 9, .8); padding: 2px 8px; border-radius: 3px; font-size: 12px; }
+.bedienung .stand { background: var(--llb-palette-rgba-13-11-9-p8); padding: 2px 8px; border-radius: 3px; font-size: var(--text-klein); }
 .bedienung .stand:empty, .hinweis:empty { display: none; }
 .ast[hidden], [hidden] { display: none !important; }
 
 /* --- Tidy-up 03.11. -------------------------------------------------- */
-/* Map column: the map above, then a bar of two fixed rows – legend on top,
-   actions below. The rows never change height, so the 4:3 map keeps its size
-   whether dots, numbered rings or resource colours are shown (08.11.2026). */
+/* Map column: compact legend/actions under the map; view and map filters share
+   a translucent toolbar over the map. */
 .kartenspalte { display: flex; flex-direction: column; min-height: 0; overflow: hidden; border-right: 1px solid var(--rand); }
 .kartenspalte .buehne { flex: 1 1 auto; }
 .kartenleiste {
 	position: relative;
-	display: grid;
-	grid-template-columns: minmax(0, 1fr);
-	grid-template-rows: 20px minmax(28px, auto);
+	display: flex;
 	align-items: center;
-	gap: 2px;
+	gap: 8px;
+	min-width: 0;
+	height: 34px;
+	flex: 0 0 34px;
 	padding: 4px 10px;
 	background: var(--fläche);
 	border-top: 1px solid var(--rand);
-	font-size: 12px;
+	font-size: var(--text-bedienung);
 	color: var(--schwach);
 }
-/* Map controls sit on the map: level top left, view and zoom top right. They
-   are not part of the legend and do not change the bar height. */
+/* Map controls share one translucent bar: filters on the left, view and zoom
+   on the right. The level range belongs to the lower legend bar. */
 .kartenkopf {
 	position: absolute; top: 8px; left: 8px; right: 8px; z-index: 8;
-	display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+	display: flex; align-items: center; justify-content: space-between; gap: 10px;
+	min-height: 40px; padding: 4px 6px;
+	background: var(--llb-palette-rgba-13-11-9-p82);
+	border: 1px solid var(--llb-palette-rgba-214-179-90-p45);
+	border-radius: 4px;
+	box-shadow: 0 2px 8px var(--llb-palette-rgba-0-0-0-p35);
+	backdrop-filter: blur(4px);
 	pointer-events: none;
 }
-.kartenkopf-links, .kartenkopf-rechts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.kartenkopf-rechts { justify-content: flex-end; }
-.kartenkopf .karte-stufe, .kartenkopf .kartenansicht, .kartenkopf .gelaende-zoom { pointer-events: auto; }
-.karten-pfad { border-bottom: 1px solid var(--rand); background: var(--fläche); }
+.kartenkopf-links, .kartenkopf-rechts { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; min-width: 0; }
+.kartenkopf-links { position: relative; }
+.kartenkopf-rechts { justify-content: flex-end; margin-left: auto; }
+.kartenkopf .karte-stufe, .kartenkopf .kartenansicht, .kartenkopf .gelaende-zoom,
+.kartenkopf .notizen { pointer-events: auto; }
+.kartenkopf .geber-schalter { pointer-events: auto; }
+.kartenkopf .notizen { position: static; }
+.kartenkopf .notizen-feld { top: calc(100% + 6px); right: auto; bottom: auto; left: 0; width: min(300px, calc(100cqw - 12px)); }
+.kartenkopf button { min-height: 30px; padding: 4px 6px; font-size: var(--text-bedienung); line-height: var(--zeile-einfach); }
+.kartenkopf .gelaende-zoom button { min-width: 30px; padding: 4px 7px; }
 /* Same container as the header, so the trail starts above the first column. */
 .karten-pfad .katalog-pfad {
 	display: flex; align-items: baseline; gap: 0;
 	width: 100%; max-width: var(--huelle); margin: 0 auto; padding: 9px 16px;
-	color: var(--schwach); font-size: var(--text-bedienung); line-height: 1.5;
-	overflow: hidden; white-space: nowrap;
+	color: var(--schwach); font-size: var(--text-bedienung); line-height: var(--zeile-normal);
+	overflow: hidden; white-space: nowrap; column-gap: 6px;
 }
 /* Long names give way inside their step, so the current place stays readable. */
 .karten-pfad .katalog-pfad a,
@@ -1009,18 +1008,18 @@ td.haken-zelle.teil { color: var(--laufend); }
 @media (max-width: 700px) {
 	.karten-pfad .katalog-pfad > :nth-child(-n+2) { display: none; }
 }
-.legende-zeile { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.legende-zeile { display: flex; flex: 1 1 auto; align-items: center; gap: 6px; min-width: 0; }
 .kartenleiste .legende {
 	position: static; flex: 1 1 auto; min-width: 0;
 	display: flex; flex-wrap: nowrap; align-items: center; gap: 6px 16px;
 	overflow: hidden; background: none; padding: 0;
-	font-size: 12px;
+	font-size: inherit;
 }
 /* Items keep their size instead of shrinking into two-line stubs. Entries that
    do not fit are dropped whole – a cut word looks like a defect. */
 .kartenleiste .legende > * { flex: 0 0 auto; white-space: nowrap; }
 .kartenleiste .legende > .zu-breit { display: none; }
-.legende-mehr { flex: 0 0 auto; margin-left: auto; padding: 1px 7px; font-size: 11px; line-height: 1.4; }
+.legende-mehr { flex: 0 0 auto; margin-left: auto; padding: 1px 7px; font-size: var(--text-mikro); line-height: var(--zeile-kompakt); }
 /* Without a visible legend there is nothing to expand: no lone question mark. */
 .legende[hidden] + .legende-mehr { display: none; }
 /* The button keeps its space whether it is needed or not, so the legend's own
@@ -1031,20 +1030,24 @@ td.haken-zelle.teil { color: var(--laufend); }
 	display: flex; flex-wrap: wrap; gap: 4px 16px;
 	max-width: min(560px, calc(100% - 20px));
 	padding: 8px 10px; background: var(--fläche); border: 1px solid var(--rand);
-	box-shadow: 0 4px 14px rgba(0, 0, 0, .5); color: var(--schwach); font-size: 12px;
+	box-shadow: 0 4px 14px var(--llb-palette-rgba-0-0-0-p5); color: var(--schwach); font-size: var(--text-klein);
 }
-.leiste-aktionen { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; min-width: 0; }
-.leiste-rechts { margin-left: auto; display: inline-flex; align-items: center; gap: 12px; }
-.karte-stufe { min-width: 0; text-align: left; padding: 2px 7px; border: 1px solid rgba(214, 179, 90, .45); border-radius: 3px; background: rgba(13, 11, 9, .82); white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 12px; }
-.kartenkopf .kartenansicht, .kartenkopf .gelaende-zoom { background: rgba(13, 11, 9, .82); border-radius: 3px; }
+.leiste-aktionen { display: flex; align-items: center; flex: 0 0 auto; flex-wrap: nowrap; gap: 6px 10px; min-width: 0; margin-left: auto; white-space: nowrap; font-size: inherit; }
+.leiste-rechts { display: inline-flex; align-items: center; gap: 8px; }
+.karte-stufe { min-width: 0; flex: 0 0 auto; text-align: left; padding: 0; border: 0; border-radius: 0; background: var(--llb-palette-transparent); white-space: nowrap; font-variant-numeric: tabular-nums; font-size: inherit; line-height: var(--zeile-einfach); }
+.kartenansicht, .gelaende-zoom { background: var(--llb-palette-transparent); border-radius: 3px; }
+.kartenansicht button, .gelaende-zoom button { font-size: var(--text-bedienung); line-height: var(--zeile-einfach); }
+.kartenkopf .geber-schalter { min-height: 30px; font-size: var(--text-bedienung); line-height: var(--zeile-einfach); }
+.kartenkopf .geber-schalter[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+.kartenkopf .geber-schalter[aria-pressed="false"] { color: var(--schwach); }
 .kartenleiste .koordinate { text-align: right; }
 
 /* List: notes and counters sit under the name, the level stays right. */
 #liste li .qname .vermerk,
-#liste li .qname .laufstand { display: block; margin-left: 0; font-size: 11px; }
+#liste li .qname .laufstand { display: block; margin-left: 0; font-size: var(--text-mikro); }
 
 /* Empty detail: overview of the selected area */
-.uebersicht { display: grid; grid-template-columns: auto 1fr; gap: 3px 14px; margin: 12px 0 14px; font-size: 13px; }
+.uebersicht { display: grid; grid-template-columns: auto 1fr; gap: 3px 14px; margin: 12px 0 14px; font-size: var(--text-kompakt); }
 .uebersicht dt { color: var(--schwach); }
 .uebersicht dd { margin: 0; font-variant-numeric: tabular-nums; }
 
@@ -1062,11 +1065,11 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .nav.liste-offen .nav-baum { display: none; }
 .nav.liste-offen .nav-liste { display: flex; }
 .nav #liste { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
-.liste-titel { display: block; padding: 10px 12px 6px; color: var(--gold); font-size: 14px; }
+.liste-titel { display: block; padding: 10px 12px 6px; color: var(--gold); font-size: var(--text-bedienung); }
 
 /* Header search with a result panel. Width per gemeinsam.css: one fixed size. */
 .globalsuche { position: relative; }
-.globalsuche input { font-size: 13px; padding: 5px 10px; }
+.globalsuche input { font-size: var(--text-kompakt); padding: 5px 10px; }
 .suchergebnis {
 	position: absolute;
 	left: 0; right: 0; top: calc(100% + 4px);
@@ -1075,25 +1078,25 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 	background: var(--fläche);
 	border: 1px solid var(--rand);
 	border-radius: 4px;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+	box-shadow: 0 8px 24px var(--llb-palette-rgba-0-0-0-p45);
 	z-index: 40;
 	padding: 4px 0;
 }
-.such-gruppe { display: flex; align-items: center; gap: 6px; padding: 6px 12px 2px; font-size: 11px; color: var(--schwach); text-transform: uppercase; letter-spacing: .08em; }
+.such-gruppe { display: flex; align-items: center; gap: 6px; padding: 6px 12px 2px; font-size: var(--text-mikro); color: var(--schwach); text-transform: uppercase; letter-spacing: .08em; }
 .such-gruppe-symbol, .such-symbol { display: inline-flex; align-items: center; justify-content: center; color: var(--gold); flex: 0 0 auto; }
 .such-gruppe-symbol svg, .such-symbol svg { width: 16px; height: 16px; }
 .such-zeile {
 	display: flex; justify-content: space-between; gap: 10px; width: 100%;
 	text-align: left; background: none; border: 0; border-radius: 0;
-	padding: 5px 12px; font-size: 13px;
+	padding: 5px 12px; font-size: var(--text-kompakt);
 }
 .such-zeile:hover, .such-zeile:focus { background: var(--fläche-hell); }
 .such-haupt { display: flex; align-items: center; gap: 7px; min-width: 0; }
-.such-mehr { display: block; padding: 4px 12px 5px; color: var(--gold); font-size: 11px; text-decoration: none; }
+.such-mehr { display: block; padding: 4px 12px 5px; color: var(--gold); font-size: var(--text-mikro); text-decoration: none; }
 .such-mehr:hover { text-decoration: underline; }
-.such-laden { padding: 6px 12px 4px; color: var(--schwach); font-size: 11px; }
-.such-zusatz { color: var(--schwach); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
-.such-andere { display: block; padding: 6px 12px 4px; font-size: 12px; color: var(--gold); text-decoration: none; border-top: 1px solid var(--rand); margin-top: 4px; }
+.such-laden { padding: 6px 12px 4px; color: var(--schwach); font-size: var(--text-mikro); }
+.such-zusatz { color: var(--schwach); font-size: var(--text-mikro); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
+.such-andere { display: block; padding: 6px 12px 4px; font-size: var(--text-klein); color: var(--gold); text-decoration: none; border-top: 1px solid var(--rand); margin-top: 4px; }
 /* The header keeps one line; its widths live in gemeinsam.css so the row does
  * not move when the content changes. */
 .kopf .menue { flex-wrap: nowrap; white-space: nowrap; }
@@ -1105,61 +1108,61 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 /* Map without zoom; switch between quest givers and objectives */
 .buehne { cursor: default; }
 .umschalter { display: flex; gap: 0; margin-left: auto; }
-.umschalter button { font-size: 12px; padding: 2px 10px; border-radius: 0; }
+.umschalter button { font-size: var(--text-klein); padding: 2px 10px; border-radius: 0; }
 .umschalter button:first-child { border-radius: 3px 0 0 3px; }
 .umschalter button:last-child { border-radius: 0 3px 3px 0; border-left: 0; }
-.umschalter button[aria-pressed="true"] { background: #3a3226; border-color: var(--gold); color: var(--text); }
+.umschalter button[aria-pressed="true"] { background: var(--llb-palette-3a3226); border-color: var(--gold); color: var(--text); }
 .umschalter button[aria-pressed="false"] { color: var(--schwach); }
 .schritt { pointer-events: auto; cursor: help; }
 
 /* Facts from the game as tags */
 .marken { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; }
-.marke { font-size: 11px; padding: 1px 7px; border: 1px solid var(--rand); border-radius: 9px; color: var(--schwach); background: var(--fläche-hell); }
+.marke { font-size: var(--text-mikro); padding: 1px 7px; border: 1px solid var(--rand); border-radius: 9px; color: var(--schwach); background: var(--fläche-hell); }
 
 /* List sections and region overview */
-#liste li.abschnitt { background: var(--fläche-hell); color: var(--gold); font-size: 12px; padding: 5px 12px; position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--rand); }
+#liste li.abschnitt { background: var(--fläche-hell); color: var(--gold); font-size: var(--text-klein); padding: 5px 12px; position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--rand); }
 #liste li.abschnitt span:first-child { flex: 1 1 auto; }
 #liste li.abschnitt.zu { color: var(--schwach); }
-#liste li.listenhinweis { color: var(--schwach); font-size: 11px; font-style: italic; cursor: default; }
+#liste li.listenhinweis { color: var(--schwach); font-size: var(--text-mikro); font-style: italic; cursor: default; }
 .gebietsliste { list-style: none; padding: 0; margin: 10px 0; }
-.gebietsliste li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--rand); cursor: pointer; font-size: 13px; }
+.gebietsliste li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--rand); cursor: pointer; font-size: var(--text-kompakt); }
 .gebietsliste li:hover { color: var(--gold); }
-.gebietsliste .stufe { color: var(--schwach); font-size: 12px; white-space: nowrap; }
+.gebietsliste .stufe { color: var(--schwach); font-size: var(--text-klein); white-space: nowrap; }
 
 /* One line under the description folds a quest's objectives */
-.ziele-schalter { display: block; width: 100%; text-align: left; margin: 10px 0 6px; padding: 6px 10px; background: var(--fläche-hell); border: 1px solid var(--rand); color: var(--gold); font-size: 13px; }
+.ziele-schalter { display: block; width: 100%; text-align: left; margin: 10px 0 6px; padding: 6px 10px; background: var(--fläche-hell); border: 1px solid var(--rand); color: var(--gold); font-size: var(--text-kompakt); }
 .ziele-schalter[aria-expanded="true"] { color: var(--text); }
 .detail ul { margin: 4px 0 12px; }
 .detail p.text + ul { margin-top: 2px; }
 
 /* Filter/Notizen: the game's map notes, list as in the game's world map */
 .notizen { position: relative; }
-.notizen > button { font-size: 12px; padding: 2px 8px; }
-.gebietskarte { font-size: 12px; padding: 2px 8px; }
-.notizen-feld { position: absolute; bottom: calc(100% + 6px); left: 0; z-index: 30; width: 280px; max-height: 60vh; overflow-y: auto; background: var(--fläche); border: 1px solid var(--rand); padding: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+.notizen > button { font-size: var(--text-klein); padding: 2px 8px; }
+.gebietskarte { font-size: var(--text-klein); padding: 2px 8px; }
+.notizen-feld { position: absolute; bottom: calc(100% + 6px); left: 0; z-index: 30; width: 280px; max-height: 60vh; overflow-y: auto; background: var(--fläche); border: 1px solid var(--rand); padding: 6px; box-shadow: 0 4px 14px var(--llb-palette-rgba-0-0-0-p5); }
 .notizen-alle { display: flex; gap: 6px; margin-bottom: 6px; }
-.notizen-alle button { flex: 1; font-size: 12px; padding: 2px 6px; }
+.notizen-alle button { flex: 1; font-size: var(--text-klein); padding: 2px 6px; }
 .notizen-feld ul { list-style: none; margin: 0; padding: 0; }
 .notizen-feld label { display: flex; align-items: center; gap: 8px; padding: 2px 4px; cursor: pointer; color: var(--text); }
 .notizen-feld label:hover { background: var(--fläche-hell); }
-.notizen-feld label img { width: 24px; height: 24px; flex: none; filter: drop-shadow(0 1px 1px #000); }
+.notizen-feld label img { width: 24px; height: 24px; flex: none; filter: drop-shadow(0 1px 1px var(--llb-palette-000)); }
 .notizen-feld label span { flex: 1; }
 .notizen-feld input[type="checkbox"], .geber-schalter input { width: auto; margin: 0; flex: none; }
 
 /* Vorkommen: crafting resources from the game's placements. One switch group of
    its own next to the game's filter list; the colour is the legend. */
 .vorkommen-feld { width: 300px; }
-.vorkommen-feld label i { width: 12px; height: 12px; border-radius: 2px; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.55); }
+.vorkommen-feld label i { width: 12px; height: 12px; border-radius: 2px; flex: none; box-shadow: 0 0 0 1px var(--llb-palette-rgba-0-0-0-p55); }
 /* One line per trade, each with its own kind; nothing is shown until chosen. */
 .vorkommen-zeilen { display: flex; flex-direction: column; gap: 6px; margin: 6px 0 0; }
-.vorkommen-zeile { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+.vorkommen-zeile { display: flex; align-items: center; gap: 7px; font-size: var(--text-klein); }
 .vorkommen-zeile > span { flex: 0 0 auto; min-width: 62px; }
-.vorkommen-zeile select { flex: 1 1 auto; min-width: 0; font-size: 12px; padding: 2px; }
+.vorkommen-zeile select { flex: 1 1 auto; min-width: 0; font-size: var(--text-klein); padding: 2px; }
 .vorkommen-ebene { position: absolute; inset: 0; pointer-events: auto; cursor: crosshair; }
 #vorkommen.an > button { border-color: var(--gold); color: var(--gold); }
 /* One entry, not one per profession: the swatch carries all chosen colours and
    the list next to the switch names them (08.11.2026). */
-.vorkommen-farbe { width: 9px; height: 9px; border-radius: 1px; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.6); }
+.vorkommen-farbe { width: 9px; height: 9px; border-radius: 1px; flex: none; box-shadow: 0 0 0 1px var(--llb-palette-rgba-0-0-0-p6); }
 .vorkommen-tip {
 	position: fixed;
 	z-index: 60;
@@ -1168,25 +1171,25 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 	max-height: 260px;
 	overflow: auto;
 	padding: 6px 8px;
-	background: rgba(20, 17, 14, .97);
+	background: var(--llb-palette-rgba-20-17-14-p97);
 	border: 1px solid var(--rand);
 	border-radius: 3px;
-	box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
-	font-size: 12px;
+	box-shadow: 0 4px 14px var(--llb-palette-rgba-0-0-0-p5);
+	font-size: var(--text-klein);
 	color: var(--text);
 }
 .vorkommen-tip p { margin: 0 0 4px; color: var(--schwach); }
 .vorkommen-tip ul { list-style: none; margin: 0; padding: 0; }
 .vorkommen-tip li { display: flex; align-items: center; gap: 6px; padding: 1px 0; }
 .vorkommen-tip li i { width: 10px; height: 10px; border-radius: 2px; flex: none; }
-.vorkommen-tip a { display: inline-block; margin-top: 6px; font-size: 12px; color: var(--gold); }
-.vorkommen-tip .klein { color: var(--schwach); font-size: 11px; margin: 4px 0 0; }
+.vorkommen-tip a { display: inline-block; margin-top: 6px; font-size: var(--text-klein); color: var(--gold); }
+.vorkommen-tip .klein { color: var(--schwach); font-size: var(--text-mikro); margin: 4px 0 0; }
 .geber-schalter { white-space: nowrap; }
 .notizen-ebene { position: absolute; inset: 0; pointer-events: none; }
-.welt img.notiz { position: absolute; display: block; right: auto; bottom: auto; width: 24px; height: 24px; max-width: none; margin: -12px 0 0 -12px; pointer-events: auto; filter: drop-shadow(0 1px 1px #000) drop-shadow(0 0 1px #000); }
+.welt img.notiz { position: absolute; display: block; right: auto; bottom: auto; width: 24px; height: 24px; max-width: none; margin: -12px 0 0 -12px; pointer-events: auto; filter: drop-shadow(0 1px 1px var(--llb-palette-000)) drop-shadow(0 0 1px var(--llb-palette-000)); }
 .welt img.notiz:hover { transform: scale(1.4); z-index: 4; }
 .zielorte { margin: 8px 0 16px; padding: 6px 10px; background: var(--fläche-hell); border-radius: 3px; }
-.zielorte p { margin: 3px 0; font-size: 12px; font-variant-numeric: tabular-nums; }
+.zielorte p { margin: 3px 0; font-size: var(--text-klein); font-variant-numeric: tabular-nums; }
 .belohnungen { margin: 14px 0; padding: 10px 12px; background: var(--fläche-hell); border-radius: 4px; }
 .belohnungen h3 { margin: 0 0 6px; font-size: var(--text-normal); color: var(--gold); }
 .belohnungen ul { margin: 0; padding-left: 18px; }
@@ -1196,7 +1199,7 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .belohnungen li a { color: inherit; }
 .belohnungen li a:hover { color: var(--gold); }
 .gegenstand-symbol { width: 20px; height: 20px; border-radius: 2px; object-fit: contain;
-	background: #14110e; box-shadow: 0 0 0 1px var(--rand); vertical-align: -5px; margin-right: 6px; }
+	background: var(--llb-icon-tile-bg); box-shadow: 0 0 0 1px var(--llb-icon-tile-border); vertical-align: -5px; margin-right: 6px; }
 .belohnungen .auswahl > strong { display: block; margin-bottom: 4px; }
 .belohnungen .auswahl > ul { margin: 0; padding-left: 18px; }
 .belohnungen .auswahl > ul > li { margin: 4px 0; }
@@ -1212,29 +1215,30 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .belohnungen .auswahl { margin: 8px 0 0; }
 .belohnungen .auswahl strong { color: var(--text); }
 /* Item quality, the game's own colours: common, uncommon, rare, incomparable, legendary. */
-.q1 { color: #d8d2c4; } .q2 { color: #e0c15c; } .q3 { color: #b98cd6; }
-.q4 { color: #6fc3c3; } .q5 { color: #e6a94d; } .q0 { color: inherit; }
-.jagdpunkt { position: absolute; transform: translate(-50%, -50%); width: 24px; height: 24px; border: 2px dashed #f3bc65; border-radius: 50%; background: #4a301bd9; color: #fff2d9; font: bold 11px/20px sans-serif; text-align: center; box-sizing: border-box; }
+.q1 { color: var(--llb-palette-d8d2c4); } .q2 { color: var(--llb-palette-e0c15c); } .q3 { color: var(--llb-palette-b98cd6); }
+.q4 { color: var(--llb-palette-6fc3c3); } .q5 { color: var(--llb-palette-e6a94d); } .q0 { color: inherit; }
+.jagdpunkt { position: absolute; transform: translate(-50%, -50%); width: 24px; height: 24px; border: 2px dashed var(--llb-palette-f3bc65); border-radius: 50%; background: var(--llb-palette-4a301bd9); color: var(--llb-palette-fff2d9); font: var(--gewicht-bold) var(--text-mikro)/20px var(--schrift); text-align: center; box-sizing: border-box; }
 /* Places of the quests a deed asks for: a hint like a hunting spot, but dotted gold. */
-.hinweispunkt { position: absolute; transform: translate(-50%, -50%); width: 22px; height: 22px; border: 2px dotted var(--gold); border-radius: 50%; background: #3a2f1cd9; color: #f4e6c4; font: bold 10px/18px sans-serif; text-align: center; box-sizing: border-box; }
-.jagdhinweis { border-left: 3px dashed #dba54e; }
+.hinweispunkt { position: absolute; transform: translate(-50%, -50%); width: 22px; height: 22px; border: 2px dotted var(--gold); border-radius: 50%; background: var(--llb-palette-3a2f1cd9); color: var(--llb-palette-f4e6c4); font: var(--gewicht-bold) var(--text-mikro)/18px var(--schrift); text-align: center; box-sizing: border-box; }
+.jagdhinweis { border-left: 3px dashed var(--llb-palette-dba54e); }
 .jagdhinweis button { margin: 4px 6px 0 0; }
-.marker.ohne-geber .punkt { display: none; }
+.marker.ohne-geber .punkt.questgeber { display: none; }
 .marker { pointer-events: none; }
 .marker > * { pointer-events: auto; }
 .geber-schalter { display: flex; align-items: center; gap: 4px; cursor: pointer; }
 .koordinate { font-variant-numeric: tabular-nums; min-width: 9em; }
 
 /* Places below the shown map, at the top of its list. */
-#liste li.unterkarte { color: var(--gold, #e0b062); cursor: pointer; font-weight: 600; }
-#liste li.unterkarte:hover { background: rgba(255, 255, 255, .05); }
+#liste li.unterkarte { color: var(--gold, var(--llb-palette-e0b062)); cursor: pointer; font-weight: var(--gewicht-semibold); }
+#liste li.unterkarte:hover { background: var(--llb-palette-rgba-255-255-255-p05); }
 
 /* --- Phone and tablet (06.11.): one pane at a time --------------------- */
 .mobil-reiter { display: none; }
 @media (max-width: 1000px) {
 	body { display: block; height: auto; padding-bottom: 54px; }
+	body[data-seite="karte"] > .seitenfuss { display: none; }
 	main { display: block; height: auto; overflow: visible; }
-	.kopf h1 { font-size: 15px; }
+	.kopf h1 { font-size: var(--text-fliesstext-kompakt); }
 	.spalte { height: auto; overflow: visible; border-right: none; }
 	.nav-baum, .nav-liste { min-height: 0; flex: 0 1 auto; }
 	.nav #liste { overflow: visible; max-height: none; }
@@ -1254,49 +1258,48 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 	}
 	.mobil-reiter button {
 		flex: 1 1 0; border: 0; border-radius: 0; padding: 13px 6px;
-		font-size: 13px; color: var(--schwach); background: none;
+		font-size: var(--text-kompakt); color: var(--schwach); background: none;
 	}
 	.mobil-reiter button[aria-pressed="true"] { color: var(--gold); box-shadow: inset 0 2px 0 var(--gold); }
-	/* Filter panels are 280–300 px wide and would hang over the right edge on a
-	   phone; there they become a sheet above the map bar. The map keeps its fixed
-	   height here, so the action row may wrap without anything jumping. */
-	.kartenleiste { grid-template-rows: 20px auto; }
-	/* The bar is the bottom of the column: filter sheets open upwards and must
-	   not be clipped by the column's overflow. */
+	/* Filter panels stay anchored below the map controls and inside the screen. */
 	.kartenspalte { overflow: visible; }
-	.leiste-aktionen { flex-wrap: wrap; gap: 4px 12px; padding: 1px 0 2px; }
+	.kartenkopf .notizen-feld { width: min(300px, calc(100cqw - 12px)); max-height: 60vh; }
+	.leiste-aktionen { gap: 4px 8px; padding: 0; }
 	.kartenleiste .koordinate { display: none; }
-	.karte-stufe { min-width: 0; font-size: 11px; padding: 1px 5px; }
+	.karte-stufe { min-width: 0; font-size: inherit; padding: 2px 6px; }
 	.kartenkopf { top: 6px; left: 6px; right: 6px; }
 	.kartenkopf-rechts { gap: 4px; }
-	/* The sheet resolves against the bar, not the small button: full width and
-	   always above the bar, however many rows the actions need. */
-	.leiste-aktionen .notizen { position: static; }
-	.notizen-feld {
-		position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); top: auto;
-		width: auto; max-height: min(calc(100vw * 0.75), 62vh);
-	}
+}
+@container (max-width: 560px) {
+	.kartenkopf { align-items: stretch; flex-wrap: wrap; gap: 4px; }
+	.kartenkopf-links, .kartenkopf-rechts { flex: 1 0 100%; }
+	.kartenkopf-links { flex-wrap: wrap; gap: 4px; }
+	.kartenkopf-rechts { margin-left: 0; justify-content: flex-end; }
+	.kartenleiste { gap: 6px; padding: 4px 6px; }
+}
+@media (max-width: 1000px) {
+	.kartenkopf button { min-height: 44px; }
 }
 
 /* Detail column: same reading size as the quest list, and a little wider than
    before so the reward rows keep their line. */
-.spalte.detail { font-size: .875rem; line-height: 1.55; }
-.spalte.detail h2 { font-size: 1rem; margin-bottom: 8px; }
+.spalte.detail { font-size: var(--text-bedienung); line-height: var(--zeile-detail); }
+.spalte.detail h2 { font-size: var(--text-normal); margin-bottom: 8px; }
 .spalte.detail .kennung { margin-bottom: 10px; }
 .spalte.detail .text { margin-bottom: 12px; }
 .spalte.detail h3 { margin: 18px 0 8px; }
 .spalte.detail .belohnungen {
 	padding: 12px 0 10px;
 	margin: 16px 0;
-	background: transparent;
+	background: var(--llb-palette-transparent);
 	border-top: 1px solid var(--rand);
 	border-bottom: 1px solid var(--rand);
 	border-radius: 0;
 }
 .spalte.detail .belohnungen h3 {
 	margin: 0 0 9px;
-	font-size: .95rem;
-	font-weight: 600;
+	font-size: var(--text-fliesstext-kompakt);
+	font-weight: var(--gewicht-semibold);
 	letter-spacing: .01em;
 }
 .spalte.detail .belohnungen > ul {
@@ -1309,7 +1312,7 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 	align-items: center;
 	gap: 5px;
 	margin: 6px 0;
-	line-height: 1.35;
+	line-height: var(--zeile-zusatz);
 }
 .spalte.detail .belohnungen .gegenstand-symbol {
 	flex: 0 0 auto;
@@ -1325,13 +1328,13 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 .spalte.detail .belohnungen .auswahl {
 	margin: 12px 0 0;
 	padding: 9px 0 0 12px;
-	border-top: 1px solid color-mix(in srgb, var(--rand) 65%, transparent);
-	border-left: 2px solid color-mix(in srgb, var(--gold) 60%, transparent);
+	border-top: 1px solid color-mix(in srgb, var(--rand) 65%, var(--llb-palette-transparent));
+	border-left: 2px solid color-mix(in srgb, var(--gold) 60%, var(--llb-palette-transparent));
 }
 .spalte.detail .belohnungen .auswahl > strong {
 	margin-bottom: 6px;
-	font-size: .85rem;
-	font-weight: 600;
+	font-size: var(--text-bedienung);
+	font-weight: var(--gewicht-semibold);
 	color: var(--schwach);
 }
 .spalte.detail .belohnungen .auswahl > ul > li {
@@ -1345,23 +1348,23 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 /* Wider detail column; landschaft.css sets the list column, so this needs
    more weight than a bare `main`. */
 body main { grid-template-columns: clamp(280px, var(--listenbreite, 390px), calc(100% - 750px)) minmax(320px, 1fr) 420px; }
-.detail .kennung, .detail .marken { font-size: .75rem; }
+.detail .kennung, .detail .marken { font-size: var(--text-klein); }
 
 /* Travel planner link under the facts line of the detail column. */
 .detail-reise { color: var(--gold); }
 
 /* Preview flyout for linked quests: small map cut, first line, nothing more. */
 .vorschau { position: fixed; z-index: 70; width: 250px; padding: 10px 12px;
-	background: rgba(20, 17, 14, .98); border: 1px solid var(--rand); border-radius: 4px;
-	box-shadow: 0 6px 18px rgba(0, 0, 0, .55); font-size: .8125rem; color: var(--text); }
-.vorschau strong { display: block; color: var(--gold); font-weight: 500; margin-bottom: 2px; }
-.vorschau-zeile { color: var(--schwach); font-size: .75rem; margin-bottom: 6px; }
+	background: var(--llb-palette-rgba-20-17-14-p98); border: 1px solid var(--rand); border-radius: 4px;
+	box-shadow: 0 6px 18px var(--llb-palette-rgba-0-0-0-p55); font-size: var(--text-kompakt); color: var(--text); }
+.vorschau strong { display: block; color: var(--gold); font-weight: var(--gewicht-medium); margin-bottom: 2px; }
+.vorschau-zeile { color: var(--schwach); font-size: var(--text-klein); margin-bottom: 6px; }
 .vorschau-karte { position: relative; aspect-ratio: 4 / 3; margin: 0 0 6px; border-radius: 3px;
-	overflow: hidden; background: #14110e; border: 1px solid var(--rand); }
+	overflow: hidden; background: var(--llb-palette-14110e); border: 1px solid var(--rand); }
 .vorschau-karte img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .vorschau-pin { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
-	background: #f0a63c; border: 2px solid #14110e; }
-.vorschau p { margin: 0; line-height: 1.4; color: #cfc5b5; }
+	background: var(--llb-palette-f0a63c); border: 2px solid var(--llb-palette-14110e); }
+.vorschau p { margin: 0; line-height: var(--zeile-kompakt); color: var(--llb-palette-cfc5b5); }
 
 /* The way to the full catalogue page stays at the bottom of the column. */
 .detail-ganz { display: none; }
@@ -1379,7 +1382,7 @@ body main { grid-template-columns: clamp(280px, var(--listenbreite, 390px), calc
 /* Recipe list: result, ingredients and the recipe itself are links. */
 .rezept-tabelle a.zutat { color: inherit; text-decoration: none; }
 .rezept-tabelle a.zutat:hover { color: var(--gold); text-decoration: underline; }
-.rezept-detail { margin-top: 4px; font-size: 11px; }
+.rezept-detail { margin-top: 4px; font-size: var(--text-mikro); }
 .rezept-detail a { color: var(--schwach); text-decoration: none; }
 .rezept-detail a:hover { color: var(--gold); text-decoration: underline; }
 .rezept-tabelle td a { text-decoration: none; }
@@ -1390,53 +1393,53 @@ body main { grid-template-columns: clamp(280px, var(--listenbreite, 390px), calc
 /* Detail panel on the map: labelled facts and framed sections instead of a
    run-on line. The same 54 px icon tile as the mobile result rows. */
 .detail-kopf { margin: 0 0 10px; }
-.detail-art { margin: 0 0 3px; color: var(--gold); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+.detail-art { margin: 0 0 3px; color: var(--gold); font-size: var(--text-mikro); letter-spacing: .06em; text-transform: uppercase; }
 .detail-titel { display: flex; align-items: flex-start; gap: 10px; }
-.detail-titel h2 { margin: 0; font-size: 1.12rem; line-height: 1.25; font-weight: 600; color: var(--text); }
+.detail-titel h2 { margin: 0; font-size: var(--text-zwischen); line-height: var(--zeile-label); font-weight: var(--gewicht-semibold); color: var(--text); }
 .detail-symbol { width: 54px; height: 54px; flex: none; display: grid; place-items: center; box-sizing: border-box;
-	border: 1px solid #65563f; border-radius: 5px; background: #362f26; color: var(--gold); }
+	border: 1px solid var(--llb-icon-tile-border); border-radius: 5px; background: var(--llb-icon-tile-bg); color: var(--gold); }
 .detail-symbol svg { width: 24px; height: 24px; }
-.detail-fakten { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 12px; margin: 0 0 10px; font-size: .8125rem; }
+.detail-fakten { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 12px; margin: 0 0 10px; font-size: var(--text-kompakt); }
 .detail-fakten dt { color: var(--schwach); }
 .detail-fakten dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 .detail-fakten a, .detail-fakten .gebietsprung { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
 .detail-fortschritt { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0 0 10px;
 	padding: 8px 10px; background: var(--fläche-hell); border: 1px solid var(--rand); border-radius: 5px; }
-.detail-fortschritt > span:first-child { color: var(--schwach); font-size: .8125rem; }
-.detail-lage { color: var(--schwach); font-size: .78rem; }
-.detail-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 0 0 12px; font-size: .8125rem; }
+.detail-fortschritt > span:first-child { color: var(--schwach); font-size: var(--text-kompakt); }
+.detail-lage { color: var(--schwach); font-size: var(--text-klein); }
+.detail-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 0 0 12px; font-size: var(--text-kompakt); }
 .detail-aktionen a { color: var(--gold); }
 .detail-abschnitt { margin: 0 0 10px; padding: 10px 12px; background: var(--fläche-hell);
 	border: 1px solid var(--rand); border-radius: 5px; }
-.detail-abschnitt > h3 { margin: 0 0 7px; font-size: .95rem; font-weight: 600; letter-spacing: normal;
+.detail-abschnitt > h3 { margin: 0 0 7px; font-size: var(--text-fliesstext-kompakt); font-weight: var(--gewicht-semibold); letter-spacing: normal;
 	text-transform: none; color: var(--text); }
-.detail-abschnitt .text { margin: 0 0 7px; font-size: .875rem; line-height: 1.55; }
+.detail-abschnitt .text { margin: 0 0 7px; font-size: var(--text-bedienung); line-height: var(--zeile-detail); }
 .detail-abschnitt .text:last-child { margin-bottom: 0; }
 .detail-abschnitt .ziele-schalter { width: 100%; margin: 0; }
 .detail-schritt + .detail-schritt { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--rand); }
 .detail-ziele-liste { margin: 6px 0 0; padding-left: 1.4em; }
-.detail-ziele-liste li { margin-bottom: 3px; font-size: .875rem; }
-.detail-abschnitt .zielorte { margin-top: 8px; color: var(--schwach); font-size: .78rem; }
+.detail-ziele-liste li { margin-bottom: 3px; font-size: var(--text-bedienung); }
+.detail-abschnitt .zielorte { margin-top: 8px; color: var(--schwach); font-size: var(--text-klein); }
 .detail-abschnitt .zielorte p { margin: 2px 0; }
-.detail-abschnitt .zielorte h4 { margin: 6px 0 3px; font-size: .8rem; color: var(--schwach); font-weight: 600; }
+.detail-abschnitt .zielorte h4 { margin: 6px 0 3px; font-size: var(--text-klein); color: var(--schwach); font-weight: var(--gewicht-semibold); }
 .detail-reward-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.detail-reward-liste li { display: flex; align-items: flex-start; gap: 9px; margin: 0; font-size: .875rem; }
+.detail-reward-liste li { display: flex; align-items: flex-start; gap: 9px; margin: 0; font-size: var(--text-bedienung); }
 .detail-reward-symbol { width: 54px; height: 54px; flex: none; display: grid; place-items: center; box-sizing: border-box;
-	border: 1px solid #65563f; border-radius: 4px; background: #362f26; }
-.detail-reward-symbol img { width: 78%; height: 78%; object-fit: contain; filter: brightness(1.35); }
+	border: 1px solid var(--llb-icon-tile-border); border-radius: 4px; background: var(--llb-icon-tile-bg); }
+.detail-reward-symbol img { width: 78%; height: 78%; object-fit: contain; filter: var(--llb-icon-item-filter); }
 .detail-reward-text { min-width: 0; overflow-wrap: anywhere; }
 .detail-reward-text a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .detail-reward-text .stufe { margin-left: 6px; color: var(--schwach); }
 .detail-reward-liste .merkmal { color: var(--schwach); }
 .detail-abschnitt .auswahl { margin-top: 8px; }
-.detail-abschnitt .auswahl > strong { display: block; margin-bottom: 4px; font-size: .8125rem; }
+.detail-abschnitt .auswahl > strong { display: block; margin-bottom: 4px; font-size: var(--text-kompakt); }
 .detail-abschnitt .auswahl ul { list-style: none; margin: 0; padding: 0; }
-.detail-abschnitt .auswahl li { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 4px 0; font-size: .8125rem; }
+.detail-abschnitt .auswahl li { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 4px 0; font-size: var(--text-kompakt); }
 .detail-bedingungen, .detail-kette-liste { list-style: none; margin: 0; padding: 0; }
-.detail-bedingungen li, .detail-kette-liste li { font-size: .8125rem; padding: 2px 0; }
+.detail-bedingungen li, .detail-kette-liste li { font-size: var(--text-kompakt); padding: 2px 0; }
 .detail-bedingungen .zeichen, .detail-kette-liste .zeichen { display: inline-block; width: 1em; color: var(--schwach); }
 .detail-bedingungen .zeichen.ok, .detail-kette-liste .zeichen.ok { color: var(--fertig); }
 .detail-bedingungen li.sprung, .detail-kette-liste li.sprung { cursor: pointer; }
 .detail-bedingungen li.sprung:hover, .detail-kette-liste li.sprung:hover { color: var(--gold); text-decoration: underline; }
 .detail-kartenaktion { margin: 12px 0 0; }
-.detail-kartenaktion .katalog-knopf { color: var(--gold); background: var(--fläche-hell); border: 1px solid var(--rand); border-radius: 4px; padding: 6px 10px; font-size: .8125rem; cursor: pointer; }
+.detail-kartenaktion .katalog-knopf { color: var(--gold); background: var(--fläche-hell); border: 1px solid var(--rand); border-radius: 4px; padding: 6px 10px; font-size: var(--text-kompakt); cursor: pointer; }

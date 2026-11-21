@@ -95,6 +95,17 @@ def validate_configuration() -> None:
             if ident in assigned:
                 raise ValueError(f'map {ident} occurs in multiple display groups')
             assigned.add(ident)
+    for raw_id, override in config.get('map_overrides', {}).items():
+        ident = int(raw_id)
+        if ident not in tree:
+            raise ValueError(f'unknown map override ID: {ident}')
+        target = override.get('merge_into')
+        if target is not None:
+            target = int(target)
+            if target not in tree:
+                raise ValueError(f'unknown map merge target ID: {target}')
+            if int(tree[ident].get('eltern') or -1) != int(tree[target].get('eltern') or -1):
+                raise ValueError(f'map {ident} and merge target {target} are not siblings')
 
 
 def display_name(ident: int, name: str, lang: str) -> str:

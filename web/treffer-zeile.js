@@ -74,6 +74,7 @@
 	}
 	function header(target, options) {
 		var row = node('li', 'mql-row-heading' + (options.levels === false ? ' mql-row-no-levels' : '') + (options.progress ? '' : ' mql-row-heading-no-progress') + (options.levelHeading ? ' mql-row-single-level' : ''));
+		if (options.progress && target.classList) { target.classList.add('mql-row-list-has-progress'); }
 		row.appendChild(node('span', '', w.result));
 		if (options.levels !== false) { row.appendChild(node('span', '', options.levelHeading || w.levels)); }
 		if (options.progress) { row.appendChild(node('span', '', options.progressLabel || (options.levelHeading && window.MQL_STATUS_UI?.words?.(lang).progress) || w.progress)); }
@@ -88,7 +89,9 @@
 		target.appendChild(row);
 	}
 	function row(target, options) {
-		var li = node('li', 'mql-row' + (options.levels === false ? ' mql-row-no-levels' : '') + (options.progress ? '' : ' mql-row-no-progress') + (options.levelHeading ? ' mql-row-single-level' : ''));
+		var progressColumn = !!options.progress || options.progressColumn === true ||
+			!!(target.classList && target.classList.contains('mql-row-list-has-progress'));
+		var li = node('li', 'mql-row' + (options.levels === false ? ' mql-row-no-levels' : '') + (progressColumn ? '' : ' mql-row-no-progress') + (options.levelHeading ? ' mql-row-single-level' : ''));
 		var link = options.onActivate ? node('button', 'mql-row-hit') : options.href ? node('a', 'mql-row-hit') : node('div', 'mql-row-hit');
 		if (options.href) { link.href = options.href; }
 		if (options.onActivate) {
@@ -111,8 +114,12 @@
 			});
 			li.appendChild(values);
 		}
-		if (options.progress) {
-			if (options.progress.classList.contains('mql-row-progress')) { li.appendChild(options.progress); }
+		if (progressColumn) {
+			if (!options.progress) {
+				var emptyProgress = node('span', 'mql-row-progress');
+				emptyProgress.setAttribute('aria-hidden', 'true');
+				li.appendChild(emptyProgress);
+			} else if (options.progress.classList.contains('mql-row-progress')) { li.appendChild(options.progress); }
 			else {
 				var progress = node('span', 'mql-row-progress');
 				progress.appendChild(options.progress);

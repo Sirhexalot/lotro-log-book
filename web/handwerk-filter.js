@@ -186,6 +186,40 @@
 			facets:function(all,s){var out={};groups.forEach(function(g){if(g.kind==='multi'||g.kind==='single'){out[g.id]=g.options.map(function(o){var candidate=JSON.parse(JSON.stringify(s));candidate.filters[g.id]=g.kind==='multi'?[o.value]:o.value;return {value:o.value,count:all.filter(function(r){return matches(r,candidate);}).length};});}});return out;},
 			renderResults:function(result,target){target.replaceChildren();
 				if(isRecipe&&recipeRenderer){target.appendChild(recipeRenderer(result.payload.map(function(r){return r.raw;})));return;}
+				if(isMaterial&&window.MQL_TREFFERZEILE){
+					var ui=window.MQL_TREFFERZEILE,list=document.createElement('ul');
+					list.className='mql-row-list';
+					ui.header(list,{progress:false});
+					result.payload.forEach(function(r){
+						var professions=Array.from(new Set(r.uses.map(function(u){return profession(u.profession);}).filter(Boolean)));
+						var tiers=Array.from(new Set(r.uses.map(function(u){return tierText(u.tier);}).filter(Boolean)));
+						var areas=(r.areas||[]).slice().sort(function(a,b){return b.count-a.count;});
+						var href=r.kind==='resource'
+							?(areas.length?'/'+lang+'/'+({de:'karte',en:'map',fr:'carte'})[lang]+'/?vorkommen='+encodeURIComponent(r.resource)+'&vorkarte='+encodeURIComponent(areas[0].map):'')
+							:url('item',r.id);
+						var row=ui.row(list,{
+							image:r.symbol,icon:'gegenstand',name:r.name,meta:professions.join(' · '),
+							href:href,
+							values:tiers.length?[{label:ui.words.professionLevel,value:tiers.join(' · ')}]:[],
+							progress:null
+						});
+						if(r.kind==='resource'&&areas.length){
+							var details=document.createElement('details');
+							details.className='handwerk-rohstoff-orte';
+							details.appendChild(text('summary',T('hw_roh_gebiet')+' ('+areas.length+')'));
+							areas.forEach(function(a){
+								var link=text('a',a.name+' ('+a.count.toLocaleString(lang)+')');
+								link.href='/'+lang+'/'+({de:'karte',en:'map',fr:'carte'})[lang]+'/?vorkommen='+encodeURIComponent(r.resource)+'&vorkarte='+encodeURIComponent(a.map);
+								details.appendChild(link);
+							});
+							row.appendChild(details);
+						}
+						list.appendChild(row);
+					});
+					if(!result.total){target.appendChild(text('p',T('hw_keine_rezepte')));}
+					else{target.appendChild(list);}
+					return;
+				}
 				result.payload.forEach(function(r){var section=document.createElement('section');section.className='filter-craft-row';
 					var title=document.createElement('h3');
 					if(r.symbol){var bildchen=document.createElement('img');bildchen.className='symbol';bildchen.src='/bild/items/'+r.symbol+'.webp';bildchen.alt='';bildchen.width=22;bildchen.height=22;bildchen.loading='lazy';bildchen.decoding='async';title.appendChild(bildchen);}

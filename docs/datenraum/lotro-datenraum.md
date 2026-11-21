@@ -36,6 +36,7 @@ Entschlüsselung des gesamten Spiels.
 - [Charakterreferenzen, Decoder-Klassen und offene Kartenlinks](lotro-datenraum-charakterreferenz.md)
 - [Einzelbelege zu Charakterreferenzen und Kartenlinks](lotro-datenraum-charakterreferenz.json)
 - [Semantischer Datenvertrag: Bedeutung, Einheiten, Logik und Verluste](lotro-datenraum-semantik.md)
+- [Tausch, Behälter, Zerlegung und schlanker Gegenstandsbestand: Modell für drei offene Bezüge](tausch-behaelter-zerlegung.md)
 - [Konkrete Property-Lesezugriffe in 27 Extractor-Dateien](lotro-datenraum-semantik-leseindex.md)
 - [Semantikbelege: Quellhashes und vollständige Befundlisten](lotro-datenraum-semantik-pruefung.json)
 - [Nicht aufgelöste Referenzen, maschinenlesbar](lotro-datenraum-relationen.json)
@@ -326,6 +327,53 @@ Zwei Karten können dasselbe Bild verwenden und unterschiedliche Rahmen haben.
 Ein Navigationslink ist nicht automatisch eine geografische Enthaltenseinrelation.
 Region-Codes sind keine Karten-IDs.
 
+### Kartenname, Kartenzuordnung und Website-Navigation
+
+Ein Kartenname ist Anzeigetext, keine Identität. `kartenname()` leitet ihn in
+fester Reihenfolge ab: Sprachlabel der Karte, gemeinsames Präfix der Kindkarten,
+englischer Name über Kartenlabels und Gebietsnamen, zuletzt ein technischer
+Ersatzname. Fehlt eine Beschriftung im Client, hat die Karte in
+`parchmentMaps.xml` dennoch zugeordnete Gebiete. Deren Namen sind die belastbare
+Benennungsquelle (`gebietsnamen()` aus dem eigenen DAT-Export). Sie brauchen
+dieselbe Bereinigung wie Gegenstandsnamen, weil einzelne Gebietsnamen
+Client-Escapes wie `\q` tragen (8 von 1.610).
+
+Am 20.11.2026 tragen 17 Karten keinen Namen. Sie erzeugen je Sprache 193
+Aufgaben- und 52 Tatenlabels sowie 17 der 216 Einträge der Kartennavigation,
+sämtlich in der Form `Karte <ID>`. Ein technischer Ersatzname ist ein
+Datenmangel, keine Spielbezeichnung. Gemessen ist die Zahl über
+`daten/quests-<sprache>.json`, `daten/taten-<sprache>.json` und
+`web/gebiete-<sprache>.js`.
+
+Die Website-Navigation (Region → Landschaft → Unterkarte) ist eine Projektion
+aus den Labels `f` und den Karten-IDs `fk`. Sie ist kein Geografiebaum:
+`geoAreas.xml` führt Region → Territorium → Gebiet, `parchmentMaps.xml` ordnet
+Karten Gebieten zu. Vergleich am 21.11.2026: 6 Regionen, 64 Landschaften und
+152 Unterkarten bei uns gegen 7 Regionen, 86 Territorien und 679 Gebiete in
+`geoAreas.xml`. 30 Landschaften tragen exakt einen Territoriumsnamen, 6 bilden
+ein Gebiet ab, 34 führen eigene Kartennamen; 19 Territorien verteilen sich auf
+mehrere Landschaften.
+
+Die Regionszuordnung stammt aus `f[0]`, nicht aus dem Karten-Regionscode.
+Deshalb kann eine Karte in einer anderen Website-Region stehen als ihr Code
+erwarten lässt (Morannon: Code 3, Inhalt Das Ödland). Die Regionsebene von
+`geoAreas.xml` taugt nicht als Anzeigegliederung: Rohan, Gondor und Mordor
+hängen dort unter Rhovanion, zwei Regionen bleiben leer. Belastbare
+Vergleichsebene ist das Territorium.
+
+Dieselben Gebietswerte speisen auch den Filter „Region und Gebiet“ für Aufgaben
+und Taten. Eine Kartenumbenennung kann daher Filteroptionen unterhalb der
+Regionsebene umbenennen oder zusammenführen. Solange `f[0]` und die
+Regionszuordnung nicht geändert werden, bleiben die sechs Regionsgruppen und
+ihre Gesamtsummen stabil; Gebietszähler können sich durch die Zusammenfassung
+auf neue Optionen verteilen. Die Zähler sind pro Aufgaben-/Tatenindex aus den
+gebauten Datensätzen zu prüfen, nicht aus der Kartennavigation abzuleiten.
+Am 21.11.2026 wurden die sechs Helm-Klamm-Varianten für Aufgaben unter
+„Helms Klamm“ zusammengefasst (43 Aufgabenoption-Treffer); der Tatenfilter hat
+85 Treffer für die Region Rohan und keine Taten auf diesen Karten. Die
+Regionensummen und getrennten Gebietsoptionen stehen im
+Abnahmevermerk `docs/archiv/kartenbenennung-hierarchie.md`.
+
 **Korrektur gegenüber vereinfachten bisherigen Aussagen:** `GameMaps.attribute`
 ordnet Positionen anhand Rahmen, Tiefe und Abstand zur Mitte zu; bei
 überlappenden Karten ist das eine Auswahlregel. `_fit_overviews` berechnet
@@ -344,6 +392,10 @@ Hierarchien ab; `dungeons.xml` kann Positionen und Basemap-Bezüge enthalten.
 Ein Gebiet braucht keine eigene Karte; eine Karte kann mehrere
 Navigationspfade besitzen. Aus einer Karten-ID folgt keine eindeutige
 Position eines Gebietsknotens im Websitebaum.
+
+Für den Abgleich der Website-Hierarchie gilt: Territorium ist die
+Vergleichsebene, nicht die Region. Eine Landschaft ohne Territoriumsbezug und
+ein Name der Form `Karte <ID>` sind Prüfbefunde, keine Spielbezeichnungen.
 
 ### Landmarke und Vorkommen
 

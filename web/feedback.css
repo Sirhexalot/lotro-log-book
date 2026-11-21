@@ -3,7 +3,7 @@
 .feedback-seite > p { max-width: 68ch; }
 .feedback-seite form { max-width: 760px; margin-top: 24px; }
 .feedback-feld { display: grid; gap: 6px; margin: 0 0 18px; }
-.feedback-feld span { font-weight: 600; }
+.feedback-feld span { font-weight: var(--gewicht-semibold); }
 .feedback-feld textarea,
 .feedback-feld input {
 	width: 100%; max-width: 100%; padding: 10px 12px;
@@ -22,8 +22,8 @@
 	color: var(--schwach); font-size: var(--text-bedienung);
 }
 .feedback-status { min-height: 1.6em; margin: 12px 0; }
-.feedback-status.fehler { color: #ef9a87; }
-.feedback-status.erfolg { color: #9bc887; }
+.feedback-status.fehler { color: var(--llb-palette-ef9a87); }
+.feedback-status.erfolg { color: var(--llb-palette-9bc887); }
 .feedback-falle {
 	position: absolute !important; left: -10000px !important; top: auto !important;
 	width: 1px !important; height: 1px !important; overflow: hidden !important;

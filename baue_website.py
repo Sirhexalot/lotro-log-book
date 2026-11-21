@@ -40,6 +40,7 @@ DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'sets.css', 'lan
             'karten-start-taten-de.js', 'karten-start-taten-en.js',
             'karten-start-taten-fr.js',
             'start.html', 'start-en.html', 'start-fr.html', 'spielstand.html', '404.html',
+            'lotro-log-book-mark.svg',
            'plugin.html', 'companion.html', 'ruf.html', 'handwerk.html', 'belohnungen.html', 'gegenstand.html', 'impressum.html', 'datenschutz.html')
 BILDER = ('bild/start.jpg', 'bild/start-en.jpg', 'bild/start-fr.jpg',
           'bild/companion-import-knopf.png')
@@ -69,6 +70,10 @@ def kopiere(ziel):
     ziel_ordner = ziel / 'bild' / 'items'
     if not (ziel_ordner.exists() and ziel_ordner.resolve() == ordner.resolve()):
         shutil.copytree(ordner, ziel_ordner, dirs_exist_ok=True)
+    schriftordner = WEB / 'fonts'
+    if not schriftordner.is_dir():
+        raise SystemExit('MISSING: %s (lokale Webschriften)' % schriftordner)
+    shutil.copytree(schriftordner, ziel / 'fonts', dirs_exist_ok=True)
     daten = WEB / 'karten-daten'
     if not daten.is_dir():
         raise SystemExit('MISSING: %s (run build_karten_kurz.py)' % daten)
@@ -105,6 +110,10 @@ def stempeln(ziel):
     for name in sorted(DATEIEN):
         if name.endswith(('.js', '.css')):
             summe.update((ziel / name).read_bytes())
+    for schrift in sorted((ziel / 'fonts').glob('*')):
+        if schrift.is_file():
+            summe.update(schrift.name.encode('utf-8'))
+            summe.update(schrift.read_bytes())
     marke = summe.hexdigest()[:10]
     # The data files load with window.MQL_STAND from stand.js. build_daten.py writes
     # that per run, so the last language built wins and a change in another one

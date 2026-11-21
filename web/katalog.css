@@ -1,12 +1,11 @@
 /* Static catalogue pages use the site's tokens and header container. */
 body.katalog-seite { display: block; height: auto; min-height: 100vh; }
-.katalog-marke { grid-area: marke; color: var(--gold); text-decoration: none; white-space: nowrap; letter-spacing: .04em; }
 .katalog-inhalt { display: block; width: 100%; max-width: var(--huelle); margin: 0 auto; padding: 24px 16px 48px; }
 .katalog-inhalt article { max-width: 960px; }
-.katalog-inhalt h1 { font-size: var(--text-titel); line-height: 1.3; overflow-wrap: anywhere; }
+.katalog-inhalt h1 { font-size: var(--text-titel); line-height: var(--zeile-titel); overflow-wrap: anywhere; }
 .katalog-inhalt h2 { font-size: var(--text-abschnitt); margin-top: 28px; }
 .katalog-inhalt h3 { font-size: var(--text-normal); }
-.katalog-inhalt article { font-size: var(--text-normal); line-height: 1.6; }
+.katalog-inhalt article { font-size: var(--text-normal); line-height: var(--zeile-lesetext); }
 .katalog-inhalt a:not(:where(.katalog-knopf, .katalog-chip, .katalog-ortlink, .gebiet-tab, .mql-row-hit)) {
 	color: var(--gold);
 	text-decoration-line: underline;
@@ -22,7 +21,7 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	border-radius: 2px;
 }
 .katalog-orientierung { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:4px 16px; }
-.entity-feedback-link { font-size:var(--text-bedienung); }
+.entity-feedback-link { font-size: var(--text-bedienung); }
 .katalog-orientierung .katalog-pfad a {
 	color: var(--schwach);
 	text-decoration: none;
@@ -61,13 +60,13 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 
 /* Quest page: one place gets a map cut with a pin, many places only the count. */
 .katalog-karte-gross { margin: 0 0 14px; max-width: 640px; aspect-ratio: 4 / 3;
-  border: 1px solid var(--rand); border-radius: 4px; overflow: hidden; background: #14110e; }
+  border: 1px solid var(--rand); border-radius: 4px; overflow: hidden; background: var(--llb-palette-14110e); }
 .katalog-karte-gross img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .katalog-ort { position: relative; margin: 12px 0; max-width: 320px; aspect-ratio: 4 / 3;
-	border: 1px solid var(--rand); border-radius: 4px; overflow: hidden; background: #14110e; }
+	border: 1px solid var(--rand); border-radius: 4px; overflow: hidden; background: var(--llb-palette-14110e); }
 .katalog-ort img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .katalog-pin { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%;
-	background: #f0a63c; border: 2px solid #14110e; box-shadow: 0 0 0 3px rgba(240, 166, 60, .25); }
+	background: var(--llb-palette-f0a63c); border: 2px solid var(--llb-palette-14110e); box-shadow: 0 0 0 3px var(--llb-palette-rgba-240-166-60-p25); }
 .katalog-marken { color: var(--schwach); font-size: var(--text-bedienung); }
 .katalog-inhalt h1 svg.symbol { width: 26px; height: 26px; vertical-align: -3px; margin-right: 10px; color: var(--gold); }
 /* The item's own picture stays bigger than the entity mark. */
@@ -79,8 +78,8 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-inhalt .katalog-varianten { padding: 0; list-style: none; }
 
 .katalog-reiter { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 8px;
-    border-bottom: 1px solid var(--rand); }
-.katalog-reiter button { padding: 7px 12px; border: 1px solid var(--rand);
+    border-bottom: 1px solid var(--llb-flaechen-rand); }
+.katalog-reiter button { padding: 7px 12px; border: 1px solid var(--llb-flaechen-rand);
     border-bottom: 0; border-radius: 4px 4px 0 0; color: var(--text);
     background: var(--fläche); font: inherit; cursor: pointer; }
 .katalog-reiter button[aria-selected="true"] { color: var(--gold);
@@ -90,8 +89,8 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .item-bezugsreiter {
 	--item-reiter-flaeche: var(--llb-flaechen-ton);
 	--item-reiter-rand: var(--llb-flaechen-rand);
-	--item-feld-rand: #84745f;
-	--item-zweittext: #c9bdab;
+	--item-feld-rand: var(--llb-palette-84745f);
+	--item-zweittext: var(--llb-palette-c9bdab);
 	margin-top: 22px;
 }
 .item-bezugsreiter > .katalog-reiter {
@@ -119,7 +118,7 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	color: var(--item-zweittext); opacity: 1;
 }
 .item-bezugsreiter .filter-ui .filter-toolbar button {
-	background-color: #3a3023; border-color: var(--item-feld-rand);
+	background-color: var(--llb-palette-3a3023); border-color: var(--item-feld-rand);
 }
 .item-bezugsreiter > [role="tabpanel"][hidden] { display: none; }
 .item-bezugsreiter [role="tabpanel"] > section > h3 { margin: 0 0 6px; }
@@ -161,7 +160,7 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-detailraster .katalog-text { max-width: 68ch; }
 .katalog-detailraster > .katalog-text { margin-top: 16px; }
 .katalog-metazeile { margin: 0; color: var(--schwach); font-size: var(--text-bedienung); }
-.item-seite .katalog-metazeile { color: #c9bdab; }
+.item-seite .katalog-metazeile { color: var(--llb-palette-c9bdab); }
 .katalog-kompaktleiste { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; }
 .katalog-kompaktleiste > p { margin: 0; }
 .katalog-kompaktleiste #katalog-status { margin-inline-start: auto; }
@@ -190,7 +189,7 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	.entity-detail-split > .entity-detail-place { grid-column: span 5; }
 	.item-seite .entity-detail-overview-pair > :is(.entity-item-description, .katalog-werteflaeche) { grid-column: span 6; }
 }
-.quest-herkunft > h2, .quest-detail-ort > h2 { margin: 0 0 8px; font-size: var(--text-abschnitt); font-weight: 500; }
+.quest-herkunft > h2, .quest-detail-ort > h2 { margin: 0 0 8px; font-size: var(--text-abschnitt); font-weight: var(--gewicht-medium); }
 .quest-herkunft .katalog-fakten { margin: 0; }
 .entity-detail-layout .entity-detail-place > .quest-detail-ort { max-width: none; }
 .entity-detail-place .katalog-ort { max-width: none; }
@@ -218,9 +217,9 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 /* Section headings read as sections on every entity page, not as fine print. */
 .katalog-abschnitt > h2 {
 	font-size: var(--text-abschnitt); letter-spacing: normal; text-transform: none;
-	font-weight: normal; color: var(--text); margin: 0 0 10px;
+	font-weight: var(--gewicht-normal); color: var(--text); margin: 0 0 10px;
 }
-.katalog-abschnitt h3 { font-size: var(--text-bedienung); color: var(--gold); margin: 12px 0 4px; font-weight: 500; }
+.katalog-abschnitt h3 { font-size: var(--text-bedienung); color: var(--gold); margin: 12px 0 4px; font-weight: var(--gewicht-medium); }
 .katalog-abschnitt ul { margin: 0; padding-left: 20px; }
 /* Place: the map cut beside its description, not above it. */
 .katalog-ort-flex { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
@@ -235,7 +234,7 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-gabe { display: flex; align-items: flex-start; gap: 12px; padding: 9px 0; border-bottom: 1px dashed var(--rand); font-size: var(--text-bedienung); }
 /* A link must look like one, but the quality colour carries information. */
 .katalog-gabe a { color: inherit; text-decoration: underline; text-underline-offset: 2px;
-	text-decoration-color: color-mix(in srgb, currentColor 45%, transparent); }
+	text-decoration-color: color-mix(in srgb, currentColor 45%, var(--llb-palette-transparent)); }
 .katalog-gabe a:hover { color: var(--gold); text-decoration-color: currentColor; }
 /* Reward tiles use the shared 64/54 px result-row icon, not a smaller variant. */
 .katalog-gabe .mql-row-icon { flex: 0 0 auto; }
@@ -253,17 +252,12 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 
 /* Header on catalogue pages: same logo mark as the app, and the tab row must
    line up with the brand instead of indenting by the wrapper's padding. */
-.katalog-marke::before {
-	content: ''; display: inline-block; width: 20px; height: 20px; margin-right: 8px;
-	vertical-align: -4px; background: center / 20px 20px no-repeat;
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d6b35a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 22a3 3 0 01-3-3'/%3E%3Cpath d='M10 22c2.761 0 5-1.79 5-4-4.42 0-4.08-5-8.5-5a4.501 4.501 0 000 9z'/%3E%3Cpath d='M10 3H8'/%3E%3Cpath d='M12.5 11.5 22 2'/%3E%3Cpath d='M20 13v4'/%3E%3Cpath d='M22 15h-4'/%3E%3Cpath d='M4 5v4'/%3E%3Cpath d='M6 7H2'/%3E%3Cpath d='m6.98 13.02 2.665-2.664a1.21 1.21 0 011.71 0l2.29 2.288a1.21 1.21 0 010 1.712l-2.088 2.087'/%3E%3Cpath d='M9 2v2'/%3E%3C/svg%3E");
-}
 .kopf-innen .familie-reiter { padding-left: 0; padding-right: 0; }
 /* The search opens the search page; it should look like a link, not a field. */
 .suchen-knopf {
 	display: inline-flex; align-items: center; padding: 4px 0;
 	color: var(--schwach); font-size: var(--text-bedienung); text-decoration: none;
-	border-bottom: 1px solid transparent;
+	border-bottom: 1px solid var(--llb-palette-transparent);
 }
 .suchen-knopf:hover { color: var(--gold); border-bottom-color: var(--gold); }
 /* Space between breadcrumb and title, and between title and chips. */
@@ -285,31 +279,31 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
  * The eyebrow names slot and type, the heading carries the quality colour, the
  * armour value stands alone and every bonus follows as "+n Name". */
 .katalog-augenbraue {
-	margin: 0 0 2px; color: var(--schwach); font-size: var(--text-bedienung); line-height: 1.5;
+	margin: 0 0 2px; color: var(--schwach); font-size: var(--text-bedienung); line-height: var(--zeile-normal);
 	letter-spacing: normal;
 }
-body[data-art="i"] .katalog-kopf h1 { font-size: 1.9rem; line-height: 1.2; }
-body[data-art="i"] .katalog-kopf h1.q1 { color: #d8d2c4; }
-body[data-art="i"] .katalog-kopf h1.q2 { color: #e0c15c; }
-body[data-art="i"] .katalog-kopf h1.q3 { color: #b98cd6; }
-body[data-art="i"] .katalog-kopf h1.q4 { color: #6fc3c3; }
-body[data-art="i"] .katalog-kopf h1.q5 { color: #e6a94d; }
+body[data-art="i"] .katalog-kopf h1 { font-size: var(--text-titel-spezial); line-height: var(--zeile-eng); }
+body[data-art="i"] .katalog-kopf h1.q1 { color: var(--llb-palette-d8d2c4); }
+body[data-art="i"] .katalog-kopf h1.q2 { color: var(--llb-palette-e0c15c); }
+body[data-art="i"] .katalog-kopf h1.q3 { color: var(--llb-palette-b98cd6); }
+body[data-art="i"] .katalog-kopf h1.q4 { color: var(--llb-palette-6fc3c3); }
+body[data-art="i"] .katalog-kopf h1.q5 { color: var(--llb-palette-e6a94d); }
 
 .katalog-grundwert {
 	display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
 	margin: 0 0 10px; padding: 0 0 12px; border-bottom: 1px solid var(--rand);
 	color: var(--schwach);
 }
-.katalog-grundwert b { font-size: 1.7rem; font-weight: normal; color: var(--text); }
+.katalog-grundwert b { font-size: var(--text-kpi); font-weight: var(--gewicht-normal); color: var(--text); }
 
 .katalog-boni { list-style: none; margin: 0; padding: 0; }
 .katalog-boni li { display: flex; gap: 10px; align-items: baseline; padding: 5px 0; }
-.katalog-boni b { min-width: 3.2em; font-weight: normal; color: #8ab681; font-variant-numeric: tabular-nums; }
+.katalog-boni b { min-width: 3.2em; font-weight: var(--gewicht-normal); color: var(--llb-palette-8ab681); font-variant-numeric: tabular-nums; }
 .katalog-boni span { color: var(--text); }
 
 @media (max-width: 640px) {
-	body[data-art="i"] .katalog-kopf h1 { font-size: 1.55rem; }
-	.katalog-grundwert b { font-size: 1.4rem; }
+	body[data-art="i"] .katalog-kopf h1 { font-size: var(--text-titel-spezial-mobil); }
+	.katalog-grundwert b { font-size: var(--text-abschnitt-gross); }
 }
 
 /* --- Area/region tabs (12.11.2026): one content group at a time.
@@ -322,16 +316,16 @@ body[data-art="i"] .katalog-kopf h1.q5 { color: #e6a94d; }
 }
 .gebiet-tab {
 	flex: 0 0 auto; min-height: 44px; display: inline-flex; align-items: center; gap: 8px;
-	padding: 10px 14px; font-size: 1rem; color: var(--schwach);
+	padding: 10px 14px; font-size: var(--text-normal); color: var(--schwach);
 	background: var(--fläche); border: 1px solid var(--rand); border-radius: 4px;
 }
 .gebiet-tab:hover, .gebiet-tab:focus-visible { color: var(--gold); border-color: var(--gold); }
 .gebiet-tab[aria-selected="true"] {
-	color: #19150f; background: var(--gold); border-color: var(--gold);
-	font-weight: bold; box-shadow: inset 0 -3px 0 #fff0b9;
+	color: var(--llb-palette-19150f); background: var(--gold); border-color: var(--gold);
+	font-weight: var(--gewicht-bold); box-shadow: inset 0 -3px 0 var(--llb-palette-fff0b9);
 }
-.gebiet-zahl { font-size: .8rem; font-variant-numeric: tabular-nums; padding: 1px 6px; border-radius: 10px; background: rgba(255, 255, 255, .08); }
-.gebiet-tab[aria-selected="true"] .gebiet-zahl { background: rgba(25, 21, 15, .16); }
+.gebiet-zahl { font-size: var(--text-klein); font-variant-numeric: tabular-nums; padding: 1px 6px; border-radius: 10px; background: var(--llb-palette-rgba-255-255-255-p08); }
+.gebiet-tab[aria-selected="true"] .gebiet-zahl { background: var(--llb-palette-rgba-25-21-15-p16); }
 
 .gebiet-buehne { padding-top: 18px; }
 @media (max-width: 640px) {

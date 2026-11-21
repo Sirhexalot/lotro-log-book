@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+	<g id="marke" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+		<!-- Open field journal -->
+		<path d="M18 22 48 14q5-1 5 4v53q0 4-4 5l-29 9q-5 1-5-4V28q0-4 3-6Z"/>
+		<path d="M22 29v49m5-45 20-6M27 39l19-6M27 49l18-6M27 59l18-6M25 70l20-6M20 80l27-8"/>
+		<!-- Quill and its shaft -->
+		<path d="M56 84c4-22 17-55 36-70 0 23-11 47-34 65"/>
+		<path d="M55 87 91 14M63 70l-1-15m8 4 1-16m7 5 4-16m-13 35 15-3m-9-12 15-4m-8-10 10-4"/>
+	</g>
+</svg>

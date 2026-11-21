@@ -22,10 +22,12 @@ import html
 import json
 import re
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
 BASIS = Path('/Users/adrian/Documents/07_Hobbys/Lotro')
+sys.path.insert(0, str(HIER / 'tools'))
 STANDARD_KATALOG = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Quests_de.lua'
 LOKALES_PLUGIN = Path.home() / 'Developer/Lotro/MagicQuestLog/plugin/MagicQuestLog/Data'
 STANDARD_FORTSCHRITT = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data/Progress.lua'
@@ -101,6 +103,21 @@ def gebietsnamen():
     return namen
 
 
+@functools.lru_cache(maxsize=None)
+def karten_ueberschreibungen():
+    """Reviewed DAT-area labels and optional presentation parents, keyed by map ID."""
+    from gebietssicht import configuration
+    return {int(ident): dict(row)
+            for ident, row in configuration().get('map_overrides', {}).items()}
+
+
+def gebietsname(englisch, sprache):
+    """Localized DAT area name, cleaned with the same rules as map labels."""
+    texte = gebietsnamen().get(englisch) or {}
+    name = texte.get(sprache) or texte.get('en') or ''
+    return kartenname_putzen(html.unescape(name).replace('\\q', '"'))
+
+
 def kartenname(ident, sprache):
     """A game map's name in this language. A map the labels miss takes the part
     before ':' its children share ("Ost-Rohan: Die Steppe" -> "Ost-Rohan"), then its
@@ -115,7 +132,51 @@ def kartenname(ident, sprache):
                  for name in kinder if ':' in name}
     if len(vorsilben) == 1:
         return vorsilben.pop()
-    return name_ueber_englisch(spiel.maps[ident]['name'], sprache) or 'Karte %d' % ident
+    name = name_ueber_englisch(spiel.maps[ident]['name'], sprache)
+    if name and not re.fullmatch(r'(?:Karte|Map|Carte)\s+\d+', name, re.IGNORECASE):
+        return name
+    override = karten_ueberschreibungen().get(int(ident), {})
+    area_name = gebietsname(override.get('area', ''), sprache)
+    if area_name:
+        return area_name
+    fallback = {'de': 'Karte', 'en': 'Map', 'fr': 'Carte'}.get(sprache, 'Map')
+    return '%s %d' % (fallback, ident)
+
+
+def kartenpfad(ident, pfad, baum, mit_bild, sprache):
+    """Presentation path for a map, optionally placed under a sibling overview.
+
+    The actual map ID remains the final path element; only the visible parent
+    path is redirected. This lets variant maps share a landscape without
+    changing their geometry or the game's map hierarchy.
+    """
+    override = karten_ueberschreibungen().get(int(ident), {})
+    target = override.get('merge_into')
+    if target is None:
+        return ([baum[index]['name'] for index in pfad],
+                [index if index in mit_bild else None for index in pfad])
+
+    target_chain = spielkarten().chain(int(target))
+    if not target_chain or not pfad or target_chain[0] != pfad[0]:
+        return ([baum[index]['name'] for index in pfad],
+                [index if index in mit_bild else None for index in pfad])
+
+    siblings = [
+        map_id for map_id, row in karten_ueberschreibungen().items()
+        if row.get('merge_into') == target and row.get('area') == override.get('area')
+    ]
+    localized = gebietsname(override.get('area', ''), sprache)
+    if len(siblings) > 1:
+        variant = siblings.index(int(ident)) + 1
+        suffix = {'de': 'Kartenvariante', 'en': 'Map variant',
+                  'fr': 'Variante de carte'}.get(sprache, 'Map variant')
+        label = '%s · %s %d' % (localized, suffix, variant)
+    else:
+        label = localized
+    display_ids = target_chain + [int(ident)]
+    labels = [baum[index]['name'] for index in target_chain] + [label]
+    map_ids = [index if index in mit_bild else None for index in display_ids]
+    return labels, map_ids
 
 
 # Area names of the catalogue that name a map under another name, the same in all
@@ -236,8 +297,7 @@ def kartenpfade(quests, karten, sprache, art):
         if not pfad:
             ohne_ort.append(quest)
             continue
-        quest['f'] = [baum[index]['name'] for index in pfad]
-        quest['fk'] = [index if index in mit_bild else None for index in pfad]
+        quest['f'], quest['fk'] = kartenpfad(pfad[-1], pfad, baum, mit_bild, sprache)
         zaehler['karte'] += 1
     for quest in ohne_ort:
         treffer, stelle = None, -1

@@ -13,7 +13,6 @@
 	if (!ziel) { return; }
 
 	var REIHE = ['PROSPECTOR', 'FORESTER', 'SCHOLAR', 'COOK'];
-	var FARBE = { PROSPECTOR: '#c48a3c', FORESTER: '#6f9f55', SCHOLAR: '#8b7fc4', COOK: '#c9a63f' };
 	var berufe = (window.MQL_REFERENZ || {}).berufe || {};
 	var daten = null;
 	var beruf = '';
@@ -32,6 +31,12 @@
 	function text(wert) { return wert ? (wert[sprache] || wert.en || '') : ''; }
 	function zahl(wert) { return Number(wert).toLocaleString(t('locale')); }
 	function berufName(schluessel) { return text((berufe[schluessel] || {}).n) || schluessel; }
+	function berufFarbe(schluessel) {
+		var token = '--beruf-' + String(schluessel || '').toLowerCase();
+		var rootStyle = getComputedStyle(document.documentElement);
+		return rootStyle.getPropertyValue(token).trim()
+			|| rootStyle.getPropertyValue('--beruf-standard').trim();
+	}
 	function stufenName(schluessel, stufe) {
 		var liste = (berufe[schluessel] || {}).s || [];
 		for (var i = 0; i < liste.length; i += 1) {
@@ -117,7 +122,7 @@
 			var name = eltern('td', null);
 			var farbe = eltern('i', null);
 			farbe.className = 'roh-farbe';
-			farbe.style.background = FARBE[schluessel] || '#c48a3c';
+			farbe.style.background = berufFarbe(schluessel);
 			name.appendChild(farbe);
 			name.appendChild(eltern('span', sorte));
 			tr.appendChild(name);
@@ -168,7 +173,7 @@
 			knopf.className = 'rezept-knopf';
 			knopf.setAttribute('aria-pressed', String(schluessel === beruf));
 			var punkt = eltern('i', null);
-			punkt.style.background = FARBE[schluessel] || '#c48a3c';
+			punkt.style.background = berufFarbe(schluessel);
 			knopf.insertBefore(punkt, knopf.firstChild);
 			knopf.addEventListener('click', function () {
 				beruf = schluessel;

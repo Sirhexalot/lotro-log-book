@@ -1,21 +1,3 @@
-/* Item browser: search on top, facets left, results right.
- * Same shell as every other page; only the middle is a two-column workspace. */
-
-/* gemeinsam.css carries the type scale only; the palette comes from style.css
- * on the map pages. This page brings its own copy, like start.css does. */
-:root {
-	--grund: #14110e;
-	--fläche: #1e1a16;
-	--fläche-hell: #2a251f;
-	--rand: #3a332b;
-	--text: #e8e1d5;
-	--schwach: #a89c8a;
-	--gold: #d6b35a;
-	--offen: #f0a63c;
-	--fertig: #7fbb72;
-	--laufend: #7fa6c9;
-}
-
 *,
 *::before,
 *::after { box-sizing: border-box; }
@@ -25,43 +7,43 @@ body { background: var(--grund); color: var(--text); }
 
 .gs { max-width: var(--huelle); margin: 0 auto; padding: 24px 16px 56px; }
 
-.gs-kopf h1 { margin: 0 0 6px; font-size: 1.75rem; font-weight: normal; }
+.gs-kopf h1 { margin: 0 0 6px; font-size: var(--text-titel); font-weight: var(--gewicht-normal); }
 .gs-unter { margin: 0 0 16px; color: var(--schwach); max-width: 70ch; }
 
 .gs-suche { display: flex; gap: 8px; max-width: 720px; margin-bottom: 24px; }
 .gs-suche input[type="search"] {
-	flex: 1; min-width: 0; font: inherit; font-size: 1rem; color: var(--text);
+	flex: 1; min-width: 0; font: inherit; font-size: var(--text-normal); color: var(--text);
 	background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; padding: 10px 12px;
 }
 .gs-suche input[type="search"]:focus { border-color: var(--gold); outline: none; }
 .gs-suche .knopf {
-	background: var(--gold); color: #14110e; border: 1px solid var(--gold);
-	border-radius: 3px; padding: 10px 18px; font: inherit; font-weight: bold; cursor: pointer;
+	background: var(--gold); color: var(--llb-palette-14110e); border: 1px solid var(--gold);
+	border-radius: 3px; padding: 10px 18px; font: inherit; font-weight: var(--gewicht-bold); cursor: pointer;
 }
-.gs-suche .knopf:hover { background: #e6c46d; }
+.gs-suche .knopf:hover { background: var(--llb-palette-e6c46d); }
 
 .gs-raster { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 28px; align-items: start; }
 
 /* --- Filter ---------------------------------------------------------- */
 .gs-filter { position: sticky; top: 16px; border-right: 1px solid var(--rand); padding-right: 20px; }
 .gs-filter-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
-.gs-filter-kopf strong { font-size: 1rem; color: var(--gold); font-weight: normal; }
+.gs-filter-kopf strong { font-size: var(--text-normal); color: var(--gold); font-weight: var(--gewicht-normal); }
 .gs-reset {
 	background: none; border: 0; padding: 0; color: var(--schwach);
-	font: inherit; font-size: .8rem; cursor: pointer; text-decoration: underline;
+	font: inherit; font-size: var(--text-klein); cursor: pointer; text-decoration: underline;
 }
 .gs-reset:hover { color: var(--gold); }
 
 .gs-filter-knopf { display: none; }
 .gs-gruppe { border-top: 1px solid var(--rand); padding-top: 12px; margin-bottom: 14px; }
 .gs-gruppe h2 {
-	margin: 0 0 8px; font-size: .8rem; font-weight: normal; color: var(--schwach);
+	margin: 0 0 8px; font-size: var(--text-klein); font-weight: var(--gewicht-normal); color: var(--schwach);
 	text-transform: uppercase; letter-spacing: .08em;
 }
 .gs-optionen { display: flex; flex-direction: column; gap: 2px; }
 .gs-option {
 	display: flex; align-items: center; gap: 8px; padding: 3px 0;
-	font-size: .875rem; cursor: pointer; border-radius: 3px;
+	font-size: var(--text-bedienung); cursor: pointer; border-radius: 3px;
 }
 .gs-option:hover { color: var(--gold); }
 .gs-option input {
@@ -74,20 +56,20 @@ body { background: var(--grund); color: var(--text); }
 .gs-option input:checked::after { content: ''; width: 9px; height: 9px; background: var(--gold); border-radius: 1px; }
 .gs-option input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .gs-option span:first-of-type { flex: 1; }
-.gs-anzahl { color: var(--schwach); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.gs-anzahl { color: var(--schwach); font-size: var(--text-klein); font-variant-numeric: tabular-nums; }
 .gs-mehr-optionen {
 	background: none; border: 0; padding: 4px 0; color: var(--gold);
-	font: inherit; font-size: .8rem; cursor: pointer; text-align: left;
+	font: inherit; font-size: var(--text-klein); cursor: pointer; text-align: left;
 }
-.gs-stufenbereich p { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; font-size: .8rem; color: var(--schwach); }
+.gs-stufenbereich p { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; font-size: var(--text-klein); color: var(--schwach); }
 .gs-stufenbereich input {
-	width: 64px; font: inherit; font-size: .8rem; color: var(--text);
+	width: 64px; font: inherit; font-size: var(--text-klein); color: var(--text);
 	background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; padding: 4px 6px;
 }
 
 /* --- Results --------------------------------------------------------- */
-.gs-stand { margin: 0 0 10px; color: var(--schwach); font-size: .875rem; }
-.gs-sortierung { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; margin: 0 0 10px; font-size: .875rem; }
+.gs-stand { margin: 0 0 10px; color: var(--schwach); font-size: var(--text-bedienung); }
+.gs-sortierung { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; margin: 0 0 10px; font-size: var(--text-bedienung); }
 .gs-sortierung select { font: inherit; color: var(--text); background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; padding: .2rem .4rem; }
 .gs-sortierung select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .gs-ergebnis { list-style: none; margin: 0; padding: 0; }
@@ -98,14 +80,14 @@ body { background: var(--grund); color: var(--text); }
 }
 .gs-zeile:hover { background: var(--fläche); }
 .gs-zeile .symbol { grid-row: span 2; width: 22px; height: 22px; }
-.gs-name { color: inherit; font-size: .95rem; }
-.gs-name.q1 { color: #d8d2c4; } .gs-name.q2 { color: #e0c15c; } .gs-name.q3 { color: #b98cd6; }
-.gs-name.q4 { color: #6fc3c3; } .gs-name.q5 { color: #e6a94d; }
-.gs-meta { grid-column: 2; color: var(--schwach); font-size: .78rem; }
+.gs-name { color: inherit; font-size: var(--text-fliesstext-kompakt); }
+.gs-name.q1 { color: var(--llb-palette-d8d2c4); } .gs-name.q2 { color: var(--llb-palette-e0c15c); } .gs-name.q3 { color: var(--llb-palette-b98cd6); }
+.gs-name.q4 { color: var(--llb-palette-6fc3c3); } .gs-name.q5 { color: var(--llb-palette-e6a94d); }
+.gs-meta { grid-column: 2; color: var(--schwach); font-size: var(--text-klein); }
 .gs-leer { padding: 14px 4px; color: var(--schwach); }
 .gs-mehr-feld { margin: 16px 0 0; }
 .gs-mehr-feld .knopf {
-	border: 1px solid var(--rand); color: var(--gold); background: transparent;
+	border: 1px solid var(--rand); color: var(--gold); background: var(--llb-palette-transparent);
 	border-radius: 3px; padding: 8px 16px; font: inherit; cursor: pointer;
 }
 .gs-mehr-feld .knopf:hover { background: var(--fläche); }
@@ -113,7 +95,7 @@ body { background: var(--grund); color: var(--text); }
 @media (max-width: 900px) {
 	.gs-raster { grid-template-columns: minmax(0, 1fr); }
 	.gs-filter-knopf {
-		display: block; width: 100%; font: inherit; font-size: .9rem; cursor: pointer;
+		display: block; width: 100%; font: inherit; font-size: var(--text-fliesstext-kompakt); cursor: pointer;
 		background: var(--fläche); color: var(--gold); border: 1px solid var(--rand);
 		border-radius: 3px; padding: 9px 12px; text-align: left; margin-bottom: 10px;
 	}
@@ -139,12 +121,12 @@ body { background: var(--grund); color: var(--text); }
 .gs-baum .gs-option { flex: 1; }
 .gs-pfeil {
 	width: 18px; height: 22px; padding: 0; border: 0; background: none; cursor: pointer;
-	color: var(--schwach); font-size: .8rem; line-height: 1;
+	color: var(--schwach); font-size: var(--text-klein); line-height: var(--zeile-einfach);
 }
 .gs-pfeil:hover { color: var(--gold); }
 .gs-pfeil-leer { display: inline-block; width: 18px; }
 .gs-tiefe-1 { padding-left: 14px; }
 .gs-tiefe-2 { padding-left: 30px; }
 .gs-tiefe-3 { padding-left: 46px; }
-.gs-tiefe-2 .gs-option { font-size: .92rem; }
-.gs-tiefe-3 .gs-option { font-size: .88rem; }
+.gs-tiefe-2 .gs-option { font-size: var(--text-fliesstext-kompakt); }
+.gs-tiefe-3 .gs-option { font-size: var(--text-bedienung); }

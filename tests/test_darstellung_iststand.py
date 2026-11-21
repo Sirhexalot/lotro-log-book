@@ -63,7 +63,7 @@ class DarstellungIststandTest(unittest.TestCase):
 
     def test_class_tabs_share_the_item_surface(self):
         css = read('web/klassen.css')
-        self.assertIn('background: #29241e', css)
+        self.assertIn('background: var(--llb-flaechen-ton)', css)
         self.assertIn('.klassen-katalog [role="tabpanel"]', css)
         twig = read('php/templates/app/klassen.twig')
         self.assertIn('klassen-reiter katalog-reiter', twig)

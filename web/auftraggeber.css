@@ -9,38 +9,38 @@
 .giver-list { list-style: none; margin: 0; padding: 0; }
 .giver-list > li { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: start; border-bottom: 1px solid var(--rand); padding: .55rem 0; }
 .giver-list > li > a { display: flex; gap: .5rem; align-items: baseline; overflow-wrap: anywhere; }
-.giver-list > li > .giver-meta { display: block; color: var(--schwach); font-size: .875rem; margin-left: 1.5rem; }
+.giver-list > li > .giver-meta { display: block; color: var(--schwach); font-size: var(--text-bedienung); margin-left: 1.5rem; }
 .giver-state { flex: 0 0 1rem; align-self: center; color: var(--schwach); text-align: center; }
 .giver-manual-status { grid-column: 2; grid-row: 1 / span 2; margin-left: 1rem; }
 .giver-list > li[data-state="done"] > a { color: var(--schwach); }
-.giver-list > li[data-state="done"] .giver-state { color: #91b97c; }
+.giver-list > li[data-state="done"] .giver-state { color: var(--llb-palette-91b97c); }
 .giver-hide-done .giver-list > li[data-state="done"] { display: none; }
-.giver-hide { display: inline-flex; gap: .5rem; align-items: baseline; font-size: .875rem;
+.giver-hide { display: inline-flex; gap: .5rem; align-items: baseline; font-size: var(--text-bedienung);
 	margin: .25rem 0 1rem; cursor: pointer; }
 .giver-hide input { width: auto; accent-color: var(--gold); }
 .giver-progress { margin: .25rem 0 .75rem; }
 .giver-total { margin: 0 0 .5rem; }
-.giver-count { color: var(--schwach); font-weight: normal; font-size: .875rem; }
+.giver-count { color: var(--schwach); font-weight: var(--gewicht-normal); font-size: var(--text-bedienung); }
 /* Region → landscape tree, the same shape as the item search: the arrow opens
    a branch, the checkbox filters the whole branch. */
 .giver-tree .giver-region { display: flex; align-items: baseline; gap: .35rem; }
 .giver-tree .giver-region .sets-option { flex: 1; min-width: 0; }
 .giver-pfeil { flex: 0 0 1.1rem; width: 1.1rem; height: 1.1rem; padding: 0; margin: 0;
-	border: 0; background: transparent; color: var(--gold); font: inherit; line-height: 1;
+	border: 0; background: var(--llb-palette-transparent); color: var(--gold); font: inherit; line-height: var(--zeile-einfach);
 	cursor: pointer; }
 .giver-pfeil-leer { display: inline-block; }
 .giver-kinder { margin: .1rem 0 .35rem 2.95rem; }
 .giver-kinder[hidden] { display: none; }
 .giver-kind { padding-left: 0; }
 .landmarken-gebietgruppe { margin: .35rem 0 .5rem; padding-left: .55rem; border-left: 2px solid var(--rand); }
-.landmarken-gebietgruppe > strong { display: block; margin: 0 0 .15rem; color: var(--gold); font-size: .875rem; font-weight: 600; }
-.landmarken-gebietgruppe[data-gebietgruppe="east-rohan"] { border-left-color: #7eb6c6; }
-.landmarken-gebietgruppe[data-gebietgruppe="west-rohan"] { border-left-color: #c5a56b; }
-.landmarken-gebietgruppe[data-gebietgruppe="dunland"] { border-left-color: #83a276; }
+.landmarken-gebietgruppe > strong { display: block; margin: 0 0 .15rem; color: var(--gold); font-size: var(--text-bedienung); font-weight: var(--gewicht-semibold); }
+.landmarken-gebietgruppe[data-gebietgruppe="east-rohan"] { border-left-color: var(--llb-palette-7eb6c6); }
+.landmarken-gebietgruppe[data-gebietgruppe="west-rohan"] { border-left-color: var(--llb-palette-c5a56b); }
+.landmarken-gebietgruppe[data-gebietgruppe="dunland"] { border-left-color: var(--llb-palette-83a276); }
 .sets-sort { display: flex; flex-wrap: wrap; gap: .75rem; align-items: baseline;
-	margin: 0 0 .5rem; font-size: .875rem; }
+	margin: 0 0 .5rem; font-size: var(--text-bedienung); }
 .sets-sort > span { color: var(--schwach); }
-.sets-sort a[aria-current="true"] { color: var(--text); font-weight: bold; text-decoration: none; }
+.sets-sort a[aria-current="true"] { color: var(--text); font-weight: var(--gewicht-bold); text-decoration: none; }
 @media (max-width: 600px) {
 	.giver-kopf { align-items: flex-start; }
 	.giver-symbol { width: 48px; height: 48px; }

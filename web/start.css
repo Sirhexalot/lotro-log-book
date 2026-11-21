@@ -1,40 +1,20 @@
-:root {
-	--grund: #14110e;
-	--fläche: #1e1a16;
-	--fläche-hell: #2a251f;
-	--rand: #3a332b;
-	--text: #e8e1d5;
-	--schwach: #a89c8a;
-	--gold: #d6b35a;
-	--offen: #d99a3c;
-	--fertig: #6f9c6a;
-}
-
 * { box-sizing: border-box; }
 
 html, body {
 	margin: 0;
 	background: var(--grund);
 	color: var(--text);
-	font: 16px/1.65 "Verdana", "Segoe UI", sans-serif;
+	font: var(--text-normal)/var(--zeile-lesetext) var(--schrift);
 }
 
 body { min-height: 100vh; display: flex; flex-direction: column; }
 
 a { color: var(--gold); }
 
-.kopf {
-	background: var(--fläche);
-	border-bottom: 1px solid var(--rand);
-}
-
-/* Same header as the app pages, two rows: see .kopf in gemeinsam.css. */
-.kopf-innen { margin: 0; }
-
 .kopf h1 {
 	margin: 0;
-	font-size: 16px;
-	font-weight: normal;
+	font-size: var(--text-normal);
+	font-weight: var(--gewicht-normal);
 	letter-spacing: .04em;
 	color: var(--gold);
 }
@@ -48,11 +28,11 @@ a { color: var(--gold); }
 .sprachen a,
 .sprachen button {
 	font: inherit;
-	font-size: 12px;
+	font-size: var(--text-klein);
 	letter-spacing: .08em;
 	color: var(--schwach);
-	background: transparent;
-	border: 1px solid transparent;
+	background: var(--llb-palette-transparent);
+	border: 1px solid var(--llb-palette-transparent);
 	border-radius: 3px;
 	padding: 3px 7px;
 	cursor: pointer;
@@ -79,21 +59,21 @@ main {
 .intro .dach {
 	margin: 0 0 6px;
 	color: var(--schwach);
-	font-size: 12px;
+	font-size: var(--text-klein);
 	text-transform: uppercase;
 	letter-spacing: .1em;
 }
 
 .intro h2 {
 	margin: 0 0 12px;
-	font-size: 30px;
-	line-height: 1.25;
-	font-weight: normal;
+	font-size: var(--text-hero);
+	line-height: var(--zeile-label);
+	font-weight: var(--gewicht-normal);
 }
 
 .intro h2 em { color: var(--gold); font-style: normal; }
 
-.lead { margin: 0; color: var(--schwach); font-size: 17px; }
+.lead { margin: 0; color: var(--schwach); font-size: var(--text-zwischen); }
 
 .bild { margin: 28px 0 8px; }
 
@@ -108,7 +88,7 @@ main {
 .bild figcaption {
 	margin-top: 8px;
 	color: var(--schwach);
-	font-size: 12px;
+	font-size: var(--text-klein);
 }
 
 section { margin-top: 36px; }
@@ -118,15 +98,15 @@ section { margin-top: 36px; }
 	border-left-width: 4px;
 	border-radius: 3px;
 	padding: 10px 14px;
-	background: rgba(217, 154, 60, .08);
+	background: var(--llb-palette-rgba-217-154-60-p08);
 	color: var(--text);
-	font-size: 14px;
+	font-size: var(--text-bedienung);
 }
 
 h3 {
 	margin: 0 0 12px;
-	font-size: 15px;
-	font-weight: normal;
+	font-size: var(--text-fliesstext-kompakt);
+	font-weight: var(--gewicht-normal);
 	color: var(--gold);
 	text-transform: uppercase;
 	letter-spacing: .08em;
@@ -157,15 +137,15 @@ h3 {
 	display: grid;
 	place-items: center;
 	color: var(--gold);
-	font-size: 13px;
+	font-size: var(--text-kompakt);
 }
 
 .grenzen { margin: 0; padding-left: 20px; }
 .grenzen li { margin-bottom: 8px; }
 
 code {
-	font-family: "SF Mono", Menlo, Consolas, monospace;
-	font-size: 13px;
+	font-family: var(--mono);
+	font-size: var(--text-kompakt);
 	background: var(--fläche-hell);
 	border: 1px solid var(--rand);
 	border-radius: 3px;
@@ -180,14 +160,14 @@ code {
 	color: var(--grund);
 	background: var(--gold);
 	text-decoration: none;
-	font-size: 15px;
+	font-size: var(--text-fliesstext-kompakt);
 }
 
-.knopf:hover { background: #e6c46d; }
+.knopf:hover { background: var(--llb-palette-e6c46d); }
 
 .knopf.klein {
 	padding: 4px 12px;
-	font-size: 13px;
+	font-size: var(--text-kompakt);
 }
 
 .weiter { margin: 40px 0 0; }
@@ -202,15 +182,15 @@ footer p {
 	margin: 0 auto;
 	padding: 14px 20px 0;
 	color: var(--schwach);
-	font-size: 12px;
-	line-height: 1.6;
+	font-size: var(--text-klein);
+	line-height: var(--zeile-lesetext);
 }
 
 footer p:last-child { padding-bottom: 18px; }
 .leise { opacity: .85; }
 
 @media (max-width: 640px) {
-	.intro h2 { font-size: 23px; }
+	.intro h2 { font-size: var(--text-abschnitt-gross); }
 	main { padding-top: 22px; }
 }
 
@@ -237,16 +217,16 @@ body.landing .hero {
 	overflow: hidden;
 	margin: 0 -20px;
 	padding: 44px 20px 34px;
-	background: radial-gradient(120% 140% at 50% -20%, rgba(214, 179, 90, .10), transparent 60%);
+	background: radial-gradient(120% 140% at 50% -20%, var(--llb-palette-rgba-214-179-90-p10), var(--llb-palette-transparent) 60%);
 }
 body.landing .hero h2 {
 	margin-top: 0;
 	margin-bottom: 14px;
-	font-size: 38px;
-	line-height: 1.2;
+	font-size: var(--text-display);
+	line-height: var(--zeile-eng);
 	letter-spacing: -.01em;
 }
-body.landing .lead { font-size: 17px; max-width: 720px; margin: 0 auto 22px; }
+body.landing .lead { font-size: var(--text-zwischen); max-width: 720px; margin: 0 auto 22px; }
 
 .suche-start {
 	display: flex;
@@ -259,7 +239,7 @@ body.landing .lead { font-size: 17px; max-width: 720px; margin: 0 auto 22px; }
 	flex: 1;
 	min-width: 0;
 	font: inherit;
-	font-size: 15px;
+	font-size: var(--text-fliesstext-kompakt);
 	color: var(--text);
 	background: var(--fläche);
 	border: 1px solid var(--rand);
@@ -295,8 +275,8 @@ body.landing .einstieg .knopf { margin: 0 4px; }
 		inset: 0;
 		z-index: -1;
 		background:
-			linear-gradient(90deg, rgba(20, 17, 14, .6), rgba(20, 17, 14, .35) 45%, rgba(20, 17, 14, .6)),
-			linear-gradient(180deg, rgba(20, 17, 14, .85), rgba(20, 17, 14, .62) 45%, rgba(20, 17, 14, .9));
+			linear-gradient(90deg, var(--llb-palette-rgba-20-17-14-p6), var(--llb-palette-rgba-20-17-14-p35) 45%, var(--llb-palette-rgba-20-17-14-p6)),
+			linear-gradient(180deg, var(--llb-palette-rgba-20-17-14-p85), var(--llb-palette-rgba-20-17-14-p62) 45%, var(--llb-palette-rgba-20-17-14-p9));
 	}
 }
 @media (min-width: 1100px) {
@@ -315,8 +295,8 @@ body.landing .einstieg .knopf { margin: 0 4px; }
 		background-repeat: no-repeat;
 		filter: blur(1px) saturate(.95);
 		opacity: .78;
-		-webkit-mask-image: radial-gradient(115% 105% at 78% 50%, #000 52%, transparent 100%);
-		mask-image: radial-gradient(115% 105% at 78% 50%, #000 52%, transparent 100%);
+		-webkit-mask-image: radial-gradient(115% 105% at 78% 50%, var(--llb-palette-000) 52%, var(--llb-palette-transparent) 100%);
+		mask-image: radial-gradient(115% 105% at 78% 50%, var(--llb-palette-000) 52%, var(--llb-palette-transparent) 100%);
 	}
 	body.landing .hero::after {
 		content: '';
@@ -324,10 +304,10 @@ body.landing .einstieg .knopf { margin: 0 4px; }
 		inset: 0;
 		z-index: -1;
 		background:
-			linear-gradient(90deg, #14110e 0%, #14110e 30%, rgba(20, 17, 14, .94) 42%,
-				rgba(20, 17, 14, .42) 62%, rgba(20, 17, 14, .10) 100%),
-			linear-gradient(180deg, rgba(20, 17, 14, .55), transparent 32%,
-				transparent 68%, rgba(20, 17, 14, .55));
+			linear-gradient(90deg, var(--llb-palette-14110e) 0%, var(--llb-palette-14110e) 30%, var(--llb-palette-rgba-20-17-14-p94) 42%,
+				var(--llb-palette-rgba-20-17-14-p42) 62%, var(--llb-palette-rgba-20-17-14-p10) 100%),
+			linear-gradient(180deg, var(--llb-palette-rgba-20-17-14-p55), var(--llb-palette-transparent) 32%,
+				var(--llb-palette-transparent) 68%, var(--llb-palette-rgba-20-17-14-p55));
 	}
 	body.landing .hero > * { margin-left: 0; margin-right: auto; max-width: 660px; }
 	body.landing .hero > .suche-start { margin-left: 0 !important; }
@@ -337,7 +317,7 @@ body.landing .einstieg .knopf { margin: 0 4px; }
 
 .knopf.sekundaer {
 	color: var(--gold);
-	background: transparent;
+	background: var(--llb-palette-transparent);
 	border-color: var(--rand);
 }
 .knopf.sekundaer:hover { background: var(--fläche-hell); }
@@ -369,8 +349,8 @@ body.landing .einstieg .knopf { margin: 0 4px; }
 .zahlen a:hover small,
 .zahlen a:focus-visible small { color: var(--text); text-decoration: underline; }
 .zahlen a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
-.zahlen span { font-size: 20px; color: var(--gold); margin-right: 7px; }
-.zahlen small { font-size: 15px; color: var(--schwach); }
+.zahlen span { font-size: var(--text-abschnitt); color: var(--gold); margin-right: 7px; }
+.zahlen small { font-size: var(--text-fliesstext-kompakt); color: var(--schwach); }
 
 .familien-karten {
 	display: grid;
@@ -383,11 +363,11 @@ body.landing .einstieg .knopf { margin: 0 4px; }
 	background: var(--fläche);
 	padding: 16px 18px 18px;
 }
-.familie-karte h4 { margin: 0 0 6px; font-size: 17px; font-weight: normal; }
+.familie-karte h4 { margin: 0 0 6px; font-size: var(--text-zwischen); font-weight: var(--gewicht-normal); }
 .familie-karte h4 a { text-decoration: none; }
 .familie-karte h4 a:hover { text-decoration: underline; }
-.familie-karte p { margin: 0 0 10px; color: var(--schwach); font-size: 14px; }
-.familie-karte ul { margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.familie-karte p { margin: 0 0 10px; color: var(--schwach); font-size: var(--text-bedienung); }
+.familie-karte ul { margin: 0; padding: 0; list-style: none; font-size: var(--text-bedienung); }
 .familie-karte li + li { margin-top: 7px; }
 .familie-karte li { color: var(--schwach); }
 
@@ -396,9 +376,9 @@ body.landing .einstieg .knopf { margin: 0 4px; }
 	padding: 0 0 0 16px;
 }
 .neuigkeit + .neuigkeit { margin-top: 22px; }
-.neuigkeit .datum { margin: 0; color: var(--schwach); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
-.neuigkeit h4 { margin: 3px 0 6px; font-size: 17px; font-weight: normal; color: var(--text); }
-.neuigkeit p { margin: 0 0 6px; color: var(--schwach); font-size: 15px; }
+.neuigkeit .datum { margin: 0; color: var(--schwach); font-size: var(--text-klein); letter-spacing: .06em; text-transform: uppercase; }
+.neuigkeit h4 { margin: 3px 0 6px; font-size: var(--text-zwischen); font-weight: var(--gewicht-normal); color: var(--text); }
+.neuigkeit p { margin: 0 0 6px; color: var(--schwach); font-size: var(--text-fliesstext-kompakt); }
 .neuigkeit p:last-child { color: var(--text); }
 .neuigkeit a { color: var(--gold); }
 
@@ -407,13 +387,13 @@ body.landing section { margin-top: 34px; }
 
 @media (max-width: 700px) {
 	body.landing .hero { padding: 28px 16px 24px; margin: 0 -16px; }
-	body.landing .hero h2 { font-size: 26px; }
-	body.landing .lead { font-size: 15px; }
+	body.landing .hero h2 { font-size: var(--text-hero-mobil); }
+	body.landing .lead { font-size: var(--text-fliesstext-kompakt); }
 	.suche-start { flex-wrap: wrap; }
 	.suche-start input[type="search"] { flex: 1 1 100%; }
 	.suche-start .knopf { flex: 1 1 100%; text-align: center; }
 	.zahlen { gap: 8px 18px; }
-	.zahlen span { font-size: 17px; }
-	.zahlen small { font-size: 14px; }
+	.zahlen span { font-size: var(--text-zwischen); }
+	.zahlen small { font-size: var(--text-bedienung); }
 	body.landing main { padding: 0 16px 44px; }
 }

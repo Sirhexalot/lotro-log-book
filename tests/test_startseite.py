@@ -55,7 +55,7 @@ class HeroTest(unittest.TestCase):
         self.assertIn('body.landing .hero::before', CSS)
         # A readable page needs an overlay over the picture.
         self.assertIn('body.landing .hero::after', CSS)
-        self.assertIn('linear-gradient(90deg, #14110e 0%', CSS)
+        self.assertIn('linear-gradient(90deg, var(--llb-palette-14110e) 0%', CSS)
 
 
 if __name__ == '__main__':

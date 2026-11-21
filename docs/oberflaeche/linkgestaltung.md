@@ -32,9 +32,14 @@ gemeinsamen Gestaltungsregeln in `AGENTS.md`.
 
 ## Schrift
 
-- Gemeinsame Tokens aus `gemeinsam.css` verwenden: Fließtext `--text-normal`,
-  Bedienung `--text-bedienung`, Abschnitt `--text-abschnitt`, Titel
-  `--text-titel`.
+- Website-Schrift ist lokal ausgeliefertes Roboto aus `web/fonts/`; keine
+  Google-Fonts-URL einbinden. Monospace bleibt für Code ein eigener Sonderfall
+  (`--mono`).
+- Schriftfamilie (`--schrift`), Gewichte (`--gewicht-*`), Zeilenhöhen
+  (`--zeile-*`) und Schriftgrößen (`--text-*`) zentral in `gemeinsam.css`
+  verwenden. Die Grundstufen sind Fließtext `--text-normal`, Bedienung
+  `--text-bedienung`, Abschnitt `--text-abschnitt` und Titel `--text-titel`;
+  kompakte Stufen nur für dichte Metadaten und Kartenbeschriftungen.
 - Metadaten und Bedienhinweise nicht willkürlich verkleinern. Mobile Reiter
   bleiben mindestens auf der Bedienungsstufe; dichte Kartenbedienelemente
   dürfen nur dann kompakt sein, wenn Lesbarkeit und Bedienbarkeit erhalten sind.
@@ -50,4 +55,4 @@ Tastaturfokus, besuchte Zustände, DE/EN/FR sowie Desktop, Tablet und Mobil
 berücksichtigen. Nach CSS-Änderungen an Katalogseiten insbesondere kontrollieren,
 dass keine Links in Browser-Standardblau zurückfallen.
 
-Die Umsetzung liegt in `web/gemeinsam.css` und `web/katalog.css`.
+Die Umsetzung liegt in `web/gemeinsam.css` und den Bereichs-CSS-Dateien.
