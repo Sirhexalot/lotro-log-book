@@ -20,18 +20,25 @@ async function landschaftOeffnen(page, pfad, name) {
 	await page.waitForFunction(() => document.querySelectorAll('#liste li .qname').length > 0, null, { timeout: 20000 });
 }
 
-async function eintragOeffnen(page) {
+async function eintragOeffnen(page, art) {
 	await page.evaluate(() => {
 		const zeile = Array.from(document.querySelectorAll('#liste li')).find((li) => li.querySelector('.qname'));
 		zeile.querySelector('.qname').click();
 	});
-	await page.waitForFunction(() => {
+	/* Erst wenn die Detailspalte den erwarteten Typ zeigt, ist der Klick angekommen;
+	 * sonst würde die Zusammenfassung der Landschaft als Treffer gelten. */
+	await page.waitForFunction((erwartet) => {
 		const detail = document.getElementById('detail');
-		return detail && detail.querySelector('.detail-kopf') && detail.innerText.trim().length > 40;
-	}, null, { timeout: 20000 });
+		const art = detail?.querySelector('.detail-art')?.textContent?.trim().toLocaleLowerCase();
+		return art === erwartet && detail.innerText.trim().length > 40;
+	}, art.toLocaleLowerCase(), { timeout: 20000 });
 }
 
 async function detailPruefen(page, art, breite) {
+	/* Die Detailspalte füllt sich nach dem Klick nachgeladen; erst messen, wenn
+	 * die Abschnitte stehen (sonst zählt man den Zwischenstand). */
+	await page.waitForFunction(() => document.querySelectorAll('#detail .llb-flaeche').length >= 3,
+		null, { timeout: 10000 }).catch(() => {});
 	const stand = await page.evaluate(() => {
 		const detail = document.getElementById('detail');
 		const kachel = detail.querySelector('.mql-row-icon, .mql-kachel, .llb-kachel');
@@ -45,7 +52,7 @@ async function detailPruefen(page, art, breite) {
 		};
 	});
 	assert.ok(stand.titel, art + ': Titel fehlt');
-	assert.ok(stand.flaechen >= 3, art + ': zu wenige Flächen (' + stand.flaechen + ')');
+	assert.ok(stand.flaechen >= 3, art + ': zu wenige Flächen (' + stand.flaechen + ') bei „' + stand.titel + '“ / ' + breite + ' px');
 	assert.ok(stand.fakten >= 1, art + ': Fakten fehlen');
 	if (stand.kachel !== null) {
 		assert.equal(stand.kachel, breite > 700 ? 64 : 54, art + ': Icon-Kachel-Größe');
@@ -68,11 +75,11 @@ async function detailPruefen(page, art, breite) {
 			for (const breite of [1280, 390]) {
 				await page.setViewportSize({ width: breite, height: breite > 700 ? 900 : 844 });
 				await landschaftOeffnen(page, '/de/karte/', 'Breeland');
-				await eintragOeffnen(page);
+				await eintragOeffnen(page, 'Aufgabe');
 				await detailPruefen(page, 'Aufgabe', breite);
 
 				await landschaftOeffnen(page, '/de/karte/taten/', 'Breeland');
-				await eintragOeffnen(page);
+				await eintragOeffnen(page, 'Tat');
 				await detailPruefen(page, 'Tat', breite);
 			}
 			assert.deepEqual(fehler, [], 'JS-Fehler: ' + fehler.join(' | '));
