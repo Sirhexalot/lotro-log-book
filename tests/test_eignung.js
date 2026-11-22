@@ -5,8 +5,8 @@
  *
  * The thresholds are the ones agreed on 22.11.2026: green up to 10 levels
  * below the character, yellow 11–14, grey from 15; red wins over grey; a
- * scalable item above the character is not judgeable, nor is one above the
- * game's level cap. Kind 1 tests the rules, kind 2 the real catalogue rows.
+ * item without a minimum level is not judgeable, nor is one above the game's
+ * level cap; a scalable item above the character is simply too high. Kind 1 tests the rules, kind 2 the real catalogue rows.
  */
 'use strict';
 const fs = require('node:fs');
@@ -79,7 +79,7 @@ assert.equal(state({}), undefined, 'nothing known means no chip');
 assert.equal(state([]), undefined, 'PHP sends an empty set as []');
 check('class known but no level', {rk: 'Hunter'}, 'unklar');
 check('above the level cap', {ml: 282}, 'unklar');
-check('scalable above the character', {ml: 130, sc: 1}, 'unklar');
+check('scalable above the character is too high', {ml: 130, sc: 1}, 'zu-hoch');
 check('scalable above but wrong class stays a block', {ml: 130, sc: 1, rk: 'Guardian'}, 'falsch');
 check('scalable above but wrong armour stays a block', {ml: 130, sc: 1, at: 'HEAVY'}, 'falsch');
 check('scalable below stays coloured', {ml: 120, sc: 1}, 'passt');
@@ -100,7 +100,7 @@ assert.equal(E.ton({ml: 120}, null), null, 'no character means no colour');
 check('short keys', {ml: 120}, 'passt');
 check('long keys from PHP', {min: 120, klasse: '', armour: 'LIGHT'}, 'passt');
 check('long keys, wrong armour', {min: 120, armour: 'HEAVY'}, 'falsch');
-check('long keys, scalable above', {min: 130, scalable: 1}, 'unklar');
+check('long keys, scalable above is too high', {min: 130, scalable: 1}, 'zu-hoch');
 check('long keys, scalable above but wrong class', {min: 130, scalable: 1, klasse: 'Guardian'}, 'falsch');
 
 // --- catalogue rows -----------------------------------------------------
@@ -109,6 +109,6 @@ const row = [0, 'x', 0, 0, 0, 0, 0, 388, 0, 0, '', '', '', 'CROSSBOW', 120, fals
 assert.equal(E.zeile(row, E.charakter()).code, 'passt', 'catalogue row is judged by min level');
 assert.equal(E.zeile(row, E.charakter()).title, 'Mindeststufe 120 · passt zu Stufe 123');
 row[14] = 130;
-assert.equal(E.zeile(row, E.charakter()).code, 'unklar', 'scalable row above the character');
+assert.equal(E.zeile(row, E.charakter()).code, 'zu-hoch', 'scalable row above the character');
 
 console.log('eignung: thresholds, blocks, not-judgeable and catalogue rows passed');

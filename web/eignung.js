@@ -10,7 +10,7 @@
  *   grün    Abstand 0–10 Stufen        gelb   11–14        grau   ab 15
  *   rot     falsche Klasse/Rüstung/Waffe/Volk oder Mindeststufe zu hoch
  *   "Passt, aber prüfen" nur bei Grün: weitere Voraussetzung oder unbekannte Klasse
- *   "Unklar": keine Mindeststufe, über der Spielgrenze, skalierbar über dir
+ *   "Unklar": keine Mindeststufe oder über der Spielgrenze
  */
 (function () {
 	'use strict';
@@ -195,11 +195,6 @@
 		if (prof && req.wt && !erlaubt(prof.w, req.wt, ch.stufe)) {
 			return ergebnis('falsch', 'waffe', w.waffe,
 				fuellen(w.titelFalschWaffe, {ml: ml}));
-		}
-		/* Erst die harten Sperren, dann die Skalierung: ein Gegenstand für eine
-		 * fremde Klasse bleibt „nicht für dich“, auch wenn er über dir skaliert. */
-		if (req.sc && ml > ch.stufe) {
-			return ergebnis('unklar', 'skaliert', w.skaliert, w.titelSkaliert);
 		}
 		if (ml > ch.stufe) {
 			return ergebnis('zu-hoch', '', fuellen(w.zuHoch, {n: ml - ch.stufe}),
