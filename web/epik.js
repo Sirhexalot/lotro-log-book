@@ -257,7 +257,7 @@
 				eigeneZaehlung: true };
 		},
 		karte: function () { return daten ? daten.karte : null; },
-		ansicht: function () { return 'gelaende'; },
+		ansicht: function () { return null; },
 		brauchtDaten: function () {
 			if (daten) { return false; }
 			var gewaehlt = '';

@@ -6,9 +6,13 @@
 
 /* The drawn map of Middle-earth behind the terrain: the client's terrain
    leaves gaps, and they show the drawing instead of black. */
-#buehne.epik-grund {
+#buehne.epik-grund.gelaende-aktiv {
 	background-image: var(--epik-grund);
 	background-size: cover;
 	background-position: center;
 	background-repeat: no-repeat;
 }
+
+/* The epic's list title leads back to the landscape overview. */
+#liste-titel.als-link { cursor: pointer; }
+#liste-titel.als-link:hover, #liste-titel.als-link:focus-visible { text-decoration: underline; }

@@ -2458,11 +2458,19 @@
 		if (sonder && !zustand.suchliste) {
 			sonder.montiere(sonderHost());
 			sonder.zeichneListe();
+			listeTitel.classList.add('als-link');
+			listeTitel.setAttribute('role', 'link');
+			listeTitel.tabIndex = 0;
+			listeTitel.title = ltexte[3];
 			zeichneKartenBreadcrumb();
 			zeichneMarker();
 			aktualisiereFilterZahlen();
 			return;
 		}
+		listeTitel.classList.remove('als-link');
+		listeTitel.removeAttribute('role');
+		listeTitel.removeAttribute('tabindex');
+		listeTitel.removeAttribute('title');
 		var listeGefiltert = gefiltert(quelle);
 		// Counts, level ranges and the active filter belong to the tool row and
 		// the detail pane; the list header stays the plain location name.
@@ -3613,6 +3621,21 @@
 		liste.scrollTop = oben;
 	});
 
+	// The title of a special view leads back to the overview, like the
+	// "All landscapes" crumb.
+	(function () {
+		function zurueck() {
+			if (sonderFuer(zustand.knoten)) { landschaftUebersicht(); }
+		}
+		listeTitel.addEventListener('click', zurueck);
+		listeTitel.addEventListener('keydown', function (ereignis) {
+			if (ereignis.key === 'Enter' || ereignis.key === ' ') {
+				ereignis.preventDefault();
+				zurueck();
+			}
+		});
+	})();
+
 	// --- Start ---------------------------------------------------------
 	// Landscape-first navigation reuses the catalogue, progress and details.
 	var landschaftAktiv = true;
@@ -3884,6 +3907,10 @@
 		if (abmeldenUebersichtAnsicht) { abmeldenUebersichtAnsicht(); abmeldenUebersichtAnsicht = null; }
 		landschaftBereich = null;
 		haupt.classList.add('landschaft-start'); landschaftStart.hidden = false;
+		listeTitel.classList.remove('als-link');
+		listeTitel.removeAttribute('role');
+		listeTitel.removeAttribute('tabindex');
+		listeTitel.removeAttribute('title');
 		zeichneKartenBreadcrumb();
 		landschaftAdresse(null, null, !!ohneVerlauf);
 		landschaftStart.textContent = '';
