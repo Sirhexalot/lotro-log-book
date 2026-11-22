@@ -80,6 +80,8 @@ assert.equal(state([]), undefined, 'PHP sends an empty set as []');
 check('class known but no level', {rk: 'Hunter'}, 'unklar');
 check('above the level cap', {ml: 282}, 'unklar');
 check('scalable above the character', {ml: 130, sc: 1}, 'unklar');
+check('scalable above but wrong class stays a block', {ml: 130, sc: 1, rk: 'Guardian'}, 'falsch');
+check('scalable above but wrong armour stays a block', {ml: 130, sc: 1, at: 'HEAVY'}, 'falsch');
 check('scalable below stays coloured', {ml: 120, sc: 1}, 'passt');
 
 // --- warning only on green ---------------------------------------------
@@ -99,6 +101,7 @@ check('short keys', {ml: 120}, 'passt');
 check('long keys from PHP', {min: 120, klasse: '', armour: 'LIGHT'}, 'passt');
 check('long keys, wrong armour', {min: 120, armour: 'HEAVY'}, 'falsch');
 check('long keys, scalable above', {min: 130, scalable: 1}, 'unklar');
+check('long keys, scalable above but wrong class', {min: 130, scalable: 1, klasse: 'Guardian'}, 'falsch');
 
 // --- catalogue rows -----------------------------------------------------
 // Positional row: 10 class, 11 race, 12 armour, 13 weapon, 14 min, 15 extra, 16 scalable.

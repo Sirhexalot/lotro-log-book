@@ -176,9 +176,6 @@
 			return ergebnis('unklar', 'grenze', w.grenze,
 				fuellen(w.titelGrenze, {ml: ml, grenze: SPIELGRENZE}));
 		}
-		if (req.sc && ml > ch.stufe) {
-			return ergebnis('unklar', 'skaliert', w.skaliert, w.titelSkaliert);
-		}
 		if (req.rk) {
 			var klassen = String(req.rk).split(';').filter(Boolean);
 			if (klassen.length && ch.klasse && klassen.indexOf(ch.klasse) < 0) {
@@ -198,6 +195,11 @@
 		if (prof && req.wt && !erlaubt(prof.w, req.wt, ch.stufe)) {
 			return ergebnis('falsch', 'waffe', w.waffe,
 				fuellen(w.titelFalschWaffe, {ml: ml}));
+		}
+		/* Erst die harten Sperren, dann die Skalierung: ein Gegenstand für eine
+		 * fremde Klasse bleibt „nicht für dich“, auch wenn er über dir skaliert. */
+		if (req.sc && ml > ch.stufe) {
+			return ergebnis('unklar', 'skaliert', w.skaliert, w.titelSkaliert);
 		}
 		if (ml > ch.stufe) {
 			return ergebnis('zu-hoch', '', fuellen(w.zuHoch, {n: ml - ch.stufe}),
