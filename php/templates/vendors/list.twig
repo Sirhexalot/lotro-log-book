@@ -49,7 +49,7 @@
             {% if filters.stufe %}<p class="sets-turn">
                 <a class="sets-option-link" href="{{ list_url }}">{{ gw.stufe_all }}</a>
             </p>{% endif %}
-            <ul class="sets-list mql-row-list">{% if vendors %}{{ result.heading(lang, gw.stufe_heading) }}{% endif %}{% for row in vendors %}{{ result.row(lang, row.url, row.name, [attribute(gw, 'type_' ~ row.type), row.meta]|filter(v => v)|join(' · '), entity_symbol, '', gw.stufe_heading, row.level_from is not null ? row.level_from|number_format(0, ',', '.') : '') }}{% else %}<li>{{ gw.empty }}</li>{% endfor %}</ul>
+            <ul class="sets-list mql-row-list">{% if vendors %}{{ result.heading(lang, gw.ware) }}{% endif %}{% for row in vendors %}{{ result.row(lang, row.url, row.name, [attribute(gw, 'type_' ~ row.type), row.meta]|filter(v => v)|join(' · '), entity_symbol, '', gw.ware, row.level_range|default('')) }}{% else %}<li>{{ gw.empty }}</li>{% endfor %}</ul>
             {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ gw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ gw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>

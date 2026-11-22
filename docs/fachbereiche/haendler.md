@@ -28,8 +28,12 @@ before it links a barter row to a vendor page.
 
 - Name in DE/EN/FR from `lore/labels/<sprache>/npc.xml`.
 - Type: „Händler“, „Tauschhändler“ or „Händler und Tauschhändler“.
-- **Two tabs** „Wo“ and „Was“ with their counts (places, goods). A vendor with
-  only one of the two shows no tab bar.
+- **Two tabs** „Wo“ and „Was“ with their counts (places, goods), from the shared
+  tab component (`components/reiter.twig`, `reiter.css`, `reiter.js`); the bar
+  is labelled „Händlerangaben“ and names the tab group, not the vendor. Bar and
+  panels are siblings so that `reiter.css` can frame the panel; no page carries
+  tab or panel styling of its own. A vendor with only one of the two sections
+  shows no tab bar and frames that section with `llb-flaeche` instead.
 - „Wo“ shows **one** map for the picked place and a compact list of every known
   place (region › area, coordinates, map and route links); picking a row swaps
   map and pin. Nine places no longer mean nine stacked map pictures.

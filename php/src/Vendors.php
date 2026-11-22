@@ -43,6 +43,7 @@ final class Vendors
                      'barter_items' => 'Tauschgegenstände',
                      'barter_offers' => 'Tausch: Preis und Ware',
                      'tab_where' => 'Wo', 'tab_goods' => 'Was',
+                     'tab_label' => 'Händlerangaben',
                      'barter_noscript' => 'Die vollständige Liste mit Filter braucht JavaScript; hier stehen die ersten 50 Einträge.',
                      'items_count' => '%s Gegenstände', 'items_count_one' => '1 Gegenstand',
                      'places' => 'Standort', 'map' => 'Auf Karte zeigen', 'route' => 'Route planen',
@@ -70,6 +71,7 @@ final class Vendors
                      'barter_items' => 'Barter goods',
                      'barter_offers' => 'Barter: price and goods',
                      'tab_where' => 'Where', 'tab_goods' => 'What',
+                     'tab_label' => 'Vendor details',
                      'barter_noscript' => 'The full list with filters needs JavaScript; the first 50 entries are shown here.',
                      'items_count' => '%s items', 'items_count_one' => '1 item',
                      'places' => 'Location', 'map' => 'Show on map', 'route' => 'Plan a route',
@@ -97,6 +99,7 @@ final class Vendors
                      'barter_items' => 'Objets de troc',
                      'barter_offers' => 'Troc : prix et marchandise',
                      'tab_where' => 'Où', 'tab_goods' => 'Quoi',
+                     'tab_label' => 'Informations sur le marchand',
                      'barter_noscript' => 'La liste complète avec filtres nécessite JavaScript ; les 50 premières entrées sont affichées ici.',
                      'items_count' => '%s objets', 'items_count_one' => '1 objet',
                      'places' => 'Lieu', 'map' => 'Voir sur la carte', 'route' => 'Planifier un trajet',
@@ -354,9 +357,16 @@ final class Vendors
                     $total === 1 ? $words['items_count_one'] : $words['items_count']);
             }
             $row['meta'] = implode(' · ', $meta);
-            // Rechte Spalte: ab welcher Stufe es hier Ware gibt.
+            // Rechte Spalte: welche Stufen die Ware abdeckt. Nur die untere
+            // Grenze wäre bei einer Bereichsfilterung irreführend (ein Händler
+            // mit Ware 1–400 bleibt im Band 100–120 sichtbar).
             $row['level_from'] = isset($row['ml_min']) && $row['ml_min'] !== null
                 ? (int) $row['ml_min'] : null;
+            $row['level_range'] = $row['level_from'] === null ? null
+                : (isset($row['ml_max']) && $row['ml_max'] !== null
+                   && (int) $row['ml_max'] > $row['level_from']
+                    ? $row['level_from'] . '–' . (int) $row['ml_max']
+                    : (string) $row['level_from']);
         }
         unset($row);
 

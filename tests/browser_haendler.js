@@ -28,6 +28,18 @@ const base = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 
 			// „Wo“: one map, nine places, the map changes with the picker.
 			await page.locator('[data-reiter-knopf="wo"]').click();
+			/* The panel surface belongs to the tab component (`reiter.css`), so a
+			   panel is framed and lifted off the page background on this page too. */
+			const panelStil = await page.evaluate(() => {
+				const btn = document.querySelector('.llb-reiter [aria-selected="true"]');
+				const panel = document.getElementById(btn.getAttribute('aria-controls'));
+				const stil = getComputedStyle(panel);
+				return { rand: stil.borderTopWidth, ton: stil.backgroundColor,
+					seite: getComputedStyle(document.body).backgroundColor };
+			});
+			assert.equal(panelStil.rand, '1px', 'Panel ohne Rahmen');
+			assert.notEqual(panelStil.ton, 'rgba(0, 0, 0, 0)', 'Panel ohne Fläche');
+			assert.notEqual(panelStil.ton, panelStil.seite, 'Panel hebt sich nicht vom Hintergrund ab');
 			assert.equal(await page.locator('#haendler-tab-wo .llb-karte').count(), 1);
 			assert.equal(await page.locator('.vendor-orte li').count(), 9);
 			const before = await page.locator('#vendor-karte-bild').getAttribute('src');
@@ -68,6 +80,23 @@ const base = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 			assert.match((await page.locator('.llb-reiter [data-reiter-knopf]').allTextContents()).join(' '), /\d/);
 			assert.ok(await page.locator('[data-tausch-root] li.mql-row').count() > 0);
 
+			/* A vendor with only one of the two sections has no bar; that single
+			   section carries the shared surface `llb-flaeche` instead. */
+			for (const [id, selector] of [['70003A69', '.vendor-places'], ['7000D49E', '.vendor-goods']]) {
+				const single = await page.goto(`${base}/${lang}/${seg}/${id}/`);
+				assert.equal(single.status(), 200);
+				assert.equal(await page.locator('.llb-reiter').count(), 0, id + ' zeigt eine Reiterleiste');
+				const einzeln = await page.evaluate((sel) => {
+					const section = document.querySelector(sel);
+					const stil = getComputedStyle(section);
+					return { flaeche: section.classList.contains('llb-flaeche'),
+						rand: stil.borderTopWidth, ton: stil.backgroundColor };
+				}, selector);
+				assert.equal(einzeln.flaeche, true, id + ': Abschnitt ohne llb-flaeche');
+				assert.equal(einzeln.rand, '1px', id + ': Abschnitt ohne Rahmen');
+				assert.notEqual(einzeln.ton, 'rgba(0, 0, 0, 0)', id + ': Abschnitt ohne Fläche');
+			}
+
 			assert.deepEqual(errors, []);
 			await context.close();
 			console.log(lang, 'tabs, place picker, level filter, quality filter, pure barterer OK');
@@ -89,7 +118,8 @@ const base = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 			await sort.selectOption({ label: sortLabel });
 			await page.waitForTimeout(700);
 			assert.match(decodeURIComponent(page.url()), /sort=stufe/);
-			const stufen = (await page.locator('.mql-row-value b').allTextContents()).map(Number);
+			const stufen = (await page.locator('.mql-row-value b').allTextContents())
+				.map(text => Number(String(text).split('–')[0]));
 			assert.ok(stufen.length > 1, lang);
 			const sortiert = stufen.slice().sort((a, b) => a - b);
 			assert.deepEqual(stufen, sortiert, `${lang}: not ascending`);
