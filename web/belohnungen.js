@@ -36,10 +36,18 @@
 			({de: 'gegenstand', en: 'item', fr: 'objet'}[lang] || 'gegenstand') + '/' +
 			encodeURIComponent(row.raw[0]) + '/';
 		heading.appendChild(name);
-		var meta = [T('bl_gegenstaende')];
-		if (row.raw[3]) { meta.push(T('stufe') + ' ' + row.raw[3]); }
-		var metadata = node('span', meta.join(' · '));
+		var metadata = node('span');
 		metadata.className = 'bl-meta';
+		metadata.appendChild(document.createTextNode(T('bl_gegenstaende')));
+		if (row.raw[3]) { metadata.appendChild(document.createTextNode(' · ' + T('stufe') + ' ' + row.raw[3])); }
+		// The reward index carries the item's requirements (build_belohnungen.py).
+		// The level stays neutral; the state speaks as a chip next to it.
+		var stand = window.MQL_EIGNUNG && row.raw[7]
+			? window.MQL_EIGNUNG.ton(row.raw[7], window.MQL_EIGNUNG.charakter()) : null;
+		if (stand) {
+			metadata.appendChild(document.createTextNode(' · '));
+			metadata.appendChild(window.MQL_EIGNUNG.chip(stand));
+		}
 		heading.appendChild(metadata);
 		article.appendChild(heading);
 		li.appendChild(article);

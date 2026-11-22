@@ -135,9 +135,30 @@ def catalogue_data(lang: str) -> dict:
     return {'quests': compact(quest_rows, quests), 'deeds': compact(deed_rows, deeds)}
 
 
+def schreib_proficiency(profile: dict | None = None) -> None:
+    """Klassen-Proficiencys ohne Sprache: Rüstungs- und Waffenart mit Lernstufe.
+
+    Die Eignungsprüfung im Browser braucht beides, um zu unterscheiden, ob ein
+    Gegenstand nur so aussieht, als passe er, oder ob die Klasse ihn wirklich
+    führen darf (ein Hunter trägt keine schwere Rüstung und keine Schilde).
+    """
+    profile = profile or build()
+    tabelle = {
+        key: {'a': {eintrag['type']: eintrag['level'] for eintrag in cls['armour']},
+              'w': {eintrag['type']: eintrag['level'] for eintrag in cls['weapons']}}
+        for key, cls in profile['classes'].items()
+    }
+    (WEB / 'klassen-proficiency.js').write_text(
+        '/* Generated from the LOTRO client lore. Do not edit by hand. */\n'
+        f'window.MQL_KLASSEN_PROFICIENCY={json.dumps(tabelle, ensure_ascii=False, separators=(",", ":"))};\n',
+        encoding='utf-8',
+    )
+
+
 def write() -> None:
+    # One parse for all three languages and the neutral proficiency table.
+    profile = build()
     for lang in LANGS:
-        profile = build()
         (WEB / f'klassen-{lang}.js').write_text(
             '/* Generated from the LOTRO client lore. */\n'
             f'window.MQL_KLASSEN={json.dumps(profile, ensure_ascii=False, separators=(",", ":"))};\n',
@@ -149,6 +170,9 @@ def write() -> None:
             f'window.MQL_KLASSEN_KATALOG={json.dumps(catalogues, ensure_ascii=False, separators=(",", ":"))};\n',
             encoding='utf-8',
         )
+    # Sprachneutral: der Gegenstandskatalog spricht die Typ-Schlüssel des
+    # Clients (HEAVY, BOW …), eine Tabelle genügt für alle drei Sprachen.
+    schreib_proficiency(profile)
 
 
 if __name__ == '__main__':

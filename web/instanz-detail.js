@@ -129,9 +129,11 @@
 					target.appendChild(empty); return;
 				}
 				rowsUI.header(target,{levelHeading:heading});
+				var ch = window.MQL_EIGNUNG && window.MQL_EIGNUNG.charakter();
 				r.payload.forEach(function (item) {
 					var row = rowsUI.row(target,{href:item.url,name:item.name,meta:item.meta,
 						icon:loot ? 'gegenstand' : item.icon,image:item.image,levelHeading:heading,
+						eignung:ch && item.eignung ? window.MQL_EIGNUNG.ton(item.eignung,ch) : null,
 						values:[{label:heading,value:loot ? chanceText(matchingConditions(item,r.state.filters),lang) : item.quest}]});
 					if (!loot) {
 						var link = document.createElement('a'); link.href = item.quest_url; link.textContent = item.quest;

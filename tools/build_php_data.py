@@ -340,6 +340,7 @@ def write_title_index(target: Path, lang: str, titles: dict,
     # The deed kind in the title export is not always localised; the deed
     # categories from the page models are, and they match the deed pages.
     from php_viewmodel import DEED_TYPES, OTHER_DEED
+    from titelarten import label as titelart
     kategorien = deed_categories()
     fremd = set(OTHER_DEED.values())
 
@@ -377,7 +378,11 @@ def write_title_index(target: Path, lang: str, titles: dict,
         for region, gebiet in paare:
             if gebiet != region:
                 labels['area_region'][str(gebiet)] = str(region)
-        teile = [eintrag['name']]
+        # The client's title kind ("Crafting", "Kinship", …) is its own filter:
+        # it is the only statement about titles that no quest or deed awards.
+        arten_titel = [titelart(kind, lang) for kind in (eintrag.get('k') or [])
+                       if titelart(kind, lang)]
+        teile = [eintrag['name']] + arten_titel
         for quelle in quellen:
             teile.append(quelle[2])
         for wert in sorted(gebiete):
@@ -387,11 +392,13 @@ def write_title_index(target: Path, lang: str, titles: dict,
         rows.append({'id': ident, 'name': eintrag['name'],
                      'regions': sorted(regionen), 'areas': sorted(gebiete),
                      'quests': aufgaben, 'deeds': taten, 'arten': sorted(arten),
+                     'cats': arten_titel,
                      'search': ' '.join(teil for teil in teile if teil).lower()})
     rows.sort(key=lambda row: schluessel(row['name']))
     # Deed kinds arrive already localised from the page models; they are their
     # own labels.
     labels['art'] = {art: art for row in rows for art in row['arten']}
+    labels['cat'] = {wert: wert for row in rows for wert in row['cats']}
     payload = {'schema': 1, 'lang': lang, 'labels': labels, 'titles': rows}
     (target / lang / 'titles-index.json').write_text(
         json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
@@ -504,7 +511,7 @@ def write_instance_details(target: Path, lang: str, instanzen: dict, quests: dic
                            maps: dict, items: dict, quest_pages: dict, loot_data: dict,
                            map_previews: dict, instance_data: dict) -> dict:
     """Localized instance pages from the finder, quest catalogue and loot audit."""
-    from php_viewmodel import route
+    from php_viewmodel import route, eignung_daten
     loot_instances = loot_data.get('instanzen') or {}
     pools = loot_data.get('pools') or []
     labels = {
@@ -568,6 +575,7 @@ def write_instance_details(target: Path, lang: str, instanzen: dict, quests: dic
                         'image': item['icon'], 'icon': item['symbol'] or 'gegenstand',
                         'meta': ' · '.join(filter(None, (
                             '%s ×' % item['qty'] if item['qty'] > 1 else '', group['label']))),
+                        'eignung': item.get('eignung') or {},
                         'quest_id': task['id'], 'quest': task['name'], 'quest_url': task['url'],
                     })
         details[ident] = {
@@ -617,7 +625,8 @@ def write_instance_details(target: Path, lang: str, instanzen: dict, quests: dic
         for drop in sorted(loot_items.values(), key=lambda row: (schluessel(row['name']), row['id'])):
             conditions = drop.pop('conditions')
             chances = sorted(set().union(*conditions.values()), reverse=True)
-            chest_loot.append(dict(drop, chance=' / '.join(chest_chance(p, lang) for p in chances),
+            chest_loot.append(dict(drop, eignung=eignung_daten(items.get(drop['id'])),
+                                  chance=' / '.join(chest_chance(p, lang) for p in chances),
                                   conditions=[
                                       {'level': band, 'tier': tier, 'players': group,
                                        'chances': sorted(values, reverse=True)}

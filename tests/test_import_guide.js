@@ -33,6 +33,9 @@ function page(language, characters) {
   };
   const document = {
     getElementById(id) { assert.ok(ids[id], 'Unknown element: ' + id); return ids[id]; },
+    // The page mounts the shared tab bar; this stub has no DOM for it, so the
+    // lookup answers "not here" instead of throwing.
+    querySelector: () => null,
     querySelectorAll: () => [], createElement: element
   };
   vm.runInNewContext(fs.readFileSync(path.join(web, 'spielstand.js'), 'utf8'), {

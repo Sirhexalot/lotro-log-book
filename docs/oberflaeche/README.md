@@ -5,6 +5,7 @@
 - [Common filter component](filter-komponente.md)
 - [Filter memory and sorting](filter-sortierung.md)
 - [Class profile](klassenprofil.md)
+- [Item suitability](eignung.md)
 - [Tabs](reiter.md)
 - [Links and type](linkgestaltung.md)
 

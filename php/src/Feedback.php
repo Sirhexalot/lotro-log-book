@@ -15,7 +15,6 @@ final class Feedback
 {
     private const MAX_MESSAGE = 5000;
     private const MAX_REPLY_TO = 254;
-    private const MIN_FORM_SECONDS = 3;
     private const RATE_LIMIT = 3;
     private const RATE_WINDOW = 3600;
 
@@ -224,45 +223,72 @@ final class Feedback
     /** @return array{status:int,body:array<string,string>} */
     public function submit(array $server, array $post): array
     {
+        $requestId = bin2hex(random_bytes(4));
+        $this->writeLog('request', 'received', 'request=' . $requestId);
         if (($server['REQUEST_METHOD'] ?? '') !== 'POST') {
+            $this->writeLog('request', 'rejected',
+                'request=' . $requestId . '; reason=method; status=405');
             return ['status' => 405, 'body' => ['error' => 'method']];
         }
         if (!$this->databaseConfigured()) {
             $this->writeLog('mysql', 'configuration_incomplete',
-                'missing=' . implode(',', $this->missingDatabaseKeys()));
+                'request=' . $requestId . '; missing=' . implode(',', $this->missingDatabaseKeys()));
             return ['status' => 503, 'body' => ['error' => 'unavailable']];
         }
 
         self::startSession();
-        $form = $_SESSION['llb_feedback_form'] ?? null;
-        unset($_SESSION['llb_feedback_form']);
-        $token = (string) ($post['token'] ?? '');
-        if (!is_array($form) || !hash_equals((string) ($form['token'] ?? ''), $token)) {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            $this->writeLog('request', 'rejected',
+                'request=' . $requestId . '; reason=session_unavailable; status=403');
             return ['status' => 403, 'body' => ['error' => 'expired']];
         }
-        if (time() - (int) ($form['started'] ?? 0) < self::MIN_FORM_SECONDS) {
-            return ['status' => 400, 'body' => ['error' => 'too_fast']];
+        $form = $_SESSION['llb_feedback_form'] ?? null;
+        $token = (string) ($post['token'] ?? '');
+        if (!is_array($form)) {
+            $this->writeLog('request', 'rejected',
+                'request=' . $requestId . '; reason=session_form_missing; status=403');
+            return ['status' => 403, 'body' => ['error' => 'expired']];
+        }
+        if ($token === '') {
+            $this->writeLog('request', 'rejected',
+                'request=' . $requestId . '; reason=token_missing; status=403');
+            return ['status' => 403, 'body' => ['error' => 'expired']];
+        }
+        if (!hash_equals((string) ($form['token'] ?? ''), $token)) {
+            $this->writeLog('request', 'rejected',
+                'request=' . $requestId . '; reason=token_mismatch; status=403');
+            return ['status' => 403, 'body' => ['error' => 'expired']];
         }
         if (trim((string) ($post['website'] ?? '')) !== '') {
+            $this->writeLog('request', 'rejected',
+                'request=' . $requestId . '; reason=honeypot; status=400');
             return ['status' => 400, 'body' => ['error' => 'invalid']];
         }
         if (!$this->sameOrigin($server)) {
+            $this->writeLog('request', 'rejected',
+                'request=' . $requestId . '; reason=origin_check; status=403');
             return ['status' => 403, 'body' => ['error' => 'origin']];
         }
 
         $message = trim((string) ($post['message'] ?? ''));
         if ($message === '' || mb_strlen($message, 'UTF-8') > self::MAX_MESSAGE) {
+            $this->writeLog('request', 'rejected',
+                'request=' . $requestId . '; reason=message_validation; status=422');
             return ['status' => 422, 'body' => ['error' => 'message']];
         }
         $replyTo = trim((string) ($post['reply_email'] ?? ''));
         if (strlen($replyTo) > self::MAX_REPLY_TO
             || ($replyTo !== '' && filter_var($replyTo, FILTER_VALIDATE_EMAIL) === false)
             || preg_match('/[\r\n]/', $replyTo)) {
+            $this->writeLog('request', 'rejected',
+                'request=' . $requestId . '; reason=email_validation; status=422');
             return ['status' => 422, 'body' => ['error' => 'email']];
         }
 
         $pageUrl = $this->pageUrl((string) ($post['page_url'] ?? ''));
         if ($pageUrl === null) {
+            $this->writeLog('request', 'rejected',
+                'request=' . $requestId . '; reason=context_validation; status=422');
             return ['status' => 422, 'body' => ['error' => 'context']];
         }
         $entityType = $this->cleanLine((string) ($post['entity_type'] ?? ''), 60);
@@ -274,7 +300,10 @@ final class Feedback
         }
 
         $ip = (string) ($server['REMOTE_ADDR'] ?? '');
-        if (!$this->allowRate($ip)) {
+        $rateReason = '';
+        if (!$this->allowRate($ip, $rateReason)) {
+            $this->writeLog('request', 'rejected',
+                'request=' . $requestId . '; reason=' . $rateReason . '; status=429');
             return ['status' => 429, 'body' => ['error' => 'limit']];
         }
 
@@ -283,28 +312,35 @@ final class Feedback
                 $message, $replyTo, $pageUrl, $entityType, $entityId, $entityName, $viewport, $server
             );
         } catch (PDOException $error) {
-            $this->writeLog('mysql', 'insert_failed', $this->pdoError($error));
+            $this->writeLog('mysql', 'insert_failed',
+                'request=' . $requestId . '; ' . $this->pdoError($error));
             return ['status' => 503, 'body' => ['error' => 'store']];
         }
-        $this->writeLog('mysql', 'insert_ok');
+        // Preserve a valid form token through validation and transient storage
+        // failures; consume it only after the feedback is durable.
+        unset($_SESSION['llb_feedback_form']);
+        $this->writeLog('mysql', 'insert_ok', 'request=' . $requestId);
         if (!$this->smtpConfigured()) {
             $this->writeLog('smtp', 'configuration_incomplete',
-                'missing=' . implode(',', $this->missingSmtpKeys()));
+                'request=' . $requestId . '; missing=' . implode(',', $this->missingSmtpKeys()));
             return ['status' => 200, 'body' => ['ok' => 'saved_mail_failed']];
         }
         try {
             $this->send($message, $replyTo, $pageUrl, $entityType, $entityId, $entityName, $viewport, $server);
-            $this->writeLog('smtp', 'send_ok');
+            $this->writeLog('smtp', 'send_ok', 'request=' . $requestId);
             $this->markNotified($feedbackId);
         } catch (MailException|\RuntimeException $error) {
             $this->writeLog('smtp', 'send_failed',
-                get_class($error) . ': ' . $this->safeLogDetail($error->getMessage()));
+                'request=' . $requestId . '; ' . get_class($error) . ': '
+                    . $this->safeLogDetail($error->getMessage()));
             return ['status' => 200, 'body' => ['ok' => 'saved_mail_failed']];
         } catch (PDOException $error) {
             // The mail has already gone out and the feedback is durable. A
             // failed notification marker must not make the visitor resubmit.
-            $this->writeLog('mysql', 'notification_marker_failed', $this->pdoError($error));
+            $this->writeLog('mysql', 'notification_marker_failed',
+                'request=' . $requestId . '; ' . $this->pdoError($error));
         }
+        $this->writeLog('request', 'completed', 'request=' . $requestId . '; status=200');
         return ['status' => 200, 'body' => ['ok' => 'sent']];
     }
 
@@ -411,13 +447,15 @@ final class Feedback
         $statement->execute([':id' => $id]);
     }
 
-    private function allowRate(string $ip): bool
+    private function allowRate(string $ip, ?string &$reason = null): bool
     {
         if ($ip === '' || !filter_var($ip, FILTER_VALIDATE_IP)) {
+            $reason = 'invalid_client_address';
             return false;
         }
         $directory = dirname($this->rateFile);
         if (!is_dir($directory) && !@mkdir($directory, 0700, true) && !is_dir($directory)) {
+            $reason = 'rate_directory_unavailable';
             return false;
         }
         $handle = @fopen($this->rateFile, 'c+');
@@ -425,6 +463,7 @@ final class Feedback
             if (is_resource($handle)) {
                 fclose($handle);
             }
+            $reason = 'rate_file_unavailable';
             return false;
         }
         try {
@@ -446,6 +485,7 @@ final class Feedback
             $key = hash_hmac('sha256', $ip, $this->config['LLB_FEEDBACK_RATE_KEY']);
             $hits = $state[$key] ?? [];
             if (count($hits) >= self::RATE_LIMIT) {
+                $reason = 'rate_limit_reached';
                 return false;
             }
             $hits[] = $now;
@@ -455,6 +495,7 @@ final class Feedback
             fwrite($handle, (string) json_encode($state));
             fflush($handle);
             @chmod($this->rateFile, 0600);
+            $reason = 'allowed';
             return true;
         } finally {
             flock($handle, LOCK_UN);

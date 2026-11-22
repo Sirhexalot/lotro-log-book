@@ -1,0 +1,112 @@
+{% extends 'app/layout.twig' %}
+{% import 'components/reiter.twig' as reiter %}
+
+{% block koerper_attribute %} data-seite="ratgeber" class="seite-text"{% endblock %}
+
+{% block stile %}
+<link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/reiter.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/ratgeber.css?v={{ asset_stand }}">
+{% endblock %}
+
+{% block haupt %}
+<main class="seite ratgeber-seite">
+	<h2 id="rat-titel">Ratgeber</h2>
+	<p id="rat-einleitung" class="rat-einleitung"></p>
+
+	{# Without an imported character the page explains what it needs. #}
+	<section id="rat-ohne" class="rat-ohne" hidden>
+		<p id="rat-ohne-text"></p>
+		<a class="llb-knopf" id="rat-import" href="/de/spielstand/" data-art="haupt"></a>
+	</section>
+
+	<section id="rat-inhalt" hidden>
+		<header class="rat-kopf">
+			<div class="rat-wer">
+				<strong id="rat-name"></strong>
+				<span id="rat-klasse" class="rat-quiet"></span>
+			</div>
+			<span id="rat-stand" class="rat-quiet"></span>
+		</header>
+
+		{{ reiter.reiter('rat', 'Ratgeber', [
+			{key: 'ausruestung', label: 'Ausrüstung', panel: 'rat-panel-ausruestung'},
+			{key: 'taschen', label: 'Taschen & Bank', panel: 'rat-panel-taschen'},
+			{key: 'weiter', label: 'Weiterspielen', panel: 'rat-panel-weiter'}
+		], 'ausruestung') }}
+
+		<section id="rat-panel-ausruestung" role="tabpanel" aria-labelledby="rat-ausruestung" class="rat-flaeche">
+			<p id="rat-gear-hinweis" class="rat-quiet" hidden></p>
+			<div class="rat-blatt" id="rat-blatt">
+				<div class="rat-spalte" id="rat-spalte-links"></div>
+				<div class="rat-mitte">
+					<div class="rat-bild" aria-hidden="true">
+						<svg viewBox="0 0 100 175" role="presentation"><path class="rat-silhouette" d="M27 46C25 22 38 10 50 8c15 2 25 17 23 38l-9 12 4 10 14 8 7 40-10 3-8-31-3 32-4 35 7 12H52l-2-36-3 36H29l7-12-3-35-4-31-10 29-9-3 8-39 15-8 4-10Z"/><path class="rat-kopf-silhouette" d="M34 41c2-11 9-18 16-22 8 5 14 12 16 22l-7 12-9 5-9-5z"/></svg>
+					</div>
+					<div class="rat-zeile" id="rat-spalte-unten"></div>
+				</div>
+				<div class="rat-spalte" id="rat-spalte-rechts"></div>
+			</div>
+			<section class="rat-detail" id="rat-detail" aria-live="polite">
+				<h3 id="rat-detail-titel"></h3>
+				<p id="rat-detail-text"></p>
+				<div id="rat-detail-werte"></div>
+				<div id="rat-detail-muster"></div>
+				<button type="button" id="rat-kandidaten-knopf" class="llb-knopf" data-art="rand" hidden></button>
+				<section id="rat-kandidaten" class="rat-kandidaten" hidden aria-live="polite">
+					<h4 id="rat-kandidaten-titel"></h4>
+					<p id="rat-kandidaten-anzahl" class="rat-quiet"></p>
+					<p id="rat-kandidaten-hinweis" class="rat-quiet"></p>
+					<ul id="rat-kandidaten-liste" class="mql-row-list"></ul>
+				</section>
+			</section>
+		</section>
+
+		<section id="rat-panel-taschen" role="tabpanel" aria-labelledby="rat-taschen" class="rat-flaeche" hidden>
+			<div class="rat-lager" role="group" id="rat-lager"></div>
+			<label class="rat-suche">
+				<span class="visuell-versteckt" id="rat-suche-label">Gegenstand suchen</span>
+				<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+				<input id="rat-suche-feld" type="search" autocomplete="off" aria-labelledby="rat-suche-label">
+			</label>
+			<p id="rat-lager-hinweis" class="rat-quiet" hidden></p>
+			<p id="rat-treffer" class="rat-quiet"></p>
+			<ul id="rat-liste" class="rat-liste"></ul>
+			<p id="rat-leer" class="rat-quiet" hidden></p>
+		</section>
+
+		<section id="rat-panel-weiter" role="tabpanel" aria-labelledby="rat-weiter" class="rat-flaeche" hidden>
+			<h3 id="rat-weiter-titel"></h3>
+			<p id="rat-weiter-text" class="rat-quiet"></p>
+			<div class="rat-wege">
+				<article><strong id="rat-wege-epik"></strong><p id="rat-wege-epik-text" class="rat-quiet"></p></article>
+				<article><strong id="rat-wege-taten"></strong><p id="rat-wege-taten-text" class="rat-quiet"></p></article>
+				<article><strong id="rat-wege-aufgaben"></strong><p id="rat-wege-aufgaben-text" class="rat-quiet"></p></article>
+			</div>
+			<p id="rat-weiter-offen" class="rat-quiet"></p>
+		</section>
+
+		<p id="rat-lokal" class="rat-quiet rat-lokal"></p>
+	</section>
+</main>
+{% endblock %}
+
+{% block skripte %}
+<script src="/texte.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-logbuch.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-site.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-spielstand.js?v={{ asset_stand }}" defer></script>
+<script src="/texte-ratgeber.js?v={{ asset_stand }}" defer></script>
+<script src="/sprache.js?v={{ asset_stand }}" defer></script>
+<script src="/speicher.js?v={{ asset_stand }}" defer></script>
+<script src="/menue.js?v={{ asset_stand }}" defer></script>
+<script src="/familienmenue.js?v={{ asset_stand }}" defer></script>
+<script src="/klassen-{{ lang }}.js?v={{ asset_stand }}" defer></script>
+<script src="/symbole.js?v={{ asset_stand }}" defer></script>
+<script src="/klassen-proficiency.js?v={{ asset_stand }}" defer></script>
+<script src="/eignung.js?v={{ asset_stand }}" defer></script>
+<script src="/treffer-zeile.js?v={{ asset_stand }}" defer></script>
+<script src="/ratgeber.js?v={{ asset_stand }}" defer></script>
+{% endblock %}

@@ -111,6 +111,22 @@ async function mode(page){return page.locator('#welt').getAttribute('data-karten
         await context.close();
       }
     }
+    {
+      const context=await browser.newContext({viewport:{width:1280,height:900}}),p=await context.newPage();
+      await p.addInitScript(()=>localStorage.setItem('mql.vorkommen','{"wahl":{}}'));
+      await p.goto(`${base}/de/karte/?vorkommen=1879077402&vorkarte=268437716`,{waitUntil:'networkidle'});
+      await ready(p);
+      await p.waitForFunction(()=>document.querySelector('.vorkommen-ebene')?.style.pointerEvents==='auto');
+      assert.equal(await p.evaluate(()=>localStorage.getItem('mql.vorkommen')),'{"wahl":{}}',
+        'a resource link must not overwrite the saved manual selection');
+      await p.locator('#vorkommen-knopf').click();
+      await p.locator('#vorkommen-liste select').first().waitFor();
+      await p.locator('#vorkommen-liste select').first().selectOption('*');
+      assert.notEqual(await p.evaluate(()=>localStorage.getItem('mql.vorkommen')),'{"wahl":{}}',
+        'a subsequent manual selection should still be saved');
+      results.push('resource link temporarily enables its resource; manual changes remain saved');
+      await context.close();
+    }
     for(const route of ['karte/','karte/taten/']){
       const context=await browser.newContext({viewport:{width:1280,height:900}}),p=await context.newPage(),errors=[];
       p.on('pageerror',e=>errors.push(e.message));

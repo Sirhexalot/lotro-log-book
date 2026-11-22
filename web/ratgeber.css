@@ -1,0 +1,74 @@
+/* Advisor page: the gear sheet with a portrait in the middle, then bags and
+ * vault below one shared switch. Colours and steps come from gemeinsam.css. */
+.ratgeber-seite { max-width: var(--huelle); margin: 0 auto; padding: 0 12px 48px; }
+.rat-einleitung { color: var(--schwach); max-width: 72ch; }
+.rat-quiet { color: var(--schwach); }
+.rat-ohne { background: var(--fläche-hell); border-radius: 4px; padding: 14px; margin: 18px 0; }
+.rat-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin: 18px 0 10px; }
+.rat-wer strong { display: block; font-size: var(--text-abschnitt); }
+.rat-flaeche { margin-top: 12px; }
+
+/* --- Sheet ---------------------------------------------------------------- */
+.rat-blatt { display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, 1.15fr) minmax(0, 1fr);
+	gap: 8px; background: var(--fläche-hell); padding: 10px; border-radius: 4px; }
+.rat-spalte { display: flex; flex-direction: column; gap: 4px; }
+.rat-mitte { display: flex; flex-direction: column; gap: 6px; }
+.rat-bild { display: grid; place-items: center; min-height: 210px;
+	background: var(--fläche-hell); }
+.rat-bild svg { width: 118px; height: 200px; }
+.rat-silhouette { fill: var(--rand); }
+.rat-kopf-silhouette { fill: var(--gold); opacity: .35; }
+.rat-zeile { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+
+.rat-platz { display: flex; align-items: center; gap: 7px; min-height: 38px; padding: 3px 6px;
+	text-align: left; background: var(--grund); color: var(--text);
+	border: 1px solid var(--rand); border-radius: 3px; font: inherit; font-size: var(--text-klein); cursor: pointer; }
+.rat-platz:hover { border-color: var(--gold); }
+.rat-platz[aria-pressed="true"] { border-color: var(--gold); background: var(--auswahl); }
+.rat-symbol { display: grid; place-items: center; flex: none; width: 26px; height: 26px;
+	background: var(--fläche-hell); color: var(--gold); border-radius: 3px; font-size: var(--text-bedienung); }
+.rat-symbol-klein { width: 22px; height: 22px; font-size: var(--text-klein); }
+.rat-platzname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rat-platz.belegt .rat-symbol { background: var(--auswahl); }
+
+.rat-detail { margin-top: 10px; background: var(--fläche-hell); border-radius: 4px; padding: 12px; }
+.rat-detail h3 { margin: 0 0 4px; }
+.rat-detail h4 { margin: 10px 0 3px; font-size: var(--text-klein); color: var(--gold); }
+.rat-kandidaten { margin-top: 12px; }
+/* Die Zeilen selbst kommen aus treffer-zeile.js und filter-ui.css; hier bleibt
+   nur der Abstand. Keine eigenen Rahmen, sonst zeichnet die Liste doppelt. */
+.rat-kandidaten .mql-row-list { margin-top: 6px; }
+.rat-werte { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 3px 14px; }
+.rat-werte li { font-size: var(--text-klein); }
+
+/* --- Bags and vault ------------------------------------------------------- */
+.rat-lager { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.rat-lagerknopf { font: inherit; font-size: var(--text-klein); padding: 5px 10px; cursor: pointer;
+	background: var(--fläche-hell); color: var(--text); border: 1px solid var(--rand); border-radius: 3px; }
+.rat-lagerknopf[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+.rat-suche { display: flex; align-items: center; gap: 6px; max-width: 360px;
+	border: 1px solid var(--rand); border-radius: 3px; padding: 0 6px; background: var(--fläche-hell); }
+.rat-suche svg { width: 15px; height: 15px; flex: none; color: var(--schwach); }
+.rat-suche input { width: 100%; min-width: 0; border: 0; background: none; color: var(--text);
+	font: inherit; font-size: var(--text-klein); padding: 6px 2px; outline: 0; }
+.rat-liste { list-style: none; margin: 10px 0 0; padding: 0; }
+.rat-stueck { display: flex; align-items: center; gap: 8px; padding: 5px 0;
+	border-bottom: 1px solid var(--rand); font-size: var(--text-klein); }
+.rat-stueck:last-child { border-bottom: 0; }
+.rat-stueckname { min-width: 0; flex: 1 1 auto; }
+.rat-stueck .rat-quiet { flex: none; }
+
+/* --- Continue playing ----------------------------------------------------- */
+.rat-wege { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin: 10px 0; }
+.rat-wege article { background: var(--fläche-hell); border-radius: 4px; padding: 10px; }
+.rat-wege strong { display: block; margin-bottom: 3px; }
+.rat-lokal { margin-top: 22px; font-size: var(--text-klein); }
+
+@media (max-width: 760px) {
+	.rat-blatt { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+	.rat-mitte { grid-column: 1 / -1; grid-row: 1; flex-direction: row; align-items: center; }
+	.rat-bild { min-height: 120px; flex: 0 0 100px; }
+	.rat-zeile { flex: 1 1 auto; }
+	.rat-platz { min-height: 44px; }
+	.rat-bild svg { width: 70px; height: 118px; }
+}

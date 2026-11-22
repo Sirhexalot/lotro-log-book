@@ -3,8 +3,9 @@
 {# Title or virtue page: the award sources and the limits of the catalogue. #}
 {% block inhalt %}
 <article>{{ include('entity/_heading.twig') }}
-<section><h2>{{ w.sources }}</h2>
-<ul class="katalog-liste quellen-liste" data-quellen-liste>{% for source in page.sources %}<li{% if source.url %} data-url="{{ source.url }}"{% endif %}>{% if source.url %}<a href="{{ source.url }}">{{ source.text }}</a>{% else %}{{ source.text }}{% endif %}{% if source.extra %} · {{ source.extra }}{% endif %}</li>{% endfor %}</ul></section>
+{% if page.categories|default([]) %}<p class="katalog-metazeile">{% for kategorie in page.categories %}<span class="katalog-chip">{{ kategorie }}</span>{% if not loop.last %} {% endif %}{% endfor %}</p>{% endif %}
+{% if page.sources %}<section><h2>{{ w.sources }}</h2>
+<ul class="katalog-liste quellen-liste" data-quellen-liste>{% for source in page.sources %}<li{% if source.url %} data-url="{{ source.url }}"{% endif %}>{% if source.url %}<a href="{{ source.url }}">{{ source.text }}</a>{% else %}{{ source.text }}{% endif %}{% if source.extra %} · {{ source.extra }}{% endif %}</li>{% endfor %}</ul></section>{% endif %}
 {% if page.ranked %}<p class="llb-hinweis">{{ w.ranked }}</p>{% endif %}
 </article>
 {% endblock %}

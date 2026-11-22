@@ -44,7 +44,7 @@ final class Catalogue
                     'klassen' => 'klassen',
                    'suche' => 'suche', 'feedback' => 'feedback', 'sets' => 'set', 'givers' => 'auftraggeber',
                    'landmarks' => 'landmarke', 'vendors' => 'haendler', 'titles' => 'titel', 'factions' => 'fraktion', 'instances' => 'instanz',
-                  'adventures' => 'abenteuer'],
+                  'adventures' => 'abenteuer', 'ratgeber' => 'ratgeber'],
         'en' => ['start' => '', 'karte' => 'map', 'questfinder' => 'quest-finder', 'taten' => 'map/deeds',
                  'gegenstandssuche' => 'item-search', 'handwerk' => 'crafting/recipes',
                  'reise' => 'travel', 'ruf' => 'reputation', 'belohnungen' => 'rewards',
@@ -52,7 +52,7 @@ final class Catalogue
                     'klassen' => 'classes',
                    'suche' => 'search', 'feedback' => 'feedback', 'sets' => 'set', 'givers' => 'quest-giver',
                    'landmarks' => 'landmark', 'vendors' => 'vendor', 'titles' => 'title', 'factions' => 'faction', 'instances' => 'instance',
-                  'adventures' => 'adventure'],
+                  'adventures' => 'adventure', 'ratgeber' => 'advisor'],
         'fr' => ['start' => '', 'karte' => 'carte', 'questfinder' => 'recherche-quetes', 'taten' => 'carte/prouesses',
                  'gegenstandssuche' => 'recherche-objets', 'handwerk' => 'artisanat/recettes',
                  'reise' => 'voyage', 'ruf' => 'reputation', 'belohnungen' => 'recompenses',
@@ -60,7 +60,7 @@ final class Catalogue
                     'klassen' => 'classes',
                    'suche' => 'recherche', 'feedback' => 'retour', 'sets' => 'ensemble', 'givers' => 'donneur-de-quete',
                    'landmarks' => 'site', 'vendors' => 'marchand', 'titles' => 'titre', 'factions' => 'faction', 'instances' => 'instance',
-                  'adventures' => 'aventure'],
+                  'adventures' => 'aventure', 'ratgeber' => 'conseiller'],
     ];
 
     private array $labels;

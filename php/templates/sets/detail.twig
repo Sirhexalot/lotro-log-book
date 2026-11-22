@@ -2,6 +2,7 @@
 {% block inhalt %}
 <article class="set-detail">
 {% import 'entity/_header.twig' as heading %}
+{% import 'components/eignung.twig' as eignung %}
 {{ heading.detail(kind, lang, w, set.name, icon, '', '', entity_filter_url|default(''), entity_filter_label|default('')) }}<p>{{ sw.parts|replace({'%s': set.parts}) }}</p>
 <p class="llb-aktionen"><a class="llb-knopf" href="#setteile">{{ sw.pieces }}</a> <a class="llb-knopf" href="#setboni">{{ sw.bonuses }}</a></p>
 <section id="setteile"><h2>{{ sw.pieces }}</h2>
@@ -10,7 +11,7 @@
 <article class="set-card{% if member.missing %} set-card-missing{% endif %}">
     <h3>{% if member.card and member.card.symbol %}<img src="/bild/items/{{ member.card.symbol }}.webp" alt="" width="32" height="32" loading="lazy">{% endif %}{% if member.url %}<a class="{{ member.card.head_class }}" href="{{ member.url }}">{{ member.name }}</a>{% else %}{{ member.name }}{% endif %}{% if member.count > 1 %} <span class="set-card-count">· {{ member.count }}×</span>{% endif %}</h3>
     {% if member.card %}
-        <p class="set-card-meta">{% for chip in member.card.chips %}<span>{{ chip.text }}</span>{% endfor %}</p>
+        <p class="set-card-meta">{% for chip in member.card.chips %}<span{{ eignung.attribute(chip.eignung|default({})) }}>{{ chip.text }}</span>{% endfor %}</p>
         {% if member.card.required_class %}<p>{{ sw.class }}: {{ member.card.required_class }}</p>{% endif %}
         {% if member.card.armour %}<p>{{ sw.armour }}: {{ member.card.armour }}</p>{% endif %}
         {% if member.card.values %}<dl>{% for row in member.card.values %}<dt>{{ row.label }}</dt><dd>{{ row.value }}</dd>{% endfor %}</dl>{% endif %}

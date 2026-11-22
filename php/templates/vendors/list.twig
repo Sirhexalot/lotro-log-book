@@ -30,7 +30,7 @@
             {% endif %}
             {% for key, options in facets %}{% if key != 'region' and key != 'area' and options %}
             <fieldset><legend>{{ attribute(gw, key) }}</legend>
-                {% for option in options %}<label class="sets-option"><input type="checkbox" name="{{ key }}[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ attribute(gw, key ~ '_' ~ option.value) }}</span><small>{{ option.count }}</small></label>{% endfor %}
+                {% for option in options %}<label class="sets-option"><input type="checkbox" name="{{ key }}[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
             </fieldset>{% endif %}{% endfor %}
             <div class="sets-filter-actions"><button type="submit">{{ gw.apply }}</button><a href="{{ list_url }}">{{ gw.reset }}</a></div>
         </details>

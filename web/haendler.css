@@ -1,0 +1,99 @@
+/* Vendor detail page: the where/what tabs, the place picker and the barter list.
+ *
+ * The rows reuse the catalogue row markup (`gs-zeile`), so only the place
+ * picker needs its own rules: one map, a compact list of every known spot. */
+
+.vendor-reiter {
+	margin: 0 0 18px;
+}
+
+.vendor-ortsicht {
+	display: grid;
+	grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+	gap: 18px;
+	align-items: start;
+}
+
+@media (max-width: 760px) {
+	.vendor-ortsicht { grid-template-columns: 1fr; }
+}
+
+.vendor-ortsicht .llb-karte {
+	margin: 0;
+}
+
+.vendor-orte {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	border-top: 1px solid var(--rand);
+}
+
+.vendor-orte li {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border-bottom: 1px solid var(--rand);
+	padding: 0 6px 0 8px;
+}
+
+.vendor-orte li.ist-aktiv {
+	box-shadow: inset 3px 0 0 var(--gold);
+}
+
+.ort-zeile {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 8px 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.ort-zeile:hover .ort-name,
+.ort-zeile:focus-visible .ort-name {
+	text-decoration: underline;
+}
+
+.ort-name {
+	color: var(--zeile-titel, var(--text));
+	overflow-wrap: anywhere;
+}
+
+.ort-meta {
+	color: var(--schwach);
+	font-size: var(--text-klein);
+}
+
+.ort-aktionen {
+	display: flex;
+	gap: 10px;
+	font-size: var(--text-klein);
+	white-space: nowrap;
+}
+
+.ort-aktionen a {
+	color: var(--text-bedienung);
+}
+
+@media (max-width: 760px) {
+	.ort-aktionen { flex-direction: column; gap: 2px; }
+}
+
+.vendor-goods h2 {
+	margin-top: 18px;
+}
+
+.vendor-barter {
+	margin-top: 6px;
+}
+
+.vendor-barter .gs-zeile .gs-meta {
+	color: var(--gold);
+}

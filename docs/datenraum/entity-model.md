@@ -19,7 +19,7 @@ no quest text, no item data and no map image; it names fields and counts them.
 | Item | `i` | 52,802 | item | Gegenstand | objet |
 | Recipe | `recipe` | 7,924 | recipe | Rezept | recette |
 | Set | `set` | 2,223 | set | Set | ensemble |
-| Title | `title` | 2,500 | title | Titel | titre |
+| Title | `title` | 3,095 | title | Titel | titre |
 | Virtue | `virtue` | 20 | virtue | Tugend | vertu |
 | Faction | `f` | 114 | faction | Fraktion | faction |
 | Quest giver | `giver` | 5,067 | quest giver | Auftraggeber | donneur de quête |
@@ -33,6 +33,12 @@ Two counts need their limit stated: the 226 maps are the parchment maps the
 catalogue can address, not every interior map in the client. The 20 virtues are
 the ones the client exposes as reward-bearing virtues; that is not a claim about
 the full virtue system.
+
+Titles are complete against the client: 3,095 pages stand for the 3,147 title
+records, after 24 internal or name-dependent entries were excluded and 39 equal
+display names were merged. 2,521 titles name a quest or a deed as their source;
+the rest (crafting, event, kinship, hobby, …) carry the client's title kind
+instead, and their pages have no source section.
 
 ## Relations
 

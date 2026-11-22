@@ -203,7 +203,12 @@ if ($html === null) {
 header('Content-Type: text/html; charset=utf-8');
 // Revalidate on every navigation: a page cached for minutes kept showing
 // a half-written upload long after the data was there.
-if (isset($result['app']) && in_array($result['app'], ['karte', 'taten'], true)) {
+if (isset($result['app']) && $result['app'] === 'feedback') {
+    // The page embeds a per-session token; it must never be reused from cache.
+    header('Cache-Control: private, no-store, max-age=0, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+} elseif (isset($result['app']) && in_array($result['app'], ['karte', 'taten'], true)) {
     // The map shell is frequently updated; do not let the browser reuse old HTML.
     header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
     header('Pragma: no-cache');

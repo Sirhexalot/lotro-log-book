@@ -1,6 +1,7 @@
 {% extends 'layout.twig' %}
 {% import 'entity/_result_row.twig' as result %}
 {% import 'components/reiter.twig' as reiter %}
+{% import 'components/eignung.twig' as eignung %}
 
 {# Item page: descriptive item content first, related sources/usages as tabs. #}
 {% block inhalt %}
@@ -8,12 +9,12 @@
 <article class="item-seite katalog-detailraster entity-detail-layout">
 {{ include('entity/_heading.twig') }}
 {% if page.eyebrow %}<p class="katalog-augenbraue">{{ page.eyebrow }}</p>{% endif %}
-{% if page.chips and not page.has_values %}<p class="katalog-metazeile">{{ page.chips|map(chip => chip.text)|join(' · ') }}</p>{% endif %}
+{% if page.chips and not page.has_values %}<p class="katalog-metazeile">{% for chip in page.chips %}{% if not loop.first %} · {% endif %}<span class="{{ chip.cls }}"{{ eignung.attribute(chip.eignung|default({})) }}>{{ chip.text }}</span>{% endfor %}</p>{% endif %}
 <div class="entity-detail-grid llb-raster{% if page.description and page.has_values %} entity-detail-overview-pair{% endif %}">
 {% if page.description %}<section class="entity-item-description llb-flaeche" aria-label="{{ w.description }}"><p class="katalog-text">{{ page.description }}</p></section>{% endif %}
 {% if page.has_values %}<section class="katalog-abschnitt katalog-werteflaeche llb-flaeche" data-ton="hell">
 <h2>{{ w.values }}</h2>
-{% if page.chips %}<p class="katalog-metazeile">{% for chip in page.chips %}{% if not loop.first %} · {% endif %}<span class="{{ chip.cls }}">{{ chip.text }}</span>{% endfor %}</p>{% endif %}
+{% if page.chips %}<p class="katalog-metazeile">{% for chip in page.chips %}{% if not loop.first %} · {% endif %}<span class="{{ chip.cls }}"{{ eignung.attribute(chip.eignung|default({})) }}>{{ chip.text }}</span>{% endfor %}</p>{% endif %}
 {% if page.required_class|default(false) %}<p class="katalog-metazeile">{{ w.required_class }}: {{ page.required_class }}</p>{% endif %}
 {% if page.armour %}<p class="katalog-grundwert"><span>{{ w.armour }}</span><b>{{ page.armour }}</b></p>{% endif %}
 {% if page.values %}<dl class="katalog-werte-raster">{% for row in page.values %}<div><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>{% endfor %}</dl>{% endif %}
@@ -32,19 +33,26 @@
 {% if page.browse|default(false) %}<section class="llb-flaeche"><h2>{{ w.browse }}</h2><p>{{ page.browse.note }}</p><p><a href="{{ page.browse.url }}" class="llb-knopf">{{ page.browse.text }}</a></p></section>{% endif %}
 
 {% set barter_count = page.barter_sources|default([])|length %}
-{% set item_tabs = [{key: 'woher', label: w.tab_where_from, panel: 'item-tab-woher',
-                     zahl: page.where_from_count|default(0) - barter_count}] %}
+{# „Woher“ nur, wenn es außer Tausch etwas zu zeigen gibt. Der Zähler trägt
+   den Tausch mit; die Differenz ist alles andere. So stimmt es auch mit einem
+   Seitenmodell, das das Feld noch nicht kennt. #}
+{% set where_other = page.has_where_other is defined ? page.has_where_other
+                     : (page.where_from_count|default(0) - barter_count) > 0 %}
+{% set item_tabs = [] %}
+{% if where_other %}{% set item_tabs = item_tabs|merge([
+    {key: 'woher', label: w.tab_where_from, panel: 'item-tab-woher',
+     zahl: page.where_from_count|default(0) - barter_count}]) %}{% endif %}
 {% if page.has_used_for|default(false) %}{% set item_tabs = item_tabs|merge([
     {key: 'wofuer', label: w.tab_used_for, panel: 'item-tab-wofuer', zahl: page.used_for_count|default(0)}]) %}{% endif %}
 {% if barter_count %}{% set item_tabs = item_tabs|merge([
     {key: 'barter', label: w.source_barters, panel: 'item-tab-barter', zahl: barter_count}]) %}{% endif %}
 {% set has_tabs = item_tabs|length > 1 %}
 {% if has_tabs %}<div class="item-bezugsreiter">
-{{ reiter.reiter('item', w.ilabel, item_tabs, 'woher') }}
+{{ reiter.reiter('item', w.ilabel, item_tabs, item_tabs|first.key) }}
 {% endif %}
 {% if page.task_filter|default(false) %}<script type="application/json" id="item-task-filter-data">{{ page.task_filter|json_encode|raw }}</script>{% endif %}
 
-{% if page.has_where_from|default(false) %}<section id="item-tab-woher"{% if has_tabs %} role="tabpanel" aria-labelledby="item-woher" tabindex="0"{% else %} class="katalog-abschnitt katalog-beziehungen llb-flaeche"{% endif %}>
+{% if where_other %}<section id="item-tab-woher"{% if has_tabs %} role="tabpanel" aria-labelledby="item-woher" tabindex="0"{% else %} class="katalog-abschnitt katalog-beziehungen llb-flaeche"{% endif %}>
 {% if not has_tabs %}<h2>{{ w.tab_where_from }}</h2>{% endif %}
 {% for group in page.where_groups|filter(g => not g.barter_filter|default(false)) %}
 {% include 'entity/_item_group.twig' %}

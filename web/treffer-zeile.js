@@ -102,6 +102,13 @@
 		var body = node('span', 'mql-row-body');
 		body.appendChild(node('strong', 'mql-row-name', options.name));
 		if (options.meta) { body.appendChild(node('small', 'mql-row-meta', options.meta)); }
+		/* The state is a chip on its own line under the name: left, where the
+		 * item is described — not on the numbers, which stay neutral. */
+		if (options.eignung && window.MQL_EIGNUNG) {
+			var mark = node('span', 'mql-row-eignung');
+			mark.appendChild(window.MQL_EIGNUNG.chip(options.eignung));
+			body.appendChild(mark);
+		}
 		link.appendChild(body);
 		li.appendChild(link);
 		if (options.levels !== false) {

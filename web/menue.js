@@ -38,15 +38,15 @@
 		de: { start: '', karte: 'karte', questfinder: 'aufgabenfinder', taten: 'karte/taten', gegenstandssuche: 'gegenstandssuche', klassen: 'klassen',
 			handwerk: 'handwerk/rezepte', reise: 'reise', ruf: 'ruf', belohnungen: 'belohnungen',
 			spielstand: 'spielstand', companion: 'companion', plugin: 'plugin', suche: 'suche', feedback: 'feedback',
-			instances: 'instanz', adventures: 'abenteuer' },
+			instances: 'instanz', adventures: 'abenteuer', ratgeber: 'ratgeber' },
 		en: { start: '', karte: 'map', questfinder: 'quest-finder', taten: 'map/deeds', gegenstandssuche: 'item-search', klassen: 'classes',
 			handwerk: 'crafting/recipes', reise: 'travel', ruf: 'reputation', belohnungen: 'rewards',
 			spielstand: 'progress', companion: 'companion', plugin: 'plugin', suche: 'search', feedback: 'feedback',
-			instances: 'instance', adventures: 'adventure' },
+			instances: 'instance', adventures: 'adventure', ratgeber: 'advisor' },
 		fr: { start: '', karte: 'carte', questfinder: 'recherche-quetes', taten: 'carte/prouesses', gegenstandssuche: 'recherche-objets', klassen: 'classes',
 			handwerk: 'artisanat/recettes', reise: 'voyage', ruf: 'reputation', belohnungen: 'recompenses',
 			spielstand: 'progression', companion: 'companion', plugin: 'plugin', suche: 'recherche', feedback: 'retour',
-			instances: 'instance', adventures: 'aventure' }
+			instances: 'instance', adventures: 'aventure', ratgeber: 'conseiller' }
 	};
 	function app(seite) {
 		var teil = (APP[sprache] || {})[seite];
@@ -100,6 +100,7 @@
 			{ seite: 'fraktion', href: pfad('fraktion'), text: t('menue_fraktionen'), desc: 'd_fraktionen' }] },
 		{ key: 'charakter', text: t('nav_charakter'), tab: [
 			{ seite: 'klassen', href: app('klassen'), text: t('menue_klassen'), desc: 'd_klassen' },
+			{ seite: 'ratgeber', href: app('ratgeber'), text: t('menue_ratgeber'), desc: 'd_ratgeber' },
 			{ seite: 'spielstand', href: app('spielstand'), text: t('menue_fortschritt'), desc: 'd_fortschritt' }] }
 	];
 
@@ -109,7 +110,8 @@
 		landmarke: 'welt', fraktion: 'erfolge',
 		gegenstand: 'gegenstaende', vendor: 'gegenstaende',
 		handwerk: 'gegenstaende', beruf: 'gegenstaende', titel: 'erfolge', tugend: 'erfolge',
-		ruf: 'erfolge', belohnungen: 'erfolge', klassen: 'charakter', spielstand: 'charakter', plugin: 'charakter' };
+		ruf: 'erfolge', belohnungen: 'erfolge', klassen: 'charakter', spielstand: 'charakter', plugin: 'charakter',
+		ratgeber: 'charakter' };
 	var familie = seite === 'feedback' ? '' : (ZUORDNUNG[seite] || 'welt');
 
 	FAMILIEN.forEach(function (gruppe) {

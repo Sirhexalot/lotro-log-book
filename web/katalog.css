@@ -106,7 +106,9 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-detailraster .katalog-text { max-width: 68ch; }
 .katalog-detailraster > .katalog-text { margin-top: 16px; }
 .katalog-metazeile { margin: 0; color: var(--schwach); font-size: var(--text-bedienung); }
-.item-seite .katalog-metazeile { color: var(--llb-palette-c9bdab); }
+/* One token for both themes: the fixed light grey was unreadable in the light
+   design, where the meta line carries the state chip. */
+.item-seite .katalog-metazeile { color: var(--schwach); }
 .katalog-kompaktleiste { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; }
 .katalog-kompaktleiste > p { margin: 0; }
 .katalog-kompaktleiste #katalog-status { margin-inline-start: auto; }

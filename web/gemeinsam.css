@@ -49,6 +49,9 @@
 	--offen: var(--llb-palette-f0a63c);
 	--fertig: var(--llb-palette-7fbb72);
 	--laufend: var(--llb-palette-7fa6c9);
+	/* Eignung eines Gegenstands; der Name behält die Seltenheitsfarbe. */
+	--eignung-falsch: var(--llb-palette-e0827a);
+	--eignung-warnung: var(--llb-palette-d6b35a);
 	--marke-aktiv: var(--llb-palette-e8e1d5);
 	--auswahl: var(--llb-palette-3a3226);
 	/* Raw colour values live here; components and themes reference these tokens. */
@@ -314,6 +317,8 @@ html[data-theme="light"] {
 	--offen: var(--llb-palette-b9380a);
 	--fertig: var(--llb-palette-367344);
 	--laufend: var(--llb-palette-1d4ed8);
+	--eignung-falsch: var(--llb-palette-b9380a);
+	--eignung-warnung: var(--llb-palette-76560c);
 	--marke-aktiv: var(--llb-palette-29261f);
 	--auswahl: var(--llb-palette-f2e7c7);
 	--hover-flaeche: var(--fläche-hell);
@@ -918,3 +923,41 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: var(--gol
 	.status-zeile > .manueller-status { width: 100%; margin: 4px 0 0; }
 	.status-kennung { margin-top: 0; }
 }
+
+/* Eignung eines Gegenstands für den importierten Charakter. Der Name behält
+   die Seltenheitsfarbe; der Zustand steht als Chip neben der Stufe, nie als
+   Farbe auf der Zahl. `html` hält die Farbe über den gedämpften Zeilentönen. */
+html [data-eignung] { color: var(--schwach); }
+html [data-eignung="passt"], html [data-eignung="achtung"] { color: var(--fertig); }
+html [data-eignung="aelter"] { color: var(--gold); }
+html [data-eignung="ueberholt"], html [data-eignung="unklar"] { color: var(--schwach); }
+html [data-eignung="zu-hoch"], html [data-eignung="falsch"] { color: var(--eignung-falsch); }
+.eignung-chip {
+	display: inline-flex; align-items: center; border: 1px solid currentColor;
+	border-radius: 999px; padding: 0 .5rem; font-size: var(--text-klein);
+	font-weight: var(--gewicht-medium); line-height: 1.55; white-space: nowrap;
+	color: inherit;
+}
+html .eignung-chip[data-eignung="passt"], html .eignung-chip[data-eignung="achtung"] { color: var(--fertig); }
+html .eignung-chip[data-eignung="aelter"] { color: var(--gold); }
+html .eignung-chip[data-eignung="ueberholt"], html .eignung-chip[data-eignung="unklar"] { color: var(--schwach); }
+html .eignung-chip[data-eignung="zu-hoch"], html .eignung-chip[data-eignung="falsch"] { color: var(--eignung-falsch); }
+html .eignung-chip[data-eignung="unklar"] { border-style: dashed; }
+/* Screen-reader text: app pages do not load style.css, where this used to live. */
+.visuell-versteckt {
+	position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+	overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+[data-eignung] .eignung-zeichen {
+	display: inline-block; flex: 0 0 auto; width: .5rem; height: .5rem;
+	margin-right: .4rem; border-radius: 50%; background: currentColor;
+	vertical-align: .05em;
+}
+[data-eignung="achtung"] .eignung-zeichen {
+	display: inline-flex; align-items: center; justify-content: center;
+	width: .95rem; height: .95rem; border-radius: .2rem; background: none;
+	border: 1.5px solid var(--eignung-warnung); color: var(--eignung-warnung);
+	font-size: var(--text-klein); font-weight: var(--gewicht-bold); line-height: 1;
+}
+[data-eignung="achtung"] .eignung-zeichen::after { content: '!'; }
+[data-eignung="unklar"] .eignung-zeichen { background: none; border: 1.5px solid currentColor; }

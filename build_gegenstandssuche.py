@@ -17,6 +17,7 @@ groups by the game's words instead of inventing buckets.
 """
 import html
 import json
+import re
 import xml.etree.ElementTree as ElementTree
 from pathlib import Path
 from tools.sortierung import schluessel
@@ -51,6 +52,55 @@ KLASSENWERKZEUG_KLASSEN = {
     'Weapon Auras', 'Instrument', 'Socketed Instrument',
     'Shield-spikes', 'Champion Horns', 'Word of Mastery', 'Mariner Items',
 }
+
+# Bündel im „Sonstigen“. Der Client kennt 209 Item-Klassen und keine gröbere
+# Ebene; diese zehn Bündel sind unsere Ordnung darüber. Zugeordnet wird über den
+# englischen Klassennamen des Clients – der ist sprachunabhängig stabil, die
+# deutschen Namen sind Übersetzungen. Die genaue Klasse bleibt darunter sichtbar.
+# Reihenfolge = Anzeigereihenfolge.
+BUENDEL = (
+    ('tracery', {'de': 'Legendäre Schrift', 'en': 'Legendary traceries',
+                 'fr': 'Joyaux légendaires'},
+     ('word of ', 'tracery')),
+    ('crafting', {'de': 'Handwerk', 'en': 'Trade goods', 'fr': 'Artisanat'},
+     ('craft:', 'craft ', 'ingredient', 'component', 'resource', 'tool', 'recipe')),
+    ('housing', {'de': 'Haus und Einrichtung', 'en': 'Housing', 'fr': 'Logement'},
+     ('home:', 'housing', 'furniture', 'wall', 'yard', 'structural', 'paints')),
+    ('consume', {'de': 'Verbrauch und Aufwertung',
+                 'en': 'Consumables and upgrades', 'fr': 'Consommables et améliorations'},
+     ('food', 'potion', 'healing', 'oil', 'scroll', 'torch', 'pipeweed', 'firework',
+      'festival', 'consumable')),
+    ('cosmetic', {'de': 'Kleidung und Kosmetik', 'en': 'Clothing and cosmetics',
+                  'fr': 'Vêtements et cosmétiques'},
+     ('outfit:', 'clothing', 'cosmetic', 'dye')),
+    ('class_tool', {'de': 'Klassenwerkzeug', 'en': 'Class items',
+                    'fr': 'Objets de classe'},
+     ('class items', 'instrument', 'banner', 'pennant', 'trap', 'thrown')),
+    ('quest', {'de': 'Aufgabe und Zugang', 'en': 'Quest and access',
+               'fr': 'Quête et accès'},
+     ('quest', 'key')),
+    ('currency', {'de': 'Tauschwährung', 'en': 'Barter currency',
+                  'fr': 'Monnaie d’échange'},
+     ('barter', 'exchange')),
+    ('mount', {'de': 'Reittiere', 'en': 'Mounts', 'fr': 'Montures'},
+     ('mount', 'bridle')),
+    ('trophy', {'de': 'Trophäen und Sammeln', 'en': 'Trophies and collectibles',
+                'fr': 'Trophées et collections'},
+     ('trophy', 'collect', 'relic', 'treasure')),
+    ('rest', {'de': 'Ohne Zuordnung', 'en': 'Unassigned', 'fr': 'Non classé'},
+     ()),
+)
+BUENDEL_REIHENFOLGE = [eintrag[0] for eintrag in BUENDEL]
+
+
+def buendel_von(klasse_englisch: str) -> str:
+    """Bündel eines Gegenstands aus dem englischen Klassennamen des Clients."""
+    text = (klasse_englisch or '').strip().lower()
+    for schluessel, _namen, muster in BUENDEL:
+        if any(m in text for m in muster):
+            return schluessel
+    return 'rest'
+
 
 # Der Client-Export kennt die Art jedes Gegenstands; die Ausrüstungsdatei nur
 # Rüstung, Waffe und den Rest.
@@ -88,6 +138,12 @@ def roh_klassen() -> dict:
             'armourType': eintrag.get('armourType') or '',
             'weaponType': eintrag.get('weaponType') or '',
             'minLevel': eintrag.get('minLevel') or '',
+            # Die Schadensart steht nur bei Waffen im Client-Katalog. Sie ist ein
+            # belegtes Merkmal, kein aus dem Namen geratener Wert.
+            'damageType': eintrag.get('damageType') or '',
+            'scalable': bool((eintrag.get('scaling') or '').strip()),
+            # Die Kurve hinter der Skalierung: Angabe steckt in `scaling`.
+            'scaling': eintrag.get('scaling') or '',
             'hasExtraRequirement': any(eintrag.get(name) for name in (
                 'requiredEffect', 'requiredFaction', 'requiredGloryRank',
                 'requiredProfession', 'requiredTrait')),
@@ -121,6 +177,89 @@ def enum_namen(name: str) -> dict:
     return codes
 
 
+def schadensarten() -> dict:
+    """Schadensart-Schlüssel (z. B. ``WESTERNESSE``) → übersetzter Name.
+
+    Der Client nennt die Schadensart als Schlüssel, die Übersetzung steht in
+    ``labels/<sprache>/enum-DamageType.xml``. Nur Arten mit einem Namen werden
+    angeboten; eine rohe Kennung ist kein Filterwert für Spieler.
+    """
+    pfad = CLIENT_LORE / 'enums' / 'DamageType.xml'
+    if not pfad.is_file():
+        return {}
+    namensschluessel = {}
+    for eintrag in ElementTree.parse(pfad).getroot().iter('entry'):
+        schluessel = eintrag.get('key')
+        if schluessel:
+            namensschluessel[schluessel] = eintrag.get('name') or ''
+    if not namensschluessel:
+        return {}
+    ergebnis = {}
+    for sprache in SPRACHEN:
+        label_pfad = CLIENT_LORE / 'labels' / sprache / ('enum-DamageType.xml')
+        if not label_pfad.is_file():
+            continue
+        labels = {k.get('key'): html.unescape(k.get('value') or '')
+                  for k in ElementTree.parse(label_pfad).getroot().iter('label')}
+        for schluessel, name in namensschluessel.items():
+            wert = labels.get(name)
+            if wert:
+                ergebnis.setdefault(schluessel, {})[sprache] = wert.strip()
+    return {k: v for k, v in ergebnis.items() if v.get('de') or v.get('en')}
+
+
+SKALIERUNG = HIER / 'web' / 'skalierung.js'
+PROGRESSIONS = CLIENT_LORE / 'progressions.xml'
+
+
+def progressions_id(spec: str) -> str:
+    """Die Progressions-Kennung aus einer Skalierungsangabe.
+
+    `Advancement_Level#50-:1879381078;1:0.3` → `1879381078`; `Item_Level#120-`
+    hat keine Kurve.
+    """
+    treffer = re.search(r':(\d+)(?:;|$)', spec or '')
+    return treffer.group(1) if treffer else ''
+
+
+def skalierung_kurven(specs) -> dict:
+    """Angabe aus `scaling` → Kurve (Stufe → Gegenstandsstufe).
+
+    Der Client schreibt die Kurve als Progression; nur die Stellen, an denen die
+    Gegenstandsstufe steigt, werden gebraucht. Ohne Kurve gilt die
+    Gegenstandsstufe aus dem Katalog (etwa `Item_Level#120-`).
+    """
+    benoetigt = {}
+    for spec in specs:
+        kennung = progressions_id(spec)
+        if kennung:
+            benoetigt[kennung] = None
+    if not benoetigt or not PROGRESSIONS.is_file():
+        return {}
+    for _, knoten in ElementTree.iterparse(PROGRESSIONS):
+        ident = knoten.get('identifier')
+        if knoten.tag == 'arrayProgression' and ident in benoetigt and benoetigt[ident] is None:
+            startstufe = int(knoten.get('minX') or 1)
+            werte = []
+            for punkt in knoten.iter('point'):
+                wert = int(float(punkt.get('y')))
+                werte.extend([wert] * int(punkt.get('count') or 1))
+            steigend, letzte = [], None
+            for nummer, gegenstand in enumerate(werte):
+                if gegenstand != letzte:
+                    steigend.append([startstufe + nummer, gegenstand])
+                    letzte = gegenstand
+            benoetigt[ident] = steigend
+        if knoten.tag in ('arrayProgression', 'parameterProgression'):
+            knoten.clear()
+    ergebnis = {}
+    for spec in specs:
+        kennung = progressions_id(spec)
+        if kennung and benoetigt.get(kennung):
+            ergebnis[spec] = benoetigt[kennung]
+    return ergebnis
+
+
 def qualitaet(wert):
     if isinstance(wert, int):
         return wert if 1 <= wert <= 5 else 0
@@ -132,7 +271,8 @@ def qualitaet(wert):
     return QUALITY.get(str(wert).upper(), 0)
 
 
-def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_namen, truhen=()):
+def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_namen,
+                  schadensart_namen, kurven_index, truhen=()):
     namen = typen['slot'].get(sprache) or {}
     ruestung = typen['armour'].get(sprache) or {}
     waffen = typen['weapon'].get(sprache) or {}
@@ -152,6 +292,14 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
     gattung_index = {code: nummer for nummer, code in enumerate(gattung_namen)}
 
     KAT = {name: KATEGORIEN.index(name) for name in KATEGORIEN}
+    # Bündel im Sonstigen: Beschriftung je Sprache, Zuordnung über den englischen
+    # Klassennamen. Die genaue Klasse bleibt die Ebene darunter.
+    buendel_liste = [namen.get(sprache) or namen.get('en')
+                     for _schluessel, namen, _muster in BUENDEL]
+    buendel_index = {schluessel: nummer
+                     for nummer, schluessel in enumerate(BUENDEL_REIHENFOLGE)}
+    buendel_je_klasse = {code: buendel_index[buendel_von(namen.get('en') or '')]
+                         for code, namen in klasse_namen.items()}
     schmuck = klasse_index.get(SCHMUCK_KLASSE, -1)
     kategorien = []
     for kategorie in KATEGORIEN:
@@ -162,6 +310,18 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
 
     plaetze, platz_index = [], {}
     arten, art_index = [], {}
+    # Schadensart: nur die Arten, die der Bestand belegt und der Client benennt.
+    # Sie ist kein Ersatz für die Kategorie, sondern ein eigener Filter, weil sie
+    # quer zu Waffenart und Hand liegt.
+    beschriftet = []
+    for code in sorted({(klassen.get(ident) or {}).get('damageType') or '' for ident in items} - {''}):
+        namen_der_art = schadensart_namen.get(code) or {}
+        beschriftung = namen_der_art.get(sprache) or namen_der_art.get('en') or ''
+        if beschriftung:
+            beschriftet.append((schluessel(beschriftung), code, beschriftung))
+    beschriftet.sort()
+    schaden_liste = [beschriftung for _, _, beschriftung in beschriftet]
+    schaden_index = {code: nummer for nummer, (_, code, _) in enumerate(beschriftet)}
     eintraege = []
     for ident, item in items.items():
         quelle = roh.get(ident) or {}
@@ -260,7 +420,12 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
                           klassen.get(ident, {}).get('armourType', ''),
                           klassen.get(ident, {}).get('weaponType', ''),
                           min_stufe,
-                          bool(klassen.get(ident, {}).get('hasExtraRequirement'))])
+                          bool(klassen.get(ident, {}).get('hasExtraRequirement')),
+                          bool(klassen.get(ident, {}).get('scalable')),
+                          schaden_index.get((klassen.get(ident) or {}).get('damageType') or '', -1),
+                          kurven_index.get((klassen.get(ident) or {}).get('scaling') or '', -1),
+                          buendel_je_klasse.get(klasse_code, buendel_index['rest'])
+                          if kat == KAT['ITEM'] else -1])
 
     eintraege.sort(key=lambda zeile: (schluessel(zeile[1]), zeile[0]))
     daten = {
@@ -278,6 +443,12 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
         'classToolKeys': klassenwerkzeug_klassen,
         'gattung': gattung_liste,
         'gattungKey': list(gattung_index),
+        # Mittlere Ebene unter „Sonstiges“; die Client-Klasse bleibt darunter.
+        'buendel': buendel_liste,
+        'buendelKey': list(BUENDEL_REIHENFOLGE),
+        # Filter "Schadensart": Schlüssel für die Adresse, Namen für die Anzeige.
+        'schaden': schaden_liste,
+        'schadenKey': [code for _, code, _ in beschriftet],
         'instanceChest': sorted(zeile[0] for zeile in eintraege if zeile[0] in truhen),
         'e': eintraege,
     }
@@ -297,15 +468,37 @@ def main():
     klassen = roh_klassen()
     klasse_namen = enum_namen('ItemClass')
     gattung_namen = enum_namen('EquipmentCategory')
+    schadensart_namen = schadensarten()
     # Ohne die Klassen aus dem Client fiele Schmuck zurück in "Sonstiges" und
     # die Gruppen wären still falsch. Lieber abbrechen als das ausliefern.
     if roh and not (klassen and klasse_namen and gattung_namen):
         raise SystemExit('Client-Katalog unvollständig: items.xml, enums/ItemClass.xml und '
                          'enums/EquipmentCategory.xml unter %s erwartet.' % CLIENT_LORE)
+
+    # Skalierung: je Angabe eine Kurve, jede Kurve nur einmal in der Datei.
+    specs = {(klassen.get(i) or {}).get('scaling') or '' for i in items}
+    je_spec = skalierung_kurven(specs)
+    kurven, kurven_index = [], {}
+    for spec in sorted(je_spec):
+        schluessel = json.dumps(je_spec[spec], separators=(',', ':'))
+        if schluessel not in kurven_index:
+            kurven_index[schluessel] = len(kurven)
+            kurven.append(je_spec[spec])
+    spec_index = {spec: kurven_index[json.dumps(kurve, separators=(',', ':'))]
+                  for spec, kurve in je_spec.items()}
+    SKALIERUNG.write_text(
+        '/* Written by build_gegenstandssuche.py. Do not edit by hand. */\n'
+        'window.MQL_SKALIERUNG = %s;\n'
+        % json.dumps({'kurven': kurven}, ensure_ascii=False, separators=(',', ':')),
+        encoding='utf-8')
+
     for sprache in SPRACHEN:
         anzahl, groesse = sprache_datei(sprache, items, typen, roh, klassen,
-                                        klasse_namen, gattung_namen, truhen)
+                                        klasse_namen, gattung_namen,
+                                        schadensart_namen, spec_index, truhen)
         print('%s: %d Gegenstände, %.1f MB' % (sprache, anzahl, groesse / 1048576.0))
+    print('Skalierung: %d Kurven, %.0f kB'
+          % (len(kurven), SKALIERUNG.stat().st_size / 1024))
 
 
 if __name__ == '__main__':

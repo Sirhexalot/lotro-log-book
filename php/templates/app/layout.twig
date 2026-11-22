@@ -70,6 +70,10 @@
 <script src="/status.js?v={{ asset_stand }}" defer></script>
 <script src="/reiter.js?v={{ asset_stand }}" defer></script>
 <script src="/sortierung.js?v={{ asset_stand }}" defer></script>
+{# Shared by every row that shows an item: the eignung colour and the class
+   proficiency table it needs. Before treffer-zeile.js in the page blocks. #}
+<script src="/klassen-proficiency.js?v={{ asset_stand }}" defer></script>
+<script src="/eignung.js?v={{ asset_stand }}" defer></script>
 {% block skripte %}{% endblock %}
 <script src="/theme.js?v={{ asset_stand }}" defer></script>
 </body>

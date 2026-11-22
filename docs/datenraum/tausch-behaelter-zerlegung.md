@@ -1,7 +1,7 @@
 # Barter, containers, disenchanting and a slim item set
 
-**Status as of:** 20.11.2026. **Status:** data model drafted, no pipeline and
-no page yet. The numbers are measured on the client dump of 01.11.2026
+**Status as of:** 22.11.2026. **Status:** barter built (data, vendor page);
+containers and disenchanting still drafted, no pipeline and no page. The numbers are measured on the client dump of 01.11.2026
 (`lore/` of the Companion installation, same state as
 `LotroCompanion/lotro-data`) and on the own full item export of 08.11.2026.
 They describe the set, not today's server availability.
@@ -91,50 +91,57 @@ only their inclusion in the catalogue is missing.
 
 ### 4.2 Barter `daten/tausch.json`
 
-A profile is a vendor's offer: a list of costs and a
-list of gifts. The same profile can be used by several vendors
-(3,469 profiles against 12,360 references), which is why the vendor reference sits on the
-offer, not on the profile.
+**Built 22.11.2026.** `tools/tausch.py` reads `barters.xml` and writes
+`daten/tausch.json` (3.6 MiB): 1,097 vendors, 3,470 profiles, 42,612 offers,
+36,114 goods and 3,063 prices. It is the source for both the vendor page and the
+item page; `daten/items.json` carries only the link (`tausch`: vendor plus
+profile), no prices.
+
+A profile is one barter list: costs and goods. The same profile hangs on several
+vendors of one profession, so the offers sit on the profile and the reference on
+the vendor.
 
 ```json
 {"schema": 1,
- "quelle": {"datei": "lore/barters.xml", "stand": "2026-11-01"},
- "haendler": {
-   "70000AAE": {"name": "Jolfur", "titel": "Hunter Trainer",
-                "klasse": "Hunter",
-                "ort": {"karte": 268437557, "x": 41.2, "y": 63.8,
-                        "gebiet": "Eriador"}}
+ "vendors": {
+   "7001F02F": {"name": "Celeblas", "title": "Curiosities", "class": "",
+                "profiles": ["7001F113", "7001F114"]}
  },
- "angebote": [
-   {"profil": "7000B0C8",
-    "haendler": ["70000AAE"],
-    "geben": [["7000A2C1", 100], ["7000A2C2", 16]],
-    "erhalten": [["7000B7D1", 1]],
-    "bedingung": {"klasse": "Hunter", "fraktion": ["7000BEEF", 4],
-                  "aufgabe": null}}
- ]}
+ "profiles": {
+   "7001F114": {"name": {"de": "Kleinere Klassengegenstände", "en": "Minor Class Items", "fr": "…"},
+                "offers": [
+                  {"give": [["7002B017", 250], ["7002B018", 10]],
+                   "receive": [["70000F2C", 5]]}
+                ]}
+ },
+ "names": {"7002B017": {"de": "Zeichen", "en": "Mark", "fr": "Marque"}}}
 ```
 
 Rules:
 
-- **Quantities.** If `quantity` is missing in the source, 1 applies (44,161 of 58,933 costs
-  carry a quantity, 14,772 do not; for the gifts 783 of 42,590). The 1 is
-  therefore proven and not an assumption.
-- **Conditions** stay separate and are not offset into a "from level X".
-  `requiredClass` sits on the vendor (159 of 1,096) or on the profile
-  (12), `requiredFaction` on 565 profiles in the format `"<fraktion>;<stufe>"`,
-  `requiredQuest` on 505. The meaning of the level number still has to be proven and
-  is carried only as a raw value until then.
-- **Location** comes from `did-positions-2026-11-03/positions.jsonl` (world position
-  `instance` 0); 1,095 of the 1,096 vendors have a position. Map and
-  coordinates arise with the same rule as for quest givers and
-  landmarks, no invented point.
-- **Merging with the existing set.** `daten/items.json` already carries a field
-  `tausch` from the recipe source export (recipes only, type `tausch`). The new
-  source is merged additively and deduplicated by `(händler, abgaben, gabe)`;
-  the old set is not silently replaced.
-- **No silver price.** Barter costs items, not coins. Vendor prices
-  in silver are in `vendors.xml` and remain a separate statement.
+- **Quantities.** A missing `quantity` in the source means 1. 28,083 offers
+  carry one price row, 12,719 two, 1,810 three.
+- **IDs.** Everything in 8-digit hex; the XML writes decimal. Profile IDs are
+  converted the same way, so labels and pages join on one spelling.
+- **Names.** Prices are currencies and barter goods without a page of their own.
+  Their DE/EN/FR names come from `labels/<lang>/items.xml` (100 % covered).
+  Profile names come from `labels/<lang>/barterers.xml` (3,077 of 3,470); the
+  rest stay empty on German and French pages instead of showing the English
+  developer name.
+- **Reputation.** Four offers give reputation instead of an item; they carry
+  `reputation: [[faction, amount]]` and produce no goods row.
+- **Location and conditions** are not in this file. Positions stay in
+  `daten/haendler.json` (`did-positions`); `requiredClass`, `requiredFaction`
+  and `requiredQuest` are not carried yet – the class sits on 159 vendors, the
+  faction and quest conditions on the profiles.
+- **Vendor page.** `build_haendler.py` writes `offers`, `sold`,
+  `barterProfiles` and `barterNames`; `tools/vendor_viewmodel.py` groups the
+  offers by profile and names the price. 2,287 vendors, 818 pure barterers,
+  1,086 with offers.
+- **Item page.** The group exists (`source_barters`), but the price text needs
+  `php_viewmodel.py`, which belongs to the item pipeline until it commits.
+- **No silver price.** Barter costs items, not coins. Vendor prices in silver
+  are in `vendors.xml` and remain a separate statement.
 
 ### 4.3 Containers `daten/behaelter.json`
 

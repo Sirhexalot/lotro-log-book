@@ -122,10 +122,55 @@
 		function importMeta(quelle) {
 			if (!quelle || typeof quelle !== 'object') { return null; }
 			var aus = {};
-			['quests', 'deeds', 'crafting', 'recipes', 'reputation'].forEach(function (art) {
+			['quests', 'deeds', 'crafting', 'recipes', 'reputation', 'gear', 'bags', 'bank'].forEach(function (art) {
 				if (typeof quelle[art] === 'boolean') { aus[art] = quelle[art]; }
 			});
 			return Object.keys(aus).length ? aus : null;
+		}
+		function kurz(text, laenge) {
+			return String(text == null ? '' : text).slice(0, laenge || 120);
+		}
+		/** Gear, bags and vault as the advisor page needs them: bounded and plain.
+		 *  Names are display text from the client; nothing else leaves the import. */
+		function ausruestung(quelle) {
+			if (!quelle || typeof quelle !== 'object' || !Array.isArray(quelle.slots)) { return null; }
+			var slots = quelle.slots.slice(0, 32).filter(Array.isArray).map(function (z) {
+				var werte = Array.isArray(z[6]) ? z[6].slice(0, 40).filter(Array.isArray).map(function (paar) {
+					return [kurz(paar[0], 60), zahl(paar[1])];
+				}) : [];
+				var muster = Array.isArray(z[7]) ? z[7].slice(0, 24).filter(Array.isArray).map(function (paar) {
+					return [kurz(paar[0], 90), paar[1] === null || paar[1] === undefined ? null : zahl(paar[1])];
+				}) : [];
+				return [kurz(z[0], 40), hex.test(String(z[1] || '')) ? String(z[1]).toUpperCase() : '',
+					kurz(z[2]), z[3] === null || z[3] === undefined ? null : zahl(z[3]),
+					z[4] === null || z[4] === undefined ? null : Number(z[4]) || null,
+					z[5] ? kurz(z[5], 40) : null, werte, muster];
+			});
+			return { stamp: String(quelle.stamp || ''), slots: slots };
+		}
+		/** Bag rows are [id, name, count, bound]; vault rows [chest, id, name, count]. */
+		function stuecke(quelle, schluessel, art) {
+			if (!quelle || typeof quelle !== 'object' || !Array.isArray(quelle[schluessel])) { return []; }
+			return quelle[schluessel].slice(0, 240).filter(Array.isArray).map(function (z) {
+				if (art === 'bank') {
+					return [kurz(z[0], 40), hex.test(String(z[1] || '')) ? String(z[1]).toUpperCase() : '',
+						kurz(z[2]), z[3] === undefined ? 1 : Math.max(1, zahl(z[3]))];
+				}
+				return [hex.test(String(z[0] || '')) ? String(z[0]).toUpperCase() : '',
+					kurz(z[1]), z[2] === undefined ? 1 : Math.max(1, zahl(z[2])),
+					z[3] ? kurz(z[3], 40) : null];
+			});
+		}
+		function taschen(quelle) {
+			if (!quelle || typeof quelle !== 'object') { return null; }
+			return { stamp: String(quelle.stamp || ''), max: quelle.max === null || quelle.max === undefined ? null : zahl(quelle.max),
+				items: stuecke(quelle, 'items', 'bags') };
+		}
+		function bank(quelle) {
+			if (!quelle || typeof quelle !== 'object') { return null; }
+			return { used: quelle.used === null || quelle.used === undefined ? null : zahl(quelle.used),
+				max: quelle.max === null || quelle.max === undefined ? null : zahl(quelle.max),
+				chests: stuecke(quelle, 'chests', 'bank') };
 		}
 		if (!eintrag || typeof eintrag.name !== 'string' || !eintrag.name) { return null; }
 		return {
@@ -135,6 +180,7 @@
 			date: String(eintrag.date || ''), quests: ids(eintrag.quests), deeds: ids(eintrag.deeds),
 			rezepte: ids(eintrag.rezepte), importMeta: importMeta(eintrag.importMeta),
 			laufend: laufend(eintrag.laufend), ruf: ruf(eintrag.ruf), handwerk: handwerk(eintrag.handwerk),
+			gear: ausruestung(eintrag.gear), bags: taschen(eintrag.bags), bank: bank(eintrag.bank),
 			manuell: manuelleStatusdaten(eintrag.manuell), manuellOnly: eintrag.manuellOnly === true
 		};
 	}

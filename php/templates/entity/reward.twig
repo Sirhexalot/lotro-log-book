@@ -1,5 +1,6 @@
 {# One reward line, shared by deeds and other entity pages. #}
-<div class="katalog-gabe">
+{% import 'components/eignung.twig' as eignung %}
+<div class="katalog-gabe"{{ eignung.attribute(item.eignung|default({})) }}>
 {%- if item.kind == 'item' -%}
 {%- if item.icon %}<span class="mql-row-icon mql-row-icon-item" aria-hidden="true"><img src="/bild/items/{{ item.icon }}.webp" alt="" width="48" height="48" loading="lazy" decoding="async"></span>{% endif -%}
 <span>{% if item.qty %}{{ item.qty }} × {% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}</span>

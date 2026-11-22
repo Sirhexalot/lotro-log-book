@@ -154,7 +154,8 @@
 		return new Promise(function (fertig) {
 			if (eintrag.isFile) {
 				var name = eintrag.name;
-				if (!/^(summary|questsStatus|deedsStatus|reputation|crafting)\.xml$/.test(name)) { fertig(); return; }
+				// Gear, bags and the character vault feed the advisor page.
+				if (!/^(summary|questsStatus|deedsStatus|reputation|crafting|current|inventory|characterVault)\.xml$/.test(name)) { fertig(); return; }
 				ziel.push({
 					path: pfad + name,
 					read: function () {

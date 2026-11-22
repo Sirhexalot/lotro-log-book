@@ -83,13 +83,23 @@ def baue(katalog_dir, sprache):
                 name = (eintrag['n'].get(sprache) or eintrag['n'].get('en') or '').strip()
                 if name:
                     mit_id[name] = ident
+        gesehen = set()
         for eintrag in belohnungen[art]:
             if len(eintrag) == 3:
                 ident, name = eintrag[0], eintrag[1]
             else:
                 name = eintrag[0]
                 ident = mit_id.get(name, '')
-            rows.append([buchstabe, ident or mit_id.get(name, ''), name, '', ''])
+            ident = ident or mit_id.get(name, '')
+            gesehen.add(ident)
+            rows.append([buchstabe, ident, name, '', ''])
+        # Titles that no quest or deed awards (crafting, event, kinship …) are
+        # only in the catalogue; they are searchable all the same.
+        if art == 't' and quelle.is_file():
+            for ident, eintrag in json.loads(quelle.read_text(encoding='utf-8'))['eintraege'].items():
+                name = (eintrag['n'].get(sprache) or eintrag['n'].get('en') or '').strip()
+                if name and ident not in gesehen:
+                    rows.append([buchstabe, ident, name, '', ''])
 
     # Items come from the merged namespace (build_items.py): equipment, reward
     # items and crafting items in one list with one ID.

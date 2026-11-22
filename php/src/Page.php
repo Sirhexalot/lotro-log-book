@@ -194,6 +194,7 @@ final class Page
             'taten' => 'karte',
             'questfinder' => 'aufgabenfinder',
             'klassen' => 'klassen',
+            'ratgeber' => 'ratgeber',
             default => $page,
         };
         // The title and description live in build_seo.PAGES, exported with the labels.
@@ -203,6 +204,7 @@ final class Page
             'gegenstandssuche' => 'gegenstaende.html',
             'questfinder' => 'aufgabenfinder.html',
             'klassen' => 'klassen.html',
+            'ratgeber' => 'ratgeber.html',
             default => $page . '.html',
         };
         $seo = $this->catalogue->appSeo($datei, $lang) ?? ['title' => 'LOTRO Log Book', 'description' => ''];
@@ -257,6 +259,17 @@ final class Page
                     'de' => 'Schick eine Rückmeldung zum LOTRO Log Book.',
                     'en' => 'Send feedback about the LOTRO Log Book.',
                     'fr' => 'Envoyez un retour sur le LOTRO Log Book.',
+                ][$lang],
+            ];
+        }
+        if ($page === 'ratgeber') {
+            $seo = [
+                'title' => ['de' => 'Ratgeber für deinen Charakter', 'en' => 'Advisor for your character',
+                    'fr' => 'Conseiller pour votre personnage'][$lang],
+                'description' => [
+                    'de' => 'Sieh deine angelegte Ausrüstung, deine Taschen und die nächsten sinnvollen Schritte – aus dem Spielstand, den du in deinem Browser importiert hast.',
+                    'en' => 'See your worn gear, your bags and the next sensible steps – from the progress you imported in your browser.',
+                    'fr' => 'Voyez votre équipement porté, vos sacs et les prochaines étapes utiles – d’après la progression importée dans votre navigateur.',
                 ][$lang],
             ];
         }

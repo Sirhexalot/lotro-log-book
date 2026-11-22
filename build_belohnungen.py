@@ -13,12 +13,16 @@ import re
 import sys
 from pathlib import Path
 
+from tools.gegenstand_anforderungen import lade
 HIER = Path(__file__).resolve().parent
 from itemnamen import sauberer_name
 BASIS = Path('/Users/adrian/Documents/07_Hobbys/Lotro')
 STANDARD_KATALOG = BASIS / 'MagicQuestLog/plugin/MagicQuestLog/Data'
 STANDARD_EXPORT = BASIS / 'Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03'
 STANDARD_REWARDS = BASIS / 'Companion-Test/source-exporter/rewards-stats-2026-11-06'
+# Trage-Voraussetzungen (Mindeststufe, Klasse, Rüstungsart …) für die Eignungsfarbe.
+ITEM_LORE = Path('/Users/adrian/Applications/LOTRO-Companion-Test/Lotro Companion'
+                 '/app/data/lore/items.xml')
 
 # The deed's own category, from the export. Codes checked against their names:
 # 20 slayer, 1 explorer, 11 quest deeds, 33/34 lore. Everything else (class,
@@ -89,11 +93,17 @@ def reward_ids(sprache, dateiname):
     if not pfad.is_file():
         return {}
     eintraege = json.loads(pfad.read_text(encoding='utf-8')).get('eintraege', {})
-    return {
-        sauberer_name((eintrag.get('n') or {}).get(sprache) or
-                      (eintrag.get('n') or {}).get('en') or '', sprache): ident
-        for ident, eintrag in eintraege.items()
-    }
+    ids = {}
+    for ident, eintrag in eintraege.items():
+        namen = (eintrag.get('n') or {})
+        # The page name first, then the other spellings the client or a reward
+        # row uses for the same title (see build_titel.py).
+        for name in (namen.get(sprache), namen.get('en'), namen.get('de')):
+            if name:
+                ids.setdefault(sauberer_name(name, sprache), ident)
+        for name in ((eintrag.get('a') or {}).get(sprache) or []):
+            ids.setdefault(sauberer_name(name, sprache), ident)
+    return ids
 
 
 def eintrag(kind, record, kategorien, labels, geografien):
@@ -153,6 +163,7 @@ def baue(katalog_dir, sprache, ziel, export_dir, rewards_dir):
     tugend_ids = reward_ids(sprache, 'tugenden.json')
     titel_ids = reward_ids(sprache, 'titel.json')
     statistik = item_stats(rewards_dir, sprache)
+    anforderungen = lade(ITEM_LORE)
     tugenden, titel, gegenstaende = {}, {}, {}
     for art, kind in (('taten', 'd'), ('aufgaben', 'q')):
         for record in sammle(katalog_dir, sprache, art):
@@ -175,7 +186,8 @@ def baue(katalog_dir, sprache, ziel, export_dir, rewards_dir):
                         continue
                     item = gegenstaende.setdefault(ident, {
                         'n': name, 'q': int(reward[3] or 0), 'l': int(reward[4] or 0),
-                        'b': bound, 's': {}})
+                        'b': bound, 's': {},
+                        'e': anforderungen.get(str(ident).upper()) or None})
                     item['s'][tuple(quelle)] = True
     order = []
     for key in TYPE_ORDER:
@@ -188,7 +200,7 @@ def baue(katalog_dir, sprache, ziel, export_dir, rewards_dir):
         't': [[titel_ids.get(name, ''), name, sorted({tuple(q) for q in quellen})]
               for name, quellen in sorted(titel.items())],
         'g': [[ident, item['n'], item['q'], item['l'], item['b'], sorted(item['s']),
-               statistik.get(str(ident).upper(), {})]
+               statistik.get(str(ident).upper(), {}), item.get('e')]
               for ident, item in sorted(gegenstaende.items(), key=lambda pair: (pair[1]['n'].lower(), pair[0]))],
         'o': order,
     }
@@ -211,7 +223,11 @@ def main():
           % (len(data['v']), len(data['t']), len(data['g']), ziel.name, ziel.stat().st_size / 1048576))
     # The reward browser shows items only; a title without a catalogue entry is
     # listed nowhere else, so the build names it instead of dropping it quietly.
-    ohne_katalog = [row[1] for row in data['t'] if not row[0]]
+    # Test entries of the client ("TBD", "JUBILÄUMS-TITEL") stay out on
+    # purpose and are no gap in the catalogue.
+    platzhalter = {'TBD', 'JUBILÄUMS-TITEL', '--'}
+    ohne_katalog = [row[1] for row in data['t']
+                    if not row[0] and (row[1] or '').strip().upper() not in platzhalter]
     if ohne_katalog:
         print('Hinweis: %d Titel ohne Katalogeintrag (nur in Belohnungsdaten): %s%s'
               % (len(ohne_katalog), ', '.join(ohne_katalog[:5]),

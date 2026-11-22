@@ -1,5 +1,6 @@
 {# One source group of an item page: chest loot, direct tasks or a plain list.
    Included by both the "Woher" and the "Tauschhändler" panel. #}
+{% import 'entity/_result_row.twig' as result %}
 {% if group.instance_chests|default(false) %}
 <section>
 <h3>{{ group.label }}</h3>

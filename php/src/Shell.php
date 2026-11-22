@@ -85,6 +85,7 @@ final class Shell
              $this->assetTag('filter-ui.css'),
              $this->assetTag('aufgabenfinder.css'),
              $this->assetTag('auftraggeber.css'),
+             $this->assetTag('haendler.css'),
              $this->assetTag('instanzen.css'),
             $this->assetTag('theme-light.css'),
         ]);
@@ -100,6 +101,8 @@ final class Shell
              $this->scriptTag('filter-ui.js'), $this->scriptTag('filter-server.js'),
               $this->scriptTag('zutaten.js'), $this->scriptTag('sets.js'),
               $this->scriptTag('symbole.js'),
+              $this->scriptTag('klassen-proficiency.js'),
+              $this->scriptTag('eignung.js'),
               $this->scriptTag('treffer-zeile.js'),
               $this->scriptTag('treffer-fortschritt.js'),
              $this->scriptTag('auftraggeber.js'), $this->scriptTag('aufgaben-filter.js'),
@@ -169,6 +172,7 @@ final class Shell
              ['key' => 'charakter', 'text' => $w['familie_charakter'], 'tabs' => [
                 ['klassen', $app('klassen'), ['de' => 'Klassen & Völker', 'en' => 'Classes & races', 'fr' => 'Classes et races'][$lang],
                     ['de' => 'Spielbare Kombinationen und Klassenprofile', 'en' => 'Playable combinations and class profiles', 'fr' => 'Combinaisons jouables et profils de classe'][$lang]],
+                ['ratgeber', $app('ratgeber'), $w['menue_ratgeber'] ?? 'Ratgeber', $w['d_ratgeber'] ?? ''],
                 ['spielstand', $app('spielstand'), $w['menue_fortschritt'], $w['d_fortschritt']],
             ]],
         ];
@@ -181,6 +185,7 @@ final class Shell
             'set' => 'gegenstaende',
             'questfinder' => 'welt',
             'klassen' => 'charakter',
+            'ratgeber', 'spielstand' => 'charakter',
             'giver', 'instances' => 'welt',
             'vendor' => 'gegenstaende',
             default => $this->catalogue->famille()[$kind] ?? null,
@@ -300,6 +305,7 @@ final class Shell
             'handwerk' => ['gegenstaende', $w['menue_handwerk']],
             'belohnungen' => ['erfolge', $w['menue_belohnungen']],
             'ruf' => ['erfolge', $w['menue_ruf']],
+            'ratgeber' => ['charakter', $w['menue_ratgeber'] ?? 'Ratgeber'],
             'spielstand' => ['charakter', $w['menue_fortschritt']],
             'klassen' => ['charakter', ['de' => 'Klassen & Völker', 'en' => 'Classes & races', 'fr' => 'Classes et races'][$lang]],
             'companion' => ['charakter', null],

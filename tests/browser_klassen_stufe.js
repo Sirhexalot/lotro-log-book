@@ -44,7 +44,7 @@ function digits(text) {
 
 			// The tab counters come from the same level-filtered rows.
 			const counters = await page.locator('[role=tab]').allInnerTexts();
-			assert.deepEqual(counters.map(digits), [11512, 3685, 14470], counters.join(' | '));
+			assert.deepEqual(counters.map(digits), [11512, 3685, 14806], counters.join(' | '));
 			assert.ok(counters[0].includes(tabs[0]));
 
 			// Deeds use the visible deed level too: a level-130 deed stays out.
@@ -76,6 +76,19 @@ function digits(text) {
 			}).filter(value => value !== null));
 			assert.ok(metaLevels.every(value => value <= 123), 'every row is usable at level 123');
 
+			// The state is a chip under the name, and the filter narrows by it.
+			assert.equal(await page.locator('#filter-gegenstaende details[data-key="eignung"]').count(), 1, 'suitability filter group');
+			assert.ok((await page.locator('#klassen-gegenstaende .eignung-chip').first().innerText()).trim().length > 2, 'state chip');
+			const passtBox = page.locator('#filter-gegenstaende details[data-key="eignung"] input[type=checkbox]').first();
+			await passtBox.check();
+			await page.waitForFunction(() => {
+				const chips = Array.from(document.querySelectorAll('#klassen-gegenstaende .eignung-chip'));
+				return chips.length && chips.every(chip => chip.getAttribute('data-eignung') === 'passt');
+			}, { timeout: 30000 });
+			await passtBox.uncheck();
+			await page.waitForFunction(() => Array.from(document.querySelectorAll('#klassen-gegenstaende .eignung-chip'))
+				.some(chip => chip.getAttribute('data-eignung') !== 'passt'), { timeout: 30000 });
+
 			// A level change updates the labels and drops the page-scoped filters.
 			await page.locator('#filter-gegenstaende .filter-panel input[type=checkbox]').first().check();
 			await page.waitForFunction(() => !document.querySelector('#klassen-gegenstaende').hasAttribute('aria-busy'));
@@ -87,10 +100,10 @@ function digits(text) {
 				const n = document.querySelector('#filter-gegenstaende .filter-result-toolbar [role=status]');
 				return n && n.textContent.includes('120');
 			}, { timeout: 30000 });
-			await page.waitForFunction(() => /14.?456/.test(document.querySelector('#klassen-items').textContent)
+			await page.waitForFunction(() => /14.?792/.test(document.querySelector('#klassen-items').textContent)
 				&& /11.?413/.test(document.querySelector('#klassen-quests').textContent), { timeout: 30000 });
 			assert.equal(await page.evaluate(() => [...new URLSearchParams(location.search).keys()].some(k => k.startsWith('kf-'))), false, 'scoped filters reset');
-			assert.deepEqual((await page.locator('[role=tab]').allInnerTexts()).map(digits), [11413, 3685, 14456]);
+			assert.deepEqual((await page.locator('[role=tab]').allInnerTexts()).map(digits), [11413, 3685, 14792]);
 
 			// Mobile: the same filter opens as a dialog.
 			await page.setViewportSize({ width: 390, height: 844 });

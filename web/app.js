@@ -1548,6 +1548,11 @@
 	// one map in vorkommen/<map>.js and load when the layer is first used.
 	var vorkommen = null, vorkWahl = {}, vorkKarten = {}, vorkLaeuft = {};
 	var vorkBild = null, vorkTip = null, vorkStellen = [];
+	var vorkLinkKarte = 0, vorkLinkAktiv = false, vorkGespeicherteWahl = null;
+	try {
+		var vorkAdresse = new URLSearchParams(window.location.search);
+		vorkLinkKarte = parseInt(vorkAdresse.get('vorkarte'), 10) || 0;
+	} catch (fehler) { vorkLinkKarte = 0; }
 	var VORK_BERUFE = ['PROSPECTOR', 'FORESTER', 'SCHOLAR', 'COOK'];
 	var VORK_TEXT = { PROSPECTOR: 'vorkommen_erz', FORESTER: 'vorkommen_holz',
 		SCHOLAR: 'vorkommen_gelehrte', COOK: 'vorkommen_anbau' };
@@ -1573,6 +1578,7 @@
 			}
 		} catch (fehler) { vorkWahl = {}; }
 	}
+	vorkGespeicherteWahl = JSON.parse(JSON.stringify(vorkWahl));
 
 	function vorkMerken() {
 		try {
@@ -1691,6 +1697,7 @@
 			});
 			wahl.value = vorkWahl[beruf] || '';
 			wahl.addEventListener('change', function () {
+				vorkLinkAktiv = false;
 				vorkWahl[beruf] = wahl.value;
 				vorkMerken();
 				zeichneMarker();
@@ -1795,6 +1802,11 @@
 	function zeichneVorkommen() {
 		var bild = vorkEbeneBauen();
 		var karte = zustand.karte;
+		if (vorkLinkAktiv && (!karte || Number(karte.idx) !== vorkLinkKarte)) {
+			vorkWahl = JSON.parse(JSON.stringify(vorkGespeicherteWahl || {}));
+			vorkLinkAktiv = false;
+			if (vorkommen) { vorkBaueListe(); }
+		}
 		var aktiv = vorkommen && karte && vorkAnzahl();
 		bild.style.pointerEvents = aktiv ? 'auto' : 'none';
 		if (!aktiv) { bild.width = 1; bild.height = 1; vorkStellen = []; vorkSchliesseTip(); vorkLegendeSetzen(null); return; }
@@ -1850,6 +1862,7 @@
 		});
 		document.getElementById('vorkommen-alle').addEventListener('click', function () {
 			if (!vorkommen) { return; }
+			vorkLinkAktiv = false;
 			VORK_BERUFE.forEach(function (beruf) { vorkWahl[beruf] = '*'; });
 			vorkMerken();
 			vorkBaueListe();
@@ -1857,6 +1870,7 @@
 		});
 		document.getElementById('vorkommen-keine').addEventListener('click', function () {
 			if (!vorkommen) { return; }
+			vorkLinkAktiv = false;
 			VORK_BERUFE.forEach(function (beruf) { vorkWahl[beruf] = ''; });
 			vorkMerken();
 			vorkBaueListe();
@@ -1877,8 +1891,13 @@
 			if (gewaehlt) {
 				ladeVorkommen(function () {
 					var typ = vorkTypen().filter(function (eintrag) { return eintrag[0] === gewaehlt; })[0];
-					if (typ) { vorkWahl[typ[2]] = typ[0]; }
-					vorkMerken();
+					if (typ) {
+						vorkWahl[typ[2]] = typ[0];
+						vorkLinkAktiv = !!vorkLinkKarte && !!zustand.karte &&
+							Number(zustand.karte.idx) === vorkLinkKarte;
+					}
+					// A resource link controls this visit only. Manual changes in
+					// the panel still go through vorkMerken() and remain a preference.
 					vorkBaueListe();
 					zeichneVorkommen();
 				});

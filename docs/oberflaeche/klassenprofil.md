@@ -17,7 +17,7 @@ character level exists there.
 
 | Tab | Gate | At level 123 (Hunter/Hobbit, 22.11.2026) |
 | --- | --- | ---: |
-| Items | minimum level <= level, class/race, armour/weapon knowledge, no further condition | 14.470 |
+| Items | minimum level <= level, class/race, armour/weapon knowledge; further conditions stay with a warning | 14.806 |
 | Quests | displayed quest level (fallback: prerequisite level) <= level | 11.512 |
 | Deeds | displayed deed level <= level | 3.685 |
 
@@ -25,6 +25,12 @@ The class catalogue reads the displayed level `l` from the catalogue, not
 `minLevel`/`level` from the client XML. Otherwise level-130 deeds and quests
 remained in a level-123 list. The filter matches the level column the visitor
 sees.
+
+Items with a further requirement (reputation, virtue, effect, craft) are no
+longer dropped: they stay in the list with the warning sign, because the
+character may well fulfil the condition — that is what [item
+suitability](eignung.md) marks. The level colour on these rows follows the
+class, race and level chosen above, not the import.
 
 The item level is strength, not a wear requirement. It stays visible in the
 result column and in the sort, but it is not a gate. A level-130 ring does not
@@ -67,6 +73,8 @@ lists use the same rows.
 - `tests/test_gegenstandssuche.py`: minimum-level fallback and known examples.
 - `tests/test_class_data.py`: item gate uses the minimum level, not the item
   level; no level ranges on this page; descending defaults.
+- `tests/test_eignung.js`: thresholds, class/race, armour and weapon
+  proficiency, scalable, level cap, no character.
 - `tests/browser_klassen_stufe.js`: DE/EN/FR, counters, no level range, a usable
   item above the character level, level change, reset, mobile.
 - `tests/browser_filter_php.js`: the minimum-level range on the item search.

@@ -310,7 +310,10 @@
 		function eligible(row) { var req = requirements(row); return (!req.length || req.indexOf(classKey) >= 0) && (!row[11] || row[11] === raceKey); }
 		var classItems = equipment.e.filter(function (row) { var req = requirements(row), itemClass = equipment.klasseKey[row[8]]; return equipment.katKey[row[3]] === 'ITEM' && classToolKeys.has(itemClass) && req.length && eligible(row) && row[14] <= level; });
 		var gear = equipment.e.filter(function (row) {
-				var category = equipment.katKey[row[3]]; if (row[15] || !eligible(row)) { return false; }
+				// Items with a further requirement stay in the list: they are not
+				// excluded (the character may fulfil it), only marked with the
+				// warning sign so nobody takes the green at face value.
+				var category = equipment.katKey[row[3]]; if (!eligible(row)) { return false; }
 				if (category === 'ARMOUR') { return Object.prototype.hasOwnProperty.call(armour, row[12]) && armour[row[12]] <= level && row[14] <= level; }
 				if (category === 'WEAPON' || category === 'LEGENDARY_WEAPON') { return Object.prototype.hasOwnProperty.call(weapons, row[13]) && weapons[row[13]] <= level && row[14] <= level; }
 				return false;
@@ -328,6 +331,8 @@
 			area: 'klassen-items',
 			ids: rows.map(function (row) { return row[0]; }),
 			levelGroups: false,
+			// Colour by the class, race and level chosen above, not by the import.
+			eignung: function () { return {stufe: Number(level), klasse: classKey, volk: raceKey}; },
 			defaultSort: 'itemLevelDesc',
 			descendingSort: true,
 			countLabel: fillWert(text.countItems, level),

@@ -94,6 +94,15 @@ def baue_gegenstandssuche() -> None:
                    cwd=str(HIER), check=True)
 
 
+def baue_erkennung() -> None:
+    """Die Erkennungsbasis und ihre Teilladungen gehören in jeden Bau.
+
+    Ohne sie könnte der Ratgeber ein getragenes Stück nicht nachschlagen; die
+    Dateien sind erzeugt und stehen deshalb nicht im Repo."""
+    subprocess.run([sys.executable, str(HIER / 'tools' / 'build_gegenstand_erkennung.py')],
+                   cwd=str(HIER), check=True)
+
+
 def baue_karten_kurz(ziel: Path) -> None:
     """Generate compact first-paint data without changing the source catalogues."""
     script = HIER / 'tools' / 'build_karten_kurz.py'
@@ -214,6 +223,9 @@ def pruefen(ziel: Path) -> list[str]:
                   'instanzen.css', 'php/templates/instances/detail.twig',
                   'php/templates/instances/list.twig',
                   'klassen.css', 'klassen.js', 'php/templates/app/klassen.twig',
+                 'skalierung.js', 'umschmieden.js', 'ratgeber.js', 'ratgeber.css',
+                 'texte-ratgeber.js', 'eignung.js', 'klassen-proficiency.js',
+                 'php/templates/app/ratgeber.twig', 'erkennung/de/000.js',
                  'flaeche.css', 'php/templates/components/flaeche.twig', 'fakten.css', 'kachel.css', 'hinweis.css', 'knopf.css', 'karte.css',
                  'php/templates/components/karte.twig',
                  'klappe.css', 'klappe.js',
@@ -288,6 +300,7 @@ def main() -> int:
     # Generate the start files and both shard trees before copying web/.
     # Otherwise a release could contain stale shards from the previous build.
     baue_gegenstandssuche()
+    baue_erkennung()
     baue_klassen()
     kopiere_web(ziel)
     if (HIER / 'daten' / 'instanz-beute.json').is_file():

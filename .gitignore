@@ -27,6 +27,8 @@ web/epik-*.js
 web/karten-daten/
 web/download/
 web/bild/
+# Erzeugt von tools/build_gegenstand_erkennung.py (rund 92 MB Teilladungen).
+web/erkennung/
 
 # Gebautes
 dist-web/

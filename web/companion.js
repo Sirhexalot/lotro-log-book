@@ -53,6 +53,127 @@
 		};
 	}
 
+	/** Text between a tag's start and its first closing tag, or '' when absent. */
+	function bodyOf(source, tag, from) {
+		var end = source.indexOf('</' + tag + '>', from);
+		return end >= 0 ? source.slice(from, end) : '';
+	}
+
+	/** "<stat name=\"AGILITY\" value=\"123\"/>" pairs, in document order. */
+	function stats(text) {
+		var out = [], pattern = /<stat\b([^>]*?)\/?>/g, match;
+		while ((match = pattern.exec(text || '')) !== null) {
+			var a = attributes(match[1]);
+			if (!a.name || a.value === undefined) { continue; }
+			var wert = Number(a.value);
+			out.push([a.name, isFinite(wert) ? wert : a.value]);
+		}
+		return out;
+	}
+
+	/** The item's stat block: the resolved one when present, else the default. */
+	function itemStats(body) {
+		var res = /<resultStats\b[^>]*>/.exec(body);
+		if (res) { return stats(bodyOf(body, 'resultStats', res.index + res[0].length)); }
+		var def = /<defautStats\b[^>]*>/.exec(body);
+		if (def) { return stats(bodyOf(body, 'defautStats', def.index + def[0].length)); }
+		return stats(body);
+	}
+
+	/**
+	 * current.xml: the gear the character wears, plus the state that file records
+	 * for it (level, damage, stats, traceries). One row per equipped slot:
+	 * [slot, item id, name, level, dps|null, boundTo|null, stats, sockets].
+	 * An empty slot is kept with an empty item id, because "not read" and
+	 * "worn nothing" must stay distinguishable.
+	 */
+	function gear(text) {
+		var quelle = text || '';
+		var a = /<character\b[^>]*>/.exec(quelle);
+		var stamp = a ? attributes(a[0]).date : '';
+		var rows = [];
+		var slot = /<equipmentSlot\b([^>]*?)(\/?)>/g, match;
+		while ((match = slot.exec(quelle)) !== null) {
+			var s = attributes(match[1]);
+			var name = s.name || '';
+			if (!name) { continue; }
+			var body = match[2] === '/' ? '' : bodyOf(quelle, 'equipmentSlot', slot.lastIndex);
+			var item = /<item\b([^>]*?)(\/?)>/.exec(body);
+			var i = item ? attributes(item[1]) : null;
+			var inner = item && item[2] !== '/' ? bodyOf(body, 'item', item.index + item[0].length) : '';
+			var sockets = [], socket = /<socket\b([^>]*?)\/?>/g, k;
+			while ((k = socket.exec(inner)) !== null) {
+				var so = attributes(k[1]);
+				if (so.traceryName) { sockets.push([so.traceryName, Number(so.itemLevel) || null]); }
+			}
+			rows.push([name, i ? (hexId(i.key) || '') : '', i ? (i.name || '') : '',
+				i && i.level ? Number(i.level) : null,
+				i && i.dps ? Number(i.dps) : null,
+				i && i.boundTo ? i.boundTo : null,
+				item ? itemStats(inner) : [],
+				sockets]);
+		}
+		return { stamp: stamp, slots: rows };
+	}
+
+	/**
+	 * inventory.xml: one row per filled bag slot.
+	 * [item id, name, count, boundTo|null]. The bags carry no slot or category of
+	 * their own; a catalogue lookup supplies those.
+	 */
+	function bags(text) {
+		var quelle = text || '';
+		var status = /<status\b([^>]*?)\/?>/.exec(quelle);
+		var max = /<bags\b([^>]*?)\/?>/.exec(quelle);
+		var rows = [], slot = /<slot\b([^>]*?)(\/?)>/g, match;
+		while ((match = slot.exec(quelle)) !== null) {
+			var s = attributes(match[1]);
+			var body = match[2] === '/' ? '' : bodyOf(quelle, 'slot', slot.lastIndex);
+			var item = /<item\b([^>]*?)(\/?)>/.exec(body);
+			if (!item) { continue; }
+			var i = attributes(item[1]);
+			rows.push([hexId(i.key) || '', i.name || '',
+				s.count === undefined ? 1 : Number(s.count),
+				i.boundTo ? i.boundTo : null]);
+		}
+		return {
+			stamp: status ? attributes(status[1]).time || '' : '',
+			max: max ? Number(attributes(max[1]).max) || null : null,
+			items: rows
+		};
+	}
+
+	/**
+	 * characterVault.xml: the character's own vault. Kept are the counters and the
+	 * items per chest; an empty vault stays a read vault, not a missing file.
+	 * [chest name, item id, name, count]
+	 */
+	function vault(text) {
+		var quelle = text || '';
+		var head = /<vault\b([^>]*?)(\/?)>/.exec(quelle);
+		var v = head ? attributes(head[1]) : {};
+		var rows = [], chest = /<chest\b([^>]*?)(\/?)>/g, match;
+		while ((match = chest.exec(quelle)) !== null) {
+			var c = attributes(match[1]);
+			var body = match[2] === '/' ? '' : bodyOf(quelle, 'chest', chest.lastIndex);
+			var slot = /<slot\b([^>]*?)(\/?)>/g, s;
+			while ((s = slot.exec(body)) !== null) {
+				var so = attributes(s[1]);
+				var inner = s[2] === '/' ? '' : bodyOf(body, 'slot', slot.lastIndex);
+				var item = /<item\b([^>]*?)(\/?)>/.exec(inner);
+				if (!item) { continue; }
+				var i = attributes(item[1]);
+				rows.push([c.name || '', hexId(i.key) || '', i.name || '',
+					so.count === undefined ? 1 : Number(so.count)]);
+			}
+		}
+		return {
+			used: v.used === undefined ? null : Number(v.used),
+			max: v.max === undefined ? null : Number(v.max),
+			chests: rows
+		};
+	}
+
 	/**
 	 * Finished ids from questsStatus.xml or deedsStatus.xml. Only the entries of the
 	 * top level count: deeds carry nested objectiveStatus elements with their own
@@ -219,10 +340,14 @@
 			importMeta: {
 				quests: !!files.quests, deeds: !!files.deeds,
 				crafting: !!files.crafting, recipes: !!files.crafting,
-				reputation: !!files.reputation
+				reputation: !!files.reputation,
+				gear: !!files.gear, bags: !!files.bags, bank: !!files.bank
 			},
 			klasse: who.klasse, race: who.race, level: who.level,
 			date: isoDate(who.importDate),
+			gear: files.gear ? gear(files.gear) : null,
+			bags: files.bags ? bags(files.bags) : null,
+			bank: files.bank ? vault(files.bank) : null,
 			quests: quests.ids, deeds: deeds.ids,
 			underway: quests.underway + deeds.underway,
 			laufend: running,
@@ -323,7 +448,10 @@
 			var parts = String(item.path).replace(/\\/g, '/').split('/');
 			var file = parts[parts.length - 1];
 			var kind = { 'summary.xml': 'summary', 'questsStatus.xml': 'quests', 'deedsStatus.xml': 'deeds',
-				'reputation.xml': 'reputation', 'crafting.xml': 'crafting' }[file];
+				'reputation.xml': 'reputation', 'crafting.xml': 'crafting',
+				// Gear, bags and vault: what the advisor needs. The vault lives in
+				// the character folder, the shared storage does not, so it stays out.
+				'current.xml': 'gear', 'inventory.xml': 'bags', 'characterVault.xml': 'bank' }[file];
 			if (!kind) { return; }
 			var folder = parts.slice(0, -1).join('/');
 			// Companion also keeps an account summary.xml; only character folders count.
@@ -338,11 +466,13 @@
 	function readCharacters(items) {
 		var groups = groupFiles(items);
 		return Promise.all(groups.map(function (group) {
-			return Promise.all(['summary', 'quests', 'deeds', 'reputation', 'crafting'].map(function (kind) {
+			var arten = ['summary', 'quests', 'deeds', 'reputation', 'crafting', 'gear', 'bags', 'bank'];
+			return Promise.all(arten.map(function (kind) {
 				return group[kind] ? group[kind].read() : Promise.resolve('');
 			})).then(function (texts) {
 				return character({ summary: texts[0], quests: texts[1], deeds: texts[2],
-					reputation: texts[3], crafting: texts[4] });
+					reputation: texts[3], crafting: texts[4],
+					gear: texts[5], bags: texts[6], bank: texts[7] });
 			});
 		})).then(function (list) {
 			var characters = list.filter(Boolean);

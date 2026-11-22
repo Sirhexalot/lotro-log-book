@@ -99,6 +99,11 @@ def baue(quelle, sprache, variants=None):
     # the file name directly and no page needs a second lookup.
     seite = json.loads((HIER / 'daten' / 'items.json').read_text(encoding='utf-8')).get('items') or {}
 
+    def anforderungen(item_id):
+        eintrag = seite.get(str(item_id).upper()) or {}
+        return {key: eintrag[key] for key in ('ml', 'rk', 'rr', 'at', 'wt', 'ex', 'sc')
+                if eintrag.get(key)} or None
+
     def symbol(item_id):
         return (seite.get(str(item_id)) or {}).get('ic') or ''
     professions = data.get('professions') or {}
@@ -150,7 +155,8 @@ def baue(quelle, sprache, variants=None):
                 item_level = int(item.get('l') or variant.get('level') or 0)
             except (TypeError, ValueError):
                 item_level = 0
-            result_rows.append([item_id, item_name, item_level, symbol(item_id)])
+            result_rows.append([item_id, item_name, item_level, symbol(item_id),
+                                anforderungen(item_id)])
         zeilen.append([
             result_name,
             int(result.get('q') or 0),
@@ -175,6 +181,8 @@ def baue(quelle, sprache, variants=None):
             recipe['r'][0],
             (recipe.get('cr') or [''])[0],
             result_rows,
+            # Trage-Voraussetzungen des Ergebnisses für die Eignungsfarbe.
+            anforderungen(recipe['r'][0]),
         ])
     zeilen.sort(key=lambda row: (row[0].lower(), row[3], row[1]))
     return zeilen

@@ -23,8 +23,8 @@ KATEGORIEN = ['ARMOUR', 'WEAPON', 'LEGENDARY_WEAPON', 'LEGENDARY_ITEM', 'ESSENCE
               'JEWELLERY']
 # Welche Ebene die Kategorie im Baum aufklappt (erste Kindebene).
 KINDER = {'ARMOUR': 'art', 'WEAPON': 'art', 'LEGENDARY_WEAPON': 'art',
-          'LEGENDARY_ITEM': 'platz', 'JEWELLERY': 'gattung', 'ITEM': 'klasse'}
-FELD = {'kat': 3, 'platz': 5, 'art': 6, 'klasse': 8, 'gattung': 9}
+          'LEGENDARY_ITEM': 'platz', 'JEWELLERY': 'gattung', 'ITEM': 'buendel'}
+FELD = {'kat': 3, 'platz': 5, 'art': 6, 'klasse': 8, 'gattung': 9, 'buendel': 19}
 
 
 def lies(sprache):
@@ -34,6 +34,38 @@ def lies(sprache):
 
 
 class GegenstandssucheTests(unittest.TestCase):
+    def test_damage_type_is_a_weapon_only_filter(self):
+        """Damage type is evidenced only for weapons and never invented.
+
+        The dimension is its own filter, not a level of the category tree: a
+        third tree level would multiply every weapon type by every damage type.
+        """
+        for sprache in SPRACHEN:
+            daten = lies(sprache)
+            self.assertEqual(len(daten['schaden']), len(daten['schadenKey']), sprache)
+            self.assertTrue(all(name.strip() for name in daten['schaden']), sprache)
+            waffen = [row for row in daten['e'] if daten['katKey'][row[3]] in
+                      ('WEAPON', 'LEGENDARY_WEAPON')]
+            kennungen = {row[0] for row in waffen}
+            andere = [row for row in daten['e'] if row[0] not in kennungen]
+            # Every row carries the slot; only weapons carry a damage type.
+            self.assertTrue(all(row[17] >= 0 for row in waffen), sprache)
+            self.assertTrue(all(row[17] == -1 for row in andere), sprache)
+            for row in daten['e']:
+                self.assertLess(row[17], len(daten['schaden']), (sprache, row))
+        # The keys are the game values, so an address keeps its meaning in
+        # every language while the labels, and with them the display order,
+        # follow the language.
+        keys = {frozenset(lang['schadenKey']) for lang in (lies(sprache) for sprache in SPRACHEN)}
+        self.assertEqual(len(keys), 1, 'Schadensarten-Schlüssel je Sprache verschieden')
+        for sprache in SPRACHEN:
+            daten = lies(sprache)
+            self.assertEqual(daten['schaden'], sorted(daten['schaden'], key=schluessel),
+                             (sprache, 'Schadensarten nicht nach Anzeigenamen sortiert'))
+        self.assertIn('FIRE', lies('de')['schadenKey'])
+        self.assertIn('Feuer', lies('de')['schaden'])
+        self.assertIn('Fire', lies('en')['schaden'])
+
     def test_every_item_is_present_with_a_name(self):
         items = json.loads((ROOT / 'daten' / 'items.json').read_text(encoding='utf-8'))['items']
         daten = lies('de')
@@ -166,6 +198,31 @@ class GegenstandssucheTests(unittest.TestCase):
                                if daten[feld][z[FELD[feld]]].strip()]
                 self.assertGreater(len(beschriftet), len(teil) * 0.95,
                                    (sprache, schluessel))
+
+    def test_item_group_is_a_readable_middle_level(self):
+        """„Sonstiges“ holds 27.600 items; the middle level must keep it usable.
+
+        The buckets come from the client's ItemClass names, so the exact class
+        stays visible below. Nothing may fall out, and the same game key must
+        mean the same thing in every language.
+        """
+        for sprache in SPRACHEN:
+            daten = lies(sprache)
+            self.assertEqual(len(daten['buendel']), len(daten['buendelKey']), sprache)
+            self.assertTrue(all(name.strip() for name in daten['buendel']), sprache)
+            item = [z for z in daten['e'] if daten['katKey'][z[3]] == 'ITEM']
+            self.assertTrue(all(z[19] >= 0 for z in item), (sprache, 'Sonstiges ohne Bündel'))
+            # Nur Gegenstände im Sonstigen tragen ein Bündel.
+            andere = [z for z in daten['e'] if daten['katKey'][z[3]] != 'ITEM' and z[19] >= 0]
+            self.assertEqual(andere, [], (sprache, 'Bündel außerhalb des Sonstigen'))
+            rest = daten['buendelKey'].index('rest')
+            ohne = sum(1 for z in item if z[19] == rest)
+            self.assertLess(ohne, len(item) * 0.1, (sprache, 'zu viel ohne Zuordnung'))
+            schrift = daten['buendelKey'].index('tracery')
+            self.assertGreater(sum(1 for z in item if z[19] == schrift), 10000, sprache)
+        # Dieselben Schlüssel in derselben Reihenfolge, nur die Wörter wechseln.
+        schluessel = {tuple(lang['buendelKey']) for lang in (lies(s) for s in SPRACHEN)}
+        self.assertEqual(len(schluessel), 1, 'Bündel-Schlüssel je Sprache verschieden')
 
     def test_jewellery_is_its_own_category(self):
         """The client calls it Geschmeide/Jewellery/Bijoux, not "other"."""

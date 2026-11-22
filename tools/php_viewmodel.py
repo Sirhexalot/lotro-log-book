@@ -239,10 +239,12 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
         if amount and amount > 1:
             return {'icon': icon,
                     'symbol': None if art in ('i', 'c') else {'t': 'titel', 'v': 'tugend'}.get(art, 'titel'),
-                    'url': link['url'], 'text': link['text'], 'qty': int(amount)}
+                    'url': link['url'], 'text': link['text'], 'qty': int(amount),
+                    'eignung': eignung_daten(entry) if art in ('i', 'c') else {}}
         return {'icon': icon, 'symbol': None if art in ('i', 'c') else
                 {'t': 'titel', 'v': 'tugend'}.get(art, 'titel'),
-                'url': link['url'], 'text': link['text'], 'qty': 0}
+                'url': link['url'], 'text': link['text'], 'qty': 0,
+                'eignung': eignung_daten(entry) if art in ('i', 'c') else {}}
 
     fixed = [r for r in quest.get('rw', []) if r[0] == 'i']
     choice = [r for r in quest.get('rw', []) if r[0] == 'c']
@@ -397,7 +399,8 @@ def deed_view(builder: ViewBuilder, deed: dict, index: dict, categories: dict) -
             entry = builder.items.get(item_id) if item_id else None
             return {'kind': 'item', 'icon': (entry or {}).get('ic'),
                     'url': route(lang, 'i', item_id) if entry else None,
-                    'text': name, 'qty': int(amount) if amount and amount > 1 else 0}
+                    'text': name, 'qty': int(amount) if amount and amount > 1 else 0,
+                    'eignung': eignung_daten(entry)}
         if art == 't':
             return {'kind': 'title', 'label': w['titlelabel'], 'text': name}
         if art == 'v':
@@ -509,7 +512,10 @@ def honor_view(builder: ViewBuilder, art: str, entry: dict) -> dict:
     """Title or virtue page: what it is and which deeds award it."""
     w, lang = builder.w, builder.lang
     name = entry.get('name') or ''
-    rows = (entry.get('q') or {}).get(lang) or []
+    # The index falls back to English when the language's own award row is
+    # missing (a name that only the English export spells alike); the page
+    # follows that so it never hides a source the list already counts.
+    rows = (entry.get('q') or {}).get(lang) or (entry.get('q') or {}).get('en') or []
     sources = []
     for row in rows:
         kind, qid, qname = row[0], row[1], row[2]
@@ -523,11 +529,14 @@ def honor_view(builder: ViewBuilder, art: str, entry: dict) -> dict:
         elif kind == 'd':
             reference = route(lang, 'd', qid) if qid in builder.deeds else app_url(lang, 'taten', id=qid)
         sources.append({'url': reference, 'text': qname, 'extra': extra})
+    from titelarten import label as titelart
+    arten = [titelart(kind, lang) for kind in (entry.get('k') or [])]
     return {
         'kind': art,
         'id': entry.get('i') or entry.get('id') or '',
         'name': name,
         'icon': 'titel' if art == 'title' else 'tugend',
+        'categories': [wert for wert in arten if wert],
         'sources': sources,
         'ranked': bool(re.search(r'\bRANK\b|\bNAME\b|\bSURNAME\b', name)),
         'seo': seo.honor(lang, name=name, art=art, sources=sources),
@@ -685,6 +694,7 @@ def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None,
         results.append({'id': variant[0], 'name': variant[1],
                         'level': variant[2] or None,
                         'symbol': variant[3] if len(variant) > 3 else None,
+                        'eignung': eignung_daten(builder.items.get(variant[0])),
                         'url': route(lang, 'i', variant[0])})
     if not results:
         for ident in (row[18] if len(row) > 18 else None,
@@ -693,6 +703,7 @@ def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None,
                 results.append({'id': ident,
                                 'name': builder_name(builder, builder.items[ident]),
                                 'level': builder.items[ident].get('l') or None,
+                                'eignung': eignung_daten(builder.items.get(ident)),
                                 'symbol': row[16] if ident == row[18] else row[17],
                                 'url': route(lang, 'i', ident)})
 
@@ -995,6 +1006,25 @@ class ItemContext:
         return [choice for _, _, choice in sorted(choices, key=lambda row: (row[0], row[1], row[2]['url']))]
 
 
+def eignung_daten(item: dict | None) -> dict:
+    """Trager-Voraussetzungen für das Datenattribut an Gabe und Chip.
+
+    Leer, wenn der Gegenstand keine Mindeststufe kennt: dann gibt es nichts zu
+    beurteilen und der Browser färbt nicht.
+    """
+    item = item or {}
+    try:
+        minimum = int(item.get('ml') or 0)
+    except (TypeError, ValueError):
+        minimum = 0
+    if minimum <= 0:
+        return {}
+    return {'min': minimum, 'klasse': item.get('rk') or '',
+            'volk': item.get('rr') or '', 'armour': item.get('at') or '',
+            'waffe': item.get('wt') or '', 'extra': 1 if item.get('ex') else 0,
+            'scalable': 1 if item.get('sc') else 0}
+
+
 def builder_name(builder: ViewBuilder, item: dict) -> str:
     names = item.get('n') or {}
     if item.get('instanztruhe_neu'):
@@ -1018,7 +1048,17 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
     if quality:
         chips.append({'cls': 'q%d' % QUALITY_NUMBER.get(quality, 0), 'text': ctx.label('quality', quality)})
     if min_level:
-        chips.append({'cls': '', 'text': '%s %s' % (w['min_level'], min_level)})
+        # The chip carries its requirements so the browser can colour it for the
+        # imported character: level, class, race, armour/weapon type, further
+        # condition, scaling. Without a character nothing is coloured.
+        chips.append({'cls': '', 'text': '%s %s' % (w['min_level'], min_level),
+                      'eignung': {'min': min_level, 'klasse': item.get('rk') or '',
+                                  'volk': item.get('rr') or '',
+                                  'armour': item.get('at') or '',
+                                  'waffe': item.get('wt') or '',
+                                  'extra': 1 if item.get('ex') else 0,
+                                  'scalable': 1 if (item.get('sc') or
+                                                    (details or {}).get('scalable')) else 0}})
     if item_level and (item_level != min_level or item.get('instanztruhe_neu')):
         chips.append({'cls': '', 'text': '%s %s' % (w['item_level'], item_level)})
     binding = (details or {}).get('binding')
@@ -1268,6 +1308,13 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
     description = (details or {}).get('description')
     if isinstance(description, dict):
         description = description.get(lang) or description.get('en') or description.get('de')
+    if not description:
+        # Gegenstände ohne Ausrüstungsdatensatz (etwa Tauschware) bringen ihre
+        # Beschreibung aus dem vollständigen Export mit; ohne sie wäre die Seite leer.
+        beschreibung = item.get('besch')
+        if isinstance(beschreibung, dict):
+            description = (beschreibung.get(lang) or beschreibung.get('en')
+                           or beschreibung.get('de'))
     if not description and item.get('instanztruhe_neu'):
         description = ((ctx.full.get(ident) or {}).get('d') or {}).get(lang)
     description = (description or '').strip()
@@ -1322,6 +1369,9 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
                             len(vendor_entries) + len(barter_entries),
         'used_for_count': len(used_in),
         'has_where_from': bool(resources or sources or crafted_by or vendor_entries or barter_entries),
+        # Der Reiter „Woher“ zeigt nur, was nicht Tausch ist. Ein Stück, das
+        # ausschließlich am Tauschhändler hängt, hat keinen leeren Woher-Reiter.
+        'has_where_other': bool(resources or sources or crafted_by or vendor_entries),
         'has_used_for': bool(used_in),
         'where_groups': where_groups,
         'task_filter': {},

@@ -39,7 +39,11 @@ class BuiltSetCatalogueTest(unittest.TestCase):
                         if member['url']:
                             self.assertIn(member['id'], items)
                             self.assertEqual(member['url'], '/%s/%s/%s/' % (lang, item_segment, member['id']))
-                            self.assertNotIn('set', member['card'])
+                            # A member may link to its page without a card: the
+                            # card describes wearable parts, a linked piece of
+                            # another kind still has a page of its own.
+                            if member['card']:
+                                self.assertNotIn('set', member['card'])
                         else:
                             self.assertIsNone(member['card'])
                 if '70069B64' in pages:

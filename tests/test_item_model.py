@@ -76,8 +76,9 @@ class ItemModelTests(unittest.TestCase):
                  'ESSENCE', 'ITEM', 'JEWELLERY'],
             )
             # id, name, icon, category, quality, slot, type, level, class,
-            # genre, required class/race, armour, weapon, min level, extra condition
-            self.assertEqual(len(data['e'][0]), 16)
+            # genre, required class/race, armour, weapon, min level, extra
+            # condition, scalable, damage type, scaling curve, item group
+            self.assertEqual(len(data['e'][0]), 20)
             self.assertNotIn('binding', data)
 
     def test_php_item_page_has_separate_where_and_used_for_models(self):
@@ -94,6 +95,23 @@ class ItemModelTests(unittest.TestCase):
         self.assertTrue(critical[0].get('recipe_level'))
         self.assertTrue(critical[0].get('result'))
         self.assertEqual(critical[0]['result']['id'], '7001C51E')
+
+    def test_barter_only_item_has_no_empty_where_tab(self):
+        """An item that hangs only on a barterer has no „Woher" content.
+
+        The tab bar used to show a „Woher" tab with nothing in it; the section
+        only exists when there is something besides barter.
+        """
+        shard = __import__('hashlib').md5(b'7006FE2E').hexdigest()[:2]
+        page = json.loads((DATEN / ('de/page-i/%s.json' % shard))
+                          .read_text(encoding='utf-8'))['entities']['7006FE2E']
+        self.assertTrue(page['barter_sources'])
+        self.assertFalse(page['vendor'])
+        if 'has_where_other' in page:
+            self.assertFalse(page['has_where_other'])
+        template = (ROOT / 'php/templates/entity/item.twig').read_text(encoding='utf-8')
+        self.assertIn('has_where_other is defined', template)
+        self.assertIn('{% if where_other %}', template)
 
     def test_large_item_source_gets_task_finder_rows(self):
         shard = __import__('hashlib').md5(b'7002E28D').hexdigest()[:2]
@@ -133,7 +151,9 @@ class ItemModelTests(unittest.TestCase):
                 'entities'][ident]
             self.assertEqual(page['type'], 'barter')
             self.assertEqual(page['name'], name)
-            self.assertTrue(page['items'])
+            # Die Ware steht im Tausch (Preis → Ware), nicht in der Verkaufsliste.
+            self.assertTrue(any(group['rows'] for group in page['offers']))
+            self.assertEqual(page['items'], [])
             self.assertEqual(page['id'], ident)
 
         item = '70001B7E'

@@ -582,6 +582,7 @@
 			list.appendChild(ui.row(list,{
 				image:wert[16],icon:'rezept',name:wert[0],meta:wert[3],
 				href:recipeUrl(wert[10]),
+				eignung:wert[21]&&window.MQL_EIGNUNG?window.MQL_EIGNUNG.ton(wert[21],window.MQL_EIGNUNG.charakter()):null,
 				values:stufen,
 				progress:progress ? ui.recipeProgress(wert[10]) : null
 			}));

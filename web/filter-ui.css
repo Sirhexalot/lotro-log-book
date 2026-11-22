@@ -218,3 +218,6 @@ details[open]>.filter-group-heading>.filter-arrow,details[open]>summary>.filter-
 :is(.sets-list, .gs-ergebnis, .finder-ergebnisse, .related-results, .mql-row-list)
 	> li:is(.mql-row, .mql-row-heading) { border-bottom: 0; }
 .gs-ergebnis > li:first-child.mql-row, .finder-ergebnisse > li:first-child.mql-row { border-top: 0; }
+
+/* Eignung unter dem Namen: eigene Zeile, links, Zahlen bleiben neutral. */
+.mql-row-eignung { display: block; margin-top: .3rem; }

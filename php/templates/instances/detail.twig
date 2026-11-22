@@ -70,12 +70,12 @@
                     {% elseif key == 'aufgabenbelohnungen' %}
                         {{ result.heading(lang, iw.reward_quest) }}
                         {% for row in section.rows %}
-                        {{ result.row(lang, row.url, row.name, row.meta, symbol(row.icon), row.image, iw.reward_quest, row.quest, '', '', '', row.quest_url) }}
+                        {{ result.row(lang, row.url, row.name, row.meta, symbol(row.icon), row.image, iw.reward_quest, row.quest, '', '', '', row.quest_url, row.eignung|default({})) }}
                         {% endfor %}
                     {% else %}
                         {{ result.heading(lang, iw.loot_chance) }}
                         {% for row in section.rows %}
-                        {{ result.row(lang, row.url, row.name, '', symbol('gegenstand'), row.image, iw.loot_chance, row.chance) }}
+                        {{ result.row(lang, row.url, row.name, '', symbol('gegenstand'), row.image, iw.loot_chance, row.chance, '', '', '', '', row.eignung|default({})) }}
                         {% endfor %}
                     {% endif %}
                 </ul>

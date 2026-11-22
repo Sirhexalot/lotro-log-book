@@ -13,8 +13,9 @@ const { chromium } = require('playwright');
 const basis = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 
 const seiten = [
-	/* Woher, Wofür and the barterer tab. */
-	{ pfad: '/de/gegenstand/70001B7E/', reiter: 3 },
+	/* Woher, Wofür and the barterer tab. The barter source of a crafted item
+	   sits on the recipe, so an item needs all three of its own for this row. */
+	{ pfad: '/de/gegenstand/70003979/', reiter: 3 },
 	{ pfad: '/de/instanz/7001A78B/', reiter: 3 },
 	{ pfad: '/de/klassen/', reiter: 3 },
 	{ pfad: '/de/gebiet/268437576/', reiter: 3 },
