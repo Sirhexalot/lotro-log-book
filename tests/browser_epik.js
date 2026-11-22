@@ -193,11 +193,14 @@ async function zustand(page) {
 			assert.ok(nachScroll.baender >= 10, design + ': Liste wird beim Scrollen flach');
 			assert.ok(nachScroll.buecher >= 1, design + ': Buchabschnitte fehlen nach dem Scrollen');
 
-			/* Der Listentitel führt zurück zur Landschaftsübersicht. */
+			/* Der Listentitel öffnet die Epik selbst über ihre Adresse. */
 			await page.locator('#liste-titel').click();
-			await page.waitForTimeout(1500);
-			assert.ok(await page.locator('.landschaft-kachel').count() > 0,
-				design + ': Titel führt nicht zur Übersicht');
+			await page.waitForLoadState('load');
+			await page.waitForFunction(() =>
+				document.querySelectorAll('#liste li.epik-band').length === 10,
+				null, { timeout: 30000 });
+			assert.match(await page.evaluate(() => location.search),
+				/gebiet=Epische\+Geschichte/, design + ': Titel führt nicht zur Epik-Adresse');
 
 			assert.deepEqual(fehler, [], 'JS-Fehler: ' + fehler.join(' | '));
 			await context.close();

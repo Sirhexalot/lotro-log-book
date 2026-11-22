@@ -2461,7 +2461,6 @@
 			listeTitel.classList.add('als-link');
 			listeTitel.setAttribute('role', 'link');
 			listeTitel.tabIndex = 0;
-			listeTitel.title = ltexte[3];
 			zeichneKartenBreadcrumb();
 			zeichneMarker();
 			aktualisiereFilterZahlen();
@@ -3621,17 +3620,18 @@
 		liste.scrollTop = oben;
 	});
 
-	// The title of a special view leads back to the overview, like the
-	// "All landscapes" crumb.
+	// The title of a special view opens that view itself, so its address is
+	// reachable again from any state inside it.
 	(function () {
-		function zurueck() {
-			if (sonderFuer(zustand.knoten)) { landschaftUebersicht(); }
+		function oeffne() {
+			var sonder = sonderFuer(zustand.knoten);
+			if (sonder && sonder.adresse) { window.location.assign(sonder.adresse()); }
 		}
-		listeTitel.addEventListener('click', zurueck);
+		listeTitel.addEventListener('click', oeffne);
 		listeTitel.addEventListener('keydown', function (ereignis) {
 			if (ereignis.key === 'Enter' || ereignis.key === ' ') {
 				ereignis.preventDefault();
-				zurueck();
+				oeffne();
 			}
 		});
 	})();

@@ -246,6 +246,9 @@
 	window.MQL_EPIK_ANSICHT = {
 		setzeDaten: setzeDaten,
 		bereit: function () { return !!daten; },
+		adresse: function () {
+			return window.location.pathname + '?gebiet=' + encodeURIComponent(name()).replace(/%20/g, '+');
+		},
 		passt: function (knoten) {
 			return !!(daten && knoten && knoten.schluessel === schluessel());
 		},
