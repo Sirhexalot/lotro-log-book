@@ -174,6 +174,30 @@ class ItemModelTests(unittest.TestCase):
         self.assertTrue(all('/de/haendler/' in source['url']
                             for source in recipe['sources'] if source['url']))
 
+    def test_barter_row_names_the_price_and_the_translated_list(self):
+        """Eine Tauschzeile nennt Preis und Liste in der Seitensprache."""
+        import hashlib
+        item = '70000F2C'
+        for lang, preis, liste in (('de', 'kostet', 'Geringe Klassen-Gegenstände'),
+                                   ('en', 'costs', 'Minor Class Items'),
+                                   ('fr', 'coûte', 'Objets de classe mineurs')):
+            shard = hashlib.md5(item.encode()).hexdigest()[:2]
+            page = json.loads((DATEN / ('%s/page-i/%s.json' % (lang, shard))).read_text(
+                encoding='utf-8'))['entities'][item]
+            group = next(g for g in page['where_groups'] if g.get('barter_filter'))
+            extra = group['entries'][0]['extra']
+            self.assertIn(preis, extra, lang)
+            self.assertIn(liste, extra, lang)
+
+    def test_barter_item_page_keeps_its_own_name(self):
+        """Der Händlername in der Tauschzeile darf den Seitentitel nicht ersetzen."""
+        import hashlib
+        item = '7004CA88'
+        shard = hashlib.md5(item.encode()).hexdigest()[:2]
+        page = json.loads((DATEN / ('de/page-i/%s.json' % shard)).read_text(
+            encoding='utf-8'))['entities'][item]
+        self.assertEqual(page['name'], ITEMS[item]['n']['de'])
+
     def test_barter_vendor_page_names_its_goods(self):
         source = (ROOT / 'php/src/Vendors.php').read_text(encoding='utf-8')
         for needle in ("'barter_items' => 'Tauschgegenstände'",

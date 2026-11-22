@@ -50,6 +50,9 @@ before it links a barter row to a vendor page.
   only in English („Crafting“), and a German page invents no
   translation. The item entry under „Woher“ shows for the same reason
   only the name.
+- **Item pages** put the same price into their „Tauschhändler“ group
+  („kostet 500 Zeichen · Geringe Klassen-Gegenstände“) and take the vendor
+  name from `daten/haendler.json` instead of the English client row.
 
 ## Limits
 

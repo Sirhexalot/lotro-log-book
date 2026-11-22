@@ -887,13 +887,48 @@ QUALITY_BY_KEY = {1: 'LEGENDARY', 2: 'RARE', 3: 'INCOMPARABLE', 4: 'UNCOMMON', 5
 QUALITY_NUMBER = {'COMMON': 1, 'UNCOMMON': 2, 'RARE': 3, 'INCOMPARABLE': 4, 'LEGENDARY': 5}
 
 
+def tausch_index(daten: dict | None) -> dict:
+    """Ware → ihre Tauschzeilen (Händler, Liste, Preis).
+
+    Dieselbe Ware kann bei mehreren Händlern und in mehreren Listen stehen;
+    jede Zeile bleibt deshalb erhalten.
+    """
+    if not daten:
+        return {}
+    index = {}
+    profile = daten.get('profiles') or {}
+    for vendor_id, vendor in (daten.get('vendors') or {}).items():
+        for pid in vendor.get('profiles') or []:
+            for angebot in (profile.get(pid) or {}).get('offers') or []:
+                give = angebot.get('give') or []
+                for item_id, menge in angebot.get('receive') or []:
+                    index.setdefault(item_id, []).append({
+                        'vendor': str(vendor_id).upper(),
+                        'profile': pid,
+                        'give': give,
+                        'menge': menge,
+                    })
+    return index
+
+
+def tausch_preis(give: list, namen: dict, lang: str) -> str:
+    """Der Preis einer Tauschzeile in der Seitensprache."""
+    teile = []
+    for ident, menge in give or []:
+        texte = namen.get(ident) or {}
+        name = texte.get(lang) or texte.get('en') or ident
+        teile.append('%d %s' % (menge, name))
+    return ' + '.join(teile)
+
+
 class ItemContext:
     """Everything the item pages need beyond the item record itself."""
 
     def __init__(self, builder: ViewBuilder, details: dict, sets: dict, labels: dict,
                  typen: dict, vorkommen: dict, boni: dict, boni_labels: dict,
                  referenz: dict, full: dict | None = None, damage_types: dict | None = None,
-                 vendor_ids: set | None = None):
+                 vendor_ids: set | None = None, tausch: dict | None = None,
+                 vendor_names: dict | None = None):
         self.builder = builder
         self.details = details
         self.sets = sets
@@ -907,6 +942,12 @@ class ItemContext:
         self.damage_types = damage_types or {}
         # Only an id with a vendor page may become a link on an item page.
         self.vendor_ids = {str(v).upper() for v in (vendor_ids or ())}
+        self.vendor_names = {str(k).upper(): v for k, v in (vendor_names or {}).items()}
+        # Tauschpreise stehen in daten/tausch.json; sie gehören zur Ware, nicht
+        # zur Liste, deshalb ein Index Ware → Zeilen.
+        self.tausch = tausch_index(tausch)
+        self.tausch_profiles = (tausch or {}).get('profiles') or {}
+        self.tausch_names = (tausch or {}).get('names') or {}
         self.by_name = {}
         for ident, item in builder.items.items():
             name = sauber(builder_name(builder, item))
@@ -1119,6 +1160,15 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
             '–' if value is None else str(value))
         bonuses.append({'label': label, 'display': text})
     scale = (details or {}).get('scale')
+    # Werte skalierbarer Stücke stehen im Katalog auf ihrer Höchststufe. Ohne
+    # diesen Hinweis liest ein Stufe-123-Charakter 525 und 765 DPS als seine Werte.
+    values_note = None
+    if (details or {}).get('scalable') and item.get('l'):
+        values_note = {
+            'de': 'Werte auf Höchststufe: Gegenstandsstufe %s.',
+            'en': 'Stats at maximum level: item level %s.',
+            'fr': 'Valeurs au niveau maximal : niveau d’objet %s.',
+        }[lang] % item['l']
 
     resources = []
     for entry in item.get('vor') or []:
@@ -1257,18 +1307,39 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
 
     barter_entries = []
     for source in item.get('tausch') or []:
-        ident = vendor_key(source.get('id'))
-        # The barterer's occupation is English-only in the client; the area is
-        # what the row can name on a German page.
-        extra = source.get('area') or ''
+        haendler = vendor_key(source.get('id'))
+        # Der Preis steht in daten/tausch.json; die Zeile in items.json kennt
+        # nur den Händler. Ohne Preisdaten bleibt der englische Listenname.
+        zeilen = [row for row in (ctx.tausch.get(ident) or [])
+                  if row['vendor'] == haendler]
+        preise = []
+        listen = []
+        for row in zeilen:
+            preis = tausch_preis(row['give'], ctx.tausch_names, lang)
+            if preis and preis not in preise:
+                preise.append(preis)
+            liste = ((ctx.tausch_profiles.get(row['profile']) or {}).get('name') or {}).get(lang)
+            if liste and liste not in listen:
+                listen.append(liste)
+        teile = []
+        if preise:
+            teile.append('%s %s' % (w['costs'], ' · '.join(preise)))
+        if listen:
+            teile.append(' · '.join(listen))
+        extra = ' · '.join(teile) if teile else (source.get('area') or '')
+        # Der Händlername kommt aus der Händlerdatei; die Tauschzeile trägt ihn
+        # nur englisch, wie der Client ihn schreibt. Nicht `name` nennen: das
+        # ist der Gegenstandsname der Seite.
+        haendler_name = ((ctx.vendor_names.get(haendler) or {}).get(lang)
+                         or source.get('name') or haendler)
         barter_entries.append({
-            'id': ident,
-            'name': source.get('name') or ident,
+            'id': haendler,
+            'name': haendler_name,
             'title': source.get('title'),
             'area': source.get('area'),
-            'text': source.get('name') or ident,
+            'text': haendler_name,
             'extra': extra,
-            'url': vendor_url(lang, ident) if ident in ctx.vendor_ids else '',
+            'url': vendor_url(lang, haendler) if haendler in ctx.vendor_ids else '',
         })
     if barter_entries:
         where_groups.append({'label': w['source_barters'], 'filter': None,
@@ -1349,6 +1420,7 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         # raw scale record, even if that record renders no text (10 pages).
         'has_values': bool(armour or basic or bonuses or scale),
         'values': basic,
+        'values_note': values_note,
         'bonuses': bonuses,
         'scale': scale[0] if scale and scale[0] else None,
         'resources': resources,

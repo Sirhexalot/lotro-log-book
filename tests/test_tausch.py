@@ -6,11 +6,15 @@ must not attribute an offer to a vendor more than once, and must not drop the
 translated profile names.
 """
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 from tools.tausch import baue, bericht, kennung, menge
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from php_viewmodel import tausch_index, tausch_preis  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -139,6 +143,38 @@ class TauschTests(unittest.TestCase):
         ziel.write_text(json.dumps(daten, ensure_ascii=False), encoding='utf-8')
         gelesen = json.loads(ziel.read_text(encoding='utf-8'))
         self.assertEqual(gelesen['vendors'], daten['vendors'])
+
+
+class TauschPreisTests(unittest.TestCase):
+    """Die Gegenstandsseite nennt den Preis in der Seitensprache."""
+
+    DATEN = {
+        'vendors': {'7001F02F': {'profiles': ['7001F114']}},
+        'profiles': {'7001F114': {
+            'name': {'de': 'Kleinere Klassengegenstände', 'en': 'Minor Class Items'},
+            'offers': [{'give': [['7002B017', 250], ['7002B018', 10]],
+                        'receive': [['70000F2C', 5]]}],
+        }},
+        'names': {'7002B017': {'de': 'Zeichen', 'en': 'Mark'},
+                  '7002B018': {'de': 'Medaillon', 'en': 'Medallion'}},
+    }
+
+    def test_index_keeps_vendor_list_and_offer(self):
+        index = tausch_index(self.DATEN)
+        zeile = index['70000F2C'][0]
+        self.assertEqual(zeile['vendor'], '7001F02F')
+        self.assertEqual(zeile['profile'], '7001F114')
+
+    def test_price_follows_the_page_language_and_falls_back_to_english(self):
+        index = tausch_index(self.DATEN)
+        give = index['70000F2C'][0]['give']
+        self.assertEqual(tausch_preis(give, self.DATEN['names'], 'de'),
+                         '250 Zeichen + 10 Medaillon')
+        self.assertEqual(tausch_preis(give, self.DATEN['names'], 'fr'),
+                         '250 Mark + 10 Medallion')
+
+    def test_missing_source_returns_an_empty_index(self):
+        self.assertEqual(tausch_index(None), {})
 
 
 if __name__ == '__main__':

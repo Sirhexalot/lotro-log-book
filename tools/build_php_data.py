@@ -60,6 +60,7 @@ SITEMAP_KINDS = ('q', 'd', 'i', 'area', 'region', 'recipe', 'title', 'virtue', '
 GIVER_SOURCE: dict | None = None
 QUEST_GIVERS: dict = {}
 VENDOR_SOURCE: dict | None = None
+TAUSCH_SOURCE: dict | None = None
 RECIPE_SOURCE: dict | None = None
 
 
@@ -816,7 +817,10 @@ def load_item_context(builder, model, lang):
     boni_labels = (ITEM_BONI.get('labels') or {}).get(lang) or {}
     return ItemContext(builder, ITEM_DETAILS, ITEM_SETS, ITEM_LABELS, ITEM_TYPEN,
                        vorkommen, boni, boni_labels, referenz, ITEM_FULL, DAMAGE_TYPES.get(lang, {}),
-                       vendor_ids=set((VENDOR_SOURCE or {}).get('vendors') or {}))
+                       vendor_ids=set((VENDOR_SOURCE or {}).get('vendors') or {}),
+                       tausch=TAUSCH_SOURCE,
+                       vendor_names={vid: (v.get('name') or {})
+                                     for vid, v in ((VENDOR_SOURCE or {}).get('vendors') or {}).items()})
 
 
 DEED_CATEGORIES: dict | None = None
@@ -888,7 +892,7 @@ def main() -> int:
     instance_data = instanzdaten(instanz_source, DATEN / 'instanzen-roh.jsonl')
     from set_viewmodel import set_pages, link_items
 
-    global GIVER_SOURCE, QUEST_GIVERS, VENDOR_SOURCE, RECIPE_SOURCE
+    global GIVER_SOURCE, QUEST_GIVERS, VENDOR_SOURCE, RECIPE_SOURCE, TAUSCH_SOURCE
     if not (DATEN / 'auftraggeber.json').is_file():
         raise SystemExit('MISSING: daten/auftraggeber.json (run python3 build_auftraggeber.py first)')
     GIVER_SOURCE = json.loads((DATEN / 'auftraggeber.json').read_text(encoding='utf-8'))
@@ -897,6 +901,10 @@ def main() -> int:
     if not (DATEN / 'haendler.json').is_file():
         raise SystemExit('MISSING: daten/haendler.json (run python3 build_haendler.py first)')
     VENDOR_SOURCE = json.loads((DATEN / 'haendler.json').read_text(encoding='utf-8'))
+    # Preise und Tauschlisten (tools/tausch.py); fehlt die Datei, bleibt die
+    # Gegenstandsseite beim Händler ohne Preis.
+    TAUSCH_SOURCE = (json.loads((DATEN / 'tausch.json').read_text(encoding='utf-8'))
+                     if (DATEN / 'tausch.json').is_file() else None)
     RECIPE_SOURCE = (json.loads(RECIPE_SOURCE_DATEI.read_text(encoding='utf-8'))
                      if RECIPE_SOURCE_DATEI.is_file() else {'sources': {}})
     region_ids = {

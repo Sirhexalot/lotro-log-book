@@ -85,9 +85,7 @@ further sharding is needed for the finder at this size.
 
 ## Verification
 
-- `python3 -m unittest discover -s tests -p 'test_*.py'` — green apart from one
-  test in the vendor area, which belongs to the parallel vendor/barter work
-  (`daten/tausch.json` is being built there).
+- `python3 -m unittest discover -s tests -p 'test_*.py'` — 488 tests green.
 - `node tests/browser_schadensart.js` — DE/EN/FR.
 - `node tests/browser_item_filter_preview.js` — real index, layout, category
   counts and mobile selection in all three languages.
@@ -151,5 +149,7 @@ against the finder catalogue:
       against the finder (see above).
 - [ ] Decide whether barter goods beyond armour and weapons need a page of their
       own; today they all have one, with name, quality, description and source.
-- [ ] Vendor page and barter prices: separate work in `tools/tausch.py`,
-      `build_haendler.py` and the vendor templates.
+- [x] Vendor page and barter prices: `tools/tausch.py` writes
+      `daten/tausch.json`, the vendor page shows offers as price → goods, and
+      the item page names the price and the translated barter list
+      („kostet 500 Zeichen · Geringe Klassen-Gegenstände“).
