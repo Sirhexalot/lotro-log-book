@@ -157,7 +157,8 @@ def main() -> int:
     sys.path.insert(0, str(ROOT.parent / 'MagicQuestLog' / 'tools'))
     from game_maps import GameMaps
     maps = GameMaps(Path.home() / 'Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore')
-    spots = places(set(vendors), maps)
+    # Auch reine Tauschhändler stehen im Positions-Export: 817 von 818.
+    spots = places(set(vendors) | nur_barter, maps)
     known = {str(row['idx']) for row in json.loads(MAPS.read_text(encoding='utf-8'))}
     output = {}
     for ident, vendor in vendors.items():
@@ -197,7 +198,9 @@ def main() -> int:
             'type': 'barter',
             # No localized occupation in the client; empty instead of English.
             'title': {lang: '' for lang in LANGS},
-            'places': [],
+            'places': [{**spot, 'map': spot['map'] if spot['map'] is not None
+                        and str(spot['map']) in known else None}
+                       for spot in spots.get(ident, [])],
             'items': sorted(item for item in barter_items[ident] if item in public_items),
             'offers': barter_offers.get(ident) or [],
         }
