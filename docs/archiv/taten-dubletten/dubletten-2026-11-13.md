@@ -1,17 +1,17 @@
-# Dublettenbericht Taten
+# Duplicate report deeds
 
-Quelle: `/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/deeds.json`
-Stand: 2026-11-13
+Source: `/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/deeds.json`
+Status as of: 2026-11-13
 
-Regel: exakt gleiche Signatur (Name, Kategorie, Tab, Beschreibung, Ziele). Höchste ID behalten, niedrigere als ersetzt markieren.
+Rule: exactly identical signature (name, category, tab, description, objectives). Keep the highest ID, mark the lower ones as replaced.
 
-| Tat | Kategorie | alte ID | neue ID | im Spielstand | Besonderheit |
+| Deed | Category | old ID | new ID | in character progress | Peculiarity |
 | --- | --- | --- | --- | --- | --- |
 | Aktives Blocken | Klasse | 70000E6C | 70038484 |  |  |
 | Anhänger Elendils | Klasse | 700161FB | 70037F52 |  |  |
 | Anmutiges Verhalten | Klasse | 70000EA8 | 70037F1C |  |  |
 | Athletische Statur | Klasse | 700161EA | 70037F34 |  |  |
-| Auf der Spur einer alten Ziege |  | 7002A5F5 | 7002D4C1 |  | Quest-Voraussetzung nur bei alter ID; Ruf-Belohnung nur bei neuer ID |
+| Auf der Spur einer alten Ziege |  | 7002A5F5 | 7002D4C1 |  | Quest prerequisite only on the old ID; reputation reward only on the new ID |
 | Beharrlichkeit | Klasse | 70016306 | 70037EFE |  |  |
 | Das Geheimnis des Teerkochens | Klasse | 7001621A | 70037EE6 |  |  |
 | Dauerhafte Moral | Klasse | 70016208 | 70037F21 |  |  |
@@ -25,7 +25,7 @@ Regel: exakt gleiche Signatur (Name, Kategorie, Tab, Beschreibung, Ziele). Höch
 | Geschicklichkeit und Kraft | Klasse | 70016303 | 70037F0A |  |  |
 | Geschickter Werfer | Klasse | 700162FC | 70037EFD |  |  |
 | Geschicktes Blocken | Klasse | 7001630C | 70037F0C |  |  |
-| Geschärfte Sinne | Klasse | 70000E82 | 70037ECE | ja | Spielstand: 70037ECE |
+| Geschärfte Sinne | Klasse | 70000E82 | 70037ECE | ja | character progress: 70037ECE |
 | Grausame Chancen | Klasse | 70016238 | 70037F7B |  |  |
 | Großzügige Milde | Klasse | 700161EB | 70037F38 |  |  |
 | Harmonische Melodie | Klasse | 70000E9E | 70037F1A |  |  |
@@ -51,7 +51,7 @@ Regel: exakt gleiche Signatur (Name, Kategorie, Tab, Beschreibung, Ziele). Höch
 | Schnelligkeit | Klasse | 70000E74 | 700384E5 |  |  |
 | Schreckliches Antlitz | Klasse | 70016304 | 70037EFF |  |  |
 | Silberne Zunge | Klasse | 70000EA9 | 70037F19 |  |  |
-| Starke Sehne | Klasse | 70000E81 | 70037ECD | ja | Spielstand: 70037ECD |
+| Starke Sehne | Klasse | 70000E81 | 70037ECD | ja | character progress: 70037ECD |
 | Stechender Stoß | Klasse | 70000E6B | 70038485 |  |  |
 | Stärke der Persönlichkeit | Klasse | 700162FE | 70037F04 |  |  |
 | Störende Prinzipien | Klasse | 70016356 | 70038570 |  |  |
@@ -60,7 +60,7 @@ Regel: exakt gleiche Signatur (Name, Kategorie, Tab, Beschreibung, Ziele). Höch
 | Tod ist kein Thema | Klasse | 70016305 | 70037F10 |  |  |
 | Treffen, wo es schmerzt | Klasse | 70016229 | 700384E6 |  |  |
 | Täuschende Wunde | Klasse | 70000E32 | 70037F79 |  |  |
-| Tödliche Präzision | Klasse | 70000E87 | 70037EEE | ja | Spielstand: 70037EEE |
+| Tödliche Präzision | Klasse | 70000E87 | 70037EEE | ja | character progress: 70037EEE |
 | Tödliche Schläge | Klasse | 70000E5A | 70037F2B |  |  |
 | Unauffällige Weisheit | Klasse | 70000E99 | 70037EE3 |  |  |
 | Unerbittlich | Klasse | 70000EA4 | 70037F24 |  |  |

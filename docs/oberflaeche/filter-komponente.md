@@ -1,98 +1,98 @@
-# Gemeinsame Filterkomponente – lokaler Implementierungsstand
+# Common filter component – local implementation status
 
-## Umfang
+## Scope
 
-Die gemeinsamen Bausteine sind implementiert und mit isolierten synthetischen
-Testseiten geprüft. **Gegenstandssuche, Sets und Belohnungen sind jetzt in den
-regulären PHP-Templates lokal angebunden, aber noch nicht veröffentlicht.**
-Auftraggeber, Landmarken, Fraktionen, Instanzen sowie die drei Handwerksreiter
-sind ebenfalls lokal auf die Komponente migriert. Keine
-Veröffentlichung ist erfolgt. Der detaillierte Umsetzungsplan liegt unter
+The common building blocks are implemented and checked with isolated synthetic
+test pages. **Item search, sets and rewards are now bound locally in the
+regular PHP templates, but not yet published.**
+Quest givers, landmarks, factions, instances as well as the three crafting tabs
+are likewise migrated locally to the component. No
+publication has taken place. The detailed implementation plan lies under
 `~/.opencode/plan/lotro-filter-navigation-handwerk-2026-11-12.md`.
 
-- `web/filterzustand.js`: reine Zustandsnormalisierung, Aktionen, Chips und
-  adapterbasierte URL-Codecs; direkt mit Node testbar.
-- `web/filteradapter.js`: deklarative Query-Codecs, Clientadapter mit
-  Deduplizierung/Pagination und Serveradapter mit validiertem HTML-Modell.
-- `web/filtergedaechtnis.js`: kompatible read/write/clear-API; neue Einträge
-  verwenden `{v:2,q:...}`, `readState` erkennt Legacy- und unbekannte Versionen.
-- `web/filter-ui.js` und `.css`: eine gemountete UI je Listenroot, Desktopsidebar,
-  nativer Mobil-Dialog, Fokusführung, Chips, Rangevalidierung, History und
-  Requestabbruch. UI-Texte kommen aus der Konfiguration.
+- `web/filterzustand.js`: pure state normalisation, actions, chips and
+  adapter-based URL codecs; directly testable with Node.
+- `web/filteradapter.js`: declarative query codecs, client adapter with
+  deduplication/pagination and server adapter with validated HTML model.
+- `web/filtergedaechtnis.js`: compatible read/write/clear API; new entries
+  use `{v:2,q:...}`, `readState` recognises legacy and unknown versions.
+- `web/filter-ui.js` and `.css`: one mounted UI per list root, desktop sidebar,
+  native mobile dialog, focus management, chips, range validation, history and
+  request abort. UI texts come from the configuration.
 
-## Adaptervertrag
+## Adapter contract
 
-`MQL_FILTER_UI.mount(root, {config, adapter, characterContext})` liefert
-`ready`, `dispatch`, `getState`, `setCharacterContext` und asynchrones `destroy`.
-Das Root benötigt ein Element mit `data-filter-results`. Initiales GET-Markup
-kann mit `data-filter-fallback` markiert werden und wird nur im erweiterten
-Modus versteckt. Die Komponente ist nicht innerhalb eines konkurrierenden
-Formularcontrollers zu mounten. Alte Seitenlistener beim Migrieren ablösen.
+`MQL_FILTER_UI.mount(root, {config, adapter, characterContext})` delivers
+`ready`, `dispatch`, `getState`, `setCharacterContext` and asynchronous `destroy`.
+The root needs an element with `data-filter-results`. Initial GET markup
+can be marked with `data-filter-fallback` and is hidden only in extended
+mode. The component is not to be mounted within a competing
+form controller. Detach old page listeners when migrating.
 
-`adapter.load(state, {signal, characterContext})` liefert
+`adapter.load(state, {signal, characterContext})` delivers
 `{state,total,facets,pagination,capabilities,payload}`.
-`adapter.renderResults(result,target)` rendert ausschließlich die Ergebnisse.
-Fachliche Filterprädikate, Sortierung und Facetten bleiben im Datenadapter.
-Der öffentliche Serveradapter serialisiert nur den konfigurierten URL-Codec,
-niemals den Charakterkontext.
+`adapter.renderResults(result,target)` renders exclusively the results.
+Domain filter predicates, sorting and facets remain in the data adapter.
+The public server adapter serialises only the configured URL codec,
+never the character context.
 
-Serverantwort: genau ein Root mit `data-filter-area="<bereich>"` und
-`data-filter-schema="1"`, darin ein JSON-Skript
-`type="application/json" data-filter-model` und genau ein
-`data-filter-results`-Fragment. JSON in PHP HTML-sicher mit JSON_HEX_TAG,
-JSON_HEX_AMP, JSON_HEX_APOS und JSON_HEX_QUOT serialisieren. Der bestehende
-GET-Endpunkt muss ohne JavaScript vollständig bedienbar bleiben.
-Paginationlinks des erweiterten Modus erhalten `data-filter-page="2"` usw.
-Ein vollständiges ausführbares Beispiel liefern die isolierten Testfixtures.
+Server response: exactly one root with `data-filter-area="<bereich>"` and
+`data-filter-schema="1"`, in it a JSON script
+`type="application/json" data-filter-model` and exactly one
+`data-filter-results` fragment. Serialise JSON HTML-safe in PHP with JSON_HEX_TAG,
+JSON_HEX_AMP, JSON_HEX_APOS and JSON_HEX_QUOT. The existing
+GET endpoint must remain fully operable without JavaScript.
+Pagination links of extended mode receive `data-filter-page="2"` etc.
+A complete executable example is delivered by the isolated test fixtures.
 
-## Reproduzierbare Tests
+## Reproducible tests
 
-### Entitätenvertrag
+### Entity contract
 
-`docs/datenraum/lotro-datenraum-entitaeten.json` ist die eine Quelle für die
-Ausprägung jeder Entität: Zeilenfelder, Filtergruppen, erlaubte Relationen,
-Fortschritt und der Status jeder Liste.
+`docs/datenraum/lotro-datenraum-entitaeten.json` is the one source for the
+shape of each entity: row fields, filter groups, permitted relations,
+progress and the status of each list.
 
-- `component`: die Liste nutzt die gemeinsame Filterkomponente.
-- `direct`: höchstens fünf Einträge, direkte Darstellung.
-- `open`: bekannte Lücke mit Grund; `tests/test_relationen_audit.py` prüft, dass
-  sie in den echten Daten tatsächlich über der Schwelle liegt.
+- `component`: the list uses the common filter component.
+- `direct`: at most five entries, direct rendering.
+- `open`: known gap with reason; `tests/test_relationen_audit.py` checks that
+  it actually lies above the threshold in the real data.
 
-Die Listenzeile trägt nur Identität und Einordnung (Symbol, Name, Beruf/Art,
-Stufe oder Lernstand) und führt selbst zum Detail. Zutaten, Quellen, Werte und
- weitere Angaben gehören ausschließlich auf die Detailseite;
-`tests/test_entitaeten_vertrag.py` hält das fest.
+The list row carries only identity and classification (symbol, name, profession/kind,
+level or crafting knowledge) and itself leads to the detail. Ingredients, sources, values and
+further data belong exclusively on the detail page;
+`tests/test_entitaeten_vertrag.py` fixes that.
 
-### Relationale Listen auf Detailseiten
+### Relational lists on detail pages
 
-Für jede relationale Liste auf einer Detailseite gilt dieselbe globale Schwelle:
+For every relational list on a detail page the same global threshold applies:
 
-- **0 bis einschließlich 5 Einträge:** direkte Liste, ohne Filterkomponente.
-- **Ab 6 Einträgen:** gemeinsame Filterkomponente mit derselben Ergebnisdarstellung
-  wie auf der zugehörigen Standardliste; auf Detailseiten nutzt sie die volle
-  Inhaltsbreite.
-- Die Suchzeile nutzt diese volle Breite. Das Suchfeld wächst flexibel, ohne
-  Mindestbreite, damit der Suchknopf nicht aus dem Bildschirm läuft. Die
-  Trefferleiste darf einzelne Bedienelemente umbrechen; sie darf aber weder
-  den Filtercontainer überschreiten noch einen horizontalen Seitenüberlauf
-  erzeugen. Auf Mobilgeräten sind Umbrüche innerhalb der Trefferleiste erlaubt.
+- **0 up to and including 5 entries:** direct list, without filter component.
+- **From 6 entries:** common filter component with the same result rendering
+  as on the associated standard list; on detail pages it uses the full
+  content width.
+- The search row uses this full width. The search field grows flexibly, without
+  a minimum width, so that the search button does not run off screen. The
+  result bar may wrap individual controls; but it may neither
+  exceed the filter container nor create a horizontal page overflow.
+  On mobile devices wraps within the result bar are allowed.
 
-Die Beziehung selbst bleibt fester Kontext und kann durch „Zurücksetzen“ nicht
-entfernt werden. Die Schwelle ist im PHP-Seitenmodell als
-`FilterRegeln::MAX_DIREKTLISTE` definiert und wird vom Relation-Renderer
-übernommen.
+The relation itself remains fixed context and cannot be removed by „Zurücksetzen“.
+The threshold is defined in the PHP page model as
+`FilterRegeln::MAX_DIREKTLISTE` and is taken over by the
+relation renderer.
 
-Lokale Gegenstandssuche (kein Build/Upload, bindet nur an Loopback):
+Local item search (no build/upload, binds only to loopback):
 
 ```bash
 python3 tools/filter_vorschau.py --port 8924
 ```
 
-Adresse: `http://127.0.0.1:8924/gegenstaende.html?lang=de` (auch en/fr).
-Die Vorschau ersetzt ausschließlich beim lokalen HTTP-Aufruf den alten
-Seitencontroller durch `gegenstaende-filter.js`. Spielkategorien, Namen und
-Suchdaten stammen aus dem vorhandenen Gegenstandsindex, nicht aus Fixtures.
-Gegenstandslinks öffnen derzeit die öffentliche Detailseite.
+Address: `http://127.0.0.1:8924/gegenstaende.html?lang=de` (also en/fr).
+The preview replaces the old page controller with `gegenstaende-filter.js` exclusively on the local HTTP call.
+Game categories, names and search data come from the existing item index,
+not from fixtures.
+Item links currently open the public detail page.
 
 ```bash
 node tests/test_filterzustand.js
@@ -101,149 +101,149 @@ NODE_PATH=/opt/homebrew/lib/node_modules node tests/browser_filter_consistency.j
 NODE_PATH=/opt/homebrew/lib/node_modules node tests/browser_item_filter_preview.js
 ```
 
-Der Browserlauf startet und beendet einen eigenen HTTP-Fixtureserver und
-isolierte Chromium-Kontexte. Er berührt weder echte Charakterstände noch
-Hosting oder Vorschauprozesse anderer Sitzungen. Playwright wird aus der
-vorhandenen Installation geladen; kein neuer npm-Build ist nötig.
+The browser run starts and ends its own HTTP fixture server and
+isolated Chromium contexts. It touches neither real character progress nor
+hosting or preview processes of other sessions. Playwright is loaded from the
+existing installation; no new npm build is needed.
 
-Geprüft: DE/EN/FR × Client/Server × zehn Viewportbreiten
-(360/390/430/768/900/901/1000/1001/1280/1440), Checkbox-ODER, Rangevalidierung,
-Chips, Reset, Reload, explizit leere Suchadresse vor Gedächtnis, getrennte
-Bereichsschlüssel, Dialog/Focus-Trap/Escape/History, Querformat,
-zehn aufeinanderfolgende Updates ohne doppelte Bindungen, Fehlerantworten,
-ungültiges Modell/falscher Bereich, konkurrierende Requests, Abbau/Remount
-und serverseitige Suche ohne JavaScript. Screenshots liegen standardmäßig
-unter `~/.cache/llb-filter-browser-tests`, konfigurierbar über
-`LLB_FILTER_ARTIFACTS`; keine Bildartefakte im Repository.
+Checked: DE/EN/FR × client/server × ten viewport widths
+(360/390/430/768/900/901/1000/1001/1280/1440), checkbox OR, range validation,
+chips, reset, reload, explicitly empty search address before memory, separate
+area keys, dialog/focus trap/Escape/history, landscape orientation,
+ten consecutive updates without double bindings, error responses,
+invalid model/wrong area, competing requests, teardown/remount
+and server-side search without JavaScript. Screenshots lie by default
+under `~/.cache/llb-filter-browser-tests`, configurable via
+`LLB_FILTER_ARTIFACTS`; no image artefacts in the repository.
 
-## Verbleibende Abnahme
+## Remaining acceptance
 
-- Ausbau der Abnahme der echten Referenzen: vollständige Filterkombinationen,
-  Same-Member-Prädikat, Pagination, Herkunft der Stufenwerte und Detailrückwege.
-- Personenbezogene Verfügbarkeitsregeln samt Import-/Backupintegration.
-- Echte Geräteprüfung mit iOS-Safari, Bildschirmtastatur und Safe Area.
-- Screenreaderprüfung, 200%-Zoom und vollständige Detailrückwege/Scrollrestore.
+- Expansion of the acceptance of the real references: complete filter combinations,
+  same-member predicate, pagination, origin of the level values and detail back paths.
+- Personal availability rules together with import/backup integration.
+- Real device check with iOS Safari, on-screen keyboard and safe area.
+- Screen reader check, 200 % zoom and complete detail back paths/scroll restore.
 
-Fixtureabnahme ist ausdrücklich keine Abnahme dieser noch nicht migrierten
-Produktionsseiten und kein Nachweis eines physischen iOS-Tests.
+Fixture acceptance is explicitly no acceptance of these not yet migrated
+production pages and no proof of a physical iOS test.
 
-### Nachprüfung der echten lokalen Gegenstandssuche
+### Re-check of the real local item search
 
-Nach Nutzer-Screenshot korrigiert: Suchfeld und Zähler/Sortierung liegen in
-getrennten flexiblen Zeilen; Baumknoten zeigen Checkbox und Aufklappen ohne
-doppelte Beschriftung; leere Kinderlisten erzeugen keinen Aufklapper.
-Ergebniszeilen enthalten wieder Symbol, Seltenheitsfarbe und Metadaten.
-Zähler werden sprachgerecht formatiert. Der neue reale Index-Browserlauf prüft
-DE/EN/FR bei 390/768/901/1280/1440 px, Sortierfeld im sichtbaren Bereich,
-fehlenden horizontalen Overflow, Zeilenbestandteile und mobile Auswahl.
-Desktop- und Mobil-Screenshots wurden zusätzlich visuell geprüft.
+Corrected after a user screenshot: search field and counter/sorting lie in
+separate flexible rows; tree nodes show checkbox and expanding without
+double label; empty child lists create no expander.
+Result rows again contain symbol, rarity colour and metadata.
+Counters are formatted language-appropriately. The new real index browser run checks
+DE/EN/FR at 390/768/901/1280/1440 px, sorting field in the visible area,
+missing horizontal overflow, row components and mobile selection.
+Desktop and mobile screenshots were additionally checked visually.
 
-### Verbindliches Inhaltsraster, lokal umgesetzt
+### Binding content grid, implemented locally
 
-`filter-ui.css` definiert jetzt statt einzelner Marker-/Margin-Korrekturen:
+`filter-ui.css` now defines instead of individual marker/margin corrections:
 
-- 280/300-px-Filterspalte, 24-px-Spaltengasse und gemeinsame obere Kante von
-  Filtergruppen und Ergebnisliste. Trefferleiste/Chips/Fehler liegen auf der
-  Ergebnisspalte, Suche weiterhin auf voller Inhaltsbreite.
-- Filterzeile: 16 px Pfeil, 16 px Checkbox, flexibler Text, 7ch Trefferzahl,
-  jeweils 8 px Zwischenraum. SVG-Pfeile ersetzen Textzeichen/native Marker.
-  Gruppenüberschriften und flache Optionen verwenden dieselben Achsen.
-- 16 px Einzug je Unterebene, unveränderte rechte Zahlenkante; Gruppenüberschriften
-  und einzeilige Optionen sind in ihrer Zeile zentriert. Bei umgebrochenen
-  Labels bleiben Checkbox und Aufklapppfeil an der **ersten Textzeile**.
-  Desktop mindestens 32 px, Mobil mindestens 44 px Zeilenhöhe. Karten
-  innen/untereinander je 12 px.
-- Ergebniszeile: 32 px Symbolspalte, 12 px Textabstand, identische Kante für
-  Titel/Metadaten und durchgehende Trennlinien; Pagination im Ergebniscontainer.
+- 280/300 px filter column, 24 px column gutter and a common upper edge of
+  filter groups and result list. Result bar/chips/errors lie on the
+  result column, search still on the full content width.
+- Filter row: 16 px arrow, 16 px checkbox, flexible text, 7ch result number,
+  each 8 px spacing. SVG arrows replace text characters/native markers.
+  Group headings and flat options use the same axes.
+- 16 px indent per sub-level, unchanged right number edge; group headings
+  and single-line options are centred in their row. With wrapped
+  labels checkbox and expand arrow remain on the **first text line**.
+  Desktop at least 32 px, mobile at least 44 px row height. Maps
+  12 px inside and between each other.
+- Result row: 32 px symbol column, 12 px text spacing, identical edge for
+  title/metadata and continuous dividing lines; pagination in the result container.
 
-Der reale Browserlauf misst zusätzlich Checkbox-/Text-/Zahlenfluchten zwischen
-Kategorie und Seltenheit, Pfeil-/Checkboxmittellinien, künstlich mehrzeilige
-Labels, Ergebnistextachsen und gemeinsame Containerkanten (Toleranz 1 CSS-px).
-Dieses Raster gilt inzwischen für alle unten dokumentierten migrierten Seiten.
+The real browser run additionally measures checkbox/text/number alignments between
+category and rarity, arrow/checkbox centrelines, artificially multi-line
+labels, result text axes and common container edges (tolerance 1 CSS px).
+This grid meanwhile applies to all migrated pages documented below.
 
-## Reguläre PHP-Referenzen
+## Regular PHP references
 
-`tests/browser_filter_php.js` prüft Gegenstandssuche und Sets in DE/EN/FR,
-390/901/1440 px, Sets-Auswahl/Reload, Dialog und No-JS-Suche mit echten Daten.
-Der lokale Testlauf ist grün; außerdem 198 Python-Tests im aktuellen Stand.
-Die Sets behalten ihr serverseitiges Prädikat und die GET-Formulare. Der
-Serveradapter liest strukturierte Formularfelder plus `data-filter-total`,
-statt Zähler aus übersetzten Texten zu parsen. Auf migrierten Roots beendet
-sich der alte sets.js-Controller vor dem Binden von Listenern.
+`tests/browser_filter_php.js` checks item search and sets in DE/EN/FR,
+390/901/1440 px, set selection/reload, dialog and no-JS search with real data.
+The local test run is green; besides, 198 Python tests in the current state.
+The sets keep their server-side predicate and the GET forms. The
+server adapter reads structured form fields plus `data-filter-total`,
+instead of parsing counters from translated texts. On migrated roots
+the old sets.js controller ends before binding listeners.
 
-Aktueller lokaler PHP-Server auf Port 8927 verwendet einen isolierten
-Composer-Autoloader unter `~/.cache/llb-php/filter-vendor-r4d4wh8c` und Daten
-unter `~/.cache/llb-php/phpdata`; bestehende gemeinsame Vendor-Dateien blieben
-unverändert. Lokale Adressen: `/de/gegenstandssuche/` und `/de/set/`.
+The current local PHP server on port 8927 uses an isolated
+Composer autoloader under `~/.cache/llb-php/filter-vendor-r4d4wh8c` and data
+under `~/.cache/llb-php/phpdata`; existing shared vendor files remained
+unchanged. Local addresses: `/de/gegenstandssuche/` and `/de/set/`.
 
-Beim Vorbereiten der nächsten Welle wurde Factions::query korrigiert: Die
-Methode erhält nun die bereits geladenen Fraktionszeilen für die erlaubten
-Geografiewerte. Die Fraktionsseite ist inzwischen ebenfalls migriert (siehe unten).
+While preparing the next wave, Factions::query was corrected: the
+method now receives the already loaded faction rows for the permitted
+geography values. The faction page is meanwhile migrated as well (see below).
 
-## Lokaler Rollout: Serverkataloge und Handwerk
+## Local rollout: server catalogues and crafting
 
-Die obige Referenzphase ist inzwischen erweitert: `filter-server.js` liest
-die bestehenden GET-Formulare von Sets, Auftraggebern, Landmarken, Fraktionen
-und Instanzen. Geografie bleibt Region → Landschaft; verschachtelte Optionen
-können über `groupId` auf die fachlich getrennte Landschaftsgruppe verweisen.
-Damit bleiben die bisherigen UND/ODER-Prädikate im PHP erhalten. Sortierung,
-Zahlenbereiche, Nachweischeckbox und Pagination bleiben normale GET-Parameter.
-Auf migrierten Listen laufen weder sets.js noch auftraggeber.js als zweiter
-Filtercontroller. Auftraggeberdetails verwenden ihre bisherige Fortschrittslogik.
+The reference phase above is meanwhile extended: `filter-server.js` reads
+the existing GET forms of sets, quest givers, landmarks, factions
+and instances. Geography remains region → landscape; nested options
+can refer to the domain-separate landscape group via `groupId`.
+Thereby the previous AND/OR predicates remain in the PHP. Sorting,
+number ranges, proof checkbox and pagination remain normal GET parameters.
+On migrated lists neither sets.js nor auftraggeber.js runs as a second
+filter controller. Quest giver details use their previous progress logic.
 
-`handwerk-filter.js` verwaltet genau eine aktive Filterinstanz für Berufe,
-Rezepte und Rohstoffe. Reiter und URL bleiben beim Wechsel/Reload erhalten;
-Suchtexte sind pro Reiter getrennt. Beruf/Stufe/Umfang können übernommen
-werden. Der alte Rezeptcontroller liefert nur seinen Ergebnisrenderer;
-alte Filter-/Reiterlistener werden auf der migrierten Seite nicht registriert.
-Die Berufsübersicht ist ohne Import ein öffentlicher Katalog; mit belegten
-Berufsdaten kann der Umfang auf eigene Berufe eingeschränkt werden.
+`handwerk-filter.js` manages exactly one active filter instance for professions,
+recipes and resources. Tabs and URL remain on switch/reload;
+search texts are separate per tab. Profession/level/scope can be taken over.
+The old recipe controller delivers only its result renderer;
+old filter/tab listeners are not registered on the migrated page.
+The profession overview is a public catalogue without an import; with proven
+profession data the scope can be limited to own professions.
 
-Materialien stammen aus allen Pflicht-/optionalen Rezeptzutaten und werden
-nach Item-ID dedupliziert. Verwendungen behalten alle Berufs-/Stufenbezüge;
-Beruf und Stufe müssen von derselben Verwendung erfüllt sein. Herstellungslinks
-stammen aus Ergebnis-IDs der Rezepte. Explizite Sammelvorkommen sind eigene
-Resource-Datensätze mit echten Kartenreferenzen, NICHT per Namen mit Items
-verbunden. Unbekannte Itemherkunft bleibt unbekannt. Geografiefilter trifft
-direkte Sammelvorkommen, keine geratenen Verarbeitungsketten.
+Materials come from all mandatory/optional recipe ingredients and are
+deduplicated by item ID. Uses keep all profession/level references;
+profession and level must be met by the same use. Production links
+come from result IDs of the recipes. Explicit resource occurrences are own
+resource records with real map references, NOT linked to items by name.
+Unknown item origin remains unknown. Geography filter hits
+direct resource occurrences, no guessed processing chains.
 
-Positive Rezeptkenntnis aus alten Importen bleibt sichtbar und filterbar.
-Ein negativer Lernstandfilter ist nur bei explizitem complete-Rezeptnachweis
-verfügbar; dieser Umbau erzeugt selbst keinen solchen Nachweis. Importer und
-Sicherungsformat wurden dafür nicht stillschweigend umgestellt.
+Positive recipe knowledge from old imports remains visible and filterable.
+A negative crafting knowledge filter is available only with explicit complete recipe proof;
+this rebuild itself creates no such proof. Importer and
+backup format were not silently converted for that.
 
-Neue Abnahme: `tests/browser_filter_rollout.js` prüft 21 reale Sprach-/Seiten-
-bzw. Reiterkombinationen: alle fünf angefragten Bereiche in DE/EN/FR,
-Desktop/Mobil, Auswahl/Reset/Reload, Server-Back/Forward, Geografie-Kindauswahl,
-Serverformulare ohne JS sowie synthetischen Legacy-Rezeptstand ohne erfundene
-Negativzustände. Zusätzliche Referenztests und 60 Fixture-Viewportkombinationen
-bleiben bestehen. Aktuell 198 Python- und 13 Node-Testdateien grün.
+New acceptance: `tests/browser_filter_rollout.js` checks 21 real language/page
+or tab combinations: all five requested areas in DE/EN/FR,
+desktop/mobile, selection/reset/reload, server back/forward, geography child selection,
+server forms without JS as well as synthetic legacy recipe state without invented
+negative states. Additional reference tests and 60 fixture viewport combinations
+remain. Currently 198 Python and 13 Node test files green.
 
-Screenshots der echten Seiten liegen unter `~/.cache/llb-filter-browser-tests/`.
-Kein Upload, kein Push und kein physischer iOS-/Screenreader-Test erfolgt.
-Die vollständige ursprüngliche Handwerks-Datenpipeline/Importerweiterung ist
-ein eigener Ausbau, nicht durch die Filterintegration als erledigt behauptet.
+Screenshots of the real pages lie under `~/.cache/llb-filter-browser-tests/`.
+No upload, no push and no physical iOS/screen reader test takes place.
+The complete original crafting data pipeline/importer extension is
+a separate expansion, not claimed as done by the filter integration.
 
-## Nachprüfung: leere Gruppen und Fundgebiete
+## Re-check: empty groups and find areas
 
-Leere Optionsgruppen werden nach Facettenauswertung verborgen. Ausgewählte
-Nulltreffer bleiben sichtbar/entfernbar. Öffnungszustände werden unabhängig
-vom DOM gehalten, damit nach Rückkehr einer ausgeblendeten Gruppe nicht
-ungewollt alle zuvor offenen Gruppen geschlossen sind.
+Empty option groups are hidden after facet evaluation. Selected
+zero hits remain visible/removable. Opening states are held independently
+of the DOM so that after the return of a hidden group not
+all previously open groups are unintentionally closed.
 
-Fundgebiete im Materialreiter bilden Region → Landschaft → benannter Fundort.
-Page.php liefert dafür ausschließlich die bereits vorhandene sprachrichtige
-Spielkartenhierarchie (ID, Parent, Tier, Name) als sicheres JSON. Gruppierung
-erfolgt über die im Resourceindex belegte Karten-ID und Elternkette; fehlende
-Zuordnung wird ausdrücklich benannt statt geraten. Region/Landschaft/Fundort
-bleiben getrennte Filtergruppen mit gemeinsamem verschachteltem UI.
+Find areas in the material tab form region → landscape → named find spot.
+Page.php delivers for that exclusively the already existing language-correct
+game map hierarchy (ID, parent, tier, name) as safe JSON. Grouping
+happens via the map ID and parent chain proven in the resource index; a missing
+assignment is explicitly named instead of guessed. Region/landscape/find spot
+remain separate filter groups with a common nested UI.
 
-Rezeptkategorien sind im geprüften `CraftingUICategory.xml` ein flaches Enum
-mit code/name, ohne Parentfeld. Der vorhandene Rezeptexport trägt pro Rezept
-genau eine solche Kategorie und einen Beruf. Keine darüberliegende
-Kategorienhierarchie als Spieldaten ausgeben. Berufsfilter grenzt die angebotenen
-Kategorien bereits über Facetten ein.
+Recipe categories are in the checked `CraftingUICategory.xml` a flat enum
+with code/name, without parent field. The existing recipe export carries per recipe
+exactly one such category and one profession. Do not output an overarching
+category hierarchy as game data. The profession filter already narrows the offered
+categories via facets.
 
-`tests/browser_filter_refinements.js` prüft DE/EN/FR: verschwundene leere
-Rüstungsart bei Waffensets, erhaltene aktive Nullauswahl, verschachtelte
-Fundgebiete, Landschaftsauswahl, Reload und Mobilansicht.
+`tests/browser_filter_refinements.js` checks DE/EN/FR: vanished empty
+armour type for weapon sets, kept active zero selection, nested
+find areas, landscape selection, reload and mobile view.

@@ -689,7 +689,7 @@
     "rows": 13067,
     "resolved": 13067,
     "unresolved": {},
-    "target_note": "Union quests.xml/quest + deeds.xml/deed; gemeinsamer Achievable-ID-Raum"
+    "target_note": "Union quests.xml/quest + deeds.xml/deed; shared achievable ID space"
   },
   {
     "source": "deeds.xml",
@@ -701,7 +701,7 @@
     "rows": 62,
     "resolved": 62,
     "unresolved": {},
-    "target_note": "Union quests.xml/quest + deeds.xml/deed; gemeinsamer Achievable-ID-Raum"
+    "target_note": "Union quests.xml/quest + deeds.xml/deed; shared achievable ID space"
   },
   {
     "source": "quests.xml",

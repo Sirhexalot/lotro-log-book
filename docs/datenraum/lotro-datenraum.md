@@ -1,681 +1,678 @@
-# LOTRO-Spieldaten: Datenraum, Properties und Relationen
+# LOTRO game data: data space, properties and relations
 
-**Prüfauftrag:** 17.11.2026. **Status:** laufendes, quellengestütztes Audit.
+**Audit assignment:** 17.11.2026. **Status:** ongoing, source-based audit.
 
-### Ausgeführter Lauf
+### Executed run
 
-Der Struktur-Auditor ist erfolgreich durchgelaufen: 1.141 XML-Dateien,
-2.785 dateibezogene XML-Elementpfade und 84.761 DAT-Rohdatensätze aus fünf
-Quellen. Die separate Referenzprüfung prüfte 210.908 Verweisvorkommen über
-25 Regeln; 991 Vorkommen (613 verschiedene Auftraggeber-IDs) fehlen im
-geprüften `NPCs.xml`-Zielbestand. Sie sind **nicht automatisch ungültig**:
-weitere Objekttypen und die spezialisierten NPC-/Platzierungsexporte müssen
-als mögliche Zielbestände geprüft werden.
+The structure auditor ran through successfully: 1,141 XML files,
+2,785 file-related XML element paths and 84,761 DAT raw records from five
+sources. The separate reference check examined 210,908 reference occurrences across
+25 rules; 991 occurrences (613 different quest giver IDs) are missing in the
+checked `NPCs.xml` target set. They are **not automatically invalid**:
+further object types and the specialised NPC/placement exports must be
+checked as possible target sets.
 
-Ein zunächst nur gegen Aufgaben beziehungsweise nur gegen Taten geprüfter
-Voraussetzungsverweis erzeugte scheinbare Lücken. Die erneute Prüfung gegen
-den gemeinsamen Aufgaben-/Taten-ID-Raum löst alle 13.129 geprüften
-Voraussetzungsverweise auf. Das belegt die Zielauflösung, nicht die vollständige
-Semantik jeder Voraussetzung.
+A prerequisite reference first checked only against quests or only against deeds
+produced apparent gaps. The renewed check against
+the shared quest/deed ID space resolves all 13,129 checked
+prerequisite references. That proves the target resolution, not the complete
+semantics of every prerequisite.
 
-Diese Dokumentation unterscheidet ausdrücklich zwischen vollständig erfassten
-Feldvorkommen eines konkreten Datenbestands und vollständig entschlüsselter
-Spielsemantik. Letztere ist mit den vorhandenen Exporten nicht für sämtliche
-DAT-Klassen nachgewiesen. Dieses Dokument behauptet daher keine vollständige
-Entschlüsselung des gesamten Spiels.
+This documentation distinguishes explicitly between fully captured
+field occurrences of a concrete data set and fully decrypted
+game semantics. The latter is not proven for all
+DAT classes with the existing exports. This document therefore claims no complete
+decryption of the entire game.
 
-## Lesen und Umfang
+## Reading and scope
 
-- [Alle Companion-XML-Properties je Entität und Unterstruktur](lotro-datenraum-xml-properties.md)
-- [Alle beobachteten DAT-Propertypfade je Klasse und Export](lotro-datenraum-dat-properties.md)
-- [Referenzprüfungen und auflösbare Ziele](lotro-datenraum-relationen.md)
-- [Vertiefung: 61 weitere Referenzprüfungen und Auftraggeber](lotro-datenraum-vertiefung.md)
-- [Vertiefungsbelege mit offenen IDs und Quellhashes](lotro-datenraum-vertiefung.json)
-- [Verdichtete Exporte: sämtliche Feldpfade und Vergleiche](lotro-datenraum-exportvergleich.md)
-- [Feldabweichungen und offene Exportreferenzen, maschinenlesbar](lotro-datenraum-exportvergleich.json)
-- [Charakterreferenzen, Decoder-Klassen und offene Kartenlinks](lotro-datenraum-charakterreferenz.md)
-- [Einzelbelege zu Charakterreferenzen und Kartenlinks](lotro-datenraum-charakterreferenz.json)
-- [Semantischer Datenvertrag: Bedeutung, Einheiten, Logik und Verluste](lotro-datenraum-semantik.md)
-- [Tausch, Behälter, Zerlegung und schlanker Gegenstandsbestand: Modell für drei offene Bezüge](tausch-behaelter-zerlegung.md)
-- [Konkrete Property-Lesezugriffe in 27 Extractor-Dateien](lotro-datenraum-semantik-leseindex.md)
-- [Semantikbelege: Quellhashes und vollständige Befundlisten](lotro-datenraum-semantik-pruefung.json)
-- [Nicht aufgelöste Referenzen, maschinenlesbar](lotro-datenraum-relationen.json)
-- [Tatsächlich gelesene Quellen mit SHA-256](lotro-datenraum-quellen.md)
-- [Laufumfang und Zähler](lotro-datenraum-lauf.json)
-- [Reproduzierbarer lesender Auditor](lotro_datenraum_audit.py)
+- [All Companion XML properties per entity and substructure](lotro-datenraum-xml-properties.md)
+- [All observed DAT property paths per class and export](lotro-datenraum-dat-properties.md)
+- [Reference checks and resolvable targets](lotro-datenraum-relationen.md)
+- [Deepening: 61 further reference checks and quest givers](lotro-datenraum-vertiefung.md)
+- [Deepening evidence with open IDs and source hashes](lotro-datenraum-vertiefung.json)
+- [Compacted exports: all field paths and comparisons](lotro-datenraum-exportvergleich.md)
+- [Field deviations and open export references, machine-readable](lotro-datenraum-exportvergleich.json)
+- [Character references, decoder classes and open map links](lotro-datenraum-charakterreferenz.md)
+- [Individual evidence on character references and map links](lotro-datenraum-charakterreferenz.json)
+- [Semantic data contract: meaning, units, logic and losses](lotro-datenraum-semantik.md)
+- [Barter, containers, disenchanting and a slim item set: model for three open references](tausch-behaelter-zerlegung.md)
+- [Concrete property reads in 27 extractor files](lotro-datenraum-semantik-leseindex.md)
+- [Semantics evidence: source hashes and complete finding lists](lotro-datenraum-semantik-pruefung.json)
+- [Unresolved references, machine-readable](lotro-datenraum-relationen.json)
+- [Actually read sources with SHA-256](lotro-datenraum-quellen.md)
+- [Run scope and counters](lotro-datenraum-lauf.json)
+- [Reproducible read-only auditor](lotro_datenraum_audit.py)
 
-Die Anhänge gehören zur Dokumentation. Tabellen mit allen Attributen stehen
-nicht nur für ausgewählte Muster, sondern für jeden tatsächlich beobachteten
-Elementpfad im eingelesenen Stand zur Verfügung. Verschachtelte Strukturen
-werden nicht als eigenständige Spielobjekte ausgegeben, nur weil sie XML-Tags
-haben. Sprachlabels und Enums sind eigene Referenzbestände.
+The appendices belong to the documentation. Tables with all attributes are
+available not only for selected samples but for every actually observed
+element path in the read state. Nested structures
+are not output as separate game objects just because they have XML tags.
+Language labels and enums are separate reference sets.
 
-## 1. Validierungsregeln
+## 1. Validation rules
 
-1. **Strukturbeleg:** Feldname, Container, Typ und Vorkommen im vollständigen
-   eingelesenen Bestand. Keine Bedeutungsableitung allein aus einem Feldnamen.
-2. **Bedeutungsbeleg:** explizite Auswertung im Exporter/Decoder, verknüpft mit
-   Quelldaten. Ein Website-Fallback ist keine zusätzliche Spielregel.
-3. **Referenzbeleg:** benanntes Quellfeld, expliziter Zieltyp und exakter
-   ID-Abgleich. Identischer Anzeigename reicht nicht.
-4. **Grenzen:** Ein nicht vorhandener Wert bedeutet weder 0 noch false.
-   Fehlende Ziel-ID bedeutet zunächst nur „in diesem Zielbestand nicht gefunden“.
-5. **Kardinalität:** Beobachtete Mehrfachvorkommen sind keine Garantie für
-   allgemeine Mindest-/Höchstkardinalität.
-6. **Aktualität:** Ein gelesener Client-/Lore-Stand beweist nicht die heutige
-   Serververfügbarkeit oder die Freischaltung eines Charakters.
-7. **Rechte:** Quellenzugang und Bibliothekserlaubnis sind keine pauschale
-   Weitergabeerlaubnis für Spieltexte, Bilder oder fremden Code.
+1. **Structure proof:** field name, container, type and occurrence in the complete
+   read set. No meaning derived from a field name alone.
+2. **Meaning proof:** explicit evaluation in the exporter/decoder, linked with
+   source data. A website fallback is not an additional game rule.
+3. **Reference proof:** named source field, explicit target type and exact
+   ID match. An identical display name is not enough.
+4. **Limits:** A value that is not present means neither 0 nor false.
+   A missing target ID initially means only "not found in this target set".
+5. **Cardinality:** Observed multiple occurrences are no guarantee of
+   general minimum/maximum cardinality.
+6. **Currency:** A read client/lore state does not prove today's
+   server availability or a character's unlock.
+7. **Rights:** Source access and library permission are no blanket
+   permission to pass on game texts, images or third-party code.
 
-Ungeklärte DAT-Felder bleiben mit ihrem unveränderten technischen Namen im
-Strukturinventar sichtbar. Ihre Bedeutung wird nicht als gültige Fachinformation
-ausgegeben. Damit verschwinden unbekannte Properties nicht still aus „alle Properties“.
+Unexplained DAT fields stay visible in the structure inventory with their unchanged
+technical name. Their meaning is not output as valid domain information.
+That way unknown properties do not silently disappear from "all properties".
 
-## 2. Quellen und ihre Grenzen
+## 2. Sources and their limits
 
-### DAT-Rohdaten
+### DAT raw data
 
-Wurzel: `~/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/`.
-Der als `full-dat-en-de-fr-2026-11-03` benannte Ordner umfasst ausgewählte
-Aufgaben-/Taten-/Geografie-/Kontrollklassen, nicht alle Klassen des Spiels.
+Root: `~/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/`.
+The folder named `full-dat-en-de-fr-2026-11-03` comprises selected
+quest/deed/geography/control classes, not all classes of the game.
 
-**Wichtige Herkunftskorrektur:** `NOTE-2026-11-03.md` bestätigt, dass nur
-`quests.json` und `deeds.json` am 03.11. erneut gelesen wurden. Positionen,
-Gebiete und weitere Dateien wurden vom Stand 01.11. übernommen. Das
-Ordnerdatum ist deshalb kein einheitlicher Exportzeitpunkt. Das vorhandene
-Manifest trägt weiterhin einen Erstellungszeitpunkt vom 01.11. Der Roh-Anhang
-kennzeichnet seine tatsächliche Quelldatei; `raw.jsonl` darf nicht automatisch
-als neuester Textstand bezeichnet werden.
+**Important origin correction:** `NOTE-2026-11-03.md` confirms that only
+`quests.json` and `deeds.json` were read again on 03.11. Positions,
+areas and further files were taken over from the state of 01.11. The
+folder date is therefore not a uniform export time. The existing
+manifest still carries a creation time of 01.11. The raw appendix
+marks its actual source file; `raw.jsonl` must not automatically be called
+the newest text state.
 
-Zusätzliche Bestände: NPCs, platzierte Entitäten, DID-Positionen, Ruf/Handwerk,
-Belohnungen, Rezepte, Gegenstände, Sets und spezialisierte Instanzenexporte.
-Fehlende Rohdaten einer Klasse werden nicht durch einen kompakten Website-Export
-als angeblich vollständige Rohdefinition ersetzt.
+Additional sets: NPCs, placed entities, DID positions, reputation/crafting,
+rewards, recipes, items, sets and specialised instance exports.
+Missing raw data of a class is not replaced by a compact website export
+as an allegedly complete raw definition.
 
 ### Companion
 
-Aktive Lore:
+Active lore:
 `~/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore/`.
-Die frühere Compendium-Tools-Kopie unter `Companion-Test` ist ein zusätzlicher
-historischer Vergleichsstand, nicht automatisch der vollständige aktuelle Bestand.
-Insbesondere liegt `items.xml` in der aktiven Lore.
+The earlier Compendium tools copy under `Companion-Test` is an additional
+historical comparison state, not automatically the complete current set.
+In particular `items.xml` lies in the active lore.
 
-Die XML-Attribute sind gespeicherte Companion-Felder. Sie sind nicht eins zu
-eins identisch mit DAT-Propertynamen. Eine XML-Auswertung belegt keine
-unabhängige zweite Datenherkunft, wenn sie denselben DAT-Decoder verwendet.
+The XML attributes are stored Companion fields. They are not one to
+one identical with DAT property names. An XML evaluation proves no
+independent second data origin if it uses the same DAT decoder.
 
-### Website und Plugin
+### Website and plugin
 
-Generatoren und Viewmodels dokumentieren Transformationen, Filter und Verluste.
-Sie sind kein vollständiger Ersatz für Rohdaten. Plugin und Website bleiben
-getrennt; Charakterfortschritt wird nicht eingelesen oder veröffentlicht.
+Generators and view models document transformations, filters and losses.
+They are no complete substitute for raw data. Plugin and website remain
+separate; character progress is not read or published.
 
-Insbesondere `Data/Progress.lua`, PluginData, Konten und Charakterexporte sind
-kein Bestandteil dieses Audits.
+In particular `Data/Progress.lua`, PluginData, accounts and character exports are
+not part of this audit.
 
-### LOTROInterface: Compendium und Item Scanner
+### LOTROInterface: Compendium and Item Scanner
 
 - Compendium: <https://www.lotrointerface.com/downloads/info526-LOTROCompendium.html>
 - Item Scanner: <https://www.lotrointerface.com/downloads/info699.html>
-- Scanner-Archiv: <https://www.lotrointerface.com/downloads/download.php?id=699>
+- Scanner archive: <https://www.lotrointerface.com/downloads/download.php?id=699>
 
-Geprüft wurde der Scanner-Quellcode von **Version 1.2**, insbesondere
-`Compendium/Extensions/ItemBrowseControl.lua`, Funktionen
+The scanner source code of **version 1.2** was checked, in particular
+`Compendium/Extensions/ItemBrowseControl.lua`, functions
 `BuildDiscoveryDatabase`, `ImportScanData`, `persist`, `LoadItems`.
-Kein Plugin wurde installiert oder im Spiel ausgeführt.
+No plugin was installed or run in the game.
 
-## 3. Identitäten und ID-Räume
+## 3. Identities and ID spaces
 
-- DAT-Quellobjekte: achtstellige Hex-ID in den Exporten; referenzierende
-  Properties können dieselbe Zahl dezimal enthalten.
-- Companion: viele Objekt-IDs dezimal. Eine Umrechnung muss den 32-Bit-Wert
-  erhalten; Sprache ist kein Teil der Spielidentität.
-- Karten-ID, Kartenbild-ID, Weltregion-Code, geografische Gebiets-ID,
-  Marker-ID und platzierte Objekt-DID sind getrennte Identitäten.
-- Berufs-/Enum-Schlüssel sind nicht pauschal DAT-Objekt-IDs.
-- Lokalisierung: Objekt-ID plus Propertypfad beziehungsweise Labelschlüssel
-  und Sprache. Gleiche Anzahl Sprachschlüssel beweist keine vollständige Übersetzung.
-- Ein Objekt kann mehrere Platzierungen und mehrere Rollen haben.
-  Auftraggeber, Händler und Tauscher sind Rollen, nicht zwingend
-  unterschiedliche NPC-Identitäten.
+- DAT source objects: eight-digit hex ID in the exports; referencing
+  properties can contain the same number in decimal.
+- Companion: many object IDs in decimal. A conversion must preserve the 32-bit
+  value; language is not part of the game identity.
+- Map ID, map image ID, world region code, geographical area ID,
+  marker ID and placed object DID are separate identities.
+- Profession/enum keys are not blanket DAT object IDs.
+- Localisation: object ID plus property path or label key
+  and language. An equal number of language keys proves no complete translation.
+- An object can have several placements and several roles.
+  Quest giver, vendor and barter vendor are roles, not necessarily
+  different NPC identities.
 
-## 4. Fachliche Entitäten und belegte Relationen
+## 4. Domain entities and proven relations
 
-Für **alle** Properties der hier genannten Bestände gelten die vollständigen
-Pfadtabellen im XML-/DAT-Anhang. Dieser Abschnitt erklärt ausschließlich die
-quellengestützten Zusammenhänge und Transformationsgrenzen.
+For **all** properties of the sets named here, the complete
+path tables in the XML/DAT appendix apply. This section explains exclusively the
+source-based connections and transformation limits.
 
-### Aufgabe und Tat
+### Quest and deed
 
-DAT-Klasse 1398 enthält beide. `Quest_IsAccomplishment` wird zur Trennung
-ausgewertet; nicht aus dem Namen ableiten. Name, Beschreibung, Zielstruktur,
-Voraussetzungen, Belohnungen und Flags sind getrennte Felder.
+DAT class 1398 contains both. `Quest_IsAccomplishment` is evaluated for the separation;
+do not derive it from the name. Name, description, objective structure,
+prerequisites, rewards and flags are separate fields.
 
-Belegte Verweiswege:
+Proven reference paths:
 
-- `Quest_QuestTreasureDID` → Belohnungstabelle.
-- `Quest_NextQuest` → weitere Aufgabe; nicht ungeprüft als lineare Kette verstehen.
-- `Quest_PrecludedQuest` → ausschließender Aufgabenverweis.
-- `Quest_BestowalRoles` → Bestowal-Rollenstruktur, nicht bloß ein Gebername.
-- `Quest_ObjectiveArray` → Ziele und Bedingungen mit eigenen Indizes.
-- `Quest_PositiveFaction` / `Quest_NegativeFaction` → Fraktionsbezug.
-- `QuestArc_Quest_Array` → Mitglieder einer Aufgabenreihe (Klasse 2119).
+- `Quest_QuestTreasureDID` → reward table.
+- `Quest_NextQuest` → further quest; do not understand as a linear chain unchecked.
+- `Quest_PrecludedQuest` → excluding quest reference.
+- `Quest_BestowalRoles` → bestowal role structure, not merely a giver name.
+- `Quest_ObjectiveArray` → objectives and conditions with their own indices.
+- `Quest_PositiveFaction` / `Quest_NegativeFaction` → faction reference.
+- `QuestArc_Quest_Array` → members of a quest series (class 2119).
 
-Voraussetzungen müssen mit ihrer Logik (UND/ODER, Status, Negation) erhalten
-bleiben. Eine flache ID-Liste ersetzt keine Bedingungsstruktur.
-`Quest_IsHidden`, fehlende LOTRO-Punkte oder ein fehlender Journaleintrag
-beweisen keine generelle Unspielbarkeit.
+Prerequisites must be preserved with their logic (AND/OR, status, negation).
+A flat ID list does not replace a condition structure.
+`Quest_IsHidden`, missing LOTRO points or a missing journal entry
+prove no general unplayability.
 
-Companion speichert unter `quests.xml`/`deeds.xml` unter anderem Voraussetzungen,
-Zielbedingungen, Belohnungen und Kartenbezüge. Die vollständigen
-Unterelemente stehen pfadgenau im Anhang. Die Website verwendet zusätzlich
-verkürzte Schlüssel (`i`, `v`, `vo`, `vl`, `vb`, `rw`, `fk` usw.); diese
-sind Ausgabeformat, keine originalen DAT-Properties.
+Companion stores under `quests.xml`/`deeds.xml` among other things prerequisites,
+objective conditions, rewards and map references. The complete
+sub-elements are in the appendix, path by path. The website additionally uses
+shortened keys (`i`, `v`, `vo`, `vl`, `vb`, `rw`, `fk` etc.); these
+are output format, not original DAT properties.
 
-### Ziel, Bedingung und Zielposition
+### Objective, condition and objective position
 
-Ziele und Bedingungen sind eingebettete Strukturen mit eigener Reihenfolge.
-Ziel-/Bedingungsindex gehören zur Identität eines Fortschrittszählers.
-Referenztypen unterscheiden unter anderem NPC, Objekt, Item, Landmarke,
-Fertigkeit, Fraktion und andere Aufgaben/Taten.
+Objectives and conditions are embedded structures with their own order.
+Objective/condition index belong to the identity of a progress counter.
+Reference types distinguish among others NPC, object, item, landmark,
+skill, faction and other quests/deeds.
 
-`locations.json` enthält Zuordnung zur Aufgabe/Tat, Ziel-ID,
-Ziel-/Bedingungsindizes und räumlichen Kontext. Positionen bestehen nicht nur
-aus Länge/Breite: Region, Instanz/Layer, Zelle/Block und lokale XYZ dürfen
-nicht durch einen bloßen Koordinatenvergleich verloren gehen.
-Endliche Koordinaten sind kein Nachweis einer korrekten Karte.
+`locations.json` contains assignment to the quest/deed, objective ID,
+objective/condition indices and spatial context. Positions do not consist only
+of longitude/latitude: region, instance/layer, cell/block and local XYZ must
+not be lost through a mere coordinate comparison.
+Finite coordinates are no proof of a correct map.
 
-### Belohnungstabelle
+### Reward table
 
-`export_rewards.py`, Funktion `export`, belegt:
+`export_rewards.py`, function `export`, proves:
 
-- `QuestTreasure_FixedItemArray` und `SelectableItemArray` →
-  Gegenstände mit `QuestTreasure_Item` und `ItemQuantity`.
-- `FixedTitleArray` / `SelectableTitleArray` → Titel.
-- `FixedTraitArray` → Traits.
-- `FixedEmoteArray` / `SelectableEmoteArray` → Emotes.
-- `FixedVirtueArray` → Tugendreferenz und originales Increment-Feld.
+- `QuestTreasure_FixedItemArray` and `SelectableItemArray` →
+  items with `QuestTreasure_Item` and `ItemQuantity`.
+- `FixedTitleArray` / `SelectableTitleArray` → titles.
+- `FixedTraitArray` → traits.
+- `FixedEmoteArray` / `SelectableEmoteArray` → emotes.
+- `FixedVirtueArray` → virtue reference and original increment field.
 
-**Verlust im kompakten Export:** feste und wählbare Titel werden in `titles`
-zusammengeführt; auch bei Emotes geht diese Trennung verloren. Der kompakte
-Belohnungsexport ist damit für eine vollständige Relationstypisierung nicht
-ausreichend. Die IDs sind im spezialisierten Export vorhanden, auch wenn
-spätere Web-/Plugin-Belohnungszeilen sie teilweise nicht weiterreichen.
+**Loss in the compact export:** fixed and selectable titles are merged
+in `titles`; this separation is lost for emotes as well. The compact
+reward export is therefore not sufficient for a complete relation typing. The IDs are present in the specialised export, even if
+later web/plugin reward rows partly do not pass them on.
 
-Eine ungeprüfte Tugend-Increment-/XP-Tierzahl wird nicht in Tugend-EP umgedeutet.
-Billing-Tokens bleiben Content-/Abrechnungsreferenzen, keine gleichartige
-Gegenstandsbelohnung.
+An unchecked virtue increment/XP tier number is not reinterpreted as virtue XP.
+Billing tokens remain content/billing references, not an equivalent
+item reward.
 
-### Gegenstand
+### Item
 
-Vollständige gespeicherte Companion-Struktur: `items.xml`; zusätzlich
-Enums, `stats.xml`, `progressions.xml`, `sets.xml`, Container-, Beute- und
-Rezeptbestände.
+Complete stored Companion structure: `items.xml`; additionally
+enums, `stats.xml`, `progressions.xml`, `sets.xml`, container, loot and
+recipe sets.
 
-`export_items.py` verwendet:
+`export_items.py` uses:
 
 - DAT: `Name`, `Description`, `Item_Level`, `Usage_MinLevel`, `Usage_MaxLevel`,
   `ItemMunging_MinMungeLevel`, `ItemMunging_MaxMungeLevel`, `Item_Quality`,
-  Icon-Layer, `Mod_Array`, `Item_Armor_Value`, `Combat_WeaponSpeed`,
+  icon layers, `Mod_Array`, `Item_Armor_Value`, `Combat_WeaponSpeed`,
   `Inventory_BindOnAcquire`, `Inventory_BindOnEquip`, `Inventory_Unique`.
-- Companion-Metadaten: Kategorie, Slot, Rüstungs-/Waffen-/Schadensart,
-  Klassen-/Berufsvoraussetzung, Stufe, Skalierung, DPS und Schaden.
+- Companion metadata: category, slot, armour/weapon/damage type,
+  class/profession prerequisite, level, scaling, DPS and damage.
 
-**Wichtige Abgrenzung:** Der Export wählt seine IDs tatsächlich über
-`sorted(items_meta)` aus `items.xml` und prüft ihre Existenz im DAT-Inventar.
-Sein Titel „every item“ beweist keine Vollständigkeit aller Item-DAT-Klassen.
-Das ist gerade der Bereich, in dem Scanner-IDs zusätzliche Lücken zeigen können.
+**Important boundary:** The export actually selects its IDs via
+`sorted(items_meta)` from `items.xml` and checks their existence in the DAT
+inventory. Its title "every item" proves no completeness of all item DAT classes.
+That is precisely the area where scanner IDs can show additional gaps.
 
-Weitere Transformationsverluste:
+Further transformation losses:
 
-- Bindung wird auf 0/1/2 reduziert; vollständige Accountbindung folgt daraus nicht.
-- `sets_by_item[item] = set_id` hält nur den zuletzt zugewiesenen Setwert;
-  eine mögliche Mehrfachzugehörigkeit geht verloren.
-- Nicht vorhandene numerische Werte werden teilweise 0. Diese 0 ist dann
-  ein Exportfallback, kein gesicherter originaler Spielwert.
-- Mindeststufe kann aus anderen Feldern ergänzt werden; ursprüngliche
-  `Usage_MinLevel` und abgeleitetes `ml` müssen getrennt dokumentiert bleiben.
-- Stats werden über Progressionskurven und Rundung abgeleitet. Nicht jede
-  Itemklasse/Skalierung wird dadurch vollständig erklärt.
-- `ITEM` ist eine breite Kategorie. Client-`class`/`equipmentCategory`
-  bleiben eigenständige Achsen; nicht automatisch „Sonstiges“ nennen.
+- Binding is reduced to 0/1/2; full account binding does not follow from it.
+- `sets_by_item[item] = set_id` holds only the last assigned set value;
+  a possible multiple membership is lost.
+- Non-present numeric values become 0 in places. That 0 is then
+  an export fallback, not a secured original game value.
+- Minimum level can be supplemented from other fields; original
+  `Usage_MinLevel` and derived `ml` must stay documented separately.
+- Stats are derived via progression curves and rounding. Not every
+  item class/scaling is thereby fully explained.
+- `ITEM` is a broad category. Client `class`/`equipmentCategory`
+  remain separate axes; do not automatically call it "other".
 
-### Item Scanner: genaues gespeichertes Modell
+### Item Scanner: exact stored model
 
-Ein Scanner-Datensatz kann `id`, `name`, `cat`, `qual`, `level` enthalten.
-`id` wird numerisch gespeichert und zur Shortcut-Anzeige in Hex umgerechnet.
-Automatisch gelesen werden optional `GetName()`, `GetCategory()`, `GetQuality()`
-über `GetShortcut():GetItem():GetItemInfo()`.
+A scanner record can contain `id`, `name`, `cat`, `qual`, `level`.
+`id` is stored numerically and converted to hex for the shortcut display.
+Automatically read are optionally `GetName()`, `GetCategory()`, `GetQuality()`
+via `GetShortcut():GetItem():GetItemInfo()`.
 
-`level` wird in `LoadItems` manuell aus einem Textfeld übernommen.
-Auch Name, Kategorie und Qualität sind bearbeitbar. Eine gespeicherte Datei
-kennzeichnet deren automatische/manuelle Herkunft nicht je Feld.
-Sie darf deshalb nicht pauschal als unveränderte Clientauskunft gelten.
+`level` is taken over manually from a text field in `LoadItems`.
+Name, category and quality are editable as well. A stored file
+does not mark their automatic/manual origin per field.
+It must therefore not be taken as an unchanged client statement across the board.
 
-Scankonfiguration: `min`, `max`, `itemid`, `discovereddb`, `loaddetails`,
-`skipknownitems`. Accountweite Speicherung unter `CompendiumItemScanner`.
-Das ist Scannerzustand, kein Item-Propertysatz.
+Scan configuration: `min`, `max`, `itemid`, `discovereddb`, `loaddetails`,
+`skipknownitems`. Account-wide storage under `CompendiumItemScanner`.
+That is scanner state, not an item property set.
 
-Der Scan versucht Shortcuttypen `Hobby`, `Skill`, `Item` und nimmt einen
-erfolgreich erkannten Item-Shortcut auf. Es ist weder ein Inventarscan des
-Charakters noch ein Verfügbarkeits-/Besitznachweis. Der feste historische
-Standard-ID-Bereich garantiert keine heutige Gesamtdeckung.
+The scan tries shortcut types `Hobby`, `Skill`, `Item` and records a
+successfully recognised item shortcut. It is neither an inventory scan of the
+character nor an availability/ownership proof. The fixed historical
+default ID range guarantees no complete coverage today.
 
-Keine Ausrüstungseigenschaften, Rezept-, Händler-, Beute-, Quest- oder
-Setrelationen werden dadurch vollständig exportiert. Die Websitebeschreibung
-enthält ältere Abschnitte und neuere 1.2-Änderungen; der geprüfte Code belegt
-die automatische Name/Kategorie/Qualität-Funktion.
+No equipment properties, recipe, vendor, loot, quest or
+set relations are thereby fully exported. The website description
+contains older sections and newer 1.2 changes; the checked code proves
+the automatic name/category/quality function.
 
-### Rezept, Beruf, Stufe und Zutat
+### Recipe, profession, tier and ingredient
 
-DAT-Klasse 1024; `export_recipes.py` belegt:
+DAT class 1024; `export_recipes.py` proves:
 
-- `CraftRecipe_ResultItem` und `ResultItemQuantity` → reguläres Ergebnis.
-- `CraftRecipe_CriticalResultItem` und Menge → kritisches Ergebnis.
-- `CraftRecipe_Profession` → Beruf.
-- `CraftRecipe_Tier` → Stufencode, `CraftRecipe_UICategory` → Kategorie.
-- `IngredientList` / `OptionalIngredientList` → Zutaten mit Mengen;
-  optionale Zutaten zusätzlich `IngredientCritBonus`.
-- `CriticalSuccessChance`, `ExecutionTime` bleiben eigene Messwerte.
+- `CraftRecipe_ResultItem` and `ResultItemQuantity` → regular result.
+- `CraftRecipe_CriticalResultItem` and quantity → critical result.
+- `CraftRecipe_Profession` → profession.
+- `CraftRecipe_Tier` → tier code, `CraftRecipe_UICategory` → category.
+- `IngredientList` / `OptionalIngredientList` → ingredients with quantities;
+  optional ingredients additionally `IngredientCritBonus`.
+- `CriticalSuccessChance`, `ExecutionTime` remain separate measurements.
 
-Ein Rezept ist nicht derselbe Datensatz wie ein erlernbarer Rezeptgegenstand.
-`scrollItem`/Rezept-ID und hergestellter Itemtyp dürfen nicht zusammenfallen.
-Der kompakte Export verwirft Rezepte ohne aufgelöstes Ergebnis oder ohne
-aufgelöste Zutaten. Mengen-Default 1 ist an mehreren Stellen Generatorlogik.
+A recipe is not the same record as a learnable recipe item.
+`scrollItem`/recipe ID and produced item type must not coincide.
+The compact export discards recipes without a resolved result or without
+resolved ingredients. Quantity default 1 is generator logic in several places.
 
-`crafting.xml` enthält Beruf, Berufsstufe, Beherrschung/Fertigkeit und
-historische Berufsverbünde. Dass Verbünde gespeichert sind, beweist nicht ihre
-unveränderte aktuelle Spielmechanik.
+`crafting.xml` contains profession, profession tier, mastery/skill and
+historical profession guilds. That guilds are stored does not prove their
+unchanged current game mechanics.
 
-### NPC, Kreatur, Auftraggeber, Händler und Tauscher
+### NPC, creature, quest giver, vendor and barter vendor
 
-Bestände: `NPCs.xml`, `mobs.xml`, `vendors.xml`, `barters.xml`,
-platzierte DAT-Entitäten und DID-Positionen.
+Sets: `NPCs.xml`, `mobs.xml`, `vendors.xml`, `barters.xml`,
+placed DAT entities and DID positions.
 
-NPC-ID und Platzierungs-ID sind verschieden. Ein NPC kann viele Standorte
-haben. Ein Händler verweist auf Verkaufslisten; Tauscher führen Profile und
-Tauscheinträge mit Abgabe/Erhalt/Menge sowie gegebenenfalls Voraussetzungen.
-Beute und Rufbezüge von Kreaturen sind eigene Relationen, keine Positionen.
+NPC ID and placement ID are different. An NPC can have many locations.
+A vendor references sale lists; barter vendors carry profiles and
+barter entries with cost/receipt/quantity as well as possible prerequisites.
+Loot and reputation references of creatures are separate relations, not positions.
 
-Auftraggebernamen ohne eindeutige ID erzeugen keine sichere NPC-Verknüpfung.
-Die Gruppierung identischer Namen ist keine Identitätszusammenführung.
-Jagdhinweise aus Kreaturenplatzierungen sind keine exakten Tat-Zielpositionen.
+Quest giver names without a unique ID create no certain NPC link.
+The grouping of identical names is no identity merge.
+Hunting hints from creature placements are no exact deed objective positions.
 
-### Karte, Kartenbild und Kartenlink
+### Map, map image and map link
 
-**Karte ist eine eigenständige Entität.** Sie ist nicht gleichbedeutend mit
-geografischem Gebiet oder Website-Navigationsknoten.
+**A map is a separate entity.** It is not the same as a
+geographical area or a website navigation node.
 
-- `parchmentMaps.xml`: Karten-ID, Name, Region-Code, Elternkarte,
-  Questguide-Information und zugeordnete Gebietsreferenzen.
-- `maps/maps/maps.xml`: Karten-ID, `imageId`, geografischer Faktor,
-  Min-/Max-Grenzen und weitere im Anhang erfasste Unterstrukturen.
-- `maps/links.xml`: Quell-ID, Ziel-ID, Linkposition und
-  tatsächlich vorhandene zusätzliche Attribute.
+- `parchmentMaps.xml`: map ID, name, region code, parent map,
+  quest guide information and assigned area references.
+- `maps/maps/maps.xml`: map ID, `imageId`, geographical factor,
+  min/max limits and further substructures captured in the appendix.
+- `maps/links.xml`: source ID, target ID, link position and
+  actually present additional attributes.
 
-**Nachprüfung des vollständigen Linkbestands:** 2.557 Links. Die 2.557
-`parentId`-Vorkommen verteilen sich auf 1.152 in `maps.xml` auflösbare
-Kartenreferenzen und 1.405 Referenzen auf 266 geografische Gebiete.
-Alle Quell-IDs lösen sich in dieser Union auf. Von 2.557 Zielreferenzen
-fehlen zwei im geprüften Kartenbestand: `268448107` und `268449764`.
-Sie sind damit ungeklärt, nicht pauschal ungültig. Die `parentId` eines
-beliebigen Links ist insbesondere kein Beweis für eine Karten-Elternrelation.
-- `maps/labels/<Sprache>/basemaps.xml`: sprachabhängiger Kartenname.
-- Marker besitzen eigene IDs und Kategorie/DID/Positionsbezüge.
+**Re-check of the complete link set:** 2,557 links. The 2,557
+`parentId` occurrences distribute over 1,152 map references resolvable in `maps.xml`
+and 1,405 references to 266 geographical areas.
+All source IDs resolve in this union. Of 2,557 target references
+two are missing in the checked map set: `268448107` and `268449764`.
+They are therefore unexplained, not invalid across the board. The `parentId` of any
+link is in particular no proof of a map parent relation.
+- `maps/labels/<Sprache>/basemaps.xml`: language-dependent map name.
+- Markers have their own IDs and category/DID/position references.
 
-Zwei Karten können dasselbe Bild verwenden und unterschiedliche Rahmen haben.
-Ein Navigationslink ist nicht automatisch eine geografische Enthaltenseinrelation.
-Region-Codes sind keine Karten-IDs.
+Two maps can use the same image and have different frames.
+A navigation link is not automatically a geographical containment relation.
+Region codes are not map IDs.
 
-### Kartenname, Kartenzuordnung und Website-Navigation
+### Map name, map assignment and website navigation
 
-Ein Kartenname ist Anzeigetext, keine Identität. `kartenname()` leitet ihn in
-fester Reihenfolge ab: Sprachlabel der Karte, gemeinsames Präfix der Kindkarten,
-englischer Name über Kartenlabels und Gebietsnamen, zuletzt ein technischer
-Ersatzname. Fehlt eine Beschriftung im Client, hat die Karte in
-`parchmentMaps.xml` dennoch zugeordnete Gebiete. Deren Namen sind die belastbare
-Benennungsquelle (`gebietsnamen()` aus dem eigenen DAT-Export). Sie brauchen
-dieselbe Bereinigung wie Gegenstandsnamen, weil einzelne Gebietsnamen
-Client-Escapes wie `\q` tragen (8 von 1.610).
+A map name is display text, not an identity. `kartenname()` derives it in a
+fixed order: language label of the map, common prefix of the child maps,
+English name via map labels and area names, finally a technical
+substitute name. If a caption is missing in the client, the map has
+assigned areas in `parchmentMaps.xml` nonetheless. Their names are the reliable
+naming source (`gebietsnamen()` from the own DAT export). They need
+the same cleanup as item names, because individual area names carry
+client escapes such as `\q` (8 of 1,610).
 
-Am 20.11.2026 tragen 17 Karten keinen Namen. Sie erzeugen je Sprache 193
-Aufgaben- und 52 Tatenlabels sowie 17 der 216 Einträge der Kartennavigation,
-sämtlich in der Form `Karte <ID>`. Ein technischer Ersatzname ist ein
-Datenmangel, keine Spielbezeichnung. Gemessen ist die Zahl über
-`daten/quests-<sprache>.json`, `daten/taten-<sprache>.json` und
+On 20.11.2026, 17 maps carry no name. They produce per language 193
+quest and 52 deed labels as well as 17 of the 216 entries of the map navigation,
+all in the form `Karte <ID>`. A technical substitute name is a
+data deficiency, not a game label. The number is measured via
+`daten/quests-<sprache>.json`, `daten/taten-<sprache>.json` and
 `web/gebiete-<sprache>.js`.
 
-Die Website-Navigation (Region → Landschaft → Unterkarte) ist eine Projektion
-aus den Labels `f` und den Karten-IDs `fk`. Sie ist kein Geografiebaum:
-`geoAreas.xml` führt Region → Territorium → Gebiet, `parchmentMaps.xml` ordnet
-Karten Gebieten zu. Vergleich am 21.11.2026: 6 Regionen, 64 Landschaften und
-152 Unterkarten bei uns gegen 7 Regionen, 86 Territorien und 679 Gebiete in
-`geoAreas.xml`. 30 Landschaften tragen exakt einen Territoriumsnamen, 6 bilden
-ein Gebiet ab, 34 führen eigene Kartennamen; 19 Territorien verteilen sich auf
-mehrere Landschaften.
+The website navigation (region → landscape → sub-map) is a projection
+from the labels `f` and the map IDs `fk`. It is not a geography tree:
+`geoAreas.xml` leads region → territory → area, `parchmentMaps.xml` assigns
+maps to areas. Comparison on 21.11.2026: 6 regions, 64 landscapes and
+152 sub-maps on our side against 7 regions, 86 territories and 679 areas in
+`geoAreas.xml`. 30 landscapes carry exactly one territory name, 6 form
+an area, 34 carry their own map names; 19 territories distribute over
+several landscapes.
 
-Die Regionszuordnung stammt aus `f[0]`, nicht aus dem Karten-Regionscode.
-Deshalb kann eine Karte in einer anderen Website-Region stehen als ihr Code
-erwarten lässt (Morannon: Code 3, Inhalt Das Ödland). Die Regionsebene von
-`geoAreas.xml` taugt nicht als Anzeigegliederung: Rohan, Gondor und Mordor
-hängen dort unter Rhovanion, zwei Regionen bleiben leer. Belastbare
-Vergleichsebene ist das Territorium.
+The region assignment comes from `f[0]`, not from the map region code.
+Therefore a map can sit in a different website region than its code
+suggests (Morannon: code 3, content Das Ödland). The region level of
+`geoAreas.xml` is not suitable as a display structure: Rohan, Gondor and Mordor
+hang under Rhovanion there, two regions remain empty. The reliable
+comparison level is the territory.
 
-Dieselben Gebietswerte speisen auch den Filter „Region und Gebiet“ für Aufgaben
-und Taten. Eine Kartenumbenennung kann daher Filteroptionen unterhalb der
-Regionsebene umbenennen oder zusammenführen. Solange `f[0]` und die
-Regionszuordnung nicht geändert werden, bleiben die sechs Regionsgruppen und
-ihre Gesamtsummen stabil; Gebietszähler können sich durch die Zusammenfassung
-auf neue Optionen verteilen. Die Zähler sind pro Aufgaben-/Tatenindex aus den
-gebauten Datensätzen zu prüfen, nicht aus der Kartennavigation abzuleiten.
-Am 21.11.2026 wurden die sechs Helm-Klamm-Varianten für Aufgaben unter
-„Helms Klamm“ zusammengefasst (43 Aufgabenoption-Treffer); der Tatenfilter hat
-85 Treffer für die Region Rohan und keine Taten auf diesen Karten. Die
-Regionensummen und getrennten Gebietsoptionen stehen im
-Abnahmevermerk `docs/archiv/kartenbenennung-hierarchie.md`.
+The same area values also feed the filter "region and area" for quests
+and deeds. A map renaming can therefore rename or merge filter options below the
+region level. As long as `f[0]` and the
+region assignment are not changed, the six region groups and
+their totals stay stable; area counters can distribute over new options through the
+consolidation. The counters are to be checked per quest/deed index from the
+built records, not derived from the map navigation.
+On 21.11.2026 the six Helm's Deep variants for quests were merged under
+„Helms Klamm“ (43 quest option hits); the deed filter has
+85 hits for the region Rohan and no deeds on these maps. The
+region totals and separate area options are in the
+acceptance note `docs/archiv/kartenbenennung-hierarchie.md`.
 
-**Korrektur gegenüber vereinfachten bisherigen Aussagen:** `GameMaps.attribute`
-ordnet Positionen anhand Rahmen, Tiefe und Abstand zur Mitte zu; bei
-überlappenden Karten ist das eine Auswahlregel. `_fit_overviews` berechnet
-Übersichtsrahmen durch lineare Anpassung. Solche abgeleiteten Werte werden
-nicht als originale, exakt validierte DAT-Grenzen ausgegeben.
-MoorMap wird nur für optionale Plugin-Kartennummern verwendet, nicht als
-autoritative Geometriequelle.
+**Correction against simplified earlier statements:** `GameMaps.attribute`
+assigns positions by frame, depth and distance to the centre; with
+overlapping maps that is a selection rule. `_fit_overviews` computes
+overview frames by linear fitting. Such derived values are
+not output as original, exactly validated DAT limits.
+MoorMap is used only for optional plugin map numbers, not as an
+authoritative geometry source.
 
-### Geografische Region, Territorium, Gebiet und Verlies
+### Geographical region, territory, area and dungeon
 
-Im Baseline-DAT sind Klassen 180, 692, 690 und 691 getrennt.
+In the baseline DAT, classes 180, 692, 690 and 691 are separate.
 `Area_RegionID`, `Area_Region`, `Area_Territory`, `Dungeon_ParentDungeon`
-sind unterschiedliche Properties. `geoAreas.xml` bildet geografische
-Hierarchien ab; `dungeons.xml` kann Positionen und Basemap-Bezüge enthalten.
+are different properties. `geoAreas.xml` maps geographical
+hierarchies; `dungeons.xml` can contain positions and basemap references.
 
-Ein Gebiet braucht keine eigene Karte; eine Karte kann mehrere
-Navigationspfade besitzen. Aus einer Karten-ID folgt keine eindeutige
-Position eines Gebietsknotens im Websitebaum.
+An area needs no map of its own; a map can have several
+navigation paths. A map ID does not imply a unique
+position of an area node in the website tree.
 
-Für den Abgleich der Website-Hierarchie gilt: Territorium ist die
-Vergleichsebene, nicht die Region. Eine Landschaft ohne Territoriumsbezug und
-ein Name der Form `Karte <ID>` sind Prüfbefunde, keine Spielbezeichnungen.
+For the comparison of the website hierarchy the following applies: territory is the
+comparison level, not the region. A landscape without a territory reference and
+a name of the form `Karte <ID>` are check findings, not game labels.
 
-### Landmarke und Vorkommen
+### Landmark and resource occurrence
 
-Landmarken: DAT-Klasse 1210 und `landmarks.xml`; Positionen separat über DID.
-Aufgaben-/Tatbedingungen können Landmarken nach ID referenzieren.
+Landmarks: DAT class 1210 and `landmarks.xml`; positions separately via DID.
+Quest/deed conditions can reference landmarks by ID.
 
-Rohstoffvorkommen: `resources.xml` und Kartenmarker; Beruf/Stufe/Item und
-mögliche Fundstellen sind getrennte Bezüge. Eine mögliche Platzierung ist
-keine Zusicherung des aktuell vorhandenen Rohstoffs, seiner Menge oder
-Nachwachszeit.
+Crafting resource occurrences: `resources.xml` and map markers; profession/tier/item and
+possible find spots are separate references. A possible placement is
+no assurance of the currently present resource, its quantity or
+regrowth time.
 
-### Instanzvorlage und Instanzenfinder
+### Instance template and instance finder
 
-Vorlagen: Klassen 1368/2651, `privateEncounters.xml`.
-Finder-Auswahl: `WorldJoinControl` Klasse 2606 (`7001B7CE`),
-`WorldJoin_AvailablePETemplates_Array` und `WorldJoinControl_InstanceGroups`.
-`Skirmish_Template_GroupSizeArray`, Min-/Max-LevelScale und
-DifficultyTierArray sind die Quellen für konfigurierte Größen/Stufen/
-Schwierigkeiten, nicht Aufgabenstufe oder Namenspräfix.
+Templates: classes 1368/2651, `privateEncounters.xml`.
+Finder selection: `WorldJoinControl` class 2606 (`7001B7CE`),
+`WorldJoin_AvailablePETemplates_Array` and `WorldJoinControl_InstanceGroups`.
+`Skirmish_Template_GroupSizeArray`, min/max LevelScale and
+DifficultyTierArray are the sources for configured sizes/levels/
+difficulties, not quest level or name prefix.
 
-Vorlage, auswählbarer Findereintrag, Begegnungsgruppe, Contentlayer und
-öffnende Aufgabe sind getrennte Begriffe. Vorlagenmitgliedschaft allein
-beweist keine aktive Finder-Verfügbarkeit.
+Template, selectable finder entry, encounter group, content layer and
+opening quest are separate terms. Template membership alone
+proves no active finder availability.
 
-### Fraktion, Titel, Tugend, Trait, Fertigkeit und Emote
+### Faction, title, virtue, trait, skill and emote
 
-Jeweils eigene Bestände mit eigenen IDs/Schlüsseln; sämtliche Properties in
+Each has its own sets with own IDs/keys; all properties in
 `factions.xml`, `titles.xml`, `virtues.xml`, `traits.xml`, `skills.xml`,
-`emotes.xml` einschließlich Unterstrukturen erfasst.
+`emotes.xml` including substructures captured.
 
-Fraktionsstufen sind nicht mit exakt bekannten persönlichen Rufpunkten
-gleichzusetzen. Traits können Effekte/Fertigkeiten referenzieren; Tugenden
-nutzen Stats/Skalierungen. Ein Belohnungsname ohne ID ist kein belastbarer Join.
+Faction levels are not to be equated with exactly known personal reputation points.
+Traits can reference effects/skills; virtues
+use stats/scalings. A reward name without an ID is no reliable join.
 
-### Reise
+### Travel
 
-`travelNPCs.xml`: NPC, Knotenreferenz, Entdeckungsbedingung und Position.
-`travels.xml`: Knoten, Ziele, Routen, Routenaktionen, Preise, Mindeststufe,
-Quest-/Fraktionsbedingungen, Modus und swift-Flag.
-`skills.xml` enthält Reisefertigkeiten als eigene Unterstruktur.
+`travelNPCs.xml`: NPC, node reference, discovery condition and position.
+`travels.xml`: nodes, destinations, routes, route actions, prices, minimum level,
+quest/faction conditions, mode and swift flag.
+`skills.xml` contains travel skills as their own substructure.
 
-Route ist eine gerichtete Verbindung; Preis 0 kann belegt sein. Routen-
-Aktionen und Delay sind nicht automatisch die gesamte Reitdauer. Die
-Zusammenlegung gleich positionierter Knoten ist eine Projekttransformation.
-Keine Dauer, Kilometer oder Charakterfreischaltungen daraus erfinden.
+A route is a directed connection; price 0 can be proven. Route
+actions and delay are not automatically the entire riding duration. The
+merging of equally positioned nodes is a project transformation.
+Invent no duration, kilometres or character unlocks from it.
 
-### Weitere vollständig strukturell erfasste Companion-Bestände
+### Further fully structurally captured Companion sets
 
-Das Inventar umfasst auch Effekte und Effekt-Untertypen, Aktionstabellen,
-Beutetabellen und Untertabellen, Container, Stats, Progressionen,
-Wertetabellen, Klassen, Rassen, Herkunft, Sammlungen, Bündnisse,
-Welt-Ereignisse, Housing, Hobbys, Legendärsysteme, Traceries, Relikte,
-Entzauberung, Belohnungspfade und technische Referenzlisten.
+The inventory also comprises effects and effect subtypes, action tables,
+loot tables and subtables, containers, stats, progressions,
+value tables, classes, races, origin, collections, allegiances,
+world events, housing, hobbies, legendary systems, traceries, relics,
+disenchantment, reward tracks and technical reference lists.
 
-Für diese Bestände sind Feldpfade und gespeicherte Verschachtelungen
-vollständig aufgelistet. Die vollständige Semantik aller Effektoperatoren,
-Loot-Codes und dynamischen Voraussetzungen ist damit **nicht** bestätigt.
-Insbesondere `dropFrequency`, Gewicht, Auswahlzahl und Wahrscheinlichkeit
-sind keine austauschbaren Begriffe.
+For these sets, field paths and stored nestings are
+fully listed. The complete semantics of all effect operators,
+loot codes and dynamic prerequisites is thereby **not** confirmed.
+In particular `dropFrequency`, weight, selection count and probability
+are not interchangeable terms.
 
-## 5. Bestehende TODOs und Widersprüche
+## 5. Existing TODOs and contradictions
 
-- `docs/todos/entitaeten-verlinkung.md`: Der frühere URL-Audit prüft die
-  Erreichbarkeit gebauter URLs. Er beweist nicht sämtliche Rohdatenrelationen.
-  „Keine IDs“ trifft dort auf bestimmte verdichtete Ausgabezeilen zu,
-  nicht allgemein auf Titel-/Trait-/Emote-Quelldatensätze.
-- `docs/todos/kartenreiter-aufgaben.md`: Mehrere Navigationsknoten mit
-  derselben Karten-ID sind ein konkreter Beleg, dass Karte und Baumknoten
-  getrennte Identitäten benötigen.
-- `docs/todos/aufgaben-navigation.md`: Thema/Klasse/Herkunft und geografische
-  Navigation sind verschiedene Auswahlachsen; UI-Gruppen nicht zu neuen
-  Spielobjekten erklären.
-- `docs/todos/SEO.md`: behandelt Ladeverhalten, keine zusätzlichen
-  Spielrelationen. Gekürzte Initialdaten sind nicht der vollständige Katalog.
-- `docs/archiv/dat-auswertung-2026-11-06.md`: datierter Untersuchungsstand,
-  einschließlich damaliger offener Punkte. Nicht ungeprüft als aktueller
-  Feld-/Verfügbarkeitsnachweis übernehmen.
-- `docs/fachbereiche/instanzenfinder-dat.md` ersetzt die ältere Namenspräfix-/Queststufen-
-  Ableitung für die Finder-Darstellung.
+- `docs/todos/entitaeten-verlinkung.md`: The earlier URL audit checks the
+  reachability of built URLs. It does not prove all raw data relations.
+  "No IDs" there refers to certain compacted output rows,
+  not generally to title/trait/emote source records.
+- `docs/todos/kartenreiter-aufgaben.md`: Several navigation nodes with
+  the same map ID are concrete proof that map and tree node
+  need separate identities.
+- `docs/todos/aufgaben-navigation.md`: topic/class/origin and geographical
+  navigation are different selection axes; do not declare UI groups as new
+  game objects.
+- `docs/todos/SEO.md`: covers loading behaviour, no additional
+  game relations. Shortened initial data is not the complete catalogue.
+- `docs/archiv/dat-auswertung-2026-11-06.md`: dated investigation state,
+  including then open points. Do not adopt unchecked as current
+  field/availability proof.
+- `docs/fachbereiche/instanzenfinder-dat.md` replaces the older name prefix/quest level
+  derivation for the finder presentation.
 
-## 6. Noch nicht abgeschlossene Vollständigkeitsnachweise
+## 6. Completeness proofs not yet concluded
 
-### Abgeleitete Qualitätsprioritäten
+### Derived quality priorities
 
-Die auditgestützten Konsequenzen und konkreten Abnahmekriterien stehen in
-[`todo-qualitaetsverbesserung.md`](todo-qualitaetsverbesserung.md). Kurz:
+The audit-based consequences and concrete acceptance criteria are in
+[`todo-qualitaetsverbesserung.md`](todo-qualitaetsverbesserung.md). In short:
 
-1. Account-/Charakterbindung und Rezeptvarianten verlustfrei erhalten.
-2. Fehlend, explizite Null, fehlgeschlagene Auflösung und berechnete Werte
-   getrennt behandeln.
-3. Beziehungen und Aufgabenbedingungen nur in der belegten Struktur
-   auswerten.
-4. Quelle → Export → Seitenmodell mit Regressionen absichern.
+1. Preserve account/character binding and recipe variants losslessly.
+2. Treat missing, explicit null, failed resolution and computed values
+   separately.
+3. Evaluate relations and quest conditions only in the proven structure.
+4. Safeguard source → export → page model with regressions.
 
-Das ist eine priorisierte Arbeitsgrundlage, keine bereits erteilte Freigabe
-für Implementierung, Datenneubau oder Veröffentlichung.
+That is a prioritised working basis, not an approval already granted
+for implementation, data rebuild or publication.
 
-### Fünfter Prüfschritt: tatsächliche Bedeutung und Informationsverluste
+### Fifth review step: actual meaning and information losses
 
-Der separate [semantische Datenvertrag](lotro-datenraum-semantik.md) erläutert
-an konkreten Codepfaden:
+The separate [semantic data contract](lotro-datenraum-semantik.md) explains
+on concrete code paths:
 
-- UND-/ODER-Verknüpfung, Vergleichsoperatoren und Statuscodierung von
-  Aufgaben-/Tatvoraussetzungen; Entfernen ungelöster Voraussetzungen
-  und den Hiding-Content-Sonderfall im Extractor.
-- Bindungsentscheidung, Stapelgrenzen, Item-/Nutzungs-/Skalierungsstufen,
-  Haltbarkeit, gewährte Fertigkeiten/Traits und kontextabhängige XP.
-- Rezeptvarianten, kritische Chance als Bruchzahl versus Prozentinteger,
-  XP-/Cooldown-Schlüssel statt direkter Mengen und Sekundenwerte.
-- Item-/Beuteprofil-Union, Filter, Mengen-Defaults und getrennte Gewichte/
-  DropFrequency-Codes; Decoder-Fallback 0 bei fehlendem Lookup.
-- Tauschrichtung anhand der Arrayreihenfolge, mengenbestimmende
-  Lookup-Kurven und ausdrücklich unvollständige Extraktorbedingungen.
+- AND/OR joining, comparison operators and status coding of
+  quest/deed prerequisites; removal of unresolved prerequisites
+  and the hiding content special case in the extractor.
+- Binding decision, stack limits, item/usage/scaling levels,
+  durability, granted skills/traits and context-dependent XP.
+- Recipe variants, critical chance as a fraction versus percentage integer,
+  XP/cooldown keys instead of direct quantities and seconds values.
+- Item/loot profile union, filters, quantity defaults and separate weights/
+  DropFrequency codes; decoder fallback 0 on missing lookup.
+- Barter direction based on the array order, quantity-determining
+  lookup curves and explicitly incomplete extractor conditions.
 
-Konkrete Verluste: 38.514 Accountbindungen werden im kompakten Feld `b`
-nicht unterschieden; 2.480 Rezepte haben mehrere Ergebnisversionen;
-756 Rezepte enthalten Varianten, in denen normale/kritische Ergebnisse
-erst über ihre Stufe unterscheidbar sind. 4.557 Grundchancen wurden
-einheitenrichtig ohne Abweichung abgeglichen.
+Concrete losses: 38,514 account bindings are not distinguished in the compact field `b`;
+2,480 recipes have several result versions;
+756 recipes contain variants in which normal/critical results
+only become distinguishable via their level. 4,557 base chances were
+compared unit-correctly without deviation.
 
-Die 314 erfassten Propertyzugriffe aus 27 gezielten Quelldateien sind
-kein pauschaler Semantiknachweis für alle 285 dabei vorkommenden
-Propertynamen. Der breitere Quellindex wurde durch einen iCloud-Lesetimeout
-unterbrochen und zählt nicht als erfolgreicher vollständiger Lauf.
+The 314 captured property accesses from 27 targeted source files are
+no blanket semantics proof for all 285 property names occurring there.
+The wider source index was interrupted by an iCloud read timeout
+and does not count as a successful complete run.
 
-Prüfabschluss dieses Teilschritts: elf Audit-Regressionstests bestanden;
-alle 17 relativen Dokumentationslinks im Hauptdokument zeigen auf vorhandene
-Dateien. Keine Website-, Plugin-, Client- oder Charakterdatei geändert.
+Review conclusion of this partial step: eleven audit regression tests passed;
+all 17 relative documentation links in the main document point to existing
+files. No website, plugin, client or character file changed.
 
-### Vierter Prüfschritt: Klassen, Charakterreferenzen und Kartenlücken
+### Fourth review step: classes, character references and map gaps
 
-23 weitere Regeln, 5.411 Referenzvorkommen: nach Korrektur der konkreten
-Zielräume sämtliche Werte auflösbar. Geprüft wurden Rasse/Herkunft,
-erlaubte Klassen, Rassen-/Klassen-Traits, Klassenfertigkeiten und Traitbäume,
-Herkunftstitel, Tugendkurven/-effekte, Bündnisse, Sammlungstitel,
-Handwerks-Titel/-Rezepte/-Gilden und Fraktionsstufen-Taten.
+23 further rules, 5,411 reference occurrences: after correcting the concrete
+target spaces all values are resolvable. The checks covered race/origin,
+allowed classes, race/class traits, class skills and trait trees,
+origin titles, virtue curves/effects, allegiances, collection titles,
+crafting titles/recipes/guilds and faction tier deeds.
 
-Zwei relevante Schemaeigenschaften:
+Two relevant schema properties:
 
-- `allegiance/@advancementProgressionID` verweist im geprüften XML auf
-  `allegiances.xml/curve/@id`, nicht auf `progressions.xml`.
-  Alle sieben Referenzen lösen sich dort auf. Gleiche technische
-  Benennung „Progression“ bedeutet nicht denselben Tabellenbestand.
-- `faction/level/@deedKey` enthält sowohl symbolische Tat-Keys als auch
-  dezimale Tat-IDs. Der ursprüngliche reine Key-Join ließ 162 Werte
-  offen; die Union aus Tat-Key und Tat-ID löst alle 358 Werte auf.
-  Das Quellfeld darf nicht pauschal in eine einzige numerische oder
-  symbolische Darstellung umgewandelt werden.
+- `allegiance/@advancementProgressionID` references in the checked XML
+  `allegiances.xml/curve/@id`, not `progressions.xml`.
+  All seven references resolve there. The same technical
+  naming "progression" does not mean the same table set.
+- `faction/level/@deedKey` contains both symbolic deed keys and
+  decimal deed IDs. The original pure key join left 162 values
+  open; the union of deed key and deed ID resolves all 358 values.
+  The source field must not be converted into a single numeric or
+  symbolic representation across the board.
 
-Die Bedeutung der zuvor nur numerisch behandelten Auftraggeberklassen wurde
-gegen die verwendete Decoder-Bibliothek überprüft:
-`classes.xml` innerhalb `delta-lotro-dat-utils-11.13.jar` nennt
+The meaning of the previously only numerically handled quest giver classes was
+checked against the decoder library in use:
+`classes.xml` inside `delta-lotro-dat-utils-11.13.jar` names
 796 = `IItem`, 1723 = `MonsterTemplate`, 1724 = `NPCTemplate`.
-`javap -constants` bestätigt außerdem MOB=1723 und NPC=1724.
-Der NPC-Extractor akzeptiert nur `WStateClass.NPC`. Sein begrenzter
-Zielbestand erklärt somit nicht das gesamte Rollenspektrum von Auftraggebern.
-Ein MonsterTemplate ist allein durch die Klassenzugehörigkeit noch kein
-feindlicher Gegner; ein IItem noch kein tragbarer Inventargegenstand.
+`javap -constants` additionally confirms MOB=1723 and NPC=1724.
+The NPC extractor accepts only `WStateClass.NPC`. Its limited
+target set thus does not explain the entire role spectrum of quest givers.
+A MonsterTemplate is not a hostile opponent by class membership alone;
+an IItem is not a carryable inventory item either.
 
-Die zwei offenen Kartenlink-Ziele `268448107` und `268449764` besitzen auch
-keine Treffer in den geprüften Kartenlabels DE/EN/FR. Beide eingehenden Links
-haben `parentId=268451272` und `contentLayerId=0`, aber unterschiedliche
-`from`-Positionen. Ohne Zielgeometrie und Identitätsbeleg werden keine
-Kartenentitäten oder Grenzen ergänzt. Die Linkdatensätze bleiben erhalten.
+The two open map link targets `268448107` and `268449764` also have
+no hits in the checked map labels DE/EN/FR. Both incoming links
+have `parentId=268451272` and `contentLayerId=0`, but different
+`from` positions. Without target geometry and identity proof no
+map entities or limits are added. The link records are preserved.
 
-### Dritter Prüfschritt: verdichtete Exporte
+### Third review step: compacted exports
 
-Der erfolgreiche Vergleich erfasste die vollständigen gespeicherten
-Item-, Set-, Rezept-, Rezeptquellen- und Belohnungsstrukturen. Der erweiterte
-Wiederholungslauf ist ebenfalls abgeschlossen: 24 Abdeckungs-/Referenzregeln
-mit 466.178 Verweisvorkommen und 666.741 Feldvergleiche über neun Feldpaare.
-Die Regeln umfassen auch Gegenrichtungen, sind also keine Zählung
-verschiedener Spielbeziehungen. Reproduktion:
+The successful comparison captured the complete stored
+item, set, recipe, recipe source and reward structures. The extended
+repetition run is also concluded: 24 coverage/reference rules
+with 466,178 reference occurrences and 666,741 field comparisons across nine field pairs.
+The rules also cover opposite directions, so they are not a count
+of different game relations. Reproduction:
 `python3 lotro_datenraum_exportvergleich.py`.
 
-Belegt im ersten erfolgreichen Lauf:
+Proven in the first successful run:
 
-- 152.088 Itemexport-IDs existieren im Companion-Bestand von 152.100 Items.
-  Die zwölf nicht exportierten IDs haben dort sämtlich einen leeren Namen.
-  Daraus folgt nicht automatisch, an welcher Stelle der historischen
-  DAT-Verarbeitung sie entfallen sind.
-- Neun explizit verglichene Item-Feldpaare stimmen für alle jeweils auf
-  beiden Seiten vorhandenen Werte überein: Qualität, Stufe, Kategorie,
-  Slot, Rüstungsart, Waffenart, Schadensart, Klassen- und Berufsvoraussetzung.
-  Die unterschiedlichen Nenner sind im Anhang erhalten. Dies ist keine
-  Bestätigung der nicht verglichenen Defaults, Stats oder Mindeststufen.
-- Alle 2.223 Setexport-IDs, 11.159 Set-Mitgliederverweise und ausgegebenen
-  Item-Set-Verweise sind auflösbar. Im geprüften Companion-Bestand wurden
-  **keine tatsächlichen Mehrfach-Setmitgliedschaften** und keine widersprechenden
-  Item-Set-Zuordnungen gefunden. Der skalare Export wäre dafür strukturell
-  verlustbehaftet, aber dieser konkrete Stand zeigt keinen solchen Verlust.
-- Reguläre und kritische Rezeptresultate sowie reguläre und optionale
-  Rezeptzutaten sind im vollständigen Itemexport auflösbar.
-- 44 unterschiedliche Stat-Referenzen in den als `virtues` verdichteten
-  Belohnungszeilen fehlen im dortigen Tugend-Namenskatalog. **Alle 44**
-  tragen die Stats-Labels „Skirmish Test Rank“ (EN/FR) und „Testrang für
-  Scharmützel“ (DE). Sie dürfen nicht allein aufgrund des Exportfeldnamens
-  als reguläre Tugenden behandelt werden. Belege für jede ID im JSON-Anhang.
-- Sechs Rezeptquellen-Schlüssel fehlen im Rezeptexport. `700777B8` existiert
-  im Companion-Rezeptbestand; `70076B49`, `70076B4A`, `70076B3C`,
-  `7007764C` und `70076B52` fehlen auch dort. Diese Bestandsabweichung
-  erklärt noch nicht ihre historische Ursache.
+- 152,088 item export IDs exist in the Companion set of 152,100 items.
+  The twelve not exported IDs all have an empty name there.
+  From that it does not automatically follow at which point of the historical
+  DAT processing they dropped out.
+- Nine explicitly compared item field pairs agree for all values present on
+  both sides in each case: quality, level, category,
+  slot, armour type, weapon type, damage type, class and profession prerequisite.
+  The differing denominators are preserved in the appendix. This is no
+  confirmation of the uncompared defaults, stats or minimum levels.
+- All 2,223 set export IDs, 11,159 set member references and output
+  item set references are resolvable. In the checked Companion set
+  **no actual multiple set memberships** and no contradicting
+  item set assignments were found. The scalar export would be structurally
+  lossy for that, but this concrete state shows no such loss.
+- Regular and critical recipe results as well as regular and optional
+  recipe ingredients are resolvable in the complete item export.
+- 44 different stat references in the reward rows compacted as `virtues`
+  are missing in the virtue name catalogue there. **All 44**
+  carry the stats labels "Skirmish Test Rank" (EN/FR) and "Testrang für
+  Scharmützel" (DE). They must not be treated as regular virtues on the basis of the
+  export field name alone. Evidence for each ID in the JSON appendix.
+- Six recipe source keys are missing in the recipe export. `700777B8` exists
+  in the Companion recipe set; `70076B49`, `70076B4A`, `70076B3C`,
+  `7007764C` and `70076B52` are missing there as well. This set deviation
+  does not yet explain their historical cause.
 
-Ein fehlender kompakter Belohnungsschlüssel ist kein Nachweis einer fehlenden
-DAT-Tabelle: Der Exporter filtert Tabellen nach seinen unterstützten
-Belohnungsarten. Das betrifft im geprüften Bestand 3.812 Aufgaben- und
-1.082 Taten-Verweisvorkommen. Ohne die zugehörigen Rohtabellen ist eine
-abschließende Klassifikation jedes Falls nicht belegt.
+A missing compact reward key is no proof of a missing
+DAT table: the exporter filters tables by its supported
+reward types. In the checked set that affects 3,812 quest and
+1,082 deed reference occurrences. Without the associated raw tables a
+conclusive classification of each case is not proven.
 
-### Zweiter Prüflauf
+### Second review run
 
-Reproduktion: `python3 lotro_datenraum_vertiefung.py`. Fünf automatische
-Regressionstests für JSON-/XML-Pfadbildung, Referenzzähler, verschachtelte
-Reliktziele und die Trennung von Inventar-/Dekodierbeleg bestanden:
-`python3 test_lotro_datenraum_audit.py`. Dies sind Audit-Werkzeugtests,
-keine vollständigen fachlichen Spieltests.
+Reproduction: `python3 lotro_datenraum_vertiefung.py`. Five automatic
+regression tests for JSON/XML path building, reference counters, nested
+relic targets and the separation of inventory/decoding proof passed:
+`python3 test_lotro_datenraum_audit.py`. These are audit tool tests,
+not complete domain game tests.
 
-61 zusätzliche Regeln erfassen 416.636 Referenzvorkommen. Davon sind
-415.366 gegen die ausdrücklich genannten Zielbestände auflösbar;
-1.270 Vorkommen bleiben in diesen Zielbeständen offen:
+61 additional rules capture 416,636 reference occurrences. Of those,
+415,366 are resolvable against the explicitly named target sets;
+1,270 occurrences remain open in these target sets:
 
-- `npcTalk`: 1.222 Vorkommen in Aufgaben (507 verschiedene IDs) und
-  31 in Taten (acht verschiedene IDs). Sämtliche dieser verschiedenen IDs
-  gehören laut DAT-Inventar zur Klasse 1723. Das Feld `npcId` beweist
-  also allein keine Mitgliedschaft in `NPCs.xml`.
-- Zwei Instanzvorlagen referenzieren Aufgaben-IDs, die in den geprüften
-  Companion-Aufgaben-/Tatenlisten fehlen, aber im DAT-Inventar Klasse 1398
-  besitzen: `1879443606` und `1879407580`.
-- 13 Tat-Zielbedingungen verweisen auf dieselbe im Companion-Zielbestand
-  fehlende ID `1879049597`; auch sie existiert im DAT-Inventar Klasse 1398.
-- Zwei Kartenlink-Ziele fehlen im geprüften Kartenbestand (siehe oben).
+- `npcTalk`: 1,222 occurrences in quests (507 different IDs) and
+  31 in deeds (eight different IDs). All of these different IDs
+  belong to class 1723 according to the DAT inventory. The field `npcId` therefore
+  proves no membership in `NPCs.xml` on its own.
+- Two instance templates reference quest IDs that are missing in the checked
+  Companion quest/deed lists but have class 1398 in the DAT inventory:
+  `1879443606` and `1879407580`.
+- 13 deed objective conditions reference the same ID `1879049597` missing in the Companion target set;
+  it also exists in the DAT inventory class 1398.
+- Two map link targets are missing in the checked map set (see above).
 
-**Nachprüfung gegen den normalisierten DAT-Export:** Alle drei zuletzt
-genannten Aufgaben-IDs sind tatsächlich in
-`full-dat-en-de-fr-2026-11-03/quests.json` vorhanden, Klasse 1398:
+**Re-check against the normalised DAT export:** All three quest IDs mentioned last
+are actually present in
+`full-dat-en-de-fr-2026-11-03/quests.json`, class 1398:
 `1879443606` = `70060896`, `1879407580` = `70057BDC`,
-`1879049597` = `7000057D`. Damit lösen sich die zwei Instanzverweise und
-13 Tat-Zielverweise gegen diesen DAT-Bestand auf. Die Zahlen im
-Companion-Referenzbericht bleiben korrekt als Prüfung genau jenes Zielbestands
-erhalten; sie dürfen nicht als ungelöste Referenzen über alle Quellen gelesen
-werden. Einzelbelege und Hashes:
-`lotro-datenraum-aufgabenluecken.json`; reproduzierbar mit
+`1879049597` = `7000057D`. Thus the two instance references and
+13 deed objective references resolve against this DAT set. The numbers in the
+Companion reference report remain correctly preserved as the check of exactly that target set;
+they must not be read as unresolved references across all sources. Individual evidence and hashes:
+`lotro-datenraum-aufgabenluecken.json`; reproducible with
 `python3 lotro_datenraum_aufgabenluecken.py`.
 
-Bei den ursprünglich 613 offenen Auftraggeber-IDs wurden 519 dekodierte
-Datensätze gefunden: 323 Klasse 796 und 196 Klasse 1723. Die übrigen 94
-sind im Inventar Klasse 796 belegt, aber in den geprüften spezialisierten
-Rohdateien nicht vorhanden. Die vollständige Klassensemantik wird daraus
-nicht geraten. Die 613 IDs sind keine 613 nachgewiesenen kaputten Spielobjekte.
+For the originally 613 open quest giver IDs, 519 decoded
+records were found: 323 class 796 and 196 class 1723. The remaining 94
+are proven in the inventory as class 796 but not present in the checked specialised
+raw files. The complete class semantics is not guessed from that.
+The 613 IDs are not 613 proven broken game objects.
 
-Zusätzlich korrigierte Zielauswahl:
+Additionally corrected target selection:
 
-- Relikte liegen in `relics.xml` unter Kategorien; ein nur auf Root-Kinder
-  begrenzter Join war falsch. Mit `.//relic` lösen sich alle 469, 250
-  beziehungsweise 391 geprüften Referenzvorkommen aus Reliktlisten,
-  Reliktgruppen und Containern auf.
-- `treasureGroupProfileId` in Trophäenlisten verweist nicht ausschließlich
-  auf `itemsTable`. 7.503 zunächst dort nicht gefundene Vorkommen lösen
-  sich gegen 103 `treasureList`-IDs auf. Beide Zieltypen bleiben getrennt.
-- Händlerlisten, Tauschabgaben/-erhalte, direkte Beutegegenstände,
-  Containerlisten, die geprüften Skill-/Trait-/Effekt-/Progressionsverweise
-  und die 232 Parchment-Kartenreferenzen sind in den konkret geprüften
-  Zielbeständen ohne offene Werte auflösbar.
+- Relics lie in `relics.xml` under categories; a join limited to root children
+  was wrong. With `.//relic` all 469, 250
+  respectively 391 checked reference occurrences from relic lists,
+  relic groups and containers resolve.
+- `treasureGroupProfileId` in trophy lists does not exclusively
+  reference `itemsTable`. 7,503 occurrences initially not found there resolve
+  against 103 `treasureList` IDs. Both target types remain separate.
+- Vendor lists, barter costs/receipts, direct loot items,
+  container lists, the checked skill/trait/effect/progression references
+  and the 232 parchment map references are resolvable in the concretely checked
+  target sets without open values.
 
-Die Strukturinventare gelten nur für tatsächlich eingelesene Quellen.
-Für den Anspruch **sämtliche Spielentitäten, jede Property und jede fachlich
-gültige Relation** fehlen weiterhin:
+The structure inventories apply only to actually read sources.
+For the claim **all game entities, every property and every domain-valid
+relation**, the following are still missing:
 
-- Vollständige Dekodierung sämtlicher DAT-Inventarklassen, nicht nur der
-  bisher unterstützten/geexportierten Auswahl.
-- Vollständiger semantischer Nachweis jeder verschachtelten Property und
-  jedes referenzierenden Feldes; Namen allein reichen nicht.
-- Vollständige typisierte Referenzprüfung über alle Loot-/Effekt-/Skill-/
-  Welt-Ereignis-/Bedingungs-Untertypen und alle ID-Räume.
-- Feldweise Vergleichsmatrix DAT ↔ Companion ↔ normalisierte Exporte für
-  alle Bestände, einschließlich Default-/Filter-/Rundungs-/Lokalisierungsverluste.
-- Unabhängiger aktueller Clientabgleich räumlicher Projektion und
-  dynamischer Verfügbarkeit; kein Spieltest wurde in diesem Audit durchgeführt.
-- Nachweis der Übersetzungsbedeutung, nicht bloß gleicher Sprachschlüssel.
+- Complete decoding of all DAT inventory classes, not only the
+  previously supported/exported selection.
+- Complete semantic proof of every nested property and
+  every referencing field; names alone are not enough.
+- Complete typed reference check across all loot/effect/skill/
+  world event/condition subtypes and all ID spaces.
+- Field-by-field comparison matrix DAT ↔ Companion ↔ normalised exports for
+  all sets, including default/filter/rounding/localisation losses.
+- Independent current client comparison of spatial projection and
+  dynamic availability; no game test was carried out in this audit.
+- Proof of translation meaning, not merely equal language keys.
 
-Diese Punkte werden nicht als erledigt markiert. Das vorliegende Dokument ist
-eine überprüfbare Grundlage mit vollständigen beobachteten Strukturpfaden,
-aber noch kein abgeschlossenes semantisches Gesamtmodell aller LOTRO-Daten.
+These points are not marked as done. The present document is
+a verifiable basis with complete observed structure paths,
+but not yet a concluded semantic overall model of all LOTRO data.

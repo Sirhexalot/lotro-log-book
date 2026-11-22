@@ -1,67 +1,66 @@
-# Umsetzungskonzept: Aufgabenstatus manuell setzen
+# Implementation concept: setting quest status manually
 
-**Umsetzungsstand:** Statussteuerung umgesetzt; abschließende Vollabnahme noch offen.
+**Implementation status:** status control implemented; final full acceptance still open.
 
-Bereits umgesetzt:
+Already implemented:
 
-- getrennte Speicherung von manuellen Aufgaben- und Tatenstatus
-- effektiver Status über eine zentrale `MQL_SPEICHER`-API
-- bereichsweises Überschreiben durch Companion-Import
-- Sicherung und Wiederherstellung des Feldes `manuell`
-- Pluginexport mit effektivem Status ohne erfundene Teilzielzähler
-- gemeinsame Statuskomponente auf Katalog-Detailseiten, Aufgabenfinder,
-  Kartenliste und Aufgabendetail
-- Statussteuerung in Auftraggeber- und Quellenlisten
-- Statusänderungen lösen eine Neuberechnung von Finder-, Listen- und
-  Fortschrittsanzeigen aus
-- kompakte Auswahlfelder ohne zusätzliche Abschluss-Haken in den Listen
-- manuelle Statuspflege auch ohne vorherigen Companion-Import über ein lokales
-  Profil „Manuelle Angaben“
-- Aufgaben-/Tatenquellen auf Titel-, Tugend-, Gebiets-, Regions- und
-  Gegenstandsseiten sowie Rufquellen angeschlossen
-- Abenteuerübersichten verwenden den effektiven manuellen Aufgabenstatus für
-  ihre Summen und Empfehlungen
-- erste Unit- und Browserprüfungen in `tests/test_speicher.js` und
+- separate storage of manual quest and deed status
+- effective status through a central `MQL_SPEICHER` API
+- section-wise overwriting by the Companion import
+- backup and restore of the `manuell` field
+- plugin export with the effective status, without invented sub-objective counters
+- shared status component on catalogue detail pages, quest finder,
+  map list and quest detail
+- status control in quest giver and source lists
+- status changes trigger a recalculation of finder, list and
+  progress displays
+- compact select fields without additional completion checkmarks in the lists
+- manual status maintenance even without a previous Companion import, via a local
+  profile „Manuelle Angaben“
+- quest/deed sources connected on title, virtue, area, region and
+  item pages as well as reputation sources
+- adventure overviews use the effective manual quest status for
+  their totals and recommendations
+- first unit and browser checks in `tests/test_speicher.js` and
   `tests/browser_manual_status.js`
 
-Noch offen:
+Still open:
 
-- vollständige Karten-/Finder-/Detailabnahme in DE/EN/FR, Desktop und Mobil
-- Gegenstandsseiten nach dem aktuellen PHP-Umbau vollständig browserseitig
-  abnehmen
-- Sicherungs-/Importmeldungen und Pluginexport mit allen manuellen Fällen
-  vollständig browserseitig abnehmen
+- full map/finder/detail acceptance in DE/EN/FR, desktop and mobile
+- accept item pages fully in the browser after the current PHP rebuild
+- accept backup/import messages and plugin export with all manual cases
+  fully in the browser
 
-## Ziel
+## Goal
 
-Aufgaben und Taten sollen im Browser manuell auf **offen**, **in Arbeit** oder
-**erledigt** gesetzt werden können. Die Angabe gilt bis zum nächsten passenden
-Import aus LOTRO Companion. Der Import bleibt führend und ersetzt die
-manuellen Angaben.
+Quests and deeds should be settable manually in the browser to **offen**, **in Arbeit** or
+**erledigt**. The entry applies until the next matching
+import from LOTRO Companion. The import stays authoritative and replaces the
+manual entries.
 
-Die Daten bleiben wie bisher ausschließlich im Browser.
+The data, as before, stays exclusively in the browser.
 
-## Geltungsbereich
+## Scope
 
-Die Statussteuerung wird für einzelne Aufgaben beziehungsweise Taten angeboten
-an folgenden Stellen:
+Status control is offered for individual quests or deeds
+in the following places:
 
-- Kartenansicht: Aufgabenliste links
-- Kartenansicht: ausgewähltes Aufgabendetail rechts
-- Aufgabenfinder
-- einzelne Aufgaben-/Taten-Detailseite
-- Listen einzelner Aufgaben bei Auftraggebern sowie Quellenlisten, sofern dort
-  bereits ein Fortschrittsstatus angezeigt wird
+- map view: quest list on the left
+- map view: selected quest detail on the right
+- quest finder
+- individual quest/deed detail page
+- lists of individual quests at quest givers as well as source lists, provided a
+  progress status is already shown there
 
-Reine Summen, Gebietskacheln, Regionsfortschritte und Abenteuerübersichten
-bekommen keine einzelne Statussteuerung. Ihre Zahlen ergeben sich automatisch
-aus dem effektiven Status.
+Pure totals, area tiles, region progress and adventure overviews
+get no individual status control. Their numbers follow automatically
+from the effective status.
 
-## Statusmodell
+## Status model
 
-Importdaten und manuelle Angaben werden getrennt gespeichert.
+Import data and manual entries are stored separately.
 
-Beispiel:
+Example:
 
 ```js
 {
@@ -79,161 +78,160 @@ Beispiel:
 }
 ```
 
-Erlaubte manuelle Werte:
+Allowed manual values:
 
 - `offen`
 - `laufend`
 - `fertig`
 
-Kein Eintrag in `manuell` bedeutet: Importstatus verwenden.
+No entry in `manuell` means: use the import status.
 
-Die bestehende Importstruktur `quests`, `deeds` und `laufend` bleibt erhalten.
-Das verhindert unnötige Änderungen an Sicherungen, Pluginexport und
-Bestandsdaten.
+The existing import structure `quests`, `deeds` and `laufend` stays intact.
+That prevents unnecessary changes to backups, plugin export and
+existing data.
 
-## Vorrang und Importregeln
+## Precedence and import rules
 
-Während der Laufzeit hat eine manuelle Angabe Vorrang vor der Darstellung des
-zuletzt importierten Spielstands.
+At runtime a manual entry takes precedence over the display of the
+last imported character progress.
 
-Beim erneuten Import gilt:
+On a new import the following applies:
 
-1. Die importierten Daten des gelesenen Bereichs werden ersetzt.
-2. Die manuellen Angaben dieses Bereichs werden gelöscht.
-3. Der sichtbare Status kommt danach wieder ausschließlich aus dem Import.
+1. The imported data of the read section is replaced.
+2. The manual entries of this section are deleted.
+3. The visible status afterwards comes again exclusively from the import.
 
-Bereiche werden getrennt behandelt:
+Sections are handled separately:
 
-- `questsStatus.xml` ersetzt Aufgabenstatus und löscht `manuell.quests`.
-- `deedsStatus.xml` ersetzt Tatenstatus und löscht `manuell.deeds`.
-- Fehlt eine Datei im Import, darf der vorhandene Bereich nicht blind geleert
-  werden.
+- `questsStatus.xml` replaces quest status and deletes `manuell.quests`.
+- `deedsStatus.xml` replaces deed status and deletes `manuell.deeds`.
+- If a file is missing in the import, the existing section must not be emptied
+  blindly.
 
-Damit kann ein unvollständiger Import nicht versehentlich alle Angaben eines
-Charakters verlieren.
+That way an incomplete import cannot accidentally lose all entries of a
+character.
 
-Nach einem Import soll die Meldung die Zahl der verworfenen manuellen Angaben
-nennen, zum Beispiel:
+After an import the message should name the number of discarded manual entries,
+for example:
 
 > 18 Aufgaben importiert. 3 manuelle Statusangaben wurden durch den Import
 > ersetzt.
 
-## Zentrale Speicher-API
+## Central storage API
 
-`web/speicher.js` erhält zentrale Funktionen, damit Kartenansicht, Finder und
-Katalog nicht jeweils eigene Statuslogik entwickeln:
+`web/speicher.js` receives central functions so that map view, finder and
+catalogue do not each develop their own status logic:
 
-- `status(art, id)` – effektiver Status: `offen`, `laufend`, `fertig` oder
-  neutral/unbekannt
-- `importStatus(art, id)` – Status nur aus dem Import
-- `setzeStatus(art, id, status)` – manuelle Angabe speichern
-- `entferneManuellenStatus(art, id)` – zurück auf Importstatus
-- `manuelleStatus(art, id)` – prüft, ob eine manuelle Angabe vorhanden ist
-- `loescheManuelleStatus(art)` – beim passenden Import aufrufen
+- `status(art, id)` – effective status: `offen`, `laufend`, `fertig` or
+  neutral/unknown
+- `importStatus(art, id)` – status from the import only
+- `setzeStatus(art, id, status)` – store a manual entry
+- `entferneManuellenStatus(art, id)` – back to the import status
+- `manuelleStatus(art, id)` – checks whether a manual entry exists
+- `loescheManuelleStatus(art)` – call on the matching import
 
-Bestehende direkte Zugriffe auf `quests`, `deeds` und `laufend` werden in den
-Darstellungsbereichen schrittweise durch die zentrale Statusabfrage ersetzt.
-Die Importdaten selbst bleiben für Voraussetzungen, Machbarkeit und
-Zielzähler separat verfügbar.
+Existing direct accesses to `quests`, `deeds` and `laufend` are replaced step by
+step in the display areas by the central status query.
+The import data itself stays separately available for prerequisites, feasibility and
+objective counters.
 
-## UI-Steuerung
+## UI control
 
-### Gemeinsame Statuskomponente
+### Shared status component
 
-Der Status wird als kompaktes Auswahlfeld mit Symbol und Text dargestellt:
+The status is shown as a compact select field with icon and text:
 
 - `· offen`
 - `◐ in Arbeit`
 - `✓ erledigt`
 
-Das Auswahlfeld enthält drei Zustände:
+The select field contains three states:
 
 - Offen
 - In Arbeit
 - Erledigt
 
-Eine manuelle Angabe wird dezent durch den goldenen Feldrand und eine
-Rücksetzen-Aktion gekennzeichnet. Ein sichtbares „Import“-Label wird nicht
-angezeigt; die Rücksetzen-Aktion verwendet wieder den Importstatus. Symbol und
-Text bleiben immer sichtbar.
+A manual entry is subtly marked by the golden field border and a
+reset action. A visible „Import“ label is not
+shown; the reset action uses the import status again. Icon and
+text always stay visible.
 
-### Kartenliste
+### Map list
 
-Das Statussymbol links und der Statusbereich bleiben ein eigener Klickbereich.
-Ein Klick auf den Aufgabennamen öffnet weiterhin das Detail. Dadurch wird die
-bestehende Zeilenauswahl nicht unbeabsichtigt ausgelöst.
+The status icon on the left and the status area remain a separate click area.
+A click on the quest name still opens the detail. That way the
+existing row selection is not triggered unintentionally.
 
-### Aufgabendetail
+### Quest detail
 
-Die aktuelle Statuszeile wird erweitert:
+The current status line is extended:
 
 ```text
 Stufe 140 · von Cána · Angmar · Eriador · [◐ In Arbeit ▾] ⓘ
 ```
 
-Das Info-Symbol erklärt den manuellen Status und die Importregel.
+The info icon explains the manual status and the import rule.
 
-### Aufgabenfinder
+### Quest finder
 
-Der bereits rechts angezeigte Status wird als Button umgesetzt:
+The status already shown on the right is implemented as a button:
 
 ```text
 Sturm auf Gwathrenost                         ◐ In Arbeit ▾
 ```
 
-Die Statusfilter verwenden weiterhin den effektiven Status.
+The status filters continue to use the effective status.
 
-### Detailseiten und Quellenlisten
+### Detail pages and source lists
 
-Die vorhandene Statusanzeige wird um dieselbe Komponente ergänzt. Nur dort,
-wo eine einzelne Aufgabe oder Tat eindeutig identifiziert ist, wird die
-Änderung angeboten.
+The existing status display is extended by the same component. Only where
+an individual quest or deed is unambiguously identified is the
+change offered.
 
-## Hilfe und Erklärung
+## Help and explanation
 
-Es braucht keinen großen separaten Hilfebereich und keine neue Hauptseite.
-Empfohlen werden drei kleine Erklärungsebenen:
+No large separate help area and no new main page are needed.
+Three small levels of explanation are recommended:
 
-1. **ⓘ neben jedem Status**
-   - Desktop: Tooltip bei Hover und Fokus
-   - Mobil: Erklärung nach Tippen
-2. **Details-Abschnitt auf der Spielstandseite**
-   Titel: „Wie funktionieren manuelle Aufgabenstatus?“
-3. **Kurzer Hinweis im Statusmenü**
+1. **ⓘ next to every status**
+   - desktop: tooltip on hover and focus
+   - mobile: explanation after tapping
+2. **details section on the character progress page**
+   Title: „Wie funktionieren manuelle Aufgabenstatus?“
+3. **short note in the status menu**
    > Manuelle Angaben gelten bis zum nächsten passenden Import. Der Import
    > kann sie ersetzen.
 
-Der Hilfeabschnitt erklärt:
+The help section explains:
 
 - Offen, In Arbeit und Erledigt
-- dass „In Arbeit“ keine importierten Teilziele erzeugt
-- dass der nächste Companion-Import führend ist
-- dass die Angaben nur im Browser gespeichert werden
-- dass der Plugin-/Charakterexport den aktuellen effektiven Stand exportiert
+- that „In Arbeit“ does not create imported sub-objectives
+- that the next Companion import is authoritative
+- that the entries are stored only in the browser
+- that the plugin/character export exports the current effective state
 
-Die Texte werden in Deutsch, Englisch und Französisch ergänzt.
+The texts are added in German, English and French.
 
-## Sicherung und Export
+## Backup and export
 
-### Browser-Sicherung
+### Browser backup
 
-`manuell` wird in der bestehenden JSON-Sicherung mitgesichert. Alte
-Sicherungen ohne dieses Feld werden als leere manuelle Statussammlung
-eingelesen.
+`manuell` is included in the existing JSON backup. Old
+backups without this field are read in as an empty manual status collection.
 
-### Plugin-/Charakterexport
+### Plugin/character export
 
-Der bestehende Pluginexport soll den zum Exportzeitpunkt effektiven Status
-verwenden. Eine manuell auf „Erledigt“ gesetzte Aufgabe wird also bis zum
-nächsten Import auch in den Pluginexport übernommen.
+The existing plugin export should use the status that is effective at export time.
+A quest set manually to „Erledigt“ is therefore also taken into the plugin export
+until the next import.
 
-Bei „In Arbeit“ können die importierten Teilzielzähler fehlen. Der Export darf
-deshalb keine erfundenen Zähler erzeugen; er exportiert den Status ohne
-Teilzielinformationen.
+For „In Arbeit“ the imported sub-objective counters can be missing. The export must
+therefore not create invented counters; it exports the status without
+sub-objective information.
 
-## Betroffene Dateien
+## Affected files
 
-Voraussichtlich:
+Presumably:
 
 - `web/speicher.js`
 - `web/companion.js`
@@ -243,49 +241,47 @@ Voraussichtlich:
 - `web/katalog.js`
 - `web/auftraggeber.js`
 - `web/entitaeten-listen.js`
-- `web/plugin.js` beziehungsweise die Exportfunktionen in
+- `web/plugin.js` or the export functions in
   `web/companion.js`
-- gemeinsame Status-/Katalog-CSS-Dateien
-- `web/texte*.js` und `web/texte-spielstand.js`
-- Companion-, Speicher- und Finder-Tests
+- shared status/catalogue CSS files
+- `web/texte*.js` and `web/texte-spielstand.js`
+- Companion, storage and finder tests
 
-Vor der Umsetzung müssen die tatsächlich verwendeten Statusadapter und die
-aktuelle Einbindung der drei Sprachdateien noch einmal geprüft werden.
+Before implementation, the status adapters actually in use and the
+current inclusion of the three language files must be checked once more.
 
-## Tests und Abnahme
+## Tests and acceptance
 
-Automatisierte Tests:
+Automated tests:
 
-- alter Charakterdatensatz ohne `manuell`
-- manuell offen, laufend und erledigt
-- Statuswechsel und Zurücksetzen
-- Import von Aufgaben löscht nur manuelle Aufgabenstatus
-- Import von Taten löscht nur manuelle Tatenstatus
-- Import ohne `questsStatus.xml` oder `deedsStatus.xml` löscht den Bereich
-  nicht
-- Sicherung und Wiederherstellung
-- Pluginexport mit effektivem Status
-- Finder- und Kartenfilter verwenden denselben Status
+- old character record without `manuell`
+- manual offen, laufend and erledigt
+- status change and reset
+- importing quests deletes only manual quest status
+- importing deeds deletes only manual deed status
+- import without `questsStatus.xml` or `deedsStatus.xml` does not delete the section
+- backup and restore
+- plugin export with effective status
+- finder and map filter use the same status
 
-Browserprüfung in DE, EN und FR:
+Browser check in DE, EN and FR:
 
-- Kartenansicht Desktop und Mobil
-- Finder Desktop und Mobil
-- Detailseite
-- Charakterwechsel
-- Import nach manuellen Änderungen
-- Sicherung und Pluginexport
+- map view desktop and mobile
+- finder desktop and mobile
+- detail page
+- character switch
+- import after manual changes
+- backup and plugin export
 
-## Umsetzungsschritte
+## Implementation steps
 
-1. Gemeinsame Status- und Speicherlogik in `speicher.js` festlegen.
-2. Importzusammenführung mit bereichsweisem Löschen manueller Angaben
-   umsetzen.
-3. Statuskomponente und Info-Erklärung bauen.
-4. Kartenliste und Aufgabendetail anschließen.
-5. Aufgabenfinder und Detail-/Quellenlisten anschließen.
-6. Sicherung und Pluginexport anpassen.
-7. Übersetzungen ergänzen.
-8. Unit-, Import- und Browserprüfungen durchführen.
-9. Projekt-TODO unter `docs/todos/` mit den konkreten Abnahmepunkten anlegen
-   beziehungsweise nach der Umsetzung aktualisieren.
+1. Define the shared status and storage logic in `speicher.js`.
+2. Implement the import merge with section-wise deletion of manual entries.
+3. Build the status component and the info explanation.
+4. Connect map list and quest detail.
+5. Connect quest finder and detail/source lists.
+6. Adjust backup and plugin export.
+7. Add translations.
+8. Run unit, import and browser checks.
+9. Create the project TODO under `docs/todos/` with the concrete acceptance points
+   or update it after implementation.

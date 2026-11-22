@@ -1,8 +1,8 @@
-# Semantik: konkreter Property-Leseindex des Extractors
+# Semantics: concrete property read index of the extractor
 
-Dies ist ein Belegindex, keine automatische Bedeutungsübersetzung. Erfasst sind explizite Propertyzugriffe in den unten genannten, tatsächlich gelesenen Extractor-Dateien. Dynamische Propertynamen, indirekte Helfer und weitere Dateien sind dadurch nicht vollständig abgedeckt. Kommentare werden nicht als Implementierungsbeleg gezählt. Der lokale Quellstand ist nicht ohne Build-/Commitabgleich als identisch mit jeder installierten JAR anzusehen.
+This is an evidence index, not an automatic translation of meaning. It captures explicit property reads in the extractor files named below, which were actually read. Dynamic property names, indirect helpers and further files are therefore not completely covered. Comments are not counted as implementation evidence. The local source state must not be treated as identical to every installed JAR without a build/commit comparison.
 
-| Property | Quellbeleg | Tatsächlicher Zugriff |
+| Property | Source evidence | Actual access |
 | --- | --- | --- |
 | Accomplishment_List | achievables/MainDatAchievablesLoader.java:148 | `Object[] list=(Object[])deedsDirectory.getProperty("Accomplishment_List");` |
 | Allegiance_Group | items/ItemDetailsLoader.java:406 | `Integer groupCode=(Integer)props.getProperty("Allegiance_Group");` |

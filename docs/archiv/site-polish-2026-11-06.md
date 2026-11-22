@@ -1,51 +1,50 @@
-# Startseite, Import und Typografie – 6. November 2026
+# Start page, import and typography – 6 November 2026
 
-## Änderungen
+## Changes
 
-- Startseiten DE/EN/FR neu gefasst: direkter Karteneinstieg, Taten und Import vor
-  dem Bild; drei datierte Neuigkeiten, kurzer Funktionsüberblick und sichtbarer
-  LOTROInterface-Link zu Magic Quest Log. Keine Warnliste und keine wiederholten
-  Browser-Datenschutzhinweise auf der Startseite.
-- Menü und Importüberschrift: „Spielstand importieren“, „Import progress“,
-  „Importer la progression“. Ordnerauswahl und die zweite Importstufe benennen
-  ihre konkrete Funktion. Der frühere Datenschutzkasten ist ein kurzer Hinweis.
-- Datenschutz auf fünf Abschnitte gekürzt, vollständig übersetzt; deutsche
-  Fassung auch ohne JavaScript lesbar. Hosting, GoatCounter und Betroffenenrechte
-  bleiben genannt. Keine pauschale Behauptung, dass keinerlei Daten übertragen
-  werden. Anbieterinformationen geprüft:
-  <https://www.goatcounter.com/help/privacy> und
+- Start pages DE/EN/FR rewritten: direct map entry, deeds and import before
+  the image; three dated news items, a short feature overview and a visible
+  LOTROInterface link to Magic Quest Log. No warning list and no repeated
+  browser privacy notes on the start page.
+- Menu and import heading: „Spielstand importieren“, „Import progress“,
+  „Importer la progression“. Folder selection and the second import step name
+  their concrete function. The former privacy box is a short note.
+- Privacy shortened to five sections, fully translated; the German
+  version is also readable without JavaScript. Hosting, GoatCounter and data subject rights
+  remain named. No blanket claim that no data at all is transferred. Provider information checked:
+  <https://www.goatcounter.com/help/privacy> and
   <https://docs.hetzner.com/general/company-and-policy/data-protection-at-hetzner/>.
-- Die Hetzner-Logfrist wird ausdrücklich als **konfigurierbarer Anbieterstandard**
-  beschrieben, nicht als geprüfte Kontoeinstellung. Die konkrete Einstellung in
-  konsoleH bleibt zu bestätigen; keine Hosting-Einstellung geändert.
-- Bestehende Impressumsänderungen erhalten; Sprachumschaltung ergänzt und Footer
-  vereinheitlicht. Auf jeder Seite nur Impressum und Datenschutz, in der gewählten
-  Sprache. Der Kartenfooter verbraucht echten Layoutraum statt die Karte zu überdecken.
-- Gemeinsame Schriftstufen in `gemeinsam.css`: Fließtext 16 px, Bedienung und
-  Metadaten 14 px, Abschnittsüberschriften 20 px, Seitentitel 28 px; Schriftfamilie
-  identisch, Monospace nur für Pfade/Befehle. Keine willkürliche Kleinschrift in
-  Tabellen, Hinweisen, Gebietskacheln und Kartenbedienung. Kleine Ziffern direkt
-  in Kartensymbolen bleiben davon getrennt.
-- Seitentitel, Sprach-/Navigationsbezeichnungen, Footer, Import-Links und
-  fehlenden französischen Startseiten-Text ergänzt. Englische/französische
-  FAQ erklärt ausgeschlossene Alternativen jetzt korrekt, statt beide Seiten
-  eines Aufgabenpaars pauschal auszuschließen. Katalog- und Fortschrittsdaten
-  bleiben unverändert.
+- The Hetzner log retention is expressly described as a **configurable provider standard**,
+  not as a checked account setting. The concrete setting in
+  konsoleH remains to be confirmed; no hosting setting changed.
+- Existing imprint changes retained; language switch added and footer
+  unified. On every page only imprint and privacy, in the selected
+  language. The map footer uses real layout space instead of covering the map.
+- Shared type sizes in `gemeinsam.css`: body text 16 px, controls and
+  metadata 14 px, section headings 20 px, page titles 28 px; font family
+  identical, monospace only for paths/commands. No arbitrary small type in
+  tables, notes, area tiles and map controls. Small digits directly
+  in map symbols remain separate from that.
+- Page titles, language/navigation labels, footer, import links and
+  the missing French start page text added. The English/French
+  FAQ now explains excluded alternatives correctly, instead of blanket
+  excluding both sides of a quest pair. Catalogue and progress data
+  stay unchanged.
 
-## Prüfung
+## Check
 
-- `node tests/test_i18n.js`: vollständige Schlüsselsätze und Platzhalter in allen
-  Sprachen, HTML-Bindungen, Startseiten-Neuigkeiten/Plugin-Link und Datenschutz-Fallback.
-- Python-Tests: `../MagicQuestLog/.venv/bin/python -m unittest discover -s tests`.
-- `tests/browser_site_polish.js` mit Playwright CLI: 21 Seitenvarianten plus drei
-  geöffnete Tatenansichten. Titel, Sprache, Übersetzungsbindungen, Footer,
-  Schriftgrößen, Überläufe, Windows-/Mac-Anleitung, Einstieg oberhalb des sichtbaren
-  Seitenendes und vollständig eingepasste 4:3-Karte bei veränderter Fenstergröße.
-- Importtabelle zusätzlich mit einem synthetischen Charakter geprüft: Texte
-  16 px, Tabelle/Buttons/Pfade 14 px; Beschriftungen DE/EN/FR vollständig.
-- Screenshots unter `output/playwright/start-polish-*.png` und
+- `node tests/test_i18n.js`: complete key sets and placeholders in all
+  languages, HTML bindings, start page news/plugin link and privacy fallback.
+- Python tests: `../MagicQuestLog/.venv/bin/python -m unittest discover -s tests`.
+- `tests/browser_site_polish.js` with Playwright CLI: 21 page variants plus three
+  opened deed views. Title, language, translation bindings, footer,
+  font sizes, overflows, Windows/Mac instructions, entry above the visible
+  page end and fully fitted 4:3 map at a changed window size.
+- Import table additionally checked with a synthetic character: texts
+  16 px, table/buttons/paths 14 px; labels DE/EN/FR complete.
+- Screenshots under `output/playwright/start-polish-*.png` and
   `output/playwright/import-polish-*.png`.
 
-Der Veröffentlichungs-Build hat dieselbe Prüfung bestanden (21 Seitenvarianten
-und drei geöffnete Karten, keine JavaScript-Fehler). Upload am 6. November:
-42 Dateien / 0,1 MB, 744 Dateien unverändert.
+The publication build passed the same check (21 page variants
+and three opened maps, no JavaScript errors). Upload on 6 November:
+42 files / 0,1 MB, 744 files unchanged.

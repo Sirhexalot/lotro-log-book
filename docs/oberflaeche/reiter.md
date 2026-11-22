@@ -1,38 +1,38 @@
-# Reiter
+# Tabs
 
-**Regel:** Eine Reiterleiste für die ganze Seite. Jede Seite mit Reitern benutzt
-`components/reiter.twig`, `web/reiter.css` und `web/reiter.js`. Keine Seite
-schreibt eigenes `role="tablist"`-Markup, keine Seite bringt eigene
-Reiterfarben mit. Ein neuer Reiter auf einer bestehenden Seite ist ein Eintrag
-in der Liste, kein neuer Baustein.
+**Rule:** one tab bar for the whole page. Every page with tabs uses
+`components/reiter.twig`, `web/reiter.css` and `web/reiter.js`. No page
+writes its own `role="tablist"` markup, no page brings its own
+tab colours. A new tab on an existing page is an entry
+in the list, not a new building block.
 
-Wer eine neue Reiterstelle baut, prüft danach `tests/test_reiter.py` und
-`tests/browser_reiter.js`; beide schlagen fehl, sobald eine Seite wieder eigene
-Reiter mitbringt.
+Whoever builds a new tab spot checks `tests/test_reiter.py` and
+`tests/browser_reiter.js` afterwards; both fail as soon as a page again
+brings its own tabs.
 
-## Wo sie steht
+## Where it stands
 
-| Seite | Kennung | Reiter |
+| Page | Identifier | Tabs |
 |---|---|---|
-| Gegenstand (`entity/item.twig`) | `item` | Woher · Wofür |
-| Instanz (`instances/detail.twig`) | `instanz` | Aufgaben · Belohnungen · Beute |
-| Klasse (`app/klassen.twig`) | `klassen` | Aufgaben · Taten · Gegenstände |
-| Gebiet (`entity/area.twig` + `entitaeten-listen.js`) | `related` | Aufgaben · Taten · Gegenstände |
+| Item (`entity/item.twig`) | `item` | Woher · Wofür |
+| Instance (`instances/detail.twig`) | `instanz` | Quests · Rewards · Loot |
+| Class (`app/klassen.twig`) | `klassen` | Quests · Deeds · Items |
+| Area (`entity/area.twig` + `entitaeten-listen.js`) | `related` | Quests · Deeds · Items |
 | Companion (`app/companion.twig`) | `companion` | Windows · macOS |
-| Spielstand (`app/spielstand.twig`) | `ordner` | Windows · macOS |
-| Handwerk (`app/handwerk.twig`) | `handwerk` | Rezepte · Rohstoffe |
+| Character progress (`app/spielstand.twig`) | `ordner` | Windows · macOS |
+| Crafting (`app/handwerk.twig`) | `handwerk` | Recipes · Resources |
 
-## Dateien
+## Files
 
-| Datei | Aufgabe |
+| File | Task |
 |---|---|
-| `php/templates/components/reiter.twig` | Markup, Macro `reiter(kennung, titel, eintraege, aktiv, versteckt)` |
-| `web/reiter.css` | Aussehen; einzige Stelle mit Reiterfarben |
-| `web/reiter.js` | `MQL_REITER.mount(host, optionen)`: Auswahl, Panels, Tastatur, Hash |
+| `php/templates/components/reiter.twig` | Markup, macro `reiter(kennung, titel, eintraege, aktiv, versteckt)` |
+| `web/reiter.css` | appearance; only place with tab colours |
+| `web/reiter.js` | `MQL_REITER.mount(host, optionen)`: selection, panels, keyboard, hash |
 
-Eingebunden wird beides zentral: `reiter.css` in `Shell::styles()` und in
-`app/layout.twig`, `reiter.js` in beiden Layouts. Keine Seite lädt die Dateien
-selbst.
+Both are included centrally: `reiter.css` in `Shell::styles()` and in
+`app/layout.twig`, `reiter.js` in both layouts. No page loads the files
+itself.
 
 ## Markup
 
@@ -43,84 +43,84 @@ selbst.
 ], 'woher') }}
 ```
 
-- `kennung` wird Präfix der Reiter-IDs (`item-woher`).
-- `panel` ist die ID des `[role="tabpanel"]`; mehrere Reiter dürfen auf dasselbe
-  Panel zeigen (Gebietsseite rendert es neu).
-- `zahl` ist optional. Gerendert wird sie nur bei Werten größer null, als
-  gedämpftes Badge ohne Gold.
-- Seiten, die ihre Zahl erst später kennen, setzen sie über
-  `reiter.zahl(key, wert)`; `0` oder `null` entfernt das Badge wieder. Ein
-  Zähler steht nie auf einem Reiter, der noch keine Daten geladen hat.
-- `versteckt` (fünfter Parameter) liefert die Leiste mit `hidden` aus, damit
-  Besucher ohne JavaScript alle Bereiche untereinander sehen. `mount` blendet
-  sie ein.
-- Das Panel selbst bleibt Aufgabe der Seite: es trägt `role="tabpanel"` und
-  `aria-labelledby` auf die Reiter-ID (`<kennung>-<key>`).
+- `kennung` becomes the prefix of the tab IDs (`item-woher`).
+- `panel` is the ID of the `[role="tabpanel"]`; several tabs may point to the same
+  panel (the area page re-renders it).
+- `zahl` is optional. It is rendered only for values greater than zero, as a
+  muted badge without gold.
+- Pages that only know their number later set it via
+  `reiter.zahl(key, wert)`; `0` or `null` removes the badge again. A
+  counter never stands on a tab that has not yet loaded data.
+- `versteckt` (fifth parameter) delivers the bar with `hidden` so that
+  visitors without JavaScript see all sections one below the other. `mount` makes
+  it visible.
+- The panel itself remains the page's task: it carries `role="tabpanel"` and
+  `aria-labelledby` to the tab ID (`<kennung>-<key>`).
 
-## Verhalten
+## Behaviour
 
-`MQL_REITER.mount` übernimmt alles, was die Seite früher selbst gemacht hat:
+`MQL_REITER.mount` takes over everything the page used to do itself:
 
-- genau ein sichtbares Panel, alle anderen `hidden`;
-- `aria-selected` und wanderndes `tabindex`;
-- Pfeiltasten, Home und End wechseln Auswahl und Fokus zusammen;
-- `hash: true` liest den Startreiter aus der Adresse und schreibt ihn beim
-  Wechsel (`verlauf: true` für einen Eintrag im Zurück-Verlauf); `popstate` und
-  `hashchange` bringen den Reiter auch beim Zurück-Knopf zurück;
-- `onShow(key)` läuft bei jedem Wechsel, auch beim ersten, und ist der Ort für
-  nachgeladene Listen (Instanzfilter, Handwerksrezepte, Gebietslisten).
+- exactly one visible panel, all others `hidden`;
+- `aria-selected` and travelling `tabindex`;
+- arrow keys, Home and End switch selection and focus together;
+- `hash: true` reads the start tab from the address and writes it on
+  switching (`verlauf: true` for an entry in the back history); `popstate` and
+  `hashchange` bring the tab back on the back button too;
+- `onShow(key)` runs on every switch, also on the first, and is the place for
+  reloaded lists (instance filter, crafting recipes, area lists).
 
-Seiten dürfen `aria-selected`, `hidden` oder `tabindex` nicht selbst setzen.
-Sie liefern nur Inhalte und sagen, was beim Wechsel passiert.
+Pages may not set `aria-selected`, `hidden` or `tabindex` themselves.
+They deliver only content and say what happens on switching.
 
-## Aussehen
+## Appearance
 
-- Der aktive Reiter geht in die Fläche darunter über: gleiche Hintergrundfarbe,
-  keine untere Kante, goldene Oberkante, `margin-bottom: -1px`.
-- **Das Panel gehört zur Komponente.** `.llb-reiter ~ [role="tabpanel"]` trägt
-  Rahmen, Fläche, Innenabstand und den Radius `0 6px 6px 6px`. Eine Seite, die
-  ihr Panel selbst rahmt, erzeugt einen zweiten Rahmen; solche Regeln gehören
-  hierher, nicht in die Seiten-CSS.
-- Der Fokusring liegt **innen** (`outline-offset: -3px`). Ein außen liegender
-  Ring lässt den Reiter wie ein anderes Bauteil aussehen.
-- Inaktive Reiter stehen auf `--fläche` mit `--schwach`; Hover und Fokus nutzen
+- The active tab merges into the surface below: same background colour,
+  no bottom edge, golden top edge, `margin-bottom: -1px`.
+- **The panel belongs to the component.** `.llb-reiter ~ [role="tabpanel"]` carries
+  border, surface, inner padding and the radius `0 6px 6px 6px`. A page that
+  frames its panel itself creates a second border; such rules belong
+  here, not in the page CSS.
+- The focus ring lies **inside** (`outline-offset: -3px`). An outside
+  ring makes the tab look like a different component.
+- Inactive tabs stand on `--fläche` with `--schwach`; hover and focus use
   `--gold`.
-- Farben ausschließlich über Theme-Tokens. Keine festen Palettenwerte: genau
-  daran sind die alten Reiter im hellen Design gescheitert (schwarzer
-  Suchen-Knopf, unlesbare inaktive Reiter).
-- Die Leiste ist eine Zeile und bricht bei Bedarf um; auf dem Handy darf sie
-  waagerecht nicht überlaufen.
+- Colours exclusively via theme tokens. No fixed palette values: exactly
+  on that the old tabs failed in the light design (black
+  search button, illegible inactive tabs).
+- The bar is one row and wraps when needed; on the phone it may
+  not overflow horizontally.
 
-## Was nicht
+## What not
 
-- Kein zweites Reiter-Markup „nur für diese Seite“, auch nicht als Kopie.
-- Keine Reiterfarbe und kein Panel-Rahmen in einer Seiten-CSS; Änderungen
-  gehören in `reiter.css`.
-- Keine `aria-pressed`-Knopfgruppe als Reiterersatz — das ist ein Schalter, kein
-  Reiter, und wird von Screenreadern anders angekündigt.
-- Kein Zähler, der aus dem DOM gezählt wird. Die Seite liefert die Zahl; die
-  Komponente zeigt sie nur.
-- Keine Inhalte im Reiter selbst verstecken: was nicht sichtbar sein soll, ist
-  ein anderes Panel, kein `display:none` im Panel.
+- No second tab markup „only for this page“, not even as a copy.
+- No tab colour and no panel border in a page CSS; changes
+  belong in `reiter.css`.
+- No `aria-pressed` button group as a tab substitute — that is a switch, not a
+  tab, and screen readers announce it differently.
+- No counter that is counted from the DOM. The page delivers the number; the
+  component only shows it.
+- No hiding of content in the tab itself: what should not be visible is
+  a different panel, no `display:none` in the panel.
 
-## Prüfungen
+## Checks
 
-- `python3 -m unittest tests.test_reiter` – nur die Komponente enthält
-  `role="tablist"`, keine Seite bringt Altmarkup oder Altstile mit, beide
-  Layouts laden CSS und Skript.
-- `node tests/browser_reiter.js http://127.0.0.1:8817` – alle sieben Seiten,
-  beide Breiten, Klick, Pfeiltasten, helles Design, kein waagerechter Überlauf.
-  Dasselbe Skript läuft gegen die veröffentlichte Adresse.
-- `tests/browser_area_tabs.js`, `tests/browser_related_lists.js` und
-  `tests/browser_handwerk_reload.js` decken die Inhalte hinter den Reitern ab
-  (Suche, Filter, Hash über einen Reload).
+- `python3 -m unittest tests.test_reiter` – only the component contains
+  `role="tablist"`, no page brings old markup or old styles, both
+  layouts load CSS and script.
+- `node tests/browser_reiter.js http://127.0.0.1:8817` – all seven pages,
+  both widths, click, arrow keys, light design, no horizontal overflow.
+  The same script runs against the published address.
+- `tests/browser_area_tabs.js`, `tests/browser_related_lists.js` and
+  `tests/browser_handwerk_reload.js` cover the content behind the tabs
+  (search, filter, hash over a reload).
 
-## Neue Seite mit Reitern
+## New page with tabs
 
-1. Im Template `{% import 'components/reiter.twig' as reiter %}` ergänzen.
-2. Panels als `<section id="…" role="tabpanel" aria-labelledby="<kennung>-<key>">`
-   anlegen; nur das Startpanel bleibt sichtbar.
-3. `reiter.reiter('<kennung>', '<Titel>', [ … ], '<startkey>')` einsetzen.
-4. `MQL_REITER.mount` im Seitenskript aufrufen, `onShow` für nachgeladene Inhalte.
-5. `tests/test_reiter.py` um die Seite ergänzen, `tests/browser_reiter.js` um
-   Pfad und Reiterzahl.
+1. Add `{% import 'components/reiter.twig' as reiter %}` in the template.
+2. Create panels as `<section id="…" role="tabpanel" aria-labelledby="<kennung>-<key>">`;
+   only the start panel remains visible.
+3. Insert `reiter.reiter('<kennung>', '<Titel>', [ … ], '<startkey>')`.
+4. Call `MQL_REITER.mount` in the page script, `onShow` for reloaded content.
+5. Extend `tests/test_reiter.py` by the page, `tests/browser_reiter.js` by
+   path and tab count.

@@ -1,363 +1,362 @@
-# Semantisches Datenmodell – belegte Auswertungsregeln
+# Semantic data model – proven evaluation rules
 
-Stand 17.11.2026. Ergänzung zu [Datenraum und Feldinventar](lotro-datenraum.md).
+Status as of 17.11.2026. Supplement to [Data space and field inventory](lotro-datenraum.md).
 
-## Beweisstufe und Geltungsbereich
+## Level of proof and scope
 
-Die folgenden Aussagen beschreiben **tatsächlich implementierte Auswertungen im
-gelesenen Companion-Extractor-Quellstand**, kombiniert mit den vorhandenen
-XML-/JSON-Werten. Sie sind kein Nachweis einer identischen Implementierung im
-Spielserver und keine allgemeine Verfügbarkeitszusage.
+The following statements describe **evaluations actually implemented in the
+read Companion extractor source state**, combined with the existing
+XML/JSON values. They are no proof of an identical implementation in the
+game server and no general availability promise.
 
-Quellwurzel:
+Source root:
 `~/Documents/07_Hobbys/Lotro/Companion-Test/dat-reader-investigation/src/main/java/delta/games/lotro/tools/extraction/`.
-Dateinamen und Zeilenangaben unten sind relativ dazu.
-Hashes der gezielt geprüften Quellen und quantitative Gegenprüfungen:
-`lotro-datenraum-semantik-pruefung.json`. Reproduktion:
+File names and line numbers below are relative to it.
+Hashes of the specifically checked sources and quantitative cross-checks:
+`lotro-datenraum-semantik-pruefung.json`. Reproduction:
 `python3 lotro_datenraum_semantik_pruefen.py`.
 
-**Wichtig:** Struktur vollständig erfasst ≠ Bedeutung vollständig geklärt.
-Ein Getter-/Setter-Fund allein bestätigt weder Einheit noch Default.
-Nicht erläuterte Properties im Inventar behalten den Status „Bedeutung nicht
-abschließend geprüft“. Sie sind keine stillschweigend freigegebenen Fakten.
+**Important:** structure fully captured ≠ meaning fully clarified.
+A getter/setter finding alone confirms neither unit nor default.
+Unexplained properties in the inventory keep the status "meaning not
+conclusively checked". They are not silently approved facts.
 
-## 1. Aufgabe/Tat: Voraussetzungen als Ausdrucksbaum
+## 1. Quest/deed: prerequisites as an expression tree
 
-Beleg: `achievables/QuestRequirementsLoader.java:84–138,224–296`,
+Evidence: `achievables/QuestRequirementsLoader.java:84–138,224–296`,
 `utils/OperatorUtils.java:16–24`.
 
-### Boolesche Struktur
+### Boolean structure
 
-- `Usage_QuestRequirements_OrList`: Bedingungen werden zu **ODER** verbunden.
-- `Usage_QuestRequirements`: Bedingungen werden zu **UND** verbunden.
-- Sind beide vorhanden, ist das Ergebnis **UND(AND-Gruppe, OR-Gruppe)**.
-  Nicht `ODER(AND-Gruppe, OR-Gruppe)` und nicht einfach eine gemeinsame Liste.
-- Gruppen mit einem Kind werden auf dieses Kind reduziert; leere Gruppen
-  werden im Extractor zu `null`. Das ist Bereinigung der Ausgabe.
-- `deepRequirementCleanup` kann nicht auflösbare Achievable-Proxies entfernen.
-  Eine danach fehlende Voraussetzung ist deshalb kein Beweis, dass im
-  Rohdatensatz keine vorhanden war.
+- `Usage_QuestRequirements_OrList`: conditions are joined with **OR**.
+- `Usage_QuestRequirements`: conditions are joined with **AND**.
+- If both are present, the result is **AND(AND group, OR group)**.
+  Not `ODER(AND-Gruppe, OR-Gruppe)` and not simply one shared list.
+- Groups with one child are reduced to that child; empty groups
+  become `null` in the extractor. That is cleanup of the output.
+- `deepRequirementCleanup` can remove unresolvable achievable proxies.
+  A prerequisite missing afterwards is therefore no proof that none existed in the
+  raw record.
 
-### Einzelbedingung
+### Single condition
 
-| Property | Bedeutung in diesem Loader | Typ/Bezug | Grenze |
+| Property | Meaning in this loader | Type/reference | Limit |
 | --- | --- | --- | --- |
-| `Usage_QuestID` | geprüfte Aufgabe/Tat | Integer → Achievable-ID | gemeinsamer ID-Raum, nicht nur Quest-Katalog |
-| `Usage_QuestStatus` | geforderter Zustands-Code | Integer | nicht automatisch „erledigt“ |
-| `Usage_Operator` | Vergleich zwischen Zustand und Anforderung | Integer-Code | unbekannte Codes werden verworfen, nicht geraten |
+| `Usage_QuestID` | checked quest/deed | integer → achievable ID | shared ID space, not only quest catalogue |
+| `Usage_QuestStatus` | required status code | integer | not automatically "completed" |
+| `Usage_Operator` | comparison between status and requirement | integer code | unknown codes are discarded, not guessed |
 
-Operatoren: 1 = ≥, 2 = ≠, 3 = =, 4 = <, 5 = ≤, 6 = >.
-Andere Codes liefern im gelesenen Helper `null`.
+Operators: 1 = ≥, 2 = ≠, 3 = =, 4 = <, 5 = ≤, 6 = >.
+Other codes return `null` in the read helper.
 
-Statusbehandlung:
+Status handling:
 
-| Code | Behandlung im Loader |
+| Code | Handling in the loader |
 | --- | --- |
 | `0x10000000` | UNDERWAY |
 | `0x20000000` | FAILED |
 | `0x30000000` | COMPLETED |
-| `0x40000000`, `0x50000000` | Kommentare nennen ABANDONED/TAPPED, aber keine eigenständige vollständige Behandlung |
-| weitere Codes mit gesetztem `0x10000000`-Bit | laufendes Ziel; Index aus `status & 0x0FFFFFFF` |
+| `0x40000000`, `0x50000000` | comments name ABANDONED/TAPPED, but no separate complete handling |
+| other codes with the `0x10000000` bit set | running objective; index from `status & 0x0FFFFFFF` |
 
-Die Reihenfolge dieser Prüfungen ist maßgeblich. Insbesondere die kommentierte
-TAPPED-Bezeichnung ist **keine vollständig unterstützte Statussemantik**.
-Die Fallback-Bitprüfung folgt nach den exakten drei ersten Vergleichen.
+The order of these checks is decisive. In particular the commented
+TAPPED label is **not a fully supported status semantics**.
+The fallback bit check follows after the exact first three comparisons.
 
-### Spezielles Verbergen
+### Special hiding
 
-`HIDING_CONTENT_QUEST_ID=1879049597` (`7000057D`). Der Loader erkennt eine
-Voraussetzung mit diesem ID-Ziel und Status COMPLETED als Verbergungsmarker,
-setzt `achievable.hidden=true` und nimmt die Voraussetzung nicht in die
-normale ausgegebene Liste auf. Das ist konkretes Extractor-Verhalten, keine
-pauschale Regel „hidden bedeutet unspielbar“.
+`HIDING_CONTENT_QUEST_ID=1879049597` (`7000057D`). The loader recognises a
+prerequisite with this ID target and status COMPLETED as a hiding marker,
+sets `achievable.hidden=true` and does not include the prerequisite in the
+normal output list. That is concrete extractor behaviour, not a blanket rule
+"hidden means unplayable".
 
-## 2. Gegenstand: Werte, Voraussetzungen und Bindung
+## 2. Item: values, prerequisites and binding
 
-Beleg: `items/MainDatItemsLoader.java:198–297,878–892`.
+Evidence: `items/MainDatItemsLoader.java:198–297,878–892`.
 
-| Property | Ausgewertete Bedeutung | Einheit/Ziel | Fehlend/Transformation |
+| Property | Evaluated meaning | Unit/target | Missing/transformation |
 | --- | --- | --- | --- |
-| `Icon_Layer_ImageDID` | Vordergrund des Icons | Bild-DID | zusammengesetztes Icon, keine Item-ID |
-| `Icon_Layer_BackgroundDID` | Hintergrund | Bild-DID | getrennte Ebene |
-| `Icon_Layer_ShadowDID` | Schatten | Bild-DID | getrennte Ebene |
-| `Icon_Layer_UnderlayDID` | Unterlage | Bild-DID | getrennte Ebene |
-| `Inventory_Unique` | Unique-Flag | Integer, Vergleich exakt mit 1 | fehlend wird im Loader false |
-| `Inventory_MaxQuantity` | maximale Stapelgröße | Stückzahl | nur Werte >1 werden explizit gesetzt |
-| `Item_Level` | Gegenstandsstufe | Stufenzahl | nicht Mindest-Charakterstufe |
-| `Usage_MinLevel` | untere Nutzungsstufe | Charakterstufe | nullable |
-| `Usage_MaxLevel` | obere Nutzungsstufe | Charakterstufe | nullable |
-| `Item_MaxStructurePoints` | maximale Haltbarkeit | Strukturpunkte | kein Sturdiness-Enum |
-| `Item_DurabilityEnum` | Robustheits-/Sturdiness-Kategorie | Enum | keine Haltbarkeitszahl |
-| `Item_Quality` | Qualitätscode | Enum via `DatEnumsUtils.getQuality` | nicht Compendium-`q` ungeprüft gleichsetzen |
-| `Description` | Beschreibung | lokalisierter String | Markup wird entfernt |
-| `ItemMunging_MinMungeLevel` | Skalierungsgrenze im Munging-Kontext | Stufe | kann die ausgegebene Itemstufe verändern |
+| `Icon_Layer_ImageDID` | foreground of the icon | image DID | composite icon, not an item ID |
+| `Icon_Layer_BackgroundDID` | background | image DID | separate layer |
+| `Icon_Layer_ShadowDID` | shadow | image DID | separate layer |
+| `Icon_Layer_UnderlayDID` | underlay | image DID | separate layer |
+| `Inventory_Unique` | unique flag | integer, exact comparison with 1 | missing becomes false in the loader |
+| `Inventory_MaxQuantity` | maximum stack size | piece count | only values >1 are set explicitly |
+| `Item_Level` | item level | level number | not minimum character level |
+| `Usage_MinLevel` | lower usage level | character level | nullable |
+| `Usage_MaxLevel` | upper usage level | character level | nullable |
+| `Item_MaxStructurePoints` | maximum durability | structure points | no sturdiness enum |
+| `Item_DurabilityEnum` | robustness/sturdiness category | enum | no durability number |
+| `Item_Quality` | quality code | enum via `DatEnumsUtils.getQuality` | do not equate with Compendium `q` unchecked |
+| `Description` | description | localised string | markup is removed |
+| `ItemMunging_MinMungeLevel` | scaling limit in the munging context | level | can change the output item level |
 
-### Bindung ist eine Auswertung mehrerer Flags
+### Binding is an evaluation of several flags
 
-Die tatsächliche Priorität im Companion-Loader lautet:
+The actual priority in the Companion loader is:
 
 1. `Inventory_BindOnAcquire == 1`:
-   - zusätzlich `Inventory_BindToAccount == 1` → Accountbindung beim Aufnehmen;
-   - sonst Bindung beim Aufnehmen.
-2. Sonst `Inventory_BindOnEquip == 1` → Bindung beim Ausrüsten.
-3. Sonst `null`.
+   - additionally `Inventory_BindToAccount == 1` → account binding on acquire;
+   - otherwise binding on acquire.
+2. Otherwise `Inventory_BindOnEquip == 1` → binding on equip.
+3. Otherwise `null`.
 
-`null` ist die Extractor-Ausgabe ohne eine dieser erkannten Regeln, nicht der
-Nachweis sämtlicher denkbarer Bindungsmechanismen.
+`null` is the extractor output without any of these recognised rules, not the
+proof of all conceivable binding mechanisms.
 
-**Quantitativ bestätigter Verlust im kompakten Itemexport:**
+**Quantitatively confirmed loss in the compact item export:**
 
-| Companion-Bindung | Kompaktes `b` | Items |
+| Companion binding | Compact `b` | Items |
 | --- | --- | ---: |
-| Bind on Acquire | 1 | 32.847 |
-| Bound to Account on Acquire | 1 | 38.514 |
-| Bind on Equip | 2 | 46.610 |
-| Attribut fehlt | 0 | 34.117 |
+| Bind on Acquire | 1 | 32,847 |
+| Bound to Account on Acquire | 1 | 38,514 |
+| Bind on Equip | 2 | 46,610 |
+| Attribute missing | 0 | 34,117 |
 
-Die Summe ist 152.088 exportierte Items. Accountbindung und Charakterbindung
-werden bei `b=1` tatsächlich zusammengeführt. Ein Renderer kann diesen
-Unterschied aus `b` allein nicht rekonstruieren.
+The sum is 152,088 exported items. Account binding and character binding
+are actually merged at `b=1`. A renderer cannot reconstruct this
+difference from `b` alone.
 
-### Skalierung
+### Scaling
 
-Bei vorhandenem `Item_Level` und niedrigerer Itemstufe als
-`ItemMunging_MinMungeLevel` kann der Loader für nichtlegendäre Items
-`munging.getItemLevel(minScaledLevel)` setzen. Die ausgegebene Stufe kann
-somit berechnet sein. Ein direkter Vergleich gegen nur `Item_Level` wäre
-für alle Itemtypen kein vollständiger Semantiktest.
+With a present `Item_Level` and a lower item level than
+`ItemMunging_MinMungeLevel`, the loader can set
+`munging.getItemLevel(minScaledLevel)` for non-legendary items. The output level can
+therefore be computed. A direct comparison against only `Item_Level` would not be
+a complete semantics test for all item types.
 
-## 3. Gegenstand: gewährte Inhalte und Ruf
+## 3. Item: granted content and reputation
 
-Beleg: `items/ItemDetailsLoader.java:86–231,234–300`.
+Evidence: `items/ItemDetailsLoader.java:86–231,234–300`.
 
-| Property/Struktur | Belegte Auswertung | Relation/Bedingen |
+| Property/structure | Proven evaluation | Relation/conditions |
 | --- | --- | --- |
-| `Item_GrantedSkill` | gewährte Fertigkeit | Skill-ID; Ausgabe nur bei auflösbarem Skill |
-| `Mount_SkillToGrantShort` | gewährte Reitfertigkeit für kleine Figur | Skill-ID, eigener GrantType |
-| `Mount_SkillToGrantTall` | gewährte Reitfertigkeit für große Figur | Skill-ID, eigener GrantType |
-| `Mount_SkillToGrantRaceArray` | mehrere rassenabhängige Freigaben | nicht skalar zusammenfassen |
-| `Mount_SkillToGrant` | Skill des Arrayeintrags | Skill-ID |
-| `Usage_RequiredRaceEntry` | Rasse des Eintrags | Rassen-Code, nicht Rassen-DAT-ID |
-| `Item_GrantedTrait` | gewährter Trait | Trait-ID |
-| `RewardTrack_XPToAdd` | XP-Menge | in diesem Handler nur bei ExperienceType=1 als ItemXP |
-| `RewardTrack_ExperienceType` | Art der XP | kein Betrag |
-| `Reputation_IsReputationItem` | Rufitem-Kennzeichnung | Verarbeitung nur bei exakt 1 |
-| `Reputation_Faction` | Fraktion des Rufitems | nicht 0 und im Registry auflösbar |
-| `Reputation_ReputationGain` | Rufmenge, bevorzugt verwendet | Long → Integer-Ausgabe |
-| `Reputation_ReputationLoss` | alternativ verwendete Rufmenge | Code übernimmt Wert, negiert nicht selbst |
-| `EffectGenerator_UsageEffectList` | Nutzungseffekte | Liste von Effektstrukturen |
-| `EffectGenerator_EffectID` | referenzierter Effekt | gleiche Effekt-ID im Handler nur einmal verarbeitet |
-| `EffectGenerator_EffectDataList` | zusätzliche Effekt-Daten | Propertytypen entscheidend |
+| `Item_GrantedSkill` | granted skill | skill ID; output only for a resolvable skill |
+| `Mount_SkillToGrantShort` | granted riding skill for small figure | skill ID, own GrantType |
+| `Mount_SkillToGrantTall` | granted riding skill for tall figure | skill ID, own GrantType |
+| `Mount_SkillToGrantRaceArray` | several race-dependent grants | do not summarise scalarly |
+| `Mount_SkillToGrant` | skill of the array entry | skill ID |
+| `Usage_RequiredRaceEntry` | race of the entry | race code, not race DAT ID |
+| `Item_GrantedTrait` | granted trait | trait ID |
+| `RewardTrack_XPToAdd` | XP amount | in this handler only as item XP with ExperienceType=1 |
+| `RewardTrack_ExperienceType` | kind of XP | no amount |
+| `Reputation_IsReputationItem` | reputation item marker | processing only with exactly 1 |
+| `Reputation_Faction` | faction of the reputation item | not 0 and resolvable in the registry |
+| `Reputation_ReputationGain` | reputation amount, preferably used | long → integer output |
+| `Reputation_ReputationLoss` | alternatively used reputation amount | code adopts the value, does not negate itself |
+| `EffectGenerator_UsageEffectList` | usage effects | list of effect structures |
+| `EffectGenerator_EffectID` | referenced effect | same effect ID processed only once in the handler |
+| `EffectGenerator_EffectDataList` | additional effect data | property types decisive |
 
-Bei Rufmenge fehlt Gain, fehlt aber Loss nicht, verwendet der Handler Loss.
-Fehlen beide, initialisiert er 0. Das ist kein Nachweis eines originalen
-expliziten Nullwerts. Auch die Vorzeichenkonvention von Loss folgt nicht
-allein aus dem Feldnamen.
+With reputation amount, if gain is missing but loss is not, the handler uses loss.
+If both are missing, it initialises 0. That is no proof of an original
+explicit null value. The sign convention of loss also does not follow
+from the field name alone.
 
-Der Quellcode enthält bei einigen Effekt-Datentypen ausdrücklich nur
-Kommentare wie „Skill Data ID?“ oder „Array of recipe IDs?“. Diese werden
-**nicht** als validierte Relationen übernommen.
+For some effect data types the source code contains explicitly only
+comments such as "Skill Data ID?" or "Array of recipe IDs?". These are
+**not** adopted as validated relations.
 
-## 4. Rezept: Version, Resultat, Zutaten und Skalierung
+## 4. Recipe: version, result, ingredients and scaling
 
-Beleg: `crafting/MainDatRecipesLoader.java:64–159,162–227,230–341`.
+Evidence: `crafting/MainDatRecipesLoader.java:64–159,162–227,230–341`.
 
-| Property | Bedeutung im Loader | Einheit/Ziel | Transformation |
+| Property | Meaning in the loader | Unit/target | Transformation |
 | --- | --- | --- | --- |
-| `CraftRecipe_UICategory` | UI-Kategorie | CraftingUICategory-Enum | nicht Berufs-ID |
-| `CraftRecipe_XPReward` | Schlüssel in XP-Mapping | Lookup-Schlüssel | kein direkt auszugebender XP-Betrag |
-| `CraftRecipe_CooldownDuration` | Schlüssel im Cooldown-Mapping | Dauer-Typ-Code | kein direkter Sekundenwert |
-| `CraftRecipe_OneTimeRecipe` | Einmalrezept | Integer=1 | andere/fehlende Werte setzen Flag nicht |
-| `CraftRecipe_Profession` | Beruf | Berufs-ID | `getProfessionById` |
-| `CraftRecipe_Tier` | Handwerksstufe | Code/Zahl | sonst erster Wert aus TierArray |
-| `CraftRecipe_TierArray` | alternative Stufenquelle | Array | Loader verwendet Index 0 |
-| `CraftRecipe_RequiredCraftGuild` | benötigte Gilde | fachlich Fraktions-ID laut Quellkommentar | ausgegeben wird hier nur guildRequired=true bei ≠0 |
-| `CraftRecipe_ResultItem` | normales Ergebnis | Item-ID | eigenes Ergebnisobjekt |
-| `CraftRecipe_ResultItemQuantity` | normale Ergebnismenge | Stück | nur bei vorhandenem Feld gesetzt |
-| `CraftRecipe_CriticalResultItem` | kritisches Ergebnis | Item-ID >0 | eigenes Ergebnisobjekt |
-| `CraftRecipe_CriticalResultItemQuantity` | kritische Menge | Stück | getrennt von normaler Menge |
-| `CraftRecipe_CriticalSuccessChance` | Basischance | Bruchteil im DAT/Pythonexport | Java-Ausgabe `int(value*100)` |
-| `CraftRecipe_IngredientList` | normale Zutaten | Liste | eigene Positionen |
-| `CraftRecipe_OptionalIngredientList` | optionale Zutaten | Liste | optional=true |
-| `CraftRecipe_Ingredient` | Zutat-ID | Item-ID | nicht Rezept-ID |
-| `CraftRecipe_IngredientQuantity` | Zutatenmenge | Stück | nicht automatisch ein universeller DAT-Default |
-| `CraftRecipe_IngredientCritBonus` | Bonus einer optionalen Zutat | Bruchteil | Java-Ausgabe `int(value*100)` |
-| `CraftRecipe_IngredientPack` | alternatives Zutatenpaket | Item-ID | eigenes IngredientPack |
-| `CraftRecipe_IngredientPackQuantity` | Paketmenge | Stück | hier ausdrücklich Default 1 |
-| `CraftRecipe_MultiOutputArray` | zusätzliche Rezeptversionen | Array | normale Version wird geklont und überschrieben |
+| `CraftRecipe_UICategory` | UI category | CraftingUICategory enum | not a profession ID |
+| `CraftRecipe_XPReward` | key in XP mapping | lookup key | no directly outputtable XP amount |
+| `CraftRecipe_CooldownDuration` | key in cooldown mapping | duration type code | no direct seconds value |
+| `CraftRecipe_OneTimeRecipe` | one-time recipe | integer=1 | other/missing values do not set the flag |
+| `CraftRecipe_Profession` | profession | profession ID | `getProfessionById` |
+| `CraftRecipe_Tier` | crafting tier | code/number | otherwise first value from TierArray |
+| `CraftRecipe_TierArray` | alternative tier source | array | loader uses index 0 |
+| `CraftRecipe_RequiredCraftGuild` | required guild | domain-wise faction ID per source comment | only guildRequired=true is output here for ≠0 |
+| `CraftRecipe_ResultItem` | normal result | item ID | own result object |
+| `CraftRecipe_ResultItemQuantity` | normal result quantity | piece | set only when the field is present |
+| `CraftRecipe_CriticalResultItem` | critical result | item ID >0 | own result object |
+| `CraftRecipe_CriticalResultItemQuantity` | critical quantity | piece | separate from normal quantity |
+| `CraftRecipe_CriticalSuccessChance` | base chance | fraction in DAT/Python export | Java output `int(value*100)` |
+| `CraftRecipe_IngredientList` | normal ingredients | list | own positions |
+| `CraftRecipe_OptionalIngredientList` | optional ingredients | list | optional=true |
+| `CraftRecipe_Ingredient` | ingredient ID | item ID | not recipe ID |
+| `CraftRecipe_IngredientQuantity` | ingredient quantity | piece | not automatically a universal DAT default |
+| `CraftRecipe_IngredientCritBonus` | bonus of an optional ingredient | fraction | Java output `int(value*100)` |
+| `CraftRecipe_IngredientPack` | alternative ingredient pack | item ID | own IngredientPack |
+| `CraftRecipe_IngredientPackQuantity` | pack quantity | piece | here explicitly default 1 |
+| `CraftRecipe_MultiOutputArray` | additional recipe versions | array | normal version is cloned and overwritten |
 
-### Kritische Chance
+### Critical chance
 
-4.557 konkrete Vergleiche zwischen kompaktem `ch` und dem ersten
-Companion-`recipeResult/@baseCriticalChance`: alle stimmen unter
-`int(ch*100)` überein. Beispiel: 0,05 im kompakten Export entspricht
-5 in der Companion-XML. Das ist keine Garantie für jede andere
-Chance-/Gewichts-Property des Spiels.
+4,557 concrete comparisons between compact `ch` and the first
+Companion `recipeResult/@baseCriticalChance`: all agree under
+`int(ch*100)`. Example: 0.05 in the compact export corresponds to
+5 in the Companion XML. That is no guarantee for every other
+chance/weight property of the game.
 
-### Mehrfachausgaben sind keine einzelne Ergebnisliste
+### Multiple outputs are not a single result list
 
-`handleRecipeOutput` klont die erste Version und kann normales Ergebnis,
-kritisches Ergebnis und erste Zutat ersetzen.
-**2.480 Companion-Rezepte besitzen mehr als ein `recipeResult`.**
-Ein kompaktes Schema mit nur einem `r`, `cr`, `i`, `o` je Rezept kann
-diese Varianten nicht allgemein verlustfrei darstellen.
+`handleRecipeOutput` clones the first version and can replace normal result,
+critical result and first ingredient.
+**2,480 Companion recipes have more than one `recipeResult`.**
+A compact schema with only one `r`, `cr`, `i`, `o` per recipe cannot
+represent these variants losslessly in general.
 
-### Gleiches Item und gleiche Menge heißt nicht gleiches Ergebnis
+### Same item and same quantity does not mean same result
 
-Falls normale und kritische Ausgabe dieselbe Item-ID und Menge haben,
-prüft Companion zusätzlich `Item_iLevel_Crafting_Offset`:
-normale Itemstufe = `Item_Level`,
-kritische Itemstufe = `Item_Level + Offset`.
-Item-ID und Menge allein reichen semantisch nicht für Ergebnisgleichheit.
-Die Zahl tatsächlich solcher Resultate wird gesondert aus den XML-Werten
-geprüft, nicht aus dem Code geraten.
+If normal and critical output have the same item ID and quantity,
+Companion additionally checks `Item_iLevel_Crafting_Offset`:
+normal item level = `Item_Level`,
+critical item level = `Item_Level + Offset`.
+Item ID and quantity alone are semantically not enough for result equality.
+The number of actually such results is checked separately from the XML values,
+not guessed from the code.
 
 ## 5. Cooldown
 
-Beleg: `common/CooldownLoader.java:14–37`.
+Evidence: `common/CooldownLoader.java:14–37`.
 
-`CooldownControl_DurationMapList` enthält Einträge aus
+`CooldownControl_DurationMapList` contains entries from
 `CooldownControl_DurationType` → `CooldownControl_DurationValue`.
-Der Loader dokumentiert die Wert-Einheit als **Sekunden**.
-Eine Recipe-Cooldown-ID muss erst gegen diese Tabelle aufgelöst werden.
-Der Rezeptloader überträgt den Floatwert per `intValue()`, wodurch
-Nachkommastellen verloren gehen können.
+The loader documents the value unit as **seconds**.
+A recipe cooldown ID must first be resolved against this table.
+The recipe loader transfers the float value via `intValue()`, which can lose
+decimal places.
 
-## 6. Beute: Typunion, Gewicht und Wahrscheinlichkeit
+## 6. Loot: type union, weight and probability
 
-Beleg: `loot/LootLoader.java:86–108,130–160,183–253,282–293`,
+Evidence: `loot/LootLoader.java:86–108,130–160,183–253,282–293`,
 `loot/LootProbabilities.java:31–113`.
 
-| Struktur/Property | Belegte Bedeutung |
+| Structure/property | Proven meaning |
 | --- | --- |
-| `LootGen_WeightedTreasureTable` | Liste gewichteter Trophäenlisten |
-| `LootGen_WeightedTreasureTable_TrophyList_Weight` | Integer-Gewicht des Eintrags, kein direktes Prozent |
-| `LootGen_WeightedTreasureTable_TrophyList` | Referenz auf Trophäenliste |
-| `LootGen_FilteredTreasureListArray` | gefilterte Einträge |
-| `LootGen_FilteredTrophyTable_EntryDID` | Ziel wird als TrophyList, sonst WeightedTreasureTable geladen |
-| `EntityFilter_Array` | Filter der betreffenden Beuteauswahl |
-| `LootGen_TrophyList_ItemOrProfile` | Item oder Gruppenprofil |
-| `LootGen_TrophyList_ItemQuantity` | Menge des direkten Items; hier Default 1 |
-| `LootGen_TrophyList_GroupDrop` | Gruppenbeute-Flag, exakt Integer=1 |
-| `LootGen_TrophyList_DropFrequency` | Häufigkeits-Code, wird auf Wahrscheinlichkeit abgebildet |
+| `LootGen_WeightedTreasureTable` | list of weighted trophy lists |
+| `LootGen_WeightedTreasureTable_TrophyList_Weight` | integer weight of the entry, not a direct percentage |
+| `LootGen_WeightedTreasureTable_TrophyList` | reference to trophy list |
+| `LootGen_FilteredTreasureListArray` | filtered entries |
+| `LootGen_FilteredTrophyTable_EntryDID` | target is loaded as TrophyList, otherwise WeightedTreasureTable |
+| `EntityFilter_Array` | filter of the affected loot selection |
+| `LootGen_TrophyList_ItemOrProfile` | item or group profile |
+| `LootGen_TrophyList_ItemQuantity` | quantity of the direct item; here default 1 |
+| `LootGen_TrophyList_GroupDrop` | group loot flag, exactly integer=1 |
+| `LootGen_TrophyList_DropFrequency` | frequency code, is mapped to probability |
 
-Für Gruppenprofile versucht `loadTreasureGroupProfile` zuerst ItemsTable,
-dann TreasureList. Damit ist die zuvor beobachtete Zielunion auch im
-Loader-Code belegt.
+For group profiles `loadTreasureGroupProfile` first tries ItemsTable,
+then TreasureList. The target union observed earlier is thus also proven in the
+loader code.
 
-### Häufigkeits-Code → Wahrscheinlichkeit
+### Frequency code → probability
 
-**Korrektur eines zu pauschalen früheren offenen Punkts:** Companion hat
-einen Decoderpfad für die Häufigkeitscodes:
+**Correction of an earlier, too sweeping open point:** Companion has
+a decoder path for the frequency codes:
 
 `LootGenControl` →
 `LootGenControl_DropFrequencyTable` →
-`LootGenControl_DropFrequency_Label` und
+`LootGenControl_DropFrequency_Label` and
 `LootGenControl_DropFrequency_Percentage`.
 
-Live-Modus liest diese Zuordnung aus den Daten; die Debugdarstellung
-multipliziert den Wert mit 100. Der Code selbst ist weiterhin kein Prozent.
-Die konkrete aktuelle Control-Tabelle wurde in diesem Audit noch nicht
-gegen einen frischen Rohdatensatz geprüft, daher werden hier keine aktuellen
-Drop-Prozente behauptet.
+Live mode reads this assignment from the data; the debug display
+multiplies the value by 100. The code itself is still not a percentage.
+The concrete current control table has not yet been checked against a fresh raw data set
+in this audit, therefore no current
+drop percentages are claimed here.
 
-Für einen anderen Modus enthält der Code feste historische SoA-Werte.
-Diese dürfen **nicht** als allgemeine aktuelle LOTRO-Dropraten übernommen
-werden. Außerdem gibt `getProbability` für unbekannte Codes nach Warnung
-0,0 zurück: Ein exportierter Nullwert kann Decoderfallback statt bewiesener
-Unmöglichkeit sein.
+For another mode the code contains fixed historical SoA values.
+These must **not** be adopted as general current LOTRO drop rates.
+In addition, `getProbability` returns 0.0 for unknown codes after a warning:
+an exported null value can be a decoder fallback rather than proven
+impossibility.
 
-Eine Einzelwahrscheinlichkeit einer Tabellenebene ist nicht automatisch
-die gesamte Item-Dropchance eines Gegners; Verschachtelung, Filter,
-Mengen und Auswahlverfahren sind zusätzlich erforderlich.
+A single probability of one table level is not automatically
+the entire item drop chance of a creature; nesting, filters,
+quantities and selection procedure are additionally required.
 
-## 7. Händler und Tauscher
+## 7. Vendors and barter vendors
 
-Beleg: `trade/MainDatTradeLoader.java:107–217,219–350,353–404`.
+Evidence: `trade/MainDatTradeLoader.java:107–217,219–350,353–404`.
 
-### Rollen und Voraussetzungen
+### Roles and prerequisites
 
-- `Barter_ProfileArray` enthält Tauschprofil-IDs.
-- `Barter_Profile_UseTabs` wird gelesen, aber hier nicht weiter verwendet.
-  Daraus keine fachliche Regel ableiten.
-- Profilanforderungen können unter `DefaultPermissionBlobStruct` liegen.
-- `Usage_RequiredClassList` enthält Klassen-Codes, nicht Klassen-DAT-IDs.
-- `Usage_RequiredFaction` enthält `Usage_RequiredFaction_DataID` plus
-  `Usage_RequiredFaction_Tier`. Das sind Fraktion und Rufstufe, keine
-  Rufpunktmenge.
-- Der vereinfachte Handels-Questloader unterstützt hier nur COMPLETED
-  mit Operator 3 oder fehlendem Operator. Bei mehreren Bedingungen
-  überschreibt er `ret`; die Ausgabe bildet nicht alle Bedingungen ab.
-  Diese Einschränkung darf nicht auf den allgemeinen Aufgabenloader
-  übertragen werden.
+- `Barter_ProfileArray` contains barter profile IDs.
+- `Barter_Profile_UseTabs` is read but not used further here.
+  Derive no domain rule from it.
+- Profile requirements can lie under `DefaultPermissionBlobStruct`.
+- `Usage_RequiredClassList` contains class codes, not class DAT IDs.
+- `Usage_RequiredFaction` contains `Usage_RequiredFaction_DataID` plus
+  `Usage_RequiredFaction_Tier`. Those are faction and reputation level, not a
+  reputation point amount.
+- The simplified trade quest loader supports here only COMPLETED
+  with operator 3 or a missing operator. With several conditions
+  it overwrites `ret`; the output does not map all conditions.
+  This restriction must not be transferred to the general quest loader.
 
-### Tauschpositionen
+### Barter positions
 
-`Barter_ItemListArray` enthält Einträge, deren letztes Element als
-**Erhalt** und deren vorherige Elemente als **Abgabe** ausgewertet werden.
-Die Reihenfolge ist semantisch relevant.
+`Barter_ItemListArray` contains entries whose last element is evaluated as
+**receipt** and whose preceding elements are evaluated as **cost**.
+The order is semantically relevant.
 
-| Property | Auswertung |
+| Property | Evaluation |
 | --- | --- |
-| `Barter_Item` | Item-ID |
-| `Barter_ItemQuantity` | direkte Menge |
-| `Barter_ItemQuantity_LookupTable` | Progressions-ID für berechnete Menge |
-| `Barter_ItemUsesMinUsageLevelForCost` | bestimmt Verwendung der Mindest- statt Itemstufe |
-| `Barter_ReputationFaction` | Rufziel-Fraktion bei Ruf-Erhalt |
-| `Barter_ReputationRewardTier` | Ruf-Belohnungstier, kein direkter Betrag |
+| `Barter_Item` | item ID |
+| `Barter_ItemQuantity` | direct quantity |
+| `Barter_ItemQuantity_LookupTable` | progression ID for computed quantity |
+| `Barter_ItemUsesMinUsageLevelForCost` | determines use of minimum instead of item level |
+| `Barter_ReputationFaction` | reputation target faction on reputation receipt |
+| `Barter_ReputationRewardTier` | reputation reward tier, not a direct amount |
 
-Bei fehlender direkter Menge kann der Loader eine Progression bei der
-Stufe des erhaltenen Items auswerten. Er übernimmt den Wert per `intValue()`.
-Eine Tauschmenge kann also berechnet sein.
+With a missing direct quantity the loader can evaluate a progression at the
+level of the received item. It adopts the value via `intValue()`.
+A barter quantity can therefore be computed.
 
-`getAmountForTier` kennt im gelesenen Code nur Tier 5 → 1200; alle anderen
-liefern 0. Das ist **keine vollständig validierte allgemeine Ruf-Tierformel**.
-Ein solcher Nullwert ist kein Nachweis einer absichtlich ruflosen Belohnung.
+`getAmountForTier` knows in the read code only tier 5 → 1200; all others
+return 0. That is **not a fully validated general reputation tier formula**.
+Such a null value is no proof of a deliberately reputation-less reward.
 
-### Verkauf
+### Sale
 
-- `Vendor_InventoryList` referenziert Verkaufslisten.
-- `Vendor_BuysItems == 1` wird zum Ankauf-Flag; fehlend wird false.
-- `Vendor_DiscountList` enthält separate Rabatt-Referenzen.
-- Gegenstandsgrundwert, Preisfaktor, Rabatt und tatsächlich zu zahlender
-  Preis sind unterschiedliche Größen. Ein Item-Verkaufsverweis liefert
-  allein keinen endgültigen Kaufpreis.
+- `Vendor_InventoryList` references sale lists.
+- `Vendor_BuysItems == 1` becomes the buying flag; missing becomes false.
+- `Vendor_DiscountList` contains separate discount references.
+- Item base value, price factor, discount and the price actually to be paid
+  are different quantities. An item sale reference alone does not supply
+  a final purchase price.
 
-## 8. Karten, Geografie und Rollen
+## 8. Maps, geography and roles
 
-Die vollständigen ID- und Geometrieunterschiede stehen im Hauptdokument.
-Hier gelten folgende bereits quellengestützt belegte semantische Grenzen:
+The complete ID and geometry differences are in the main document.
+Here the following semantic limits, already proven from sources, apply:
 
-- Originaler Kartenrahmen und nachträglich gefitteter Übersichtsrahmen
-  sind verschiedene Herkunftsklassen.
-- Link-`parentId` kann Karte oder geografisches Gebiet sein.
-- Kartenbild-ID ist keine Kartenidentität.
-- NPC-/Monster-/IItem-Identität ist nicht dasselbe wie Auftraggeberrolle.
-- MonsterTemplate allein belegt kein feindliches Verhalten.
-- Region, Layer und Instanz gehören zum Positionskontext; gleiches
-  Koordinatenpaar beweist keinen gleichen Weltort.
-- Ein Marker einer möglichen Rohstoffplatzierung beweist kein aktuell
-  vorhandenes Objekt.
+- Original map frame and subsequently fitted overview frame
+  are different classes of origin.
+- Link `parentId` can be map or geographical area.
+- Map image ID is not a map identity.
+- NPC/monster/IItem identity is not the same as the quest giver role.
+- MonsterTemplate alone does not prove hostile behaviour.
+- Region, layer and instance belong to the position context; the same
+  coordinate pair does not prove the same world place.
+- A marker of a possible resource placement does not prove a currently
+  present object.
 
-## 9. Semantischer Restumfang – nicht als erledigt ausgeben
+## 9. Remaining semantic scope – do not report as done
 
-Noch nicht vollständig entschlüsselt oder unabhängig gegengeprüft:
+Not yet fully decrypted or independently cross-checked:
 
-- Sämtliche Effekt-Untertypen mit Operatoren, Modifikatoren, Triggern,
-  Zielauswahl und Skalierung.
-- Vollständige Skill-Kosten-/Schaden-/Heilungsberechnung einschließlich
-  Kontext, aktiver Effekte, Caps und Charakterzustand.
-- Alle Quest-/Tat-Zielereignisse, Fehlerbedingungen, Rollen- und
-  Permissionstrukturen einschließlich unbekannter Operatoren.
-- Aktuelle LootGenControl-Tabelle und Gesamtwahrscheinlichkeiten über
-  verschachtelte Filter-/Auswahltabellen.
-- Alle Grenzen des Munging-/Legendär-/Tracery-/Set-Stat-Systems.
-- Vollständige aktuelle Preis-, Ruf-, Zugangs- und Welt-Ereignislogik.
-- Clientverifikation aller Raum-/Layer-/Projektionsannahmen.
-- Nicht exportierte oder im Quellbaum nicht implementierte DAT-Klassen.
+- All effect subtypes with operators, modifiers, triggers,
+  target selection and scaling.
+- Complete skill cost/damage/healing calculation including
+  context, active effects, caps and character state.
+- All quest/deed objective events, failure conditions, role and
+  permission structures including unknown operators.
+- Current LootGenControl table and total probabilities across
+  nested filter/selection tables.
+- All limits of the munging/legendary/tracery/set stat system.
+- Complete current price, reputation, access and world event logic.
+- Client verification of all space/layer/projection assumptions.
+- DAT classes not exported or not implemented in the source tree.
 
-Der automatische Codeindex ist ein Suchwerkzeug für diesen Restumfang,
-nicht dessen semantische Abnahme. Eine echte Vollständigkeitsfreigabe ist
-erst vertretbar, wenn jede einzelne Property und Relation entweder einen
-passenden Beleg oder einen ausdrücklich dokumentierten ungeklärten Status
-hat und alle behaupteten Auswertungen gegen reale Daten geprüft wurden.
+The automatic code index is a search tool for this remaining scope,
+not its semantic acceptance. A real completeness approval is
+only justifiable when every single property and relation has either a
+matching proof or an explicitly documented unexplained status and all claimed
+evaluations have been checked against real data.

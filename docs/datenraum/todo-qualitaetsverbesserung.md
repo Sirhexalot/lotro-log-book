@@ -1,102 +1,99 @@
-# TODO: Datenqualität anhand des LOTRO-Datenraumaudits verbessern
+# TODO: Improve data quality based on the LOTRO data space audit
 
-**Projekt:** LOTRO Log Book, ausschließlich Website  
-**Stand:** 17. November 2026  
-**Status:** priorisierte Arbeitsgrundlage; noch keine Codeänderung beauftragt  
-**Auditgrundlage:** [`lotro-datenraum.md`](lotro-datenraum.md) und die dort
-verlinkten Belege
+**Project:** LOTRO Log Book, website only  
+**Status as of:** 17 November 2026  
+**Status:** prioritised working basis; no code change commissioned yet  
+**Audit basis:** [`lotro-datenraum.md`](lotro-datenraum.md) and the evidence
+linked there
 
-## Ziel
+## Goal
 
-Die Website soll belegte Spielinformationen korrekt und nachvollziehbar
-darstellen, ohne Unterschiede durch Datenverdichtung zu verlieren oder
-unbekannte Werte als sichere Spielaussagen auszugeben.
+The website should present proven game information correctly and traceably,
+without losing differences through data compression or reporting unknown
+values as certain game statements.
 
-Das Audit ist ein laufender, quellengebundener Teilstand. Es ist keine
-Freigabe, sämtliche Daten neu zu erzeugen oder jede ungeklärte Property
-fachlich zu interpretieren.
+The audit is an ongoing, source-bound partial state. It is not an approval to
+regenerate all data or to interpret every unexplained property in domain terms.
 
-## Prioritäten und Abnahmekriterien
+## Priorities and acceptance criteria
 
-### 1. Informationsverluste bei Gegenständen und Rezepten erhalten
+### 1. Preserve information losses for items and recipes
 
-- [ ] Für Bindung getrennte Werte für `BIND_ON_ACQUIRE` und
-  `BOUND_TO_ACCOUNT_ON_ACQUIRE` vorsehen. Bestehende Seiten und kompakte
-  Felder dürfen bis zur Umstellung weiterlaufen.
-- [ ] Rezeptvarianten vollständig mit ihrer jeweiligen Zutaten- und
-  Ergebniszuordnung abbilden.
-- [ ] Ergebnisvergleich und Ausgabe berücksichtigen Item-ID, Menge und
-  Ergebnisstufe.
-- [ ] Regressionstests belegen, dass keine Varianten durch Gruppierung oder
-  Deduplizierung verschwinden.
+- [ ] Provide separate values for binding, `BIND_ON_ACQUIRE` and
+  `BOUND_TO_ACCOUNT_ON_ACQUIRE`. Existing pages and compact fields may keep
+  running until the switch.
+- [ ] Represent recipe variants completely with their respective ingredient and
+  result assignment.
+- [ ] Result comparison and output take item ID, quantity and result level into
+  account.
+- [ ] Regression tests prove that no variants disappear through grouping or
+  deduplication.
 
-**Abnahme:** Testfälle umfassen die dokumentierten Fälle aus
-`lotro-datenraum-semantik-pruefung.json`; gezählte Bestände ändern sich nicht
-unerklärt. Bestehende IDs, URLs und bisherige Detailseiten bleiben erhalten.
+**Acceptance:** Test cases cover the documented cases from
+`lotro-datenraum-semantik-pruefung.json`; counted sets do not change without
+explanation. Existing IDs, URLs and previous detail pages are preserved.
 
-### 2. Fehlend, null, ungelöst und berechnet auseinanderhalten
+### 2. Keep missing, null, unresolved and computed apart
 
-- [ ] Für Daten, bei denen die Herkunft bekannt ist, unterscheiden:
-  expliziter Wert (einschließlich `0`), fehlender Quellwert,
-  fehlgeschlagene Referenz-/Tabellenauflösung und berechneter Wert.
-- [ ] Unaufgelöste Werte nicht stillschweigend als 0, false, „kostenlos“,
-  „keine Voraussetzung“ oder „keine Quelle“ darstellen.
-- [ ] Pro betroffenem Feld dokumentieren, ob der Unterschied bis zur
-  öffentlichen Seite relevant ist; keine bedeutungslosen Leeranzeigen
-  hinzufügen.
+- [ ] For data whose origin is known, distinguish:
+  explicit value (including `0`), missing source value,
+  failed reference/table resolution and computed value.
+- [ ] Do not silently present unresolved values as 0, false, "free",
+  "no prerequisite" or "no source".
+- [ ] For each affected field, document whether the difference is relevant up
+  to the public page; do not add meaningless empty displays.
 
-**Abnahme:** Tests prüfen sowohl den Roh-/Zwischenwert als auch die
-Darstellung und stellen sicher, dass ein Lookup-Fallback nicht als
-bewiesener Spielwert ausgegeben wird.
+**Acceptance:** Tests check both the raw/intermediate value and the
+presentation and ensure that a lookup fallback is not output as a proven game
+value.
 
-### 3. Beziehungen und Voraussetzungen nicht übervereinfachen
+### 3. Do not oversimplify relations and prerequisites
 
-- [ ] Auftraggeber, Händler und Tauscher als Rollen mit belegten Zieltypen
-  modellieren, nicht als Synonyme für einen einzigen NPC-Datensatz.
-- [ ] Aufgaben-/Tatvoraussetzungen nur dann als Machbarkeit auswerten, wenn
-  Operator, Status und UND-/ODER-Struktur erhalten und unterstützt sind.
-- [ ] Unaufgelöste Referenzen mit Quellfeld, ID und geprüftem Zielraum
-  protokollieren, statt sie kommentarlos zu verwerfen.
-- [ ] Karten, Kartengeometrie, Gebiet, Bild, Marker und Platzierung getrennt
-  halten; gemischte `parentId`-Zielräume nicht zu einem Kartenbaum zwingen.
+- [ ] Model quest givers, vendors and barter vendors as roles with proven target
+  types, not as synonyms for a single NPC record.
+- [ ] Evaluate quest/deed prerequisites as feasibility only when
+  operator, status and AND/OR structure are preserved and supported.
+- [ ] Log unresolved references with source field, ID and checked target space
+  instead of discarding them without comment.
+- [ ] Keep map, map geometry, area, image, marker and placement apart; do not
+  force mixed `parentId` target spaces into one map tree.
 
-**Abnahme:** Referenztests prüfen Quellfeld, Zieltyp und ID; Bedingungstests
-prüfen verschachtelte UND-/ODER-Fälle sowie unbekannte Operatoren.
-Unbekannte Semantik bleibt als unbekannt markiert.
+**Acceptance:** Reference tests check source field, target type and ID;
+condition tests check nested AND/OR cases and unknown operators.
+Unknown semantics stay marked as unknown.
 
-### 4. Vorhandene Qualitätssicherung ausbauen
+### 4. Extend the existing quality assurance
 
-- [ ] Quelle → erzeugter Datenbestand → Seitenmodell als getrennte
-  Prüfschritte ausweisen.
-- [ ] Für neue bestätigte Regeln automatisierte Regressionen ergänzen.
-- [ ] Mehrsprachigkeit über stabile IDs und Beziehungen prüfen; Übersetzungen
-  nicht aus gleich großen Beständen ableiten.
-- [ ] Kleine Browserabnahme nur für tatsächlich geänderte Oberflächen und in
-  DE/EN/FR durchführen.
+- [ ] Show source → generated data set → page model as separate
+  review steps.
+- [ ] Add automated regressions for new confirmed rules.
+- [ ] Check multilingualism via stable IDs and relations; do not derive
+  translations from equally large sets.
+- [ ] Run a small browser acceptance only for surfaces actually changed and in
+  DE/EN/FR.
 
-**Abnahme:** Der Prüfbericht nennt Eingangsdaten, Exportstand, ausgeführte
-Tests und bekannte Grenzen. Eine erfolgreiche Teilprüfung wird nicht als
-vollständige semantische Freigabe bezeichnet.
+**Acceptance:** The review report names input data, export status, executed
+tests and known limits. A successful partial check is not called a
+complete semantic approval.
 
-## Reihenfolge
+## Order
 
-1. Das Quell-/Zwischenmodell für Gegenstandsbindung und Rezeptvarianten
-   konkretisieren.
-2. Pipeline und Regressionstests ändern; erst danach betroffene Ansichten
-   umstellen.
-3. Unbekannt-/Null-/Lookup-Status anhand konkreter Felder ergänzen.
-4. Bedingungs- und Referenzprüfung erweitern.
-5. Nur bestätigte weitere Semantikbereiche einzeln übernehmen.
+1. Make the source/intermediate model for item binding and recipe variants
+   concrete.
+2. Change pipeline and regression tests; only then switch the affected views.
+3. Add unknown/null/lookup status based on concrete fields.
+4. Extend condition and reference checks.
+5. Only adopt further confirmed semantic areas one by one.
 
-## Grenzen und Nicht-Ziele
+## Limits and non-goals
 
-- Keine Änderung an `MagicQuestLog`, Spielinstallation, Charakterdateien oder
-  veröffentlichtem Bestand.
-- Kein pauschaler Neubau aller Website-Daten und keine ungeprüfte
-  Veröffentlichung.
-- Keine Ableitung von Spielserver-Verfügbarkeit allein aus Client-DAT- oder
-  Companion-Daten.
-- Keine Interpretation ungeklärter Effekte, Wahrscheinlichkeiten oder
-  Bedingungen als bestätigte Spielregel.
-- Das technische Auditmaterial bleibt unter `docs/datenraum/`; dieses TODO
-  priorisiert mögliche Folgearbeit, führt sie aber nicht selbst aus.
+- No change to `MagicQuestLog`, game installation, character files or
+  published content.
+- No blanket rebuild of all website data and no unreviewed
+  publication.
+- No derivation of game server availability from client DAT or
+  Companion data alone.
+- No interpretation of unexplained effects, probabilities or
+  conditions as a confirmed game rule.
+- The technical audit material stays under `docs/datenraum/`; this TODO
+  prioritises possible follow-up work but does not carry it out itself.

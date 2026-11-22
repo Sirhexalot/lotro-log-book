@@ -73,13 +73,14 @@ def main():
     xmls += sorted((LORE / 'enums').glob('*.xml'))
     xmls += sorted((LORE / 'maps').rglob('*.xml'))
     xmls += sorted((LORE / 'labels').rglob('*.xml'))
-    lines = ['# Vollständiges XML-Feldinventar des verfügbaren Companion-Lore-Stands',
-             '', f'Erfasst: {stamp}', '',
-             'Alle vorhandenen XML-Dateien der aktiven lokalen Lore einschließlich Items, '
-             'Enums, Karten, Marker und Sprachlabels. Jede Zeile nennt den vollständigen '
-             'Elementpfad; Attribute werden nicht zwischen verschiedenen Pfaden vermischt. '
-             'Belegt wird die gespeicherte Struktur, nicht automatisch ihre Spielsemantik. '
-             'Attributzähler sind Vorkommen; fehlendes Attribut bedeutet keinen bewiesenen Default.', '']
+    lines = ['# Complete XML field inventory of the available Companion lore state',
+             '', f'Recorded: {stamp}', '',
+             'Every XML file of the active local lore, including items, enums, maps, '
+             'markers and language labels. Each row names the full element path; '
+             'attributes are not merged across different paths. The evidence covers the '
+             'stored structure, not automatically its game semantics. '
+             'Attribute counters are occurrences; a missing attribute does not prove a '
+             'default.', '']
     xml_count = 0
     for p in xmls:
         source(p)
@@ -91,7 +92,7 @@ def main():
             attrs = '; '.join(f'`{k}` ({n}/{s["n"]})' for k, n in sorted(s['attrs'].items())) or '—'
             children = ', '.join('`' + k + '`' for k in sorted(s['children'])) or '—'
             rows.append((f'`{path}`', s['n'], attrs, children))
-        lines += [table(['Elementpfad', 'Vorkommen', 'Sämtliche Attribute (belegt/Elemente)', 'Kindelemente'], rows), '']
+        lines += [table(['Element path', 'Occurrences', 'All attributes (observed/elements)', 'Child elements'], rows), '']
         print('XML', p.relative_to(LORE), flush=True)
     (OUT / 'lotro-datenraum-xml-properties.md').write_text('\n'.join(lines))
 
@@ -102,11 +103,11 @@ def main():
         'npcs-2026-11-03', 'reputation-crafting-2026-11-03'}]
     rawpaths += sorted((WEB / 'daten').glob('*roh.jsonl'))
     rawpaths += sorted((HOME / '.cache/llb-instance-research').glob('*raw*.jsonl'))
-    lines = ['# DAT-Feldinventar: sämtliche beobachteten Pfade', '',
-             'Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen '
-             'werden über alle Datensätze ermittelt, nicht aus einem Muster. '
-             'Ein vorkommender Feldname belegt weder seine vollständige Entschlüsselung '
-             'noch einen Default bei Abwesenheit. Texte werden nicht kopiert.', '']
+    lines = ['# DAT field inventory: all observed paths', '',
+             'Classes separated per export; arrays as `[]`. Types and occurrences are '
+             'derived across all records, not from one sample. A field name that occurs '
+             'proves neither its complete decoding nor a default when absent. '
+             'Texts are not copied.', '']
     summaries = []
     for p in dict.fromkeys(rawpaths):
         source(p)
@@ -116,16 +117,16 @@ def main():
             if not line.strip():
                 continue
             r = json.loads(line)
-            c = str(r.get('class_index', 'ohne class_index'))
+            c = str(r.get('class_index', 'without class_index'))
             group = groups.setdefault(c, {'n': 0, 'stats': {}})
             group['n'] += 1
             n += 1
             profile(r, '$', group['stats'])
         summaries.append((str(p), n, len(groups)))
-        lines += ['## Quelle `' + str(p) + '`', '']
+        lines += ['## Source `' + str(p) + '`', '']
         for c, g in sorted(groups.items()):
-            lines += [f'### Klasse {c} — {g["n"]} Datensätze', '',
-                      table(['Propertypfad', 'Typ: Vorkommen'], [
+            lines += [f'### Class {c} — {g["n"]} records', '',
+                      table(['Property path', 'Type: occurrences'], [
                           ('`' + key + '`', ', '.join(f'{t}: {n}' for t, n in sorted(types.items())))
                           for key, types in sorted(g['stats'].items())]), '']
         print('DAT', p, n, flush=True)
@@ -179,18 +180,19 @@ def main():
                          'target_selector': ts, 'target_attribute': ta,
                          'rows': len(vals), 'resolved': ok, 'unresolved': dict(missing)})
     (OUT / 'lotro-datenraum-relationen.md').write_text(
-        '# Referenzvalidierung gegen konkrete Zielbestände\n\n'
-        'Exakte ID-Gleichheit, keine Namensauflösung. Dies sind explizite Prüfhypothesen: '
-        'Null Treffer oder Lücken können ein falsches Zielschema, unterschiedliche ID-Räume '
-        'oder unvollständige Bestände anzeigen. Eine Zeile ist nicht allein dadurch '
-        'eine semantisch bestätigte Relation. Fehlende Ziele werden nicht repariert. '
-        'Mehrfachvorkommen bleiben erhalten; aus Ist-Zählern folgt keine Schema-Kardinalität.\n\n' +
-        table(['Quelle', 'Geprüftes Ziel', 'Referenzen', 'Aufgelöst', 'Nicht aufgelöst', 'Offene eindeutige Werte'], relrows) +
-        '\n\nDie vollständigen nicht aufgelösten IDs stehen in `lotro-datenraum-relationen.json`.\n')
+        '# Reference validation against concrete target sets\n\n'
+        'Exact ID equality, no name resolution. These are explicit check hypotheses: '
+        'zero hits or gaps can indicate a wrong target schema, different ID spaces or '
+        'incomplete sets. A row is not a semantically confirmed relation just because it '
+        'appears here. Missing targets are not repaired. '
+        'Multiple occurrences are preserved; present-tense counts do not imply schema '
+        'cardinality.\n\n' +
+        table(['Source', 'Checked target', 'References', 'Resolved', 'Unresolved', 'Open distinct values'], relrows) +
+        '\n\nAll unresolved IDs are listed in `lotro-datenraum-relationen.json`.\n')
     (OUT / 'lotro-datenraum-relationen.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2))
     (OUT / 'lotro-datenraum-quellen.md').write_text(
-        '# Tatsächlich gelesene Quelldateien\n\nSHA-256 identifiziert den gelesenen '
-        'lokalen Stand, keine Aktualitäts- oder Rechtegarantie.\n\n' +
+        '# Source files actually read\n\nSHA-256 identifies the local state that was '
+        'read, not a guarantee of recency or of rights.\n\n' +
         table(['Absoluter Pfad', 'Bytes', 'SHA-256'], sources))
     (OUT / 'lotro-datenraum-lauf.json').write_text(json.dumps({
         'created_utc': stamp, 'xml_files': len(xmls), 'xml_paths': xml_count,

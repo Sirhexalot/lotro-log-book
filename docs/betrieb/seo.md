@@ -1,77 +1,77 @@
-# Titel und Description je Seite
+# Title and description per page
 
-Stand: 14.11.2026. Gilt für alle Katalog- und Anwendungsseiten.
+Status as of 14.11.2026. Applies to all catalogue and application pages.
 
-## Warum eine Regel
+## Why a rule
 
-Bis 14.11.2026 entstanden Titel und Description an vier Stellen: im
-Seitenlayout, in jeder View-Funktion von `tools/php_viewmodel.py`, in
-`php/src/Sets.php` und in `php/src/Givers.php`. Jede Stelle hatte ihren
-eigenen Satzbau. Folgen: 2.218 Set-Seiten mit demselben Satz, 5.067
-Auftraggeber-Seiten mit einer Vorlage, 2.809 Landmarken mit „Landmarke: Name“,
-Gebiete mit der Marke doppelt („Katalog: Breeland – LOTRO Log Book.“), und
-keine Längengrenze.
+Until 14.11.2026, titles and descriptions arose in four places: in the
+page layout, in every view function of `tools/php_viewmodel.py`, in
+`php/src/Sets.php` and in `php/src/Givers.php`. Each place had its
+own sentence structure. Consequences: 2.218 set pages with the same sentence, 5.067
+quest giver pages from one template, 2.809 landmarks with „Landmarke: Name“,
+areas with the brand twice („Katalog: Breeland – LOTRO Log Book.“), and
+no length limit.
 
-## Die Regeln
+## The rules
 
-**Titel.** Name zuerst, dann eine Einordnung, dann die Marke.
+**Title.** Name first, then a classification, then the brand.
 
-- Budget: 60 Zeichen inklusive ` – LOTRO Log Book` (17 Zeichen), also 43 für
-  den Kern. Passt die Einordnung nicht mehr, fällt sie weg — nie der Name,
-  nie die Marke.
-- Einordnung ist die Seitenart („Aufgabe“, „Tat“, „Landmarke“), bei Bedarf mit
-  Gebiet („· Eriador › Angmar“), bei Gegenständen die Seltenheit.
-- Die Marke hängt genau einmal am Titel. Beide Layouts prüfen das
+- Budget: 60 characters including ` – LOTRO Log Book` (17 characters), so 43 for
+  the core. If the classification no longer fits, it is dropped — never the name,
+  never the brand.
+- The classification is the page kind („Aufgabe“, „Tat“, „Landmarke“), with an
+  area when needed („· Eriador › Angmar“), and for items the rarity.
+- The brand hangs on the title exactly once. Both layouts check that
   (`php/templates/layout.twig`, `php/templates/app/layout.twig`).
 
-**Description.** Höchstens 155 Zeichen, drei Bausteine:
+**Description.** At most 155 characters, three building blocks:
 
-1. was die Seite ist: `Typ: Name.`
-2. ein belegter Fakt: Gebiet und Stufe, Beruf und Stufe, Anzahl Teile oder
-   Quellen, Fundort.
-3. ein Nutzen: was die Seite zusätzlich zeigt (Karte, Ziele, Setboni).
+1. what the page is: `Typ: Name.`
+2. a verified fact: area and level, profession and level, number of parts or
+   sources, location.
+3. a benefit: what the page additionally shows (map, objectives, set bonuses).
 
-Die Marke kommt in der Description einer Entitätsseite nicht vor; sie steht im
-Titel. Anwendungsseiten behalten ihre Texte aus `build_seo.PAGES`. Fehlt ein
-Fakt, fällt der Satz weg, statt einen Platzhalter zu schreiben. Ohne jeden
-Fakt trägt ein längerer Nutzen-Satz die Seite (`seo.THIN`).
+The brand does not appear in the description of an entity page; it stands in the
+title. Application pages keep their texts from `build_seo.PAGES`. If a
+fact is missing, the sentence is dropped instead of writing a placeholder. Without any
+fact, a longer benefit sentence carries the page (`seo.THIN`).
 
-**Sprache.** Zahlen mit den Trennzeichen der Sprache (`3.200` / `3,200` /
-`3 200`), Ein- und Mehrzahl aus `seo.NOUNS`, französischer Doppelpunkt mit
-Leerzeichen davor (`seo.COLON`).
+**Language.** Numbers with the separators of the language (`3.200` / `3,200` /
+`3 200`), singular and plural from `seo.NOUNS`, French colon with a
+space before it (`seo.COLON`).
 
-**Unterschiede.** `seo.dedupe()` ergänzt bei gleichen Texten einen weiteren
-vorhandenen Spielinhalt, etwa eine Quelle oder Zutat. Gibt es keinen sinnvollen
-Unterschied, bleiben die Texte gleich. Technische Kennungen gehören nicht ins
-Suchergebnis. Fehlende Angaben werden nicht kommentiert und nicht durch
-pauschale Versprechen über Fundorte, Sets oder Werte ersetzt.
+**Differences.** `seo.dedupe()` adds a further
+existing game content for identical texts, for instance a source or ingredient. If there is no meaningful
+difference, the texts stay the same. Technical identifiers do not belong in the
+search result. Missing details are not commented on and not replaced by
+blanket promises about locations, sets or values.
 
-**Listen.** Seite 1 trägt die Seitenzahl nicht im Text, jede Folgeseite nennt
-sie (`Aufgaben: 200 Einträge mit Stufe, Gebiet und Art, Seite 2 von 76.`).
-Das gilt auch für die Filterbrowser (`Titles`, `Factions`, `Landmarks`,
+**Lists.** Page 1 does not carry the page number in the text, every following page names
+it (`Aufgaben: 200 Einträge mit Stufe, Gebiet und Art, Seite 2 von 76.`).
+That also applies to the filter browsers (`Titles`, `Factions`, `Landmarks`,
 `Sets`, `Givers`, `Instances`).
 
-## Wo es steht
+## Where it lives
 
-| Ort | Aufgabe |
+| Place | Task |
 | --- | --- |
-| `tools/seo.py` | alle Texte, Grenzen, Ein-/Mehrzahl, `dedupe()` |
-| `tools/php_viewmodel.py` | ruft die Bausteine für Aufgaben, Taten, Gegenstände, Rezepte, Titel, Tugenden, Fraktionen, Landmarken, Gebiete, Regionen, Berufe, Listen |
-| `tools/set_viewmodel.py`, `tools/giver_viewmodel.py` | Set- und Auftraggeber-Detailseiten |
-| `php/src/Sets.php`, `php/src/Givers.php` | nehmen `seo` aus dem Seitenmodell |
-| `php/templates/layout.twig`, `php/templates/app/layout.twig` | Marke einmal, Fallback auf den Seitennamen |
-| `tools/build_php_data.py` | `dedupe()` vor dem Schreiben der Shards |
+| `tools/seo.py` | all texts, limits, singular/plural, `dedupe()` |
+| `tools/php_viewmodel.py` | calls the building blocks for quests, deeds, items, recipes, titles, virtues, factions, landmarks, areas, regions, professions, lists |
+| `tools/set_viewmodel.py`, `tools/giver_viewmodel.py` | set and quest giver detail pages |
+| `php/src/Sets.php`, `php/src/Givers.php` | take `seo` from the page model |
+| `php/templates/layout.twig`, `php/templates/app/layout.twig` | brand once, fallback to the page name |
+| `tools/build_php_data.py` | `dedupe()` before writing the shards |
 
-Anwendungsseiten (Karte, Suche, Handwerk, Start) behalten ihre Texte aus
-`build_seo.PAGES`; sie folgen denselben Längenregeln.
+Application pages (map, search, crafting, start) keep their texts from
+`build_seo.PAGES`; they follow the same length rules.
 
-## Prüfen
+## Checking
 
 ```bash
 python3 -m unittest tests.test_seo_texte
 python3 tools/build_php_data.py --ziel "$HOME/.cache/llb-php/phpdata"
 ```
 
-Danach je Art und Sprache: keine leere Description, keine über 155 Zeichen,
-keine doppelten Texte, Name im Titel. `tests/test_seo_texte.py` hält die
-Regeln fest; die Zahlen im gebauten Stand stehen im Bericht vom 14.11.2026.
+Then per kind and language: no empty description, none over 155 characters,
+no duplicate texts, name in the title. `tests/test_seo_texte.py` pins the
+rules; the figures in the built state stand in the report of 14.11.2026.

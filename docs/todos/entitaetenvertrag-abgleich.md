@@ -1,213 +1,213 @@
-# Entitätenvertrag: UI-Abgleich zum Bearbeiten
+# Entity contract: UI reconciliation for editing
 
-- **Status:** offen; dieser Audit beschreibt Soll und Ist, noch keine Produktänderung
-- **Verbindliche Regeln:** [`AGENTS.md`](../../AGENTS.md), Abschnitt „Navigation, Karte und Darstellung“, und [`lotro-datenraum-entitaeten.json`](../datenraum/lotro-datenraum-entitaeten.json)
-- **Ist-Übersicht:** [arc42, Abschnitt 5.9](../arc42/05-bausteinsicht.md#59-konkrete-darstellungs--und-filtermatrix-nach-entität-und-auftrittsort)
-- **Arbeitsgrenze:** Code und JSON-Vertrag bleiben unverändert, bis die Umsetzung beauftragt ist.
+- **Status:** open; this audit describes target and current state, not yet a product change
+- **Binding rules:** [`AGENTS.md`](../../AGENTS.md), section „Navigation, Karte und Darstellung“, and [`lotro-datenraum-entitaeten.json`](../datenraum/lotro-datenraum-entitaeten.json)
+- **Current-state overview:** [arc42, section 5.9](../arc42/05-building-block-view.md#59-concrete-presentation-and-filter-matrix-by-entity-and-place-of-occurrence)
+- **Work boundary:** code and JSON contract stay unchanged until the implementation is commissioned.
 
-## So ist die Liste zu bearbeiten
+## How to work through the list
 
-Jeder Eintrag ist nach **Entität** und darunter nach konkretem **UI-Auftritt** sortiert. „Auftritt“ meint genau die sichtbare Ausprägung: etwa Trefferzeile im Finder, Detailseiten-Relation oder Liste auf einer Karte. Die Dateilinks führen möglichst direkt zum verantwortlichen Template/Modul. Pro Auftritt sind festzulegen:
+Every entry is sorted by **entity** and below that by concrete **UI appearance**. „Auftritt“ means exactly the visible form: for instance a hit row in the finder, a detail page relation or a list on a map. The file links lead as directly as possible to the responsible template/module. Per appearance the following must be fixed:
 
-1. welche Felder genau sichtbar sein dürfen;
-2. welche davon nur Filter-/Suchwerte oder Zähler sind;
-3. welche Filter, Sortierung und Pagination die UI bietet;
-4. wie fehlende Daten und nicht verlinkbare Ziele behandelt werden;
-5. welcher Test genau diese UI-Ausprägung absichert.
+1. which fields exactly may be visible;
+2. which of them are only filter/search values or counters;
+3. which filters, sorting and pagination the UI offers;
+4. how missing data and non-linkable targets are handled;
+5. which test secures exactly this UI form.
 
-Abweichungen, die bereits im Code bestätigt sind, stehen mit **KORRIGIEREN**. Noch nicht vollständig gegen jede Ausprägung geprüfte Stellen stehen mit **ABGLEICHEN** – sie sind keine behaupteten Fehler.
+Deviations already confirmed in the code are marked **CORRECT**. Places not yet fully checked against every appearance are marked **RECONCILE** – they are not asserted errors.
 
-## Gemeinsame Vorgaben für alle Ausprägungen
+## Shared requirements for all appearances
 
-- [ ] Die Katalogidentität bleibt eine stabile ID; Namen sind Anzeige-/Suchtext, kein Ersatzschlüssel.
-- [ ] Ein Relationseintrag bleibt im Elternkontext. Reset darf nicht die Elternrelation entfernen.
-- [ ] Bis 5 Einträge direkt, ab 6 die vorgesehene Filterkomponente – **außer** die konkrete Liste ist im Vertrag ausdrücklich `direct`.
-- [ ] Fehlender Status bleibt unbekannt/neutral, niemals automatisch „erledigt“, „offen“, „verfügbar“ oder 0 %.
-- [ ] Kein Link aus einem mehrdeutigen Namen erraten. Nicht auflösbare Einträge erhalten die im jeweiligen Vertrag bestimmte Text-/Auslassungsdarstellung.
-- [ ] Sichtbare Listenzeile und Detailinhalt getrennt halten; ein Vertragseintrag muss je Oberfläche gelten, nicht pauschal für alle Auftrittsorte.
-- [ ] `component` muss die genaue Komponente nennen. `direct` bedeutet: direkte Fachliste auch bei mehr als fünf Elementen.
+- [ ] The catalogue identity remains a stable ID; names are display/search text, not a substitute key.
+- [ ] A relation entry stays in the parent context. Reset must not remove the parent relation.
+- [ ] Up to 5 entries directly, from 6 the intended filter component – **except** the concrete list is expressly `direct` in the contract.
+- [ ] A missing status stays unknown/neutral, never automatically „erledigt“, „offen“, „verfügbar“ or 0 %.
+- [ ] Do not guess a link from an ambiguous name. Entries that cannot be resolved receive the text/omission display determined in the respective contract.
+- [ ] Keep visible list row and detail content apart; a contract entry must apply per surface, not blanket for all appearance places.
+- [ ] `component` must name the exact component. `direct` means: direct domain list even with more than five elements.
 
-## Aufgabe (`q`)
+## Quest (`q`)
 
-Vertrag: [`q` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L14)
+Contract: [`q` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L14)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Öffentlicher Aufgabenindex | [`entity/list.twig`](../../php/templates/entity/list.twig#L14), Indexmodell in `tools/build_php_data.py` | Alphabetische, crawlbare Linkliste; Name und optional Symbol. Kein Finder mit Aufgabenfacetten. | [ ] Als eigene Ausprägung „Katalogindex“ im Vertrag führen; nicht mit Aufgabenfinder-Zeile gleichsetzen. Sichtbare Felder und Seitenumfang konkret festhalten. |
-| Aufgabenfinder – Treffer | [`app/aufgabenfinder.twig`](../../php/templates/app/aufgabenfinder.twig#L1), [`aufgabenfinder.js`](../../web/aufgabenfinder.js#L1), [`aufgaben-filter.js`](../../web/aufgaben-filter.js#L257) | Name, Symbol, Typ-/Merkmals-/Stufen-/Gebietsmeta und Fortschrittssteuerung. Filter: Thema, Klasse, Herkunft, Region/Gebiet, Merkmale, Stufe, Status; dynamische Gruppen entfallen, wenn sie keine Auswahl unterscheiden. Name/Stufe sortierbar; initial 30, dann weitere. | [ ] Zeilenfeldliste auf genau diese Ausprägung beziehen. Entscheiden, ob `flags` in der Ergebniszeile zulässige Einordnung sind: sie werden gerendert, stehen aber nicht in `q.zeilenfelder`. Filtergruppen, dynamische Auslassung, Sortierung und 30er-Limit im Vertrag nennen. |
-| Karte – Aufgabenliste | [`app.js`](../../web/app.js#L1), [`karten-aufgabenfilter.js`](../../web/karten-aufgabenfilter.js#L1) | Aufgabenzeilen im Kartenkontext mit Status, kompakter Metazeile und Auswahlverhalten; Daten stufenweise nachgeladen. | [ ] Kartenzeile getrennt vom Finder dokumentieren: erlaubte Felder, Statusdarstellung, Filter-/Sortierung, Nachladen und fehlender Ort. |
-| Aufgabendetail | [`entity/quest.twig`](../../php/templates/entity/quest.twig#L6), [`php_viewmodel.py`](../../tools/php_viewmodel.py#L250) | Name, optionale Chips/Beschreibung, belegter Ort, Auftraggeber-/Voraussetzungs-/Belohnungsbereiche, eingeklappte Ziele. `required_by` wird als `related_quests` aufgelöst. | [ ] `required_by`, Belohnungen und Zusammenhang jeweils als getrennten Auftritt abnehmen. „Belohnungen“ sind direkte Rewarddarstellung, nicht die Relationsfilterkomponente. |
-| Aufgaben als Quellen-/Relationsliste | [`RelatedLists.php`](../../php/src/RelatedLists.php#L16), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Gemeinsamer Aufgabenadapter; Zeilenrenderer kann Typ, Stufe, Merkmale, Region/Gebiet und Status ausgeben. | [ ] Merkmalsmeta mit der Entscheidung zur Finder-Zeile synchronisieren. 5/6-Grenze, Kontext-Reset und Quellen ohne gültige URL testen. |
+| Public quest index | [`entity/list.twig`](../../php/templates/entity/list.twig#L14), index model in `tools/build_php_data.py` | Alphabetical, crawlable link list; name and optional icon. No finder with quest facets. | [ ] Keep as its own appearance „Katalogindex“ in the contract; do not equate with the quest finder row. Record visible fields and page scope concretely. |
+| Quest finder – hits | [`app/aufgabenfinder.twig`](../../php/templates/app/aufgabenfinder.twig#L1), [`aufgabenfinder.js`](../../web/aufgabenfinder.js#L1), [`aufgaben-filter.js`](../../web/aufgaben-filter.js#L257) | Name, icon, type/feature/level/area meta and progress control. Filters: topic, class, origin, region/area, features, level, status; dynamic groups are dropped when they do not distinguish any selection. Sortable by name/level; 30 initially, then more. | [ ] Relate the row field list to exactly this appearance. Decide whether `flags` in the result row are a permitted classification: they are rendered but do not stand in `q.zeilenfelder`. Name filter groups, dynamic omission, sorting and the 30 limit in the contract. |
+| Map – quest list | [`app.js`](../../web/app.js#L1), [`karten-aufgabenfilter.js`](../../web/karten-aufgabenfilter.js#L1) | Quest rows in the map context with status, compact meta row and selection behaviour; data loaded in stages. | [ ] Document the map row separately from the finder: permitted fields, status display, filter/sorting, reload and missing location. |
+| Quest detail | [`entity/quest.twig`](../../php/templates/entity/quest.twig#L6), [`php_viewmodel.py`](../../tools/php_viewmodel.py#L250) | Name, optional chips/description, verified location, quest giver/prerequisite/reward areas, collapsed objectives. `required_by` is resolved as `related_quests`. | [ ] Accept `required_by`, rewards and context each as a separate appearance. „Belohnungen“ is a direct reward display, not the relation filter component. |
+| Quests as source/relation list | [`RelatedLists.php`](../../php/src/RelatedLists.php#L16), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Shared quest adapter; the row renderer can output type, level, features, region/area and status. | [ ] Synchronise the feature meta with the decision for the finder row. Test the 5/6 threshold, context reset and sources without a valid URL. |
 
-## Tat (`d`)
+## Deed (`d`)
 
-Vertrag: [`d` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L67)
+Contract: [`d` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L67)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Öffentlicher Tatenindex | [`entity/list.twig`](../../php/templates/entity/list.twig#L8), [`taten-index.js`](../../web/taten-index.js#L1) | Crawlbare alphabetische Serverliste bleibt im HTML verborgen; sichtbar ist der clientseitige Filter. Filtertreffer enthalten Symbol, Name, Tatart, Stufe, Gebiet, Merkmale und Status. Anfang 50, „Weitere anzeigen“. | [ ] Index-Ausprägung getrennt vom Detailkontext beschreiben; konkrete Ergebnisfelder/Filter-/Sortierregeln im Vertrag festhalten. Merkmalsmeta ist ebenso wie bei Aufgaben nicht in `d.zeilenfelder` benannt. |
-| Karte – Tatenmodus | [`app.js`](../../web/app.js#L1), [`karten-aufgabenfilter.js`](../../web/karten-aufgabenfilter.js#L1) | Kartenliste mit Tatart und belegtem Status; gemeinsame Gebiets-/Landschaftsnavigation mit Aufgaben. | [ ] Taten-Kartenzeile, Filtergruppen und Ladeverhalten als eigene Ausprägung festhalten. |
-| Tatdetail | [`entity/deed.twig`](../../php/templates/entity/deed.twig#L6), [`php_viewmodel.py`](../../tools/php_viewmodel.py#L450) | Art-Chips, Beschreibung, Kartenaktion/Ort, Fakten, feste und wählbare Belohnungen, eingeklappte Ziele; Zusammenhangsliste. | [ ] „Zusammenhang“ einzeln spezifizieren: welche Datensätze hineinkommen, wie Kontext fixiert wird, welche Spalten die Zeile hat. |
-| Taten als Relations-/Quellenzeile | [`RelatedLists.php`](../../php/src/RelatedLists.php#L24), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L173) | Gemeinsamer Aufgaben-/Tatenfilter mit Ergebnisfeldern inkl. Merkmale. | [ ] Entscheidung zu `flags` wie bei `q`; Schwellwert 5/6 und Linkauflösung absichern. |
+| Public deed index | [`entity/list.twig`](../../php/templates/entity/list.twig#L8), [`taten-index.js`](../../web/taten-index.js#L1) | Crawlable alphabetical server list stays hidden in the HTML; the client-side filter is visible. Filter hits contain icon, name, deed kind, level, area, features and status. 50 initially, „Weitere anzeigen“. | [ ] Describe the index appearance separately from the detail context; record concrete result fields/filter/sorting rules in the contract. As with quests, feature meta is not named in `d.zeilenfelder`. |
+| Map – deed mode | [`app.js`](../../web/app.js#L1), [`karten-aufgabenfilter.js`](../../web/karten-aufgabenfilter.js#L1) | Map list with deed kind and verified status; shared area/landscape navigation with quests. | [ ] Record deed map row, filter groups and loading behaviour as their own appearance. |
+| Deed detail | [`entity/deed.twig`](../../php/templates/entity/deed.twig#L6), [`php_viewmodel.py`](../../tools/php_viewmodel.py#L450) | Kind chips, description, map action/location, facts, fixed and selectable rewards, collapsed objectives; context list. | [ ] Specify „Zusammenhang“ individually: which records go into it, how the context is fixed, which columns the row has. |
+| Deeds as relation/source row | [`RelatedLists.php`](../../php/src/RelatedLists.php#L24), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L173) | Shared quest/deed filter with result fields incl. features. | [ ] Decision on `flags` as with `q`; secure the 5/6 threshold and link resolution. |
 
-## Gegenstand (`i`)
+## Item (`i`)
 
-Vertrag: [`i` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L106)
+Contract: [`i` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L106)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Gegenstandssuche – Treffer | [`gegenstandssuche.twig`](../../php/templates/app/gegenstandssuche.twig#L1), [`gegenstaende-filter.js`](../../web/gegenstaende-filter.js#L5) | Symbol, Name, Kategorie, Seltenheit, Kategorie-Unterwerte wie Art/Platz/Klasse/Gattung und positiver Gegenstandsstufenwert. Filter: dynamischer Kategorienbaum, Seltenheit, Stufenbereich; Name/Stufe sortierbar; 50 plus weitere. | [ ] Der Vertrag nennt nur `symbol/name/seltenheit/stufe/art`; genau klären, welche Unterwerte als `art` zählen und welche sichtbare Meta zusätzlich erlaubt ist. Suche und Filterwerte nicht als sichtbare Zeilenfelder missverstehen. |
-| Öffentlicher Itemkatalog | [`entity/list.twig`](../../php/templates/entity/list.twig#L14) | Schlichte alphabetische Linkliste, optional Symbol; Verweis auf Gegenstandssuche. | [ ] Als eigene Ausprägung dokumentieren; keine Gleichsetzung mit dem reicheren Treffer der Gegenstandssuche. |
-| Itemdetail – Beschreibung/Werte | [`entity/item.twig`](../../php/templates/entity/item.twig#L4) | Kopf, Qualitäts-/Artchips, Beschreibung, Werte/Stats, Set-/Variantenblock, sofern vorhanden. | [ ] Abgrenzung zur Listenzeile prüfen; fehlende Werte/Setdaten bleiben ausgeblendet. |
-| Itemdetail – „Woher“ Aufgaben/Taten | [`entity/item.twig`](../../php/templates/entity/item.twig#L23), [`item-task-filter.js`](../../web/item-task-filter.js#L7) | Template wechselt ab 6 in einen Filtercontainer. JS mountet erst bei mehr als 10; bei 6–10 bleibt der Fallback stehen. | **KORRIGIEREN:** gemeinsame Grenze bei 5 halten. Testfälle 5, 6, 10, 11 für beide Quelltypen `q`/`d`; Filterstatus mit und ohne Import. |
-| Itemdetail – „Wofür“ (als Zutat verwendet) | [`entity/item.twig`](../../php/templates/entity/item.twig#L30) | Bis 5 direkte Rezeptlinks. Ab 6 lokale Suche plus Rollenwahl normal/optional; keine gemeinsame Filter-UI, Sortierauswahl oder Pagination. | **KORRIGIEREN:** Vertrag `used_in=component` mit der vorgesehenen gemeinsamen Rezeptlistenkomponente erfüllen. Rollenfilter erhalten, wenn im Adapter möglich. Ergebnisfelder, Sortierung, Pagination, URL-Präfix und Reset wie Rezeptliste testen. |
-| Itemdetail – „Herstellung“ | [`php_viewmodel.py`](../../tools/php_viewmodel.py#L1097), [`entity/item.twig`](../../php/templates/entity/item.twig#L24), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L237) | Eigene Relation `recipe_made`; ab 6 gemeinsamer Rezeptfilter, getrennt von `used_in`. | [ ] Prüfen, dass die getrennte Richtung, normaler/kritischer Erfolg und Rollenangabe in Zeile/Filter erhalten bleiben. |
-| Itemdetail – Händler/Tauschquellen | [`php_viewmodel.py`](../../tools/php_viewmodel.py#L1112), [`entity/item.twig`](../../php/templates/entity/item.twig#L24), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L78) | Händler und Tauschquellen als getrennte Gruppen; Händler ab 6 gemeinsame Ort/Typ-/Suche-Komponente, Tausch mit eigenem Adapter ohne Ortsfacetten. Tauschzeilen können unlinked bleiben. | [ ] Vertrag `where_vendors` und `where_plain` auf diese exakten Gruppen abbilden; klären, ob `where_plain` auch Sammelressourcen umfasst. Textfallback und fehlende IDs testen. |
-| Itemdetail – Sammelressourcen, Varianten, Set | [`php_viewmodel.py`](../../tools/php_viewmodel.py#L1083), [`entity/item.twig`](../../php/templates/entity/item.twig#L4) | Varianten und Set sind getrennte Blöcke; Sammelressourcen enthalten Art/ Beruf/Stufe und Fundgebiete mit Karte-Links. | [ ] Diese sichtbaren Beziehungen fehlen als eigene, eindeutig benannte Auftritte im Vertrag. Entscheiden, ob eigener Relationstyp oder separater Datenraum; je Gruppe Zeile, Filter und Ortsfallback festlegen. |
-| Händlerdetail – Itemangebot | [`vendors/detail.twig`](../../php/templates/vendors/detail.twig#L15), [`gegenstaende-filter.js`](../../web/gegenstaende-filter.js#L5) | Bis 5 direkte Itemzeilen; ab 6 Gegenstandssuche-Adapter mit Such-/Kategoriefiltern, Sortierung und Seitenfenster. | [ ] Als Item-Ausprägung im Händlerkontext dokumentieren; testen, dass Händler-ID als fester Kontext erhalten bleibt. |
-| Setdetail – Itemteile | [`sets/detail.twig`](../../php/templates/sets/detail.twig#L6) | Setteilkarten mit Itemname, ggf. Symbol, Chips, erforderlicher Klasse, Rüstung, Werten/Boni; fehlende Itemseite bleibt unlinked und nach Namen gruppiert. | [ ] Nicht als schlichte Item-Listenzeile behandeln. Sichtbare Setdetailfelder als eigene Karte spezifizieren. |
-| Aufgaben-/Tatbelohnung | [`entity/quest.twig`](../../php/templates/entity/quest.twig#L11), [`entity/deed.twig`](../../php/templates/entity/deed.twig#L13), [`entity/reward.twig`](../../php/templates/entity/reward.twig#L1) | Belohnungsart, Name, Menge soweit größer als 1, Symbol; Link nur bei aufgelöstem Ziel. | [ ] Feste/wählbare Belohnung als eigene Ausgabeform sichern; keine Verfügbarkeit aus Belohnungsangabe ableiten. |
+| Item search – hits | [`gegenstandssuche.twig`](../../php/templates/app/gegenstandssuche.twig#L1), [`gegenstaende-filter.js`](../../web/gegenstaende-filter.js#L5) | Icon, name, category, rarity, category sub-values such as kind/slot/class/genus and a positive item level value. Filters: dynamic category tree, rarity, level range; sortable by name/level; 50 plus more. | [ ] The contract names only `symbol/name/seltenheit/stufe/art`; clarify exactly which sub-values count as `art` and which visible meta is additionally permitted. Do not mistake search and filter values for visible row fields. |
+| Public item catalogue | [`entity/list.twig`](../../php/templates/entity/list.twig#L14) | Plain alphabetical link list, optional icon; reference to the item search. | [ ] Document as its own appearance; do not equate with the richer hit of the item search. |
+| Item detail – description/stats | [`entity/item.twig`](../../php/templates/entity/item.twig#L4) | Head, quality/kind chips, description, stats, set/variant block, if present. | [ ] Check the boundary to the list row; missing stats/set data stay hidden. |
+| Item detail – „Woher“ quests/deeds | [`entity/item.twig`](../../php/templates/entity/item.twig#L23), [`item-task-filter.js`](../../web/item-task-filter.js#L7) | Template switches to a filter container from 6. JS mounts only beyond 10; with 6–10 the fallback stays. | **CORRECT:** keep the shared threshold at 5. Test cases 5, 6, 10, 11 for both source types `q`/`d`; filter status with and without import. |
+| Item detail – „Wofür“ (used as ingredient) | [`entity/item.twig`](../../php/templates/entity/item.twig#L30) | Up to 5 direct recipe links. From 6 local search plus role choice normal/optional; no shared filter UI, sort choice or pagination. | **CORRECT:** satisfy the contract `used_in=component` with the intended shared recipe list component. Keep the role filter if possible in the adapter. Test result fields, sorting, pagination, URL prefix and reset like the recipe list. |
+| Item detail – „Herstellung“ | [`php_viewmodel.py`](../../tools/php_viewmodel.py#L1097), [`entity/item.twig`](../../php/templates/entity/item.twig#L24), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L237) | Own relation `recipe_made`; from 6 shared recipe filter, separate from `used_in`. | [ ] Check that the separate direction, normal/critical success and role statement are retained in row/filter. |
+| Item detail – vendor/barter sources | [`php_viewmodel.py`](../../tools/php_viewmodel.py#L1112), [`entity/item.twig`](../../php/templates/entity/item.twig#L24), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L78) | Vendors and barter sources as separate groups; vendors from 6 shared location/type/search component, barter with its own adapter without location facets. Barter rows can stay unlinked. | [ ] Map contract `where_vendors` and `where_plain` onto these exact groups; clarify whether `where_plain` also covers gathering resources. Test text fallback and missing IDs. |
+| Item detail – gathering resources, variants, set | [`php_viewmodel.py`](../../tools/php_viewmodel.py#L1083), [`entity/item.twig`](../../php/templates/entity/item.twig#L4) | Variants and set are separate blocks; gathering resources contain kind/ profession/level and find areas with map links. | [ ] These visible relations are missing as their own, clearly named appearances in the contract. Decide whether a separate relation type or a separate data space; fix row, filter and location fallback per group. |
+| Vendor detail – item offer | [`vendors/detail.twig`](../../php/templates/vendors/detail.twig#L15), [`gegenstaende-filter.js`](../../web/gegenstaende-filter.js#L5) | Up to 5 direct item rows; from 6 the item search adapter with search/category filters, sorting and page window. | [ ] Document as an item appearance in the vendor context; test that the vendor ID is retained as fixed context. |
+| Set detail – item parts | [`sets/detail.twig`](../../php/templates/sets/detail.twig#L6) | Set part cards with item name, possibly icon, chips, required class, armour, stats/bonuses; a missing item page stays unlinked and grouped by name. | [ ] Do not treat as a plain item list row. Specify the visible set detail fields as their own card. |
+| Quest/deed reward | [`entity/quest.twig`](../../php/templates/entity/quest.twig#L11), [`entity/deed.twig`](../../php/templates/entity/deed.twig#L13), [`entity/reward.twig`](../../php/templates/entity/reward.twig#L1) | Reward kind, name, quantity insofar as greater than 1, icon; link only with resolved target. | [ ] Secure fixed/selectable reward as its own output form; derive no availability from a reward statement. |
 
-## Rezept (`recipe`)
+## Recipe (`recipe`)
 
-Vertrag: [`recipe` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L171)
+Contract: [`recipe` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L171)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Handwerk – Rezepttreffer | [`app/handwerk.twig`](../../php/templates/app/handwerk.twig#L1), [`handwerk-filter.js`](../../web/handwerk-filter.js#L132), [`rezepte.js`](../../web/rezepte.js#L1) | Tabellenzeile mit Rezeptname, Beruf/Stufe/Kategorie und Lernstand nach Tabellen-/Gruppenkontext; Name führt zum Detail. Filter Beruf, Tier/Stufe, Kategorie, Lernstand; ggf. eigene Berufe; Sortierung Name/Tier/Gegenstandsstufe; 50 plus weitere. | [ ] Zeilenfelder und Filter je Handwerks-Reiter konkret spezifizieren. Lernstand nur bei ausreichendem Importbeleg; fehlend bleibt unbekannt. |
-| Itemdetail – `used_in` und `recipe_made` | Siehe [`entity/item.twig`](../../php/templates/entity/item.twig#L30) und [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L180) | Zwei Richtungen; `recipe_made` nutzt gemeinsame Komponente, `used_in` derzeit lokale Suche/Rollenwahl. | **KORRIGIEREN:** gemeinsamer Adapter muss in beiden Richtungen dieselbe Rezeptzeilen-/Sortier-/Paginationregel verwenden; Richtung als fester Kontext erhalten. |
-| Rezeptdetail – Zutaten | [`entity/recipe.twig`](../../php/templates/entity/recipe.twig#L5) | Zutaten und optionale Zutaten als direkte Listen mit Menge, ggf. Symbol/Chance; Itemlink nur bei vorhandener Zielseite. | [ ] Vertrag führt `ingredients` ausdrücklich als `direct`: so beibehalten. Herkunftsschalter nur bei belegter Antwort; Menge/Rolle/Chance gehören hierher, nicht in Rezepttrefferzeile. |
-| Rezeptdetail – Ergebnis/Beruf | [`entity/recipe.twig`](../../php/templates/entity/recipe.twig#L5), [`entity/profession.twig`](../../php/templates/entity/profession.twig#L5) | Beruf, Tier, Kategorie, ggf. Gegenstandsstufe, kritisches Ergebnis und Rezeptparameter. | [ ] Ergebnislink nur bei aufgelöster Item-ID; fehlende kritische ID als Text. Beruf führt in die Handwerksanwendung, nicht auf eine Beruf-Detailseite. |
+| Crafting – recipe hits | [`app/handwerk.twig`](../../php/templates/app/handwerk.twig#L1), [`handwerk-filter.js`](../../web/handwerk-filter.js#L132), [`rezepte.js`](../../web/rezepte.js#L1) | Table row with recipe name, profession/level/category and crafting knowledge by table/group context; name leads to the detail. Filters profession, tier/level, category, crafting knowledge; possibly own professions; sorting name/tier/item level; 50 plus more. | [ ] Specify row fields and filters concretely per crafting tab. Crafting knowledge only with sufficient import evidence; missing stays unknown. |
+| Item detail – `used_in` and `recipe_made` | See [`entity/item.twig`](../../php/templates/entity/item.twig#L30) and [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L180) | Two directions; `recipe_made` uses the shared component, `used_in` currently local search/role choice. | **CORRECT:** the shared adapter must use the same recipe row/sorting/pagination rule in both directions; retain the direction as fixed context. |
+| Recipe detail – ingredients | [`entity/recipe.twig`](../../php/templates/entity/recipe.twig#L5) | Ingredients and optional ingredients as direct lists with quantity, possibly icon/chance; item link only with an existing target page. | [ ] The contract lists `ingredients` expressly as `direct`: keep it that way. Origin toggle only with a verified answer; quantity/role/chance belong here, not in the recipe hit row. |
+| Recipe detail – result/profession | [`entity/recipe.twig`](../../php/templates/entity/recipe.twig#L5), [`entity/profession.twig`](../../php/templates/entity/profession.twig#L5) | Profession, tier, category, possibly item level, critical result and recipe parameters. | [ ] Result link only with a resolved item ID; missing critical ID as text. Profession leads into the crafting application, not to a profession detail page. |
 
-## Beruf (`p`)
+## Profession (`p`)
 
-Vertrag: [`p`/Beruf im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json)
+Contract: [`p`/Beruf in the entity contract](../datenraum/lotro-datenraum-entitaeten.json)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Handwerk – Berufsreiter | [`app/handwerk.twig`](../../php/templates/app/handwerk.twig#L1), [`handwerk-filter.js`](../../web/handwerk-filter.js#L132) | Berufsname und je nach lokalem Spielstand bekannte Stufen-/XP-Zeilen. Filter Beruf und „eigene“ nur mit Charakter; Sortierung Name, 50 plus weitere. | [ ] Konkrete Zeilenfelder und persönliche Statusgrundlage je Reiter im Vertrag ausweisen. Ohne Import keine Fortschrittswerte anzeigen. |
-| Rezeptdetail – Beruflink | [`entity/recipe.twig`](../../php/templates/entity/recipe.twig#L6) | Berufsname verlinkt in Handwerk/Rezepte, keine Berufdetailseite. | [ ] Im Vertrag ausdrücklich als Navigationslink statt Beruf-Detailentität führen; alte Beruf-URL nicht als Listenauftritt dokumentieren. |
+| Crafting – profession tab | [`app/handwerk.twig`](../../php/templates/app/handwerk.twig#L1), [`handwerk-filter.js`](../../web/handwerk-filter.js#L132) | Profession name and, depending on local character progress, known level/XP rows. Filters profession and „eigene“ only with a character; sorting name, 50 plus more. | [ ] Show concrete row fields and the personal status basis per tab in the contract. Without import, show no progress values. |
+| Recipe detail – profession link | [`entity/recipe.twig`](../../php/templates/entity/recipe.twig#L6) | Profession name links into crafting/recipes, no profession detail page. | [ ] Keep in the contract expressly as a navigation link instead of a profession detail entity; do not document the old profession URL as a list appearance. |
 
 ## Set (`set`)
 
-Vertrag: [`set` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L211)
+Contract: [`set` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L211)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Setbrowser – Treffer | [`sets/list.twig`](../../php/templates/sets/list.twig#L17), [`Sets.php`](../../php/src/Sets.php#L154) | Mehrere Itemicons, Setname, Teilezahl, aggregierte Klasse/Rüstungsart. Filter: Suche Set-/Itemnamen, Klasse, Ausrüstungsart, Rüstung, Charakterstufe von/bis. Alle Bedingungen müssen am selben verfügbaren Teil erfüllt sein. Name/ID sortiert; 30 pro Seite. | **ABGLEICHEN:** Vertrag erlaubt `symbol/name/stufe`, nennt aber Teilezahl und Klassen-/Rüstungsmeta nicht. Entscheiden, ob die Metadaten als zulässige Einordnung ergänzt werden oder aus der Zeile verschwinden. |
-| Setdetail – Setteile | [`sets/detail.twig`](../../php/templates/sets/detail.twig#L3), [`set_viewmodel.py`](../../tools/set_viewmodel.py#L8) | Karten mit Name, Symbol, Chips, Klasse/Rüstung/Werten/Boni; fehlende Itemseiten bleiben Text, identische ungelöste Namen werden gezählt gruppiert. | [ ] `members=direct` ist ausdrücklich; keine Filterumschaltung erzwingen. Kartenfelder und gruppierte Fallbackzeile einzeln im Vertrag als Detaildarstellung beschreiben. |
-| Setdetail – Boni | [`sets/detail.twig`](../../php/templates/sets/detail.twig#L22) | Schwelle und vorhandene Bonuszeilen, unklare/fehlende Daten gemäß Datenmodell. | [ ] Nicht in Trefferzeilen ziehen; nur belegte Schwellen/Wirkungen anzeigen. |
-| Itemdetail – Setzugehörigkeit | [`entity/item.twig`](../../php/templates/entity/item.twig#L4), [`php_viewmodel.py`](../../tools/php_viewmodel.py#L1137) | Setkopf, Teile und Boni als Itemdetailblock, falls eine Set-ID auflösbar ist. | [ ] Als eigene Item-Detailausprägung aufführen; Setlink nur mit auflösbarer Setseite. |
+| Set browser – hits | [`sets/list.twig`](../../php/templates/sets/list.twig#L17), [`Sets.php`](../../php/src/Sets.php#L154) | Several item icons, set name, part count, aggregated class/armour type. Filters: search set/item names, class, equipment type, armour, character level from/to. All conditions must be met on the same available part. Sorted by name/ID; 30 per page. | **RECONCILE:** the contract permits `symbol/name/stufe` but does not name part count and class/armour meta. Decide whether the metadata is added as a permitted classification or disappears from the row. |
+| Set detail – set parts | [`sets/detail.twig`](../../php/templates/sets/detail.twig#L3), [`set_viewmodel.py`](../../tools/set_viewmodel.py#L8) | Cards with name, icon, chips, class/armour/stats/bonuses; missing item pages stay text, identical unresolved names are grouped with a count. | [ ] `members=direct` is express; do not force a filter switch. Describe card fields and the grouped fallback row individually in the contract as detail display. |
+| Set detail – bonuses | [`sets/detail.twig`](../../php/templates/sets/detail.twig#L22) | Threshold and existing bonus rows, unclear/missing data according to the data model. | [ ] Do not pull into hit rows; show only verified thresholds/effects. |
+| Item detail – set membership | [`entity/item.twig`](../../php/templates/entity/item.twig#L4), [`php_viewmodel.py`](../../tools/php_viewmodel.py#L1137) | Set head, parts and bonuses as an item detail block, if a set ID is resolvable. | [ ] List as its own item detail appearance; set link only with a resolvable set page. |
 
-## Auftraggeber (`giver`)
+## Quest giver (`giver`)
 
-Vertrag: [`giver` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L242)
+Contract: [`giver` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L242)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Auftraggeberbrowser – Treffer | [`givers/list.twig`](../../php/templates/givers/list.twig#L38), [`Givers.php`](../../php/src/Givers.php#L276) | Name plus Meta: Art, Titel, bis zu drei Orte, Stufenspanne, Aufgabenanzahl; 30 pro Seite. Suche, Region/Landschaftsbaum, Art, Stufenbereich, Merkmale; Name/Stufe sortierbar. | **ABGLEICHEN:** Vertragszeile nennt Symbol/Name/Art/Gebiet/Stufe, Code zeigt Titel und Aufgabenanzahl, aber kein Symbol. Festlegen, welche Felder erlaubt sind, dann beidseitig angleichen. |
-| Auftraggeberdetail – Standort | [`givers/detail.twig`](../../php/templates/givers/detail.twig#L19) | Belegte Karten/Pins, Koordinaten, Gebietsweg und Routenlink. Fehlende Bild-/Ortsdaten werden weggelassen. | [ ] Standortkarte als Detailblock getrennt von Treffer-Meta spezifizieren; keine Koordinate oder Karte ergänzen, wenn nicht vorhanden. |
-| Auftraggeberdetail – Aufgaben | [`givers/detail.twig`](../../php/templates/givers/detail.twig#L32), [`Givers.php`](../../php/src/Givers.php#L379) | Alle zugeordneten Aufgaben als Name, Stufe, Gebiet und Chips; clientseitige Suche, Fortschrittsanzeige, „Erledigte ausblenden“. | [ ] Status/Importgrenzen, Suchumfang, Sortierung und fehlende Quest-IDs im Vertrag konkretisieren. Relation ist im Detailkontext fix. |
-| Aufgabenseite – Auftraggeberlink | [`entity/quest.twig`](../../php/templates/entity/quest.twig#L10), [`php_viewmodel.py`](../../tools/php_viewmodel.py#L250) | Einzelner aufgelöster Auftraggeberlink; mehrere Quellzuordnungen bleiben im Datenmodell erhalten. | [ ] Vertrag soll kenntlich machen, dass Detailseite nicht notwendigerweise alle Auftraggeber als Liste zeigt. |
+| Quest giver browser – hits | [`givers/list.twig`](../../php/templates/givers/list.twig#L38), [`Givers.php`](../../php/src/Givers.php#L276) | Name plus meta: kind, title, up to three locations, level range, quest count; 30 per page. Search, region/landscape tree, kind, level range, features; sortable by name/level. | **RECONCILE:** the contract row names icon/name/kind/area/level, the code shows title and quest count but no icon. Fix which fields are permitted, then align both sides. |
+| Quest giver detail – location | [`givers/detail.twig`](../../php/templates/givers/detail.twig#L19) | Verified maps/pins, coordinates, area path and route link. Missing image/location data is omitted. | [ ] Specify the location map as a detail block separately from hit meta; add no coordinate or map when not present. |
+| Quest giver detail – quests | [`givers/detail.twig`](../../php/templates/givers/detail.twig#L32), [`Givers.php`](../../php/src/Givers.php#L379) | All assigned quests as name, level, area and chips; client-side search, progress display, „Erledigte ausblenden“. | [ ] Make status/import limits, search scope, sorting and missing quest IDs concrete in the contract. The relation is fixed in the detail context. |
+| Quest page – quest giver link | [`entity/quest.twig`](../../php/templates/entity/quest.twig#L10), [`php_viewmodel.py`](../../tools/php_viewmodel.py#L250) | Single resolved quest giver link; several source assignments remain in the data model. | [ ] The contract should make clear that the detail page does not necessarily show all quest givers as a list. |
 
-## Händler (`vendor`)
+## Vendor (`vendor`)
 
-Vertrag: [`vendor` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L275)
+Contract: [`vendor` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L275)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Händlerbrowser – Treffer | [`vendors/list.twig`](../../php/templates/vendors/list.twig#L36), [`Vendors.php`](../../php/src/Vendors.php#L1) | Name plus Meta aus Art, Orten und Warenanzahl; Filter Suche, Region/Landschaft, Typ und Stufenbereich laut Browser; Name/ID, 30 je Seite. | [ ] Vertragsfelder `symbol/name/art/gebiet/anzahl` mit konkreter Ausgabe vergleichen; keine unsichtbaren Felder als sichtbare Zeile deklarieren. |
-| Händlerdetail – Standorte | [`vendors/detail.twig`](../../php/templates/vendors/detail.twig#L8) | Pro Platz Karte/Pin, Ortsweg, Koordinaten und Karten-/Routenaktion, nur wenn verfügbar. | [ ] Detailausprägung dokumentieren; Regionstext ohne passenden Bildrahmen darf nicht zum erfundenen Pin werden. |
-| Händlerdetail – Waren | [`vendors/detail.twig`](../../php/templates/vendors/detail.twig#L15), [`gegenstaende-filter.js`](../../web/gegenstaende-filter.js#L5) | Bis 5 einfache Itemzeilen; ab 6 Gegenstandsfilter, Sortierung Name/Stufe und 50 plus weitere. | [ ] Vertragsrelation `items=component` mit derselben Itemzeile/Filtersemantik wie Gegenstandssuche vergleichen; Händler bleibt fester Kontext. |
-| Itemdetail – Händlerquelle | [`entity/item.twig`](../../php/templates/entity/item.twig#L24), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L78) | Händlername mit Link; ab 6 Suche, Ort und Händlertyp in gemeinsamer Komponente. | [ ] Vertrag `where_vendors` auf diese konkrete Variante beziehen; unbekannte Händler-ID nicht als URL ausgeben. |
+| Vendor browser – hits | [`vendors/list.twig`](../../php/templates/vendors/list.twig#L36), [`Vendors.php`](../../php/src/Vendors.php#L1) | Name plus meta from kind, locations and goods count; filters search, region/landscape, type and level range per browser; name/ID, 30 per page. | [ ] Compare contract fields `symbol/name/art/gebiet/anzahl` with the concrete output; do not declare invisible fields as a visible row. |
+| Vendor detail – locations | [`vendors/detail.twig`](../../php/templates/vendors/detail.twig#L8) | Per place map/pin, location path, coordinates and map/route action, only if available. | [ ] Document the detail appearance; a region text without a matching image frame must not become an invented pin. |
+| Vendor detail – goods | [`vendors/detail.twig`](../../php/templates/vendors/detail.twig#L15), [`gegenstaende-filter.js`](../../web/gegenstaende-filter.js#L5) | Up to 5 simple item rows; from 6 item filter, sorting name/level and 50 plus more. | [ ] Compare contract relation `items=component` with the same item row/filter semantics as the item search; the vendor remains fixed context. |
+| Item detail – vendor source | [`entity/item.twig`](../../php/templates/entity/item.twig#L24), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L78) | Vendor name with link; from 6 search, location and vendor type in the shared component. | [ ] Relate contract `where_vendors` to this concrete variant; do not output an unknown vendor ID as a URL. |
 
-## Titel (`title`)
+## Title (`title`)
 
-Vertrag: [`title` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L306)
+Contract: [`title` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L306)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Titelbrowser – Treffer | [`titles/list.twig`](../../php/templates/titles/list.twig#L44), [`Titles.php`](../../php/src/Titles.php#L187) | Titelname plus Meta aus Quelle/Herkunft und abgeleiteten Orten/Quellenzahl; Suche, Aufgabe/Tat-Herkunft, Tatart, Region/Landschaft; Name/ID, 30 pro Seite. | [ ] Vertragsfelder `name/quelle` und Filter `geografie/art/herkunft` pro Browserausprägung definieren; Meta und Quellenzahl konkret erlauben oder entfernen. |
-| Titeldetail – Quellen | [`entity/title.twig`](../../php/templates/entity/title.twig#L5), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Quellenname plus optionaler Zusatz; Link bei gültiger URL, sonst Text. Große Gruppen können nach Aufgaben/Taten getrennt gefiltert werden. | [ ] Testen: gemischte Quelltypen, gültige/fehlende Links, 5/6-Grenze, Zusatztext, Kontext-Reset. |
-| Belohnungsbrowser | [`app/belohnungen.twig`](../../php/templates/app/belohnungen.twig#L1), [`belohnungen.js`](../../web/belohnungen.js#L1) | Aktueller Browser führt Gegenstände, nicht Titel; Titelrewarddaten dienen anderen Katalog-/Suchprozessen. | [ ] Im Vertrag festhalten, dass Rewarddaten nicht gleich öffentliche Titel-Trefferliste sind. |
+| Title browser – hits | [`titles/list.twig`](../../php/templates/titles/list.twig#L44), [`Titles.php`](../../php/src/Titles.php#L187) | Title name plus meta from source/origin and derived locations/source count; search, quest/deed origin, deed kind, region/landscape; name/ID, 30 per page. | [ ] Define contract fields `name/quelle` and filters `geografie/art/herkunft` per browser appearance; concretely permit or remove meta and source count. |
+| Title detail – sources | [`entity/title.twig`](../../php/templates/entity/title.twig#L5), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Source name plus optional addition; link with valid URL, otherwise text. Large groups can be filtered separately by quests/deeds. | [ ] Test: mixed source types, valid/missing links, 5/6 threshold, addition text, context reset. |
+| Reward browser | [`app/belohnungen.twig`](../../php/templates/app/belohnungen.twig#L1), [`belohnungen.js`](../../web/belohnungen.js#L1) | The current browser leads items, not titles; title reward data serve other catalogue/search processes. | [ ] Record in the contract that reward data is not the same as a public title hit list. |
 
-## Tugend (`virtue`)
+## Virtue (`virtue`)
 
-Vertrag: [`virtue` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L335)
+Contract: [`virtue` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L335)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Tugenddetail – Quellen | [`entity/virtue.twig`](../../php/templates/entity/virtue.twig#L5), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Tugendname und Quellenzeilen mit optionalem Zusatz; gültige URL wird Link, andernfalls Klartext. Große Quelllisten nutzen Aufgaben-/Tatenfilter, soweit Relationsmodell vorhanden ist. | [ ] Quelle, Zusatz und Linkfallback je Quelltyp festlegen; 5/6-Grenze und Renderfallback testen. |
-| Aufgabe/Tat – Tugendbelohnung | [`entity/reward.twig`](../../php/templates/entity/reward.twig#L1), [`entity/quest.twig`](../../php/templates/entity/quest.twig#L11) | Tugend kann als Belohnungsangabe erscheinen; eigener Link nur bei auflösbarer Zielseite. | [ ] Belohnungsdarstellung von Tugend-Quellenliste trennen. |
-| Ruf-/Belohnungsanwendung | [`app/belohnungen.twig`](../../php/templates/app/belohnungen.twig#L1), [`belohnungen.js`](../../web/belohnungen.js#L1) | Belohnungsbrowser filtert aktuell Gegenstände; Tugenden sind keine Treffer in diesem Browser. | [ ] Vertrag soll diesen Nicht-Auftritt explizit vom Detail-/Rewarddatenraum abgrenzen. |
+| Virtue detail – sources | [`entity/virtue.twig`](../../php/templates/entity/virtue.twig#L5), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Virtue name and source rows with optional addition; a valid URL becomes a link, otherwise plain text. Large source lists use the quest/deed filter, insofar as a relation model exists. | [ ] Fix source, addition and link fallback per source type; test the 5/6 threshold and render fallback. |
+| Quest/deed – virtue reward | [`entity/reward.twig`](../../php/templates/entity/reward.twig#L1), [`entity/quest.twig`](../../php/templates/entity/quest.twig#L11) | A virtue can appear as a reward statement; its own link only with a resolvable target page. | [ ] Separate the reward display from the virtue source list. |
+| Reputation/reward application | [`app/belohnungen.twig`](../../php/templates/app/belohnungen.twig#L1), [`belohnungen.js`](../../web/belohnungen.js#L1) | The reward browser currently filters items; virtues are no hits in this browser. | [ ] The contract should explicitly distinguish this non-appearance from the detail/reward data space. |
 
-## Fraktion (`f`)
+## Faction (`f`)
 
-Vertrag: [`f` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L362)
+Contract: [`f` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L362)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Fraktionsbrowser – Treffer | [`factions/list.twig`](../../php/templates/factions/list.twig#L37), [`Factions.php`](../../php/src/Factions.php#L167) | Name plus aus Rufquellen abgeleitete Orte; Suche, Region/Landschaft und „mit Rufquellen“; Name/ID, 30 pro Seite. | [ ] Vertrag `symbol/name/gebiet` mit echter Zeile vergleichen; im Template ist kein Symbol sichtbar. Filter „Quellen“ ist boolesch, keine Quelltyp-Facette. |
-| Fraktionsdetail – Rang und Quellen | [`entity/fraktion.twig`](../../php/templates/entity/fraktion.twig#L7), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Beschreibung, Rangstufen, getrennte Aufgaben-/Tatenquellgruppen mit Stufe/Stärke/Ort-Zusatz; eigener Ruf bleibt Charakterzustand. | [ ] Je Quelltyp Felder, Filteradapter, Schwelle und Fallback prüfen; Rangliste ist direkte Detaildarstellung. |
-| Rufanwendung – Charakterstand | [`app/ruf.twig`](../../php/templates/app/ruf.twig#L1), [`ruf.js`](../../web/ruf.js#L1) | Lokaler importierter Ruf; unbekannte Punkte als „–“, Stufenfortschritt nur auf belegten Daten. | [ ] Nicht mit statischer Fraktionsliste/Detailseite vermischen; Vertragsgrenze zwischen Katalog und Charakterdaten benennen. |
+| Faction browser – hits | [`factions/list.twig`](../../php/templates/factions/list.twig#L37), [`Factions.php`](../../php/src/Factions.php#L167) | Name plus locations derived from reputation sources; search, region/landscape and „mit Rufquellen“; name/ID, 30 per page. | [ ] Compare contract `symbol/name/gebiet` with the real row; no icon is visible in the template. Filter „Quellen“ is boolean, not a source type facet. |
+| Faction detail – rank and sources | [`entity/fraktion.twig`](../../php/templates/entity/fraktion.twig#L7), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Description, rank levels, separate quest/deed source groups with level/strength/location addition; own reputation remains character state. | [ ] Check fields, filter adapter, threshold and fallback per source type; the rank list is a direct detail display. |
+| Reputation application – character progress | [`app/ruf.twig`](../../php/templates/app/ruf.twig#L1), [`ruf.js`](../../web/ruf.js#L1) | Local imported reputation; unknown points as „–“, level progress only on verified data. | [ ] Do not mix with static faction list/detail page; name the contract boundary between catalogue and character data. |
 
-## Landmarke (`l`)
+## Landmark (`l`)
 
-Vertrag: [`l` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L392)
+Contract: [`l` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L392)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Landmarkenbrowser – Treffer | [`landmarks/list.twig`](../../php/templates/landmarks/list.twig#L37), [`Landmarks.php`](../../php/src/Landmarks.php#L1) | Name plus Gebiet/Region und Aufgabenanzahl; Filter Suche, Region/Landschaft, „mit Aufgaben“; Name/ID, 30 pro Seite. | [ ] Vertragsfelder `name/gebiet/aufgaben` passen grundsätzlich; je Feld sichtbar vs Filter/Zähler markieren. „Ohne Landschaft“ separat dokumentieren. |
-| Landmarkendetail – Ort | [`entity/landmarke.twig`](../../php/templates/entity/landmarke.twig#L5) | Karte/Pin, Koordinaten, Karten-/Regionslink und Kartenaktion nur bei vorhandener Position. | [ ] Fehlt Position: Ortsblock/Pin entfällt; das als Pflicht-Fallback testen. |
-| Landmarkendetail – Aufgaben | [`entity/landmarke.twig`](../../php/templates/entity/landmarke.twig#L13), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Zugeordnete Aufgabenlinks; große Liste kann gemeinsamen Aufgabenfilter einsetzen. | [ ] `targets` nicht als exakten Abschlussort ausgeben; Linkauflösung und Schwelle 5/6 absichern. |
+| Landmark browser – hits | [`landmarks/list.twig`](../../php/templates/landmarks/list.twig#L37), [`Landmarks.php`](../../php/src/Landmarks.php#L1) | Name plus area/region and quest count; filters search, region/landscape, „mit Aufgaben“; name/ID, 30 per page. | [ ] Contract fields `name/gebiet/aufgaben` fit in principle; mark per field visible vs filter/counter. Document „Ohne Landschaft“ separately. |
+| Landmark detail – location | [`entity/landmarke.twig`](../../php/templates/entity/landmarke.twig#L5) | Map/pin, coordinates, map/region link and map action only with an existing position. | [ ] If position is missing: location block/pin is dropped; test that as a mandatory fallback. |
+| Landmark detail – quests | [`entity/landmarke.twig`](../../php/templates/entity/landmarke.twig#L13), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Assigned quest links; a large list can use the shared quest filter. | [ ] Do not output `targets` as an exact completion location; secure link resolution and the 5/6 threshold. |
 
-## Gebiet (`area`)
+## Area (`area`)
 
-Vertrag: [`area` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L421)
+Contract: [`area` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L421)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Gebietsdetail – Geografie | [`entity/area.twig`](../../php/templates/entity/area.twig#L7) | Gebietsname/-karte, Kartenapp-Aktion, Elternregion und direkte Untergebiete. | [ ] Kinderliste separat von Entitäts-Relationsliste erfassen; nur existierende Karten-/Gebietslinks. |
-| Gebietsdetail – Inhaltstabs | [`entity/area.twig`](../../php/templates/entity/area.twig#L14), [`RelatedLists.php`](../../php/src/RelatedLists.php#L33), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Tabs Aufgabe → Tat → Gegenstand mit Anzahlen; bis 5 direkte Links, ab 6 typabhängige gemeinsame Filterkomponente. Elterngebiet bleibt Kontext. | [ ] Pro Tab exakte Zeilenfelder, tatsächlich aktive Filtergruppen, Sortierung und Seitenfenster dokumentieren. Prüfen, ob Gegenstände nach abgeleiteten Quellenorten klar markiert sind. |
-| Karte/Abenteuer – Gebiet | [`abenteuer.twig`](../../php/templates/app/abenteuer.twig#L1), [`abenteuer.js`](../../web/abenteuer.js#L1), [`abenteuer-logik.js`](../../web/abenteuer-logik.js#L1) | Gebiet als Karteneintrag/-punkt oder regionale Gebietsliste mit persönlichem Fortschritt/Stufenpassung, falls Datenbasis vorhanden. | [ ] Diese Ausprägung getrennt von der PHP-Gebietsdetailseite spezifizieren; fehlende Position/Importwerte bleiben leer statt geschätzt. |
+| Area detail – geography | [`entity/area.twig`](../../php/templates/entity/area.twig#L7) | Area name/map, map app action, parent region and direct sub-areas. | [ ] Record the child list separately from the entity relation list; only existing map/area links. |
+| Area detail – content tabs | [`entity/area.twig`](../../php/templates/entity/area.twig#L14), [`RelatedLists.php`](../../php/src/RelatedLists.php#L33), [`entitaeten-listen.js`](../../web/entitaeten-listen.js#L31) | Tabs Aufgabe → Tat → Gegenstand with counts; up to 5 direct links, from 6 a type-dependent shared filter component. The parent area remains context. | [ ] Document exact row fields, actually active filter groups, sorting and page window per tab. Check whether items are clearly marked by derived source locations. |
+| Map/adventure – area | [`abenteuer.twig`](../../php/templates/app/abenteuer.twig#L1), [`abenteuer.js`](../../web/abenteuer.js#L1), [`abenteuer-logik.js`](../../web/abenteuer-logik.js#L1) | Area as map entry/point or regional area list with personal progress/level fit, if a data basis is present. | [ ] Specify this appearance separately from the PHP area detail page; missing position/import values stay empty instead of estimated. |
 
 ## Region (`region`)
 
-Vertrag: [`region` im Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json#L452)
+Contract: [`region` in the entity contract](../datenraum/lotro-datenraum-entitaeten.json#L452)
 
-| UI-Auftritt | Code/Element | Ist laut Code | Soll/Änderung |
+| UI appearance | Code/element | Current state per code | Target/change |
 |---|---|---|---|
-| Regionsdetail – Untergebiete | [`entity/area.twig`](../../php/templates/entity/area.twig#L7) (Template für Gebiet und Region) | Name/Karte, Eltern-/Kindkontext und direkte Untergebiete soweit vorhanden. | [ ] Prüfen, welche Felder für Regionen tatsächlich erzeugt werden und im selben Template bedingt entfallen; nicht pauschal Gebietsfelder übernehmen. |
-| Regionsdetail – aggregierter Inhalt | [`entity/area.twig`](../../php/templates/entity/area.twig#L14), [`RelatedLists.php`](../../php/src/RelatedLists.php#L33) | Aufgaben/Taten/Gegenstände aus Regionsmitgliedern, getrennte Tabs und je Typ eigener Adapter. | [ ] Aggregationsregel und Region als unveränderlichen Filterkontext ausdrücklich festhalten; Gebiet und Region nicht als direkte `fk`-Kante verwechseln. |
-| Abenteuer – Region | [`abenteuer.twig`](../../php/templates/app/abenteuer.twig#L1), [`abenteuer.js`](../../web/abenteuer.js#L1) | Region als Kartenübersicht mit Gebietsmarken; Fortschrittsring nur mit Import, Punkt nur bei belegter Kartenverknüpfung. | [ ] Als eigene App-Ausprägung führen; keine allgemeine Filterbrowserregel auf Kartenpunkte übertragen. |
+| Region detail – sub-areas | [`entity/area.twig`](../../php/templates/entity/area.twig#L7) (template for area and region) | Name/map, parent/child context and direct sub-areas insofar as present. | [ ] Check which fields are actually created for regions and conditionally dropped in the same template; do not adopt area fields wholesale. |
+| Region detail – aggregated content | [`entity/area.twig`](../../php/templates/entity/area.twig#L14), [`RelatedLists.php`](../../php/src/RelatedLists.php#L33) | Quests/deeds/items from region members, separate tabs and a separate adapter per type. | [ ] Record the aggregation rule and the region as immutable filter context explicitly; do not confuse area and region as a direct `fk` edge. |
+| Adventure – region | [`abenteuer.twig`](../../php/templates/app/abenteuer.twig#L1), [`abenteuer.js`](../../web/abenteuer.js#L1) | Region as map overview with area markers; progress ring only with import, point only with verified map link. | [ ] Keep as its own app appearance; do not transfer a general filter browser rule to map points. |
 
-## Instanz (Finder-Ausprägung, keine Katalog-Detailentität)
+## Instance (finder appearance, no catalogue detail entity)
 
 Code: [`instances/list.twig`](../../php/templates/instances/list.twig#L1), [`Instances.php`](../../php/src/Instances.php#L90)
 
-| UI-Auftritt | Ist laut Code | Soll/Änderung |
+| UI appearance | Current state per code | Target/change |
 |---|---|---|
-| Instanzfinder – Ergebniszeile | Name, Gruppe/Cluster und belegte Metadaten; keine Instanz-Detailseite und kein automatischer Aufgabenlink. Suche, Cluster, Art, Stufenbereich, Gruppengröße, Schwierigkeit; gruppierte Ausgabe, 200 je Seite. | [ ] Als eigenständige Browserentität im Vertrag führen oder ausdrücklich außerhalb des 13-Entitätenkatalogs markieren. Sichtbare Metadaten und Fälle ohne Stufe/Gruppe je Feld prüfen. |
+| Instance finder – result row | Name, group/cluster and verified metadata; no instance detail page and no automatic quest link. Search, cluster, kind, level range, group size, difficulty; grouped output, 200 per page. | [ ] Keep as an independent browser entity in the contract or expressly mark it outside the 13-entity catalogue. Check visible metadata and cases without level/group per field. |
 
-## Abweichungen mit bestätigtem Korrekturbedarf
+## Deviations with confirmed need for correction
 
-- [ ] **Item-Aufgaben-/Tatquellen:** Schwelle 6/11 vereinheitlichen (Item, EAV-01).
-- [ ] **Item „Wofür“:** gemeinsame Rezeptkomponente statt lokalem Such-/Rollenfilter ohne Sortierung/Pagination (Item/Rezept, EAV-02).
-- [ ] **Aufgaben-/Tatenzeile:** `flags` in Finder-/Relationstreffer konkret vertraglich erlauben oder aus der sichtbaren Zeile entfernen (Aufgabe/Tat, EAV-03).
-- [ ] **Setbrowserzeile:** Teilezahl sowie Klassen-/Rüstungsmeta gegen erlaubte Vertragsfelder entscheiden (Set, EAV-04).
-- [ ] **Auftraggeberbrowserzeile:** Titel/Aufgabenanzahl und fehlendes Symbol mit Vertragsfeldern abgleichen (Auftraggeber, EAV-05).
+- [ ] **Item quest/deed sources:** unify the 6/11 threshold (item, EAV-01).
+- [ ] **Item „Wofür“:** shared recipe component instead of local search/role filter without sorting/pagination (item/recipe, EAV-02).
+- [ ] **Quest/deed row:** concretely permit `flags` in finder/relation hits by contract or remove them from the visible row (quest/deed, EAV-03).
+- [ ] **Set browser row:** decide part count and class/armour meta against permitted contract fields (set, EAV-04).
+- [ ] **Quest giver browser row:** reconcile title/quest count and missing icon with contract fields (quest giver, EAV-05).
 
-## Querschnittliche Prüflücken
+## Cross-cutting check gaps
 
-- [ ] `tests/test_entitaeten_vertrag.py` prüft aktuell Entitätsmenge, Sprachsegmente, erlaubte Relationstypen, Listenstatusvokabular und einige verbotene Zeileninhalte. Es prüft nicht, ob jede konkrete UI-Ausprägung exakt ihre Vertragsfelder rendert.
-- [ ] Pro Tabellenzeile oben einen Test festlegen: DOM-Felder, Linkziele/Fallback, Filterzustand, Sortierung/Pagination und 5/6-Grenze.
-- [ ] Für Filterzustand je Oberfläche URL, gespeichertes Filtergedächtnis, Reset, Zurück/Vor, Tabs und festen Elternkontext prüfen.
-- [ ] Mit und ohne Charakterimport testen; Charakterdaten bleiben lokal und dürfen nicht als Server-/Katalogrelation behandelt werden.
-- [ ] DE/EN/FR, Desktop/Mobil sowie JavaScript- und Serverfallback für jede geänderte Ausprägung abnehmen.
-- [ ] Nach Umsetzung die Ist-Matrix in arc42 und den Entitätenvertrag synchronisieren; erst dann diese Checkliste schließen.
+- [ ] `tests/test_entitaeten_vertrag.py` currently checks entity set, language segments, permitted relation types, list status vocabulary and some forbidden row contents. It does not check whether every concrete UI appearance renders exactly its contract fields.
+- [ ] Fix one test per table row above: DOM fields, link targets/fallback, filter state, sorting/pagination and the 5/6 threshold.
+- [ ] For the filter state per surface check URL, stored filter memory, reset, back/forward, tabs and fixed parent context.
+- [ ] Test with and without character import; character data stays local and must not be treated as a server/catalogue relation.
+- [ ] Accept DE/EN/FR, desktop/mobile as well as JavaScript and server fallback for every changed appearance.
+- [ ] After implementation, synchronise the current-state matrix in arc42 and the entity contract; only then close this checklist.
 
-## Nicht als Abweichung werten
+## Do not count as deviation
 
-- `recipe.ingredients` und `set.members` tragen im Vertrag ausdrücklich den Status `direct`. Ihre direkte Detaildarstellung auch bei mehr als fünf Elementen ist daher kein Schwellenfehler.
-- Ein Eintrag ohne auflösbare Ziel-ID darf als nicht verlinkter Text erscheinen, wenn genau dieser Fallback im Vertrag für die Ausprägung festgelegt ist.
-- Eine öffentliche Indexliste darf weniger Felder als ein Finder zeigen. Dafür müssen Index und Finder im Vertrag als unterschiedliche UI-Auftritte modelliert sein.
+- `recipe.ingredients` and `set.members` expressly carry the status `direct` in the contract. Their direct detail display even with more than five elements is therefore no threshold error.
+- An entry without a resolvable target ID may appear as unlinked text if exactly this fallback is fixed in the contract for the appearance.
+- A public index list may show fewer fields than a finder. For that, index and finder must be modelled as different UI appearances in the contract.

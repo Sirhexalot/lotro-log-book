@@ -1,12 +1,12 @@
-# Kartenreiter: Zähler beim ersten Bild, Details ohne Vollkatalog
+# Map tabs: counters on first paint, details without the full catalogue
 
-**Status:** umgesetzt, lokal geprüft (20.11.2026)
-**Bereich:** Kartenansicht (Aufgaben und Taten), Startdaten, Shards
+**Status:** implemented, checked locally (20.11.2026)
+**Scope:** map view (quests and deeds), start data, shards
 
-## Beobachtung
+## Observation
 
-In der Kartenansicht zeigten Reiter von Untergebieten, die im Spiel eine
-Ebene tiefer liegen als die gemeinsame Gebietsliste sie anzeigt, `0/0`:
+In the map view, tabs of sub-areas that sit one level deeper in the game than
+the shared area list shows them displayed `0/0`:
 
 ```text
 Eriador › Dunland-Überblick
@@ -16,108 +16,108 @@ Eriador › Dunland-Überblick
 └─ Tâl Methedras      0/0   (13, Pfad über Dunland)
 ```
 
-Nach einem Klick auf einen der Reiter sprangen die Zahlen auf den richtigen
-Wert; die Liste blieb aber leer, weil der angeklickte Platzhalterknoten keine
-Einträge hatte. Ein Direktlink wie `#map-268446977/268446985` zeigte zusätzlich
-die Liste von Breeland (37 Zeilen) unter der Überschrift „Isengart“.
+After a click on one of the tabs the numbers jumped to the right value; the
+list stayed empty, however, because the clicked placeholder node had no
+entries. A direct link such as `#map-268446977/268446985` additionally showed
+the list of Breeland (37 rows) under the heading „Isengart“.
 
-Der erste Klick auf eine Aufgabe lud außerdem den vollständigen Katalog
-(`daten-de.js`, 22,7 MB bzw. 4,5 MB gepackt), nur um Beschreibung, Schritte
-und die vollständigen Ziele zu erhalten.
+The first click on a quest also loaded the complete catalogue
+(`daten-de.js`, 22,7 MB or 4,5 MB packed), only to obtain description, steps
+and the complete objectives.
 
-## Ursachen
+## Causes
 
-1. Der Zähler-Index der Startdatei war nur nach dem vollen Spielpfad
-   (`Eriador|Dunland-Überblick|Nan Curunír|Isengart`) aufgebaut. Der flache
-   Reiter heißt `Eriador|Dunland-Überblick|Isengart` und fand nichts.
-2. `landschaftReiter()` lief einmal vor dem Shard-Laden; danach wurden nur
-   Liste und Detail neu gezeichnet.
-3. `gleicheGebieteAn()` suchte vorhandene Knoten nur auf derselben Ebene. Für
-   tiefer liegende Gebiete entstand ein leerer Doppelknoten neben der
-   Landschaft.
-4. Beim Start mit Hash wurde zusätzlich das Standardgebiet (Breeland)
-   geöffnet; dessen spät eintreffende Shards überschrieben die verlinkte
-   Liste.
-5. Die Kurzfassung der Karte enthält bewusst keine Beschreibung, Schritte und
-   nur ein Ziel. Der Detailbereich holte dafür den ganzen Katalog.
-6. Die Startdatei kannte die vorhandenen Shards nicht. Übersichtskarten wie
-   `268446977` haben keinen eigenen Shard, kosteten aber bei jedem Öffnen
-   einen 404. Bis zu zwölf Untershard-Dateien wurden nacheinander geladen.
+1. The counter index of the start file was built only along the full game path
+   (`Eriador|Dunland-Überblick|Nan Curunír|Isengart`). The flat
+   tab is called `Eriador|Dunland-Überblick|Isengart` and found nothing.
+2. `landschaftReiter()` ran once before the shard loading; afterwards only
+   list and detail were redrawn.
+3. `gleicheGebieteAn()` looked for existing nodes only on the same level. For
+   deeper areas an empty duplicate node arose next to the
+   landscape.
+4. When starting with a hash, the default area (Breeland) was additionally
+   opened; its late-arriving shards overwrote the linked
+   list.
+5. The short form of the map deliberately contains no description, steps and
+   only one objective. The detail area fetched the whole catalogue for that.
+6. The start file did not know the existing shards. Overview maps such as
+   `268446977` have no shard of their own but cost a 404 on every opening. Up
+   to twelve sub-shard files were loaded one after another.
 
-## Umsetzung
+## Implementation
 
-- [x] Zählmetadaten zusätzlich nach Karten-ID indizieren (`fk` in der
-      Zusammenfassung, `zusammenfassungNachKarte` in `app.js`). Reiter zählen
-      jetzt vor jedem Nachladen richtig.
-- [x] `zaehlEintraege()`: Pfad zuerst, dann Karten-ID, dann geladene Einträge.
-- [x] `gleicheGebieteAn()` sucht vorhandene Karten knoten auch tiefer und
-      bevorzugt den belegten Knoten; keine leeren Doppelknoten mehr.
-- [x] Die Promotionskopie der Übersichtskarte entfernt keine Kinder mehr
-      (`__kartenansicht-eigene` entfällt); Reiter und Liste der Übersicht
-      bleiben vollständig.
-- [x] `landschaftOeffnen()` wartet auf die Shards der Landschaft und zeichnet
-      dann Reiter, Liste und Detail aus einem Stand. Ein Auftragszähler
-      verhindert, dass ein spätes Laden eine neuere Auswahl überschreibt.
-- [x] Start mit Hash öffnet nur noch das verlinkte Gebiet.
-- [x] `tools/build_karten_kurz.py` schreibt je Karte bzw. Region einen
-      Detail-Shard (`detail-map-<id>.js`, `detail-region-<n>.js`) mit
-      Beschreibung, Schritten, vollständigen Zielen und `u`/`gi`/`nq`/`pq`/
-      `tl`/`lp`. Der Katalog (`daten-<sprache>.js`) bleibt nur Rückfall.
-- [x] `MQL_SHARD_MAPS` nennt die vorhandenen Karten-Shards; fehlende werden
-      nicht mehr angefragt (kein 404 für Übersichtskarten).
-- [x] Shards werden mit vier gleichzeitigen Anfragen geladen statt nacheinander.
-- [x] `tests/test_kartenstart.py` prüft Detail-Shards, Feldumfang,
-      Start-Metadaten und den Ladepfad.
+- [x] Index the count metadata additionally by map ID (`fk` in the
+      summary, `zusammenfassungNachKarte` in `app.js`). Tabs now count
+      correctly before every reload.
+- [x] `zaehlEintraege()`: path first, then map ID, then loaded entries.
+- [x] `gleicheGebieteAn()` also looks for existing map nodes deeper and
+      prefers the verified node; no more empty duplicate nodes.
+- [x] The promotion copy of the overview map no longer removes children
+      (`__kartenansicht-eigene` is gone); tabs and list of the overview
+      stay complete.
+- [x] `landschaftOeffnen()` waits for the shards of the landscape and then
+      draws tabs, list and detail from one state. A request counter
+      prevents a late load from overwriting a newer selection.
+- [x] Starting with a hash opens only the linked area.
+- [x] `tools/build_karten_kurz.py` writes a detail shard per map or region
+      (`detail-map-<id>.js`, `detail-region-<n>.js`) with
+      description, steps, complete objectives and `u`/`gi`/`nq`/`pq`/
+      `tl`/`lp`. The catalogue (`daten-<sprache>.js`) remains only a fallback.
+- [x] `MQL_SHARD_MAPS` names the existing map shards; missing ones are
+      no longer requested (no 404 for overview maps).
+- [x] Shards are loaded with four concurrent requests instead of one after another.
+- [x] `tests/test_kartenstart.py` checks detail shards, field scope,
+      start metadata and the load path.
 
-## Abnahme
+## Acceptance
 
-- Reiter in DE/EN/FR zeigen die Zahlen vor dem Öffnen: Isengart 14,
-  Das Eisenloch 12, Galtrev 30, Tâl Methedras 13 (Aufgaben); Isengart 2
-  (Taten, die anderen drei haben keine Taten).
-- Klick auf einen Reiter zeigt dieselbe Zahl in Liste und Detail.
-- Direktlink auf ein Untergebiet zeigt dessen Liste, nicht die des
-  Standardgebiets.
-- Erste Aufgabenauswahl lädt nur `detail-map-*.js` (Isengart 16 KB, größter
-  Shard Auenland 797 KB), nie `daten-de.js`.
+- Tabs in DE/EN/FR show the numbers before opening: Isengart 14,
+  Das Eisenloch 12, Galtrev 30, Tâl Methedras 13 (quests); Isengart 2
+  (deeds, the other three have no deeds).
+- A click on a tab shows the same number in list and detail.
+- A direct link to a sub-area shows its list, not that of the
+  default area.
+- The first quest selection loads only `detail-map-*.js` (Isengart 16 KB, largest
+  shard Auenland 797 KB), never `daten-de.js`.
 
-## Weitere Inhalte: Kacheln fehlten (20.11.2026)
+## Weitere Inhalte: tiles were missing (20.11.2026)
 
-Der Block **Weitere Inhalte** stand als leere Überschrift unten auf der
-Gebietsübersicht: keine Kachel für Epische Geschichte, Klassenaufgaben,
-Herkunftsaufgaben, Feste, Missionen, Instanzen, Handwerk, Aufgabenbrett und
+The block **Weitere Inhalte** stood as an empty heading at the bottom of the
+area overview: no tile for Epische Geschichte, Klassenaufgaben,
+Herkunftsaufgaben, Feste, Missionen, Instanzen, Handwerk, Aufgabenbrett and
 Weitere Aufgaben.
 
-Zwei Ursachen:
+Two causes:
 
-1. Die Kacheln entstanden aus den geladenen Katalogeinträgen
-   (`quests.some(q => q.th === …)`). Beim Karten-Erststart ist `quests` leer,
-   also blieb der Block leer. Die Entscheidung kommt jetzt aus den kompakten
-   Startmetadaten (`th`, `a` in der Zusammenfassung), die vor jedem Shard
-   vorliegen.
-2. Die Themenkennung `th` fehlte in den gebauten Daten. `build_daten.py` las
-   die Aufgaben aus der iCloud-Kopie des Plugin-Katalogs (Stand 09.11.), die
-   keine `theme:`-Pfade enthält; nur Taten kamen aus dem lokalen Checkout.
-   Der Aufgabenbau nutzt jetzt zuerst `../MagicQuestLog/plugin/…/Quests_*.lua`
-   und fällt nur bei fehlender Datei auf iCloud zurück.
-   `SEKTIONEN` übersetzt die Pfadnamen `@themeEpic`, `@themeClass`,
-   `@themeOrigin`, `@themeOther` (vorher stand „themeEpic“ als Titel da).
+1. The tiles arose from the loaded catalogue entries
+   (`quests.some(q => q.th === …)`). On the map first start `quests` is empty,
+   so the block stayed empty. The decision now comes from the compact
+   start metadata (`th`, `a` in the summary), which are present before every
+   shard.
+2. The topic identifier `th` was missing in the built data. `build_daten.py` read
+   the quests from the iCloud copy of the plugin catalogue (status 09.11.), which
+   contains no `theme:` paths; only deeds came from the local checkout.
+   The quest build now uses `../MagicQuestLog/plugin/…/Quests_*.lua` first
+   and falls back to iCloud only when the file is missing.
+   `SEKTIONEN` translates the path names `@themeEpic`, `@themeClass`,
+   `@themeOrigin`, `@themeOther` (previously „themeEpic“ stood there as the title).
 
-Die Epische Geschichte öffnet weiterhin die Kartenansicht, nicht den Finder.
-Ihre Kapitel liegen in `thema-epic-<sprache>.js` (58 KiB); die Kartenansicht
-lädt die Datei erst beim Aufruf `?gebiet=Epische Geschichte` und baut den Baum
-danach neu. Ein leerer Block wird nicht mehr ausgegeben (gilt auch für Taten,
-die keine Themenkacheln haben).
+Epische Geschichte still opens the map view, not the finder.
+Its chapters lie in `thema-epic-<sprache>.js` (58 KiB); the map view
+loads the file only on the call `?gebiet=Epische Geschichte` and rebuilds the
+tree afterwards. An empty block is no longer output (this also applies to deeds
+that have no topic tiles).
 
-Der Aufgabenbau liest jetzt den lokalen Plugin-Export (15.11.) statt der
-iCloud-Kopie (09.11.). Dadurch kommen neue Karten und Aufgaben hinzu; die
-Zähler verschieben sich (Dunland-Überblick 401 → 494, neue Untergebiete
-„Ring von Isengart“, „Die Tiefen von Isengart“). Das ist der aktuellere Export,
-kein Zählfehler – vor einer Veröffentlichung mit Adrian abstimmen.
+The quest build now reads the local plugin export (15.11.) instead of the
+iCloud copy (09.11.). New maps and quests are added through that; the
+counters shift (Dunland-Überblick 401 → 494, new sub-areas
+„Ring von Isengart“, „Die Tiefen von Isengart“). That is the more recent export,
+not a counting error – agree with Adrian before a publication.
 
-## Noch zu prüfen
+## Still to check
 
-- [ ] Browserprüfung Desktop und Mobil mit und ohne Spielstand in DE/EN/FR
-      nach dem nächsten Build.
-- [ ] Freigabe und Veröffentlichung (Upload) getrennt beauftragen.
-- [ ] Nach dem Release im Netzwerk-Panel bestätigen, dass beim ersten Klick
-      kein `daten-<sprache>.js` mehr geladen wird.
+- [ ] Browser check desktop and mobile with and without character progress in DE/EN/FR
+      after the next build.
+- [ ] Request approval and publication (upload) separately.
+- [ ] After the release, confirm in the network panel that on the first click
+      no `daten-<sprache>.js` is loaded any more.

@@ -38,62 +38,62 @@ def rule(fn, sel, attr, ts, note):
 
 
 rule('vendors.xml', './/sellList', 'sellListId',
-     [('vendors.xml', './sellList', 'sellListId')], 'Händler → Verkaufsliste')
-rule('vendors.xml', './/sellEntry', 'id', I, 'Verkaufsposition → Gegenstand')
+     [('vendors.xml', './sellList', 'sellListId')], 'Vendor → sell list')
+rule('vendors.xml', './/sellEntry', 'id', I, 'Sell entry → item')
 rule('barters.xml', './barterer/barterProfile', 'profileId',
-     [('barters.xml', './barterProfile', 'profileId')], 'Tauscher → Tauschprofil')
+     [('barters.xml', './barterProfile', 'profileId')], 'Barter vendor → barter profile')
 for tag in ['give', 'receive']:
-    rule('barters.xml', './/' + tag, 'id', I, 'Tauschposition ' + tag + ' → Gegenstand')
+    rule('barters.xml', './/' + tag, 'id', I, 'Barter entry ' + tag + ' → item')
 rule('barters.xml', './/receiveReputation', 'factionId',
-     [('factions.xml', './faction', 'id')], 'Ruferhalt → Fraktion')
+     [('factions.xml', './faction', 'id')], 'Reputation gain → faction')
 for tag in ['itemsTableEntry', 'trophyListEntry']:
-    rule('loots.xml', './/' + tag, 'itemId', I, 'Beuteeintrag → Gegenstand')
+    rule('loots.xml', './/' + tag, 'itemId', I, 'Loot entry → item')
 for tag in ['treasureListEntry', 'trophyListEntry']:
     rule('loots.xml', './/' + tag, 'treasureGroupProfileId',
          [('loots.xml', './itemsTable', 'id'), ('loots.xml', './treasureList', 'id')],
-         'Beuteprofil-ID → itemsTable oder treasureList; Zieltypen nicht zusammenführen')
+         'Loot profile ID → itemsTable or treasureList; target types kept separate')
 rule('loots.xml', './/weightedTreasureTableEntry', 'trophyListId',
-     [('loots.xml', './trophyList', 'id')], 'Gewichtete Tabelle → Trophäenliste')
+     [('loots.xml', './trophyList', 'id')], 'Weighted table → trophy list')
 for attr, target in [('trophyListId', 'trophyList'), ('weightedTreasureTableId', 'weightedTreasureTable')]:
     rule('loots.xml', './/filteredTrophyTableEntry', attr,
-         [('loots.xml', './' + target, 'id')], 'Gefilterte Tabelle → ' + target)
+         [('loots.xml', './' + target, 'id')], 'Filtered table → ' + target)
 for tag in ['relicsListEntry', 'relicsTreasureGroupEntry']:
-    rule('loots.xml', './/' + tag, 'relicId', R, 'Reliktbeute → Relikt')
+    rule('loots.xml', './/' + tag, 'relicId', R, 'Relic loot → relic')
 rule('loots.xml', './/relicsListEntry', 'relicsTreasureGroupId',
-     [('loots.xml', './relicsTreasureGroup', 'id')], 'Reliktliste → Reliktgruppe')
+     [('loots.xml', './relicsTreasureGroup', 'id')], 'Relic list → relic group')
 for attr, tag in [('treasureListId', 'treasureList'), ('trophyListId', 'trophyList'),
                   ('weightedTreasureTableId', 'weightedTreasureTable'),
                   ('filteredTrophyTableId', 'filteredTrophyTable'),
                   ('filteredTrophyTableId2', 'filteredTrophyTable'),
                   ('filteredTrophyTableId3', 'filteredTrophyTable')]:
     rule('containers.xml', './container', attr, [('loots.xml', './' + tag, 'id')], 'Container → ' + tag)
-rule('containers.xml', './relicsContainer', 'relicId', R, 'Reliktcontainer → Relikt')
+rule('containers.xml', './relicsContainer', 'relicId', R, 'Relic container → relic')
 rule('containers.xml', './relicsContainer', 'relicsListId',
-     [('loots.xml', './relicsList', 'id')], 'Reliktcontainer → Reliktliste')
+     [('loots.xml', './relicsList', 'id')], 'Relic container → relic list')
 for tag, attr, ts in [('skill', 'id', S), ('effect', 'id', E),
                      ('trait', 'pointCostProgression', P), ('trait', 'rankOverlayProgression', P)]:
-    rule('traits.xml', './/' + tag, attr, ts, 'Trait-Unterstruktur → ' + str(ts))
+    rule('traits.xml', './/' + tag, attr, ts, 'Trait substructure → ' + str(ts))
 for tag, attr, ts in [('effect', 'id', E), ('requiredEffect', 'id', E),
                      ('requiredTrait', 'id', T), ('combo', 'skillID', S),
                      ('details', 'inductionId', [('inductions.xml', './induction', 'id')]),
                      ('attack', 'maxDamageProgression', P), ('attack', 'dpsModProgression', P)]:
-    rule('skills.xml', './/' + tag, attr, ts, 'Skill-Unterstruktur → ' + str(ts))
+    rule('skills.xml', './/' + tag, attr, ts, 'Skill substructure → ' + str(ts))
 for tag in ['powerCost', 'powerCostPerSecond', 'moraleCost', 'moraleCostPerSecond']:
-    rule('skills.xml', './/' + tag, 'pointsProgression', P, 'Kosten → Progression')
-rule('parchmentMaps.xml', './parchmentMap', 'id', M, 'Karte → Geometrie gleicher Karten-ID')
+    rule('skills.xml', './/' + tag, 'pointsProgression', P, 'Cost → progression')
+rule('parchmentMaps.xml', './parchmentMap', 'id', M, 'Map → geometry of the same map ID')
 rule('maps/links.xml', './link', 'parentId',
      M + [('geoAreas.xml', './area', 'id')],
-     'Link-Quell-ID → Karten- oder Gebiets-ID; gemischter ID-Raum, keine pauschale Kartenhierarchie')
-rule('maps/links.xml', './link', 'target', M, 'Link-Ziel-ID → Karte (Zielhypothese)')
-rule('privateEncounters.xml', './/map', 'mapId', M, 'Instanzkarteneintrag → Karte')
+     'Link source ID → map or area ID; mixed ID space, no general map hierarchy')
+rule('maps/links.xml', './link', 'target', M, 'Link target ID → map (target hypothesis)')
+rule('privateEncounters.xml', './/map', 'mapId', M, 'Instance map entry → map')
 for tag in ['privateEncounter', 'skirmishPrivateEncounter', 'questToBestow', 'randomQuest']:
-    rule('privateEncounters.xml', './/' + tag, 'questId', A, 'Instanzvorlage → Aufgabe/Tat-ID-Raum')
+    rule('privateEncounters.xml', './/' + tag, 'questId', A, 'Instance template → quest/deed ID space')
 for fn in ['quests.xml', 'deeds.xml']:
     for tag, attr, ts in [('skillUsed', 'skillId', S), ('monsterDied', 'mobId', [('mobs.xml', './mob', 'id')]),
                          ('npcTalk', 'npcId', [('NPCs.xml', './NPC', 'id')]),
                          ('questComplete', 'achievableId', A), ('questBestowed', 'achievableId', A),
                          ('inventoryItem', 'itemId', I), ('itemUsed', 'itemId', I)]:
-        rule(fn, './/' + tag, attr, ts, 'Aufgaben-/Tatbedingung → typisiertes Ziel')
+        rule(fn, './/' + tag, attr, ts, 'Quest/deed condition → typed target')
 
 results = []
 for fn, sel, attr, ts, note in rules:
@@ -132,30 +132,30 @@ payload = {'rules': results, 'giver_resolution': giver_rows, 'input_sha256': inp
 rows = [(r['meaning'], f'{r["source"]} `{r["selector"]}/@{r["attribute"]}`',
          r['references'], r['resolved'], sum(r['unresolved'].values()), r['zero_sentinels']) for r in results]
 text = [
-    '# Vertiefung: typisierte Referenzen und Auftraggeber', '',
-    'Diese Prüfung erweitert, ersetzt aber nicht den vorherigen Referenzlauf. '
-    'Feldpfade sind konkret im XML belegt. Die Zielzuordnung ist eine ausdrücklich '
-    'genannte Prüfregel; Treffer beweisen ID-Auflösbarkeit, nicht jede Laufzeitsemantik. '
-    'Regeln mit null Referenzen sind ohne Evidenz und nicht als bestätigte Relation zu lesen. '
-    'Wert 0 wird separat genannt und nicht stillschweigend gelöscht.', '',
-    '## Auftraggeber-Lücken im reinen NPC-Katalog', '',
-    f'Von {len(want)} verschiedenen dort nicht gefundenen IDs haben {len(found)} '
-    'einen dekodierten Datensatz in NPC-/Platzierungsexporten. '
-    f'Alle {sum(i in inventory for i in want)} kommen im DAT-Inventar vor. '
-    'Ein Inventareintrag belegt Klasse/ID, aber keine erfolgreich gelesenen Properties.', '',
-    table(['Befund', 'Eindeutige IDs'], [
-        ('Dekodiert, Klasse 796', sum(x['class_index'] == 796 for x in found.values())),
-        ('Dekodiert, Klasse 1723', sum(x['class_index'] == 1723 for x in found.values())),
-        ('Nur Inventar, nicht im geprüften Rohbestand', len(want) - len(found))]), '',
-    'Die numerischen Klassen werden hier bewusst nicht allein anhand ihrer Namen '
-    'zu NPCs oder Gegenständen erklärt. Die pauschale Aussage „613 ungültige NPCs“ '
-    'wäre falsch. Eine Geberrolle kann auf einen anderen Quellobjekttyp zeigen.', '',
-    '## Zusätzliche Referenzprüfungen', '',
-    table(['Beziehung/Prüfhypothese', 'Quellpfad', 'Verweise', 'Aufgelöst', 'Nicht aufgelöst', 'Davon Wert 0'], rows), '',
-    '## Reproduktion und Belege', '',
-    '`python3 lotro_datenraum_vertiefung.py`. Sämtliche offenen Werte, '
-    'Auftraggeber-IDs, Klassen und SHA-256 der Eingaben: '
-    '`lotro-datenraum-vertiefung.json`. Keine Spiel-/Plugin-/Webdatei verändert.', ''
+    '# Deep dive: typed references and quest givers', '',
+    'This check extends but does not replace the earlier reference run. '
+    'Field paths are concretely evidenced in the XML. The target assignment is an '
+    'explicitly named check rule; hits prove ID resolvability, not every runtime '
+    'semantic. Rules with zero references have no evidence and must not be read as a '
+    'confirmed relation. The value 0 is reported separately and not silently dropped.', '',
+    '## Quest giver gaps in the plain NPC catalogue', '',
+    f'Of {len(want)} distinct IDs not found there, {len(found)} have a decoded record in '
+    'the NPC/placement exports. '
+    f'All {sum(i in inventory for i in want)} occur in the DAT inventory. '
+    'An inventory entry proves class/ID, but no successfully read properties.', '',
+    table(['Finding', 'Distinct IDs'], [
+        ('Decoded, class 796', sum(x['class_index'] == 796 for x in found.values())),
+        ('Decoded, class 1723', sum(x['class_index'] == 1723 for x in found.values())),
+        ('Inventory only, not in the checked raw set', len(want) - len(found))]), '',
+    'The numeric classes are deliberately not explained here from their names alone as '
+    'NPCs or items. The blanket statement "613 invalid NPCs" '
+    'would be wrong. A giver role can point to a different source object type.', '',
+    '## Additional reference checks', '',
+    table(['Relation/check hypothesis', 'Source path', 'References', 'Resolved', 'Unresolved', 'Of which value 0'], rows), '',
+    '## Reproduction and evidence', '',
+    '`python3 lotro_datenraum_vertiefung.py`. All open values, '
+    'quest giver IDs, classes and the SHA-256 of the inputs: '
+    '`lotro-datenraum-vertiefung.json`. No game, plugin or web file changed.', ''
 ]
 (OUT / 'lotro-datenraum-vertiefung.md').write_text('\n'.join(text))
 print('rules', len(results), 'references', sum(r['references'] for r in results),

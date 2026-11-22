@@ -1,42 +1,42 @@
-# Entitäten-Link-Audit
+# Entity link audit
 
-**Stand:** 15. November 2026  
-**Geprüfter Bestand:** vorhandene `phpdata`-Shards, Viewmodel, Router,
-Katalog-Templates und die aktuell gebauten DE-/EN-/FR-Seiten.
+**Status as of:** 15 November 2026  
+**Checked stock:** existing `phpdata` shards, viewmodel, router,
+catalogue templates and the currently built DE/EN/FR pages.
 
-## Folgeprüfung 16.11.2026
+## Follow-up check 16.11.2026
 
-Nach den Linkkorrekturen wurde der vollständige PHP-Datenbestand neu gebaut
-und mit `tools/audit_php_links.py` geprüft:
+After the link corrections the complete PHP data stock was rebuilt
+and checked with `tools/audit_php_links.py`:
 
-- **1.449.979 interne URLs**
-- **0 nicht auflösbare Ziele**
-- Die zuvor 4.572 falschen Landmarken-Elternlinks (51 Karten-IDs in drei
-  Sprachen) verwenden jetzt den tatsächlichen Kartentyp.
-- Bei Set-Mitgliedern sind je Sprache **10.654 von 11.152** Links zu
-  vorhandenen Item-Seiten belegt. Die übrigen 498 IDs haben keine Item-Seite
-  im Katalog und bleiben ohne Link.
-- Der Link-Audit ist reproduzierbar: `python3 tools/audit_php_links.py <phpdata>`.
-- Die korrigierten Beziehungen sind live unter
+- **1.449.979 internal URLs**
+- **0 unresolvable targets**
+- The previously 4.572 wrong landmark parent links (51 map IDs in three
+  languages) now use the actual map type.
+- For set members, **10.654 of 11.152** links to existing item pages are verified
+  per language. The remaining 498 IDs have no item page
+  in the catalogue and remain without a link.
+- The link audit is reproducible: `python3 tools/audit_php_links.py <phpdata>`.
+- The corrected relations were checked live at
   `https://llb.sirhexalot.de/de/aufgabe/700000A4/`,
-  `https://llb.sirhexalot.de/de/landmarke/70003BCA/` und
-  `https://llb.sirhexalot.de/de/set/7000D487/` geprüft.
+  `https://llb.sirhexalot.de/de/landmarke/70003BCA/` and
+  `https://llb.sirhexalot.de/de/set/7000D487/`.
 
-## Ergebnis
+## Result
 
-Der automatische Bestandstest hat **1.310.641 URL-Felder** in Seiten- und
-Listenmodellen gefunden:
+The automatic stock test found **1.310.641 URL fields** in page and
+list models:
 
-| Ergebnis | Anzahl | Bewertung |
+| Result | Count | Assessment |
 |---|---:|---|
-| Ziel ist eine gebaute Entitätsseite | 1.173.049 | technisch gültig |
-| Ziel ist eine Anwendung/Katalogsuche | 133.020 | überwiegend beabsichtigte Fallbacks, fachlich einzeln prüfen |
-| nicht auflösbare Entitäts-URL | 4.572 | echter Fehler |
-| externe URL | 0 | keine |
+| target is a built entity page | 1.173.049 | technically valid |
+| target is an application/catalogue search | 133.020 | mostly intended fallbacks, check individually on the domain level |
+| unresolvable entity URL | 4.572 | real error |
+| external URL | 0 | none |
 
-Die 4.572 kaputten URLs sind **153 eindeutige URLs**, also 51 Karten-IDs
-jeweils in DE, EN und FR. Alle stammen aus `page-l`-Landmarkenseiten und
-haben die Form:
+The 4.572 broken URLs are **153 unique URLs**, that is 51 map IDs
+each in DE, EN and FR. All come from `page-l` landmark pages and
+have the form:
 
 ```text
 /de/region/<Gebiets-oder-Karten-ID>/
@@ -44,11 +44,10 @@ haben die Form:
 /fr/region/<Gebiets-oder-Karten-ID>/
 ```
 
-Es gibt nur sechs gebaute Top-Level-Regionseiten. Viele der 51 IDs sind
-jedoch Gebietskarten oder Unterkarten und dürfen deshalb nicht als `region`
-verlinkt werden.
+There are only six built top-level region pages. Many of the 51 IDs are,
+however, area maps or sub-maps and therefore must not be linked as `region`.
 
-Beispiele:
+Examples:
 
 ```text
 268437653  Breeland
@@ -62,8 +61,8 @@ Beispiele:
 268455271
 ```
 
-Vollständig betroffen sind diese 51 Karten-IDs; die Abweichung ist nicht
-sprachabhängig:
+These 51 map IDs are fully affected; the deviation is not
+language-dependent:
 
 ```text
 268437576, 268437592, 268437615, 268437653, 268437678, 268437713,
@@ -77,47 +76,47 @@ sprachabhängig:
 268454945, 268455271, 268455280
 ```
 
-## Konkrete Lücken
+## Concrete gaps
 
-### 1. Landmarke → Region: falscher Entitätstyp
+### 1. Landmark → region: wrong entity type
 
-In `tools/php_viewmodel.py:603–606` wird die Elternkarte jeder Landmarke
-pauschal als `region` verlinkt:
+In `tools/php_viewmodel.py:603–606` the parent map of every landmark is
+linked blanket as `region`:
 
 ```python
 ort['region'] = {'url': route(lang, 'region', str(eltern.get('idx'))), ...}
 ```
 
-Die Elternkarte muss anhand des tatsächlichen Kartenbaums als Region oder
-Gebiet verlinkt werden. Bei Gebietskarten darf kein Region-Link entstehen.
-Das ist die einzige aktuell nachgewiesene Gruppe kaputter URLs.
+The parent map must be linked as region or area based on the actual map tree.
+For area maps no region link may arise.
+That is the only currently proven group of broken URLs.
 
-### 2. Set → Item: vorhandene IDs ohne Link
+### 2. Set → item: existing IDs without link
 
-Die Set-Seiten enthalten **498 Mitglieder pro Sprache**, insgesamt 1.494
-Einträge, mit einer vorhandenen Item-ID und einer gebauten Item-Detailseite,
-aber `url: null`.
+The set pages contain **498 members per language**, 1.494 entries in total,
+with an existing item ID and a built item detail page,
+but `url: null`.
 
-Betroffene Logik: `tools/php_viewmodel.py:1053–1063`. Die Mitglieder werden
-dort ausdrücklich als unverbunden übernommen, obwohl `iid in builder.items`
-bereits geprüft wird.
+Affected logic: `tools/php_viewmodel.py:1053–1063`. The members are
+explicitly taken over as unlinked there, although `iid in builder.items`
+is already checked.
 
-Beispielstruktur:
+Example structure:
 
 ```json
 {"id":"7005CC84","name":"Aufsteigendes Licht","url":null}
 ```
 
-Diese Links können ohne Namensauflösung direkt über die ID auf
-`/<sprache>/<item-segment>/<id>/` zeigen.
+These links can point directly via the ID to
+`/<sprache>/<item-segment>/<id>/` without name resolution.
 
-### 3. Fraktion → Aufgabe/Tat: nicht veröffentlichte Quellen
+### 3. Faction → quest/deed: unpublished sources
 
-Die Fraktionsdaten enthalten 10.059 Quellen je Sprache. Davon bleiben 59 je
-Sprache ohne Link, weil die IDs zu ausgeblendeten DNT-Aufgaben gehören und
-keine Aufgabe-Seite besitzen. Insgesamt sind das 177 `url: null`-Einträge.
+The faction data contain 10.059 sources per language. 59 per
+language remain without a link because the IDs belong to hidden DNT quests and
+possess no quest page. In total these are 177 `url: null` entries.
 
-Beispiele:
+Examples:
 
 ```text
 7002451E  DNT HIDING CONTENT - Task: Broken Wooden Maces
@@ -125,92 +124,89 @@ Beispiele:
 70024525  DNT HIDING CONTENT - Task: Blackened Feathers
 ```
 
-Das ist derzeit kein kaputter Link, sondern eine fachliche Grenze des
-veröffentlichten Katalogs. Im Umsetzungst TODO muss aber festgelegt werden,
-ob solche Quellen als Text bleiben, aus den Fraktionsseiten herausfallen oder
-auf eine Anwendungssuche zeigen.
+This is currently not a broken link but a domain limit of the
+published catalogue. In the implementation TODO, however, it must be fixed
+whether such sources stay as text, drop out of the faction pages or
+point to an application search.
 
-### 4. Aufgaben → Gebiet/Karte: nicht jeder Pfadteil ist verlinkt
+### 4. Quests → area/map: not every path part is linked
 
-39.694 `area_trail`-Einträge haben keinen URL-Wert. Das betrifft vor allem
-weitere Pfadteile nach den ersten beiden Kartenebenen sowie Karten, die im
-Viewmodel nicht als veröffentlichte Karte auflösbar sind. Die sichtbare
-Karten-/Gebietsbezeichnung bleibt Text.
+39.694 `area_trail` entries have no URL value. This affects above all
+further path parts after the first two map levels as well as maps that cannot
+be resolved as a published map in the viewmodel. The visible
+map/area label remains text.
 
-Das ist nicht automatisch eine Lücke: Kartenvarianten ohne benannte oder
-veröffentlichte Entitätsseite sollen nicht als technische „Karte 268…“
-verlinkt werden. Die verbleibenden Fälle brauchen jedoch eine gezielte
-Paritätsprüfung gegen den Spielkartenbaum.
+This is not automatically a gap: map variants without a named or
+published entity page should not be linked as technical „Karte 268…“.
+The remaining cases, however, need a targeted
+parity check against the game map tree.
 
-### 5. Aufgabe/Tat → Belohnung: IDs und Belohnungsarten getrennt prüfen
+### 5. Quest/deed → reward: check IDs and reward kinds separately
 
-52.858 `items`-Einträge ohne URL liegen überwiegend in Aufgabenbelohnungen.
-Darin enthalten sind:
+52.858 `items` entries without a URL lie predominantly in quest rewards.
+Contained in them are:
 
-- Gegenstände ohne stabile Item-ID im importierten Belohnungssatz,
-- Titel, Tugenden, Traits und Emotes, die im aktuellen Viewmodel nur als
-  Symbol/Text ausgegeben werden,
-- auswählbare oder variable Belohnungen ohne eindeutige Zielzuordnung.
+- items without a stable item ID in the imported reward set,
+- titles, virtues, traits and emotes that are output only as
+  icon/text in the current viewmodel,
+- selectable or variable rewards without unambiguous target assignment.
 
-Titel- und Tugendseiten existieren grundsätzlich. Der Audit muss deshalb die
-Rohdaten prüfen, ob bei diesen Belohnungen eine stabile Titel-/Tugend-ID
-vorliegt. Nur dann ist ein fehlender Link eine echte Lücke; eine reine
-Namensauflösung wäre wegen Varianten und Übersetzungen nicht zuverlässig.
+Title and virtue pages exist in principle. The audit must therefore check the
+raw data for a stable title/virtue ID on these rewards. Only then is a missing link a real gap; a pure
+name resolution would not be reliable because of variants and translations.
 
-## Link-Matrix des aktuellen Stands
+## Link matrix of the current state
 
-| Quelle | Ziel | aktueller Stand |
+| Source | Target | current state |
 |---|---|---|
-| Aufgabe | Aufgabe | kanonische Links für Voraussetzungen, Ketten und Ausschlüsse |
-| Aufgabe | Auftraggeber | Detailseite, sonst Such-Fallback bei fehlender ID |
-| Aufgabe | Gebiet/Region | Kartenpfad teilweise kanonisch, weitere Teile teils Text |
-| Aufgabe | Gegenstand | ID-Link, sonst Name ohne Link |
-| Aufgabe | Karte/Reise | Anwendungspfad, fachlich beabsichtigt |
-| Tat | Gegenstand | ID-Link, bei fehlender ID Text |
-| Tat | Gebiet/Karte | Karten-/Anwendungspfad, Nachbar-Taten kanonisch |
-| Tat | Titel/Tugend | derzeit überwiegend Text |
-| Gegenstand | Aufgabe/Tat | kanonische Quellenlinks, fehlende Quellen als Anwendung |
-| Gegenstand | Rezept | kanonische Rezeptlinks |
-| Gegenstand | Fundgebiet | Kartenanwendung mit Vorkommensparametern |
-| Gegenstand | Set | Set-Link vorhanden; Set-Mitglieder zurück zum Item fehlen |
-| Rezept | Gegenstand | kanonischer Item-Link, namenbasierter Fallback |
-| Rezept | Beruf | Handwerks-/Berufsadresse, bewusst keine eigenständige Detailseite |
-| Gebiet | Aufgabe/Tat/Gegenstand | kanonische Listenlinks |
-| Gebiet | Elterngebiet/Region | kanonisch, muss mit Landmarkenlogik vereinheitlicht werden |
-| Landmarke | Aufgabe/Tat | kanonische Links |
-| Landmarke | Gebiet | kanonischer Gebiet-Link |
-| Landmarke | Region | aktuell für 51 Karten-IDs (153 URLs) falscher Typ |
-| Fraktion | Aufgabe/Tat | kanonisch, außer 59 DNT-IDs ohne Zielseite |
-| Titel/Tugend | Aufgabe/Tat | kanonisch, fehlende Ziele fallen auf Anwendung zurück |
-| Set | Gegenstand | 498 vorhandene Item-IDs bisher ohne Link |
-| Instanz | — | Anwendungsliste ohne eigene Detailseiten; keine fehlende Detailroute |
+| quest | quest | canonical links for prerequisites, chains and exclusions |
+| quest | quest giver | detail page, otherwise search fallback when ID is missing |
+| quest | area/region | map path partly canonical, further parts partly text |
+| quest | item | ID link, otherwise name without link |
+| quest | map/travel | application path, deliberate on the domain level |
+| deed | item | ID link, text when ID is missing |
+| deed | area/map | map/application path, neighbouring deeds canonical |
+| deed | title/virtue | currently predominantly text |
+| item | quest/deed | canonical source links, missing sources as application |
+| item | recipe | canonical recipe links |
+| item | find area | map application with resource occurrence parameters |
+| item | set | set link present; set members back to the item missing |
+| recipe | item | canonical item link, name-based fallback |
+| recipe | profession | crafting/profession address, deliberately no independent detail page |
+| area | quest/deed/item | canonical list links |
+| area | parent area/region | canonical, must be unified with the landmark logic |
+| landmark | quest/deed | canonical links |
+| landmark | area | canonical area link |
+| landmark | region | currently wrong type for 51 map IDs (153 URLs) |
+| faction | quest/deed | canonical, except 59 DNT IDs without target page |
+| title/virtue | quest/deed | canonical, missing targets fall back to the application |
+| set | item | 498 existing item IDs so far without link |
+| instance | — | application list without its own detail pages; no missing detail route |
 
-## Router- und Sprachprüfung
+## Router and language check
 
-- Die geprüften kanonischen Entitäts-URLs entsprechen den Sprachsegmenten in
+- The checked canonical entity URLs match the language segments in
   `php/src/Catalogue.php`.
-- Die gebauten DE-/EN-/FR-Zielseiten sind für die gültigen Entitätslinks
-  sprachparallel vorhanden.
-- Es wurden in den geprüften Seitenmodellen keine alten `.html`-Links
-  gefunden.
-- Die 133.020 Anwendungspfade sind keine 404-Ziele. Häufige beabsichtigte
-  Ziele sind Gegenstandssuche mit Filtern, Handwerk/Rezeptfilter, Karte,
-  Taten, Reise und Ruf.
-- `php/src/Catalogue.php::appLink()` enthält weiterhin Legacy-URL-Erzeugung,
-  wird für die aktuellen Viewmodel-Entitätslinks aber nicht als kanonische
-  Detailroute verwendet. Das muss bei späteren Änderungen separat gegen
-  `Router::legacyTarget()` abgesichert werden.
+- The built DE/EN/FR target pages exist in parallel across languages for the valid entity links.
+- No old `.html` links were found in the checked page models.
+- The 133.020 application paths are no 404 targets. Frequent intended
+  targets are item search with filters, crafting/recipe filter, map,
+  deeds, travel and reputation.
+- `php/src/Catalogue.php::appLink()` still contains legacy URL generation,
+  but is not used as a canonical detail route for the current viewmodel entity links.
+  That must be secured separately against
+  `Router::legacyTarget()` on later changes.
 
-## Prüfgrenzen
+## Check limits
 
-Der URL-Bestandstest kann nur URLs prüfen, die im gebauten JSON-Modell
-vorhanden sind. Er erkennt nicht allein:
+The URL stock test can only check URLs that are present in the built JSON model.
+It does not detect on its own:
 
-- Beziehungen, deren ID bereits im Rohmodell verloren geht,
-- falsche, aber technisch existierende Entitätstypen,
-- Links, die nur durch JavaScript ergänzt werden,
-- fehlende Links in reinem Fließtext ohne URL-Feld,
-- sichtbare Unterschiede zwischen statischem Altbau und PHP-Seite ohne
-  zusätzlichen Browservergleich.
+- relations whose ID is already lost in the raw model,
+- wrong but technically existing entity types,
+- links that are added only by JavaScript,
+- missing links in pure running text without a URL field,
+- visible differences between the static old build and the PHP page without
+  an additional browser comparison.
 
-Diese Punkte sind als eigene Arbeitsschritte im Umsetzungs-TODO festgehalten.
+These points are recorded as their own work steps in the implementation TODO.

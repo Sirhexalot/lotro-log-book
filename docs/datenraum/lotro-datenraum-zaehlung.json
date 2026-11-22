@@ -1,0 +1,46 @@
+{
+  "measured_at": "2026-11-22T07:37:17.673756+00:00",
+  "source": "daten/ and web/ of the built German catalogue, one language",
+  "language": "de",
+  "entities": {
+    "quests": 15118,
+    "deeds": 5461,
+    "items": 52802,
+    "recipes": 7924,
+    "sets": 2223,
+    "titles": 2500,
+    "virtues": 20,
+    "factions": 114,
+    "quest_givers": 5067,
+    "vendors": 1562,
+    "landmarks": 2809,
+    "landmarks_with_position": 2761,
+    "landmarks_with_map": 2588,
+    "landmarks_with_objectives": 1874,
+    "instances": 167,
+    "maps": 226,
+    "resource_occurrence_maps": 164
+  },
+  "relations": {
+    "quests_with_quest_giver": 9319,
+    "distinct_quest_giver_ids_in_quests": 4767,
+    "quest_reward_rows": 19381,
+    "quest_reward_item_links": 13035,
+    "distinct_reward_items": 1395,
+    "deeds_with_reward": 4445,
+    "items_with_vendor": 2693,
+    "item_vendor_links": 43006,
+    "items_with_recipe": 6707,
+    "items_with_source": 6568,
+    "items_with_barter": 1726
+  },
+  "reference_rules": {
+    "main_rules": 25,
+    "main_references": 210908,
+    "main_unresolved": 991,
+    "deep_rules": 61,
+    "deep_references": 416636,
+    "deep_unresolved": 1270,
+    "deep_rules_without_references": 0
+  }
+}

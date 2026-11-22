@@ -1,121 +1,121 @@
-# Auftraggeber
+# Quest giver
 
-Stand: 10.11.2026. **Veröffentlicht.** Übersicht und Detailseiten laufen in
-DE/EN/FR, samt Menü, zentraler Suche, Kartenlinks, Baumfilter und Fortschritt
-aus dem importierten Charakter.
+Status as of 10.11.2026. **Published.** Overview and detail pages run in
+DE/EN/FR, together with menu, central search, map links, tree filter and progress
+from the imported character.
 
-## Quellen
+## Sources
 
-Alle Angaben kommen aus dem Client-Export und den Spieldefinitionen. Nichts wird
-aus Namen, Wiki oder Vermutungen ergänzt.
+All data comes from the client export and the game definitions. Nothing is
+added from names, wiki or guesses.
 
-| Angabe | Quelle |
+| Item | Source |
 | --- | --- |
-| Wer eine Aufgabe vergibt | `lore/quests.xml`, `<bestower npcId>`; Lücke aus `Quest_BestowalRoles` des DAT-Exports |
-| Name in DE/EN/FR | `lore/labels/<sprache>/npc.xml`; Rückfall auf `Name.texts` des NPC-Rohexports |
-| Tätigkeit | `lore/NPCs.xml` `title` → derselbe Labelbestand |
-| Begrüßung, Beschreibung | `npcs-*/raw.jsonl` (`NPC_ActionPicker_GreetingString`, `Description`) |
-| Art (Person/Kreatur/Gegenstand) | `class_index` des Rohexports; `NPC_IsInanimate` macht daraus ein Objekt |
-| Standort | `did-positions-*/positions.jsonl` (instanzlos), Zuordnung zur Karte über `game_maps.GameMaps.attribute` |
-| Aufgaben, Stufe, Merkmale | bestehender Webkatalog `daten/quests-<sprache>.json` |
+| Who gives a quest | `lore/quests.xml`, `<bestower npcId>`; gap from `Quest_BestowalRoles` of the DAT export |
+| Name in DE/EN/FR | `lore/labels/<sprache>/npc.xml`; fallback to `Name.texts` of the NPC raw export |
+| Activity | `lore/NPCs.xml` `title` → the same label set |
+| Greeting, description | `npcs-*/raw.jsonl` (`NPC_ActionPicker_GreetingString`, `Description`) |
+| Kind (person/creature/item) | `class_index` of the raw export; `NPC_IsInanimate` makes an object out of it |
+| Location | `did-positions-*/positions.jsonl` (instance-free), assignment to the map via `game_maps.GameMaps.attribute` |
+| Quests, level, features | existing web catalogue `daten/quests-<sprache>.json` |
 
-Ein Standort bekommt nur dann eine Karte, wenn die Spielkarte im eigenen
-Kartenbestand liegt. Koordinaten bleiben auch ohne Karte stehen; sie werden
-nicht verschoben und nicht gemittelt, um „auf die Karte zu passen“.
+A location gets a map only if the game map lies in the own map stock.
+Coordinates remain even without a map; they are neither shifted nor averaged
+to „fit the map“.
 
-## Regeln
+## Rules
 
-- **Nur belegte Namen.** Fehlt der Name in einer der drei Sprachen, entfällt der
-  Eintrag und wird im Prüfbericht gezählt. 187 solcher IDs bleiben außen vor.
-- **Mehrere Auftraggeber je Aufgabe** bleiben erhalten (802 Aufgaben). Die
-  Aufgaben-Detailseite verlinkt den ersten Auftraggeber, den das Spiel nennt.
-- **Technische Aufgabenbretter** mit reiner Stufenspanne als Namen („21-30“,
-  „151-160 Hamât Renewed“) bekommen keine Seite: 22 Einträge. Der Name allein
-  wäre als Überschrift wertlos.
-- **Standorte werden geclustert**: Punkte einer Region innerhalb von 0,3
-  Karteneinheiten gelten als ein Ort; höchstens acht Orte je Auftraggeber.
-  Mehrere weit auseinanderliegende Orte bleiben getrennt.
-- **Keine Porträts.** Für normale NSCs enthält der geprüfte Export kein
-  fertiges Bild. Die Seite zeigt ein neutrales Symbol; es wird kein Wiki- oder
-  KI-Bild als Spielaussehen ausgegeben.
-- **Keine erfundene Biografie.** Die Beschreibung erscheint nur, wenn der Client
-  selbst eine mitliefert (261 Einträge, überwiegend Aufgaben-Gegenstände).
-  Begrüßungen stehen eingeklappt und mit Spoilerhinweis.
-- **Kein Fortschrittsanspruch ohne Import.** Ohne Charakter steht „Kein
-  Charakter importiert – der Abschluss ist nicht bekannt.“ Der Zähler nennt nur
-  die bei uns zugeordneten Aufgaben, nicht alle spielbaren.
+- **Proven names only.** If the name is missing in one of the three languages,
+  the entry is dropped and counted in the test report. 187 such IDs stay out.
+- **Several quest givers per quest** remain (802 quests). The
+  quest detail page links the first quest giver that the game names.
+- **Technical quest boards** with a pure level span as name („21-30“,
+  „151-160 Hamât Renewed“) get no page: 22 entries. The name alone
+  would be worthless as a heading.
+- **Locations are clustered**: points of a region within 0,3
+  map units count as one place; at most eight places per quest giver.
+  Several far-apart places remain separate.
+- **No portraits.** For normal NPCs the verified export contains no
+  finished image. The page shows a neutral symbol; no wiki or
+  AI image is output as game appearance.
+- **No invented biography.** The description appears only if the client
+  itself provides one (261 entries, mostly quest items).
+  Greetings stand collapsed and with a spoiler note.
+- **No progress claim without import.** Without a character it says „Kein
+  Charakter importiert – der Abschluss ist nicht bekannt.“ The counter names only
+  the quests assigned with us, not all playable ones.
 
-## Adressen und Filter
+## Addresses and filters
 
-- Liste: `/de/auftraggeber/`, `/en/quest-giver/`, `/fr/donneur-de-quete/`
-- Detail: ID anhängen, z. B. `/de/auftraggeber/70000002/`
-- Filter als GET-Parameter: `q`, `region[]`, `area[]`, `kind[]`, `tag[]`,
+- List: `/de/auftraggeber/`, `/en/quest-giver/`, `/fr/donneur-de-quete/`
+- Detail: append ID, e.g. `/de/auftraggeber/70000002/`
+- Filter as GET parameter: `q`, `region[]`, `area[]`, `kind[]`, `tag[]`,
   `from`, `to`, `page`
-- Region und Landschaft sind Kartenschlüssel (stabile Spiel-IDs), keine Namen.
-  Der Filter zeigt die Landschaften unter ihrer Region als Baum, wie die
-  Gegenstandssuche. Namenlose Karten („Karte 268450271“) sind keine Landschaft;
-  solche Orte behalten nur ihre Region.
-- Jede Trefferzeile nennt zuerst die Art (Person, Kreatur, Gegenstand oder
-  „Art nicht belegt“), damit gleichnamige Einträge und Gegenstände erkennbar sind.
-- Sortierung über `sort=name` (Standard) oder `sort=stufe`; „Stufe“ ist die
-  niedrigste Aufgabe, unbekannte Stufen stehen zuletzt. Der Server sortiert vor
-  der Seitenaufteilung, damit Blättern und JavaScript-freie Nutzung stimmen.
-- Der Filterstand wird lokal gemerkt und beim parameterlosen Aufruf
-  wiederhergestellt; Rücklinks von Detailseiten tragen ihn mit
+- Region and landscape are map keys (stable game IDs), no names.
+  The filter shows the landscapes under their region as a tree, like the
+  item search. Unnamed maps („Karte 268450271“) are no landscape;
+  such places keep only their region.
+- Each result row names first the kind (person, creature, item or
+  „Art nicht belegt“), so that entries with the same name and items are recognisable.
+- Sorting via `sort=name` (default) or `sort=stufe`; „Stufe“ is the
+  lowest quest, unknown levels stand last. The server sorts before
+  the page split, so that paging and JavaScript-free use are correct.
+- The filter state is remembered locally and restored on the
+  parameterless call; back links from detail pages carry it along
   (`docs/oberflaeche/filter-sortierung.md`).
-- Detailseiten verlinken unter „Weitere Einträge mit diesem Namen“ die übrigen
-  Spiel-IDs desselben Namens mit Ort und Aufgabenzahl. Die Einträge bleiben
-  getrennt, weil die Spieldaten keine Identität belegen; ab zwölf verweist ein
-  Link auf die nach dem Namen gefilterte Liste.
-- Stufe und Merkmal müssen von **derselben Aufgabe** erfüllt sein. Ein Ort
-  genügt aus einem beliebigen Standort des Auftraggebers.
-- Facetten zählen ohne die eigene Filtergruppe; gewählte Nulltreffer bleiben
-  sichtbar. 30 Einträge je Seite.
-- Checkboxen und Stufenfelder filtern sofort (`sets.js` bedient die gemeinsame
-  Filterhülle). Ohne JavaScript bleibt „Anwenden“ als Rückfall.
-- Gefilterte Listen tragen `noindex,follow` und eine eigene Canonical-URL.
-  Sprachwechsel behält die Filter und beginnt auf Seite 1.
+- Detail pages link under „Weitere Einträge mit diesem Namen“ the other
+  game IDs of the same name with place and quest count. The entries remain
+  separate because the game data proves no identity; from twelve a
+  link points to the list filtered by name.
+- Level and feature must be met by **the same quest**. A place
+  is enough from any location of the quest giver.
+- Facets count without their own filter group; selected zero hits remain
+  visible. 30 entries per page.
+- Checkboxes and level fields filter immediately (`sets.js` serves the common
+  filter shell). Without JavaScript „Anwenden“ remains as fallback.
+- Filtered lists carry `noindex,follow` and their own canonical URL.
+  Language switching keeps the filters and starts on page 1.
 
-## Aufbau
+## Structure
 
-| Datei | Aufgabe |
+| File | Task |
 | --- | --- |
-| `build_auftraggeber.py` | Datenbasis und Prüfbericht aus den Spieldateien |
-| `tools/giver_viewmodel.py` | Listenindex, Detailseiten, Kartenspuren, Aufgabenzeilen |
-| `php/src/Givers.php` | Filterlogik, Facetten, Seiten, DE/EN/FR-Texte |
-| `php/templates/givers/` | Listen- und Detailvorlage |
-| `web/auftraggeber.css` | Kopfdarstellung und Aufgabenliste |
-| `web/auftraggeber.js` | Fortschritt, Zähler, „Erledigte ausblenden“ |
+| `build_auftraggeber.py` | data basis and test report from the game files |
+| `tools/giver_viewmodel.py` | list index, detail pages, map traces, quest rows |
+| `php/src/Givers.php` | filter logic, facets, pages, DE/EN/FR texts |
+| `php/templates/givers/` | list and detail template |
+| `web/auftraggeber.css` | header rendering and quest list |
+| `web/auftraggeber.js` | progress, counters, „Erledigte ausblenden“ |
 
-Der Menüeintrag sitzt in der Familie **Welt** (`Shell.php` und `menue.js`), die
-zentrale Suche hat den Typ `n` (`build_suche.py`, `suche.js`). Die
-Aufgaben-Detailseite verlinkt über `gi` auf den Auftraggeber.
+The menu entry sits in the family **Welt** (`Shell.php` and `menue.js`), the
+central search has type `n` (`build_suche.py`, `suche.js`). The
+quest detail page links via `gi` to the quest giver.
 
-## Bauen
+## Building
 
 ```bash
 python3 build_auftraggeber.py
 python3 tools/build_php_data.py --ziel "$HOME/.cache/llb-php/phpdata"
 ../MagicQuestLog/.venv/bin/python build_suche.py --sprache de
-# ebenso en und fr
+# same for en and fr
 ```
 
-`tools/build_php_data.py` verlangt `daten/auftraggeber.json`; fehlt sie, bricht
-der Bau mit einem Hinweis ab.
+`tools/build_php_data.py` requires `daten/auftraggeber.json`; if it is missing,
+the build aborts with a note.
 
-## Prüfstand (10.11.2026)
+## Test record (10.11.2026)
 
-- 5.067 Auftraggeber, 11.567 Aufgaben mit Auftraggeber, 13.076 Zuordnungen
-- 802 Aufgaben mit mehreren Auftraggebern
-- 4.896 mit Standort, 4.284 davon mit Karte; 920 Positionen ohne Karte
-- 5 namenlose Karten fliegen aus dem Landschaftsfilter (20 Einträge, u. a. Aragorn);
-  sie behalten ihre Region
-- 507 Namen kommen mehrfach vor (1.892 Zeilen), 405 davon mit gleichem Namen und
-  Ort; Querverweise statt Verschmelzen
-- 1.335 mit Tätigkeit, 1.297 mit Begrüßung, 261 mit Beschreibung
-- Arten: 4.075 Personen, 175 Kreaturen, 347 Gegenstände, 470 ohne belegte Art
-- 171 ohne jeden Standort, 187 ohne vollständigen Namen, 22 Stufenbretter
-- Sitemaps: je Sprache Liste plus 5.067 Detailadressen
+- 5.067 quest givers, 11.567 quests with quest giver, 13.076 assignments
+- 802 quests with several quest givers
+- 4.896 with location, 4.284 of them with map; 920 positions without map
+- 5 unnamed maps fly out of the landscape filter (20 entries, e.g. Aragorn);
+  they keep their region
+- 507 names occur several times (1.892 rows), 405 of them with the same name and
+  place; cross-references instead of merging
+- 1.335 with activity, 1.297 with greeting, 261 with description
+- Kinds: 4.075 persons, 175 creatures, 347 items, 470 without proven kind
+- 171 without any location, 187 without a complete name, 22 level boards
+- Sitemaps: per language list plus 5.067 detail addresses
 
 Tests:
 
@@ -125,37 +125,37 @@ python3 -m unittest tests.test_auftraggeber tests.test_giver_viewmodel \
 node tests/test_giver_controls.js
 ```
 
-Die vollständige Python-Suite behält den bekannten Fehler in
-`test_katalogseiten.test_one_public_address_per_entity` (erwartet den alten
-Apache-Block statt des PHP-Blocks). Daraus keine grüne Gesamtsuite ableiten.
+The complete Python suite keeps the known error in
+`test_katalogseiten.test_one_public_address_per_entity` (expects the old
+Apache block instead of the PHP block). Derive no green overall suite from that.
 
-## Veröffentlichung 10.11.2026
+## Publication 10.11.2026
 
-Release aus `~/.cache/llb-release` (19.894 Dateien, 798,4 MB): zuerst 3.077
-Datendateien (196,6 MB), danach 17 Anwendungs-/Assetdateien (16,1 MB) über den
-bestehenden FTPS-Uploader. Die `.htaccess` blieb unverändert; ihre
-Sprachregel deckt auch die neuen Segmente mit Bindestrich ab. Keine
-Charakterdaten im Release.
+Release from `~/.cache/llb-release` (19.894 files, 798,4 MB): first 3.077
+data files (196,6 MB), then 17 application/asset files (16,1 MB) via the
+existing FTPS uploader. The `.htaccess` stayed unchanged; its
+language rule also covers the new segments with a hyphen. No
+character data in the release.
 
-Live geprüft:
+Live checked:
 
-- Listen und Detailseiten in DE/EN/FR, Baumfilter mit Sofortfilterung und
-  erhaltenem Aufklappzustand, Art in jeder Zeile, Querverweise bei gleichem
-  Namen, Kartenvorschau und Mobilansicht ohne Überlauf.
-- Menüeintrag unter **Welt**, zentrale Suche mit eigener Gruppe und Rücklink
-  von der Aufgaben-Detailseite.
-- Kleinschreibung und `.html` werden per 301 kanonisiert; unbekannte IDs
-  liefern 404, der Giver-Index 403.
-- Alle drei Sitemaps liefern je 5.068 URLs; der Sitemap-Index nennt sie.
-- 5.067 Giver-Zeilen in `suche-de.js`.
+- Lists and detail pages in DE/EN/FR, tree filter with immediate filtering and
+  kept open state, kind in every row, cross-references for the same
+  name, map preview and mobile view without overflow.
+- Menu entry under **Welt**, central search with its own group and back link
+  from the quest detail page.
+- Lower case and `.html` are canonicalised via 301; unknown IDs
+  return 404, the giver index 403.
+- All three sitemaps return 5.068 URLs each; the sitemap index names them.
+- 5.067 giver rows in `suche-de.js`.
 
-## Offene Punkte
+## Open points
 
-- 470 Einträge haben keine belegte Art, weil der Rohexport sie nicht enthält
-  („explicit IDs only“). Ein vollständigerer NPC-Export würde das schließen.
-- 920 Positionen liegen in Innenräumen oder Instanzen ohne eigene Karte. Sie
-  zeigen Koordinaten, aber keinen Kartenausschnitt.
-- Porträts fehlen weiterhin. Ein eigenes Rendering aus den Aussehensdaten wäre
-  ein separates Projekt; Fremdbilder bleiben ausgeschlossen.
-- Abschnitt „Auftraggeber in diesem Gebiet“ auf den Gebietsseiten ist noch
-  nicht eingebaut.
+- 470 entries have no proven kind because the raw export does not contain them
+  („explicit IDs only“). A more complete NPC export would close that.
+- 920 positions lie in interiors or instances without their own map. They
+  show coordinates, but no map excerpt.
+- Portraits are still missing. Own rendering from the appearance data would be
+  a separate project; foreign images remain excluded.
+- Section „Auftraggeber in diesem Gebiet“ on the area pages is not yet
+  built in.

@@ -1,69 +1,69 @@
-# Tausch, Behälter, Zerlegung und schlanker Gegenstandsbestand
+# Barter, containers, disenchanting and a slim item set
 
-**Stand:** 20.11.2026. **Status:** Datenmodell entworfen, noch keine Pipeline und
-keine Seite. Die Zahlen sind am Client-Dump vom 01.11.2026 gemessen
-(`lore/` der Companion-Installation, gleicher Stand wie
-`LotroCompanion/lotro-data`) sowie am eigenen Item-Voll-Export vom 08.11.2026.
-Sie beschreiben den Bestand, nicht die heutige Serververfügbarkeit.
+**Status as of:** 20.11.2026. **Status:** data model drafted, no pipeline and
+no page yet. The numbers are measured on the client dump of 01.11.2026
+(`lore/` of the Companion installation, same state as
+`LotroCompanion/lotro-data`) and on the own full item export of 08.11.2026.
+They describe the set, not today's server availability.
 
-Dieses Dokument ergänzt den [Entitätenvertrag](lotro-datenraum-entitaeten.json)
-und die [Gegenstands-Pipeline](gegenstaende-iststand.md). Es beschreibt drei
-Datensätze, die bestehende Seiten vervollständigen, ohne eine neue Entität zu
-erfinden: Tauschhändler, Behälter und Zerlegung. Dazu kommt ein schlanker
-Gegenstandsbestand aus dem **eigenen Client-Export**, damit auch Items ohne
-eigene Katalogseite mit Name und Icon angezeigt werden können.
+This document supplements the [entity contract](lotro-datenraum-entitaeten.json)
+and the [item pipeline](gegenstaende-iststand.md). It describes three
+records that complete existing pages without inventing a new entity:
+barter vendors, containers and disenchanting. In addition there is a slim
+item set from the **own client export**, so that items without their
+own catalogue page can also be shown with name and icon.
 
-## 1. Warum diese drei
+## 1. Why these three
 
-Die Gegenstandsseite beantwortet heute „woher“ über Aufgaben, Taten, Rezepte,
-Händler und einen schmalen Tauschbestand aus dem Rezeptquellen-Export. Drei
-Fragen bleiben offen und sind im Client belegt:
+Today the item page answers "where from" via quests, deeds, recipes,
+vendors and a narrow barter set from the recipe source export. Three
+questions remain open and are proven in the client:
 
-- **Wofür kann ich das eintauschen, und was kostet es?** (`barters.xml`)
-- **Wo kommt das her?** Für Feldfrüchte, Kisten und Relikte fehlt jeder Bezug
+- **What can I barter this for, and what does it cost?** (`barters.xml`)
+- **Where does this come from?** For field crops, crates and relics every reference is missing
   (`containers.xml`).
-- **Was wird beim Zerlegen daraus?** (`disenchantments.xml`)
+- **What comes out of it when disenchanting?** (`disenchantments.xml`)
 
-Alle drei sind reine Gegenstandsbeziehungen. Sie brauchen keine neue Seite,
-sondern je eine Gruppe in der bestehenden „Woher/Wofür“-Fläche und eine
-Ergänzung der Händlerseite.
+All three are pure item relations. They need no new page,
+but one group each in the existing "where from/where for" surface and one
+addition to the vendor page.
 
-## 2. Mengen und Abdeckung
+## 2. Volumes and coverage
 
-| Quelle | Einträge | Beziehung zum Katalog |
+| Source | Records | Relation to the catalogue |
 |---|---:|---|
-| `items-2026-11-08/items.json` (eigener Client) | 152.088 Gegenstände | 45.897 von Tausch, Zerlegung und Instanzbeute referenzierte IDs, davon 18.245 im Katalog; **27.652 nur hier** |
-| `barters.xml` | 1.096 Händler, 3.469 Profile (12.360 Verweise), 42.594 Angebote, 58.933 Abgaben, 42.590 Gaben | 36.096 verschiedene Gaben, davon 11.586 im Katalog; 3.063 Abgaben, davon 2.557 im Katalog |
-| `containers.xml` | 6.262 (5.735 Behälter, 527 Reliktbehälter) | 4.626 mit Trophy-Liste, 926 mit Treasure-Liste, 494 mit beiden, 1.204 ohne Liste |
-| `disenchantments.xml` | 27.333 Zeilen | 10.315 Quellen im Katalog; 26.341 mit Ergebnis, 992 ohne; 45 verschiedene Ergebnisse, davon 22 im Katalog |
+| `items-2026-11-08/items.json` (own client) | 152,088 items | 45,897 IDs referenced by barter, disenchanting and instance loot, of which 18,245 in the catalogue; **27,652 here only** |
+| `barters.xml` | 1,096 vendors, 3,469 profiles (12,360 references), 42,594 offers, 58,933 costs, 42,590 gifts | 36,096 different gifts, of which 11,586 in the catalogue; 3,063 costs, of which 2,557 in the catalogue |
+| `containers.xml` | 6,262 (5,735 containers, 527 relic containers) | 4,626 with trophy list, 926 with treasure list, 494 with both, 1,204 without list |
+| `disenchantments.xml` | 27,333 rows | 10,315 sources in the catalogue; 26,341 with result, 992 without; 45 different results, of which 22 in the catalogue |
 
-Bemerkenswert: Die 45 Zerlegungsergebnisse sind ausschließlich
-Umtauschgutscheine („Receipt of …“). Zerlegen liefert also keine Ausrüstung,
-sondern ein Tauschpapier. Das ist kein Fehler der Daten und darf nicht als
-„Beute“ dargestellt werden.
+Noteworthy: the 45 disenchanting results are exclusively
+exchange vouchers ("Receipt of …"). Disenchanting therefore yields no equipment
+but a barter paper. That is not an error in the data and must not be presented as
+"loot".
 
-**Alle referenzierten IDs stehen im eigenen Voll-Export**, mit Namen in DE, EN
-und FR, Qualität, Stufe und Icon-ID. Geprüft am 20.11.2026: 36.827
-Tausch-IDs, 27.378 Zerlegungs-IDs und 44.639 Behälter-IDs, keine einzige Lücke.
-Ein Rückgriff auf Companion-Namenslabels ist damit überflüssig.
+**All referenced IDs are in the own full export**, with names in DE, EN
+and FR, quality, level and icon ID. Checked on 20.11.2026: 36,827
+barter IDs, 27,378 disenchanting IDs and 44,639 container IDs, not a single gap.
+A fallback to Companion name labels is therefore superfluous.
 
-## 3. ID-Format
+## 3. ID format
 
-Alle Spiel-IDs sind 32-Bit-Zahlen. Der Datenraum und die Website führen sie als
-achtstelliges Großbuchstaben-Hex (`70000821`), die Companion-XML-Dateien und der
-Voll-Export als Dezimalzahl (`1879050273`). Die Umrechnung passiert einmal beim
-Bau (`'%08X' % int(wert)`); im Datenmodell steht ausschließlich das Hexformat.
+All game IDs are 32-bit numbers. The data space and the website carry them as
+eight-digit uppercase hex (`70000821`), the Companion XML files and the
+full export as a decimal number (`1879050273`). The conversion happens once during the
+build (`'%08X' % int(wert)`); the data model holds only the hex format.
 
-## 4. Datenmodell
+## 4. Data model
 
-### 4.1 Schlanker Gegenstandsbestand `daten/item-kurz.json`
+### 4.1 Slim item set `daten/item-kurz.json`
 
-Der eigene Katalog (`daten/items.json`, 52.802 Einträge) ist eine
-Zusammenführung aus Ausrüstungsdetails, Belohnungen, Rezepten und Vorkommen –
-kein vollständiger Gegenstandskatalog. Die 27.652 referenzierten Gegenstände,
-die dort fehlen, sind überwiegend Kategorie `ITEM` (Sonstiges), dazu
-Ausrüstung ohne Detaildatensatz. Sie sind im Client vollständig beschrieben;
-es fehlt nur die Aufnahme in den Katalog.
+The own catalogue (`daten/items.json`, 52,802 records) is a
+merge of equipment details, rewards, recipes and resource occurrences –
+not a complete item catalogue. The 27,652 referenced items
+missing there are mainly category `ITEM` (other), plus
+equipment without a detail record. They are fully described in the client;
+only their inclusion in the catalogue is missing.
 
 ```json
 {"schema": 1, "quelle": "items-2026-11-08/items.json", "stand": "2026-11-08",
@@ -73,28 +73,28 @@ es fehlt nur die Aufnahme in den Katalog.
  }}
 ```
 
-- **Nur ergänzend.** Ein Eintrag aus `daten/items.json` gewinnt immer; die Datei
-  füllt ausschließlich Lücken und erzeugt **keine** Katalogseite.
-- **Aufnahme-Regel:** alle IDs, die Tausch, Zerlegung oder Instanzbeute
-  referenzieren und im Katalog fehlen (27.652). Behälter-Pools bleiben draußen,
-  weil sie nie als Zeile erscheinen – der Behälter steht als Quelle am
-  Gegenstand, nicht umgekehrt.
-- **Icons:** `ic` ist die Symbol-ID des Clients. 5.344 Symbole werden gebraucht;
-  950 liegen schon in `web/bild/items/`, die übrigen 4.394 in `itemIcons.zip`.
-- **Nicht in die Suche.** `build_gegenstandssuche.py` bleibt beim kuratierten
-  Katalog, sonst wüchse die Trefferliste um 27.652 Junk-Einträge.
-- Zwei Gruppen brauchen vorher eine Entscheidung: 1.336 Rezept-Objekte
-  („Rezept: …“) und 1.984 Einträge mit `x`-Flag. Bis dahin werden sie nicht als
-  normale Tauschwaren aufgenommen.
-- Ein Eintrag aus dieser Datei erzeugt **keine** Katalogseite. Ein Gegenstand
-  ohne Seite wird mit Clientnamen und Icon genannt, aber nicht verlinkt.
+- **Supplementary only.** A record from `daten/items.json` always wins; the file
+  fills gaps only and creates **no** catalogue page.
+- **Inclusion rule:** all IDs that barter, disenchanting or instance loot
+  reference and that are missing in the catalogue (27,652). Container pools stay out,
+  because they never appear as a row – the container stands as a source on the
+  item, not the other way round.
+- **Icons:** `ic` is the client's icon ID. 5,344 icons are needed;
+  950 already sit in `web/bild/items/`, the remaining 4,394 in `itemIcons.zip`.
+- **Not in the search.** `build_gegenstandssuche.py` stays with the curated
+  catalogue, otherwise the result list would grow by 27,652 junk entries.
+- Two groups need a decision beforehand: 1,336 recipe objects
+  ("Recipe: …") and 1,984 records with the `x` flag. Until then they are not included as
+  normal barter goods.
+- A record from this file creates **no** catalogue page. An item
+  without a page is named with client name and icon, but not linked.
 
-### 4.2 Tausch `daten/tausch.json`
+### 4.2 Barter `daten/tausch.json`
 
-Ein Profil ist das Angebot eines Händlers: eine Liste von Abgaben und eine
-Liste von Gaben. Dasselbe Profil kann von mehreren Händlern verwendet werden
-(3.469 Profile gegenüber 12.360 Verweisen), deshalb steht der Händlerbezug am
-Angebot, nicht am Profil.
+A profile is a vendor's offer: a list of costs and a
+list of gifts. The same profile can be used by several vendors
+(3,469 profiles against 12,360 references), which is why the vendor reference sits on the
+offer, not on the profile.
 
 ```json
 {"schema": 1,
@@ -115,32 +115,32 @@ Angebot, nicht am Profil.
  ]}
 ```
 
-Regeln:
+Rules:
 
-- **Mengen.** Fehlt `quantity` in der Quelle, gilt 1 (44.161 von 58.933 Abgaben
-  tragen eine Menge, 14.772 nicht; bei den Gaben 783 von 42.590). Die 1 ist
-  damit belegt und keine Annahme.
-- **Bedingungen** bleiben getrennt und werden nicht zu einem „ab Stufe X“
-  verrechnet. `requiredClass` steht am Händler (159 von 1.096) oder am Profil
-  (12), `requiredFaction` an 565 Profilen im Format `"<fraktion>;<stufe>"`,
-  `requiredQuest` an 505. Die Bedeutung der Stufenzahl ist noch zu belegen und
-  wird bis dahin nur als Rohwert geführt.
-- **Ort** kommt aus `did-positions-2026-11-03/positions.jsonl` (Weltlage
-  `instance` 0); 1.095 der 1.096 Händler haben eine Position. Karte und
-  Koordinaten entstehen mit derselben Regel wie bei Auftraggebern und
-  Landmarken, kein erfundener Punkt.
-- **Zusammenführen mit dem Bestand.** `daten/items.json` trägt bereits ein Feld
-  `tausch` aus dem Rezeptquellen-Export (nur Rezepte, Art `tausch`). Die neue
-  Quelle wird additiv zusammengeführt und nach `(händler, abgaben, gabe)`
-  dedupliziert; der alte Bestand wird nicht still ersetzt.
-- **Kein Silberpreis.** Tausch kostet Gegenstände, keine Münzen. Händlerpreise
-  in Silber stehen in `vendors.xml` und bleiben eine eigene Angabe.
+- **Quantities.** If `quantity` is missing in the source, 1 applies (44,161 of 58,933 costs
+  carry a quantity, 14,772 do not; for the gifts 783 of 42,590). The 1 is
+  therefore proven and not an assumption.
+- **Conditions** stay separate and are not offset into a "from level X".
+  `requiredClass` sits on the vendor (159 of 1,096) or on the profile
+  (12), `requiredFaction` on 565 profiles in the format `"<fraktion>;<stufe>"`,
+  `requiredQuest` on 505. The meaning of the level number still has to be proven and
+  is carried only as a raw value until then.
+- **Location** comes from `did-positions-2026-11-03/positions.jsonl` (world position
+  `instance` 0); 1,095 of the 1,096 vendors have a position. Map and
+  coordinates arise with the same rule as for quest givers and
+  landmarks, no invented point.
+- **Merging with the existing set.** `daten/items.json` already carries a field
+  `tausch` from the recipe source export (recipes only, type `tausch`). The new
+  source is merged additively and deduplicated by `(händler, abgaben, gabe)`;
+  the old set is not silently replaced.
+- **No silver price.** Barter costs items, not coins. Vendor prices
+  in silver are in `vendors.xml` and remain a separate statement.
 
-### 4.3 Behälter `daten/behaelter.json`
+### 4.3 Containers `daten/behaelter.json`
 
-Ein Behälter ist ein Weltobjekt (Feld, Kiste, Knoten), kein Gegenstand. Er
-verweist auf Loot-Tabellen; die Auflösung nutzt denselben Graphen wie die
-Instanz-Truhen.
+A container is a world object (field, crate, node), not an item. It
+references loot tables; the resolution uses the same graph as the
+instance chests.
 
 ```json
 {"schema": 1,
@@ -151,18 +151,18 @@ Instanz-Truhen.
  }}
 ```
 
-- `art` ist `container` oder `relics`. Reliktbehälter (527) verweisen auf
-  `relicsListId` und liefern Relikte, keine Gegenstände; sie bekommen einen
-  eigenen Zweig, statt Relikte als Gegenstände auszugeben.
-- 1.204 Behälter haben weder Trophy- noch Treasure-Liste. Sie bleiben mit Namen
-  im Bestand, aber ohne Pool – keine erfundene Beute.
-- Wahrscheinlichkeiten sind Chancen je Öffnung, keine Summe über 100 %. Bei
-  mehreren unabhängigen Würfen steht jede Chance einzeln, wie bei den
-  Instanz-Truhen.
-- Auf der Website erscheint der Behälter nur als **Quelle** eines Gegenstands
-  („Woher: Behälter“), nicht als eigene Entität.
+- `art` is `container` or `relics`. Relic containers (527) reference
+  `relicsListId` and yield relics, not items; they get their
+  own branch instead of outputting relics as items.
+- 1,204 containers have neither trophy nor treasure list. They stay in the set
+  with a name, but without a pool – no invented loot.
+- Probabilities are chances per opening, not a sum above 100 %. With
+  several independent rolls each chance stands on its own, as with the
+  instance chests.
+- On the website the container appears only as a **source** of an item
+  ("where from: container"), not as its own entity.
 
-### 4.4 Zerlegung `daten/zerlegung.json`
+### 4.4 Disenchanting `daten/zerlegung.json`
 
 ```json
 {"schema": 1,
@@ -172,83 +172,83 @@ Instanz-Truhen.
  "ohne_ergebnis": ["7000C1D3"]}
 ```
 
-- 992 Quellen haben kein `resultItemId`. Sie stehen in `ohne_ergebnis` und
-  erzeugen keine Zeile „Zerlegen ergibt“.
-- Ergebnisnamen kommen aus dem Katalog oder dem schlanken Gegenstandsbestand; die 45
-  Gutscheine sind überwiegend nicht im Katalog und bleiben ohne Link.
-- Die Beziehung ist gerichtet und nicht symmetrisch: „wird zerlegt zu“ ist
-  keine Verwendung des Ergebnisses.
+- 992 sources have no `resultItemId`. They are in `ohne_ergebnis` and
+  create no "disenchanting yields" row.
+- Result names come from the catalogue or the slim item set; the 45
+  vouchers are mainly not in the catalogue and stay without a link.
+- The relation is directed and not symmetric: "is disenchanted into" is
+  not a use of the result.
 
-### 4.5 Gemeinsamer Loot-Graph `tools/lootgraph.py`
+### 4.5 Shared loot graph `tools/lootgraph.py`
 
-Die Auflösung von Trophy-, Treasure-, gewichteten und gefilterten Tabellen
-steckt heute in `tools/build_instanz_beute.py` (fachlich beschrieben in
+The resolution of trophy, treasure, weighted and filtered tables
+currently sits in `tools/build_instanz_beute.py` (described in domain terms in
 [`docs/fachbereiche/instanzenfinder-dat.md`](../fachbereiche/instanzenfinder-dat.md)).
-Sie wird als eigenes Modul herausgezogen, damit Instanz-Truhen und Behälter
-dieselbe Logik nutzen:
+It is extracted as its own module so that instance chests and containers
+use the same logic:
 
 - `lade_graph(pfad)` → `{(tag, id): element}`
 - `loese(graph, "trophyList", id)` → `{item_id: chance}`
-- `chance()` und `gewicht()` kapseln die Regel „`dropFrequency` ist eine Chance,
-  `weight` ist relativ zu seinem Pool“.
+- `chance()` and `gewicht()` encapsulate the rule "`dropFrequency` is a chance,
+  `weight` is relative to its pool".
 
-Kein zweiter Resolver, keine abweichende Wahrscheinlichkeitsrechnung.
+No second resolver, no deviating probability calculation.
 
-## 5. Einbindung in Seiten und Vertrag
+## 5. Integration into pages and contract
 
-| Ort | Gruppe | Inhalt | Ab sechs Einträgen |
+| Place | Group | Content | From six records |
 |---|---|---|---|
-| Gegenstand | **Woher: Tausch** | Händler, Ort, Abgaben | Filterkomponente |
-| Gegenstand | **Woher: Behälter** | Behältername, Chance | Filterkomponente |
-| Gegenstand | **Zerlegen ergibt** | Ergebnis, Menge | direkt |
-| Händler | **Tauschware** | Gabe, Abgaben, Bedingung | Filterkomponente |
+| Item | **Where from: barter** | vendor, place, costs | filter component |
+| Item | **Where from: containers** | container name, chance | filter component |
+| Item | **Disenchanting yields** | result, quantity | directly |
+| Vendor | **Barter goods** | gift, costs, condition | filter component |
 
-Der Entitätenvertrag ist entsprechend ergänzt (`i`: `where_barter`,
-`where_containers`, `disenchants_into`; `vendor`: `barter`), jeweils mit Status
-`open` und Grund: Quelle und Modell stehen, die Seite baut die Gruppe noch
-nicht. Die Zeilenfelder bleiben bei Identität und Einordnung; Mengen und Preise
-gehören auf die Detailseite, nicht in die Liste.
+The entity contract is extended accordingly (`i`: `where_barter`,
+`where_containers`, `disenchants_into`; `vendor`: `barter`), each with status
+`open` and reason: source and model exist, the page does not yet build the group.
+The row fields stay with identity and classification; quantities and prices
+belong on the detail page, not in the list.
 
-Regeln, die auch hier gelten:
+Rules that apply here as well:
 
-- Kein Link ohne Katalogseite. Bei 24.510 der 36.096 Tauschgaben gibt es keine
-  Seite; sie werden mit Namen genannt, nicht verlinkt.
-- Keine erfundenen Preise, Stufen oder Rufschwellen.
-- Fehlende Angaben führen zum Weglassen der Zeile oder der Überschrift, nicht zu
-  „nicht geprüft“.
+- No link without a catalogue page. For 24,510 of the 36,096 barter gifts there is no
+  page; they are named, not linked.
+- No invented prices, levels or reputation thresholds.
+- Missing information leads to omitting the row or the heading, not to
+  "not checked".
 
-## 6. Geplante Pipeline
+## 6. Planned pipeline
 
-1. Ein Generator für den schlanken Gegenstandsbestand liest den eigenen
-   Voll-Export und schreibt nur fehlende, referenzierte IDs.
-2. `tools/build_tausch.py` → `daten/tausch.json`; Positionen aus dem
-   did-positions-Export, Karte über `game_maps` wie bei Auftraggebern.
-3. `tools/build_behaelter.py` → `daten/behaelter.json` über `lootgraph`.
+1. A generator for the slim item set reads the own
+   full export and writes only missing, referenced IDs.
+2. `tools/build_tausch.py` → `daten/tausch.json`; positions from the
+   did-positions export, map via `game_maps` as with quest givers.
+3. `tools/build_behaelter.py` → `daten/behaelter.json` via `lootgraph`.
 4. `tools/build_zerlegung.py` → `daten/zerlegung.json`.
-5. `tools/php_viewmodel.py` ergänzt die Gruppen; `build_php_data.py` schreibt
-   sie in die Seitenmodelle. Danach Vertragsstatus von `open` auf `component`.
-6. `tools/build_release.py` und `.gitignore` um die neuen `daten/*.json`
-   ergänzen (die Dateien bleiben lokal, wie alle Daten).
+5. `tools/php_viewmodel.py` adds the groups; `build_php_data.py` writes
+   them into the page models. Then contract status from `open` to `component`.
+6. Add the new `daten/*.json` to `tools/build_release.py` and `.gitignore`
+   (the files stay local, like all data).
 
-## 7. Prüfungen
+## 7. Checks
 
-- Abgaben und Gaben lösen sich gegen Katalog oder Voll-Export auf; keine leeren
-  Namen in der Ausgabe.
-- Jedes Angebot hat mindestens eine Abgabe und eine Gabe.
-- Summen: 42.594 Angebote, 6.262 Behälter, 27.333 Zerlegungen; Abweichungen
-  werden gemeldet, nicht still geschluckt.
-- Stichprobe Glinghant/„Gloves of the Seven Stars“: Profil vorhanden, Abgaben
-  Mark 100 + Medaillon 16, Händler an einer Position.
-- Zerlegung: 992 ohne Ergebnis bleiben ohne Zeile.
-- Entitätenvertrag und `php_viewmodel` nennen dieselben Gruppennamen.
+- Costs and gifts resolve against the catalogue or full export; no empty
+  names in the output.
+- Every offer has at least one cost and one gift.
+- Totals: 42,594 offers, 6,262 containers, 27,333 disenchantments; deviations
+  are reported, not silently swallowed.
+- Sample Glinghant/"Gloves of the Seven Stars": profile present, costs
+  Mark 100 + Medallion 16, vendor at a position.
+- Disenchanting: 992 without result stay without a row.
+- Entity contract and `php_viewmodel` name the same group names.
 
-## 8. Offene Punkte
+## 8. Open points
 
-- Bedeutung der Zahl in `requiredFaction="<id>;<n>"` (Rufstufe?) ist nicht
-  belegt; bis dahin nur Rohwert.
-- Ob Tauschware ohne Katalogseite eine eigene, schlanke Seite bekommen soll
-  (Name, Icon, Tauschorte) oder namenlos bleibt.
-- Ob Reliktbehälter und Relikte überhaupt angezeigt werden; Relikte sind keine
-  Gegenstände im Katalog.
-- Ob der Behälterbezug auch auf der Kartenansicht erscheint (Vorkommen zeigt
-  heute Fundstellen, keine Behälter).
+- Meaning of the number in `requiredFaction="<id>;<n>"` (reputation level?) is not
+  proven; raw value only until then.
+- Whether barter goods without a catalogue page should get their own, slim page
+  (name, icon, barter places) or stay nameless.
+- Whether relic containers and relics are shown at all; relics are not
+  items in the catalogue.
+- Whether the container reference also appears on the map view (resource occurrences show
+  find spots today, no containers).

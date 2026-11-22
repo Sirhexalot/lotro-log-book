@@ -1,71 +1,69 @@
-# Detailseite: Aufbau und Verlinkung (Spec für `build_katalogseiten.py`)
+# Detail page: structure and linking (spec for `build_katalogseiten.py`)
 
-Stand 08.11.2026. Diese Datei beschreibt, wie eine Entitätsseite aussehen soll und
-welche Daten daraus welche Links machen. Sie ist **Auftrag an den zentralen
-Katalogbau**: `build_katalogseiten.py` steht auf der Sperrliste und wird hier nicht
-angefasst.
+Status as of 08.11.2026. This file describes how an entity page should look and
+which data make which links. It is a **work order to the central
+catalogue build**: `build_katalogseiten.py` is on the blocked list and is not
+touched here.
 
-## Abschnittsfolge
+## Section order
 
 `Kurz · Ort oder Vorkommen · Woher · Wofür · Zusammenhang`
 
-Kein Abschnitt „Details“ (ID, Karten-IDs, Quelle, Stand) — der entfällt.
+No section „Details“ (ID, map IDs, source, state) — it is dropped.
 
-| Abschnitt | Inhalt | Woher |
+| Section | Content | Source |
 |---|---|---|
-| **Kurz** | Symbol, Name, eine Zeile Stufe/Gebiet, Marken (Sitzungsspiel, Alternative, wiederholbar), **Beschreibung** | `n`, `l`, `z`/`u`, `x`, `e`, `rp`, `d` |
-| **Ort** | bei genau **einem** Punkt: Kartenausschnitt + Koordinaten; bei **vielen** Punkten: Karte und Punktzahl, keine Route | `gt`, `t`, `fk` |
-| **Woher** | Auftraggeber, Gebiet/Region, Voraussetzungen, Stufenbedingung | `g`, `z`, `r`, `fk`, `v`, `vo`, `vl`, `vb` |
-| **Wofür** | Belohnungen mit Bild und Link, Titel, Tugend, Trait, Emote; darunter „Wird vorausgesetzt von“ | `rw`, Rückverweis |
-| **Zusammenhang** | Aufgabenfolge (`pq`/`nq`), ausschließende Alternativen, gleicher Auftraggeber, Vorkommen im Gebiet | `pq`, `nq`, `e`, `g`, `fk` |
+| **Kurz** | icon, name, one line level/area, markers (session play, alternative, repeatable), **description** | `n`, `l`, `z`/`u`, `x`, `e`, `rp`, `d` |
+| **Ort** | with exactly **one** point: map section + coordinates; with **many** points: map and point count, no route | `gt`, `t`, `fk` |
+| **Woher** | quest giver, area/region, prerequisites, level condition | `g`, `z`, `r`, `fk`, `v`, `vo`, `vl`, `vb` |
+| **Wofür** | rewards with image and link, title, virtue, trait, emote; below that „Wird vorausgesetzt von“ | `rw`, back reference |
+| **Zusammenhang** | quest sequence (`pq`/`nq`), excluding alternatives, same quest giver, occurrences in the area | `pq`, `nq`, `e`, `g`, `fk` |
 
-Die Beschreibung steht **oben**, nicht am Ende. Klammerzusätze hinter Werten
-entfallen („Auftraggeber: Ghân-buri-Ghân“, nicht „(noch ohne eigene Seite)“).
+The description stands **at the top**, not at the end. Parenthetical additions after values
+are dropped („Auftraggeber: Ghân-buri-Ghân“, not „(noch ohne eigene Seite)“).
 
-## Symbole
+## Icons
 
-- Ein Lucide-Symbol je Entität, **inline** vor dem `<h1>` in `.katalog-inhalt`:
-  `scroll-text` Aufgabe, `trophy` Tat, `package` Gegenstand, `book-open` Rezept,
-  `map` Gebiet, `globe` Region, `briefcase` Beruf, `award` Titel, `shield` Tugend,
-  `gem` Vorkommen. Katalog `library`, Handwerk `hammer`.
+- One Lucide icon per entity, **inline** before the `<h1>` in `.katalog-inhalt`:
+  `scroll-text` quest, `trophy` deed, `package` item, `book-open` recipe,
+  `map` area, `globe` region, `briefcase` profession, `award` title, `shield` virtue,
+  `gem` resource occurrence. Catalogue `library`, crafting `hammer`.
 - Markup: `<svg class="symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor"
   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">…</svg>`
-- Farbe über `currentColor`; die Seiten setzen `color: var(--gold)` am `<h1>`.
-- Keine Sprite-Datei: der Build kopiert keine neuen Assets, und inline funktioniert
-  auch bei `file://`.
+- Colour via `currentColor`; the pages set `color: var(--gold)` on the `<h1>`.
+- No sprite file: the build copies no new assets, and inline works
+  also with `file://`.
 
-## Belohnungen
+## Rewards
 
-`rw` trägt je Eintrag sieben Felder: Art, Name, Qualität, Gegenstandsstufe, Anzahl,
-Bindung, **ID**. Die ID ist seit dem 08.11.2026 gefüllt (19.039 von 19.385
-Einträgen), aufgelöst über den Belohnungsindex (`build_belohnungen.py`) mit dem
-Schlüssel (Quell-ID, Name) — Namen allein sind nicht eindeutig.
+`rw` carries seven fields per entry: kind, name, quality, item level, count,
+binding, **ID**. The ID has been filled since 08.11.2026 (19.039 of 19.385
+entries), resolved via the reward index (`build_belohnungen.py`) with the
+key (source ID, name) — names alone are not unique.
 
-- Zeile: Bild `bild/items/<ID>.webp` (20 px, rund, dunkler Grund), dann der Name als
-  Link `/<sprache>/<segment>/<ID>/` (`gegenstand`, `item`, `objet`).
-- Fehlt das Bild, verschwindet der Platz (`onerror`), es bleibt kein leerer Rahmen.
-- „Zur Auswahl“ bleibt eine Zeile: `zur Auswahl: A · B · C`, je Eintrag mit Bild.
-- Titel, Tugenden, Traits und Emotes bleiben Text (keine ID im Belohnungsindex).
+- Row: image `bild/items/<ID>.webp` (20 px, round, dark ground), then the name as
+  link `/<sprache>/<segment>/<ID>/` (`gegenstand`, `item`, `objet`).
+- If the image is missing, the place disappears (`onerror`), no empty frame remains.
+- „Zur Auswahl“ stays one row: `zur Auswahl: A · B · C`, each entry with image.
+- Titles, virtues, traits and emotes stay text (no ID in the reward index).
 
-## Rückverweis „Wird vorausgesetzt von“
+## Back reference „Wird vorausgesetzt von“
 
-Aus den `v`-Listen aller Aufgaben: Aufgabe → Aufgaben, die sie verlangen. Als Index
-einmal je Sprache ableiten (6.533 Aufgaben mit Voraussetzungen), nicht pro Seite
-suchen. Bei Taten entfällt der Abschnitt (keine belegte Verknüpfung).
+From the `v` lists of all quests: quest → quests that require it. Derive as an index
+once per language (6.533 quests with prerequisites), do not search per page. For deeds the section is dropped (no verified link).
 
-## Links, die es schon gibt
+## Links that already exist
 
-Gebiet `/de/gebiet/<id>/`, Region `/de/region/<id>/`, Voraussetzung und Folge
-`/de/aufgabe/<id>/`, Karte `index.html?id=<id>`, Reise `reise.html?nach=<lat>+<lon>`.
+Area `/de/gebiet/<id>/`, region `/de/region/<id>/`, prerequisite and sequel
+`/de/aufgabe/<id>/`, map `index.html?id=<id>`, travel `reise.html?nach=<lat>+<lon>`.
 
-## Was nicht auf die Seite kommt
+## What does not go on the page
 
-Erfahrung und Geld (nicht in den entpackbaren Daten), Mengen bei Tugenden
-(unbekannt), eine Tat-Verknüpfung über `hz` (das sind nur Positionen).
+Experience and money (not in the extractable data), quantities for virtues
+(unknown), a deed link via `hz` (those are only positions).
 
-## Taten
+## Deeds
 
-Gleiche Folge, mit drei Abweichungen: Symbol `trophy`, „Woher“ nennt die Tat-Art und
-die Kategorie statt Auftraggeber, und „Wofür“ zeigt Tugend, LOTRO-Punkte und Titel.
-Ein Rückverweis auf Aufgaben fehlt, solange die Tat ihre Aufgaben nicht mit IDs
-nennt.
+Same order, with three deviations: icon `trophy`, „Woher“ names the deed kind and
+the category instead of a quest giver, and „Wofür“ shows virtue, LOTRO points and title.
+A back reference to quests is missing as long as the deed does not name its quests with IDs.

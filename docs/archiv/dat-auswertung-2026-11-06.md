@@ -1,192 +1,192 @@
-# Was die Spieldaten außer Positionen hergeben – 6. November 2026
+# What the game data yields beyond positions – 6 November 2026
 
-Lesende Auswertung des eigenen DAT-Exports
-`Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03` plus gezielte
-Nachladungen aus dem Client (nur gelesen, nichts installiert oder verändert).
-Keine Wiki-, Kroel- oder Deed-Tracker-Daten.
+Read-only evaluation of the own DAT export
+`Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03` plus targeted
+reloads from the client (read only, nothing installed or changed).
+No wiki, Kroel or deed tracker data.
 
-## 1. Belohnungen: der größte ungenutzte Block
+## 1. Rewards: the largest unused block
 
-Jede Aufgabe und jede Tat verweist auf eine Belohnungstabelle
-(`Quest_QuestTreasureDID`). 9.594 verschiedene Tabellen werden von 14.252
-Aufgaben und allen 5.534 Taten verwendet.
+Every quest and every deed refers to a reward table
+(`Quest_QuestTreasureDID`). 9.594 different tables are used by 14.252
+quests and all 5.534 deeds.
 
-| Feld in der Tabelle | Tabellen | Bedeutung |
+| Field in the table | Tables | Meaning |
 |---|---:|---|
-| `FixedItemArray` | 6.039 | feste Gegenstände mit Anzahl |
-| `SelectableItemArray` | 1.660 | Auswahl aus mehreren Gegenständen |
-| `FixedTitleArray` | 2.511 | Titel |
-| `SelectableTitleArray` | 13 | Titel zur Auswahl |
-| `FixedVirtueArray` | 565 | Tugend + Stufe |
-| `Virtue_XP_Tier` | 9.544 | Tugend-Erfahrung, Stufe |
-| `FixedTraitArray` | 258 | Trait/Fertigkeit |
-| `FixedEmoteArray` / `SelectableEmoteArray` | 15 | Emote |
-| `FixedBillingTokenArray` | 122 | Store-/Content-Freischaltung, **keine** Spielerbelohnung |
+| `FixedItemArray` | 6.039 | fixed items with count |
+| `SelectableItemArray` | 1.660 | selection from several items |
+| `FixedTitleArray` | 2.511 | titles |
+| `SelectableTitleArray` | 13 | titles to choose from |
+| `FixedVirtueArray` | 565 | virtue + level |
+| `Virtue_XP_Tier` | 9.544 | virtue experience, level |
+| `FixedTraitArray` | 258 | trait/skill |
+| `FixedEmoteArray` / `SelectableEmoteArray` | 15 | emote |
+| `FixedBillingTokenArray` | 122 | store/content unlock, **no** player reward |
 
-Verteilung auf die Einträge:
+Distribution across the entries:
 
-- **Aufgaben:** 9.526 mit festen Gegenständen, 1.800 mit Auswahl, 204 mit Titel,
-  115 mit Trait, 7 mit Tugend, 721 mit Tugend-Erfahrung.
-- **Taten:** 3.224 mit Gegenständen, 570 mit Tugend, 2.377 mit Titel,
-  174 mit Trait.
+- **Quests:** 9.526 with fixed items, 1.800 with a selection, 204 with a title,
+  115 with a trait, 7 with a virtue, 721 with virtue experience.
+- **Deeds:** 3.224 with items, 570 with a virtue, 2.377 with a title,
+  174 with a trait.
 
-Beispiel „Free the Tree“ (70000008): fester „Gift Mathom“ plus Auswahl aus drei
-Gegenständen der Stufe 9. Beispiel „Barghest-slayer (Advanced)“ (70005BD3):
-30× Mark und 1× Entschlossenheit.
+Example „Free the Tree“ (70000008): fixed „Gift Mathom“ plus a selection from three
+level 9 items. Example „Barghest-slayer (Advanced)“ (70005BD3):
+30× Mark and 1× Entschlossenheit.
 
-### Gegenstände in Belohnungen
+### Items in rewards
 
-- **6.905 verschiedene Gegenstände** werden als Belohnung vergeben.
-- 9.502 feste Vergaben, 5.631 Auswahloptionen.
-- Aufgelöst: Name in DE/EN/FR, Qualität, Gegenstandsstufe, Bindung,
-  Grundwert. Stufen von 1 bis 572, Median 50.
-- Qualitäten: 2.840 ungewöhnlich, 2.303 selten, 782 besonders, 744 episch,
-  228 gewöhnlich, 8 ohne Angabe.
-- 6.180 der Belohnungsgegenstände sind beim Aufnehmen gebunden.
+- **6.905 different items** are granted as a reward.
+- 9.502 fixed grants, 5.631 selection options.
+- Resolved: name in DE/EN/FR, quality, item level, binding,
+  base value. Levels from 1 to 572, median 50.
+- Qualities: 2.840 ungewöhnlich, 2.303 selten, 782 besonders, 744 episch,
+  228 gewöhnlich, 8 without statement.
+- 6.180 of the reward items are bound on acquisition.
 
-### Titel
+### Titles
 
-- **2.545 verschiedene Titel**, davon 61 mit Platzhaltern
-  (`${NAME}`, `${RANK}`, `${SURNAME}`), etwa „Warg-hunter“ oder
-  „Honorary Shirriff“. Unser Plugin löst diese Platzhalter bereits auf.
+- **2.545 different titles**, of them 61 with placeholders
+  (`${NAME}`, `${RANK}`, `${SURNAME}`), for instance „Warg-hunter“ or
+  „Honorary Shirriff“. Our plugin already resolves these placeholders.
 
-### Tugenden
+### Virtues
 
-- 20 der 21 Tugenden kommen in Belohnungstabellen vor; die Namen lassen sich
-  über die spiel-eigenen Statistikbezeichnungen sauber zuordnen
+- 20 of the 21 virtues appear in reward tables; the names can be
+  cleanly assigned via the game's own stat designations
   (Entschlossenheit, Tapferkeit, Weisheit …).
-- Dazu kommen Testränge („Skirmish Test Rank“), die ausgefiltert werden müssen.
+- In addition there are test ranks („Skirmish Test Rank“), which must be filtered out.
 
-## 2. Weitere auswertbare Bereiche
+## 2. Further evaluable areas
 
-| Bereich | Datensätze | Inhalt |
+| Area | Records | Content |
 |---|---:|---|
-| Rezepte | 7.925 | Ergebnis, kritischer Erfolg, Zutaten mit Menge, Chance, Dauer |
-| Rezept-Gegenstände | 6.189 | die erlernbaren Rezeptgegenstände |
-| Verkäufer | ~1.466 | `Vendor_ItemList` mit allen verkauften Gegenständen |
-| Barter | 3.479 | Tauschlisten: geforderte Gegenstände und Mengen |
-| Reittier-Routen | 5.322 | Start, Ziel, Reisemodus (plus 2.303 Segmente) |
-| Gegenstands-Sets | 2.226 | Mitglieder, Set-Stufe, Set-Boni |
-| Beute-Tabellen | 15.305 | Gegenstand, Menge, Drop-Frequenz |
-| Gruppen-Beute | 6.425 | `TreasureGroupProfile_ItemTable` |
-| NPCs | 16.912 | inkl. Vendor-, Barter- und Rufbezug |
-| Kreaturen | 20.835 | inkl. Spezies, Stufe, Beute-Verweisen |
+| Recipes | 7.925 | result, critical success, ingredients with quantity, chance, duration |
+| Recipe items | 6.189 | the learnable recipe items |
+| Vendors | ~1.466 | `Vendor_ItemList` with all sold items |
+| Barter | 3.479 | barter lists: required items and quantities |
+| Mount routes | 5.322 | start, destination, travel mode (plus 2.303 segments) |
+| Item sets | 2.226 | members, set level, set bonuses |
+| Loot tables | 15.305 | item, quantity, drop frequency |
+| Group loot | 6.425 | `TreasureGroupProfile_ItemTable` |
+| NPCs | 16.912 | incl. vendor, barter and reputation reference |
+| Creatures | 20.835 | incl. species, level, loot references |
 
-Dazu kommen bereits genutzte Felder: Rufbelohnung (`PosRepToGive`,
-`PositiveFaction`), LOTRO-Punkte (`TurbinePointTier`), wiederholbar, daily,
-Zeitlimit, Gruppe, Instanz, Aufgabe davor/danach.
+In addition, already used fields: reputation reward (`PosRepToGive`,
+`PositiveFaction`), LOTRO points (`TurbinePointTier`), repeatable, daily,
+time limit, group, instance, quest before/after.
 
-## 3. Was ausdrücklich nicht sauber geht
+## 3. What explicitly does not work cleanly
 
-- **Gegenstands-Werte:** `Mod_Array` nennt nur die veränderten Statistiken und
-  eine Progression-ID. Die Zahlenwerte stecken in Progressions-Tabellen; ohne
-  deren Auswertung wäre jede Anzeige geraten. Qualität, Stufe, Bindung und
-  Grundwert sind dagegen direkt lesbar.
-- **Gegenstands-Kategorien:** Der frühere Trockenlauf ergab nur 54 % Treffer
-  gegenüber Compendium; 68 von 77 Regeln widersprüchlich. Kategorien also nicht
-  blind übernehmen.
-- **Aufgaben-EP und Geld:** Nur 4.437 von 15.692 Aufgaben verweisen auf eine
-  konkrete Belohnungstabelle (`Quest_RewardLevelDID`). Dort stehen exakte Werte
-  je Tier (Beispiel: Stufe 7 → 98 EP, 290 Geld). Für die übrigen 8.656 mit Tier
-  aber ohne Tabelle müsste die Standardberechnung des Clients nachgebildet
-  werden – ohne Nachweis nicht anzeigen.
-- **Tugend-Mengen:** Die Zuordnung Tugendname ist belegt, die Bedeutung von
-  `QuestTreasure_Virtue_Increment` und `Virtue_XP_Tier` ist noch nicht
-  gegengeprüft. Bis dahin nur „Tugend: Entschlossenheit“, keine erfundene Zahl.
-- **Beute-Chancen:** `LootGen_TrophyList_DropFrequency` ist ein Code, keine
-  Prozentangabe. Ohne Bedeutungsnachweis keine Wahrscheinlichkeiten.
-- **Billing-Tokens:** Content-/Store-Freischaltungen (z. B. „Legendary Moria“),
-  keine Belohnung im Spielersinn.
-- **Testinhalte:** Testränge, „DNT“, Hiding-Content und Testgegenstände müssen
-  wie bisher ausgefiltert werden.
+- **Item stats:** `Mod_Array` names only the changed stats and
+  a progression ID. The numeric values sit in progression tables; without
+  their evaluation every display would be guesswork. Quality, level, binding and
+  base value, by contrast, are directly readable.
+- **Item categories:** The earlier dry run yielded only 54 % hits
+  against Compendium; 68 of 77 rules contradictory. So do not adopt categories
+  blindly.
+- **Quest XP and money:** Only 4.437 of 15.692 quests refer to a
+  concrete reward table (`Quest_RewardLevelDID`). There exact values
+  per tier stand (example: level 7 → 98 XP, 290 money). For the remaining 8.656 with a tier
+  but without a table, the client's standard calculation would have to be replicated
+  – do not show without proof.
+- **Virtue quantities:** The assignment of virtue name is verified, the meaning of
+  `QuestTreasure_Virtue_Increment` and `Virtue_XP_Tier` is not yet
+  cross-checked. Until then only „Tugend: Entschlossenheit“, no invented number.
+- **Loot chances:** `LootGen_TrophyList_DropFrequency` is a code, not a
+  percentage. Without proof of meaning no probabilities.
+- **Billing tokens:** content/store unlocks (e.g. „Legendary Moria“),
+  no reward in the player's sense.
+- **Test content:** test ranks, „DNT“, hiding content and test items must
+  be filtered out as before.
 
-## 4. Empfohlene Reihenfolge
+## 4. Recommended order
 
-1. **Belohnungen an Aufgabe und Tat** (Gegenstände inkl. Auswahl, Titel,
-   Tugendname). Direkt sichtbar im Detail, klar vom Zielort getrennt.
-2. **Gegenstandsseiten für Belohnungsgegenstände** – welche Aufgabe/Tat gibt
-   ihn, welcher Verkäufer führt ihn, welches Rezept stellt ihn her.
-3. **Handwerk: Rezepte** mit Zutaten und Ergebnis; passt zur bestehenden
-   Handwerksseite.
-4. **Tugend-Übersicht:** welche Taten welche Tugend geben (Name belegt).
-5. Später: Barter und Reittier-Routen. Loot-Chancen und Gegenstandswerte erst
-   nach Bedeutungsnachweis.
+1. **Rewards on quest and deed** (items incl. selection, titles,
+   virtue name). Directly visible in the detail, clearly separated from the target location.
+2. **Item pages for reward items** – which quest/deed gives
+   it, which vendor carries it, which recipe makes it.
+3. **Crafting: recipes** with ingredients and result; fits the existing
+   crafting page.
+4. **Virtue overview:** which deeds give which virtue (name verified).
+5. Later: barter and mount routes. Loot chances and item stats only
+   after proof of meaning.
 
-Aufwand: Punkt 1 ist eine Erweiterung von Export, Kataloggenerator, Plugin-
-Detailtext, Webdetail und Tests. Die Datenmengen bleiben klein (Belohnungs-
-gegenstände wenige MB), die drei Sprachen sind vollständig vorhanden.
+Effort: point 1 is an extension of export, catalogue generator, plugin
+detail text, web detail and tests. The data volumes stay small (reward
+items a few MB), the three languages are completely present.
 
-## 5. Umgesetzt am 6. November 2026
+## 5. Implemented on 6 November 2026
 
-- Reproduzierbarer Export `Companion-Test/source-exporter/export_rewards.py`
-  (nutzt denselben Java-Leser, schreibt `rewards-2026-11-06/rewards.json`,
-  2,1 MB, mit Quellenstempel).
-- Katalog: `rw` an jeder Aufgabe (im Detailblock) und jeder Tat (Kerndatei).
-  **10.268 Aufgaben mit 19.381 Belohnungseinträgen**, **4.445 Taten mit 7.298
-  Einträgen**. Gleiche IDs, gleiche Reihenfolge und gleiche Mengen in DE/EN/FR;
-  `verify_catalog.py` prüft das.
-- Anzeige: Plugin-Detailtext und Website zeigen die Belohnungen **vor** dem
-  Einblenden der Ziele (die Questanzeige des Spiels zeigt sie ebenfalls). Titel
-  werden vom Charakternamen befreit; `${...}` und `[e]`-Marken sind entfernt.
-- Webdaten: `build_daten.py` führt die Detailblöcke wieder zusammen. Das war
-  nötig, weil die Website seit der Katalogteilung sonst Beschreibungen, Schritte,
-  Ziele und Belohnungen verloren hätte.
-- Qualitätsfarben auf der Website, Item-Stufe und „Zur Auswahl“ getrennt.
-- Mengen der Tugenden bleiben bewusst ungenannt (Bedeutung von
-  `Virtue_Increment`/`Virtue_XP_Tier` weiterhin ungeprüft).
-- Prüfung: `verify_catalog.py`, `test_plugin.py`, `test_features.py`,
-  `test_struktur.py`, Website-Unittests, `test_i18n.js` und die Browserprüfung
-  über 21 Seitenvarianten plus Kartenansicht bestanden.
+- Reproducible export `Companion-Test/source-exporter/export_rewards.py`
+  (uses the same Java reader, writes `rewards-2026-11-06/rewards.json`,
+  2,1 MB, with source stamp).
+- Catalogue: `rw` on every quest (in the detail block) and every deed (core file).
+  **10.268 quests with 19.381 reward entries**, **4.445 deeds with 7.298
+  entries**. Same IDs, same order and same quantities in DE/EN/FR;
+  `verify_catalog.py` checks that.
+- Display: plugin detail text and website show the rewards **before** the
+  objectives are shown (the game's quest display shows them likewise). Titles
+  are freed from the character name; `${...}` and `[e]` marks are removed.
+- Web data: `build_daten.py` merges the detail blocks again. That was
+  necessary because otherwise the website would have lost descriptions, steps,
+  objectives and rewards since the catalogue split.
+- Quality colours on the website, item level and „Zur Auswahl“ separated.
+- Quantities of virtues deliberately remain unnamed (meaning of
+  `Virtue_Increment`/`Virtue_XP_Tier` still unchecked).
+- Check: `verify_catalog.py`, `test_plugin.py`, `test_features.py`,
+  `test_struktur.py`, website unit tests, `test_i18n.js` and the browser check
+  across 21 page variants plus map view passed.
 
-## 6. Belohnungsübersicht und Rezepte (6. November 2026)
+## 6. Reward overview and recipes (6 November 2026)
 
-- **Neue Seite „Belohnungen“** (`belohnungen.html`, DE/EN/FR) mit drei Ansichten:
-  Tugenden (20), Titel (2.509 DE / 2.520 EN / 2.494 FR) und Gegenstände (6.564).
-  Jeder Eintrag nennt die Aufgaben und Taten, die ihn geben, und verlinkt sie.
-  Suche über Namen und Quellen; lange Listen zeigen die ersten 300 Treffer.
-- **Filter auf der Taten-Seite:** „Belohnung: alle / Tugend / Titel / LOTRO-Punkte“.
-  Er gilt nur dort, wo er Sinn ergibt (Taten), und steht im Listenkopf.
-- **Rezepte im Handwerk:** 7.924 Rezepte mit Ergebnis, Zutaten (optional getrennt)
-  und kritischem Erfolg, Beruf und Stufe, Suche und Berufsfilter. Quelle:
-  `export_recipes.py` (Klasse 1024), 9.198 beteiligte Gegenstände, 11 Berufe.
-  Berufs-, Stufen- und Kategorienamen kommen aus den Spiel-Enums und
-  Companion-Labels; Gegenstandsnamen sind in DE/EN/FR aufgelöst.
-- **Datenmodell:** Belohnungsgegenstände tragen jetzt ihre DID (`rw`-Eintrag,
-  letztes Feld), damit die Übersicht gleiche Gegenstände zusammenfassen kann.
-  `build_belohnungen.py` und `build_rezepte.py` schreiben je Sprache eine eigene
-  Datei; `baue_website.py` kopiert und stempelt sie mit.
-- **Titelbereinigung:** doppelte Trennzeichen („, , “) und ein fehlplatzierter
-  Bindestrich vor kleingeschriebenen Wörtern werden entfernt; Wörter bleiben
-  unverändert.
+- **New page „Belohnungen“** (`belohnungen.html`, DE/EN/FR) with three views:
+  virtues (20), titles (2.509 DE / 2.520 EN / 2.494 FR) and items (6.564).
+  Every entry names the quests and deeds that give it and links them.
+  Search across names and sources; long lists show the first 300 hits.
+- **Filter on the deed page:** „Belohnung: alle / Tugend / Titel / LOTRO-Punkte“.
+  It applies only where it makes sense (deeds) and stands in the list head.
+- **Recipes in crafting:** 7.924 recipes with result, ingredients (optionally separated)
+  and critical success, profession and level, search and profession filter. Source:
+  `export_recipes.py` (class 1024), 9.198 involved items, 11 professions.
+  Profession, level and category names come from the game enums and
+  Companion labels; item names are resolved in DE/EN/FR.
+- **Data model:** reward items now carry their DID (`rw` entry,
+  last field), so that the overview can combine identical items.
+  `build_belohnungen.py` and `build_rezepte.py` write a separate file per language;
+  `baue_website.py` copies and stamps them along.
+- **Title cleanup:** duplicate separators („, , “) and a misplaced
+  hyphen before lower-case words are removed; words stay
+  unchanged.
 
-### Rezeptstruktur und Lernstand
+### Recipe structure and crafting knowledge
 
-- Die Rezepte folgen der Gliederung von Spiel und Wiki: **Beruf → Stufe →
-  Kategorie**. 10 Berufe, 17 Stufen, 491 rohe Kategorien (163 ohne die
-  Gegenstandsstufe im Namen). Beispiel Drechsler/Doomfold: Instrumente,
+- The recipes follow the structure of game and wiki: **Beruf → Stufe →
+  Kategorie**. 10 professions, 17 tiers, 491 raw categories (163 without the
+  item level in the name). Example Drechsler/Doomfold: Instrumente,
   Warden-Schnitzereien, Essenzen, Waffen, Verarbeitung.
-- Handwerk hat zwei Reiter **Berufe** und **Rezepte**; der Rezeptreiter wählt
-  Beruf und Stufe, darunter stehen die Kategorien mit Tabellen. Die Suche
-  überspringt den Baum und sucht über Ergebnis und Zutaten.
-- **Eigener Lernstand:** `crafting.xml` aus Companion enthält `<knownRecipe>`
-  (Feldobar: 111, davon 108 Drechsler). Der Import liest die IDs jetzt mit
-  (`rezepte` im Charakterspeicher), die Seite zeigt ✓ bekannt, ○ fehlt und
-  „–“ für fremde Berufe. Filter „nur fehlende“; Zähler je Stufe. Der Startberuf
-  ist der mit den meisten bekannten Rezepten.
-- Ohne Import bleibt die Spalte leer; es gibt keine erfundenen Markierungen.
-  Der Stand ist so alt wie der letzte Companion-Import.
-- Die Rezeptdaten tragen Berufsschlüssel (`WOODWORKER` …), Rezept-ID und
-  Stufencode, damit die Zuordnung ohne Namensvergleich funktioniert.
-- **Namen bereinigt:** `\q` wird zum Anführungszeichen (`"Alter Tobi"`),
-  `\n` zum Leerzeichen; `[e]`/`[n]`-Marken, `${…}`-Platzhalter und doppelte
-  Trennzeichen fallen weg. `verify_catalog.py` prüft, dass keine Rohmarkierung
-  in einer Belohnung steht.
+- Crafting has two tabs **Berufe** and **Rezepte**; the recipe tab selects
+  profession and level, below that the categories stand with tables. The search
+  skips the tree and searches across result and ingredients.
+- **Own crafting knowledge:** `crafting.xml` from Companion contains `<knownRecipe>`
+  (Feldobar: 111, of them 108 Drechsler). The import now reads the IDs along
+  (`rezepte` in the character store), the page shows ✓ bekannt, ○ fehlt and
+  „–“ for foreign professions. Filter „nur fehlende“; counter per level. The starting profession
+  is the one with the most known recipes.
+- Without import the column stays empty; there are no invented marks.
+  The state is as old as the last Companion import.
+- The recipe data carry profession keys (`WOODWORKER` …), recipe ID and
+  tier code, so that the assignment works without name comparison.
+- **Names cleaned:** `\q` becomes the quotation mark (`"Alter Tobi"`),
+  `\n` becomes the space; `[e]`/`[n]` marks, `${…}` placeholders and duplicate
+  separators are dropped. `verify_catalog.py` checks that no raw mark
+  stands in a reward.
 
-## 7. Prüfmittel
+## 7. Check tools
 
-- Vollständige Belohnungstabellen gelesen: 9.594 Tabellen, 0 Lesefehler.
-- 9.693 referenzierte Gegenstands-, Titel-, Trait- und Emote-Datensätze
-  aufgelöst, Namen in DE/EN.
-- Stichproben gegengeprüft: „Free the Tree“, „Barghest-slayer (Advanced)“,
-  Verkäufer Carlo Blagrove (125 Artikel), Rezept 70001A60 (Zutaten und
-  kritischer Erfolg), Reittier-Route Esteldín, Barter-Profil 7000AC44.
+- Complete reward tables read: 9.594 tables, 0 read errors.
+- 9.693 referenced item, title, trait and emote records
+  resolved, names in DE/EN.
+- Samples cross-checked: „Free the Tree“, „Barghest-slayer (Advanced)“,
+  vendor Carlo Blagrove (125 articles), recipe 70001A60 (ingredients and
+  critical success), mount route Esteldín, barter profile 7000AC44.

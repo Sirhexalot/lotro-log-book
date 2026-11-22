@@ -1,116 +1,115 @@
-# Konzept: Gegenstandsseiten mit „Woher“ und „Wofür“
+# Concept: item pages with „Woher“ and „Wofür“
 
-Stand: 20.11.2026
-Projekt: LOTRO Log Book
-Status: Gegenstandsseiten umgesetzt; Tauschhändler, Behälter und Zerlegung
-sind modelliert und warten auf die Anzeige (Datenmodell:
+Status as of 20.11.2026
+Project: LOTRO Log Book
+Status: item pages implemented; barter vendors, containers and disenchanting
+are modelled and wait for display (data model:
 [tausch-behaelter-zerlegung.md](../datenraum/tausch-behaelter-zerlegung.md))
 
-## 1. Anlass
+## 1. Background
 
-Auf Gegenstandsseiten können unter „Woher“ sehr viele Aufgaben erscheinen.
-Die Gegenstandssuche besitzt bereits Filter, die Quellenliste auf der
-Gegenstandsseite aber nicht. Zusätzlich kann ein Gegenstand gleichzeitig
-Quellen haben und in Rezepten verwendet werden.
+On item pages, very many quests can appear under „Woher“.
+The item search already has filters, the source list on the
+item page does not. In addition, an item can have
+sources and be used in recipes at the same time.
 
-Beispiele:
+Examples:
 
-- `7005FD7A` – „Essenz des lebhaften Erkunders“-Kiste: drei Aufgabenquellen.
-- `7001C51E` – „Armbrust der Kraft des Goldenen Heeres“: Verwendung in einem
-  Rezept als kritischer Erfolg; diese Beziehung wird derzeit nicht vollständig
-  als Herstellung angezeigt.
+- `7005FD7A` – „Essenz des lebhaften Erkunders“ chest: three quest sources.
+- `7001C51E` – „Armbrust der Kraft des Goldenen Heeres“: use in a
+  recipe as a critical success; this relation is currently not shown completely
+  as crafting.
 
-## 2. Ziel
+## 2. Goal
 
-Eine Gegenstandsseite soll auf einen Blick beantworten:
+An item page should answer at a glance:
 
-1. **Woher bekomme ich den Gegenstand?**
-2. **Wofür brauche ich den Gegenstand?**
-3. **Welche Eigenschaften und Zusammenhänge hat er?**
+1. **Where do I get the item from?**
+2. **What do I need the item for?**
+3. **Which properties and connections does it have?**
 
-Die Seite soll bei wenigen Einträgen ruhig bleiben und bei vielen Einträgen
-such- und filterbar werden. Quellen und Verwendungen dürfen nicht in einer
-gemeinsamen, missverständlichen Liste vermischt werden.
+The page should stay calm with few entries and become
+searchable and filterable with many entries. Sources and uses must not be mixed
+in one shared, misleading list.
 
-## 3. Quantitative Grundlage
+## 3. Quantitative basis
 
-Für die Reiter sind drei Datenmengen zu unterscheiden:
+Three data sets must be distinguished for the tabs:
 
-- **152.088** benannte Items im vollständigen DAT-Export
-- **52.798** Items in der aktuellen Web-Gegenstandssuche
-- **40.755** Items mit ausführlichen Ausrüstungsdetails
+- **152.088** named items in the complete DAT export
+- **52.798** items in the current web item search
+- **40.755** items with detailed equipment data
 
-Die Reiterlogik richtet sich nach den **52.798 Items der Websuche**.
+The tab logic follows the **52.798 items of the web search**.
 
 ### „Woher“
 
-Mindestens eine belegte Quelle haben **16.032 Items**:
+**16.032 items** have at least one verified source:
 
-- **6.564** als Aufgaben-/Tat-Belohnung
-  - 6.269 mit Aufgabenquellen
-  - 442 mit Tatenquellen
-  - 147 mit Aufgaben und Taten
-- **8.410** als Rezeptergebnis
-  - 6.707 normales Ergebnis
-  - 4.084 kritisches Ergebnis
-  - 2.381 in beiden Formen
-- **2.693** mit Händlerzuordnung im Webbestand
-  - Der vollständige Händlerexport umfasst 10.805 Items.
+- **6.564** as quest/deed reward
+  - 6.269 with quest sources
+  - 442 with deed sources
+  - 147 with quests and deeds
+- **8.410** as recipe result
+  - 6.707 normal result
+  - 4.084 critical result
+  - 2.381 in both forms
+- **2.693** with a vendor assignment in the web state
+  - The complete vendor export covers 10.805 items.
 
-Die Beziehungen überschneiden sich:
+The relations overlap:
 
-- 216 Items sind Belohnung und Rezeptergebnis.
-- 1.208 Items sind Rezeptergebnis und Händlerware.
-- 310 Items sind Belohnung und Händlerware.
-- 99 Items gehören allen drei Gruppen an.
+- 216 items are reward and recipe result.
+- 1.208 items are recipe result and vendor stock.
+- 310 items are reward and vendor stock.
+- 99 items belong to all three groups.
 
 ### „Wofür“
 
-Als Rezeptzutat werden **1.509 Items** verwendet:
+**1.509 items** are used as recipe ingredient:
 
-- **1.370** normale Zutaten
-- **149** optionale Zutaten
-- 10 Items in beiden Rollen
+- **1.370** normal ingredients
+- **149** optional ingredients
+- 10 items in both roles
 
-Die Anzahl der Verwendungen ist stark verteilt:
+The number of uses is strongly spread:
 
-- Median: 3 Rezepte
-- 90 Prozent der Items: höchstens 41 Rezepte
-- 95 Prozent: höchstens 76 Rezepte
-- Maximum: 4.095 Rezepte
+- Median: 3 recipes
+- 90 percent of the items: at most 41 recipes
+- 95 percent: at most 76 recipes
+- Maximum: 4.095 recipes
 
-Für „Wofür“ sind Filter daher nicht nur für Einzelfälle, sondern für die
-große Ausreißergruppe notwendig.
+For „Wofür“, filters are therefore necessary not only for individual cases but
+for the large outlier group.
 
-### Überschneidung
+### Overlap
 
-**1.271 Items** haben gleichzeitig mindestens eine „Woher“-Quelle und eine
-„Wofür“-Verwendung. Bei diesen Items sind getrennte Reiter besonders
-sinnvoll.
+**1.271 items** have at least one „Woher“ source and one
+„Wofür“ use at the same time. For these items, separate tabs are especially
+sensible.
 
-Die übrigen Items sollen nicht automatisch leere oder bedeutungslose Reiter
-bekommen.
+The remaining items must not automatically receive empty or meaningless tabs.
 
-## 4. Datenabhängiges Reitermodell
+## 4. Data-dependent tab model
 
-Die Detailseite erhält eine lokale Abschnittsnavigation:
+The detail page receives a local section navigation:
 
 ```text
 [Übersicht] [Woher · n] [Wofür · n]
 ```
 
-Die Reiter werden nur eingeblendet, wenn der jeweilige Bereich tatsächlich
-Daten besitzt:
+The tabs are only shown when the respective area actually has
+data:
 
-- keine Quelle: kein „Woher“
-- keine Verwendung: kein „Wofür“
-- Quelle und Verwendung: beide Reiter
-- keine Beziehung: nur „Übersicht“
+- no source: no „Woher“
+- no use: no „Wofür“
+- source and use: both tabs
+- no relation: only „Übersicht“
 
-Die Zahl am Reiter zählt immer **alle tatsächlichen Einträge dieses Bereichs**,
-nicht nur die Anzahl der Quellgruppen.
+The number on the tab always counts **all actual entries of this area**,
+not just the number of source groups.
 
-Beispiel:
+Example:
 
 ```text
 Woher · 3
@@ -118,63 +117,63 @@ Woher · 3
   Herstellung · 1
 ```
 
-„Woher · 2“ wäre hier falsch, auch wenn es nur zwei Aufgabeneinträge gibt.
+„Woher · 2“ would be wrong here, even if there are only two quest entries.
 
-Die Reiter sind Sprungziele beziehungsweise eine sichtbare Abschnittswahl,
-keine ausschließlich JavaScript-gesteuerte Einseitenanwendung. Alle Inhalte
-bleiben im HTML erreichbar. Ohne JavaScript funktionieren Links, Überschriften
-und Listen weiterhin.
+The tabs are jump targets or a visible section choice,
+not a one-page application driven exclusively by JavaScript. All contents
+remain reachable in the HTML. Without JavaScript, links, headings
+and lists continue to work.
 
 ### Übersicht
 
-Enthält:
+Contains:
 
-- Gegenstandsname, Icon, Qualität und Stufe
-- Beschreibung
-- Werte und Kampfwerte
-- Bindung, Einzigartig, Skalierung
-- Klasse/Beruf und Essenzplätze
-- Set und Setboni
-- Ausprägungen/Varianten
+- item name, icon, quality and level
+- description
+- stats and combat stats
+- binding, unique, scaling
+- class/profession and essence slots
+- set and set bonuses
+- forms/variants
 
-Sets, Varianten und Werte erhalten **keine eigenen Hauptreiter**. Sie gehören
-zur Übersicht und werden nur als Abschnitte angezeigt, wenn Daten vorhanden
-sind. Im Webbestand betreffen Sets etwa 10.661 Items und gleiche Namen mit
-mehreren Ausprägungen etwa 19.370 Items; daraus ergibt sich aber keine
-zusätzliche Suchrichtung wie bei Quelle und Verwendung.
+Sets, variants and stats receive **no main tabs of their own**. They belong
+to the Übersicht and are only shown as sections when data is present.
+In the web state, sets concern about 10.661 items and identical names with
+several forms about 19.370 items; that does not, however, result in an
+additional search direction as with source and use.
 
-### Woher – nur bei belegten Quellen
+### Woher – only with verified sources
 
-Enthält nur Wege, auf denen der Gegenstand erlangt werden kann:
+Contains only ways in which the item can be obtained:
 
-- Aufgaben
-- Taten
-- feste Belohnungen
-- wählbare Belohnungen
-- Händler
-- Tauschhändler
-- Herstellung
-- später gegebenenfalls Instanzen oder Beutetabellen, falls eindeutig belegt
+- quests
+- deeds
+- fixed rewards
+- selectable rewards
+- vendors
+- barter vendors
+- crafting
+- later possibly instances or loot tables, if unambiguously verified
 
-### Wofür – nur bei belegten Verwendungen
+### Wofür – only with verified uses
 
-Enthält nur Verwendungen:
+Contains only uses:
 
-- normale Rezeptzutat
-- optionale Rezeptzutat
-- Gegenstand als normales Rezeptergebnis
-- Gegenstand als kritisches Rezeptergebnis
-- gegebenenfalls Set- oder Systemverwendung, wenn sie belastbar aus den
-  Spieldaten hervorgeht
+- normal recipe ingredient
+- optional recipe ingredient
+- item as normal recipe result
+- item as critical recipe result
+- possibly set or system use, if it follows reliably from the
+  game data
 
-Ein globaler Filter darf niemals Aufgabenquellen und Rezeptverwendungen
-gleichzeitig filtern.
+A global filter must never filter quest sources and recipe uses
+at the same time.
 
-## 5. „Woher“ im Detail
+## 5. „Woher“ in detail
 
-### Gruppierung
+### Grouping
 
-Die Quellen werden nach Art gruppiert:
+The sources are grouped by kind:
 
 ```text
 Woher · 8 Quellen
@@ -193,313 +192,311 @@ Herstellung · 1
   Rezept …
 ```
 
-Eine Gruppe wird nur angezeigt, wenn sie mindestens einen belegten Eintrag
-enthält. Keine künstlichen Aussagen wie „keine Quelle bekannt“ erzeugen.
+A group is only shown when it contains at least one verified entry. Do not
+create artificial statements such as „keine Quelle bekannt“.
 
-### Aufgabenfilter
+### Quest filter
 
-Bei mehr als einer sinnvollen Anzahl an Aufgaben erscheint direkt in der
-Gruppe ein kompakter Filter:
+Beyond a sensible number of quests, a compact filter appears directly in the
+group:
 
-- Suche im Aufgabennamen
-- Region
-- Gebiet
-- Aufgabenstufe
-- Aufgabenart/Thema
-- Fortschritt, wenn ein Spielstand importiert ist
-- Sortierung nach Name oder Stufe
+- search in the quest name
+- region
+- area
+- quest level
+- quest kind/topic
+- progress, if character progress is imported
+- sorting by name or level
 
-Die Filter gelten ausschließlich für die Aufgaben-Untergruppe. Anfangs werden
-beispielsweise 20 Einträge gezeigt; weitere Einträge erscheinen über
-„Weitere anzeigen“ oder beim Nachladen.
+The filters apply exclusively to the quest subgroup. Initially, for
+example, 20 entries are shown; further entries appear via
+„Weitere anzeigen“ or on reload.
 
-Jede Aufgabenzeile zeigt möglichst:
+Every quest row shows as far as possible:
 
-- Aufgabentitel
-- Gebiet beziehungsweise Region
-- Statussymbol und Status, falls ein Spielstand vorhanden ist
-- Kennzeichnung als feste oder wählbare Belohnung
+- quest title
+- area or region
+- status icon and status, if character progress is present
+- marking as fixed or selectable reward
 
-Die Aufgabenliste darf nicht behaupten, dass eine wählbare Belohnung sicher
-erhalten wird.
+The quest list must not claim that a selectable reward is certainly
+obtained.
 
-### Taten
+### Deeds
 
-Taten erhalten dieselbe Listenlogik wie Aufgaben, bleiben aber eine eigene
-Gruppe. Die bestehende Tatenquelle und der vorhandene Tatenkatalog werden
-wiederverwendet.
+Deeds receive the same list logic as quests but remain their own
+group. The existing deed source and the existing deed catalogue are
+reused.
 
-### Händler und Tauschhändler
+### Vendors and barter vendors
 
-Nicht nur „Beim Händler erhältlich“ ausgeben, sondern:
+Do not just output „Beim Händler erhältlich“, but:
 
-- lokalisierter Händlername
-- Händlerart beziehungsweise Tätigkeit, sofern vorhanden
-- Gebiet/Region, sofern der Standort eindeutig belegt ist
-- Link „Auf der Karte öffnen“, sobald eine belastbare Position vorhanden ist
+- localised vendor name
+- vendor kind or activity, if available
+- area/region, if the location is unambiguously verified
+- link „Auf der Karte öffnen“ as soon as a reliable position is present
 
-Mehrere Händler werden zusammengefasst, nicht als identische Wiederholungen
-ausgegeben.
+Several vendors are summarised, not output as identical repetitions.
 
-## 6. „Wofür“ im Detail
+## 6. „Wofür“ in detail
 
-### Rezeptliste
+### Recipe list
 
-Jede Rezeptzeile enthält:
+Every recipe row contains:
 
-- Rezeptname
-- Beruf
-- Stufe
-- Handwerkskategorie
-- normale oder optionale Zutat
-- benötigte Menge
-- Lernstand, sofern importiert
+- recipe name
+- profession
+- level
+- crafting category
+- normal or optional ingredient
+- required quantity
+- crafting knowledge, if imported
 
-Beispiel:
+Example:
 
 ```text
 Armbrust der Schlagkraft
 Drechsler · Stufe 6 · Fernkampfwaffen
 ```
 
-### Ergebnisarten
+### Result kinds
 
-Normales und kritisches Ergebnis müssen unterschieden werden:
+Normal and critical result must be distinguished:
 
 ```text
 Normales Ergebnis: …
 Kritischer Erfolg: Armbrust der Kraft des Goldenen Heeres
 ```
 
-Damit wird `7001C51E` korrekt mit dem Rezept `7001C164` verbunden, obwohl der
-Gegenstand nur im Feld `CraftRecipe_CriticalResultItem` steht.
+That way `7001C51E` is correctly connected with the recipe `7001C164`, although the
+item stands only in the field `CraftRecipe_CriticalResultItem`.
 
-### Rezeptfilter
+### Recipe filter
 
-Für viele Verwendungen sind folgende Filter sinnvoll:
+For many uses the following filters are sensible:
 
-- Beruf
-- Stufe
-- Kategorie
-- normale Zutat
-- optionale Zutat
+- profession
+- level
+- category
+- normal ingredient
+- optional ingredient
 - gelernt / nicht gelernt / fremder Beruf
 
-Die vorhandene Query-Logik wie `recipe.eigene=0` bleibt erhalten und wird
-sichtbar als Umschalter dargestellt:
+The existing query logic such as `recipe.eigene=0` is retained and
+shown visibly as a toggle:
 
 ```text
 [Alle Rezepte] [Meine Berufe] [Nicht gelernt]
 ```
 
-## 7. Datenmodell und Quellen
+## 7. Data model and sources
 
-### Bereits im eigenen DAT-Export vorhanden
+### Already present in the own DAT export
 
-Der vollständige Item-Export umfasst rund 152.000 benannte Gegenstände und
-liefert unter anderem:
+The complete item export covers around 152.000 named items and
+delivers among other things:
 
-- Name und Beschreibung in DE/EN/FR
-- Kategorie, Slot, Waffen-/Rüstungsart
-- Qualität, Stufe und Mindeststufe
-- Stats, Rüstung, DPS, Schaden und Geschwindigkeit
-- Bindung, Einzigartig, Skalierung
-- erforderliche Klasse und Essenzplätze
-- Setzugehörigkeit
-- normale und kritische Rezeptergebnisse
-- Zutaten und optionale Zutaten
-- Icons
+- name and description in DE/EN/FR
+- category, slot, weapon/armour type
+- quality, level and minimum level
+- stats, armour, DPS, damage and speed
+- binding, unique, scaling
+- required class and essence slots
+- set membership
+- normal and critical recipe results
+- ingredients and optional ingredients
+- icons
 
-### Quellenexporte
+### Source exports
 
-Vorhandene Datenstände:
+Existing data states:
 
-- 1.469 Händler
-- 10.805 Gegenstände mit Händlerzuordnung
-- 820 Gegenstände im aktuellen Ausrüstungsbestand mit Händler-IDs
-- 7.924 Rezepte
-- 4.230 Rezepte mit Händler-/Tauschquellen
-- Quest-/Tat-Belohnungstabellen mit festen und wählbaren Gegenständen
+- 1.469 vendors
+- 10.805 items with vendor assignment
+- 820 items in the current equipment stock with vendor IDs
+- 7.924 recipes
+- 4.230 recipes with vendor/barter sources
+- quest/deed reward tables with fixed and selectable items
 
-Diese Daten sollen in einer gemeinsamen, nach Quellart getrennten
-Viewmodel-Schicht zusammengeführt werden. Die Gegenstandsseite darf nicht
-selbst unterschiedliche Rohdatenquellen interpretieren.
+These data should be merged in one shared viewmodel layer separated by
+source kind. The item page must not
+interpret different raw data sources itself.
 
-### Noch ausstehende Nutzung
+### Use still outstanding
 
-1. Händlerdaten mit Namen und Standorten auf der Gegenstandsseite verwenden.
-2. Tauschhändler aus `Barter_ItemListArray` ergänzen.
-3. Rezeptquellen auf Rezept- und Gegenstandsseiten verbinden.
-4. Feste und wählbare Quest-/Tat-Belohnungen unterscheiden.
-5. Kritische Rezeptergebnisse als „hergestellt durch“ ausgeben.
-6. Händlerpositionen aus dem DAT-Positions-Export nur bei belastbarer
-   Zuordnung verlinken.
+1. Use vendor data with names and locations on the item page.
+2. Add barter vendors from `Barter_ItemListArray`.
+3. Connect recipe sources on recipe and item pages.
+4. Distinguish fixed and selectable quest/deed rewards.
+5. Output critical recipe results as „hergestellt durch“.
+6. Link vendor positions from the DAT position export only with reliable
+   assignment.
 
-## 8. Rolle der LOTRO-Interface-Plugins
+## 8. Role of the LOTRO interface plugins
 
-Item Treasury beziehungsweise die gepflegte Item-Treasury-Datenbank kann
-für Abgleich und Lückenprüfung dienen. Sie enthält vor allem:
+Item Treasury or the maintained Item Treasury database can
+serve for comparison and gap checking. It contains above all:
 
-- Item-ID
-- Name und Beschreibung
-- Kategorie und Qualität
-- Haltbarkeit
-- magisch/einzigartig
-- Icon- und Hintergrund-ID
+- item ID
+- name and description
+- category and quality
+- durability
+- magical/unique
+- icon and background ID
 
-Sie ist keine geeignete Primärquelle für Aufgaben-, Rezept-, Händler- oder
-Tauschbeziehungen. Die eigene DAT-Auswertung bleibt die maßgebliche Quelle.
+It is not a suitable primary source for quest, recipe, vendor or
+barter relations. The own DAT evaluation remains the authoritative source.
 
-Item Scanner und Item-Link-Decoding sind nützlich für:
+Item Scanner and item link decoding are useful for:
 
-- neu entdeckte oder unbekannte Item-IDs
-- aktuelle Patch-/Bullroarer-Gegenstände
-- Abgleich von Item-ID, Name und Tooltip
+- newly discovered or unknown item IDs
+- current patch/Bullroarer items
+- matching item ID, name and tooltip
 
-Sie liefern aber keinen vollständigen Ersatz für die server-/DAT-seitigen
-Beziehungstabellen. Fremde Plugin-Daten werden nicht ungeprüft in die Website
-übernommen.
+They do not, however, deliver a complete replacement for the server/DAT-side
+relation tables. Foreign plugin data is not taken into the website
+unchecked.
 
-## 9. Umsetzungsphasen
+## 9. Implementation phases
 
-### Phase 1: Datenabhängige Reiter und Quellenfilter
+### Phase 1: Data-dependent tabs and source filters
 
-- [x] lokale Reiter/Anker „Übersicht“, „Woher“, „Wofür“
-- [x] Reiter nur bei vorhandenen Daten einblenden
-- [x] Zähler je Reiter aus den vorhandenen Einträgen berechnen
-- [x] Gruppierung von „Woher“ nach Aufgaben, Taten, Vorkommen, Händler und Herstellung
-- [x] einfacher Namensfilter für Aufgabenquellen sowie Namens-/Ergebnisfilter
-  für Herstellungsbeziehungen
-- Aufgabenfilter für Region, Gebiet, Stufe und Fortschritt
-- Begrenzung langer Listen mit „Weitere anzeigen“
-- [x] DE/EN/FR-Texte und mobile Grunddarstellung
+- [x] local tabs/anchors „Übersicht“, „Woher“, „Wofür“
+- [x] show tabs only with existing data
+- [x] compute the counter per tab from the existing entries
+- [x] grouping of „Woher“ by quests, deeds, resource occurrences, vendors and crafting
+- [x] simple name filter for quest sources as well as name/result filter
+  for crafting relations
+- quest filters for region, area, level and progress
+- limitation of long lists with „Weitere anzeigen“
+- [x] DE/EN/FR texts and basic mobile presentation
 
-Die lokale Navigation ist als HTML-Anker umgesetzt. Die ersten Filter laufen
-ohne JavaScript-Abhängigkeit für die Liste; feinere Aufgabenfacetten folgen
-mit den strukturierten Quellfeldern.
+The local navigation is implemented as HTML anchors. The first filters run
+without a JavaScript dependency for the list; finer quest facets follow
+with the structured source fields.
 
-### Phase 2: Datenkorrekturen
+### Phase 2: Data corrections
 
-- [x] normales und kritisches Rezeptergebnis im Itemmodell verbinden
-- [x] normale und optionale Zutaten im Itemmodell kennzeichnen
-- [x] Accountbindung von normaler Aufnahmbindung im Itemmodell unterscheiden
-- feste und wählbare Belohnungen unterscheiden
-- bestehende Filterzustände und Rücklinks erhalten
+- [x] connect normal and critical recipe result in the item model
+- [x] mark normal and optional ingredients in the item model
+- [x] distinguish account binding from normal acquisition binding in the item model
+- distinguish fixed and selectable rewards
+- retain existing filter states and back links
 
-Die neuen Rückwärtsbeziehungen liegen in `daten/items.json` zunächst parallel
-zu den Legacy-Feldern: `herstellung` enthält `regular_result` und
-`critical_result`, `verwendung` enthält `ingredient` und
-`optional_ingredient`. Die alte `b`-Bindung und die Felder `rezepte`/`zutat`
-bleiben für die Übergangszeit erhalten.
+The new reverse relations lie in `daten/items.json` initially in parallel
+to the legacy fields: `herstellung` contains `regular_result` and
+`critical_result`, `verwendung` contains `ingredient` and
+`optional_ingredient`. The old `b` binding and the fields `rezepte`/`zutat`
+are retained for the transition period.
 
-### Phase 3: Händler und Tausch
+### Phase 3: Vendors and barter
 
-- [x] konkrete Händlernamen aus dem Companion-Export
-- [x] Händlerbeziehungen auf die bestehenden 52.798 Web-Item-IDs begrenzen
-- [x] Händler als eigene kartenfähige Entität mit Itemlinks
-- [ ] Tauschhändler und Barterquellen für direkt sichtbare Gegenstandsseiten
-- [ ] Behälter als Quelle (Felder, Kisten, Reliktbehälter)
-- [ ] Zerlegungsergebnis am Gegenstand
-- Gebiet/Region
-- Kartenlink nur bei eindeutigem Standort
-- gegebenenfalls Filter nach Gebiet und Quellart
+- [x] concrete vendor names from the Companion export
+- [x] limit vendor relations to the existing 52.798 web item IDs
+- [x] vendors as their own map-capable entity with item links
+- [ ] barter vendors and barter sources for directly visible item pages
+- [ ] containers as source (fields, chests, relic containers)
+- [ ] disenchanting result on the item
+- area/region
+- map link only with an unambiguous location
+- possibly filters by area and source kind
 
-Der Vendor-Export belegt 2.693 bestehende Web-Items mit mindestens einem
-konkreten Händler. Die vorhandenen Tauschquellen betreffen im aktuellen Export
-keine dieser öffentlichen Gegenstandsseiten; deshalb werden sie nicht als
-scheinbare Quellen angezeigt.
+The vendor export verifies 2.693 existing web items with at least one
+concrete vendor. The existing barter sources concern none of these public
+item pages in the current export; therefore they are not shown as
+apparent sources.
 
-Händlerseiten verwenden die NPC-ID des Spiels als stabile ID. Der aktuelle
-Export liefert 1.469 Händler, davon 1.466 mit Standort und 1.092 mit
-zuordenbarer Webkarte. Händler erscheinen damit auf Itemseiten als Links und
-zeigen ihrerseits den Kartenstandort sowie das belegte Warenangebot.
+Vendor pages use the NPC ID of the game as a stable ID. The current
+export delivers 1.469 vendors, of them 1.466 with a location and 1.092 with an
+assignable web map. Vendors therefore appear on item pages as links and
+show in turn the map location as well as the verified goods on offer.
 
-### Phase 4: zusätzliche Spielinhalte
+### Phase 4: additional game content
 
-- Prüfung von Kisten-/Auswahlgegenständen
-- Untersuchung von Beutetabellen
-- neue DAT-Stichproben nach Spielupdates
-- Abgleich unbekannter Items mit Item Treasury/Item Scanner
+- checking chest/selection items
+- investigation of loot tables
+- new DAT samples after game updates
+- matching unknown items with Item Treasury/Item Scanner
 
-## 10. Nicht Teil der ersten Umsetzung
+## 10. Not part of the first implementation
 
-- Besitzfilter für Gegenstände: Der Charakterimport enthält keinen vollständigen
-  Taschen-/Bankbestand.
-- behauptete Drop-Wahrscheinlichkeiten oder Mengen
-- erfundene Händlerpositionen
-- automatische Aussage, dass eine wählbare Belohnung sicher ist
-- vollständige Öffnung der Inhalte von Kisten ohne belegte DAT-Beziehung
-- Übernahme fremder Wiki-/Plugin-Listen als Website-Primärdaten
+- ownership filter for items: the character import contains no complete
+  bag/bank stock.
+- claimed drop probabilities or quantities
+- invented vendor locations
+- automatic statement that a selectable reward is certain
+- complete opening of the contents of chests without a verified DAT relation
+- adoption of foreign wiki/plugin lists as website primary data
 
-## 11. Abnahmekriterien
+## 11. Acceptance criteria
 
-- Ein Gegenstand mit nur wenigen Quellen bleibt übersichtlich.
-- Ein Gegenstand mit vielen Aufgaben besitzt einen funktionierenden
-  Aufgabenfilter.
-- Ein Gegenstand mit „Woher“ und „Wofür“ ist über beide Reiter klar
-  navigierbar.
-- Ein Gegenstand ohne Quellen erhält keinen leeren „Woher“-Reiter.
-- Ein Gegenstand ohne Rezeptverwendung erhält keinen leeren „Wofür“-Reiter.
-- Die Reiterzahl zählt alle Einträge, nicht nur Gruppen.
-- Aufgaben und Rezepte werden nie in einer gemeinsamen Liste vermischt.
-- `7005FD7A` zeigt seine drei Aufgaben unter „Woher“.
-- `7001C51E` zeigt `7001C164` als kritisches Rezeptergebnis.
-- Feste und wählbare Belohnungen sind unterscheidbar.
-- Händler und Tauschhändler werden nur mit belegten Daten angezeigt.
-- Seiten funktionieren ohne JavaScript und in DE/EN/FR.
-- Filter, Zurücklinks und URL-Zustände bleiben erhalten.
-- Keine Änderung an bestehenden Karten-, Aufgaben- oder Gegenstandssuchfiltern
-  ohne eigenen Abnahmetest.
+- An item with only few sources stays clear.
+- An item with many quests has a working
+  quest filter.
+- An item with „Woher“ and „Wofür“ is clearly navigable via both tabs.
+- An item without sources receives no empty „Woher“ tab.
+- An item without recipe use receives no empty „Wofür“ tab.
+- The tab number counts all entries, not only groups.
+- Quests and recipes are never mixed in one shared list.
+- `7005FD7A` shows its three quests under „Woher“.
+- `7001C51E` shows `7001C164` as critical recipe result.
+- Fixed and selectable rewards are distinguishable.
+- Vendors and barter vendors are shown only with verified data.
+- Pages work without JavaScript and in DE/EN/FR.
+- Filters, back links and URL states are retained.
+- No change to existing map, quest or item search filters
+  without its own acceptance test.
 
-## 12. Datenstand 20.11.2026: drei Quellen und ergänzende Client-Items
+## 12. Data status 20.11.2026: three sources and supplementary client items
 
-Modell, Schemata und Grenzen stehen in
+Model, schemas and limits are in
 [`docs/datenraum/tausch-behaelter-zerlegung.md`](../datenraum/tausch-behaelter-zerlegung.md);
-der Entitätenvertrag führt die Gruppen bereits als `open`.
+the entity contract already lists the groups as `open`.
 
-### Tausch (`barters.xml`)
+### Barter (`barters.xml`)
 
-- 1.096 Tauschhändler, 3.469 Angebotsprofile (12.360 Verweise), 42.594
-  Angebote mit 58.933 Abgaben und 42.590 Gaben.
-- 36.096 verschiedene Gaben; **11.586** davon haben eine Katalogseite. Die
-  übrigen 24.510 bleiben Namen ohne Link.
-- 1.095 Händler haben eine Weltposition; 159 sind klassenbeschränkt, 565
-  Profile verlangen eine Fraktion (`"<id>;<stufe>"`), 505 eine Aufgabe.
-- Die bisherigen `tausch`-Einträge in `daten/items.json` stammen aus dem
-  Rezeptquellen-Export und werden additiv zusammengeführt, nicht ersetzt.
+- 1.096 barter vendors, 3.469 offer profiles (12.360 references), 42.594
+  offers with 58.933 costs and 42.590 grants.
+- 36.096 different grants; **11.586** of them have a catalogue page. The
+  remaining 24.510 stay names without a link.
+- 1.095 vendors have a world position; 159 are class-restricted, 565
+  profiles require a faction (`"<id>;<stufe>"`), 505 a quest.
+- The previous `tausch` entries in `daten/items.json` come from the
+  recipe source export and are merged additively, not replaced.
 
-### Behälter (`containers.xml`)
+### Containers (`containers.xml`)
 
-- 6.262 Behälter, davon 5.735 gewöhnliche und 527 Reliktbehälter.
-- 4.626 mit Trophy-Liste, 926 mit Treasure-Liste, 494 mit beiden, 1.204 ohne
-  Liste (bleiben ohne Pool).
-- Auflösung über denselben Loot-Graphen wie die Instanz-Truhen
-  (`tools/build_instanz_beute.py`, künftig `tools/lootgraph.py`).
+- 6.262 containers, of them 5.735 ordinary and 527 relic containers.
+- 4.626 with a trophy list, 926 with a treasure list, 494 with both, 1.204 without a
+  list (remain without a pool).
+- Resolution via the same loot graph as the instance chests
+  (`tools/build_instanz_beute.py`, in future `tools/lootgraph.py`).
 
-### Zerlegung (`disenchantments.xml`)
+### Disenchanting (`disenchantments.xml`)
 
-- 27.333 Zeilen, 10.315 Quellen mit Katalogseite.
-- 26.341 mit Ergebnis, 992 ohne; nur **45 verschiedene** Ergebnisse, sämtlich
-  Umtauschgutscheine („Receipt of …“), 22 davon im Katalog.
-- Zerlegen ist damit kein Beute-Ersatz und wird als eigene Gruppe geführt.
+- 27.333 rows, 10.315 sources with a catalogue page.
+- 26.341 with a result, 992 without; only **45 different** results, all of them
+  exchange vouchers („Receipt of …“), 22 of them in the catalogue.
+- Disenchanting is therefore no replacement for loot and is kept as its own group.
 
-### Ergänzende Items aus dem eigenen Client-Export
+### Supplementary items from the own client export
 
-- `items-2026-11-08/items.json` enthält 152.088 Gegenstände. Alle geprüften
-  Tausch-, Zerlegungs- und Instanzbeute-IDs sind darin vorhanden.
-- 27.652 dieser IDs fehlen im kuratierten Webkatalog. Ein geplanter schlanker
-  Zusatzbestand liefert Name, Qualität, Stufe und Icon, ohne Suchtreffer oder
-  Katalogseiten dafür zu erzeugen.
-- Der Katalogeintrag gewinnt immer. Companion-Labels sind dafür nicht nötig.
+- `items-2026-11-08/items.json` contains 152.088 items. All checked
+  barter, disenchanting and instance loot IDs are present in it.
+- 27.652 of these IDs are missing from the curated web catalogue. A planned lean
+  supplementary stock delivers name, quality, level and icon, without creating search hits or
+  catalogue pages for them.
+- The catalogue entry always wins. Companion labels are not needed for that.
 
-### Ergänzte Abnahmekriterien
+### Supplementary acceptance criteria
 
-- Tauschangebote zeigen Abgaben mit Menge und Gaben mit Menge; fehlende Menge
-  gilt als 1.
-- Ein Gegenstand ohne Katalogseite wird genannt, aber nicht verlinkt.
-- Behälter und Zerlegung erscheinen nur als Quelle bzw. Ergebnis, nie als
-  eigene Entität.
-- Behältnisse ohne Loot-Liste und Zerlegungen ohne Ergebnis erzeugen keine
-  Zeile.
-- Die Händlerseite trennt „Warenangebot“ (Silber) und „Tauschware“
-  (Gegenstände).
+- Barter offers show costs with quantity and grants with quantity; a missing quantity
+  counts as 1.
+- An item without a catalogue page is named but not linked.
+- Containers and disenchanting appear only as source or result, never as
+  their own entity.
+- Containers without a loot list and disenchantments without a result create no
+  row.
+- The vendor page separates „Warenangebot“ (silver) and „Tauschware“
+  (items).

@@ -74,19 +74,19 @@ Tests: `python3 -m unittest discover -s tests -p 'test_reisedaten.py'`.
   gathering and has no landscape spots; four scholar kinds have none recorded.
 - Tests: `python3 -m unittest discover -s tests -p 'test_vorkommen.py'`.
 
-### Schnittstelle für den zentralen Katalogbau (08.11.2026)
+### Interface for the central catalogue build (08.11.2026)
 
-Geliefert werden **Daten**, keine Seiten. `build_vorkommen.py` schreibt beides:
-die Anwendungsdateien (`web/vorkommen-<sprache>.js`, `web/vorkommen/<karte>.js`)
-und reines JSON unter `daten/vorkommen/`.
+**Data** is delivered, not pages. `build_vorkommen.py` writes both: the
+application files (`web/vorkommen-<sprache>.js`, `web/vorkommen/<karte>.js`) and
+plain JSON under `daten/vorkommen/`.
 
-| Angabe | Wert |
+| Field | Value |
 |---|---|
-| Typ | `vorkommen` (Vorschlag; EN `resource`, FR `ressource` – neu, daher abzustimmen) |
-| ID | Knoten-DID des Spiels, achtstelliges Hex, z. B. `1879077402` = „Ader: Kupfer“ |
-| Pfad | `/de/vorkommen/1879077402/` (über `build_katalogseiten.py`, nicht selbst gebaut) |
-| Quelle | Kategorie 50 („Crafting Resource“) der DAT-abgeleiteten Lore-Marker, `resources.xml` für Beruf/Stufe, `labels/<sprache>/items.xml` für Namen |
-| Suchindex | Typbuchstabe **`v`** (frei; belegt sind q, d, t, g, G, r), Name = Sorte, Kontext = „Beruf · Stufe“, Stufe = Handwerksstufe 1–16 |
+| Type | `vorkommen` (proposal; EN `resource`, FR `ressource` – new, so still to be agreed) |
+| ID | the game's node DID, eight-digit hex, e.g. `1879077402` = "Ader: Kupfer" |
+| Path | `/de/vorkommen/1879077402/` (via `build_katalogseiten.py`, not built by hand) |
+| Source | category 50 ("Crafting Resource") of the DAT-derived lore markers, `resources.xml` for profession/level, `labels/<sprache>/items.xml` for names |
+| Search index | type letter **`v`** (free; taken are q, d, t, g, G, r), name = kind, context = "Beruf · Stufe", level = crafting tier 1–16 |
 
 `daten/vorkommen/vorkommen-<sprache>.json`:
 
@@ -96,20 +96,20 @@ und reines JSON unter `daten/vorkommen/`.
  "m": [["1879445907", [[12, 291], [13, 44]]]]}
 ```
 
-- `k` Sorten: ID, Name, Beruf, Stufe.
-- `g` Gebiete: Gebiets-ID des Spiels, lokalisierter Name, Karten-ID mit den meisten Fundstellen.
-- `m` Zählung je Gebiet: Gebiets-ID → `[[Index in k, Fundstellen], …]`. Gezählt werden Stellen, nicht Varianten.
+- `k` kinds: ID, name, profession, level.
+- `g` areas: the game's area ID, localised name, map ID with the most spots.
+- `m` count per area: area ID → `[[index in k, spots], …]`. Spots are counted, not variants.
 
-`daten/vorkommen/<karte>.json`: `[[lat, lon, [Index in k, …]], …]` — die Punkte einer Karte,
-ortsgenau, sprachneutral. Mehrere Indizes je Punkt heißen: hier kann eines davon stehen.
+`daten/vorkommen/<karte>.json`: `[[lat, lon, [index in k, …]], …]` — the points of one map,
+exact to the spot, language-neutral. Several indexes per point mean: one of them can be here.
 
-Fertige Suchzeilen zum Zusammenführen liegen unter `daten/vorkommen/suche-vorkommen-<sprache>.json`,
-je 180 Zeilen im Format `[kind, id, name, context, level]`, z. B.
+Finished search rows for merging are under `daten/vorkommen/suche-vorkommen-<sprache>.json`,
+180 rows each in the format `[kind, id, name, context, level]`, e.g.
 `["v", "1879077402", "Ader: Kupfer", "Schürfer · 1", 1]`.
 
-Zwei Kopierregeln fehlen noch im zentralen `baue_website.py` (bewusst nicht selbst geändert):
-`vorkommen-<sprache>.js` und der Ordner `vorkommen/` müssen wie `notizen-*` mit ins Ziel,
-und `vorkommen-*.js` gehört in den Stempel-Hash von `stempeln()`.
+Two copy rules are still missing in the central `baue_website.py` (deliberately not
+changed here): `vorkommen-<sprache>.js` and the `vorkommen/` folder must reach the
+target like `notizen-*`, and `vorkommen-*.js` belongs in the stamp hash of `stempeln()`.
 
 ## SEO foundation (07.11.2026)
 

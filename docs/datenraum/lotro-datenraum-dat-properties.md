@@ -1,12 +1,12 @@
-# DAT-Feldinventar: sämtliche beobachteten Pfade
+# DAT field inventory: all observed paths
 
-Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über alle Datensätze ermittelt, nicht aus einem Muster. Ein vorkommender Feldname belegt weder seine vollständige Entschlüsselung noch einen Default bei Abwesenheit. Texte werden nicht kopiert.
+Classes separated per export; arrays as `[]`. Types and occurrences are derived across all records, not from one sample. A field name that occurs proves neither its complete decoding nor a default when absent. Texts are not copied.
 
-## Quelle `/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/raw.jsonl`
+## Source `/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/full-dat-en-de-fr-2026-11-03/raw.jsonl`
 
-### Klasse 1210 — 2809 Datensätze
+### Class 1210 — 2809 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 2809 |
 | `$.class_index` | int: 2809 |
@@ -103,9 +103,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_TakePermission` | int: 2809 |
 | `$.properties.WeenieType` | int: 2809 |
 
-### Klasse 1398 — 21226 Datensätze
+### Class 1398 — 21226 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 21226 |
 | `$.class_index` | int: 21226 |
@@ -930,9 +930,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_RequiresExpansionPack2_Legacy` | int: 292 |
 | `$.properties.WebStoreAccountItem_DataID` | int: 7334 |
 
-### Klasse 1683 — 1 Datensätze
+### Class 1683 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -1011,9 +1011,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Quest_TeleToObjective_PaperItemServiceToCategories_Array[].Quest_Category_Array[]` | int: 13 |
 | `$.properties.Quest_TeleToObjective_PaperItemServiceToCategories_Array[].Quest_PaperItemService_Type` | int: 1 |
 
-### Klasse 1788 — 1 Datensätze
+### Class 1788 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -1057,9 +1057,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.UI_Examination_Tooltip_1Click_Element` | int: 1 |
 | `$.properties.UI_Examination_Tooltip_1Click_Layout` | int: 1 |
 
-### Klasse 180 — 5 Datensätze
+### Class 180 — 5 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 5 |
 | `$.class_index` | int: 5 |
@@ -1073,9 +1073,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Area_Name.value` | str: 5 |
 | `$.properties.Area_RegionID` | int: 5 |
 
-### Klasse 2119 — 344 Datensätze
+### Class 2119 — 344 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 344 |
 | `$.class_index` | int: 344 |
@@ -1090,9 +1090,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.QuestArc_Quest_Array` | list: 344 |
 | `$.properties.QuestArc_Quest_Array[]` | int: 1589 |
 
-### Klasse 2395 — 1 Datensätze
+### Class 2395 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -1108,9 +1108,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Region_Map_List[].Region_Name.texts.fr` | str: 6 |
 | `$.properties.Region_Map_List[].Region_Name.value` | str: 6 |
 
-### Klasse 2461 — 1 Datensätze
+### Class 2461 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -1137,9 +1137,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.QuestEventTargetLocations[].position.region` | int: 202569 |
 | `$.properties.QuestEventTargetLocations[].target_id` | str: 202569 |
 
-### Klasse 690 — 679 Datensätze
+### Class 690 — 679 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 679 |
 | `$.class_index` | int: 679 |
@@ -1186,9 +1186,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Area_VisitedAreaType` | int: 679 |
 | `$.properties.Mount_Movement_Use_RampUp_Controller` | int: 679 |
 
-### Klasse 691 — 1324 Datensätze
+### Class 691 — 1324 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1324 |
 | `$.class_index` | int: 1324 |
@@ -1212,9 +1212,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Dungeon_Name.value` | str: 1324 |
 | `$.properties.Dungeon_ParentDungeon` | int: 1324 |
 
-### Klasse 692 — 86 Datensätze
+### Class 692 — 86 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 86 |
 | `$.class_index` | int: 86 |
@@ -1235,11 +1235,11 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Quest_InterestedQuests_Array[]` | int: 22 |
 | `$.properties.WebStoreAccountItem_DataID` | int: 46 |
 
-## Quelle `/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/npcs-2026-11-03/raw.jsonl`
+## Source `/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/npcs-2026-11-03/raw.jsonl`
 
-### Klasse 1723 — 177 Datensätze
+### Class 1723 — 177 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 177 |
 | `$.class_index` | int: 177 |
@@ -1799,9 +1799,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Vital_PowerThresholdPolicySingleton_Cached` | int: 177 |
 | `$.properties.WeenieType` | int: 177 |
 
-### Klasse 1724 — 4222 Datensätze
+### Class 1724 — 4222 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 4222 |
 | `$.class_index` | int: 4222 |
@@ -2384,9 +2384,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Vital_PowerThresholdPolicySingleton_Cached` | int: 4222 |
 | `$.properties.WeenieType` | int: 4222 |
 
-### Klasse 5785 — 4 Datensätze
+### Class 5785 — 4 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 4 |
 | `$.class_index` | int: 4 |
@@ -2890,9 +2890,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Vital_PowerThresholdPolicySingleton_Cached` | int: 4 |
 | `$.properties.WeenieType` | int: 4 |
 
-### Klasse 796 — 259 Datensätze
+### Class 796 — 259 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 259 |
 | `$.class_index` | int: 259 |
@@ -3020,19 +3020,19 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_UseWhileMoving` | int: 259 |
 | `$.properties.WeenieType` | int: 259 |
 
-### Klasse ohne class_index — 54 Datensätze
+### Class without class_index — 54 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 54 |
 | `$.error` | str: 54 |
 | `$.id` | str: 54 |
 
-## Quelle `/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/placed-2026-11-03/raw.jsonl`
+## Source `/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/placed-2026-11-03/raw.jsonl`
 
-### Klasse 1113 — 34 Datensätze
+### Class 1113 — 34 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 34 |
 | `$.class_index` | int: 34 |
@@ -3098,9 +3098,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_TakePermission` | int: 34 |
 | `$.properties.WeenieType` | int: 34 |
 
-### Klasse 1170 — 1554 Datensätze
+### Class 1170 — 1554 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1554 |
 | `$.class_index` | int: 1554 |
@@ -3234,9 +3234,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_UseWhileMoving` | int: 1535 |
 | `$.properties.WeenieType` | int: 1554 |
 
-### Klasse 1210 — 2761 Datensätze
+### Class 1210 — 2761 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 2761 |
 | `$.class_index` | int: 2761 |
@@ -3333,9 +3333,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_TakePermission` | int: 2761 |
 | `$.properties.WeenieType` | int: 2761 |
 
-### Klasse 1445 — 5 Datensätze
+### Class 1445 — 5 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 5 |
 | `$.class_index` | int: 5 |
@@ -3384,9 +3384,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_MinUsageDist_Shadow` | float: 5 |
 | `$.properties.WeenieType` | int: 5 |
 
-### Klasse 1510 — 10 Datensätze
+### Class 1510 — 10 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 10 |
 | `$.class_index` | int: 10 |
@@ -3437,9 +3437,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_MinUsageDist_Shadow` | float: 10 |
 | `$.properties.WeenieType` | int: 10 |
 
-### Klasse 1722 — 252 Datensätze
+### Class 1722 — 252 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 252 |
 | `$.class_index` | int: 252 |
@@ -3525,9 +3525,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_UseWhenCollided` | int: 200 |
 | `$.properties.WeenieType` | int: 252 |
 
-### Klasse 1723 — 17809 Datensätze
+### Class 1723 — 17809 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 17809 |
 | `$.class_index` | int: 17809 |
@@ -4271,9 +4271,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Vital_PowerThresholdPolicySingleton_Cached` | int: 17809 |
 | `$.properties.WeenieType` | int: 17809 |
 
-### Klasse 1724 — 16824 Datensätze
+### Class 1724 — 16824 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 16824 |
 | `$.class_index` | int: 16824 |
@@ -4960,9 +4960,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Vital_PowerThresholdPolicySingleton_Cached` | int: 16824 |
 | `$.properties.WeenieType` | int: 16824 |
 
-### Klasse 1725 — 1 Datensätze
+### Class 1725 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -5361,9 +5361,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Vital_PowerThresholdPolicySingleton_Cached` | int: 1 |
 | `$.properties.WeenieType` | int: 1 |
 
-### Klasse 1843 — 1 Datensätze
+### Class 1843 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -5412,9 +5412,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_MinUsageDist_Shadow` | float: 1 |
 | `$.properties.WeenieType` | int: 1 |
 
-### Klasse 1892 — 1 Datensätze
+### Class 1892 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -5463,9 +5463,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_MinUsageDist_Shadow` | float: 1 |
 | `$.properties.WeenieType` | int: 1 |
 
-### Klasse 1989 — 307 Datensätze
+### Class 1989 — 307 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 307 |
 | `$.class_index` | int: 307 |
@@ -5530,9 +5530,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_TakePermission` | int: 307 |
 | `$.properties.WeenieType` | int: 307 |
 
-### Klasse 1995 — 1 Datensätze
+### Class 1995 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -5584,9 +5584,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_TakePermission` | int: 1 |
 | `$.properties.WeenieType` | int: 1 |
 
-### Klasse 2007 — 2 Datensätze
+### Class 2007 — 2 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 2 |
 | `$.class_index` | int: 2 |
@@ -5639,9 +5639,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_MinUsageDist_Shadow` | float: 2 |
 | `$.properties.WeenieType` | int: 2 |
 
-### Klasse 2097 — 163 Datensätze
+### Class 2097 — 163 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 163 |
 | `$.class_index` | int: 163 |
@@ -5772,9 +5772,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.WeenieType` | int: 163 |
 | `$.properties.WorldPropertyBox_WorldEvent` | int: 4 |
 
-### Klasse 2516 — 2 Datensätze
+### Class 2516 — 2 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 2 |
 | `$.class_index` | int: 2 |
@@ -5832,9 +5832,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.WorldEventGenerator_ResponseMap_Array[].WorldEventGenerator_ResponseCallback` | int: 3 |
 | `$.properties.WorldEventGenerator_ResponseMap_Array[].WorldEventGenerator_WorldEvent` | int: 3 |
 
-### Klasse 2592 — 3 Datensätze
+### Class 2592 — 3 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 3 |
 | `$.class_index` | int: 3 |
@@ -5888,9 +5888,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_MinUsageDist_Shadow` | float: 3 |
 | `$.properties.WeenieType` | int: 3 |
 
-### Klasse 3074 — 1 Datensätze
+### Class 3074 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -6287,9 +6287,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Vital_PowerThresholdPolicySingleton_Cached` | int: 1 |
 | `$.properties.WeenieType` | int: 1 |
 
-### Klasse 3075 — 1 Datensätze
+### Class 3075 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -6692,9 +6692,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Vital_PowerThresholdPolicySingleton_Cached` | int: 1 |
 | `$.properties.WeenieType` | int: 1 |
 
-### Klasse 3369 — 1 Datensätze
+### Class 3369 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -6741,9 +6741,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_MinUsageDist_Shadow` | float: 1 |
 | `$.properties.WeenieType` | int: 1 |
 
-### Klasse 3725 — 34 Datensätze
+### Class 3725 — 34 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 34 |
 | `$.class_index` | int: 34 |
@@ -6844,9 +6844,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_MinUsageDist_Shadow` | float: 34 |
 | `$.properties.WeenieType` | int: 34 |
 
-### Klasse 3853 — 1 Datensätze
+### Class 3853 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -6901,9 +6901,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_MinUsageDist_Shadow` | float: 1 |
 | `$.properties.WeenieType` | int: 1 |
 
-### Klasse 4026 — 16 Datensätze
+### Class 4026 — 16 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 16 |
 | `$.class_index` | int: 16 |
@@ -7357,9 +7357,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Vital_PowerThresholdPolicySingleton_Cached` | int: 16 |
 | `$.properties.WeenieType` | int: 16 |
 
-### Klasse 663 — 1 Datensätze
+### Class 663 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -7414,9 +7414,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_MinUsageDist_Shadow` | float: 1 |
 | `$.properties.WeenieType` | int: 1 |
 
-### Klasse 794 — 1529 Datensätze
+### Class 794 — 1529 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1529 |
 | `$.class_index` | int: 1529 |
@@ -7565,9 +7565,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_UserBehaviorName` | int: 158 |
 | `$.properties.WeenieType` | int: 1529 |
 
-### Klasse 796 — 9928 Datensätze
+### Class 796 — 9928 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 9928 |
 | `$.class_index` | int: 9928 |
@@ -7923,9 +7923,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.WorldEvent_WorldEventItem` | int: 51 |
 | `$.properties.WorldPropertyBox_WorldEvent` | int: 2 |
 
-### Klasse 798 — 28 Datensätze
+### Class 798 — 28 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 28 |
 | `$.class_index` | int: 28 |
@@ -8029,9 +8029,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_TakePermission` | int: 28 |
 | `$.properties.WeenieType` | int: 28 |
 
-### Klasse 803 — 1 Datensätze
+### Class 803 — 1 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 1 |
 | `$.class_index` | int: 1 |
@@ -8119,9 +8119,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_ValidTargetTypes` | int: 1 |
 | `$.properties.WeenieType` | int: 1 |
 
-### Klasse 804 — 18 Datensätze
+### Class 804 — 18 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 18 |
 | `$.class_index` | int: 18 |
@@ -8210,9 +8210,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_TakePermission` | int: 18 |
 | `$.properties.WeenieType` | int: 18 |
 
-### Klasse 815 — 201 Datensätze
+### Class 815 — 201 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 201 |
 | `$.class_index` | int: 201 |
@@ -8320,19 +8320,19 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Usage_UseWhenCollided` | int: 16 |
 | `$.properties.WeenieType` | int: 201 |
 
-### Klasse ohne class_index — 37 Datensätze
+### Class without class_index — 37 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 37 |
 | `$.error` | str: 37 |
 | `$.id` | str: 37 |
 
-## Quelle `/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/reputation-crafting-2026-11-03/raw.jsonl`
+## Source `/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/reputation-crafting-2026-11-03/raw.jsonl`
 
-### Klasse 1023 — 10 Datensätze
+### Class 1023 — 10 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 10 |
 | `$.class_index` | int: 10 |
@@ -8398,9 +8398,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.WebStoreAccountItem_DataID` | int: 10 |
 | `$.properties.WebStore_FilteringAttribute` | int: 10 |
 
-### Klasse 1470 — 320 Datensätze
+### Class 1470 — 320 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 320 |
 | `$.class_index` | int: 320 |
@@ -8423,9 +8423,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Title_String.texts.fr` | str: 320 |
 | `$.properties.Title_String.value` | str: 320 |
 
-### Klasse 1889 — 114 Datensätze
+### Class 1889 — 114 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 114 |
 | `$.class_index` | int: 114 |
@@ -8456,9 +8456,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Reputation_LowestTier` | int: 114 |
 | `$.properties.WebStoreAccountItem_DataID` | int: 7 |
 
-### Klasse 2402 — 6 Datensätze
+### Class 2402 — 6 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 6 |
 | `$.class_index` | int: 6 |
@@ -8473,19 +8473,19 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.StringInfoProgression_Array[].texts.fr` | str: 63 |
 | `$.properties.StringInfoProgression_Array[].value` | str: 63 |
 
-### Klasse ohne class_index — 13 Datensätze
+### Class without class_index — 13 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 13 |
 | `$.error` | str: 13 |
 | `$.id` | str: 13 |
 
-## Quelle `/Users/adrian/Developer/Lotro/lotro-log-book/daten/instanzen-roh.jsonl`
+## Source `/Users/adrian/Developer/Lotro/lotro-log-book/daten/instanzen-roh.jsonl`
 
-### Klasse 1368 — 992 Datensätze
+### Class 1368 — 992 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 992 |
 | `$.class_index` | int: 992 |
@@ -8609,9 +8609,9 @@ Klassen getrennt je Export; Arrays als `[]`. Typen und Vorkommen werden über al
 | `$.properties.Skirmish_Template_MinLevelScale` | int: 1 |
 | `$.properties.WorldJoin_EncounterType` | int: 3 |
 
-### Klasse 2651 — 586 Datensätze
+### Class 2651 — 586 records
 
-| Propertypfad | Typ: Vorkommen |
+| Property path | Type: occurrences |
 | --- | --- |
 | `$` | dict: 586 |
 | `$.class_index` | int: 586 |

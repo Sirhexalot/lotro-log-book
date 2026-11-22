@@ -38,14 +38,14 @@ for name in FILES:
         for prop in found:
             proofs.append({'property': prop, 'source': name, 'line': n, 'code': line.strip()})
 lines = [
-    '# Semantik: konkreter Property-Leseindex des Extractors', '',
-    'Dies ist ein Belegindex, keine automatische Bedeutungsübersetzung. '
-    'Erfasst sind explizite Propertyzugriffe in den unten genannten, tatsächlich '
-    'gelesenen Extractor-Dateien. Dynamische Propertynamen, indirekte Helfer und '
-    'weitere Dateien sind dadurch nicht vollständig abgedeckt. Kommentare werden '
-    'nicht als Implementierungsbeleg gezählt. Der lokale Quellstand ist nicht '
-    'ohne Build-/Commitabgleich als identisch mit jeder installierten JAR anzusehen.', '',
-    table(['Property', 'Quellbeleg', 'Tatsächlicher Zugriff'],
+    '# Semantics: concrete property read index of the extractor', '',
+    'This is an evidence index, not an automatic translation of meaning. '
+    'It captures explicit property reads in the extractor files named below, which were '
+    'actually read. Dynamic property names, indirect helpers and further files are '
+    'therefore not completely covered. Comments are not counted as implementation '
+    'evidence. The local source state must not be treated as identical to every '
+    'installed JAR without a build/commit comparison.', '',
+    table(['Property', 'Source evidence', 'Actual access'],
           [(p['property'], f'{p["source"]}:{p["line"]}', '`' + p['code'] + '`')
            for p in sorted(proofs, key=lambda p: (p['property'], p['source'], p['line']))]), ''
 ]

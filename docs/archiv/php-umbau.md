@@ -1,116 +1,116 @@
-# Umbau des Katalogs auf PHP + Twig
+# Rebuilding the catalogue on PHP + Twig
 
-> Historischer Stand der PHP-Umschaltung. Für heutige Builds und reguläre Releases siehe [Betrieb](../betrieb/README.md).
+> Historical state of the PHP switchover. For today's builds and regular releases see [Operations](../betrieb/README.md).
 
-Stand: 09.11.2026. **Die Seite ist umgestellt**: seit dem 09.11.2026 liefert
-der PHP-Front-Controller Katalog, Anwendungsseiten und Sitemaps aus; die alten
-HTML-Dateien sind entfernt (siehe „Veröffentlichen“). Dieser Text beschreibt den Umbau von erzeugten statischen
-Katalogseiten zu einer PHP-Anwendung mit gemeinsamen Twig-Vorlagen. Er ist die
-Arbeitsgrundlage für die weiteren Schritte und die Abnahme vor der
-Veröffentlichung.
+Status as of 09.11.2026. **The site is switched over**: since 09.11.2026
+the PHP front controller serves catalogue, application pages and sitemaps; the old
+HTML files are removed (see „Publishing“). This text describes the rebuild from generated static
+catalogue pages to a PHP application with shared Twig templates. It is the
+working basis for the further steps and the acceptance before
+publication.
 
-## Warum
+## Why
 
-Der statische Katalog schreibt für jede Entität eine vollständige HTML-Datei.
-Bei 255.543 Seiten bedeutet eine Änderung an Kopfzeile, Menü oder einem
-gemeinsamen Text einen vollständigen Neubau und einen Abgleich von Hundert-
-tausenden Dateien. Der Upload vergleicht zwar Inhalte und überspringt
-Unverändertes, aber wenn die Änderung in jeder Seite steckt, hilft das nicht.
+The static catalogue writes a complete HTML file for every entity.
+With 255.543 pages, a change to the header, menu or a
+shared text means a complete rebuild and a comparison of hundreds of
+thousands of files. The upload does compare contents and skips
+unchanged files, but if the change sits in every page, that does not help.
 
-Ziel: **eine Änderung an der Oberfläche ist eine Änderung an wenigen Dateien.**
-Die öffentlichen URLs, die Inhalte und die Bedienung bleiben gleich.
+Goal: **a change to the interface is a change to a few files.**
+The public URLs, the contents and the operation stay the same.
 
-## Aufbau
-
-```text
-composer.json            Twig als einzige Abhängigkeit, kein Framework
-php/public/index.php     Front-Controller: Route, Statuscode, Ausgabe
-php/public/router.php    Router für `php -S` (lokal)
-php/src/Catalogue.php    Sprachen, Pfadsegmente, Routen, gültige IDs
-php/src/Data.php         liest genau einen Datenshard je Anfrage
-php/src/Router.php       200 / 301 / 404 nach denselben Regeln wie .htaccess
-php/src/Shell.php        Kopfzeile, Menü, Breadcrumb, Fußzeile, Assets
-php/src/Page.php         baut die Seitenvariablen, rendert die Vorlage
-php/src/View.php         Twig-Umgebung, `pin`-Filter, `symbol`-Funktion
-php/src/Escape.php       Escaping wie im bisherigen Generator
-php/templates/           layout.twig und je Entität eine Vorlage
-tools/build_php_data.py  erzeugt Shards und fertige Seitenmodelle
-tools/php_viewmodel.py   Regeln der Seiten, eins zu eins aus den Generatoren
-tools/build_php_labels.py  Beschriftungen und Symbole aus build_katalogseiten.py
-tests/test_php_parity.py   vergleicht PHP-Ausgabe mit dem bisherigen Generator
-```
-
-## Daten
-
-`tools/build_php_data.py` schreibt nach `phpdata/` (Standard) bzw. `--ziel`:
+## Structure
 
 ```text
-manifest.json                 Schema, Sprachen, Zähler
-labels.json                   Beschriftungen, Symbole, Basis-URL
-<sprache>/maps.json           Kartentabelle
-<sprache>/<art>/<shard>.json  Rohdaten je Entität
-<sprache>/page-<art>/<shard>.json  fertige Seitenmodelle für Twig
+composer.json            Twig as the only dependency, no framework
+php/public/index.php     front controller: route, status code, output
+php/public/router.php    router for `php -S` (local)
+php/src/Catalogue.php    languages, path segments, routes, valid IDs
+php/src/Data.php         reads exactly one data shard per request
+php/src/Router.php       200 / 301 / 404 by the same rules as .htaccess
+php/src/Shell.php        header, menu, breadcrumb, footer, assets
+php/src/Page.php         builds the page variables, renders the template
+php/src/View.php         Twig environment, `pin` filter, `symbol` function
+php/src/Escape.php       escaping as in the previous generator
+php/templates/           layout.twig and one template per entity
+tools/build_php_data.py  creates shards and finished page models
+tools/php_viewmodel.py   rules of the pages, one to one from the generators
+tools/build_php_labels.py  labels and icons from build_katalogseiten.py
+tests/test_php_parity.py   compares PHP output with the previous generator
 ```
 
-Der Shard ist ein Hash der Kennung (`md5(id)[:2]`), nicht der Anfang der ID:
-alle Spiel-IDs beginnen mit `70`, ein Präfix-Shard würde den ganzen Katalog in
-eine Datei legen.
+## Data
 
-Beziehungen (vorherige/nächste Aufgabe, Voraussetzungen, „wird vorausgesetzt
-von“, Ausschlüsse, gleicher Auftraggeber, gleicher Ort) werden **beim Bauen**
-aufgelöst und mit Namen abgelegt. Eine Seitenanfrage liest deshalb genau eine
-kleine Datei und läuft nicht durch den Katalog.
+`tools/build_php_data.py` writes to `phpdata/` (default) or `--ziel`:
 
-## Was bereits umgesetzt und geprüft ist
+```text
+manifest.json                 schema, languages, counters
+labels.json                   labels, icons, base URL
+<sprache>/maps.json           map table
+<sprache>/<art>/<shard>.json  raw data per entity
+<sprache>/page-<art>/<shard>.json  finished page models for Twig
+```
 
-- Grundgerüst, Router und gemeinsame Hülle (Kopfzeile, Menü, Breadcrumb,
-  Fußzeile, Assets mit Versionsstempel, Tracking aus dem gebauten Index).
-- **Aufgabenseiten**: Chips, Beschreibung, Ort mit Karte und Koordinaten,
-  Auftraggeber, Gebietsweg, Voraussetzungen, Belohnungen, „wird vorausgesetzt
-  von“, Zusammenhang, Ziele hinter `<details>`.
-- **Tatenseiten**: Chips, Ort, Tat-Art, Kategorie, Belohnungen mit
-  Titel-/Tugend-Symbol, Nachbartaten nach Gebiet und Art.
-- **Titel-, Tugend-, Rezept-, Berufs-, Gebiets- und Regionsseiten.**
-- **Gegenstandsseiten** (52.798 je Sprache): Werte, Boni, Vorkommen, Quellen,
-  Herstellung, Verwendung, Set-Zusammenhang, Weg in die Gegenstandssuche.
-- **Gegenstandssuche**: Baumfilter Kategorie → Art/Hand/Klasse → Platz aus den
-  Client-Feldern `category`, `class`, `equipmentCategory`, `slot`, `armourType`
-  und `weaponType`; Schmuck ist die Client-Klasse „Geschmeide“ mit Ring,
-  Armband, Ohrring, Halskette und Talisman. Eine Auswahl ist ein Zweig, nicht
-  ein loses Einzelfeld.
-- **Listen und Übersichten**: Typindizes mit 200 Einträgen je Seite,
-  Seitennavigation, Gegenstände nach Art und Seltenheit (auch kombiniert),
-  Handwerks- und Katalogseite. Insgesamt 3.252 Seiten in drei Sprachen.
-- Titel, Beschreibung, Canonical, `hreflang`, Open Graph und Twitter-Karte
-  werden wie bisher erzeugt.
-- 301 für `.html` und für die Adresse ohne Schrägstrich, 301 für
-  Kleinschreibung, echte 404.
+The shard is a hash of the identifier (`md5(id)[:2]`), not the beginning of the ID:
+all game IDs start with `70`, a prefix shard would put the whole catalogue into
+one file.
 
-Prüfung: `tests/test_php_parity.py` vergleicht die PHP-Ausgabe tokenweise mit
-der Ausgabe des bisherigen Generators (Überschriften, Texte, Links, Attribute,
-Reihenfolge).
+Relations (previous/next quest, prerequisites, „wird vorausgesetzt
+von“, exclusions, same quest giver, same location) are resolved **during the build**
+and stored with names. A page request therefore reads exactly one
+small file and does not run through the catalogue.
 
-### Befunde aus dem Abgleich
+## What is already implemented and checked
 
-Der Abgleich hat mehr gefunden als Formatierungsfehler:
+- Basic framework, router and shared shell (header, menu, breadcrumb,
+  footer, assets with version stamp, tracking from the built index).
+- **Quest pages**: chips, description, location with map and coordinates,
+  quest giver, area path, prerequisites, rewards, „wird vorausgesetzt
+  von“, context, objectives behind `<details>`.
+- **Deed pages**: chips, location, deed kind, category, rewards with
+  title/virtue icon, neighbouring deeds by area and kind.
+- **Title, virtue, recipe, profession, area and region pages.**
+- **Item pages** (52.798 per language): stats, bonuses, resource occurrences, sources,
+  crafting, use, set context, path into the item search.
+- **Item search**: tree filter category → kind/hand/class → slot from the
+  client fields `category`, `class`, `equipmentCategory`, `slot`, `armourType`
+  and `weaponType`; jewellery is the client class „Geschmeide“ with ring,
+  bracelet, earring, necklace and talisman. A selection is a branch, not
+  a loose single field.
+- **Lists and overviews**: type indices with 200 entries per page,
+  page navigation, items by kind and rarity (also combined),
+  crafting and catalogue page. 3.252 pages in three languages in total.
+- Title, description, canonical, `hreflang`, Open Graph and Twitter card
+  are created as before.
+- 301 for `.html` and for the address without a trailing slash, 301 for
+  lower case, real 404.
 
-- **Seltenheitsstufen waren verdreht** (1 = legendär, nicht gewöhnlich).
-- **Platzhalter im Namen** (`Ernte[n]`) fehlten in der Bereinigung.
-- **Zwei tote Pfade im alten Bau**: „Ausprägungen“ (Varianten) und verlinkte
-  Set-Teile werden nie gerendert, weil der Zugriff auf `model['all']` ins Leere
-  läuft. Für die Parität bleibt das so; die Aktivierung ist eine eigene
-  Entscheidung nach der Umschaltung.
-- **Leere Überschrift „Werte“** auf 10 von 52.802 Gegenstandsseiten – ein
-  Defekt des alten Baus, der bewusst mit übernommen und danach korrigiert wird.
-- **Zwei französische Beschriftungen** standen fest im Generator
-  (`Utilisation`, `Ressources`) statt in den Sprachdateien.
+Check: `tests/test_php_parity.py` compares the PHP output token by token with
+the output of the previous generator (headings, texts, links, attributes,
+order).
 
-## Adressen der Anwendungsseiten
+### Findings from the comparison
 
-Die Anwendung hatte ihre Sprache in der Abfrage (`/index.html?lang=de`). Sie
-liegt jetzt im Pfad, wie im Katalog:
+The comparison found more than formatting errors:
 
-| Bisher | Neu (DE) | EN | FR |
+- **Rarity levels were twisted** (1 = legendary, not common).
+- **Placeholders in the name** (`Ernte[n]`) were missing in the cleanup.
+- **Two dead paths in the old build**: „Ausprägungen“ (variants) and linked
+  set parts are never rendered because the access to `model['all']` runs
+  into the void. For parity this stays so; activation is a separate
+  decision after the switchover.
+- **Empty heading „Werte“** on 10 of 52.802 item pages – a
+  defect of the old build that is deliberately taken over and corrected afterwards.
+- **Two French labels** stood fixed in the generator
+  (`Utilisation`, `Ressources`) instead of in the language files.
+
+## Addresses of the application pages
+
+The application had its language in the query (`/index.html?lang=de`). It
+now lies in the path, as in the catalogue:
+
+| Before | New (DE) | EN | FR |
 |---|---|---|---|
 | `start.html` | `/de/` | `/en/` | `/fr/` |
 | `index.html?lang=de` | `/de/karte/` | `/en/map/` | `/fr/carte/` |
@@ -126,40 +126,39 @@ liegt jetzt im Pfad, wie im Katalog:
 | `suche.html?lang=de` | `/de/suche/` | `/en/search/` | `/fr/recherche/` |
 | `gegenstand.html?lang=de&id=…` | `/de/gegenstand/<ID>/` | … | … |
 
-`handwerk` gehört schon der Katalogseite, deshalb liegt der Handwerksbrowser
-eine Ebene tiefer. Abfrageparameter (`id`, `q`, `kat`, `art`, `nach`,
-`vorkommen`, …) bleiben erhalten; die alte Sprache in der Abfrage fällt weg.
-Alle alten Adressen antworten mit **301** auf die neue, mitgenommene Abfrage
-eingeschlossen.
+`handwerk` already belongs to the catalogue page, therefore the crafting browser
+lies one level deeper. Query parameters (`id`, `q`, `kat`, `art`, `nach`,
+`vorkommen`, …) remain; the old language in the query is dropped.
+All old addresses respond with **301** to the new one, including the carried-over query.
 
-Die Seiten selbst liegen als Twig-Vorlagen unter `php/templates/app/`; die
-Hülle (Titel, Canonical, `hreflang`, Kopfzeile, Fußnote, Skriptliste) steht in
-`app/layout.twig`. Das JavaScript der Anwendungen ist unverändert, nur
-`menue.js` und `sprache.js` kennen jetzt die neuen Adressen und lesen die
-Sprache aus dem Pfad.
+The pages themselves lie as Twig templates under `php/templates/app/`; the
+shell (title, canonical, `hreflang`, header, footnote, script list) stands in
+`app/layout.twig`. The JavaScript of the applications is unchanged, only
+`menue.js` and `sprache.js` now know the new addresses and read the
+language from the path.
 
-## Eine öffentliche Adresse (10.11.2026)
+## One public address (10.11.2026)
 
-Bis 10.11.2026 dienten `sirhexalot.de`, `www.sirhexalot.de`, `mm.sirhexalot.de`
-und `llb.sirhexalot.de` dieselbe Website aus demselben Ordner; nur die
-Canonicals zeigten auf `llb`. Search Console sah dadurch drei Kopien jeder
-Seite. Seitdem gilt:
+Until 10.11.2026, `sirhexalot.de`, `www.sirhexalot.de`, `mm.sirhexalot.de`
+and `llb.sirhexalot.de` served the same website from the same folder; only the
+canonicals pointed to `llb`. Search Console therefore saw three copies of every
+page. Since then the following applies:
 
-- **Alle Namen außer `llb.sirhexalot.de` antworten 301** auf dieselbe Adresse
-  unter `llb`, Pfad und Query unverändert. Die Regel steht oben in
-  `public_html/mm/.htaccess`, also im Dokumentenordner, der allen Namen gemeinsam
-  ist – nicht im Hosting-Panel. Das Panel kennt nur einen globalen Schalter für
-  HTTPS und keine Weiterleitung je Name.
-- **Kein `%{HTTPS}` in der Bedingung.** Manche Hoster beenden TLS vor dem
-  Webserver; dann liest Apache auch bei einer verschlüsselten Anfrage „off“ und
-  die Regel würde endlos auf sich selbst umleiten. Das Protokoll erledigt die
-  HTTPS-Weiterleitung des Hosts, der Name die `.htaccess`. Preis: eine
-  `http://`-Anfrage auf einem alten Namen braucht zwei Sprünge.
-- **Die `.htaccess` liegt nicht im Repository.** Gesicherte Fassungen sammelt
-  `~/.cache/llb-php/rollback/`; `tools/umschalten.py` ersetzt nur den markierten
-  PHP-Block und lässt die Hostregel stehen.
+- **All names except `llb.sirhexalot.de` respond 301** to the same address
+  under `llb`, path and query unchanged. The rule stands at the top of
+  `public_html/mm/.htaccess`, that is in the document folder that is common to all names
+  – not in the hosting panel. The panel knows only a global switch for
+  HTTPS and no redirect per name.
+- **No `%{HTTPS}` in the condition.** Some hosters terminate TLS before the
+  web server; then Apache reads „off“ even on an encrypted request and
+  the rule would redirect endlessly to itself. The protocol is handled by the
+  HTTPS redirect of the host, the name by the `.htaccess`. Price: one
+  `http://` request on an old name needs two hops.
+- **The `.htaccess` does not lie in the repository.** Backed-up versions are collected by
+  `~/.cache/llb-php/rollback/`; `tools/umschalten.py` replaces only the marked
+  PHP block and leaves the host rule standing.
 
-Prüfung (jede Zeile ein Sprung, Ziel 200):
+Check (each line one hop, target 200):
 
 ```bash
 for n in sirhexalot.de www.sirhexalot.de mm.sirhexalot.de; do
@@ -169,62 +168,62 @@ curl -sI https://sirhexalot.de/phpdata/labels.json | head -1   # 403 = gleicher 
 curl -sI https://llb.sirhexalot.de/de/ | head -1               # 200
 ```
 
-## Erledigt bei der Umschaltung
+## Done at the switchover
 
-1. **404 und Rechtstexte** liegen als Dateien im Release; PHP liefert die
-   404-Seite mit echtem Status und `noindex`.
-2. **Härten**: `phpdata/`, `php/`, `vendor/` und `phptmp/` sind per
-   `.htaccess` gesperrt, HTML antwortet mit `Cache-Control: max-age=300`,
-   Sitemaps mit einer Stunde; Typ und ID prüft der Router in jedem Pfad.
-3. **Umschaltung** über `tools/umschalten.py`; die alte `.htaccess` liegt als
-   Sicherung bereit, die alten Katalogdateien wurden danach entfernt.
-4. **Abgleich**: PHP-Adressen, Sitemaps, 301/404 und Browserprüfung DE/EN/FR
-   nach der Umschaltung.
+1. **404 and legal texts** lie as files in the release; PHP delivers the
+   404 page with real status and `noindex`.
+2. **Hardening**: `phpdata/`, `php/`, `vendor/` and `phptmp/` are blocked via
+   `.htaccess`, HTML responds with `Cache-Control: max-age=300`,
+   sitemaps with one hour; the router checks type and ID in every path.
+3. **Switchover** via `tools/umschalten.py`; the old `.htaccess` lies ready as a
+   backup, the old catalogue files were removed afterwards.
+4. **Comparison**: PHP addresses, sitemaps, 301/404 and browser check DE/EN/FR
+   after the switchover.
 
-## Noch offen
+## Still open
 
-- **HEAD-Anfragen** und ein eigener Blick auf Fehlerseiten bei kaputten Daten.
-- **Betrieb**: Speicherplatz und Zugriffszeiten der Shards beobachten. Der
-  Twig-Cache gehört nach jedem Release mit Vorlagenänderung geleert; dafür gibt
-  es inzwischen `tools/cache_leeren.py`.
+- **HEAD requests** and a separate look at error pages with broken data.
+- **Operation**: observe storage space and access times of the shards. The
+  Twig cache must be cleared after every release with a template change; for that there is
+  now `tools/cache_leeren.py`.
 
-## Abnahme vor der Veröffentlichung
+## Acceptance before publication
 
-- `python3 tools/build_php_data.py` und `tests/test_php_parity.py` grün.
-- Vollständige URL-Menge identisch, keine neuen und keine fehlenden Adressen.
-- Sitemaps gültig, vollständig, mit derselben URL-Menge wie der Build.
-- Canonicals und `hreflang` je Entität identisch.
-- 301/404-Verhalten wie bisher, keine Weiterleitungsketten.
-- Startseite, Karte, Suche, Import und Spielstand unverändert nutzbar.
-- Rückweg auf den alten Stand erprobt.
+- `python3 tools/build_php_data.py` and `tests/test_php_parity.py` green.
+- Complete URL set identical, no new and no missing addresses.
+- Sitemaps valid, complete, with the same URL set as the build.
+- Canonicals and `hreflang` identical per entity.
+- 301/404 behaviour as before, no redirect chains.
+- Start page, map, search, import and character progress usable unchanged.
+- Return path to the old state tried out.
 
-## Arbeitsort
+## Working location
 
-Das Repository liegt seit 09.11.2026 lokal unter `~/Developer/lotro-log-book`;
-der frühere iCloud-Ordner ist nur noch Lesestand. `vendor/` gehört ins Repo,
-weil Composer den Projektpfad ins Autoload schreibt – liegt es außerhalb,
-lauten die Klassenpfade auf ein anderes Verzeichnis.
+The repository lies locally under `~/Developer/lotro-log-book` since 09.11.2026;
+the former iCloud folder is only a read state. `vendor/` belongs in the repo
+because Composer writes the project path into the autoload – if it lies outside,
+the class paths point to a different directory.
 
-## iCloud (Historie)
+## iCloud (history)
 
-Der frühere Stand lag in `~/Documents` und damit in iCloud. Nicht zuletzt
-benutzte Dateien sind dort nur Platzhalter (`compressed,dataless`); Lesen
-erzwingt einen Download. Gemessen am 09.11.2026: **1534 ms je Datei** in
-`phpdata` gegenüber **0,2 ms** auf lokalem Speicher, `daten/*.json` 2270 ms,
-sogar `php/src/*.php` 1508 ms. Folge: langsame Builds, ein 78-Minuten-Release
-und ein von iCloud evakuiertes `vendor/` (Composer-Fatals).
+The former state lay in `~/Documents` and therefore in iCloud. Files not used recently
+are only placeholders there (`compressed,dataless`); reading
+forces a download. Measured on 09.11.2026: **1534 ms per file** in
+`phpdata` against **0,2 ms** on local storage, `daten/*.json` 2270 ms,
+even `php/src/*.php` 1508 ms. Consequence: slow builds, a 78-minute release
+and a `vendor/` evacuated by iCloud (Composer fatal).
 
-Deshalb:
+Therefore:
 
-- erzeugte Daten und Twig-Cache liegen außerhalb: `~/.cache/llb-php/`
-  (`LLB_DATA`, `LLB_CACHE`); `vendor/` bleibt im Repo,
-- `Companion-Test` und `MagicQuestLog` bleiben in iCloud und werden nur gelesen.
+- generated data and Twig cache lie outside: `~/.cache/llb-php/`
+  (`LLB_DATA`, `LLB_CACHE`); `vendor/` stays in the repo,
+- `Companion-Test` and `MagicQuestLog` stay in iCloud and are only read.
 
-## Veröffentlichen
+## Publishing
 
-Die veröffentlichte Seite ist die PHP-Anwendung; der Dokumentenordner enthält
-Einstiegspunkt, Anwendungsdateien, Daten und Bilder. Gebaut und hochgeladen
-wird in dieser Reihenfolge:
+The published site is the PHP application; the document folder contains
+entry point, application files, data and images. Build and upload
+happen in this order:
 
 ```bash
 python3 tools/build_php_data.py --ziel "$HOME/.cache/llb-php/phpdata"
@@ -237,26 +236,26 @@ python3 tools/umschalten.py --test                # Adressen der Live-Seite
 python3 tools/aufraeumen.py --loeschen            # alte HTML-Bestände entfernen
 ```
 
-**Der Cache-Schritt ist Pflicht, sobald eine `.twig`-Vorlage geändert wurde.**
-`deploy/index.php` setzt `LLB_PRODUCTION=1`, und damit steht Twigs
-`auto_reload` auf aus: die kompilierte Fassung bleibt liegen, bis ihr Eintrag
-unter `phptmp/twig` verschwindet. Ohne `tools/cache_leeren.py` sieht eine
-Vorlagenänderung wie ein fehlerhaftes Deployment aus.
+**The cache step is mandatory as soon as a `.twig` template has been changed.**
+`deploy/index.php` sets `LLB_PRODUCTION=1`, and with that Twig's
+`auto_reload` is off: the compiled version stays until its entry
+under `phptmp/twig` disappears. Without `tools/cache_leeren.py` a
+template change looks like a faulty deployment.
 
-`build_release.py` kopiert `web/`, `webp/` (als `karten/`), `php/`, `vendor/`
-und `phpdata/`, schreibt `index.php`, `tracking.html` und `robots.txt` und lässt
-die alten Anwendungsseiten sowie jedes `fortschritt.js` mit Spielstand weg
-(755 MB, rund 16.800 Dateien).
+`build_release.py` copies `web/`, `webp/` (as `karten/`), `php/`, `vendor/`
+and `phpdata/`, writes `index.php`, `tracking.html` and `robots.txt` and leaves
+the old application pages as well as every `fortschritt.js` with character progress out
+(755 MB, around 16.800 files).
 
-Umgeschaltet wird **nur** die `.htaccess`: ein markierter Block schickt
-Katalogadressen, alte Anwendungsseiten und Sitemaps an `index.php`, sperrt
-`phpdata/`, `php/`, `vendor/` und `phptmp/` und lässt Bilder, Skripte und Stile
-Dateien bleiben. Die alte Fassung wird vorher unter
-`~/.cache/llb-php/rollback/` gesichert; `--zurueck` lädt sie wieder hoch.
-Die früheren Katalogdateien bleiben zunächst liegen und werden nach der
-Prüfung mit `tools/aufraeumen.py` entfernt.
+**Only** the `.htaccess` is switched: a marked block sends
+catalogue addresses, old application pages and sitemaps to `index.php`, blocks
+`phpdata/`, `php/`, `vendor/` and `phptmp/` and leaves images, scripts and stylesheet
+files in place. The old version is backed up beforehand under
+`~/.cache/llb-php/rollback/`; `--zurueck` uploads it again.
+The earlier catalogue files initially stay in place and are removed after the
+check with `tools/aufraeumen.py`.
 
-## Lokal ausprobieren
+## Trying it locally
 
 ```bash
 COMPOSER_VENDOR_DIR="$HOME/.cache/llb-php/vendor" composer install
@@ -270,13 +269,13 @@ LLB_CACHE="$HOME/.cache/llb-php/twig" \
 php -S 127.0.0.1:8812 -t "$HOME/.cache/llb-vorschau" php/public/router.php
 ```
 
-Der Vorschauordner `~/.cache/llb-vorschau` enthält nur Verweise
-(`web/*` und `karten/` → `webp/`). Geht er verloren, baut
-`tools/vorschau_ordner.py` ihn in Sekunden neu; die Daten unter
-`~/.cache/llb-php/phpdata` sind ein eigener Build und bleiben davon unberührt.
+The preview folder `~/.cache/llb-vorschau` contains only links
+(`web/*` and `karten/` → `webp/`). If it is lost,
+`tools/vorschau_ordner.py` rebuilds it in seconds; the data under
+`~/.cache/llb-php/phpdata` are a separate build and remain untouched by that.
 
-Prüfung gegen den bisherigen Stand (Orakel = mit dem alten Generator erzeugte
-Seiten, z. B. unter `/tmp/llb-oracle-full`):
+Check against the previous state (oracle = pages created with the old generator,
+e.g. under `/tmp/llb-oracle-full`):
 
 ```bash
 LLB_DATA="$HOME/.cache/llb-php/phpdata" \

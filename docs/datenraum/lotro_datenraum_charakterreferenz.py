@@ -63,7 +63,7 @@ for fn, sel, attr, ts in rules:
     results.append({'source': fn, 'selector': sel, 'attribute': attr, 'target': ts,
                     'occurrences': len(vals), 'resolved': sum(v in ids for v in vals),
                     'missing': dict(missing),
-                    'target_note': 'Union deed/@key und deed/@id' if attr == 'deedKey' else None})
+                    'target_note': 'Union of deed/@key and deed/@id' if attr == 'deedKey' else None})
 
 jar = Path.home() / 'Applications/LOTRO-Companion-Test/LotRO Companion/app/lib/delta-lotro-dat-utils-11.13.jar'
 hashes[str(jar)] = hashlib.sha256(jar.read_bytes()).hexdigest()
@@ -83,36 +83,36 @@ payload = {'rules': results, 'decoder_classes': class_proof,
            'decoder_class_resource': resource, 'missing_maps': missing_maps, 'input_sha256': hashes}
 (OUT / 'lotro-datenraum-charakterreferenz.json').write_text(json.dumps(payload, indent=2, ensure_ascii=False))
 lines = [
-    '# Charakterreferenz-Entitäten und Decoder-Klassen', '',
-    '## Klassenbelege des verwendeten DAT-Decoders', '',
-    'Quelle: `delta-lotro-dat-utils-11.13.jar`, interne Ressource '
-    '`delta/games/lotro/dat/wlib/classes/io/classes.xml`. JAR-SHA-256 im JSON-Beleg. '
-    'Zusätzlich bestätigt `javap -constants ... delta.games.lotro.dat.WStateClass` '
-    'die Konstanten MOB=1723 und NPC=1724.', '',
-    table(['Klassenindex', 'Decoder-Klassenname'], sorted(class_proof.items())), '',
-    'Damit sind die zuvor numerisch dokumentierten Auftraggeberziele genauer '
-    'belegt: Klasse 796 heißt im Decoder IItem, Klasse 1723 MonsterTemplate. '
-    'Ein Auftraggeber ist somit eine Rolle über mehreren Quellobjektklassen. '
-    'Das rechtfertigt keine Einstufung jedes IItem als tragbarer Gegenstand oder '
-    'jedes MonsterTemplate als feindlicher Gegner.', '',
-    'Der NPC-Extractor `MainDatNPCsLoader.useId` akzeptiert ausschließlich '
-    '`WStateClass.NPC`. Sein `load` liest Name, OccupationTitle und Effekte; '
-    'Geschlecht wird aus Markup im Namen abgeleitet. Das ist keine unabhängige '
-    'Geschlechts-Property aus diesem Exporter.', '',
-    '## Typisierte Referenzprüfungen', '',
-    'Nichtnumerische IDs (Klassen-Key, Herkunft-Code, Tat-Key) werden ausdrücklich '
-    'gegen die richtige Zielspalte geprüft. Null Treffer heißt keine Evidenz; '
-    'offene Werte sind nicht automatisch ungültig.', '',
-    table(['Quelle', 'Ziel', 'Vorkommen', 'Aufgelöst', 'Offen'],
+    '# Character reference entities and decoder classes', '',
+    '## Class evidence from the DAT decoder in use', '',
+    'Source: `delta-lotro-dat-utils-11.13.jar`, internal resource '
+    '`delta/games/lotro/dat/wlib/classes/io/classes.xml`. JAR SHA-256 in the JSON '
+    'evidence. `javap -constants ... delta.games.lotro.dat.WStateClass` additionally '
+    'confirms the constants MOB=1723 and NPC=1724.', '',
+    table(['Class index', 'Decoder class name'], sorted(class_proof.items())), '',
+    'This documents the quest giver targets that were previously described only by '
+    'number more precisely: class 796 is called IItem in the decoder, class 1723 '
+    'MonsterTemplate. A quest giver is therefore a role across several source object '
+    'classes. That does not justify classifying every IItem as a wearable item or '
+    'every MonsterTemplate as a hostile mob.', '',
+    'The NPC extractor `MainDatNPCsLoader.useId` accepts exclusively '
+    '`WStateClass.NPC`. Its `load` reads name, OccupationTitle and effects; '
+    'gender is derived from markup in the name. That is not an independent '
+    'gender property from this exporter.', '',
+    '## Typed reference checks', '',
+    'Non-numeric IDs (class key, origin code, deed key) are explicitly checked '
+    'against the correct target column. Zero hits mean no evidence; '
+    'open values are not automatically invalid.', '',
+    table(['Source', 'Target', 'Occurrences', 'Resolved', 'Open'],
           [(f'{r["source"]} `{r["selector"]}/@{r["attribute"]}`', r.get('target_note') or str(r['target']),
             r['occurrences'], r['resolved'], sum(r['missing'].values())) for r in results]), '',
-    '## Offene Kartenlink-Ziele', '',
-    'Die zwei im Geometriebestand nicht gefundenen Ziel-IDs wurden zusätzlich '
-    'gegen die Kartenlabels DE/EN/FR geprüft. Die tatsächlichen Treffer und '
-    'eingehenden Linkattribute stehen unverändert im JSON. Fehlende Geometrie '
-    'wird nicht aus einem Namen oder einer Linkposition rekonstruiert.', '',
-    '## Reproduktion', '', '`python3 lotro_datenraum_charakterreferenz.py`. '
-    'Alle Ergebnisse und Eingabehashes: `lotro-datenraum-charakterreferenz.json`.', ''
+    '## Open map link targets', '',
+    'The two target IDs not found in the geometry set were additionally checked '
+    'against the DE/EN/FR map labels. The actual hits and '
+    'incoming link attributes are listed unchanged in the JSON. Missing geometry '
+    'is not reconstructed from a name or a link position.', '',
+    '## Reproduction', '', '`python3 lotro_datenraum_charakterreferenz.py`. '
+    'All results and input hashes: `lotro-datenraum-charakterreferenz.json`.', ''
 ]
 (OUT / 'lotro-datenraum-charakterreferenz.md').write_text('\n'.join(lines))
 print('rules', len(results), 'references', sum(r['occurrences'] for r in results),

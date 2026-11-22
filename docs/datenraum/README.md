@@ -1,15 +1,16 @@
-# LOTRO-Spieldatenraum
+# LOTRO game data space
 
-Diese Ablage enthält das laufende, quellengebundene Audit der LOTRO-DAT- und
-Companion-Daten sowie die daraus abgeleiteten Qualitätsprioritäten.
+This folder holds the ongoing, source-bound audit of the LOTRO DAT and
+Companion data as well as the quality priorities derived from it.
 
-- [Auditübersicht: Entitäten, Properties und Relationen](lotro-datenraum.md)
-- [Semantische Auswertung und bekannte Informationsverluste](lotro-datenraum-semantik.md)
-- [Gegenstände: Pipeline, Detailseiten und Filterseite](gegenstaende-iststand.md)
-- [Tausch, Behälter, Zerlegung und schlanker Gegenstandsbestand](tausch-behaelter-zerlegung.md)
-- [TODO: priorisierte Qualitätsverbesserungen](todo-qualitaetsverbesserung.md)
+- [Entity and relation model: what exists, how it connects, how much](entity-model.md)
+- [Audit overview: entities, properties and relations](lotro-datenraum.md)
+- [Semantic evaluation and known information losses](lotro-datenraum-semantik.md)
+- [Items: pipeline, detail pages and filter page](gegenstaende-iststand.md)
+- [Barter, containers, disenchanting and a slim item set](tausch-behaelter-zerlegung.md)
+- [TODO: prioritised quality improvements](todo-qualitaetsverbesserung.md)
 
-Die Übersicht verlinkt die vollständigen XML-/DAT-Feldinventare,
-Referenzprüfungen, maschinenlesbaren Befunde und unterstützenden Skripte.
-„Vollständig“ bezieht sich jeweils nur auf den benannten Exportbestand;
-die Semantik sämtlicher Spiel-DAT-Klassen ist nicht abgeschlossen.
+The overview links the complete XML/DAT field inventories,
+reference checks, machine-readable findings and supporting scripts.
+"Complete" refers only to the named export set in each case;
+the semantics of all game DAT classes is not finished.

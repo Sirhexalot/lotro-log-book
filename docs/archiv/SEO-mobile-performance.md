@@ -1,241 +1,227 @@
-# TODO SEO: Mobile-Performance der Kartenansicht
+# TODO SEO: mobile performance of the map view
 
-Stand: 16.11.2026
+Status as of 16.11.2026
 
-## Umsetzungsstand
+## Implementation status
 
-- [x] Unabhängige Karten-Startdaten (`gebiete` und `fortschritt`) werden
-      parallel geladen.
-- [x] Initiale Ziellisten werden für Aufgaben mit Auftraggeber nicht doppelt
-      geladen; vollständige Ziele kommen bei der Auswahl aus `daten-*.js`.
-- [x] Beschreibungen in den Initialdaten sind auf die sichtbare Vorschau
-      begrenzt; vollständige Texte kommen bei der Auswahl nach.
-- [x] Kartenbild mit festen 4:3-Abmessungen, asynchroner Dekodierung und hoher
-      Ladepriorität versehen.
-- [x] Unnötige erneute CSS-Anforderung nach dem Laden von `stand.js` entfernt.
-- [x] ResizeObserver- und Resize-Ereignisse für Kartenlayout und Marker
-      zusammengefasst.
-- [x] Lokale Browserprüfung der Kartenansicht mit direkter Gebietsauswahl,
-      Kartenbild, Markern und Terrain-Umschalter durchgeführt.
-- [x] Landschaftsvorschauen der hashlosen Übersicht werden erst im oder nahe
-      am Viewport geladen; im lokalen Mobiltest waren zunächst 8 von 66 Bildern
-      geladen, nach dem Scrollen 12.
+- [x] Independent map start data (`gebiete` and `fortschritt`) are loaded in
+      parallel.
+- [x] Initial target lists are not loaded twice for quests with a quest giver;
+      complete objectives come from `daten-*.js` on selection.
+- [x] Descriptions in the initial data are limited to the visible preview;
+      complete texts follow on selection.
+- [x] Map image provided with fixed 4:3 dimensions, asynchronous decoding and
+      high load priority.
+- [x] Removed the unnecessary repeated CSS request after loading `stand.js`.
+- [x] Combined ResizeObserver and resize events for map layout and markers.
+- [x] Performed a local browser check of the map view with direct area
+      selection, map image, markers and terrain toggle.
+- [x] Landscape previews of the hashless overview are loaded only in or near
+      the viewport; in the local mobile test 8 of 66 images were initially
+      loaded, 12 after scrolling.
 
-## Ausgangslage
+## Starting point
 
-PageSpeed Insights, Mobil, Bericht vom 16.11.2026:
+PageSpeed Insights, mobile, report of 16.11.2026:
 
-| Messwert | Ergebnis | Bewertung |
+| Metric | Result | Assessment |
 | --- | ---: | --- |
-| Leistung | **40/100** | kritisch |
-| Barrierefreiheit | **96/100** | gut |
-| Best Practices | **100/100** | gut |
-| SEO | **100/100** | gut |
-| First Contentful Paint | **2,6 s** | zu langsam |
-| Largest Contentful Paint | **16,6 s** | sehr kritisch |
-| Total Blocking Time | **1.330 ms** | kritisch |
-| Speed Index | **6,6 s** | zu langsam |
-| Cumulative Layout Shift | **0** | gut |
+| Performance | **40/100** | critical |
+| Accessibility | **96/100** | good |
+| Best Practices | **100/100** | good |
+| SEO | **100/100** | good |
+| First Contentful Paint | **2,6 s** | too slow |
+| Largest Contentful Paint | **16,6 s** | very critical |
+| Total Blocking Time | **1.330 ms** | critical |
+| Speed Index | **6,6 s** | too slow |
+| Cumulative Layout Shift | **0** | good |
 
-Weitere Hinweise aus dem Bericht:
+Further notes from the report:
 
-- Hauptthread-Aufwand: etwa **3,1 s**
-- JavaScript-Ausführungszeit: etwa **2,0 s**
-- nicht verwendetes JavaScript: geschätzt **99 KiB**
-- JavaScript-Komprimierung: geschätzt **11 KiB**
-- erzwungener dynamischer Umbruch durch GTM: **68 ms**
-- mögliche Bildkomprimierung bei einzelnen Landschaftsbildern: etwa **7,5 KiB**
-  und **5,6 KiB**
+- main thread work: about **3,1 s**
+- JavaScript execution time: about **2,0 s**
+- unused JavaScript: estimated **99 KiB**
+- JavaScript compression: estimated **11 KiB**
+- forced dynamic reflow by GTM: **68 ms**
+- possible image compression for individual landscape images: about **7,5 KiB**
+  and **5,6 KiB**
 
-PageSpeed zeigte als Ergebnis weiterhin:
+PageSpeed continued to show as the result:
 
 ```text
 https://llb.sirhexalot.de/en/map/
 ```
 
-Obwohl im Eingabefeld `https://sirhexalot.de/` stand. Das muss als erstes
-geklärt werden. Startseite und Kartenansicht dürfen nicht mit einem Messwert
-verwechselt werden.
+Although `https://sirhexalot.de/` stood in the input field. That must be
+clarified first. Start page and map view must not be confused with one measurement value.
 
-## Ziel
+## Goal
 
-Die Kartenansicht soll auf Mobilgeräten sichtbar und benutzbar werden, bevor
-alle nicht notwendigen JavaScript-, Filter-, Marker- und Fortschrittsdaten
-geladen und verarbeitet sind.
+The map view should become visible and usable on mobile devices before
+all unnecessary JavaScript, filter, marker and progress data are
+loaded and processed.
 
-### Zielwerte
+### Target values
 
-#### Erste Verbesserungsstufe
+#### First improvement stage
 
-- LCP unter **4 Sekunden**
-- TBT unter **600 ms**
-- FCP unter **2 Sekunden**
-- Speed Index unter **4 Sekunden**
-- PageSpeed-Leistung mindestens **70**
+- LCP below **4 seconds**
+- TBT below **600 ms**
+- FCP below **2 seconds**
+- Speed Index below **4 seconds**
+- PageSpeed performance at least **70**
 
-#### Zweite Verbesserungsstufe
+#### Second improvement stage
 
-- LCP unter **2,5 Sekunden**
-- TBT unter **300 ms**
-- PageSpeed-Leistung mindestens **85**
+- LCP below **2,5 seconds**
+- TBT below **300 ms**
+- PageSpeed performance at least **85**
 
-CLS bleibt bei **0**.
+CLS stays at **0**.
 
-## Arbeitspakete
+## Work packages
 
-### 1. Testadresse und Messgrundlage klären
+### 1. Clarify test address and measurement basis
 
-- [ ] Prüfen, warum `sirhexalot.de/` im PageSpeed-Ergebnis auf
-      `/en/map/` beziehungsweise `/en/map/` landet.
-- [ ] Weiterleitungen und Canonical der Startseite prüfen.
-- [ ] Drei getrennte Testziele festlegen:
+- [ ] Check why `sirhexalot.de/` ends up at `/en/map/` or `/en/map/` in the
+      PageSpeed result.
+- [ ] Check redirects and canonical of the start page.
+- [ ] Fix three separate test targets:
   - [ ] `/`
   - [ ] `/de/karte/`
   - [ ] `/en/map/`
-- [ ] Für jede Seite einen eigenen mobilen PageSpeed-Bericht erzeugen.
-- [ ] Pro URL mindestens drei Messungen unter identischen Bedingungen
-      durchführen.
-- [ ] Medianwerte dokumentieren, nicht nur einen Einzelwert verwenden.
-- [ ] Vorher-Nachher-Vergleich mit derselben URL und denselben Einstellungen
-      durchführen.
+- [ ] Create a separate mobile PageSpeed report for each page.
+- [ ] Perform at least three measurements per URL under identical conditions.
+- [ ] Document median values, do not use only a single value.
+- [ ] Perform a before/after comparison with the same URL and the same
+      settings.
 
-**Abnahme:** Es ist eindeutig dokumentiert, welche URL für welchen Messwert
-verantwortlich ist.
+**Acceptance:** It is unambiguously documented which URL is responsible for which measurement value.
 
-### 2. LCP-Element identifizieren
+### 2. Identify the LCP element
 
-Nicht vermuten, sondern im Lighthouse-Bericht und im Chrome-Trace feststellen:
+Do not guess, but determine in the Lighthouse report and in the Chrome trace:
 
-- [ ] Welches Element ist das LCP-Element?
-- [ ] Ist es die Kartenfläche, ein Kartenbild, ein Hero-Bild, eine Überschrift
-      oder ein erst durch JavaScript erzeugtes Element?
-- [ ] Ladezeit in Serverantwort, Ressourcenwartezeit, Download,
-      Rendering-Verzögerung und JavaScript-Verzögerung aufteilen.
-- [ ] Prüfen, ob das LCP-Element erst nach dem Karten- oder App-Start erzeugt
-      wird.
-- [ ] Den konkreten Request und den konkreten DOM-Knoten im TODO-Ergebnis
-      festhalten.
+- [ ] Which element is the LCP element?
+- [ ] Is it the map area, a map image, a hero image, a heading or an element
+      created only by JavaScript?
+- [ ] Split the load time into server response, resource wait time, download,
+      rendering delay and JavaScript delay.
+- [ ] Check whether the LCP element is created only after the map or app
+      start.
+- [ ] Record the concrete request and the concrete DOM node in the TODO
+      result.
 
-**Abnahme:** Für das LCP-Element gibt es einen konkreten Ladepfad und eine
-gemessene Ursache der Verzögerung.
+**Acceptance:** For the LCP element there is a concrete load path and a
+measured cause of the delay.
 
-### 3. Kritischen Erstinhalt vor JavaScript anzeigen
+### 3. Show critical initial content before JavaScript
 
-- [ ] Überschrift, Seitentitel und grundlegende Kartenhülle direkt im HTML
-      bereitstellen.
-- [ ] Einen sinnvollen sichtbaren Erstzustand ohne vollständigen App-Start
-      sicherstellen.
-- [ ] Kartenrahmen und Seitenlayout mit festen Dimensionen vorbereiten.
-- [ ] Keine leere weiße Fläche während der Karteninitialisierung anzeigen.
-- [ ] Nicht notwendige Filter, Marker, Fortschrittsdaten und Detailbereiche
-      erst nach dem ersten sichtbaren Inhalt laden.
-- [ ] Prüfen, ob der Kartenstart derzeit durch große Daten-JavaScript-Dateien
-      blockiert wird.
+- [ ] Provide heading, page title and basic map shell directly in the HTML.
+- [ ] Ensure a sensible visible initial state without a complete app start.
+- [ ] Prepare map frame and page layout with fixed dimensions.
+- [ ] Show no empty white area during map initialisation.
+- [ ] Load unnecessary filters, markers, progress data and detail areas only
+      after the first visible content.
+- [ ] Check whether the map start is currently blocked by large data
+      JavaScript files.
 
-**Abnahme:** Der Nutzer sieht innerhalb der ersten Sekunden Überschrift,
-Kartenrahmen und eine sinnvolle Grundansicht.
+**Acceptance:** The user sees heading,
+map frame and a sensible basic view within the first seconds.
 
-### 4. LCP-Bild und Kartenbild optimieren
+### 4. Optimise LCP image and map image
 
-- [ ] Das tatsächliche LCP-Bild im Trace identifizieren.
-- [ ] Für dieses Bild `loading="lazy"` entfernen.
-- [ ] `fetchpriority="high"` nur für das tatsächliche LCP-Bild einsetzen.
-- [ ] Falls erforderlich, gezielt `<link rel="preload">` verwenden.
-- [ ] Responsive Bildquellen mit passenden mobilen Abmessungen bereitstellen.
-- [ ] WebP-Größe und Kompression für die mobile Darstellung prüfen.
-- [ ] Bildabmessungen immer explizit angeben.
-- [ ] Für nicht sichtbare Landschaftskacheln Lazy Loading beibehalten.
-- [ ] Die von PageSpeed genannten Landschaftsbilder prüfen und nur bei
-      tatsächlichem Nutzen weiter komprimieren.
-- [ ] Prüfen, ob beim Start unnötig mehrere Kartenbilder geladen werden.
+- [ ] Identify the actual LCP image in the trace.
+- [ ] Remove `loading="lazy"` for this image.
+- [ ] Use `fetchpriority="high"` only for the actual LCP image.
+- [ ] If required, use `<link rel="preload">` in a targeted way.
+- [ ] Provide responsive image sources with matching mobile dimensions.
+- [ ] Check WebP size and compression for the mobile display.
+- [ ] Always state image dimensions explicitly.
+- [ ] Keep lazy loading for landscape tiles that are not visible.
+- [ ] Check the landscape images named by PageSpeed and compress them further
+      only with an actual benefit.
+- [ ] Check whether several map images are loaded unnecessarily at the start.
 
-**Abnahme:** Das LCP-Bild wird früh geladen, ohne dass übrige Kartenbilder den
-kritischen Pfad blockieren.
+**Acceptance:** The LCP image is loaded early, without the remaining map images blocking
+the critical path.
 
-### 5. JavaScript des ersten Seitenaufbaus reduzieren
+### 5. Reduce JavaScript of the first page build
 
-Insbesondere Kartenanwendung und Dateninitialisierung prüfen:
+Check the map application and data initialisation in particular:
 
-- [ ] Ermitteln, welche JavaScript-Dateien vor dem ersten Paint geladen werden.
-- [ ] Große Datenblöcke identifizieren, die für die erste Ansicht nicht
-      benötigt werden.
-- [ ] Karten-, Marker-, Vorkommen-, Fortschritts- und Filterdaten nach Bedarf
-      laden.
-- [ ] Nicht sichtbare Gebiete erst beim Öffnen nachladen.
-- [ ] Initiale Sortierung und Filterung auf die sichtbaren Daten begrenzen.
-- [ ] Wiederholte DOM-Abfragen und vollständige Listen-Neuberechnungen
-      reduzieren.
-- [ ] Lange synchrone Aufgaben im Main Thread zerlegen.
-- [ ] Nicht notwendige Verarbeitung mit `requestIdleCallback` oder einem
-      vergleichbaren späteren Zeitpunkt ausführen.
-- [ ] Prüfen, ob einzelne Funktionen mehrfach beim Kartenstart laufen.
-- [ ] Nicht verwendeten JavaScript-Code aus dem initialen Ladepfad entfernen.
-- [ ] Komprimierung und Minifizierung der ausgelieferten JavaScript-Dateien
-      prüfen.
+- [ ] Determine which JavaScript files are loaded before the first paint.
+- [ ] Identify large data blocks that are not needed for the first view.
+- [ ] Load map, marker, resource occurrence, progress and filter data on
+      demand.
+- [ ] Reload areas that are not visible only when opened.
+- [ ] Limit initial sorting and filtering to the visible data.
+- [ ] Reduce repeated DOM queries and complete list recalculations.
+- [ ] Split long synchronous tasks in the main thread.
+- [ ] Run unnecessary processing with `requestIdleCallback` or a comparable
+      later point in time.
+- [ ] Check whether individual functions run several times on the map start.
+- [ ] Remove unused JavaScript code from the initial load path.
+- [ ] Check compression and minification of the delivered JavaScript files.
 
-**Abnahme:** Kein unnötiger Initialisierungsschritt blockiert den Main Thread;
-die TBT sinkt messbar.
+**Acceptance:** No unnecessary initialisation step blocks the main thread;
+TBT drops measurably.
 
-### 6. Erzwungene Layout-Neuberechnungen beseitigen
+### 6. Eliminate forced layout recalculations
 
-PageSpeed meldet dynamische Umbrüche, unter anderem ausgehend von GTM.
+PageSpeed reports dynamic reflows, among others originating from GTM.
 
-- [ ] Im Chrome-Trace alle Forced-Reflow-Aufrufer erfassen.
-- [ ] Lesen und Schreiben von Layout-Eigenschaften trennen:
+- [ ] Record all forced reflow callers in the Chrome trace.
+- [ ] Separate reading and writing of layout properties:
   - [ ] `offsetWidth`
   - [ ] `offsetHeight`
   - [ ] `getBoundingClientRect()`
   - [ ] `scrollWidth`
   - [ ] `scrollHeight`
-- [ ] Karten- und Legendenlayout nicht mehrfach synchron messen.
-- [ ] Bekannte Größen über CSS-Variablen oder feste Layoutwerte bereitstellen.
-- [ ] DOM-Änderungen bündeln.
-- [ ] GTM beibehalten, aber seinen Einfluss auf den Erstaufbau messen.
-- [ ] Prüfen, ob GTM nach dem ersten sichtbaren Inhalt geladen werden kann,
-      ohne das gewünschte Tracking zu verlieren.
+- [ ] Do not measure map and legend layout synchronously several times.
+- [ ] Provide known sizes via CSS variables or fixed layout values.
+- [ ] Bundle DOM changes.
+- [ ] Keep GTM but measure its influence on the first build.
+- [ ] Check whether GTM can be loaded after the first visible content without
+      losing the desired tracking.
 
-**Abnahme:** Der Forced-Reflow-Hinweis ist deutlich reduziert; Kartenwechsel
-und Filterwechsel bleiben funktional.
+**Acceptance:** The forced reflow note is clearly reduced; map changes
+and filter changes remain functional.
 
-### 7. Daten- und Karteninitialisierung aufteilen
+### 7. Split data and map initialisation
 
-- [ ] Prüfen, ob beim Aufruf einer Karte der komplette Aufgabenbestand geladen
-      wird.
-- [ ] Prüfen, ob alle Gebietskarten geladen werden, obwohl nur eine sichtbar
-      ist.
-- [ ] Prüfen, ob Marker erst nach Sichtbarkeit der Karte berechnet werden
-      können.
-- [ ] Kartenbild, Marker und Legende in getrennten Schritten initialisieren.
-- [ ] Zuerst den sichtbaren Kartenrahmen rendern.
-- [ ] Danach sichtbare Marker laden.
-- [ ] Danach optionale Informationen laden:
-  - [ ] Vorkommen
-  - [ ] Auftraggeber
-  - [ ] Fortschritt
-  - [ ] zusätzliche Filterdaten
-- [ ] Direkte Kartenlinks, Gebietswahl und gespeicherte Filter erhalten.
+- [ ] Check whether the complete quest stock is loaded when a map is called.
+- [ ] Check whether all area maps are loaded although only one is visible.
+- [ ] Check whether markers can be computed only after the map is visible.
+- [ ] Initialise map image, markers and legend in separate steps.
+- [ ] Render the visible map frame first.
+- [ ] Then load visible markers.
+- [ ] Then load optional information:
+  - [ ] resource occurrences
+  - [ ] quest givers
+  - [ ] progress
+  - [ ] additional filter data
+- [ ] Retain direct map links, area choice and stored filters.
 
-**Abnahme:** Die Karte ist früh sichtbar; optionale Inhalte erscheinen
-nachgelagert, ohne die erste Darstellung zu blockieren.
+**Acceptance:** The map is visible early; optional content appears
+downstream without blocking the first display.
 
-### 8. SEO- und Funktionsschutz
+### 8. SEO and function protection
 
-Die SEO-Grundlagen sind bereits erfolgreich und dürfen nicht verschlechtert
-werden:
+The SEO basics are already successful and must not be worsened:
 
-- [ ] SEO-Score bleibt bei mindestens **100** oder unverändert stabil.
-- [ ] Canonical bleibt korrekt.
-- [ ] Hreflang bleibt für DE/EN/FR korrekt.
-- [ ] Überschrift und wesentlicher Text bleiben ohne JavaScript erreichbar.
-- [ ] Karten- und Kataloglinks bleiben crawlbar.
-- [ ] Keine wichtige Information ausschließlich in nachgeladenem JavaScript
-      verstecken.
-- [ ] Keine neue Soft-404 erzeugen.
-- [ ] Sitemaps und `robots.txt` bleiben korrekt.
-- [ ] GTM und GoatCounter nicht ungefragt entfernen.
-- [ ] Keine Spielstände oder Companion-Daten an Server oder Analytics senden.
+- [ ] SEO score stays at least **100** or unchanged stable.
+- [ ] Canonical stays correct.
+- [ ] Hreflang stays correct for DE/EN/FR.
+- [ ] Heading and essential text remain reachable without JavaScript.
+- [ ] Map and catalogue links remain crawlable.
+- [ ] Hide no important information exclusively in reloaded JavaScript.
+- [ ] Create no new soft 404.
+- [ ] Sitemaps and `robots.txt` stay correct.
+- [ ] Do not remove GTM and GoatCounter without being asked.
+- [ ] Send no character progress or Companion data to server or analytics.
 
-### 9. Testmatrix
+### 9. Test matrix
 
 #### URLs
 
@@ -244,53 +230,53 @@ werden:
 - [ ] `/en/map/`
 - [ ] `/fr/carte/`
 
-#### Geräte
+#### Devices
 
-- [ ] Mobil
+- [ ] Mobile
 - [ ] Desktop
 
-#### Zustände
+#### States
 
-- [ ] ohne Spielstand
-- [ ] mit synthetischem Spielstand
-- [ ] direkte Gebietsauswahl
-- [ ] Kartenwechsel
-- [ ] Filter öffnen
-- [ ] Vorkommen einschalten
-- [ ] Auftraggeber ein- und ausblenden
-- [ ] Detailansicht öffnen
-- [ ] Zurück-Navigation
+- [ ] without character progress
+- [ ] with synthetic character progress
+- [ ] direct area selection
+- [ ] map change
+- [ ] open filter
+- [ ] switch on resource occurrences
+- [ ] show and hide quest givers
+- [ ] open detail view
+- [ ] back navigation
 
-#### Technische Prüfungen
+#### Technical checks
 
-- [ ] Python-Test-Suite
-- [ ] SEO-Tests
-- [ ] Katalogprüfung
-- [ ] Browserprüfung in DE/EN/FR
-- [ ] drei PageSpeed-Messungen pro Ziel-URL
+- [ ] Python test suite
+- [ ] SEO tests
+- [ ] catalogue check
+- [ ] browser check in DE/EN/FR
+- [ ] three PageSpeed measurements per target URL
 
-## Reihenfolge
+## Order
 
-1. [ ] Testadresse und echte LCP-Seite klären
-2. [ ] Chrome-Trace erstellen und LCP-Element identifizieren
-3. [ ] Erstinhalt und LCP-Bild optimieren
-4. [ ] JavaScript-Initialisierung aufteilen
-5. [ ] Forced Reflows reduzieren
-6. [ ] Optionale Kartendaten nachladen
-7. [ ] SEO und Funktionen prüfen
-8. [ ] PageSpeed erneut messen und Ergebnisse dokumentieren
+1. [ ] Clarify test address and real LCP page
+2. [ ] Create Chrome trace and identify the LCP element
+3. [ ] Optimise initial content and LCP image
+4. [ ] Split JavaScript initialisation
+5. [ ] Reduce forced reflows
+6. [ ] Reload optional map data
+7. [ ] Check SEO and functions
+8. [ ] Measure PageSpeed again and document results
 
-## Abgrenzung
+## Scope
 
-Dieses TODO behandelt die technische Lade- und Renderleistung der
-Kartenansicht. Die SEO-Grundlagen selbst sind bereits vorhanden und werden
-nicht neu konzipiert:
+This TODO covers the technical load and render performance of the
+map view. The SEO basics themselves are already present and are
+not newly conceived:
 
-- SEO-Metadaten
-- Canonical und Hreflang
-- Sitemaps
+- SEO metadata
+- canonical and hreflang
+- sitemaps
 - `robots.txt`
-- stabile Entitäts-URLs
-- mehrsprachige Seitentexte
+- stable entity URLs
+- multilingual page texts
 
-Diese Bestandteile werden nur als Regressionsschutz geprüft.
+These components are only checked as regression protection.

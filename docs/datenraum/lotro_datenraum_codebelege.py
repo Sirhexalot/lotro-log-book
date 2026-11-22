@@ -80,32 +80,32 @@ report = {
 }
 (OUT / 'lotro-datenraum-codebelege.json').write_text(json.dumps(report, indent=2, ensure_ascii=False))
 lines = [
-    '# Codebeleg-Index für Property-Semantik', '',
-    'Alle lesbaren Java-Dateien unter dem genannten Companion-Extraktionsquellbaum '
-    'wurden nach direkten literalen `getProperty`-/`getPropertyValueByName`-Zugriffen '
-    'durchsucht. Das ist eine Fundstellenliste, **keine automatische Bedeutungsbestätigung**. '
-    'Dynamische Propertynamen, Helper-Aufrufe und weitere Bibliotheken benötigen '
-    'gesondertes Tracing. Eine fehlende Fundstelle beweist keine grundsätzlich '
-    'unbekannte Bedeutung. Quellbaum und installierte JARs sind getrennte '
-    'Versionsbelege; identische Implementierung ist nicht pauschal nachgewiesen.', '',
-    f'Quellwurzel: `{ROOT}`', '',
-    f'Nicht lesbare Quelldateien: {len(unread)}; konkrete Pfade und Fehler im JSON. '
-    'Bei Leseausfällen ist die Quellinventur ausdrücklich unvollständig.', '',
-    f'{len(lookup)} verschiedene literale Propertynamen; '
-    f'{sum(len(v) for v in lookup.values())} Code-Fundstellen. '
-    f'Von {len(observed)} beobachteten Propertynamen der vier Rohbestände '
-    f'haben {len(set(observed) & set(lookup))} mindestens einen direkten literalen '
-    'Zugriff in diesem Quellbaum.', '',
-    '## Fundstellen je Property', ''
+    '# Code evidence index for property semantics', '',
+    'All readable Java files under the named Companion extraction source tree were '
+    'searched for direct literal `getProperty`/`getPropertyValueByName` accesses. '
+    'This is a list of occurrences, **not an automatic confirmation of meaning**. '
+    'Dynamic property names, helper calls and further libraries need '
+    'separate tracing. A missing occurrence proves no fundamentally '
+    'unknown meaning. Source tree and installed JARs are separate '
+    'version records; identical implementation is not generally proven.', '',
+    f'Source root: `{ROOT}`', '',
+    f'Unreadable source files: {len(unread)}; concrete paths and errors in the JSON. '
+    'Where reads failed, the source inventory is explicitly incomplete.', '',
+    f'{len(lookup)} distinct literal property names; '
+    f'{sum(len(v) for v in lookup.values())} code occurrences. '
+    f'Of {len(observed)} observed property names in the four raw sets, '
+    f'{len(set(observed) & set(lookup))} have at least one direct literal '
+    'access in this source tree.', '',
+    '## Occurrences per property', ''
 ]
 for prop, refs in sorted(lookup.items()):
     lines += ['### `' + prop + '`', '',
-              'Beobachtete Rohdatenklassen: ' + ', '.join(sorted(observed.get(prop, set()))) + '.', '',
-              table(['Datei relativ zur Quellwurzel', 'Zeile', 'Exakter Zugriff'],
+              'Observed raw data classes: ' + ', '.join(sorted(observed.get(prop, set()))) + '.', '',
+              table(['File relative to the source root', 'Line', 'Exact access'],
                     [(r['file'], r['line'], '`' + r['code'] + '`') for r in refs]), '']
-lines += ['## Beobachtete Felder ohne direkten literalen Zugriff im geprüften Quellbaum', '',
+lines += ['## Observed fields without a direct literal access in the checked source tree', '',
           '\n'.join('- `' + k + '`' for k in sorted(set(observed) - set(lookup))), '',
-          'Vollständiger Kontext, Klassen und Hashes: `lotro-datenraum-codebelege.json`.', '']
+          'Full context, classes and hashes: `lotro-datenraum-codebelege.json`.', '']
 (OUT / 'lotro-datenraum-codebelege.md').write_text('\n'.join(lines))
 print('literal properties', len(lookup), 'observed', len(observed),
       'intersection', len(set(observed) & set(lookup)))

@@ -1,6 +1,6 @@
-# Tatsächlich gelesene Quelldateien
+# Source files actually read
 
-SHA-256 identifiziert den gelesenen lokalen Stand, keine Aktualitäts- oder Rechtegarantie.
+SHA-256 identifies the local state that was read, not a guarantee of recency or of rights.
 
 | Absoluter Pfad | Bytes | SHA-256 |
 | --- | --- | --- |

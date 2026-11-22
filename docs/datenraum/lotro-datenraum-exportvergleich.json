@@ -1,13 +1,13 @@
 {
   "checks": [
     {
-      "relation": "Itemexport-ID → Companion-Item",
+      "relation": "Item export ID → Companion item",
       "occurrences": 152088,
       "resolved": 152088,
       "missing": {}
     },
     {
-      "relation": "Companion-Item → Itemexport-ID (Abdeckung)",
+      "relation": "Companion item → item export ID (coverage)",
       "occurrences": 152100,
       "resolved": 152088,
       "missing": {
@@ -26,121 +26,121 @@
       }
     },
     {
-      "relation": "Setexport-ID → Companion-Set",
+      "relation": "Set export ID → Companion set",
       "occurrences": 2223,
       "resolved": 2223,
       "missing": {}
     },
     {
-      "relation": "Itemexport.set → Setexport-ID",
+      "relation": "Item export set → set export ID",
       "occurrences": 11159,
       "resolved": 11159,
       "missing": {}
     },
     {
-      "relation": "Setexport.i[] → Itemexport-ID",
+      "relation": "Set export i[] → item export ID",
       "occurrences": 11159,
       "resolved": 11159,
       "missing": {}
     },
     {
-      "relation": "Rezeptexport.id → Companion-Rezept",
+      "relation": "Recipe export id → Companion recipe",
       "occurrences": 7924,
       "resolved": 7924,
       "missing": {}
     },
     {
-      "relation": "Rezeptexport.p → exportierter Beruf",
+      "relation": "Recipe export p → exported profession",
       "occurrences": 7924,
       "resolved": 7924,
       "missing": {}
     },
     {
-      "relation": "Rezeptexport.t → exportierte Stufe",
+      "relation": "Recipe export t → exported tier",
       "occurrences": 7815,
       "resolved": 7815,
       "missing": {}
     },
     {
-      "relation": "Rezeptexport.c → exportierte Kategorie",
+      "relation": "Recipe export c → exported category",
       "occurrences": 7924,
       "resolved": 7924,
       "missing": {}
     },
     {
-      "relation": "Rezept.r → Rezept-Itembestand",
+      "relation": "Recipe r → recipe item set",
       "occurrences": 7924,
       "resolved": 7924,
       "missing": {}
     },
     {
-      "relation": "Rezept.r → vollständiger Itemexport",
+      "relation": "Recipe r → complete item export",
       "occurrences": 7924,
       "resolved": 7924,
       "missing": {}
     },
     {
-      "relation": "Rezept.cr → Rezept-Itembestand",
+      "relation": "Recipe cr → recipe item set",
       "occurrences": 4557,
       "resolved": 4557,
       "missing": {}
     },
     {
-      "relation": "Rezept.cr → vollständiger Itemexport",
+      "relation": "Recipe cr → complete item export",
       "occurrences": 4557,
       "resolved": 4557,
       "missing": {}
     },
     {
-      "relation": "Rezept.i → Rezept-Itembestand",
+      "relation": "Recipe i → recipe item set",
       "occurrences": 20810,
       "resolved": 20810,
       "missing": {}
     },
     {
-      "relation": "Rezept.i → vollständiger Itemexport",
+      "relation": "Recipe i → complete item export",
       "occurrences": 20810,
       "resolved": 20810,
       "missing": {}
     },
     {
-      "relation": "Rezept.o → Rezept-Itembestand",
+      "relation": "Recipe o → recipe item set",
       "occurrences": 8197,
       "resolved": 8197,
       "missing": {}
     },
     {
-      "relation": "Rezept.o → vollständiger Itemexport",
+      "relation": "Recipe o → complete item export",
       "occurrences": 8197,
       "resolved": 8197,
       "missing": {}
     },
     {
-      "relation": "Belohnung.fixed → exportierter items-Bestand",
+      "relation": "Reward fixed → exported items set",
       "occurrences": 9498,
       "resolved": 9498,
       "missing": {}
     },
     {
-      "relation": "Belohnung.choice → exportierter items-Bestand",
+      "relation": "Reward choice → exported items set",
       "occurrences": 5631,
       "resolved": 5631,
       "missing": {}
     },
     {
-      "relation": "Belohnung.titles → exportierter titles-Bestand",
+      "relation": "Reward titles → exported titles set",
       "occurrences": 2551,
       "resolved": 2551,
       "missing": {}
     },
     {
-      "relation": "Belohnung.traits → exportierter traits-Bestand",
+      "relation": "Reward traits → exported traits set",
       "occurrences": 252,
       "resolved": 252,
       "missing": {}
     },
     {
-      "relation": "Belohnung.virtues → exportierter virtues-Bestand",
+      "relation": "Reward virtues → exported virtues set",
       "occurrences": 704,
       "resolved": 660,
       "missing": {
@@ -191,13 +191,13 @@
       }
     },
     {
-      "relation": "Belohnung.emotes → exportierter emotes-Bestand",
+      "relation": "Reward emotes → exported emotes set",
       "occurrences": 20,
       "resolved": 20,
       "missing": {}
     },
     {
-      "relation": "Rezeptquellen-Schlüssel → exportierte Rezept-ID",
+      "relation": "Recipe source key → exported recipe ID",
       "occurrences": 4230,
       "resolved": 4224,
       "missing": {

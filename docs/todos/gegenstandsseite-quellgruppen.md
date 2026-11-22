@@ -1,80 +1,80 @@
-# Gegenstandsseite: Quellgruppen auf die gemeinsame Komponente
+# Item page: source groups on the shared component
 
-Stand: 18.11.2026
-Status: umgesetzt
+Status as of 18.11.2026
+Status: implemented
 
-## Ausgangslage
+## Starting point
 
-Die Gegenstandsseite zeigt unter „Woher" mehrere Gruppen. Drei davon weichen
-heute von den Regeln ab:
+The item page shows several groups under „Woher". Three of them deviate
+today from the rules:
 
-| Gruppe | Einträge | Darstellung heute | Regelverstoß |
+| Group | Entries | Presentation today | Rule violation |
 | --- | --- | --- | --- |
-| Aufgaben | bis 753 | gemeinsame Komponente | keiner |
-| Herstellung (`filter=recipes`) | bis 77 | gemeinsame Komponente (`recipe_made`) | keiner |
-| Händler (`vendor_filter`) | bis 333 | gemeinsame Komponente | keiner |
-| Tauschhändler (`barter`) | bis 333 | gemeinsame Komponente | keiner |
+| Quests | up to 753 | shared component | none |
+| Crafting (`filter=recipes`) | up to 77 | shared component (`recipe_made`) | none |
+| Vendor (`vendor_filter`) | up to 333 | shared component | none |
+| Barter vendor (`barter`) | up to 333 | shared component | none |
 
-Zusätzlich zeigt die Herstellungszeile den vollständigen Rezepttext
-(„Koch · Wilde Essenzen · Stufe 1 · 1 × …"), wodurch 77 verschiedene Rezepte
-wie eine Wiederholung wirken.
+In addition, the crafting row shows the complete recipe text
+(„Koch · Wilde Essenzen · Stufe 1 · 1 × …"), which makes 77 different recipes
+look like a repetition.
 
-## Ziel
+## Goal
 
-Jede Gruppe ist eine Relation auf **eine** Entität und nutzt deren Ausprägung:
+Each group is a relation to **one** entity and uses its form:
 
-- Aufgaben → `MQL_TASK_FILTER_SETUP(rows, 'q')`
-- Herstellung → `MQL_RECIPE_FILTER` mit `MQL_RECIPE_CONTEXT_RESULTS`
-- Händler → Händler-Ausprägung (dieselbe Zeile wie die Händlerliste)
-- Tauschhändler → eigene `barter`-Relation mit derselben Händler-Komponente
+- Quests → `MQL_TASK_FILTER_SETUP(rows, 'q')`
+- Crafting → `MQL_RECIPE_FILTER` with `MQL_RECIPE_CONTEXT_RESULTS`
+- Vendor → vendor form (the same row as the vendor list)
+- Barter vendor → own `barter` relation with the same vendor component
 
-Damit gelten überall Schwelle 5/6, Suche, Facetten, Sortierung, Pagination,
-Kontext-URL und die gemeinsame Zeilenregel.
+That way the 5/6 threshold, search, facets, sorting, pagination,
+context URL and the shared row rule apply everywhere.
 
-## Daten
+## Data
 
-`where_groups` liefert je Gruppe bereits:
+`where_groups` already delivers per group:
 
 - `label`
-- `entries` mit `url`, `text`, `recipe_level`, `result`, `profession`, `role`
-- `filter`: `tasks`, `recipes` oder `null`
-- `source_kind`: nur bei Aufgaben gesetzt
+- `entries` with `url`, `text`, `recipe_level`, `result`, `profession`, `role`
+- `filter`: `tasks`, `recipes` or `null`
+- `source_kind`: set only for quests
 
-Für die Herstellung fehlt nur eines: die Rezept-ID als eigenes Feld. Sie steckt
-heute in `url` (`/de/rezept/<ID>/`). Sie wird beim Bau zusätzlich als `id`
-geschrieben, damit der Adapter ohne URL-Parsing arbeitet.
+For crafting only one thing is missing: the recipe ID as its own field. It sits
+today in `url` (`/de/rezept/<ID>/`). It is additionally written as `id` during
+the build, so that the adapter works without URL parsing.
 
-## Aufbau
+## Structure
 
-1. **Server** rendert je Gruppe eine `section` mit `h3`, Fallback-Liste und
-   einem leeren `ul[data-filter-results]`. Ohne JavaScript bleibt die Liste
-   vollständig sichtbar.
-2. **Client** mountet je Gruppe eine eigene Instanz der Komponente. Der
-   Kontext steht als Präfix in der URL (`recipes.q`, `vendors.q`, …), damit
-   Gruppen sich nicht gegenseitig überschreiben.
-3. **Zeilen**:
-   - Aufgabe: Symbol, Name, Stufe, Gebiet, Status
-   - Rezept: Symbol, Ergebnisname, Beruf · Stufe, Lernstand
-   - Händler: Name, Gebiet, Anzahl
-4. **Schwelle**: bis 5 direkt, ab 6 Komponente in voller Breite.
-5. **Facetten**:
-   - Aufgaben: vorhandene Aufgabenfilter
-   - Herstellung: Beruf, Stufe, Kategorie
-   - Händler: normaler Händler / Tauschhändler, Gebiet
+1. **Server** renders a `section` per group with `h3`, fallback list and
+   an empty `ul[data-filter-results]`. Without JavaScript the list remains
+   completely visible.
+2. **Client** mounts its own instance of the component per group. The
+   context stands as a prefix in the URL (`recipes.q`, `vendors.q`, …), so that
+   groups do not overwrite each other.
+3. **Rows**:
+   - Quest: icon, name, level, area, status
+   - Recipe: icon, result name, profession · level, crafting knowledge
+   - Vendor: name, area, count
+4. **Threshold**: up to 5 directly, from 6 the component in full width.
+5. **Facets**:
+   - Quests: existing quest filters
+   - Crafting: profession, level, category
+   - Vendor: normal vendor / barter vendor, area
 
-## Offene Punkte
+## Open points
 
-- Bei 77 Rezepten mit identischem Ergebnis unterscheiden sich die Zeilen nur
-  durch Beruf, Stufe und Kategorie. Das ist gewollt; die Zutaten stehen auf
-  der Rezeptseite.
-- Tauschhändler und normale Händler bleiben getrennte Quellgruppen. Die
-  Händlergruppe kann weiterhin nach Händlerart unterscheiden; die
-  Tauschhändlergruppe zeigt ausschließlich Tauschhändler.
+- With 77 recipes with an identical result, the rows differ only
+  by profession, level and category. That is intended; the ingredients stand on
+  the recipe page.
+- Barter vendors and normal vendors remain separate source groups. The
+  vendor group can still distinguish by vendor kind; the
+  barter vendor group shows exclusively barter vendors.
 
 ## Tests
 
-- `tests/test_relationen_audit.py`: keine Gruppe über 5 ohne Komponente.
-- `tests/test_entitaeten_vertrag.py`: Zeilenfelder der drei Gruppen.
-- Browsertest auf `/de/gegenstand/70047510/` (77 Rezepte) und
-  `/de/gegenstand/700005D1/` (333 Händler): je eine Komponente pro Gruppe,
-  kompakte Zeile, Suche, Reset, Mobil.
+- `tests/test_relationen_audit.py`: no group over 5 without a component.
+- `tests/test_entitaeten_vertrag.py`: row fields of the three groups.
+- Browser test on `/de/gegenstand/70047510/` (77 recipes) and
+  `/de/gegenstand/700005D1/` (333 vendors): one component per group each,
+  compact row, search, reset, mobile.

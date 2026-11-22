@@ -24,7 +24,7 @@ for r in rules:
         # Achievable prerequisites can refer to quests OR deeds.
         targets |= {e.get('id') for name in ['quests.xml', 'deeds.xml']
                     for e in root(name) if e.get('id')}
-        r['target_note'] = 'Union quests.xml/quest + deeds.xml/deed; gemeinsamer Achievable-ID-Raum'
+        r['target_note'] = 'Union quests.xml/quest + deeds.xml/deed; shared achievable ID space'
     vals = [e.get(r['attribute']) for e in root(r['source']).findall(r['selector'])
             if e.get(r['attribute']) is not None]
     missing = {}
@@ -37,13 +37,13 @@ rows = [(f'{r["source"]}: `{r["selector"]}/@{r["attribute"]}`',
          r['rows'], r['resolved'], sum(r['unresolved'].values()), len(r['unresolved'])) for r in rules]
 path.write_text(json.dumps(rules, ensure_ascii=False, indent=2))
 (OUT / 'lotro-datenraum-relationen.md').write_text(
-    '# Referenzvalidierung gegen konkrete Zielbestände\n\n'
-    'Exakte ID-Gleichheit ohne Namensauflösung. Quellattribute wurden gegen die XML-Struktur '
-    'korrigiert; Voraussetzungen verwenden den gemeinsamen Aufgaben-/Taten-ID-Raum. '
-    'Ein gültiges Ziel beweist weder Charakterfreischaltung noch aktuelle Spielverfügbarkeit. '
-    'Die Regeln sind eine geprüfte Teilmenge, nicht sämtliche Relationen des Datenraums.\n\n' +
-    table(['Quelle', 'Geprüftes Ziel', 'Referenzen', 'Aufgelöst', 'Nicht aufgelöst', 'Offene eindeutige Werte'], rows) +
-    '\n\nDetails: `lotro-datenraum-relationen.json`. Reproduktion: '
-    '`python3 lotro_datenraum_referenzen.py` nach dem Hauptaudit.\n')
+    '# Reference validation against concrete target sets\n\n'
+    'Exact ID equality without name resolution. Source attributes were corrected against '
+    'the XML structure; prerequisites use the shared quest/deed ID space. '
+    'A valid target proves neither character unlock nor current game availability. '
+    'The rules are a checked subset, not all relations of the data space.\n\n' +
+    table(['Source', 'Checked target', 'References', 'Resolved', 'Unresolved', 'Open distinct values'], rows) +
+    '\n\nDetails: `lotro-datenraum-relationen.json`. Reproduction: '
+    '`python3 lotro_datenraum_referenzen.py` after the main audit.\n')
 print('rules', len(rules), 'references', sum(r['rows'] for r in rules),
       'unresolved', sum(sum(r['unresolved'].values()) for r in rules))

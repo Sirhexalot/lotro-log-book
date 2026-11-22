@@ -1,57 +1,57 @@
-# Filtergedächtnis und Sortierung
+# Filter memory and sorting
 
-Stand: 10.11.2026, veröffentlicht. Gilt für **Gegenstände**, **Auftraggeber**
-und **Rezepte**.
+Status as of 10.11.2026, published. Applies to **items**, **quest givers**
+and **recipes**.
 
-## Verhalten
+## Behaviour
 
-| Situation | Ergebnis |
+| Situation | Result |
 | --- | --- |
-| Filter oder Sortierung ändern | Der Stand wird lokal gespeichert |
-| Detailseite → Rücklink zur Liste | Link trägt den gespeicherten Stand |
-| Liste ohne Parameter öffnen | Gespeicherter Stand wird wiederhergestellt |
-| Adresse enthält bereits Filter | Adresse gewinnt, nichts wird überschrieben |
-| „Zurücksetzen“ | Löscht den gespeicherten Stand |
-| Andere Sprache | Eigener Speicher je Sprache |
+| Change filter or sorting | The state is stored locally |
+| Detail page → back link to the list | Link carries the stored state |
+| Open list without parameters | Stored state is restored |
+| Address already contains filters | Address wins, nothing is overwritten |
+| „Zurücksetzen“ | Deletes the stored state |
+| Other language | Own store per language |
 
-Der Browser-Zurück-Knopf funktionierte schon vorher, weil die Filter in der
-Adresse stehen. Verloren gingen sie über die eigenen Rückwege („Alle
-Auftraggeber“, Breadcrumb „Gegenstände“, „Handwerk“) – die tragen den Stand
-jetzt mit.
+The browser back button already worked before, because the filters stand in the
+address. They were lost via the own back paths („Alle
+Auftraggeber“, breadcrumb „Gegenstände“, „Handwerk“) – these carry the state
+along now.
 
-## Speicher
+## Store
 
-- Schlüssel: `mql.filter.<bereich>.<sprache>`, Inhalt `{"q": "<query>"}`
-- Bereiche: `gegenstaende`, `auftraggeber`, `rezepte`
-- Gespeichert wird nur die Abfragezeichenfolge (Suche, Filter, Stufe,
-  Sortierung). Keine Charakterdaten, keine Kennungen.
-- Privater Modus oder voller Speicher: Lesen/Schreiben schlägt still fehl, die
-  Liste funktioniert ohne Gedächtnis weiter.
-- Ein defekter Eintrag wird wie „nichts gespeichert“ behandelt.
+- Key: `mql.filter.<bereich>.<sprache>`, content `{"q": "<query>"}`
+- Areas: `gegenstaende`, `auftraggeber`, `rezepte`
+- Only the query string is stored (search, filter, level,
+  sorting). No character data, no identifiers.
+- Private mode or full store: reading/writing fails silently, the
+  list keeps working without memory.
+- A defective entry is treated like „nothing stored“.
 
-## Rücklinks
+## Back links
 
-`web/katalog.js` ergänzt auf Detailseiten die Links zu den Listen, sofern der
-Link keine eigene Filterabfrage hat:
+`web/katalog.js` adds the links to the lists on detail pages, provided the
+link has no own filter query:
 
 - `/de/gegenstandssuche/`, `/en/item-search/`, `/fr/recherche-objets/`
 - `/de/auftraggeber/`, `/en/quest-giver/`, `/fr/donneur-de-quete/`
-- `/de/handwerk/rezepte/` und die alte Adresse `/handwerk.html?lang=…`
+- `/de/handwerk/rezepte/` and the old address `/handwerk.html?lang=…`
 
-Ein `?lang=de` gilt nicht als Filter und wird ersetzt.
+A `?lang=de` does not count as a filter and is replaced.
 
-## Sortierung
+## Sorting
 
-- In der Adresse: `sort=name` (Standard, darf fehlen) oder `sort=stufe`.
-- **Stufe** ist aufsteigend. Einträge ohne belegte Stufe stehen zuletzt, bei
-  gleicher Stufe entscheidet der Name.
-- Gegenstände und Rezepte sortieren im Browser vor „mehr laden“ bzw. der
-  100er-Grenze.
-- Auftraggeber sortiert der Server (`Givers::sorted`) vor der Seitenaufteilung;
-  „Stufe“ ist dort die niedrigste Aufgabe des Auftraggebers. Funktioniert auch
-  ohne JavaScript und beim Blättern.
-- Die Sortierung wird wie ein Filter gespeichert und in Sprachlinks,
-  Pagination und Canonical mitgeführt. Sortierte Listen bleiben `noindex`.
+- In the address: `sort=name` (default, may be missing) or `sort=stufe`.
+- **Level** is ascending. Entries without proven level stand last, for
+  the same level the name decides.
+- Items and recipes sort in the browser before „mehr laden“ or the
+  100 limit.
+- Quest givers are sorted by the server (`Givers::sorted`) before the page split;
+  „Stufe“ there is the lowest quest of the quest giver. Works also
+  without JavaScript and when paging.
+- The sorting is stored like a filter and carried along in language links,
+  pagination and canonical. Sorted lists remain `noindex`.
 
 ## Tests
 
@@ -60,9 +60,9 @@ node tests/test_filtergedaechtnis.js
 python3 -m unittest tests.test_givers_php -v
 ```
 
-Zusätzlich in der Browserprüfung: Filter setzen, Detailseite öffnen, über den
-Rücklink zurückkehren, Zustand prüfen; Sortierung nach Stufe in DE/EN/FR;
-frische Liste ohne Parameter stellt den Stand wieder her.
+Additionally in the browser check: set filters, open detail page, return via the
+back link, check state; sorting by level in DE/EN/FR;
+a fresh list without parameters restores the state.
 
-Die bekannte Grenze: Ein anderer Browser oder ein gelöschter Speicher kennt den
-Stand nicht. Das ist gewollt – es gibt kein Konto und keine Serverablage.
+The known limit: another browser or a deleted store does not know the
+state. That is intended – there is no account and no server storage.

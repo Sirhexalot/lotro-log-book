@@ -1,41 +1,41 @@
-# 1. Einführung und Ziele
+# 1. Introduction and goals
 
-LOTRO Log Book ist eine mehrsprachige Website für Inhalte und Fortschritt aus *The Lord of the Rings Online*. Der Code bietet unter anderem Aufgaben- und Tatenkarten, Katalog- und Suchseiten, Handwerk, Reisen, Abenteuer, Fraktionen, Landmarken, Instanzen und Seiten zu einzelnen Spieleinträgen. Die öffentlich verwendeten Sprachen sind Deutsch, Englisch und Französisch.
+LOTRO Log Book is a multilingual website for content and progress from *The Lord of the Rings Online*. Among other things, the code provides quest and deed maps, catalogue and search pages, crafting, travel, adventures, factions, landmarks, instances and pages for individual game entries. The publicly used languages are German, English and French.
 
-### Anforderungen und Stakeholder
+### Requirements and stakeholders
 
-Der aus Produkt und Repository belegbare Systemzweck ist, LOTRO-Spielinhalte in einer mehrsprachigen Website auffindbar zu machen und optionale persönliche Fortschrittsdaten im Browser zu verarbeiten. Sichtbare funktionale Anforderungen sind: Inhalte über Karten, Finder, Suche, Listen und Detailseiten erschließen; Beziehungen zwischen Katalogeinträgen anzeigen, soweit sie aus den Quellen hervorgehen; unterstützte Companion-Dateien lokal importieren; Releases aus vorbereiteten Daten erzeugen und übertragen.
+The system purpose evidenced by product and repository is to make LOTRO game content findable in a multilingual website and to process optional personal progress data in the browser. Visible functional requirements are: open up content through maps, finders, search, lists and detail pages; show relationships between catalogue entries as far as they emerge from the sources; import supported Companion files locally; build and transfer releases from prepared data.
 
-Ein separates, freigegebenes Anforderungsdokument mit Muss-/Kann-Prioritäten und Abnahmekriterien ist im untersuchten Projektbestand nicht als maßgebliche Quelle festgestellt. Die folgenden Stakeholder sind daher aus den Architekturgrenzen abgeleitet, nicht als vollständige Organisationsanalyse zu verstehen:
+No separate, approved requirements document with must/can priorities and acceptance criteria was identified as an authoritative source in the examined project inventory. The following stakeholders are therefore derived from the architecture boundaries and are not to be understood as a complete organisational analysis:
 
-| Stakeholder | Architekturinteresse | Beleg-/Offenheitsstatus |
+| Stakeholder | Architecture interest | Evidence/openness status |
 |---|---|---|
-| LOTRO-Spieler und Besucher | Inhalte finden, Karten/Filter nutzen und Details lesen | Fähigkeiten sind implementiert; formale Nutzerziele sind nicht dokumentiert |
-| Besucher ohne Import | Katalog und Website ohne Plugin oder Charakterdateien nutzen | Durch öffentliche Seiten und Browsercode gestützt |
-| Nutzer mit Companion-Export | Charakterstand lokal importieren und für persönliche Ansichten nutzen | Durch `web/companion.js`, `web/speicher.js` und Tests gestützt |
-| Betreiber/Release-Verantwortliche | Datenstand prüfen und Release kontrolliert übertragen | Werkzeuge sind vorhanden; Rollen, Freigabeprozess und SLA sind offen |
-| Daten-/Generatorpflege | Quellen und Relationen korrekt verarbeiten, unbelegte Aussagen vermeiden | Projektregeln und Audits sind vorhanden; Zuständigkeiten sind offen |
-| Rechteinhaber/externe Anbieter | Regelkonforme Nutzung von Inhalten, Bibliotheken und Diensten | Vollständige Freigaben/Verträge sind nicht aus dem Anwendungscode ableitbar |
+| LOTRO players and visitors | Find content, use maps/filters and read details | Capabilities are implemented; formal user goals are not documented |
+| Visitors without an import | Use the catalogue and website without plugin or character files | Supported by public pages and browser code |
+| Users with a Companion export | Import character progress locally and use it for personal views | Supported by `web/companion.js`, `web/speicher.js` and tests |
+| Operators/release owners | Check the data status and transfer releases in a controlled way | Tools exist; roles, approval process and SLA are open |
+| Data/generator maintenance | Process sources and relations correctly, avoid unsupported statements | Project rules and audits exist; responsibilities are open |
+| Rights holders/external providers | Compliant use of content, libraries and services | Complete approvals/contracts cannot be derived from the application code |
 
-Aus der Implementierung erkennbare Architekturziele:
+Architecture goals recognisable from the implementation:
 
-- **Katalogseiten nicht je Eintrag vollständig vorab als HTML ausliefern:** Python bereitet Daten und Seitenmodelle vor; PHP rendert passende Seitenmodelle zur Anfrage.
-- **Große Datenmengen nicht für jede Anfrage vollständig durchsuchen:** Die Daten werden in Shards abgelegt und anhand stabiler IDs adressiert.
-- **Spielerfortschritt im Browser verarbeiten:** Companion-Import und Charakterauswahl liegen im JavaScript-Speicher des Browsers.
-- **Eine gemeinsame Seitenhülle und lokalisierte Pfade verwenden:** PHP/Twig und die Browseranwendung teilen Navigation, Sprachauswahl und öffentliche Sprachpfade.
+- **Do not ship catalogue pages fully pre-rendered as HTML for every entry:** Python prepares data and page models; PHP renders matching page models per request.
+- **Do not fully scan large data volumes for every request:** The data is stored in shards and addressed by stable IDs.
+- **Process player progress in the browser:** Companion import and character selection live in the browser's JavaScript storage.
+- **Use one shared page shell and localised paths:** PHP/Twig and the browser application share navigation, language selection and public language paths.
 
-Belege: `php/public/index.php`, `php/src/Data.php`, `php/src/Page.php`, `tools/build_php_data.py`, `php/src/Catalogue.php`, `web/companion.js`, `web/speicher.js`.
+Evidence: `php/public/index.php`, `php/src/Data.php`, `php/src/Page.php`, `tools/build_php_data.py`, `php/src/Catalogue.php`, `web/companion.js`, `web/speicher.js`.
 
-### Qualitätsziele (aus dem Ist-Code abgeleitet, nicht als freigegebene SLA)
+### Quality goals (derived from the current code, not as an approved SLA)
 
-| Rang | Qualitätsziel | Im Code sichtbare Umsetzung |
+| Rank | Quality goal | Implementation visible in the code |
 |---|---|---|
-| 1 | Große Kataloge effizient ausliefern | Vorbereitete Shards, kompakte Relationszeilen, keine Vollkatalogsuche pro PHP-Request |
-| 2 | Kanonische und echte Seitenantworten | Zentraler Router, 301 für alte/nichtkanonische Adressen, 404 für nicht vorhandene Einträge |
-| 3 | Fortschritt privat im Browser halten | Companion-Verarbeitung und Mehrcharakterspeicher clientseitig; Release setzt `fortschritt.js` leer |
-| 4 | Drei Sprachpfade konsistent bedienen | Sprache in URL und lokalisierte Katalog-/Labelartefakte |
-| 5 | Verknüpfungen reproduzierbar aus Daten ableiten | Build-Viewmodels und Indizes; Generator-/Vertragstests |
+| 1 | Serve large catalogues efficiently | Prepared shards, compact relation rows, no full catalogue scan per PHP request |
+| 2 | Canonical and real page responses | Central router, 301 for old/non-canonical addresses, 404 for entries that do not exist |
+| 3 | Keep progress private in the browser | Companion processing and multi-character storage on the client; release leaves `fortschritt.js` empty |
+| 4 | Serve three language paths consistently | Language in URL and localised catalogue/label artefacts |
+| 5 | Derive links reproducibly from data | Build view models and indices; generator/contract tests |
 
-Der Code setzt keine messbaren Latenz-, Verfügbarkeits-, RPO/RTO- oder Accessibility-SLAs. Diese Ziele dürfen daher nicht als erfüllte Betriebszusagen verstanden werden.
+The code sets no measurable latency, availability, RPO/RTO or accessibility SLAs. These goals must therefore not be understood as fulfilled operational commitments.
 
-Architekturzielkonflikte sind insbesondere: lokaler Charakterstand schützt vor serverseitiger Speicherung, ist dafür browser-/profilgebunden; vorbereitete Kataloge begrenzen Requestarbeit, erhöhen aber Buildkopplung und Artefaktabstimmung; crawlbare HTML-Seiten und interaktive Filter werden kombiniert, deren Fallbackqualität jedoch je Oberfläche geprüft werden muss.
+Architecture goal conflicts are in particular: local character progress protects against server-side storage but is bound to browser/profile; prepared catalogues limit request work but increase build coupling and artefact coordination; crawlable HTML pages and interactive filters are combined, but their fallback quality must be checked per surface.

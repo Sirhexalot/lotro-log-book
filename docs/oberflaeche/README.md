@@ -1,10 +1,10 @@
-# Oberflächenregeln
+# Interface rules
 
-- [Gemeinsame Bausteine](bausteine.md)
-- [Eingebettete Entitätenlisten](entitaeten-listen.md)
-- [Gemeinsame Filterkomponente](filter-komponente.md)
-- [Filtergedächtnis und Sortierung](filter-sortierung.md)
-- [Reiter](reiter.md)
-- [Links und Schrift](linkgestaltung.md)
+- [Common building blocks](bausteine.md)
+- [Embedded entity lists](entitaeten-listen.md)
+- [Common filter component](filter-komponente.md)
+- [Filter memory and sorting](filter-sortierung.md)
+- [Tabs](reiter.md)
+- [Links and type](linkgestaltung.md)
 
-Der [Entitätenvertrag](../datenraum/lotro-datenraum-entitaeten.json) beschreibt das Soll. Die [arc42-Bausteinsicht](../arc42/05-bausteinsicht.md#59-konkrete-darstellungs--und-filtermatrix-nach-entität-und-auftrittsort) dokumentiert das Ist; offene Unterschiede stehen im [UI-Abgleich](../todos/entitaetenvertrag-abgleich.md).
+The [entity contract](../datenraum/lotro-datenraum-entitaeten.json) describes the target. The [arc42 building block view](../arc42/05-building-block-view.md#59-concrete-presentation-and-filter-matrix-by-entity-and-place-of-occurrence) documents the current state; open differences are in the [UI comparison](../todos/entitaetenvertrag-abgleich.md).

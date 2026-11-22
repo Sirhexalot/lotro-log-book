@@ -1,188 +1,186 @@
-# Tatenpositionen: erneute Prüfung vom 06.11.2026
+# Deed positions: renewed check of 06.11.2026
 
-## Umgesetzter Ausbau (06.11.2026)
+## Implemented extension (06.11.2026)
 
-**Korrektur der Vorprüfung im Chat:** `GameMaps.attribute` erwartet
-`(latitude, longitude, region)`. Die dort genannten 39 Zeilen/22 Taten und
-200 Jagdtaten wurden mit vertauschten Achsen ermittelt und sind nicht gültig.
-Ebenso unbelegt war die Behauptung, alle übrigen Taten hätten „wirklich keinen
-Ort im DAT“. Der vorliegende Export beweist keine generelle Unmöglichkeit.
+**Correction of the preliminary check in the chat:** `GameMaps.attribute` expects
+`(latitude, longitude, region)`. The 39 rows/22 deeds and
+200 hunting deeds named there were determined with swapped axes and are not valid.
+Equally unverified was the claim that all remaining deeds had „wirklich keinen
+Ort im DAT“. The present export proves no general impossibility.
 
-Mit richtiger Achsenfolge sind von den 290 Cell-zero-Rohzeilen bislang ortsloser
-Taten 124 auf eine Karte zu beziehen (83 Tat-IDs); 166 sind nicht zuzuordnen.
-Cell zero und ein passendes Kartenrechteck beweisen aber keinen brauchbaren
-Tat-Zielort. Viele Zeilen gehören zu unsichtbaren Instanz-Bestowal-Rollen oder
-Eingangsschritten. Sie werden bewusst nicht als Abschlussziele veröffentlicht.
+With the correct axis order, 124 of the 290 cell-zero raw rows of previously
+location-less deeds can be related to a map (83 deed IDs); 166 cannot be assigned.
+Cell zero and a matching map rectangle do not, however, prove a usable
+deed target location. Many rows belong to invisible instance bestowal roles or
+entry steps. They are deliberately not published as completion targets.
 
-### Tatsächlich zurückgewonnen
+### Actually recovered
 
-Der Generator berücksichtigt bei Taten zusätzlich den vorhandenen
-`QuestEvent_BillboardProgressOverride`. Für reine direkte Gegner-DID-Ereignisse
-ohne Zieltext bleibt der echte Schritt mit einem neutralen Hinweis erhalten.
-Versteckte Rollenbedingungen bekommen dagegen keinen erfundenen Zieltext.
+The generator additionally considers the existing
+`QuestEvent_BillboardProgressOverride` for deeds. For pure direct enemy DID events
+without target text, the real step is retained with a neutral note.
+Hidden role conditions, by contrast, receive no invented target text.
 
-Das bringt **30 zusätzliche Positionszeilen bei sechs bislang ortslosen Taten**:
+That brings **30 additional position rows for six previously location-less deeds**:
 Conquest of Dâr-gazag (4), Tyrants of the Enemy (7), Kill the Enemy's Leaders! (6),
-Conquest of Ringdyr (4), Conqueror of the Towers (7), A Deep Well (2). Alle alten
-englischen Zielpositionen sind unverändert enthalten; die Prüfung erfolgte gegen
-den vor dem Ausbau veröffentlichten Webkatalog.
+Conquest of Ringdyr (4), Conqueror of the Towers (7), A Deep Well (2). All old
+English target positions are contained unchanged; the check was made against
+the web catalogue published before the extension.
 
-Neuer gemeinsamer Stand DE/EN/FR: **5.528 Taten, 644 mit exakten Zielpositionen,
-6.922 Zielpositionszeilen**. Katalogzähler und Tat-IDs bleiben unverändert.
+New shared state DE/EN/FR: **5.528 deeds, 644 with exact target positions,
+6.922 target position rows**. Catalogue counters and deed IDs stay unchanged.
 
-### Eigene Jagdort-Ebene
+### Separate hunting ground level
 
-`MagicQuestLog/tools/deed_locations.py` akzeptiert nur ein einzelnes
-Besiegen-Ereignis (`QuestEvent_ID=22`) mit genau einer Regel aus
-`Quest_MonsterRegion` + `Quest_MonsterSpecies`. Unbekannte semantische Felder,
-weitere Bedingungen/Gruppen, Ausschlüsse, Rollen und Gegenstandsereignisse werden
-abgewiesen. Das ist absichtlich ein enger erster Ausbau.
+`MagicQuestLog/tools/deed_locations.py` accepts only a single
+defeat event (`QuestEvent_ID=22`) with exactly one rule from
+`Quest_MonsterRegion` + `Quest_MonsterSpecies`. Unknown semantic fields,
+further conditions/groups, exclusions, roles and item events are
+rejected. That is deliberately a narrow first extension.
 
-Die Gegnerart kommt aus unserem platzierten Objekt-Export (`Agent_Species`), das
-geforderte Gebiet aus Landblock und `Area_Territory`. Nur `layer=0`, `instance=0`,
-`cell=00000000` und tatsächlich kartenzuordenbare Positionen werden verwendet.
-Der separate Katalogschlüssel `h` hält Herkunft (`dat-enemy-base-world`), Gegner-DID,
-Gebiet, Spezies, Schritt und Koordinaten fest. Keine Hülle, kein erfundener
-Mittelpunkt, keine Garantie gleichzeitig vorhandener Gegner.
+The enemy kind comes from our placed object export (`Agent_Species`), the
+required area from landblock and `Area_Territory`. Only `layer=0`, `instance=0`,
+`cell=00000000` and positions actually assignable to a map are used.
+The separate catalogue key `h` records origin (`dat-enemy-base-world`), enemy DID,
+area, species, step and coordinates. No envelope, no invented
+centre, no guarantee of enemies present at the same time.
 
-Ergebnis: **222 Taten mit 14.977 Gegner-Positionszeilen**, davon **221 Taten ohne
-exakte Ziele**. Die Vereinigungsmenge beträgt damit **865 Taten mit exakten
-Positionen oder ausdrücklich gekennzeichneten Jagdort-Hinweisen**. Diese Zahl
-darf nicht mit ausschließlich exakten Zielorten verglichen werden.
+Result: **222 deeds with 14.977 enemy position rows**, of them **221 deeds without
+exact targets**. The union therefore amounts to **865 deeds with exact
+positions or expressly marked hunting ground notes**. This number
+must not be compared with exclusively exact target locations.
 
-Website: erst nach „Ziele einblenden“, gestrichelte bernsteinfarbene Zeichen statt
-Zielringe. Ein 36-Pixel-Raster fasst nahe Standorte zusammen; der Anker bleibt ein
-realer Standort, die Zahl zählt Positionszeilen, keine lebenden Gegner. Die
-Detailansicht erklärt die Bedeutung und bietet Kartenknöpfe. Bei Auswahl einer
-anderen Tat verschwinden die Hinweise. Plugin: derselbe Hinweis erst nach dem
-Einblenden, optionaler MoorMap-Knopf zum ersten verzeichneten Gegnerstandort.
+Website: only after „Ziele einblenden“, dashed amber symbols instead of
+target rings. A 36-pixel grid summarises nearby locations; the anchor remains a
+real location, the number counts position rows, no living enemies. The
+detail view explains the meaning and offers map buttons. When another deed is selected,
+the notes disappear. Plugin: the same note only after showing, optional MoorMap button to the first recorded enemy location.
 
-### Verbleibende Landmarken
+### Remaining landmarks
 
-Sieben weiterhin ortslose Taten nennen Landmarken: Goblin-town, je zwei
-Skoironk-/Towers-of-the-Teeth-Taten, Explorer of the Black Pits und Explorer of the
-Hiddenhoard. Goblinstadt und Hiddenhoard haben Innenraum-Cell-Koordinaten ohne
-passende Kartenabbildung; Black Pits hat 40 nicht auf die vorhandenen Karten
-abbildbare Cell-zero-Zeilen. Die geprüften Landmark-Datensätze selbst liefern
-keine zusätzliche Koordinatentransformation. Das bleibt eine offene
-Innenraum-/Instanzkarten-Recherche, keine nachgewiesene DAT-Grenze.
+Seven still location-less deeds name landmarks: Goblin-town, two
+Skoironk/Towers-of-the-Teeth deeds each, Explorer of the Black Pits and Explorer of the
+Hiddenhoard. Goblinstadt and Hiddenhoard have interior cell coordinates without a
+matching map image; Black Pits has 40 cell-zero rows that cannot be mapped onto the existing maps.
+The checked landmark records themselves deliver
+no additional coordinate transformation. That remains an open
+interior/instance map research, not a proven DAT limit.
 
-Reproduzierbare lesende Prüfung:
+Reproducible read-only check:
 `MagicQuestLog/tools/audit_deed_locations.py EXPORT_DIR WEB_DATEN_TATEN_EN_JS`.
-`test_deed_locations.py` prüft Achsenfolge, Dedup, Weltlayer, Innenräume und das
-Abweisen unvollständig verstandener Ereignisse. Die älteren Abschnitte unten
-dokumentieren den Ausgangsstand und sind keine neuen Ausbauzahlen.
+`test_deed_locations.py` checks axis order, dedup, world layer, interiors and the
+rejection of incompletely understood events. The older sections below
+document the starting state and are no new extension figures.
 
-Prüfung: `test_deed_locations.py`, `verify_catalog.py`, `test_plugin.py`,
-`test_features.py`, `test_struktur.py` und die Website-Unittests bestanden.
-Browserprüfung DE/EN/FR: Hinweise zunächst verborgen, sichtbar nach Einblenden,
-verschwinden beim Tatwechsel, Kartenknopf erhält die Auswahl, veränderte
-Fenstergröße erhält die vollständige 4:3-Karte. Veröffentlichungs-Build zusätzlich
-auf Bildladung, Hint-Parität aller Sprachen und leere persönliche
-Fortschrittsdatei geprüft. Screenshot: `output/playwright/deed-hunting-en.png`.
-Plugin-Quellcode und Katalog sind vorbereitet und headless geprüft; Spielprüfung
-und ein neues Plugin-Release stehen noch aus. Keine installierten Spiel- oder
-Fortschrittsdateien verändert.
+Check: `test_deed_locations.py`, `verify_catalog.py`, `test_plugin.py`,
+`test_features.py`, `test_struktur.py` and the website unit tests passed.
+Browser check DE/EN/FR: notes initially hidden, visible after showing,
+disappear on deed change, map button retains the selection, changed
+window size retains the complete 4:3 map. The publication build additionally
+checked for image loading, hint parity of all languages and an empty personal
+progress file. Screenshot: `output/playwright/deed-hunting-en.png`.
+Plugin source code and catalogue are prepared and checked headless; game check
+and a new plugin release are still outstanding. No installed game or
+progress files changed.
 
-Website veröffentlicht und unter `https://llb.sirhexalot.de` mit Barghest-slayer
-nachgeprüft: Hinweise verborgen beim Laden, drei gruppierte Zeichen nach dem
-Einblenden, Kartenbild erfolgreich geladen. Upload: 40 Dateien / 10,1 MB.
+Website published and re-checked at `https://llb.sirhexalot.de` with Barghest-slayer:
+notes hidden on loading, three grouped symbols after
+showing, map image loaded successfully. Upload: 40 files / 10,1 MB.
 
-## Ausgewertete eigene Daten
+## Evaluated own data
 
-- DAT-Export `full-dat-en-de-fr-2026-11-03/deeds.json`, `areas.json` und
+- DAT export `full-dat-en-de-fr-2026-11-03/deeds.json`, `areas.json` and
   `locations.json`.
-- Eigener `placed-2026-11-03/raw.jsonl`-Export: Eigenschaften platzierter Gegner,
-  NPCs und Gegenstände.
-- Eigener `did-positions-2026-11-03/positions.jsonl`-Export: Standorte.
-- Landblock-Gebietszuordnung aus Companions Spielreferenz `landblocks.xml`.
-- Ausgelieferter englischer Tatenkatalog: 5.528 Einträge, davon 638 mit
-  mindestens einem Zielort und 4.890 ohne Zielort.
+- Own `placed-2026-11-03/raw.jsonl` export: properties of placed enemies,
+  NPCs and items.
+- Own `did-positions-2026-11-03/positions.jsonl` export: locations.
+- Landblock area assignment from Companion's game reference `landblocks.xml`.
+- Delivered English deed catalogue: 5.528 entries, of them 638 with
+  at least one target location and 4.890 without a target location.
 
-Wichtig: Diese 638 Taten enthalten bereits **6.892 Zielpositionszeilen** im
-englischen Webkatalog. Die Tatanzahl darf nicht mit der Anzahl der Pins einer
-anderen Website verglichen werden. Unter anderem sind die acht Blumen im Alten
-Wald sowie die Erkundungsorte des Alten Waldes und der Hügelgräberhöhen enthalten.
-Ob die Pins tatsächlich alle auf der erwarteten Karte angezeigt werden, ist eine
-separate Frage der Kartenzuordnung und Anzeige.
+Important: these 638 deeds already contain **6.892 target position rows** in the
+English web catalogue. The deed count must not be compared with the number of pins of
+another website. Among others the eight flowers in the Old
+Forest as well as the exploration places of the Old Forest and the Barrow-downs are contained.
+Whether the pins are actually all shown on the expected map is a
+separate question of map assignment and display.
 
-In der rohen Zielpositionstabelle stehen 8.645 Zeilen für 1.099 Taten. Von den
-derzeit ausgelieferten Taten ohne Zielort haben 465 bereits Rohpositionen
-(1.267 Zeilen); diese müssen auf Karten-/Schrittzuordnung und Innenräume geprüft
-werden. Fehlende Anzeige bedeutet also nicht automatisch fehlende DAT-Position.
+In the raw target position table there are 8.645 rows for 1.099 deeds. Of the
+currently delivered deeds without a target location, 465 already have raw positions
+(1.267 rows); these must be checked for map/step assignment and interiors.
+A missing display therefore does not automatically mean a missing DAT position.
 
-Keine Positionen aus dem Wiki, Deed Tracker oder Kroels Website übernommen.
+No positions taken over from the wiki, Deed Tracker or Kroel's website.
 
-## Befund
+## Finding
 
-Die bisherige Ergänzung im Kataloggenerator folgt direkten Verweisen
+The previous addition in the catalogue generator follows direct references
 (`QuestEvent_MonsterDID`, `LandmarkDID`, `ItemDID`, `NPCTalk`, `Detect`,
-`EmoteTargetDID`). Unter den bisher ortslosen Taten gibt es nur zehn mit solchen
-Verweisen auf Außenpositionen im vorhandenen Export. Darunter sind PvMP,
-Instanzen und technische Inhalte. Das ist keine Liste von zehn unmittelbar
-veröffentlichbaren Landschaftstaten.
+`EmoteTargetDID`). Among the previously location-less deeds there are only ten with such
+references to outdoor positions in the existing export. Among them are PvMP,
+instances and technical content. That is not a list of ten immediately
+publishable landscape deeds.
 
-Eine zusätzliche Quelle ist `QuestEvent_MonsterGenus_Array`. Beispiel
-`70005BD2` (Barghest-slayer): `Quest_MonsterRegion=1879049792` und
-`Quest_MonsterSpecies=57`. Platzierte Gegner führen dazu passend `Agent_Species`.
-Über Region/BlockX/BlockY wird ihr Gebiet aus `landblocks.xml` bestimmt und über
-`Area_Territory` auf das verlangte Gebiet bezogen.
+An additional source is `QuestEvent_MonsterGenus_Array`. Example
+`70005BD2` (Barghest-slayer): `Quest_MonsterRegion=1879049792` and
+`Quest_MonsterSpecies=57`. Placed enemies carry a matching `Agent_Species`.
+Via region/BlockX/BlockY their area is determined from `landblocks.xml` and related via
+`Area_Territory` to the required area.
 
-**277 bisher ortslose Taten haben mindestens einen solchen Kandidaten**, wenn
-nur Regeln mit genau `Quest_MonsterRegion` und `Quest_MonsterSpecies`
-berücksichtigt werden. Beispiele (einzigartige auf zwei Stellen gerundete Orte):
+**277 previously location-less deeds have at least one such candidate** if
+only rules with exactly `Quest_MonsterRegion` and `Quest_MonsterSpecies`
+are considered. Examples (unique locations rounded to two places):
 
-- Barghest-slayer und Advanced: je 27 Standorte.
-- Brigand-slayer und Advanced: je 422.
-- Bree-land Woodsman und Advanced: je 68.
-- Neekerbreeker-slayer und Advanced: je 54.
-- Orc-slayer und Advanced: je 292.
+- Barghest-slayer and Advanced: 27 locations each.
+- Brigand-slayer and Advanced: 422 each.
+- Bree-land Woodsman and Advanced: 68 each.
+- Neekerbreeker-slayer and Advanced: 54 each.
+- Orc-slayer and Advanced: 292 each.
 
-Diese Zahlen zählen Kandidaten, **keine geprüften Tat-Zielorte**. Andere
-Bedingungen des jeweiligen Ereignisses, Inhaltslayer, Erreichbarkeit und
-Gegnerausschlüsse müssen vor einer Übernahme geprüft werden. Manche Ereignisse
-verknüpfen Gegenstandsbeute mit Gegnerregeln; dort ist ein Gegnerstandort kein
-fester Fundort des Gegenstands.
+These numbers count candidates, **no checked deed target locations**. Other
+conditions of the respective event, content layer, reachability and
+enemy exclusions must be checked before an adoption. Some events
+link item loot with enemy rules; there an enemy location is no
+fixed find location of the item.
 
-## Nächster sinnvoller Ausbau
+## Next sensible extension
 
-1. Vollständige Ereignisse samt Bedingungen auswerten; zunächst ausschließlich
-   eindeutige Gegnerbesiegen-Regeln.
-2. Außenpositionen plus Gebiet und Weltregion prüfen; Instanzen und technische
-   Layer nicht allein anhand `cell=0` als Landschaft interpretieren.
-3. Herkunft und Bedeutung separat speichern: **Gegnerstandort**, nicht
-   garantierter Fundort, nicht erfundener Mittelpunkt eines Jagdgebiets.
-4. Dichte Standorte sinnvoll anzeigen, ohne tausende deckungsgleiche Pins.
-5. An Barghest im Breeland und weiteren Gebieten im Spiel gegenprüfen.
+1. Evaluate complete events including conditions; initially only
+   unambiguous enemy defeat rules.
+2. Check outdoor positions plus area and world region; do not interpret instances and technical
+   layers as landscape solely by `cell=0`.
+3. Store origin and meaning separately: **enemy location**, not
+   guaranteed find location, not invented centre of a hunting area.
+4. Show dense locations sensibly, without thousands of coincident pins.
+5. Cross-check in-game on Barghest in Breeland and further areas.
 
-Bis dahin bleibt der veröffentlichte Zielkatalog unverändert. In der Webansicht
-werden vorhandene Zielkoordinaten unter dem jeweiligen Schritt angezeigt;
-Ziele müssen dafür eingeblendet sein. Keine Zuordnung zu einzelnen Bedingungen
-vortäuschen, wenn nur die Schrittnummer bekannt ist.
+Until then the published target catalogue stays unchanged. In the web view
+existing target coordinates are shown under the respective step;
+objectives must be shown for that. Do not feign an assignment to individual conditions
+when only the step number is known.
 
-## Vergleich mit Deed Tracker 3.3.0 (06.11.2026)
+## Comparison with Deed Tracker 3.3.0 (06.11.2026)
 
-Vergleich nur lesend mit dem aktuellen ZIP von LOTROInterface, Download-ID 1139;
-Version anhand `CubePlugins/DeedTracker.plugin` geprüft. Das öffentliche
-GitHub-main ist älter und darf nicht als aktuelles Release gezählt werden.
-Keine fremden Positionen in unseren Katalog übernommen.
+Comparison read-only with the current ZIP from LOTROInterface, download ID 1139;
+version checked via `CubePlugins/DeedTracker.plugin`. The public
+GitHub main is older and must not be counted as a current release.
+No foreign positions taken into our catalogue.
 
-- `DeedDataEN.lua`: 4.673 Tat-IDs.
-- `DeedObjectiveInfoEN.lua`: 3.278 LAT/LONG-Paare bei 600 Tat-IDs.
-- Unser englischer Webkatalog: 5.528 Tat-IDs, 6.892 Zielpositionszeilen bei 638 IDs.
-- Alle 4.673 Deed-Tracker-Tat-IDs kommen in unserem Katalog vor; wir haben 855
-  weitere IDs. Das beweist nicht, dass diese zusätzlichen Einträge alle spielbar
-  sind.
-- 477 Taten haben bei beiden Projekten Positionen.
-- 123 Taten haben bei Deed Tracker Positionen, bei uns keine.
-- 161 Taten haben bei uns Positionen, bei Deed Tracker keine.
+- `DeedDataEN.lua`: 4.673 deed IDs.
+- `DeedObjectiveInfoEN.lua`: 3.278 LAT/LONG pairs for 600 deed IDs.
+- Our English web catalogue: 5.528 deed IDs, 6.892 target position rows for 638 IDs.
+- All 4.673 Deed Tracker deed IDs appear in our catalogue; we have 855
+  further IDs. That does not prove that these additional entries are all playable.
+- 477 deeds have positions in both projects.
+- 123 deeds have positions in Deed Tracker, none with us.
+- 161 deeds have positions with us, none in Deed Tracker.
 
-Beispiele der 123 Lücken: Goblin-town, Bilbo's Buttons, Lore of the Forgotten
-Library, Treasures of the Silvertine Lodes, Implements of the Forge. Mehrere
-betreffen Innenräume/Instanzen; deren Koordinaten sind nicht ohne Weiteres Pins
-auf einer Landschaftskarte.
+Examples of the 123 gaps: Goblin-town, Bilbo's Buttons, Lore of the Forgotten
+Library, Treasures of the Silvertine Lodes, Implements of the Forge. Several
+concern interiors/instances; their coordinates are not readily pins
+on a landscape map.
 
-Positionszeilen sind kein Qualitätsranking: mehrere mögliche Positionen für ein
-Ziel, Wiederholungen zwischen verwandten Taten und unterschiedliche Zählweisen
-können die Zahlen stark beeinflussen. Der ID-Abgleich zeigt die echten
-Abdeckungslücken besser als die bloße Pinsumme.
+Position rows are no quality ranking: several possible positions for one
+target, repetitions between related deeds and different counting modes
+can strongly influence the numbers. The ID comparison shows the real
+coverage gaps better than the mere pin sum.

@@ -1,26 +1,28 @@
-# 9. Architekturentscheidungen
+# 9. Architecture decisions
 
-Die folgenden Punkte sind implementierte Architekturentscheidungen bzw. erkennbare Konventionen. Das Repository enthält für sie keine vollständigen ADRs mit Datum, Entscheider, Alternativen und Freigabestatus. Begründungen werden daher nur genannt, wenn sie aus Code, Datenfluss oder Kommentaren nachvollziehbar sind.
+The following points are implemented architecture decisions or recognisable conventions. The repository contains no complete ADRs for them with date, decision-maker, alternatives and approval status. Reasons are therefore only named where they can be traced from code, data flow or comments.
 
-| Entscheidung | Im Code erkennbare Begründung | Beleg |
+| Decision | Reason recognisable in the code | Evidence |
 |---|---|---|
-| PHP rendert vorbereitete Modelle statt den Gesamtkatalog je Request zu durchsuchen | Seiten- und Relationsdaten werden im Build aufgelöst und in Shards abgelegt. Konsequenz: Daten und Templates benötigen koordinierte Releases; veraltete Shards können zu inkonsistenten Verweisen führen. | `tools/php_viewmodel.py`, `tools/build_php_data.py`, `php/src/Data.php` |
-| Öffentliche Seiten laufen durch einen zentralen Front-Controller | Ein gemeinsamer Ort behandelt Routing, Redirects, Fehler und Ausgabe. Konsequenz: korrekte Rewrite-/Webserverregeln sind Teil der Auslieferung. | `php/public/index.php`, `php/src/Router.php` |
-| Charakterfortschritt wird clientseitig verarbeitet | Import und Charakterwechsel verwenden Browsermodule und `localStorage`; Release stellt eine leere Fortschrittsdatei bereit. Konsequenz: Fortschritt ist browser-/profilgebunden und kein serverseitiger account state. | `web/companion.js`, `web/speicher.js`, `tools/build_release.py` |
-| Release wird in Programm, Daten und Assets klassifiziert | Manifest und SHA-256-Werte ermöglichen reproduzierbare Komponentenstände und gezielte Uploads. Konsequenz: die Komponentenzuordnung muss für neue Dateien gepflegt sein; unbekannte Pfade verhindern den Manifestbau. | `tools/release_components.py`, `upload.py` |
-| Tatendaten nutzen den gemeinsamen Generator im Plugin-Repository | Website-Builder ruft diesen explizit auf, statt einen zweiten Tatengenerator zu führen. Konsequenz: Tatenbau ist an ein externes Repository und dessen Daten-/Pythonumgebung gebunden. | `tools/build_taten_daten.py` |
-| Große Listen und Kartenansichten werden stufenweise geladen | Index-/Kompakt-/Detaildaten sind getrennt, um initiale Payloads klein zu halten. Konsequenz: Assetstand, Startdaten und Shards müssen zusammenpassen. | `tools/build_karten_kurz.py`, `web/app.js`, `tools/build_release.py` |
+| PHP renders prepared models instead of scanning the whole catalogue per request | Page and relation data are resolved during the build and stored in shards. Consequence: data and templates require coordinated releases; outdated shards can lead to inconsistent references. | `tools/php_viewmodel.py`, `tools/build_php_data.py`, `php/src/Data.php` |
+| Public pages run through a central front controller | One shared place handles routing, redirects, errors and output. Consequence: correct rewrite/web server rules are part of delivery. | `php/public/index.php`, `php/src/Router.php` |
+| Character progress is processed client-side | Import and character switching use browser modules and `localStorage`; the release provides an empty progress file. Consequence: progress is bound to browser/profile and is not a server-side account state. | `web/companion.js`, `web/speicher.js`, `tools/build_release.py` |
+| Release is classified into program, data and assets | Manifest and SHA-256 values enable reproducible component versions and targeted uploads. Consequence: the component assignment must be maintained for new files; unknown paths prevent the manifest build. | `tools/release_components.py`, `upload.py` |
+| Deed data uses the shared generator in the plugin repository | The website builder invokes it explicitly instead of maintaining a second deed generator. Consequence: the deed build is bound to an external repository and its data/Python environment. | `tools/build_taten_daten.py` |
+| Large lists and map views are loaded in stages | Index/compact/detail data are separated in order to keep initial payloads small. Consequence: asset version, start data and shards must match. | `tools/build_karten_kurz.py`, `web/app.js`, `tools/build_release.py` |
+| Documentation is written in English, including this file | One language for readers, agents and the mailing of a data-model description; player-facing texts stay DE/EN/FR because they are product. Consequence: generated audit tables must be translated at the generator, quoted labels keep their German wording, and folders outside `docs/arc42/` keep their names because scripts and tests reference them. | `AGENTS.md` (documentation rule), `docs/README.md` (rule and glossary), `docs/datenraum/*.py` |
+| The PDF is generated from the Markdown, never maintained beside it | Markdown stays the single source; Mermaid sources live in the document, so a diagram cannot drift from the text. Consequence: a PDF build needs pandoc and a local Chrome, and the file stays in the ignored `output/` folder. | `tools/build_doc_pdf.py`, `docs/datenraum/entity-model.md` |
 
-Ein formales ADR-Verzeichnis oder ein automatischer Abgleich dieser Tabelle mit Code wurde in diesem Dokumentationsschritt nicht festgestellt.
+No formal ADR directory or automatic alignment of this table with code was identified in this documentation step.
 
-### Fehlende Entscheidungsnachweise
+### Missing decision evidence
 
-Für die obigen Entscheidungen sind Zeitpunkt, verantwortliche Person, betrachtete Alternativen, explizite Qualitätsabwägung und Kriterien zur Neubewertung überwiegend nicht dokumentiert. Diese Tabelle ist daher ein Architektur-Iststand, kein nachträglich erzeugtes Freigabeprotokoll. Künftige wichtige Entscheidungen sollten diese Angaben in einem ADR festhalten.
+For the decisions above, the point in time, responsible person, alternatives considered, explicit quality trade-off and criteria for re-evaluation are largely undocumented. This table is therefore an architecture status quo, not a retroactively produced approval record. Future important decisions should record these details in an ADR.
 
-### Beschlossene, noch nicht umgesetzte Entscheidungen
+### Decided but not yet implemented decisions
 
-Diese Punkte sind entschieden, aber noch nicht im Code wirksam. Sie stehen hier, damit die Dokumentation den Stand nicht als umgesetzt ausgibt.
+These points are decided but not yet effective in the code. They are listed here so that the documentation does not present the state as implemented.
 
-| Entscheidung | Begründung | Stand und Beleg |
+| Decision | Reason | Status and evidence |
 |---|---|---|
-| Unbenannte Karten werden über ihre zugeordneten Gebiete benannt, nicht über ihre ID | `parchmentMaps.xml` führt zu jeder Karte Gebiete mit belegten Namen in DE/EN/FR; eine technische ID ist keine Spielbezeichnung. Die Ableitungskette endet damit auf einem geprüften Namen statt auf `Karte <ID>`. | Beschlossen am 20.11.2026; Umsetzung offen. Plan und Abnahmekriterien: `docs/todos/kartenbenennung-hierarchie.md`. Nach der Umsetzung wandert der Punkt in die Tabelle oben. |
+| Unnamed maps are named after their assigned areas, not after their ID | `parchmentMaps.xml` lists areas with evidenced names in DE/EN/FR for every map; a technical ID is not a game designation. The derivation chain thus ends on a checked name instead of `Karte <ID>`. | Decided on 20.11.2026; implementation open. Plan and acceptance criteria: `docs/archiv/kartenbenennung-hierarchie.md`. After implementation the point moves into the table above. |

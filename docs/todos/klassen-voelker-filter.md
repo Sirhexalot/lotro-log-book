@@ -1,47 +1,45 @@
-# Klassen- und Völkerprofile mit passenden Kataloglisten
+# Class and race profiles with matching catalogue lists
 
-Stand: 20.11.2026
-Status: umgesetzt und in lokaler Vorschau geprüft (DE/EN/FR)
+Status as of 20.11.2026
+Status: implemented and checked in the local preview (DE/EN/FR)
 
-## Umgesetzt
+## Implemented
 
-- Einstieg `Charakter → Klassen & Völker`, mit Sprachpfaden `/de/klassen/`,
-  `/en/classes/` und `/fr/classes/`.
-- Auswahl angebotener Völker je Klasse aus `classes.xml` und `races.xml`;
-  lokalisierte Namen aus den Client-Labels. Eine separate Kombinationsmatrix
-  wird nicht gezeigt.
-- Auswahl von Klasse, Volk und Stufe. „Mein Charakter“ übernimmt den aktiven
-  Import ausschließlich lokal im Browser.
-- Waffen- und Rüstungskenntnisse mit Freischaltstufe aus `classes.xml` und
-  übersetzten Typnamen aus den Client-Enums.
-- `tools/build_class_data.py` erzeugt die drei Sprachdateien beim Release-Bau.
+- Entry `Charakter → Klassen & Völker`, with language paths `/de/klassen/`,
+  `/en/classes/` and `/fr/classes/`.
+- Selection of the races offered per class from `classes.xml` and `races.xml`;
+  localised names from the client labels. A separate combination matrix
+  is not shown.
+- Selection of class, race and level. „Mein Charakter“ takes over the active
+  import exclusively locally in the browser.
+- Weapon and armour proficiencies with unlock level from `classes.xml` and
+  translated type names from the client enums.
+- `tools/build_class_data.py` creates the three language files during the release build.
 
-## Umsetzung
+## Implementation
 
-- Aufgaben und Taten: vollständige Liste nach ausgewählter Klasse, Volk und
-  Stufe; `requiredClass` und `requiredRace` werden gemeinsam angewendet.
-- Gegenstände: eine gemeinsame Liste aus passenden `requiredClass`-gebundenen
-  Verbrauchsgütern/Klassenwerkzeugen und Ausrüstung. Klasse, Volk, Stufe,
-  explizite Gegenstandsbeschränkungen sowie Waffen-/Rüstungskenntnis samt
-  Freischaltstufe grenzen die Basisliste ein.
-- Einträge mit zusätzlicher Ausrüstungsbedingung wie Eigenschaft, Ruf,
-  Fraktionsrang oder Effekt erscheinen nicht in der Ausrüstungsliste.
-- Aufgaben, Taten und die gemeinsame Gegenstandsliste verwenden die
-  Standard-Filterkomponente mit Suche, passenden Facetten, Sortierung und
-  Pagination. Je Liste bleibt der Profilkontext beim Filtern und Zurücksetzen
-  erhalten.
-- Die Ergebnisliste folgt mit gleichbleibendem Abstand direkt auf die
-  Filterleiste; ein veralteter Ladefehler verschwindet, sobald Filtern wieder
-  funktioniert. Ergebniszeilen ohne Symbol nutzen die volle Textbreite.
-- Daten bleiben im Browser; „Mein Charakter“ liest nur den lokalen Import.
+- Quests and deeds: complete list by the selected class, race and
+  level; `requiredClass` and `requiredRace` are applied together.
+- Items: one shared list from matching `requiredClass`-bound
+  consumables/class tools and equipment. Class, race, level,
+  explicit item restrictions as well as weapon/armour proficiency including
+  unlock level narrow the base list.
+- Entries with an additional equipment condition such as attribute, reputation,
+  faction rank or effect do not appear in the equipment list.
+- Quests, deeds and the shared item list use the
+  standard filter component with search, matching facets, sorting and
+  pagination. Per list, the profile context is retained when filtering and resetting.
+- The result list follows the filter bar directly at a constant distance;
+  an outdated load error disappears as soon as filtering
+  works again. Result rows without an icon use the full text width.
+- Data stays in the browser; „Mein Charakter“ reads only the local import.
 
-## Abnahme
+## Acceptance
 
-- Hobbit-Jäger: keine schwere Rüstung; Armbrustkenntnis erst ab Stufe 7.
-- Hobbit-Wächter: schwere Rüstung ab der belegten Freischaltstufe.
-- Jäger-Bärenfallen und Jäger/Hüter-Öle erscheinen gemeinsam in der
-  Gegenstandsliste; geteilte Klassenanforderungen bleiben an den Einträgen
-  erkennbar.
-- Eine klassengebundene Volkstat erscheint nur für eine erlaubte Kombination;
-  allgemeine Aufgaben und Taten bleiben auffindbar.
-- Importierte Klasse, Volk, Stufe und Fortschritt verlassen den Browser nicht.
+- Hobbit hunter: no heavy armour; crossbow proficiency only from level 7.
+- Hobbit warden: heavy armour from the verified unlock level.
+- Hunter bear traps and hunter/warden oils appear together in the
+  item list; shared class requirements remain recognisable on the entries.
+- A class-bound racial stat appears only for a permitted combination;
+  general quests and deeds remain findable.
+- Imported class, race, level and progress do not leave the browser.

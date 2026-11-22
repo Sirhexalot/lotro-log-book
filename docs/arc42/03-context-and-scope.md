@@ -1,38 +1,38 @@
-# 3. Kontextabgrenzung
+# 3. Context and scope
 
-### Beteiligte und Nachbarsysteme
+### Participants and neighbouring systems
 
-| Beteiligter / System | Beziehung zum LOTRO Log Book | Belegter Umfang |
+| Participant / system | Relationship to the LOTRO Log Book | Evidenced scope |
 |---|---|---|
-| Website-Besucher | Ruft Anwendungs-, Listen- und Detailseiten ab | Sprachpfade und Seitenauflösung in `php/src/Router.php` |
-| Browser | Führt Karten-, Such- und Filteroberflächen aus; hält Sprachwahl, Filtergedächtnis und Charakterdaten lokal | `web/*.js`, unter anderem `speicher.js`, `filtergedaechtnis.js`, `companion.js` |
-| LOTRO Companion | Liefert Dateien, die der Browserimport verarbeitet | `web/companion.js`, `web/spielstand.js` |
-| Spiel-/DAT-Daten | Werden außerhalb des HTTP-Requests exportiert und zu Website-Daten verarbeitet | Generatoren wie `build_daten.py`, `build_items.py`, `tools/build_php_data.py` |
-| MagicQuestLog | Gemeinsamer Generator für Tatendaten; externes Repository | Aufruf in `tools/build_taten_daten.py` |
-| Webserver / PHP | Leitet öffentliche Seiten an den Front-Controller; stellt statische Dateien bereit | `deploy/index.php`, `php/public/index.php`; Rewrite-Regeln sind nicht Teil des Release-Ordners |
-| FTPS-Zielserver | Erhält gebaute Release-Dateien | `upload.py` |
+| Website visitor | Requests application, list and detail pages | Language paths and page resolution in `php/src/Router.php` |
+| Browser | Runs map, search and filter surfaces; holds language selection, filter memory and character data locally | `web/*.js`, among others `speicher.js`, `filtergedaechtnis.js`, `companion.js` |
+| LOTRO Companion | Supplies files that the browser import processes | `web/companion.js`, `web/spielstand.js` |
+| Game/DAT data | Is exported outside the HTTP request and processed into website data | Generators such as `build_daten.py`, `build_items.py`, `tools/build_php_data.py` |
+| MagicQuestLog | Shared generator for deed data; external repository | Invocation in `tools/build_taten_daten.py` |
+| Web server / PHP | Routes public pages to the front controller; serves static files | `deploy/index.php`, `php/public/index.php`; rewrite rules are not part of the release folder |
+| FTPS target server | Receives built release files | `upload.py` |
 
-### Funktions- und URL-Raum
+### Function and URL space
 
-`Catalogue::APP` ordnet App-Schlüssel je Sprache den öffentlichen Pfaden zu. Zum aktuellen App-Raum gehören Startseite, Karte und Tatenmodus, Aufgabenfinder, Gegenstandssuche, Handwerk/Rezepte, Reise, Ruf, Belohnungen, Spielstandimport, Companion-Hilfe, Plugin-Hilfe, globale Suche sowie Set-, Auftraggeber-, Händler-, Landmarken-, Titel-, Fraktions-, Instanz- und Abenteuerbrowser. Die App-Adressen sind sprachpräfigiert; der Aufgaben-/Tatenmodus teilt sich ein Karten-Template.
+`Catalogue::APP` maps app keys per language to the public paths. The current app space includes the home page, map and deed mode, quest finder, item search, crafting/recipes, travel, reputation, rewards, character progress import, Companion help, plugin help, global search as well as set, quest giver, vendor, landmark, title, faction, instance and adventure browsers. The app addresses are language-prefixed; quest/deed mode share one map template.
 
-Der Entitätsraum hat getrennte Segmente für Aufgaben, Taten, Gegenstände, Gebiete, Regionen, Rezepte, Berufe, Titel, Tugenden, Sets, Auftraggeber, Händler, Fraktionen und Landmarken. Die genauen deutschen, englischen und französischen Segmente stehen ausschließlich in `php/src/Catalogue.php`; beispielhaft `/de/aufgabe/<ID>/`, `/en/quest/<ID>/`, `/fr/quete/<ID>/`. Anwendungsseiten, Entitätsseiten und datengetriebene Listen sind im Router getrennte Routeklassen. Eine Berufsadresse leitet in die Handwerksanwendung; das ist keine Beruf-Detailseite.
+The entity space has separate segments for quests, deeds, items, areas, regions, recipes, professions, titles, virtues, sets, quest givers, vendors, factions and landmarks. The exact German, English and French segments are held exclusively in `php/src/Catalogue.php`; as examples `/de/aufgabe/<ID>/`, `/en/quest/<ID>/`, `/fr/quete/<ID>/`. Application pages, entity pages and data-driven lists are separate route classes in the router. A profession address redirects into the crafting application; that is not a profession detail page.
 
-### Datenflussgrenze beim Charakterfortschritt
+### Data flow boundary for character progress
 
-Der Import und Charakterwechsel werden im Browser verarbeitet und mit `localStorage` gespeichert. Der Statistik-Endpunkt `/api/statistik` ist ein separater Pfad: Er verarbeitet Heartbeat- und Importzählereignisse und speichert aggregierte Zähler in einer Datei. Die eingesehenen Aufrufstellen senden keinen Charakterspielstand an diesen Endpunkt.
+Import and character switching are processed in the browser and stored with `localStorage`. The statistics endpoint `/api/statistik` is a separate path: it processes heartbeat and import counter events and stores aggregated counters in a file. The call sites that were inspected do not send character progress to this endpoint.
 
-Belege: `web/companion.js`, `web/speicher.js`, `web/statistik.js`, `php/public/index.php`, `php/src/Statistics.php`.
+Evidence: `web/companion.js`, `web/speicher.js`, `web/statistik.js`, `php/public/index.php`, `php/src/Statistics.php`.
 
-### Externe Schnittstellen
+### External interfaces
 
-| Schnittstelle | Zweck und belegtes Format | Nicht durch diesen Checkout festgelegt |
+| Interface | Purpose and evidenced format | Not determined by this checkout |
 |---|---|---|
-| HTTP zu Browsern | Sprachpfade, HTML, JSON/JavaScript-Assets, kanonische URLs und Statuscodes | TLS-Endpunkt, CDN/Proxy, konkrete Serverlimits |
-| Companion-Dateien | Browser verarbeitet ausgewählte XML-/Exportdateien lokal | Vollständigkeit aller Companion-Versionen |
-| DAT-/Spiel-Exporte | Generatoren lesen XML, Lua, JSON und erzeugte Zwischenformate | Verfügbarkeit/Versionierung externer Installationen |
-| MagicQuestLog | Lokaler Prozessaufruf für den gemeinsamen Taten-Generator | Vollständiger Kompatibilitätsvertrag der Repositories |
-| FTPS | `upload.py` überträgt Release-Dateien und Manifest | Anbieter, Serverkonfiguration und Zugangsdaten |
-| `/api/statistik` | JSON-Aktionen `heartbeat`, `import`, `current`; aggregierter Dateistand | Externe Trackingkonfiguration und rechtliche Bewertung |
+| HTTP to browsers | Language paths, HTML, JSON/JavaScript assets, canonical URLs and status codes | TLS endpoint, CDN/proxy, concrete server limits |
+| Companion files | Browser processes selected XML/export files locally | Completeness across all Companion versions |
+| DAT/game exports | Generators read XML, Lua, JSON and generated intermediate formats | Availability/versioning of external installations |
+| MagicQuestLog | Local process invocation for the shared deed generator | Complete compatibility contract of the repositories |
+| FTPS | `upload.py` transfers release files and manifest | Provider, server configuration and credentials |
+| `/api/statistik` | JSON actions `heartbeat`, `import`, `current`; aggregated file state | External tracking configuration and legal assessment |
 
-Dies sind aus den implementierenden Stellen abgeleitete Schnittstellen, keine versionierten API-Verträge.
+These are interfaces derived from the implementing sites, not versioned API contracts.

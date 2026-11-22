@@ -1,55 +1,55 @@
-# Händler und Tauschhändler
+# Vendors and barter vendors
 
-Ein Händler ist ein NPC, bei dem man etwas bekommt. Zwei Quellen liefern die
-Einträge, und beide gehören in denselben Katalog:
+A vendor is an NPC where one gets something. Two sources provide the
+entries, and both belong in the same catalogue:
 
-| Art | Quelle | Anzahl |
+| Kind | Source | Count |
 |---|---|---|
-| Händler (verkauft) | `vendor-items-2026-11-08/vendor-items.json` | 1.199 |
-| Händler und Tauschhändler | dieselbe Datei, zusätzlich in `barters.xml` | 270 |
-| Tauschhändler (nur Tausch) | Rückwärtsbezug aus `daten/items.json` (`tausch`) | 93 |
+| Vendor (sells) | `vendor-items-2026-11-08/vendor-items.json` | 1.199 |
+| Vendor and barter vendor | the same file, additionally in `barters.xml` | 270 |
+| Barter vendor (barter only) | reverse reference from `daten/items.json` (`tausch`) | 93 |
 
-Zusammen 1.562 Einträge in `daten/haendler.json`. `build_haendler.py` schreibt
-sie, `tools/vendor_viewmodel.py` und `php/src/Vendors.php` machen daraus Seiten
-unter `/de/haendler/<ID>/`, `/en/vendor/`, `/fr/marchand/`.
+Together 1.562 entries in `daten/haendler.json`. `build_haendler.py` writes
+them, `tools/vendor_viewmodel.py` and `php/src/Vendors.php` make pages out of
+them under `/de/haendler/<ID>/`, `/en/vendor/`, `/fr/marchand/`.
 
-## Kennungen
+## Identifiers
 
-Seitenadressen verlangen **acht Hexzeichen**; `Catalogue::isValidId` akzeptiert
-für Händler nichts anderes. Der Gegenstandsexport schreibt die NPC-Kennung
-dezimal (`1879175294`), die Labels-Datei schlüsselt sie genauso. `build_haendler.py`
-rechnet deshalb einmal in `%08X` um (`7001F07E`) und merkt sich die dezimale
-Form nur für den Label-Abgleich. `php_viewmodel.py` macht dieselbe Umrechnung,
-bevor es eine Tauschzeile auf eine Händlerseite verlinkt.
+Page addresses require **eight hex characters**; `Catalogue::isValidId` accepts
+nothing else for vendors. The item export writes the NPC identifier
+decimal (`1879175294`), the labels file keys it the same way. `build_haendler.py`
+therefore converts once into `%08X` (`7001F07E`) and remembers the decimal
+form only for the label match. `php_viewmodel.py` does the same conversion
+before it links a barter row to a vendor page.
 
-## Was eine Seite zeigt
+## What a page shows
 
-- Name in DE/EN/FR aus `lore/labels/<sprache>/npc.xml`.
-- Typ: „Händler“, „Tauschhändler“ oder „Händler und Tauschhändler“.
-- Waren: bei Händlern die verkauften, bei Tauschhändlern die eingetauschten
-  Gegenstände, bei „beides“ die Vereinigung. Überschrift entsprechend
-  „Warenangebot“ oder „Tauschgegenstände“.
-- Standort und Karte nur, wenn `did-positions` eine Position kennt.
-- **Keine** Berufsbezeichnung bei reinen Tauschhändlern: der Client liefert sie
-  nur auf Englisch („Crafting“), und eine deutsche Seite erfindet keine
-  Übersetzung. Der Gegenstandseintrag unter „Woher“ zeigt aus demselben Grund
-  nur den Namen.
+- Name in DE/EN/FR from `lore/labels/<sprache>/npc.xml`.
+- Type: „Händler“, „Tauschhändler“ or „Händler und Tauschhändler“.
+- Goods: for vendors the sold, for barter vendors the bartered
+  items, for „beides“ the union. Heading accordingly
+  „Warenangebot“ or „Tauschgegenstände“.
+- Location and map only if `did-positions` knows a position.
+- **No** profession label for pure barter vendors: the client provides it
+  only in English („Crafting“), and a German page invents no
+  translation. The item entry under „Woher“ shows for the same reason
+  only the name.
 
-## Grenzen
+## Limits
 
-- Reine Tauschhändler haben **keinen Standort** in den Exporten (0 von 93). Die
-  Seite bleibt ohne Kartenabschnitt, statt einen Ort zu raten.
-- Eine Beschreibung gibt es für keinen Händler im Export.
-- Tauschmengen und Bedingungen (was man hergibt) stehen nicht in
-  `daten/items.json`; die Seite nennt nur, was man bekommt.
-- Der Typ „Händler und Tauschhändler“ ist eine Mengenaussage, keine Aussage
-  darüber, welche Ware gegen was getauscht wird.
+- Pure barter vendors have **no location** in the exports (0 of 93). The
+  page remains without a map section instead of guessing a place.
+- There is no description for any vendor in the export.
+- Barter amounts and conditions (what one gives) are not in
+  `daten/items.json`; the page names only what one gets.
+- The type „Händler und Tauschhändler“ is a statement about amounts, not a
+  statement about which goods are traded for what.
 
-## Prüfungen
+## Checks
 
-`tests/test_item_model.py` hält fest: eine Tauschhändlerseite existiert in allen
-drei Sprachen, ihre Kennung ist achtstellig, die Gegenstandsseite verlinkt jede
-Tauschzeile, und die Zeile wiederholt die englische Berufsbezeichnung nicht.
-Die Typfilter der Händlerliste (`type_filter_vendor`, `type_filter_barter`,
-`type_filter_both`) und die Überschrift `barter_items` prüft derselbe Test über
-die Quellen.
+`tests/test_item_model.py` records: a barter vendor page exists in all
+three languages, its identifier is eight characters, the item page links every
+barter row, and the row does not repeat the English profession label.
+The type filters of the vendor list (`type_filter_vendor`, `type_filter_barter`,
+`type_filter_both`) and the heading `barter_items` are checked by the same test via
+the sources.

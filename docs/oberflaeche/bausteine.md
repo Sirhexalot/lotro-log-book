@@ -1,114 +1,114 @@
-# Gemeinsame Bausteine
+# Common building blocks
 
-Wiederkehrende Bausteine liegen an einem Ort, damit dieselbe Sache nicht je Seite anders aussieht. Der Ordner `php/templates/components/` enthält das Markup, eine gleichnamige CSS-Datei in `web/` den Look, JavaScript nur dort, wo Verhalten nötig ist.
+Recurring building blocks lie in one place so that the same thing does not look different per page. The folder `php/templates/components/` contains the markup, a CSS file of the same name in `web/` the look, JavaScript only where behaviour is needed.
 
-Ein Baustein wird nur daraus, was **dieselbe Bedeutung** an mindestens drei Stellen hat und sich in **ein Markup** bringen lässt. Reine Ähnlichkeit im Aussehen genügt nicht: sonst entsteht eine Universaldatei mit Schaltern für jeden Sonderfall.
+Something only becomes a building block if it has **the same meaning** in at least three places and can be brought into **one markup**. Mere similarity in appearance is not enough: otherwise a universal file with switches for every special case arises.
 
-## Namensregeln
+## Naming rules
 
-- Ordner und Dateien: `components/<baustein>.twig`, `web/<baustein>.css`, `web/<baustein>.js` (nur bei Bedarf).
-- CSS-Klassen: `llb-<baustein>`; Varianten über Attribute (`data-dichte="kompakt"`, `data-ton="…"`), nicht über neue Klassennamen.
-- Farben, Abstände und Radien ausschließlich aus den Token in `web/gemeinsam.css`.
-- Die Überschriftsebene gehört zum Kontext, nicht zum Baustein: h2 auf einer Katalogseite, h3 im Kartenpanel, das schon einen Entitätstitel trägt.
+- Folders and files: `components/<baustein>.twig`, `web/<baustein>.css`, `web/<baustein>.js` (only when needed).
+- CSS classes: `llb-<baustein>`; variants via attributes (`data-dichte="kompakt"`, `data-ton="…"`), not via new class names.
+- Colours, spacings and radii exclusively from the tokens in `web/gemeinsam.css`.
+- The heading level belongs to the context, not to the building block: h2 on a catalogue page, h3 in the map panel that already carries an entity title.
 
-## Fläche (Sektion mit Überschrift)
+## Surface (section with heading)
 
-`php/templates/components/flaeche.twig`, `web/flaeche.css`, geladen über `Shell::styles()` und im Kartenapp über `karte.twig`. Katalogseiten und Karten-Detailspalte tragen dieselbe Fläche, dieselbe Überschrift und denselben Rhythmus.
+`php/templates/components/flaeche.twig`, `web/flaeche.css`, loaded via `Shell::styles()` and in the map app via `karte.twig`. Catalogue pages and the map detail column carry the same surface, the same heading and the same rhythm.
 
-- Makro: `flaeche(titel, ebene = 2, klasse = '', kennung = '')`, Inhalt über `{% call %}`.
-- Die Überschrift gehört zum Baustein: h2/h3/h4 einheitlich `--text-abschnitt` (20 px), Gewicht 500, `0 0 8px`; nach oben kein Abstand. Die Ebene folgt nur der Dokumenthierarchie (h2 im Katalog, h3 im Panel).
-- Ein Innenabstand über `--llb-flaechen-innen`; der Abstand zwischen Flächen ist `--llb-flaechen-abstand` (12 px) für die Katalog-Spalte wie für die Panel-Spalte.
-- `data-ton="hell"` ist der hellere Grund für Belohnungen und Werte; Rahmen, Rundung und Abstände bleiben gleich.
-- `<details>`-Abschnitte tragen ebenfalls `llb-flaeche`; ihre Zusammenfassung liest sich wie die Abschnittsüberschrift und behält das Aufklapp-Dreieck, Gold nur bei Hover/Fokus.
-- Der Fließtext bleibt Sache der Umgebung: 16 px auf Detailseiten, 14 px in der Karten-Detailspalte.
-- Es gibt keine Struktur-Aliase mehr; jeder Abschnitt trägt `llb-flaeche` selbst. Die Panel-Fläche der Bezugsreiter bleibt bei der Reiter-Komponente (`reiter.css`).
+- Macro: `flaeche(titel, ebene = 2, klasse = '', kennung = '')`, content via `{% call %}`.
+- The heading belongs to the building block: h2/h3/h4 uniformly `--text-abschnitt` (20 px), weight 500, `0 0 8px`; no spacing to the top. The level follows only the document hierarchy (h2 in the catalogue, h3 in the panel).
+- An inner padding via `--llb-flaechen-innen`; the spacing between surfaces is `--llb-flaechen-abstand` (12 px) for the catalogue column as for the panel column.
+- `data-ton="hell"` is the lighter ground for rewards and values; border, rounding and spacings remain the same.
+- `<details>` sections also carry `llb-flaeche`; their summary reads like the section heading and keeps the fold-out triangle, gold only on hover/focus.
+- The body text remains a matter of the surroundings: 16 px on detail pages, 14 px in the map detail column.
+- There are no structure aliases any more; every section carries `llb-flaeche` itself. The panel surface of the reference tabs stays with the tab component (`reiter.css`).
 
-## Fakten (Label und Wert)
+## Facts (label and value)
 
-`web/fakten.css`, ohne eigenes Twig-Makro: die Form ist bereits eindeutig `<dl><dt>Label</dt><dd>Wert</dd>…</dl>`, und genau so schreibt sie auch `app.js`. Ein Makro müsste für zusammengesetzte Werte (Gebietspfade mit mehreren Links) Arrays bauen und würde die Vorlagen nur länger machen.
+`web/fakten.css`, without its own Twig macro: the form is already unambiguous `<dl><dt>Label</dt><dd>Wert</dd>…</dl>`, and that is exactly how `app.js` writes it. A macro would have to build arrays for composite values (area paths with several links) and would only make the templates longer.
 
-- `.llb-fakten` – zweispaltig, Label schwach, Wert umbruchfähig, Links in Gold.
-- `data-dichte="kompakt"` – kleinere Schrift, engerer Abstand, auch mobil zwei Spalten (Karten-Detailspalte, dort sind die Labels kurz).
-- Mobil ohne `kompakt` steht das Label über dem Wert.
-- `.katalog-werte-raster` (Gegenstandswerte, Instanzfakten) bleibt getrennt: Es ist eine Werte-Tabelle mit Trennlinien, keine Label-Wert-Liste.
+- `.llb-fakten` – two columns, label weak, value breakable, links in gold.
+- `data-dichte="kompakt"` – smaller font, tighter spacing, two columns on mobile as well (map detail column, where the labels are short).
+- On mobile without `kompakt` the label stands above the value.
+- `.katalog-werte-raster` (item values, instance facts) remains separate: it is a value table with dividing lines, not a label-value list.
 
-## Reiter
+## Tabs
 
-`php/templates/components/reiter.twig`, `web/reiter.css`, `web/reiter.js`, geladen über `Shell::styles()` und beide Layouts.
+`php/templates/components/reiter.twig`, `web/reiter.css`, `web/reiter.js`, loaded via `Shell::styles()` and both layouts.
 
-- Makro: `reiter(kennung, titel, eintraege, aktiv, versteckt)`; jeder Eintrag ist `{key, label, panel, zahl}`.
-- Der aktive Reiter geht in das Panel darunter über (goldene Oberkante, `margin-bottom:-1px`); Farben nur aus Token.
-- Verhalten kommt aus `MQL_REITER.mount`: ein sichtbares Panel, `aria-selected`/`tabindex`, Pfeiltasten/Home/End, optionaler Hash samt Zurück-Knopf, `onShow` für nachgeladene Inhalte.
-- Zähler sind optional und erscheinen nur bei Werten größer null; die Seite liefert die Zahl.
-- Keine Seite bringt eigenes `role="tablist"`-Markup oder eigene Reiterfarben mit. Wächter: `tests/test_reiter.py`, `tests/browser_reiter.js`.
-- Vertrag, Seitenliste und Vorgehen für neue Reiter: [`reiter.md`](reiter.md).
+- Macro: `reiter(kennung, titel, eintraege, aktiv, versteckt)`; each entry is `{key, label, panel, zahl}`.
+- The active tab merges into the panel below (golden top edge, `margin-bottom:-1px`); colours only from tokens.
+- Behaviour comes from `MQL_REITER.mount`: one visible panel, `aria-selected`/`tabindex`, arrow keys/Home/End, optional hash together with back button, `onShow` for reloaded content.
+- Counters are optional and appear only for values greater than zero; the page delivers the number.
+- No page brings its own `role="tablist"` markup or its own tab colours. Guards: `tests/test_reiter.py`, `tests/browser_reiter.js`.
+- Contract, page list and procedure for new tabs: [`reiter.md`](reiter.md).
 
-## Hinweiszeile
+## Note line
 
-`web/hinweis.css` – die leise Zeile für Einordnungen, Koordinaten, Hinweise und Intros.
+`web/hinweis.css` – the quiet line for classifications, coordinates, notes and intros.
 
-- `.llb-hinweis` färbt nur mit `--schwach` und folgt der umgebenden Schriftgröße.
-- `data-groesse="bedienung"` (14 px) und `data-groesse="klein"` (12 px) wählen eine Stufe aus der gemeinsamen Skala; die Karten-Detailspalte nutzt `klein`.
-- Ersetzt die früheren Seitenklassen `katalog-hinweis`, `katalog-marken` und `detail-lage`. Auch die statischen Kataloggeneratoren schreiben `llb-hinweis`.
-- Kein Hinweisbaustein: `.mql-row-help` (Hilfszeile mit Import-Link in Ergebnislisten) und die Hinweisflächen der Abenteuerübersicht.
+- `.llb-hinweis` colours only with `--schwach` and follows the surrounding font size.
+- `data-groesse="bedienung"` (14 px) and `data-groesse="klein"` (12 px) choose a level from the common scale; the map detail column uses `klein`.
+- Replaces the earlier page classes `katalog-hinweis`, `katalog-marken` and `detail-lage`. The static catalogue generators also write `llb-hinweis`.
+- No note building block: `.mql-row-help` (help line with import link in result lists) and the note surfaces of the adventure overview.
 
-## Klappe (Flyout)
+## Fold-out (flyout)
 
-`web/klappe.css` und `web/klappe.js` – ein Knopf mit einem Panel daneben.
+`web/klappe.css` and `web/klappe.js` – a button with a panel next to it.
 
-- Markup: `button[aria-expanded][aria-controls]` plus Panel mit `.llb-klappe-feld` und `hidden`. Das Panel bringt Fläche, Rahmen, Schatten, maximal 60 vh Höhe und Scrollen mit; Öffnungsrichtung, Breite und Inhalt gehören zur Seite.
-- Verhalten über `MQL_KLAPPE.bind(knopf, feld, {vorOeffnen, rahmen})`: Klick schaltet, Klick außerhalb schließt (Capture-Phase, damit Marker-Klicks nicht verschluckt werden), Escape schließt und gibt den Fokus zurück, `aria-expanded` wird geführt. `vorOeffnen` füllt Listen erst beim Öffnen.
-- Verwendet von Notizenfilter, Vorkommen und der vollständigen Legende auf der Karte. `rahmen` ist standardmäßig das Elternelement des Knopfes; die Legende übergibt ihre Zeile, weil Knopf und Panel dort Geschwister sind.
-- Bewusst getrennt: der Filter der Kartenliste ist ein `dialog` (mobil modal), die Kapitel-Ziele sind native `<details>`, und die Familienmenüs gehören zur Kopfzeile.
+- Markup: `button[aria-expanded][aria-controls]` plus panel with `.llb-klappe-feld` and `hidden`. The panel brings surface, border, shadow, a maximum height of 60 vh and scrolling; opening direction, width and content belong to the page.
+- Behaviour via `MQL_KLAPPE.bind(knopf, feld, {vorOeffnen, rahmen})`: click toggles, click outside closes (capture phase, so that marker clicks are not swallowed), Escape closes and returns the focus, `aria-expanded` is maintained. `vorOeffnen` fills lists only on opening.
+- Used by the note filter, resource occurrences and the complete legend on the map. `rahmen` is by default the parent element of the button; the legend passes its row because button and panel are siblings there.
+- Deliberately separate: the filter of the map list is a `dialog` (modal on mobile), the chapter goals are native `<details>`, and the family menus belong to the header.
 
-## Kartenbild mit Pin
+## Map image with pin
 
-`php/templates/components/karte.twig`, `web/karte.css` – der Kartenausschnitt aus dem Client mit einer markierten Stelle.
+`php/templates/components/karte.twig`, `web/karte.css` – the map excerpt from the client with a marked spot.
 
-- Makro `karte(lang, bild, link, pin_x, pin_y, klasse, gross, label, alt)`: Bildname unter `/karten/<sprache>/`, optionaler Link in die Kartenansicht, optionale Pin-Koordinaten, `gross` für die Karte oben auf einer Gebietsseite (640 px).
-- `.llb-karte` ist 4:3 mit dunklem Grund hinter transparenten Bildrändern; `.llb-karte-pin` sitzt prozentual im Bild.
-- Die Breite bestimmt die Umgebung: 320 px Standard, 240 px in der Zeile neben Text (`.katalog-ort-flex`), volle Spalte im Ortsbereich, 640 px als Gebietskarte.
-- Die Zeile `.katalog-ort-flex` (Bild neben Hinweisen und Aktionen) bleibt vorerst eine Seitenregel; sie ist Layout, nicht das Bild.
+- Macro `karte(lang, bild, link, pin_x, pin_y, klasse, gross, label, alt)`: image name under `/karten/<sprache>/`, optional link into the map view, optional pin coordinates, `gross` for the map at the top of an area page (640 px).
+- `.llb-karte` is 4:3 with a dark ground behind transparent image edges; `.llb-karte-pin` sits proportionally in the image.
+- The width is determined by the surroundings: 320 px standard, 240 px in the row next to text (`.katalog-ort-flex`), full column in the place area, 640 px as area map.
+- The row `.katalog-ort-flex` (image next to notes and actions) remains a page rule for now; it is layout, not the image.
 
-## Knopf und Aktionszeile
+## Button and action row
 
-`web/knopf.css` – ein Knopf in drei Arten und drei Größen, dazu die Zeile für Aktionen.
+`web/knopf.css` – a button in three kinds and three sizes, plus the row for actions.
 
-- **Arten:** ohne Attribut die ruhige Flächentaste (Flächenton, Rahmen, goldene Beschriftung); `data-art="haupt"` gefüllt gold für die Hauptaktion einer Seite; `data-art="rand"` goldene Kontur auf dunklem Grund (Import, Plugin, Feedback). Im hellen Theme wird die Konturvariante zur gefüllten Goldtaste.
-- **Größen:** Standard 8/14 px; `data-groesse="gross"` 9/18 px, fett, mindestens 44 px hoch; `data-groesse="klein"` 6/10 px mit kompakter Schrift.
-- Fokusring, Hoverfarbe und Textfarbe (`var(--grund)` auf Gold, also in beiden Themes lesbar) stehen einmal hier.
-- `.llb-aktionen` hält Platzhalter in einer Zeile, bricht bei Enge um; `data-dichte="kompakt"` ist die Stufe der Detailspalte.
-- `.katalog-link` ist kein Knopf, sondern ein Textlink in einer Aktionszeile und bleibt unverändert.
+- **Kinds:** without attribute the quiet surface button (surface tone, border, golden label); `data-art="haupt"` filled gold for the main action of a page; `data-art="rand"` golden outline on dark ground (import, plugin, feedback). In the light theme the outline variant becomes the filled gold button.
+- **Sizes:** standard 8/14 px; `data-groesse="gross"` 9/18 px, bold, at least 44 px high; `data-groesse="klein"` 6/10 px with compact font.
+- Focus ring, hover colour and text colour (`var(--grund)` on gold, thus legible in both themes) stand here once.
+- `.llb-aktionen` keeps placeholders in one row, wraps when space is tight; `data-dichte="kompakt"` is the level of the detail column.
+- `.katalog-link` is no button, but a text link in an action row and remains unchanged.
 
-## Ziele-Klappe (native `<details>`)
+## Goals fold-out (native `<details>`)
 
-`details.katalog-ziele.llb-flaeche` – die Aufgabenziele auf einer Fläche, getrennt von der Flyout-Klappe oben.
+`details.katalog-ziele.llb-flaeche` – the quest goals on a surface, separate from the flyout fold-out above.
 
-- Der Marker gehört in den Textfluss: `summary { list-style-position: inside; }`. Sonst steht der Pfeil am Flächenrand und die Zusammenfassung wirkt nicht eingerückt.
-- Prüfung: die Einzugsmessung in `tests/browser_entity_headers.js`.
+- The marker belongs in the text flow: `summary { list-style-position: inside; }`. Otherwise the arrow stands at the surface edge and the summary does not appear indented.
+- Check: the indent measurement in `tests/browser_entity_headers.js`.
 
-## Symbol-Kachel
+## Symbol tile
 
-`web/kachel.css` – eine quadratische Kachel für Entitiesymbole und Gegenstandsbilder.
+`web/kachel.css` – a square tile for entity symbols and item images.
 
-- `.llb-kachel` mit `data-art="gegenstand"` für Bilder; die bisherigen Klassen `.mql-row-icon`, `.detail-symbol` und `.detail-reward-symbol` laufen auf dieselbe Deklaration.
-- Größe über `--llb-kachel`: 64 px in Listen und Katalogköpfen, 54 px auf dem Handy und in der Karten-Detailspalte (`--llb-kachel: 54px`).
-- Die Kachel besitzt Rahmen, Rundung, Zentrierung und Bildpassung; Liste und Panel behalten Grid, Flex und Abstände.
-- **Laden:** Katalogseiten über `Shell::styles()`, App-Seiten über `php/templates/app/layout.twig`. Ergebniszeilen entstehen in geteilten Skripten (`treffer-zeile.js`), deshalb gehört `kachel.css` ins gemeinsame Layout einer Hülle, nie in eine einzelne Seite.
-- **Belohnungen** (`web/belohnungen.js`) setzen dieselbe Kachel: `.bl-symbol.mql-row-icon`, Zeile 64/54 px, die Belohnungsart färbt nur das Symbol.
-- Nicht die Kachel: `.gegenstand-symbol` (20 px, inline im Belohnungstext) und `.related-symbol` (schmale Symbolspalte ohne Rahmen).
+- `.llb-kachel` with `data-art="gegenstand"` for images; the previous classes `.mql-row-icon`, `.detail-symbol` and `.detail-reward-symbol` run on the same declaration.
+- Size via `--llb-kachel`: 64 px in lists and catalogue headers, 54 px on the phone and in the map detail column (`--llb-kachel: 54px`).
+- The tile owns border, rounding, centring and image fit; list and panel keep grid, flex and spacings.
+- **Loading:** catalogue pages via `Shell::styles()`, app pages via `php/templates/app/layout.twig`. Result rows arise in shared scripts (`treffer-zeile.js`), therefore `kachel.css` belongs in the common layout of a shell, never in a single page.
+- **Rewards** (`web/belohnungen.js`) set the same tile: `.bl-symbol.mql-row-icon`, row 64/54 px, the reward kind colours only the symbol.
+- Not the tile: `.gegenstand-symbol` (20 px, inline in the reward text) and `.related-symbol` (narrow symbol column without border).
 
-## Bestehende Bausteine
+## Existing building blocks
 
-- **Reiter:** `components/reiter.twig`, `web/reiter.css`, `web/reiter.js` — Vertrag in [`reiter.md`](reiter.md).
-- **Filter:** `web/filter-ui.js`, `filter-ui.css`, `filterzustand.js`, `filteradapter.js` mit Seitenkonfigurationen (`aufgaben-filter.js`, `gegenstaende-filter.js`, `handwerk-filter.js`, `karten-aufgabenfilter.js`).
-- **Trefferzeile:** `php/templates/entity/_result_row.twig` (serverseitig) und `web/treffer-zeile.js` (im Browser); beide bilden denselben Vertrag ab.
-- **Statuswahl:** `web/status.js` (`MQL_STATUS_UI`).
-- **Symbol-Kachel:** `.mql-row-icon` in `web/filter-ui.css`, Größen 64/54 px.
+- **Tabs:** `components/reiter.twig`, `web/reiter.css`, `web/reiter.js` — contract in [`reiter.md`](reiter.md).
+- **Filter:** `web/filter-ui.js`, `filter-ui.css`, `filterzustand.js`, `filteradapter.js` with page configurations (`aufgaben-filter.js`, `gegenstaende-filter.js`, `handwerk-filter.js`, `karten-aufgabenfilter.js`).
+- **Result row:** `php/templates/entity/_result_row.twig` (server-side) and `web/treffer-zeile.js` (in the browser); both map the same contract.
+- **Status choice:** `web/status.js` (`MQL_STATUS_UI`).
+- **Symbol tile:** `.mql-row-icon` in `web/filter-ui.css`, sizes 64/54 px.
 
-## Prüfen
+## Checking
 
-- Ein Baustein wird in DE/EN/FR auf Desktop und Handy geprüft, in Dark und Light.
-- `tests/test_darstellung_iststand.py` hält Fläche, Raster, Zeilen und Kartenpanel fest; neue Bausteine bekommen dort eine Prüfung.
-- Reiter prüfen `tests/test_reiter.py` und `tests/browser_reiter.js`; der Python-Test hält auch die Dokumentation und ihre Verweise fest.
-- Nach dem Entfernen alter Regeln beweist ein `grep`, dass die alten Klassennamen nirgends mehr vorkommen.
+- A building block is checked in DE/EN/FR on desktop and phone, in dark and light.
+- `tests/test_darstellung_iststand.py` fixes surface, grid, rows and map panel; new building blocks get a check there.
+- Tabs are checked by `tests/test_reiter.py` and `tests/browser_reiter.js`; the Python test also fixes the documentation and its references.
+- After removing old rules, a `grep` proves that the old class names no longer occur anywhere.

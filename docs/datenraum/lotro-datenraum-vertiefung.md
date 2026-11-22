@@ -1,85 +1,85 @@
-# Vertiefung: typisierte Referenzen und Auftraggeber
+# Deep dive: typed references and quest givers
 
-Diese Prüfung erweitert, ersetzt aber nicht den vorherigen Referenzlauf. Feldpfade sind konkret im XML belegt. Die Zielzuordnung ist eine ausdrücklich genannte Prüfregel; Treffer beweisen ID-Auflösbarkeit, nicht jede Laufzeitsemantik. Regeln mit null Referenzen sind ohne Evidenz und nicht als bestätigte Relation zu lesen. Wert 0 wird separat genannt und nicht stillschweigend gelöscht.
+This check extends but does not replace the earlier reference run. Field paths are concretely evidenced in the XML. The target assignment is an explicitly named check rule; hits prove ID resolvability, not every runtime semantic. Rules with zero references have no evidence and must not be read as a confirmed relation. The value 0 is reported separately and not silently dropped.
 
-## Auftraggeber-Lücken im reinen NPC-Katalog
+## Quest giver gaps in the plain NPC catalogue
 
-Von 613 verschiedenen dort nicht gefundenen IDs haben 519 einen dekodierten Datensatz in NPC-/Platzierungsexporten. Alle 613 kommen im DAT-Inventar vor. Ein Inventareintrag belegt Klasse/ID, aber keine erfolgreich gelesenen Properties.
+Of 613 distinct IDs not found there, 519 have a decoded record in the NPC/placement exports. All 613 occur in the DAT inventory. An inventory entry proves class/ID, but no successfully read properties.
 
-| Befund | Eindeutige IDs |
+| Finding | Distinct IDs |
 | --- | --- |
-| Dekodiert, Klasse 796 | 323 |
-| Dekodiert, Klasse 1723 | 196 |
-| Nur Inventar, nicht im geprüften Rohbestand | 94 |
+| Decoded, class 796 | 323 |
+| Decoded, class 1723 | 196 |
+| Inventory only, not in the checked raw set | 94 |
 
-Die numerischen Klassen werden hier bewusst nicht allein anhand ihrer Namen zu NPCs oder Gegenständen erklärt. Die pauschale Aussage „613 ungültige NPCs“ wäre falsch. Eine Geberrolle kann auf einen anderen Quellobjekttyp zeigen.
+The numeric classes are deliberately not explained here from their names alone as NPCs or items. The blanket statement "613 invalid NPCs" would be wrong. A giver role can point to a different source object type.
 
-## Zusätzliche Referenzprüfungen
+## Additional reference checks
 
-| Beziehung/Prüfhypothese | Quellpfad | Verweise | Aufgelöst | Nicht aufgelöst | Davon Wert 0 |
+| Relation/check hypothesis | Source path | References | Resolved | Unresolved | Of which value 0 |
 | --- | --- | --- | --- | --- | --- |
-| Händler → Verkaufsliste | vendors.xml `.//sellList/@sellListId` | 2202 | 2202 | 0 | 0 |
-| Verkaufsposition → Gegenstand | vendors.xml `.//sellEntry/@id` | 14271 | 14271 | 0 | 0 |
-| Tauscher → Tauschprofil | barters.xml `./barterer/barterProfile/@profileId` | 8891 | 8891 | 0 | 0 |
-| Tauschposition give → Gegenstand | barters.xml `.//give/@id` | 58933 | 58933 | 0 | 0 |
-| Tauschposition receive → Gegenstand | barters.xml `.//receive/@id` | 42590 | 42590 | 0 | 0 |
-| Ruferhalt → Fraktion | barters.xml `.//receiveReputation/@factionId` | 4 | 4 | 0 | 0 |
-| Beuteeintrag → Gegenstand | loots.xml `.//itemsTableEntry/@itemId` | 91695 | 91695 | 0 | 0 |
-| Beuteeintrag → Gegenstand | loots.xml `.//trophyListEntry/@itemId` | 54853 | 54853 | 0 | 0 |
-| Beuteprofil-ID → itemsTable oder treasureList; Zieltypen nicht zusammenführen | loots.xml `.//treasureListEntry/@treasureGroupProfileId` | 1669 | 1669 | 0 | 0 |
-| Beuteprofil-ID → itemsTable oder treasureList; Zieltypen nicht zusammenführen | loots.xml `.//trophyListEntry/@treasureGroupProfileId` | 20828 | 20828 | 0 | 0 |
-| Gewichtete Tabelle → Trophäenliste | loots.xml `.//weightedTreasureTableEntry/@trophyListId` | 2992 | 2992 | 0 | 0 |
-| Gefilterte Tabelle → trophyList | loots.xml `.//filteredTrophyTableEntry/@trophyListId` | 8809 | 8809 | 0 | 0 |
-| Gefilterte Tabelle → weightedTreasureTable | loots.xml `.//filteredTrophyTableEntry/@weightedTreasureTableId` | 1023 | 1023 | 0 | 0 |
-| Reliktbeute → Relikt | loots.xml `.//relicsListEntry/@relicId` | 469 | 469 | 0 | 0 |
-| Reliktbeute → Relikt | loots.xml `.//relicsTreasureGroupEntry/@relicId` | 250 | 250 | 0 | 0 |
-| Reliktliste → Reliktgruppe | loots.xml `.//relicsListEntry/@relicsTreasureGroupId` | 54 | 54 | 0 | 0 |
+| Vendor → sell list | vendors.xml `.//sellList/@sellListId` | 2202 | 2202 | 0 | 0 |
+| Sell entry → item | vendors.xml `.//sellEntry/@id` | 14271 | 14271 | 0 | 0 |
+| Barter vendor → barter profile | barters.xml `./barterer/barterProfile/@profileId` | 8891 | 8891 | 0 | 0 |
+| Barter entry give → item | barters.xml `.//give/@id` | 58933 | 58933 | 0 | 0 |
+| Barter entry receive → item | barters.xml `.//receive/@id` | 42590 | 42590 | 0 | 0 |
+| Reputation gain → faction | barters.xml `.//receiveReputation/@factionId` | 4 | 4 | 0 | 0 |
+| Loot entry → item | loots.xml `.//itemsTableEntry/@itemId` | 91695 | 91695 | 0 | 0 |
+| Loot entry → item | loots.xml `.//trophyListEntry/@itemId` | 54853 | 54853 | 0 | 0 |
+| Loot profile ID → itemsTable or treasureList; target types kept separate | loots.xml `.//treasureListEntry/@treasureGroupProfileId` | 1669 | 1669 | 0 | 0 |
+| Loot profile ID → itemsTable or treasureList; target types kept separate | loots.xml `.//trophyListEntry/@treasureGroupProfileId` | 20828 | 20828 | 0 | 0 |
+| Weighted table → trophy list | loots.xml `.//weightedTreasureTableEntry/@trophyListId` | 2992 | 2992 | 0 | 0 |
+| Filtered table → trophyList | loots.xml `.//filteredTrophyTableEntry/@trophyListId` | 8809 | 8809 | 0 | 0 |
+| Filtered table → weightedTreasureTable | loots.xml `.//filteredTrophyTableEntry/@weightedTreasureTableId` | 1023 | 1023 | 0 | 0 |
+| Relic loot → relic | loots.xml `.//relicsListEntry/@relicId` | 469 | 469 | 0 | 0 |
+| Relic loot → relic | loots.xml `.//relicsTreasureGroupEntry/@relicId` | 250 | 250 | 0 | 0 |
+| Relic list → relic group | loots.xml `.//relicsListEntry/@relicsTreasureGroupId` | 54 | 54 | 0 | 0 |
 | Container → treasureList | containers.xml `./container/@treasureListId` | 926 | 926 | 0 | 0 |
 | Container → trophyList | containers.xml `./container/@trophyListId` | 4626 | 4626 | 0 | 0 |
 | Container → weightedTreasureTable | containers.xml `./container/@weightedTreasureTableId` | 52 | 52 | 0 | 0 |
 | Container → filteredTrophyTable | containers.xml `./container/@filteredTrophyTableId` | 1213 | 1213 | 0 | 0 |
 | Container → filteredTrophyTable | containers.xml `./container/@filteredTrophyTableId2` | 981 | 981 | 0 | 0 |
 | Container → filteredTrophyTable | containers.xml `./container/@filteredTrophyTableId3` | 295 | 295 | 0 | 0 |
-| Reliktcontainer → Relikt | containers.xml `./relicsContainer/@relicId` | 391 | 391 | 0 | 0 |
-| Reliktcontainer → Reliktliste | containers.xml `./relicsContainer/@relicsListId` | 136 | 136 | 0 | 0 |
-| Trait-Unterstruktur → [('skills.xml', './*', 'identifier')] | traits.xml `.//skill/@id` | 442 | 442 | 0 | 0 |
-| Trait-Unterstruktur → [('effects.xml', './*', 'id')] | traits.xml `.//effect/@id` | 409 | 409 | 0 | 0 |
-| Trait-Unterstruktur → [('progressions.xml', './*', 'identifier')] | traits.xml `.//trait/@pointCostProgression` | 946 | 946 | 0 | 0 |
-| Trait-Unterstruktur → [('progressions.xml', './*', 'identifier')] | traits.xml `.//trait/@rankOverlayProgression` | 1044 | 1044 | 0 | 0 |
-| Skill-Unterstruktur → [('effects.xml', './*', 'id')] | skills.xml `.//effect/@id` | 17429 | 17429 | 0 | 0 |
-| Skill-Unterstruktur → [('effects.xml', './*', 'id')] | skills.xml `.//requiredEffect/@id` | 1555 | 1555 | 0 | 0 |
-| Skill-Unterstruktur → [('traits.xml', './trait', 'identifier')] | skills.xml `.//requiredTrait/@id` | 821 | 821 | 0 | 0 |
-| Skill-Unterstruktur → [('skills.xml', './*', 'identifier')] | skills.xml `.//combo/@skillID` | 1187 | 1187 | 0 | 0 |
-| Skill-Unterstruktur → [('inductions.xml', './induction', 'id')] | skills.xml `.//details/@inductionId` | 3631 | 3631 | 0 | 0 |
-| Skill-Unterstruktur → [('progressions.xml', './*', 'identifier')] | skills.xml `.//attack/@maxDamageProgression` | 6574 | 6574 | 0 | 0 |
-| Skill-Unterstruktur → [('progressions.xml', './*', 'identifier')] | skills.xml `.//attack/@dpsModProgression` | 47 | 47 | 0 | 0 |
-| Kosten → Progression | skills.xml `.//powerCost/@pointsProgression` | 4250 | 4250 | 0 | 0 |
-| Kosten → Progression | skills.xml `.//powerCostPerSecond/@pointsProgression` | 29 | 29 | 0 | 0 |
-| Kosten → Progression | skills.xml `.//moraleCost/@pointsProgression` | 2 | 2 | 0 | 0 |
-| Kosten → Progression | skills.xml `.//moraleCostPerSecond/@pointsProgression` | 2 | 2 | 0 | 0 |
-| Karte → Geometrie gleicher Karten-ID | parchmentMaps.xml `./parchmentMap/@id` | 232 | 232 | 0 | 0 |
-| Link-Quell-ID → Karten- oder Gebiets-ID; gemischter ID-Raum, keine pauschale Kartenhierarchie | maps/links.xml `./link/@parentId` | 2557 | 2557 | 0 | 0 |
-| Link-Ziel-ID → Karte (Zielhypothese) | maps/links.xml `./link/@target` | 2557 | 2555 | 2 | 0 |
-| Instanzkarteneintrag → Karte | privateEncounters.xml `.//map/@mapId` | 1886 | 1886 | 0 | 0 |
-| Instanzvorlage → Aufgabe/Tat-ID-Raum | privateEncounters.xml `.//privateEncounter/@questId` | 834 | 833 | 1 | 0 |
-| Instanzvorlage → Aufgabe/Tat-ID-Raum | privateEncounters.xml `.//skirmishPrivateEncounter/@questId` | 439 | 438 | 1 | 0 |
-| Instanzvorlage → Aufgabe/Tat-ID-Raum | privateEncounters.xml `.//questToBestow/@questId` | 627 | 627 | 0 | 0 |
-| Instanzvorlage → Aufgabe/Tat-ID-Raum | privateEncounters.xml `.//randomQuest/@questId` | 73 | 73 | 0 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | quests.xml `.//skillUsed/@skillId` | 78 | 78 | 0 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | quests.xml `.//monsterDied/@mobId` | 3408 | 3408 | 0 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | quests.xml `.//npcTalk/@npcId` | 20575 | 19353 | 1222 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | quests.xml `.//questComplete/@achievableId` | 3806 | 3806 | 0 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | quests.xml `.//questBestowed/@achievableId` | 143 | 143 | 0 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | quests.xml `.//inventoryItem/@itemId` | 7634 | 7634 | 0 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | quests.xml `.//itemUsed/@itemId` | 6727 | 6727 | 0 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | deeds.xml `.//skillUsed/@skillId` | 314 | 314 | 0 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | deeds.xml `.//monsterDied/@mobId` | 350 | 350 | 0 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | deeds.xml `.//npcTalk/@npcId` | 83 | 52 | 31 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | deeds.xml `.//questComplete/@achievableId` | 6233 | 6220 | 13 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | deeds.xml `.//questBestowed/@achievableId` | 19 | 19 | 0 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | deeds.xml `.//inventoryItem/@itemId` | 1117 | 1117 | 0 | 0 |
-| Aufgaben-/Tatbedingung → typisiertes Ziel | deeds.xml `.//itemUsed/@itemId` | 423 | 423 | 0 | 0 |
+| Relic container → relic | containers.xml `./relicsContainer/@relicId` | 391 | 391 | 0 | 0 |
+| Relic container → relic list | containers.xml `./relicsContainer/@relicsListId` | 136 | 136 | 0 | 0 |
+| Trait substructure → [('skills.xml', './*', 'identifier')] | traits.xml `.//skill/@id` | 442 | 442 | 0 | 0 |
+| Trait substructure → [('effects.xml', './*', 'id')] | traits.xml `.//effect/@id` | 409 | 409 | 0 | 0 |
+| Trait substructure → [('progressions.xml', './*', 'identifier')] | traits.xml `.//trait/@pointCostProgression` | 946 | 946 | 0 | 0 |
+| Trait substructure → [('progressions.xml', './*', 'identifier')] | traits.xml `.//trait/@rankOverlayProgression` | 1044 | 1044 | 0 | 0 |
+| Skill substructure → [('effects.xml', './*', 'id')] | skills.xml `.//effect/@id` | 17429 | 17429 | 0 | 0 |
+| Skill substructure → [('effects.xml', './*', 'id')] | skills.xml `.//requiredEffect/@id` | 1555 | 1555 | 0 | 0 |
+| Skill substructure → [('traits.xml', './trait', 'identifier')] | skills.xml `.//requiredTrait/@id` | 821 | 821 | 0 | 0 |
+| Skill substructure → [('skills.xml', './*', 'identifier')] | skills.xml `.//combo/@skillID` | 1187 | 1187 | 0 | 0 |
+| Skill substructure → [('inductions.xml', './induction', 'id')] | skills.xml `.//details/@inductionId` | 3631 | 3631 | 0 | 0 |
+| Skill substructure → [('progressions.xml', './*', 'identifier')] | skills.xml `.//attack/@maxDamageProgression` | 6574 | 6574 | 0 | 0 |
+| Skill substructure → [('progressions.xml', './*', 'identifier')] | skills.xml `.//attack/@dpsModProgression` | 47 | 47 | 0 | 0 |
+| Cost → progression | skills.xml `.//powerCost/@pointsProgression` | 4250 | 4250 | 0 | 0 |
+| Cost → progression | skills.xml `.//powerCostPerSecond/@pointsProgression` | 29 | 29 | 0 | 0 |
+| Cost → progression | skills.xml `.//moraleCost/@pointsProgression` | 2 | 2 | 0 | 0 |
+| Cost → progression | skills.xml `.//moraleCostPerSecond/@pointsProgression` | 2 | 2 | 0 | 0 |
+| Map → geometry of the same map ID | parchmentMaps.xml `./parchmentMap/@id` | 232 | 232 | 0 | 0 |
+| Link source ID → map or area ID; mixed ID space, no general map hierarchy | maps/links.xml `./link/@parentId` | 2557 | 2557 | 0 | 0 |
+| Link target ID → map (target hypothesis) | maps/links.xml `./link/@target` | 2557 | 2555 | 2 | 0 |
+| Instance map entry → map | privateEncounters.xml `.//map/@mapId` | 1886 | 1886 | 0 | 0 |
+| Instance template → quest/deed ID space | privateEncounters.xml `.//privateEncounter/@questId` | 834 | 833 | 1 | 0 |
+| Instance template → quest/deed ID space | privateEncounters.xml `.//skirmishPrivateEncounter/@questId` | 439 | 438 | 1 | 0 |
+| Instance template → quest/deed ID space | privateEncounters.xml `.//questToBestow/@questId` | 627 | 627 | 0 | 0 |
+| Instance template → quest/deed ID space | privateEncounters.xml `.//randomQuest/@questId` | 73 | 73 | 0 | 0 |
+| Quest/deed condition → typed target | quests.xml `.//skillUsed/@skillId` | 78 | 78 | 0 | 0 |
+| Quest/deed condition → typed target | quests.xml `.//monsterDied/@mobId` | 3408 | 3408 | 0 | 0 |
+| Quest/deed condition → typed target | quests.xml `.//npcTalk/@npcId` | 20575 | 19353 | 1222 | 0 |
+| Quest/deed condition → typed target | quests.xml `.//questComplete/@achievableId` | 3806 | 3806 | 0 | 0 |
+| Quest/deed condition → typed target | quests.xml `.//questBestowed/@achievableId` | 143 | 143 | 0 | 0 |
+| Quest/deed condition → typed target | quests.xml `.//inventoryItem/@itemId` | 7634 | 7634 | 0 | 0 |
+| Quest/deed condition → typed target | quests.xml `.//itemUsed/@itemId` | 6727 | 6727 | 0 | 0 |
+| Quest/deed condition → typed target | deeds.xml `.//skillUsed/@skillId` | 314 | 314 | 0 | 0 |
+| Quest/deed condition → typed target | deeds.xml `.//monsterDied/@mobId` | 350 | 350 | 0 | 0 |
+| Quest/deed condition → typed target | deeds.xml `.//npcTalk/@npcId` | 83 | 52 | 31 | 0 |
+| Quest/deed condition → typed target | deeds.xml `.//questComplete/@achievableId` | 6233 | 6220 | 13 | 0 |
+| Quest/deed condition → typed target | deeds.xml `.//questBestowed/@achievableId` | 19 | 19 | 0 | 0 |
+| Quest/deed condition → typed target | deeds.xml `.//inventoryItem/@itemId` | 1117 | 1117 | 0 | 0 |
+| Quest/deed condition → typed target | deeds.xml `.//itemUsed/@itemId` | 423 | 423 | 0 | 0 |
 
-## Reproduktion und Belege
+## Reproduction and evidence
 
-`python3 lotro_datenraum_vertiefung.py`. Sämtliche offenen Werte, Auftraggeber-IDs, Klassen und SHA-256 der Eingaben: `lotro-datenraum-vertiefung.json`. Keine Spiel-/Plugin-/Webdatei verändert.
+`python3 lotro_datenraum_vertiefung.py`. All open values, quest giver IDs, classes and the SHA-256 of the inputs: `lotro-datenraum-vertiefung.json`. No game, plugin or web file changed.

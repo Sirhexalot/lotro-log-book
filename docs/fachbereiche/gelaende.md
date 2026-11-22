@@ -1,146 +1,146 @@
-# Geländeansicht aus dem eigenen Client
+# Terrain view from the own client
 
-## Bedienung
+## Operation
 
-Die Kartenanwendung bietet **Gelände | Spielkarte** als Umschalter über der
-Karte. Die Spielkarte ist die Vorgabe. Ein manueller Wechsel wird unter
-`mql.kartenansicht` für alle Karten und Sprachen im selben Browser gespeichert.
-Eine Ausnahme ist die **Epische Geschichte**: Sie ist eine Sonderansicht und
-öffnet im Gelände (`MQL_GELAENDE.setView('gelaende')`). Der Wechsel gilt nur für
-diese Ansicht und ändert die gespeicherte Wahl der übrigen Seiten nicht; beim
-Verlassen fällt die Karte auf `mql.kartenansicht` zurück. Der Umschalter bleibt
-auch dort bedienbar und wirkt dann nur auf die Sonderansicht.
-Der Umschalter steht auch in den Aufgaben- und Tatenübersichten; dort wechseln
-die Landschaftsvorschauen gemeinsam mit der Kartenbühne zwischen Gelände und
-Spielkarte. Er gilt auch nach einem Reload. Eine einmalige Migration setzt die bisherige
-Ansicht auf Spielkarte und schaltet Rohstoffvorkommen aus; sie verändert weder
-Filter und Notizen noch Charaktere und Spielstände. Danach bleiben persönliche
-Karten- und Vorkommensauswahlen erhalten. Ein Link mit `?vorkommen=` aktiviert
-weiterhin gezielt die angeforderte Sorte. Kein Konto und keine Synchronisierung
-zwischen Geräten. Gesperrter Browserspeicher wird abgefangen.
+The map application offers **Gelände | Spielkarte** as a toggle above the
+map. The game map is the default. A manual switch is stored under
+`mql.kartenansicht` for all maps and languages in the same browser.
+An exception is the **Epische Geschichte**: it is a special view and
+opens in the terrain (`MQL_GELAENDE.setView('gelaende')`). The switch applies only to
+this view and does not change the stored choice of the other pages; when
+leaving, the map falls back to `mql.kartenansicht`. The toggle remains
+operable there too and then affects only the special view.
+The toggle also stands in the quest and deed overviews; there the
+landscape previews switch together with the map stage between terrain and
+game map. It also applies after a reload. A one-time migration sets the previous
+view to game map and switches resource occurrences off; it changes neither
+filters and notes nor characters and character progress. Afterwards personal
+map and resource occurrence selections remain. A link with `?vorkommen=` still
+deliberately activates the requested type. No account and no synchronisation
+between devices. Blocked browser storage is caught.
 
-Beide Ansichten erlauben Zoom und Verschieben. Zoom ist auf die native
-Auflösung beziehungsweise höchstens 4× begrenzt. Aufgabe, Liste und Auswahl
-bleiben beim Ansichtswechsel erhalten. Quest-, Ziel-, Hinweis- und Notizzeichen
-zoomen mit der Karte; in der Geländeansicht bleiben sie lesbar. Ressourcen
-werden in passender Canvasauflösung gezeichnet. Popups verwenden weiterhin ihre
-vorhandenen Auswahl- und Detailfunktionen. Die Spielkarte bleibt unverzerrt in
-4:3. Die Geländeansicht verwendet den tatsächlichen geografischen Rahmen und
-erweitert ihn bei Bedarf an das Seitenverhältnis der Kartenbühne. Die Erweiterung
-reicht nur in zusätzliche Kacheln hinein, wenn dort überwiegend Gelände aus dem
-Client verfügbar ist; fehlende Kacheln werden nicht ergänzt oder gestreckt.
-Marker und Koordinaten verwenden denselben erweiterten Rahmen.
+Both views allow zoom and panning. Zoom is limited to the native
+resolution or at most 4×. Quest, list and selection
+remain on view switch. Quest, goal, hint and note symbols
+zoom with the map; in the terrain view they remain legible. Resources
+are drawn in a suitable canvas resolution. Popups continue to use their
+existing selection and detail functions. The game map remains undistorted in
+4:3. The terrain view uses the actual geographic frame and
+extends it if needed to the aspect ratio of the map stage. The extension
+reaches only into additional tiles if mostly terrain from the
+client is available there; missing tiles are not added or stretched.
+Markers and coordinates use the same extended frame.
 
-Über der Kartenbühne liegt eine transparente Bedienleiste: links Filter und
-Vorkommen und – in der Aufgabenansicht – ein Questgeber-Ein/Aus-Knopf, rechts Gelände/Spielkarte sowie
-Zoom und Gebiet einpassen. Der Questgeber-Knopf zeigt seinen Zustand direkt an.
-Er blendet nur reine Questgeberpunkte aus; Orte auf Tatenkarten bleiben sichtbar.
-Filtermenüs bleiben innerhalb des Kartenrahmens.
-Die rahmenlose Stufenspanne steht in der unteren Leiste. Deren Legende und
-Statuswörter verwenden dieselbe Schriftstufe. Auf Mobilgeräten bleibt die
-Kartenanwendung frei vom globalen Footer; auf den übrigen Seiten sitzt er auch
-bei kurzem Inhalt am unteren Rand.
+Above the map stage lies a transparent control bar: left filter and
+resource occurrences and – in the quest view – a quest giver on/off button, right terrain/game map as well as
+zoom and fit area. The quest giver button shows its state directly.
+It hides only pure quest giver points; places on deed maps remain visible.
+Filter menus remain inside the map frame.
+The frameless level span stands in the lower bar. Its legend and
+status words use the same font level. On mobile devices the
+map application stays free of the global footer; on the other pages it sits
+at the bottom edge even with short content.
 
-Die Übersicht nutzt Gelände-Vorschaubilder, wenn Gelände gewählt wurde. Ohne
-verfügbares Bild bleibt ein leerer Bildplatz gleicher Höhe. Kartenzeilen richten
-sich jeweils nach ihrer höchsten Kachel, nicht nach der höchsten Kachel des
-gesamten Rasters. Inhaltsgruppen, Filter und Navigation sind nicht verändert.
+The overview uses terrain preview images when terrain is selected. Without an
+available image an empty image place of the same height remains. Map rows align
+each to their highest tile, not to the highest tile of the
+whole grid. Content groups, filters and navigation are not changed.
 
-## Quelle und Bau
+## Source and build
 
 ```bash
 python3 tools/build_gelaende.py
 ```
 
-Optionen: `--client`, `--lib`, `--cache`, `--prepare-only`, `--skip-export`.
-Die Standardpfade zeigen auf die lokal installierten Spiel- und Companion-
-Dateien. Der Client wird ausschließlich über lesende Companion-APIs geöffnet.
-`tools/ExportTerrain.java` nutzt `DatRadarImageProvider`. Es werden keine
-TerrainMap-Webbilder, PSB-Ausschnitte, fremden Pins oder Höhenkarten benötigt.
+Options: `--client`, `--lib`, `--cache`, `--prepare-only`, `--skip-export`.
+The default paths point to the locally installed game and Companion
+files. The client is opened exclusively via read-only Companion APIs.
+`tools/ExportTerrain.java` uses `DatRadarImageProvider`. No
+TerrainMap web images, PSB excerpts, foreign pins or height maps are needed.
 
-Alle Ausgaben liegen unter `~/.cache/llb-terrain/`:
+All outputs lie under `~/.cache/llb-terrain/`:
 
-- `<Quellstand>/source.json`: lokale Quellpfade und Größen-/Zeitstempel.
-- `<Quellstand>/requests.tsv`: eindeutige Anforderungen aus allen Kartenrahmen.
-- `<Quellstand>/raw/`: PNG-Exporte und fortsetzbares `tiles.jsonl`.
-- `public/manifest.json`: öffentliche Rahmen (Schema 2: je Karte
-  `[Region, West, Nord, Ost, Süd, Übersicht, Vorschau]`) und Kachelindizes.
-  Die Kacheln stehen als Zeilenläufe `[y, x0, x1]` statt als Einzelnamen:
-  46.850 Bytes statt 678.535, gzip 13,7 statt 177 KB je Kartenaufruf. Schema 1
-  wird vom Browser weiterhin gelesen, damit ein zwischengespeicherter Stand
-  nicht bricht.
-- `public/<Quellstand>/r<Region>/<LOD>/<Y>_<X>.webp`: geteilte Kachelpyramiden.
-- `public/<Quellstand>/thumb/<Karte>.webp`: Vorschaubilder.
-- `coverage.json`: detaillierter lokaler Abdeckungsbericht.
+- `<Quellstand>/source.json`: local source paths and size/timestamps.
+- `<Quellstand>/requests.tsv`: unique requests from all map frames.
+- `<Quellstand>/raw/`: PNG exports and resumable `tiles.jsonl`.
+- `public/manifest.json`: public frames (schema 2: per map
+  `[Region, West, Nord, Ost, Süd, Übersicht, Vorschau]`) and tile indices.
+  The tiles stand as row runs `[y, x0, x1]` instead of individual names:
+  46.850 bytes instead of 678.535, gzip 13,7 instead of 177 KB per map call. Schema 1
+  is still read by the browser so that a cached state
+  does not break.
+- `public/<Quellstand>/r<Region>/<LOD>/<Y>_<X>.webp`: shared tile pyramids.
+- `public/<Quellstand>/thumb/<Karte>.webp`: preview images.
+- `coverage.json`: detailed local coverage report.
 
-Der Quellstand wird aus Formatversion und Dateistatistik der Client-DATs
-gebildet. Fehlende Kacheln werden als fehlend protokolliert, nicht erfunden.
-Eine abgebrochene vollständige Manifestzeile ist fortsetzbar; ein beschädigtes
-JSONL-Manifest wird nicht still ignoriert. Änderungen am Kachelformat oder der
-Encodierung benötigen eine neue Formatversion. Der Client-Datenstand ist kein
-vollständiger Inhalts-Checksummentest.
+The source state is formed from format version and file statistics of the client DATs.
+Missing tiles are logged as missing, not invented.
+An aborted complete manifest row is resumable; a damaged
+JSONL manifest is not silently ignored. Changes to the tile format or the
+encoding need a new format version. The client data state is no
+complete content checksum test.
 
-## Koordinaten und Sonderkarten
+## Coordinates and special maps
 
-Companions PositionDecoder beschreibt Blöcke mit 160 lokalen Einheiten und
-0,005 Anzeigeeinheiten je Einheit. Daraus folgen 0,8 × 0,8 Spielkoordinaten je
-Kachel, mit Ursprung EW −146,8 / NS −124,4. Die geladenen Bilder sind 200 × 200
-Pixel. X läuft nach Osten, Y nach Norden; Bildzeilen werden entsprechend
-umgekehrt zusammengesetzt. Die Spielregion bleibt Bestandteil jedes Schlüssels.
-Gleiche Koordinaten verschiedener Regionen sind niemals dieselbe Kachel.
+Companion's PositionDecoder describes blocks with 160 local units and
+0,005 display units per unit. From this follow 0,8 × 0,8 game coordinates per
+tile, with origin EW −146,8 / NS −124,4. The loaded images are 200 × 200
+pixels. X runs east, Y north; image rows are therefore assembled reversed.
+The game region remains part of every key. The same coordinates of different
+regions are never the same tile.
 
-Für die fünf gezeichneten Übersichtsrahmen wird die Fläche ihrer direkten
-Unterkarten mit angefragt. Ohne diesen zweiten Durchgang blieben dort
-rechteckige Lücken, die kein Unterkarten-Rahmen angefordert hatte
-(14.11.2026, 13.761 zusätzliche Blöcke). Der Client hat den Großteil davon
-nicht: 11.977 blieben ohne Bild, nur 1.784 kamen hinzu. Die verbleibenden
-Lücken sind also echte, nicht gebaute Flächen im Client und keine fehlenden
-Exporte. Abdeckung der Übersichten danach: Rohan 77 %, Mordor 75 %,
+For the five drawn overview frames the area of their direct
+sub-maps is requested as well. Without this second pass rectangular gaps
+would remain there that no sub-map frame had requested
+(14.11.2026, 13.761 additional blocks). The client does not have the majority of them:
+11.977 remained without image, only 1.784 were added. The remaining
+gaps are therefore real, not built areas in the client and not missing
+exports. Coverage of the overviews afterwards: Rohan 77 %, Mordor 75 %,
 Rhovanion 65 %, Gondor 57 %, Haradwaith 47 %.
 
-Die Anwendung lädt nur Kacheln des sichtbaren Ausschnitts in geeigneter LOD.
-Einzelne Kacheln werden von verschiedenen Gebietskarten gemeinsam benutzt.
-Es wird kein riesiges Gesamtbild je Karte geladen. Nicht vorhandene Teilflächen
-bleiben leer; der Client enthält auch unfertiges/unzugängliches Gelände.
-Daraus werden keine begehbaren Wege oder verfügbare Aufgaben abgeleitet.
+The application loads only tiles of the visible excerpt in a suitable LOD.
+Individual tiles are shared by different area maps.
+No huge overall image per map is loaded. Non-existent partial areas
+remain empty; the client also contains unfinished/inaccessible terrain.
+No walkable paths or available quests are derived from this.
 
-Für bisher unbrauchbare **gezeichnete Übersichtsrahmen** wird ein eigener
-Geländerahmen aus vorhandenen, benannten direkten Unterkarten ermittelt. Nur
-dieselbe Spielregion zählt. Räumlich getrennte Gruppen werden nicht künstlich
-nebeneinander gesetzt: Die größte zusammenhängende Gruppe bestimmt die
-Regionsübersicht, `separateMaps` hält abgetrennte Karten fest. Diese Karten
-bleiben einzeln erreichbar. Dies ist eine aus Rahmen abgeleitete Darstellung,
-keine Behauptung exakter Gebietsgrenzpolygone.
+For previously unusable **drawn overview frames** an own
+terrain frame is determined from existing, named direct sub-maps. Only
+the same game region counts. Spatially separate groups are not artificially
+placed next to each other: the largest contiguous group determines the
+region overview, `separateMaps` records detached maps. These maps
+remain reachable individually. This is a representation derived from frames,
+not a claim of exact area boundary polygons.
 
-Der Gelände-Rahmen verändert weder die ursprünglichen Spielkarten noch deren
-IDs. Projektion und Koordinatenanzeige benutzen ihn nur bei aktiver
-Geländeansicht. Unveränderte, belegte Rohstoffdateien werden weiterbenutzt;
-`resourceMaps` verhindert Anfragen nach nicht vorhandenen Dateien.
+The terrain frame changes neither the original game maps nor their
+IDs. Projection and coordinate display use it only with active
+terrain view. Unchanged, proven resource files are reused;
+`resourceMaps` prevents requests for non-existent files.
 
-## Geprüfter Stand am 13.11.2026
+## Verified status as of 13.11.2026
 
-- 226 Karten, 96.351 angefragte eindeutige Blöcke.
-- 52.974 Bilder exportiert, 43.377 Blöcke ohne Bild.
-- Regionen 1, 2, 3, 4, 5, 6 und 14 enthalten Bilder.
-- 224 Karten haben Gelände, einschließlich der fünf neuen Geländeübersichten
-  Gondor, Rhovanion, Mordor, Rohan und Haradwaith.
-- Ausnahmen: **Kankras Höhle** (`268453438`) und **Umbar-môkh: Die Niederungen**
-  (`268454497`). Die Rahmen überschreiten den unterstützten 0–255-Blockbereich.
-  Kein automatisches Umwickeln negativer Blocknummern und keine erfundene Lage.
-- „Hat Gelände“ bedeutet vorhandene Bilder im Rahmen, nicht lückenlose Abdeckung
-  des gesamten Rechtecks oder vollständige Erreichbarkeit im Spiel.
+- 226 maps, 96.351 requested unique blocks.
+- 52.974 images exported, 43.377 blocks without image.
+- Regions 1, 2, 3, 4, 5, 6 and 14 contain images.
+- 224 maps have terrain, including the five new terrain overviews
+  Gondor, Rhovanion, Mordor, Rohan and Haradwaith.
+- Exceptions: **Kankras Höhle** (`268453438`) and **Umbar-môkh: Die Niederungen**
+  (`268454497`). The frames exceed the supported 0–255 block range.
+  No automatic wrapping of negative block numbers and no invented position.
+- „Hat Gelände“ means existing images in the frame, not gapless coverage
+  of the whole rectangle or complete reachability in the game.
 
-## Vorschau und Release
+## Preview and release
 
-Der lokale PHP-Router liest die generierten Dateien aus
-`$LLB_TERRAIN` oder `~/.cache/llb-terrain/public`.
-`tools/build_release.py --gelaende <Ordner>` übernimmt Manifest und ausschließlich
-den darin referenzierten öffentlichen Quellstand. Rohbilder, lokale Pfade,
-Forschungsskripte und persönliche Daten werden nicht mitkopiert. Ohne Gelände-
-Bau bleibt die Anwendung mit Spielkarten benutzbar.
+The local PHP router reads the generated files from
+`$LLB_TERRAIN` or `~/.cache/llb-terrain/public`.
+`tools/build_release.py --gelaende <Ordner>` takes over the manifest and exclusively
+the public source state referenced in it. Raw images, local paths,
+research scripts and personal data are not copied. Without a terrain
+build the application remains usable with game maps.
 
-Es wurde **nicht veröffentlicht**. Eigener Client-Export bedeutet keine neue
-Freigabe des Rechteinhabers für öffentliche Bildveröffentlichung.
+It was **not published**. Own client export means no new
+permission of the rights holder for public image publication.
 
 ## Tests
 
@@ -151,30 +151,30 @@ NODE_PATH=/Users/adrian/.nvm/versions/node/v24.16.0/lib/node_modules \
   LLB_TERRAIN_PHP=http://127.0.0.1:8847 node tests/browser_gelaende.js
 ```
 
-Geprüft: 213 Python-Tests, JavaScript-Präferenz-/Rahmenprüfungen und
-DE/EN/FR-Textschlüssel; alle 70.119 ausgelieferten Kacheldateien und 224
-Vorschaubilder vorhanden, Rahmenabgleich gegen DE/EN/FR jeweils 224/226.
+Checked: 213 Python tests, JavaScript preference/frame checks and
+DE/EN/FR text keys; all 70.119 delivered tile files and 224
+preview images present, frame comparison against DE/EN/FR 224/226 each.
 
-Browserprüfungen: DE/EN/FR bei 1440 und 390 px, Standardansicht, gespeicherte
-Wahl/Reload/Kartenwechsel, gleichbleibende Markergröße, Zoom, Drag, Spielkarten-
-Fallback bei fehlenden Bildern und HTTP-Fehlern, zwölf Karten/Übersichten aus
-allen vorhandenen Spielregionen, Terrain-Vorschauen und Kachelzeilen. Klicks
-auf echte Ressourcenpunkte öffnen weiterhin die Quellenanzeige; eine bloße
-Berührung wird nicht als Drag abgefangen. DPR=2 lädt die passenden feineren
-Kacheln. Bestehende Gebietsreiter und kontextuelle Listen wurden ebenfalls
-nachgeprüft. Die
-Handyprüfung ist eine Browserbreite, keine physische Touch-/Safari- oder
-Screenreader-Abnahme.
+Browser checks: DE/EN/FR at 1440 and 390 px, default view, stored
+choice/reload/map change, constant marker size, zoom, drag, game map
+fallback with missing images and HTTP errors, twelve maps/overviews from
+all existing game regions, terrain previews and tile rows. Clicks
+on real resource points still open the source display; a mere
+touch is not caught as a drag. DPR=2 loads the matching finer
+tiles. Existing area tabs and contextual lists were also checked.
+The
+mobile check is a browser width, not a physical touch/Safari or
+screen reader acceptance.
 
-## Vorkommen-Auswahl und Migration
+## Resource occurrence selection and migration
 
-Bei der einmaligen Umstellung wird `mql.vorkommen` auf eine leere Auswahl
-gesetzt. Künftige Besucher starten ebenfalls ohne Rohstoffpunkte; sie können
-Berufe oder einzelne Sorten bewusst einschalten. Ein gespeicherter Zustand
-„nichts“ bleibt nach dem Neuladen aus. Die Migrationsmarke verhindert, dass
-spätere persönliche Änderungen erneut überschrieben werden.
-`tests/browser_gelaende.js` prüft Defaults, Wiederladen und den gezielten
-Vorkommen-Link.
+During the one-time conversion `mql.vorkommen` is set to an empty selection.
+Future visitors also start without resource points; they can
+deliberately switch on professions or individual types. A stored state
+„nichts“ does not persist after the reload. The migration marker prevents later
+personal changes from being overwritten again.
+`tests/browser_gelaende.js` checks defaults, reloading and the targeted
+resource occurrence link.
 
 ## Shared landscape navigation (13.11.2026)
 

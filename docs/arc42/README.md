@@ -1,38 +1,38 @@
-# LOTRO Log Book – Architekturdokumentation nach arc42
+# LOTRO Log Book – Architecture documentation according to arc42
 
-[Zur Dokumentationsübersicht](../README.md) · [Offizielle arc42-Übersicht](https://arc42.de/overview/)
+[Documentation overview](../README.md) · [Official arc42 overview](https://arc42.de/overview/)
 
-- **Dokumentationsstand:** 20.11.2026
-- **Geltungsbereich:** Repository `lotro-log-book` einschließlich Website, Datenaufbereitung, Tests und Release-Werkzeugen.
-- **Leitlinie:** Diese Dokumentation beschreibt den im Code und in der Laufzeit belegbaren Stand. Bei Widersprüchen ist die Dokumentation zu korrigieren; sie begründet keine Änderung am Verhalten. Eine gewünschte Verhaltensänderung braucht einen eigenen Auftrag.
+- **Documentation status:** 20.11.2026
+- **Scope:** Repository `lotro-log-book` including website, data preparation, tests and release tools.
+- **Guiding principle:** This documentation describes the state that can be evidenced in the code and at runtime. Where there are contradictions, the documentation is to be corrected; it does not justify a change in behaviour. A desired behaviour change needs its own assignment.
 
-## Quellenstatus und Abgrenzung
+## Source status and delimitation
 
-Die Aussagen unten wurden gegen die genannten Dateien im Checkout geprüft. Das Repository enthält zum Dokumentationszeitpunkt zahlreiche nicht eingecheckte Änderungen. Diese Dokumentation beschreibt daher den **vorliegenden Arbeitsbaum**, nicht automatisch den letzten Commit oder die Live-Version. Bei betrieblichen Fragen sind Release-Build und Live-Verhalten zusätzlich zu prüfen.
+The statements below were checked against the named files in the checkout. At the time of documentation the repository contains numerous uncommitted changes. This documentation therefore describes the **present working tree**, not automatically the last commit or the live version. For operational questions, release build and live behaviour must be checked additionally.
 
-Vorhandene README- und `docs/`-Dateien dienen als Fundstellen und Kontext, nicht als Beleg dafür, dass ein Verhalten noch gilt. Alte Zahlen und datierte Prüfstände werden nicht als aktuelle Systemwerte übernommen. Wo der Codepfad noch nicht vollständig nachvollzogen wurde, steht das ausdrücklich dabei.
+Existing README and `docs/` files serve as references and context, not as proof that a behaviour still applies. Old numbers and dated test records are not adopted as current system values. Where the code path has not yet been traced completely, this is stated explicitly.
 
-Das separate Repository `MagicQuestLog` und Werkzeuge aus `Companion-Test` sind externe Daten- bzw. Build-Abhängigkeiten. Sie gehören nicht zum Änderungsumfang dieses Repositories. Ihr tatsächlicher Einfluss wird dort benannt, wo der Website-Code sie aufruft oder erzeugte Dateien von ihnen einliest.
-
----
-
-## Kapitel
-
-1. [Einführung und Ziele](01-einfuehrung-und-ziele.md)
-2. [Randbedingungen](02-randbedingungen.md)
-3. [Kontextabgrenzung](03-kontext-und-abgrenzung.md)
-4. [Lösungsstrategie](04-loesungsstrategie.md)
-5. [Bausteinsicht](05-bausteinsicht.md)
-6. [Laufzeitsicht](06-laufzeitsicht.md)
-7. [Verteilungssicht](07-verteilungssicht.md)
-8. [Querschnittliche Konzepte](08-querschnittliche-konzepte.md)
-9. [Architekturentscheidungen](09-architekturentscheidungen.md)
-10. [Qualitätsanforderungen und Prüfungen](10-qualitaetsanforderungen.md)
-11. [Risiken und technische Schulden](11-risiken-und-technische-schulden.md)
-12. [Glossar](12-glossar.md)
+The separate `MagicQuestLog` repository and tools from `Companion-Test` are external data and build dependencies. They are not part of this repository's change scope. Their actual influence is named where the website code calls them or reads generated files from them.
 
 ---
 
-## Pflegehinweis
+## Chapters
 
-Änderungen an dieser Dokumentation sollen sich auf nachprüfbare Implementierung stützen. Bei jeder Änderung sind die jeweils genannten Quelldateien erneut zu prüfen. Wenn Code und diese Dokumentation auseinanderlaufen, ist zuerst der Widerspruch festzuhalten; die Dokumentation wird an den bestätigten Code angepasst. Anforderungen oder gewünschte Architekturänderungen werden nicht allein aus einer veralteten Dokumentationsaussage abgeleitet.
+1. [Introduction and goals](01-introduction-and-goals.md)
+2. [Constraints](02-constraints.md)
+3. [Context and scope](03-context-and-scope.md)
+4. [Solution strategy](04-solution-strategy.md)
+5. [Building block view](05-building-block-view.md)
+6. [Runtime view](06-runtime-view.md)
+7. [Deployment view](07-deployment-view.md)
+8. [Cross-cutting concepts](08-crosscutting-concepts.md)
+9. [Architecture decisions](09-architecture-decisions.md)
+10. [Quality requirements and checks](10-quality-requirements.md)
+11. [Risks and technical debt](11-risks-and-technical-debt.md)
+12. [Glossary](12-glossary.md)
+
+---
+
+## Maintenance note
+
+Changes to this documentation should rest on verifiable implementation. On every change, the source files named in each case are to be checked again. If code and this documentation diverge, the contradiction is to be recorded first; the documentation is adapted to the confirmed code. Requirements or desired architecture changes are not derived from an outdated documentation statement alone.

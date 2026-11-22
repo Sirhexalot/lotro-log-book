@@ -1,28 +1,28 @@
-# 2. Randbedingungen
+# 2. Constraints
 
-### Technische Randbedingungen
+### Technical constraints
 
-- Composer verlangt PHP **8.1 oder höher** und Twig `^3.8`; in `composer.json` sind keine weiteren Laufzeitpakete aufgeführt.
-- Der PHP-Code verwendet einen Front-Controller und Twig, kein in `composer.json` deklariertes PHP-Framework.
-- Python erzeugt Katalogdaten, lokalisierte Beschriftungen, Seitenmodelle und Release-Dateien.
-- Der Browserteil besteht aus HTML, CSS und JavaScript. Die Anwendungslogik und Filtermodule liegen in `web/`.
-- Website-Daten werden in JSON-Dateien bereitgestellt. In der PHP-Laufzeit ist in den eingesehenen Daten- und Routingpfaden keine Datenbankanbindung vorhanden.
+- Composer requires PHP **8.1 or higher** and Twig `^3.8`; no further runtime packages are listed in `composer.json`.
+- The PHP code uses a front controller and Twig, no PHP framework declared in `composer.json`.
+- Python produces catalogue data, localised labels, page models and release files.
+- The browser part consists of HTML, CSS and JavaScript. The application logic and filter modules live in `web/`.
+- Website data is provided in JSON files. In the PHP runtime, no database connection is present in the data and routing paths that were inspected.
 
-Belege: `composer.json`, `php/public/index.php`, `php/src/Data.php`, `tools/build_php_data.py`.
+Evidence: `composer.json`, `php/public/index.php`, `php/src/Data.php`, `tools/build_php_data.py`.
 
-### Produkt- und Betriebsgrenzen
+### Product and operational boundaries
 
-- Die unterstützten Anwendungssprachen sind in `Catalogue::LANGS` auf `de`, `en`, `fr` festgelegt.
-- Quest-/Tat- und Gegenstandsdaten werden nicht im Request aus dem Spielclient extrahiert; PHP liest vorbereitete Dateien.
-- Der Website-Build ruft für die Tatendaten explizit einen gemeinsamen Generator aus dem separaten `MagicQuestLog`-Repository auf (`tools/build_taten_daten.py`).
-- `tools/build_release.py` erzeugt einen PHP-Release ohne `.htaccess`; die Umschaltung bzw. Webserver-Konfiguration ist ein separater Betriebsschritt.
+- The supported application languages are fixed to `de`, `en`, `fr` in `Catalogue::LANGS`.
+- Quest/deed and item data is not extracted from the game client during the request; PHP reads prepared files.
+- For the deed data, the website build explicitly invokes a shared generator from the separate `MagicQuestLog` repository (`tools/build_taten_daten.py`).
+- `tools/build_release.py` produces a PHP release without `.htaccess`; the switchover or web server configuration is a separate operational step.
 
-Belege: `php/src/Catalogue.php`, `tools/build_taten_daten.py`, `tools/build_release.py`.
+Evidence: `php/src/Catalogue.php`, `tools/build_taten_daten.py`, `tools/build_release.py`.
 
-### Organisatorische, rechtliche und externe Randbedingungen
+### Organisational, legal and external constraints
 
-- Website, Plugin und Companion-/DAT-Exportwerkzeuge sind getrennte Projekte. Ihre Verfügbarkeit ist keine Erlaubnis, externe Repositories, Spielinstallationen oder Charakterdateien zu verändern.
-- Lokale Quelldaten und Buildabhängigkeiten können außerhalb eines frischen Checkouts liegen; deren Versionierung und Verfügbarkeit sind nicht vom HTTP-Request kontrolliert.
-- Tracking und Statistik sind getrennte Datenpfade. Eine vollständige rechtliche Bewertung, Auftragsverarbeitung oder verbindliche Aufbewahrungsrichtlinie ist aus diesem Repository nicht ableitbar.
-- Technische Verfügbarkeit von Spielinhalten, Karten, Marken oder Bibliotheken belegt keine Nutzungsrechte. Die Rechteklärung liegt außerhalb dieser Architekturbeschreibung.
-- Rewrite-Regeln, Hostingkonfiguration, Zugangsdaten und Produktionsberechtigungen liegen teilweise außerhalb des Release-Artefakts.
+- Website, plugin and Companion/DAT export tools are separate projects. Their availability is no permission to change external repositories, game installations or character files.
+- Local source data and build dependencies can lie outside a fresh checkout; their versioning and availability are not controlled by the HTTP request.
+- Tracking and statistics are separate data paths. A complete legal assessment, data processing agreement or binding retention policy cannot be derived from this repository.
+- Technical availability of game content, maps, trademarks or libraries does not evidence any rights of use. The clarification of rights lies outside this architecture description.
+- Rewrite rules, hosting configuration, credentials and production permissions lie partly outside the release artefact.

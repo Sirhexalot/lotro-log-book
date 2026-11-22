@@ -1,26 +1,26 @@
-# Ungefähre Gebietspunkte auf der Mordor-Zeichnung
+# Approximate area points on the Mordor drawing
 
-Die Zeichnung 268453620 hat nur Pixelgrenzen, keine geografische Projektion.
-Vier gleichweltliche Links verbinden geografische Rahmenmittelpunkte mit
-Pixelpositionen: Ödland, Nord-Ithilien, Gorgoroth und Morgultal.
+The drawing 268453620 has only pixel boundaries, no geographic projection.
+Four same-world links connect geographic frame centres with pixel
+positions: Ödland, Nord-Ithilien, Gorgoroth and Morgultal.
 
-`mordor_projection()` passt X und Y jeweils linear an. Mittlere Abweichung
-im geprüften Client: 24,2 Pixel; Maximum: 47,7 Pixel bei 1024 × 768.
-Das sind ungefähre Gebietsmittelpunkte, keine exakten Questpositionen.
+`mordor_projection()` scales X and Y linearly. Mean deviation in the verified
+client: 24,2 pixels; maximum: 47,7 pixels at 1024 × 768.
+These are approximate area centres, not exact quest positions.
 
-Der Fallback gilt nur für Mordor: mindestens vier gleichweltliche Anker,
-positive Achsenfaktoren, mittlerer Fehler ≤ 40 und maximaler Fehler ≤ 80 Pixel.
-Explizite Spielkartenlinks haben Vorrang.
+The fallback applies to Mordor only: at least four same-world anchors,
+positive axis factors, mean error ≤ 40 and maximum error ≤ 80 pixels.
+Explicit game map links take precedence.
 
-Zusätzliche Punkte: Udûn, Dor Amarth, Lhingris, Agarnaith und Talath Úrui.
-`positions.derived` markiert sie; Hover und zugänglicher Name nennen die
-ungefähre Gebietsmitte in DE/EN/FR. Der überlagernde Gorgoroth-Sammelpunkt
-entfällt; seine Einträge bleiben in der Gebietsliste erreichbar.
+Additional points: Udûn, Dor Amarth, Lhingris, Agarnaith and Talath Úrui.
+`positions.derived` marks them; hover and accessible name state the
+approximate area centre in DE/EN/FR. The overlapping Gorgoroth cluster point
+is dropped; its entries remain reachable in the area list.
 
-Keine Projektion für historische Varianten, unbenannte Karten oder andere
-Spielregionen (Draugardh: Region 6). Nargroths eigener Rahmen liegt abseits
-der Landschaft und würde außerhalb des Bildes landen; kein erfundener Pin.
-Vorhandene direkte Links und andere Sammelpunkte bleiben erhalten.
+No projection for historical variants, unnamed maps or other game regions
+(Draugardh: region 6). Nargroth's own frame lies off the landscape and would
+land outside the image; no invented pin. Existing direct links and other
+cluster points remain.
 
-Prüfung: `python3 -m unittest tests.test_abenteuer_projektion`; Browserprüfung
-der fünf neuen Punkte mit Auswahl/Vorschau in DE/EN/FR sowie Mobil-Überlauf.
+Check: `python3 -m unittest tests.test_abenteuer_projektion`; browser check
+of the five new points with selection/preview in DE/EN/FR and mobile overflow.

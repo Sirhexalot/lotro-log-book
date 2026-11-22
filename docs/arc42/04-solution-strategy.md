@@ -1,26 +1,26 @@
-# 4. Lösungsstrategie
+# 4. Solution strategy
 
-1. **Build-Zeit:** Python-Generatoren verbinden die lokal verfügbaren Datenquellen und schreiben Webkataloge sowie PHP-Datenartefakte.
-2. **PHP-Datenaufbereitung:** `tools/build_php_data.py` liest Webkataloge und `daten/*.json`, baut lokalisierte Listen- und Detailmodelle, löst Relationen auf und legt Ergebnisse in JSON-Shards ab.
-3. **HTTP-Anfrage:** `php/public/index.php` bestimmt Sprache und Pfad, `Router` klassifiziert die Anfrage, `Data` liest die benötigten Dateien und `Page`/spezialisierte Klassen bereiten den Twig-Kontext vor.
-4. **Darstellung:** Twig rendert vollständiges HTML. Browser-JavaScript ergänzt die interaktiven Anwendungen und progressive Filterfunktionen.
-5. **Release:** `tools/build_release.py` stellt statische Assets, PHP-Code, Vorlagen, `vendor/` und den vorbereiteten `phpdata/`-Bestand zusammen. `upload.py` überträgt den Release; Twig-Cache und Webserver-Umschaltung sind separate Schritte.
+1. **Build time:** Python generators combine the locally available data sources and write web catalogues as well as PHP data artefacts.
+2. **PHP data preparation:** `tools/build_php_data.py` reads web catalogues and `daten/*.json`, builds localised list and detail models, resolves relations and stores results in JSON shards.
+3. **HTTP request:** `php/public/index.php` determines language and path, `Router` classifies the request, `Data` reads the required files and `Page`/specialised classes prepare the Twig context.
+4. **Presentation:** Twig renders complete HTML. Browser JavaScript supplements the interactive applications and progressive filter functions.
+5. **Release:** `tools/build_release.py` assembles static assets, PHP code, templates, `vendor/` and the prepared `phpdata/` inventory. `upload.py` transfers the release; Twig cache and web server switchover are separate steps.
 
-Die PHP-Anfrage baut keine vollständigen Kataloge neu auf. `Data::page()` und `Data::entity()` bestimmen den Dateibucket aus `md5(ID)[:2]`; `relationRows()` gruppiert angeforderte IDs nach Bucket. So bleibt der Zugriff auf die angefragten Datensätze begrenzt, auch wenn eine Detailseite verbundene Einträge lädt.
+The PHP request does not rebuild complete catalogues. `Data::page()` and `Data::entity()` determine the file bucket from `md5(ID)[:2]`; `relationRows()` groups requested IDs by bucket. This keeps access limited to the requested records, even when a detail page loads connected entries.
 
-Belege: `tools/build_php_data.py`, `tools/php_viewmodel.py`, `php/public/index.php`, `php/src/Data.php`, `php/src/Page.php`, `tools/build_release.py`.
+Evidence: `tools/build_php_data.py`, `tools/php_viewmodel.py`, `php/public/index.php`, `php/src/Data.php`, `php/src/Page.php`, `tools/build_release.py`.
 
-### Architekturansatz
+### Architecture approach
 
-Die Lösung verschiebt quellenabhängige und rechenintensive Datenintegration in den Build. PHP/Twig liefert beim Request die für Route und Seite benötigten vorbereiteten Daten; JavaScript ergänzt interaktive Filter, Karten und lokale Charakteransichten. JSON-Shards und stabile IDs begrenzen Datenzugriffe und entkoppeln URLs von übersetzten Namen. Der Release bündelt Programm, Daten und Assets, während Upload, Rewrite-Umschaltung und Twig-Cacheleerung getrennte Betriebsschritte bleiben.
+The solution moves source-dependent and compute-intensive data integration into the build. PHP/Twig delivers the prepared data needed for the route and page at request time; JavaScript supplements interactive filters, maps and local character views. JSON shards and stable IDs limit data access and decouple URLs from translated names. The release bundles program, data and assets, while upload, rewrite switchover and Twig cache clearing remain separate operational steps.
 
-| Ansatz | Ziel | Wesentliche Konsequenz |
+| Approach | Goal | Main consequence |
 |---|---|---|
-| Python-Datenbuild vor dem Request | Quellen vereinigen und Relationen vorbereiten | Buildreihenfolge und kompatible Datenstände sind wichtig |
-| PHP-Front-Controller plus Twig | Routing, Statuscodes und HTML zentral behandeln | Webserverregeln müssen den Einstiegspunkt korrekt erreichen |
-| JSON-Indizes und Shards | begrenzte Lesezugriffe ohne Requestdatenbank | Erzeuger und Leser müssen dasselbe Format verwenden |
-| Browsermodule ohne Framework | Interaktion mit ausgelieferten Webassets | Ladereihenfolge, Cacheversionen und Browserkompatibilität abstimmen |
-| Lokaler Charakterzustand | persönliche Ansichten ohne Serverprofil | Zustand ist an Browser/Profil gebunden |
-| Releasekomponenten mit Manifest | Änderungen gezielt übertragen und prüfen | Klassifikation und bestätigter Serverstand werden Betriebsbestandteil |
+| Python data build before the request | Unite sources and prepare relations | Build order and compatible data states matter |
+| PHP front controller plus Twig | Handle routing, status codes and HTML centrally | Web server rules must reach the entry point correctly |
+| JSON indices and shards | limited read access without a request database | Producer and reader must use the same format |
+| Browser modules without a framework | Interaction with shipped web assets | Coordinate load order, cache versions and browser compatibility |
+| Local character state | personal views without a server profile | State is bound to browser/profile |
+| Release components with a manifest | Transfer and verify changes selectively | Classification and confirmed server state become part of operations |
 
-Das dokumentiert die implementierte Strategie, nicht nachträglich erfundene Alternativenabwägungen.
+This documents the implemented strategy, not trade-offs invented after the fact.

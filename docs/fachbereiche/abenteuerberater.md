@@ -1,167 +1,167 @@
-# Abenteuerüberblick – Umsetzungsstand
+# Adventure overview – implementation status
 
-## Ziel
+## Goal
 
-Eine Seite, die nach einer Spielpause die Frage „Wo spiele ich weiter?“ beantwortet,
-ohne die Welt in Untergebiete zu zerlegen: die großen Inhalte als Karten, mit
-persönlichem Stand, passender Stufe und zwei Hinweisen. Ältere, überlevelte Inhalte
-bleiben gleichberechtigt sichtbar; die Seite gibt keine Route vor.
+A page that answers the question „Wo spiele ich weiter?“ after a game break,
+without splitting the world into sub-areas: the large content as maps, with
+personal progress, matching level and two hints. Older, over-levelled content
+stays equally visible; the page prescribes no route.
 
-Öffentliche Adressen: `/de/abenteuer/`, `/en/adventure/`, `/fr/aventure/`.
-Menü: **Welt → Abenteuerüberblick**.
+Public addresses: `/de/abenteuer/`, `/en/adventure/`, `/fr/aventure/`.
+Menu: **Welt → Abenteuerüberblick**.
 
-## Aufbau
+## Structure
 
-1. **Kopf** mit gewähltem Charakter und Stufe (aus dem vorhandenen Charakterspeicher).
-2. **Zwei Hinweise**: „Altes zu Ende bringen“ und „Passt zu deiner Stufe“. Ohne
-   belastbaren Vorschlag steht dort ein Hinweis, keine erfundene Empfehlung.
-3. **Meine Inhalte** (ganz oben, standardmäßig zugeklappt): Zugang nur für
-   **kaufbare** Inhalte – Erweiterungen und Aufgabenpakete –, lokal pro Konto
-   gespeichert (`mql.abenteuer.inhalte.v1`). Grundspiel und kostenlose Updates
-   stehen nicht in der Liste, weil sie immer verfügbar sind. Eine einzige Liste,
-   sortiert nach Einstiegsstufe wie die Karten, mit der Art hinter dem Namen;
-   zwei Knöpfe setzen alle Käufe auf einmal. Eine Änderung färbt Zeile und Karte
-   kurz ein, damit die Wirkung sichtbar ist.
-4. **Abenteuerkarten**: Name, Art, redaktioneller Stufenbereich, Kurztext,
-   Fortschritt und ein aufklappbarer Gebietsausschnitt. Auch 0 % wird angezeigt;
-   ein fehlender Balken hieße sonst „unbekannt“ statt „nichts geschafft“.
-5. **Fußnote**: Prozentwerte zählen einmalige Landschaftsaufgaben; ein fehlender
-   Abschluss im Import belegt keinen Nichtbesuch.
+1. **Header** with the selected character and level (from the existing character store).
+2. **Two hints**: „Altes zu Ende bringen“ and „Passt zu deiner Stufe“. Without
+   a reliable suggestion there is a note, no invented recommendation.
+3. **Meine Inhalte** (at the very top, collapsed by default): access only for
+   **purchasable** content – expansions and quest packs –, stored locally per
+   account (`mql.abenteuer.inhalte.v1`). Base game and free updates
+   are not in the list because they are always available. A single list,
+   sorted by entry level like the maps, with the kind after the name;
+   two buttons set all purchases at once. A change briefly tints row and map
+   so the effect is visible.
+4. **Adventure maps**: name, kind, editorial level range, short text,
+   progress and an expandable area excerpt. 0 % is shown too;
+   a missing bar would otherwise mean „unknown“ instead of „nothing achieved“.
+5. **Footnote**: percentages count one-time landscape quests; a missing
+   completion in the import does not prove a non-visit.
 
-Die Seite ist ohne JavaScript lesbar: Der Server rendert alle Abenteuer mit Namen,
-Stufe und Gebieten. Fortschritt, Hinweise und Zugang entstehen im Browser.
+The page is readable without JavaScript: the server renders all adventures with name,
+level and areas. Progress, hints and access arise in the browser.
 
-## Karte (14.11.2026)
+## Map (14.11.2026)
 
-Die Seite hat zwei Ansichten: **Karte | Liste**. Die Karte ist eine Zugabe; ohne
-JavaScript bleibt die Kartenliste die Seite, Schalter und Kartenbereich sind dann
-ausgeblendet.
+The page has two views: **Karte | Liste**. The map is an addition; without
+JavaScript the map list remains the page, toggle and map area are then
+hidden.
 
-- **Welt:** die gezeichnete Mittelerde-Karte des Clients (`268437554`). Die sechs
-  Regionsmarken sitzen auf den Pixelpositionen, mit denen das Spiel die Regionen
-  auf dieser Karte verknüpft (`maps/links.xml`), nicht auf einer geschätzten
-  Layoutposition.
-- **Marke:** Ring = Katalogfortschritt der geprüften Gebiete, Randfarbe =
-  Stufenpassung, Zahl = Gebiete mit einer bekannten nächsten Aufgabe. Ohne
-  Import bleibt der Fortschritt unbekannt („–“), nicht 0 %.
-- **Region:** die gezeichnete Regionskarte (z. B. Eriador) mit einem Punkt je
-  Gebiet, das das Spiel direkt auf dieser Region verlinkt. Je Punkt zeigt der
-  Ring den Fortschritt im Gebiet (Anteil erledigter Katalogaufgaben), die
-  Kernfarbe die Stufenpassung. Ohne Import bleibt der Ring leer, statt 0 % zu
-  behaupten. Die übrigen Gebiete stehen in der Liste unter der Karte; für sie
-  wird kein Punkt erfunden. Unter der Karte steht das gewählte Gebiet mit
-  Fortschritt, Stufenbereich, Stufenpassung, Anzahl nächster Aufgaben und
-  Zugang.
-- **Geländevorschau:** eine Kachel aus dem eigenen Client
-  (`/gelaende/<stand>/thumb/<karte>.webp`), sonst die gezeichnete Gebietskarte.
-  Keine Questmarker: diese Seite kennt keine Aufgabenpositionen. Knöpfe führen
-  mit `?vorkarte=<karte>` in die Kartenansicht und, wenn vorhanden, zur
-  Gebietsseite.
-- **Hinweise:** „Auf der Karte zeigen“ springt in die Region des vorgeschlagenen
-  Gebiets. Keine Route, keine Zusicherung, dass eine Aufgabe im Spiel offen ist.
-- **Gebiete als Liste:** aufklappbar unter der Regionskarte; dort stehen alle
-  Gebiete, auch die ohne eigenen Kartenpunkt.
-- Die Mittelerde-Übersicht ist direkt die Kartenansicht. Die sechs Regionen
-  werden über die Karte gewählt; eine zusätzliche globale Abenteuerliste gibt
-  es dort nicht. Innerhalb einer Region bleibt die Gebietsliste als alternative
-  Auswahl neben der Regionskarte erhalten.
+- **World:** the client's drawn Middle-earth map (`268437554`). The six
+  region markers sit on the pixel positions with which the game links the
+  regions on this map (`maps/links.xml`), not on an estimated
+  layout position.
+- **Marker:** ring = catalogue progress of the verified areas, border colour =
+  level fit, number = areas with a known next quest. Without an
+  import the progress stays unknown („–“), not 0 %.
+- **Region:** the drawn region map (e.g. Eriador) with one point per
+  area that the game links directly on this region. For each point the
+  ring shows the progress in the area (share of completed catalogue quests), the
+  core colour the level fit. Without an import the ring stays empty instead of
+  claiming 0 %. The remaining areas are in the list below the map; for them
+  no point is invented. Below the map stands the selected area with
+  progress, level range, level fit, number of next quests and
+  access.
+- **Terrain preview:** a tile from the own client
+  (`/gelaende/<stand>/thumb/<karte>.webp`), otherwise the drawn area map.
+  No quest markers: this page knows no quest positions. Buttons lead
+  with `?vorkarte=<karte>` into the map view and, if present, to the
+  area page.
+- **Hints:** „Auf der Karte zeigen“ jumps to the region of the suggested
+  area. No route, no assurance that a quest is open in the game.
+- **Areas as a list:** expandable below the region map; there all
+  areas stand, also those without their own map point.
+- The Middle-earth overview is directly the map view. The six regions
+  are chosen via the map; an additional global adventure list does
+  not exist there. Within a region the area list remains as an alternative
+  selection next to the region map.
 
-Daten: `tools/build_abenteuer.py` ergänzt je Gebiet `region` (die tier-1-Karte
-aus `daten/karten.json`) und schreibt `positions` aus `maps/links.xml`:
-`world` für die sechs Regionen, `areas` für die direkt verlinkten Gebiete (52
-der 153). Unbenannte Unterkarten (zwei Osgiliath-Varianten, zwei Alt-Anórien-
-Varianten, eine Nan-Ogol-Karte) werden nicht als eigene Gebiete geführt: ihre
-Aufgaben zählen bei der benannten Landschaft, unter der sie hängen. `Adventures.php` liefert die sechs Regionen mit übersetzten Namen aus
-der Kartentabelle, ihre Positionen und die vorhandenen Gebietsseiten.
-Fortschritt, Stufenpassung und nächste Aufgaben kommen aus derselben
-Browserlogik wie die Karten.
+Data: `tools/build_abenteuer.py` adds `region` per area (the tier-1 map
+from `daten/karten.json`) and writes `positions` from `maps/links.xml`:
+`world` for the six regions, `areas` for the directly linked areas (52
+of the 153). Unnamed sub-maps (two Osgiliath variants, two old Anórien
+variants, one Nan-Ogol map) are not kept as separate areas: their
+quests count with the named landscape they hang under. `Adventures.php` provides the six regions with translated names from
+the map table, their positions and the existing area pages.
+Progress, level fit and next quests come from the same
+browser logic as the maps.
 
-Eine **durchgehende Geländewelt** gibt es bewusst nicht: Die Gebietsrahmen
-überlappen sich vielfach, die Geländeübersichten sind nur zu 41–77 % belegt,
-und gezeichnete Grenzen fehlen in den Daten. Die Regionskarte nutzt deshalb die
-vollständige Spielkartenzeichnung.
+A **continuous terrain world** deliberately does not exist: the area frames
+overlap many times, the terrain overviews are only 41–77 % covered,
+and drawn borders are missing in the data. The region map therefore uses
+the complete game map drawing.
 
-## Daten
+## Data
 
-- `referenz/inhaltspakete.json` (Schema 2): je Abenteuer stabile Kennung,
-  Reihenfolge (Erscheinen), Art, Veröffentlichung, Namen und Kurztext in DE/EN/FR,
-  redaktioneller Stufenbereich (`levels`, `level_source: editorial`), Landschafts-
-  Wurzeln, ausdrückliche Ausschlüsse und der Prüfumfang (`review: landscape`).
-  Englische Namen sind die offiziellen Produktnamen; deutsche und französische
-  Titel sind redaktionelle Übersetzungen mit den Landschaftsnamen des Clients.
-  Aufgabenpakete und kostenlose Updates tragen statt `name` ein `name_map` und
-  heißen damit in jeder Sprache so, wie der Client die Landschaft nennt.
-  `free: true` markiert immer verfügbare Inhalte (Grundspiel, Updates); alle
-  anderen sind kaufbar und erscheinen in „Meine Inhalte“.
-- `tools/build_abenteuer.py` erzeugt daraus je Sprache `abenteuer.json` für die
-  Seite und `web/abenteuer-<sprache>.js` für den Browser. Beides ist identisch.
-- Aufgabe→Abenteuer: die tiefste Karte im `fk`-Pfad, die zu genau einem Abenteuer
-  gehört. Ein ausgeschlossener Zweig schneidet den ganzen Teilbaum ab, damit
-  später erschienene Inhalte nicht über eine alte Landschaft geerbt werden
+- `referenz/inhaltspakete.json` (schema 2): per adventure a stable identifier,
+  order (release), kind, publication, names and short text in DE/EN/FR,
+  editorial level range (`levels`, `level_source: editorial`), landscape
+  roots, explicit exclusions and the review scope (`review: landscape`).
+  English names are the official product names; German and French
+  titles are editorial translations with the client's landscape names.
+  Quest packs and free updates carry a `name_map` instead of `name` and
+  are thus called in each language the way the client calls the landscape.
+  `free: true` marks always available content (base game, updates); all
+  others are purchasable and appear in „Meine Inhalte“.
+- `tools/build_abenteuer.py` generates from it per language `abenteuer.json` for the
+  page and `web/abenteuer-<sprache>.js` for the browser. Both are identical.
+- Quest → adventure: the deepest map in the `fk` path that belongs to exactly one adventure.
+  An excluded branch cuts off the whole subtree so that
+  content released later is not inherited via an old landscape
   (Wildwald, Winkel am Mitheithel, Carn Dûm danach, Wohngebiete, Frostbluff;
-  Morgultal gehört zu Minas Morgul, nicht zu Mordor; Ältestental nicht zu Gundabad;
-  Hatokáli-Hügel nicht zu Harad).
-- Gezählt werden einmalige Landschaftsaufgaben; Wiederholbares, Tägliches,
-  Sitzungsspiele, Instanzen und technische Einträge entfallen. Ausschließende
-  Alternativen mit belegtem Abschluss bleiben, sonst fällt der tote Zweig aus dem
-  Nenner. Der Gesamtprozentwert summiert Aufgaben, nicht Gebietsprozente.
-- Gebietsstufen sind aus Aufgaben abgeleitet (p10–p90) und nur für Reihenfolge und
-  Weitergehen gedacht. Der angezeigte Stufenbereich eines Abenteuers ist
-  redaktionell und keine Messung im Client.
-- Zuordnungsumfang: Landschaftsebene geprüft. Einzelne später ergänzte Aufgaben
-  innerhalb einer alten Landschaft sind nicht ausgeschlossen; das steht als
-  Einschränkung in den erzeugten Daten.
+  Morgultal belongs to Minas Morgul, not to Mordor; Ältestental not to Gundabad;
+  Hatokáli-Hügel not to Harad).
+- Counted are one-time landscape quests; repeatable, daily,
+  session play, instances and technical entries are dropped. Excluding
+  alternatives with a proven completion remain, otherwise the dead branch falls out of the
+  denominator. The overall percentage sums quests, not area percentages.
+- Area levels are derived from quests (p10–p90) and meant only for order and
+  moving on. The displayed level range of an adventure is
+  editorial and no measurement in the client.
+- Assignment scope: landscape level verified. Individual quests added later
+  within an old landscape are not excluded; that stands as a
+  limitation in the generated data.
 
-Lokaler Bestand am 11.11.2026: 32 Abenteuer (15 Erweiterungen einschließlich Grundspiel, 12 Aufgabenpakete, 5 kostenlose Updates), 153 Gebiete, 7.821 einmalige Aufgaben.
+Local stock on 11.11.2026: 32 adventures (15 expansions including base game, 12 quest packs, 5 free updates), 153 areas, 7.821 one-time quests.
 
-## Logik
+## Logic
 
-`web/abenteuer-logik.js`, unabhängig von der Oberfläche testbar:
+`web/abenteuer-logik.js`, testable independently of the interface:
 
-- Fortschritt je Abenteuer und Gebiet; ohne Import bleibt er unbekannt (`null`),
-  nicht 0 %.
-- Zustand: `started`, `complete`, `unrecorded` (Import da, kein Abschluss),
-  `no_content`, `unknown` (kein Import).
-- Stufeneignung: `below` (Inhalt unter der Charakterstufe), `fits`, `above`
-  (Inhalt für höhere Stufen), `unknown`.
-- „Altes zu Ende bringen“: begonnen, unvollständig, nicht unter der Stufe des
-  Charakters zu hoch, Zugang nicht ausdrücklich fehlend; frühester Stufenbereich,
-  dann geringste Abdeckung.
-- „Passt zu deiner Stufe“: Stufenbereich umfasst die Charakterstufe, begonnene
-  Abenteuer zuerst; nie dasselbe Abenteuer wie der erste Hinweis.
-- Nächster Schritt im Abenteuer: frühestes Gebiet mit einer Aufgabe, deren bekannte
-  Voraussetzungen erfüllt sind. Das ist keine Zusicherung aktueller Annehmbarkeit.
-- Zugang: kaufbare Inhalte aus der gespeicherten Angabe; Grundspiel und kostenlose
-  Updates sind immer verfügbar. VIP-Regeln
-  werden nur mit ausdrücklich geprüften Feldern berücksichtigt. „Unbekannt“ heißt
-  nicht „nicht gekauft“; nur ausdrücklich fehlender Zugang nimmt ein Abenteuer aus
-  den Hinweisen, nicht aus der Liste.
+- Progress per adventure and area; without an import it stays unknown (`null`),
+  not 0 %.
+- State: `started`, `complete`, `unrecorded` (import there, no completion),
+  `no_content`, `unknown` (no import).
+- Level fit: `below` (content below the character level), `fits`, `above`
+  (content for higher levels), `unknown`.
+- „Altes zu Ende bringen“: started, incomplete, not too high above the level of the
+  character, access not explicitly missing; earliest level range,
+  then lowest coverage.
+- „Passt zu deiner Stufe“: level range includes the character level, started
+  adventures first; never the same adventure as the first hint.
+- Next step in the adventure: earliest area with a quest whose known
+  prerequisites are met. That is no assurance of current acceptability.
+- Access: purchasable content from the stored statement; base game and free
+  updates are always available. VIP rules
+  are considered only with explicitly verified fields. „Unbekannt“ means
+  not „nicht gekauft“; only explicitly missing access removes an adventure from
+  the hints, not from the list.
 
-## Grenzen
+## Limits
 
-- Die Karte ist eine Zugabe zur Kartenliste. Sie zeigt keine durchgehende
-  Geländewelt und keine gezeichneten Grenzen. Regions- und Gebietspunkte kommen
-  aus den Kartenverknüpfungen des Spiels; nicht verlinkte Gebiete bleiben ohne
-  Punkt. Die Geländevorschau gilt je Gebiet, nicht für die Welt.
-- Keine Kaufberatung: der Katalog belegt Aufgaben, keine Zugangsrechte. Freigaben
-  für VIP und kostenlose Inhalte sind noch nicht geprüft.
-- Keine Erweiterungsbilder: eigene Kartenausschnitte waren als Sigel zu klein und
-  unruhig, offizielle Motive fehlen für die älteren Erweiterungen. Die Karten
-  tragen nur Text.
-- Zugangseinstellungen sind noch nicht in der Sicherung des Charakterspeichers
-  enthalten; sie liegen nur lokal unter ihrem eigenen Schlüssel.
-- Die Reihenfolge innerhalb eines Abenteuers ist aus Gebietsstufen abgeleitet, nicht
-  als Geschichte kuratiert.
-- Kein Gesamt-Prozentwert über ganz Mittelerde.
+- The map is an addition to the map list. It shows no continuous
+  terrain world and no drawn borders. Region and area points come
+  from the game's map links; unlinked areas stay without a
+  point. The terrain preview applies per area, not for the world.
+- No purchase advice: the catalogue proves quests, not access rights. Permissions
+  for VIP and free content are not yet verified.
+- No expansion images: own map excerpts were too small and
+  restless as sigils, official motifs are missing for the older expansions. The maps
+  carry only text.
+- Access settings are not yet contained in the backup of the character store;
+  they lie only locally under their own key.
+- The order within an adventure is derived from area levels, not
+  curated as a story.
+- No overall percentage over all of Middle-earth.
 
-## Prüfungen
+## Checks
 
 ```bash
 python3 -m unittest tests.test_abenteuer tests.test_abenteuer_seite
 node tests/test_abenteuer.js
 ```
 
-Die Seitentests rendern `/de/abenteuer/`, `/en/adventure/` und `/fr/aventure/` über
-den echten Front-Controller und prüfen Karten, Namen, Stufen, Regionsmarken und
-Assets. `test_abenteuer.js` prüft zusätzlich die Regionssummen (Fortschritt,
-Stufenband aus den redaktionellen Abenteuerbereichen, Anschlüsse).
+The page tests render `/de/abenteuer/`, `/en/adventure/` and `/fr/aventure/` via
+the real front controller and check maps, names, levels, region markers and
+assets. `test_abenteuer.js` additionally checks the region sums (progress,
+level band from the editorial adventure ranges, connections).

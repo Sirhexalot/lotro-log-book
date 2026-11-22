@@ -1,8 +1,8 @@
-# Sets: Datenbasis und nächste Integration
+# Sets: data basis and next integration
 
-Stand: 09.11.2026. **Setliste, Detailseiten und Navigation sind veröffentlicht.**
-Die Auswertung bleibt bei belegten Angaben;
-fehlende Werte, Effekte und Gegenstände werden sichtbar als unvollständig behandelt.
+Status as of 09.11.2026. **The set list, detail pages and navigation are published.**
+The evaluation stays with proven data;
+missing values, effects and items are visibly treated as incomplete.
 
 ## Generator
 
@@ -12,127 +12,127 @@ python3 tools/build_php_data.py --ziel "$HOME/.cache/llb-php/phpdata"
 python3 -m unittest tests.test_sets tests.test_sets_php tests.test_set_viewmodel -v
 ```
 
-`build_sets.py` liest `sets.xml`, `stats.xml`, `classes.xml` und die
-DE/EN/FR-Labels des lokalen Companion-Clientexports. Gegenstände werden über
-`daten/items.json` und `daten/gegenstand-details.json` anhand ihrer IDs
-zugeordnet. Die Abhängigkeiten werden nur gelesen.
+`build_sets.py` reads `sets.xml`, `stats.xml`, `classes.xml` and the
+DE/EN/FR labels of the local Companion client export. Items are assigned via
+`daten/items.json` and `daten/gegenstand-details.json` by their IDs.
+The dependencies are only read.
 
-Ausgabe (generiertes Spielmaterial, von Git ausgeschlossen):
+Output (generated game material, excluded from Git):
 
-- `daten/sets.json`: vollständige Setmodelle samt Quellenmetadaten,
-  Teileverweisen und typisierten Bonusdefinitionen.
-- `daten/sets-suche-de.json`, `…-en.json`, `…-fr.json`: sprachrichtige
-  Listenindizes mit Filtermerkmalen pro Teil.
-- `daten/sets-pruefung.json`: maschinenlesbarer Prüfbericht.
+- `daten/sets.json`: complete set models together with source metadata,
+  part references and typed bonus definitions.
+- `daten/sets-suche-de.json`, `…-en.json`, `…-fr.json`: language-correct
+  list indices with filter features per part.
+- `daten/sets-pruefung.json`: machine-readable test report.
 
-Quell- und Zielpfade lassen sich mit `--quelle`, `--items`, `--details` und
-`--ziel` überschreiben. Ein dedizierter Zielordner wird angelegt, aber nicht
-geleert. Pflichtquellen fehlen nicht stillschweigend: der Bau bricht dann ab.
+Source and target paths can be overridden with `--quelle`, `--items`, `--details` and
+`--ziel`. A dedicated target folder is created, but not
+emptied. Mandatory sources do not go missing silently: the build then aborts.
 
-## Datenvertrag
+## Data contract
 
-- Neue öffentliche Set-IDs: achtstelliges Großbuchstaben-Hex der Spiel-ID.
-  Die dezimale Quell-ID bleibt zusätzlich erhalten. Namen sind keine Identität;
-  gleichnamige Sets werden nicht zusammengelegt.
-- Setnamen nutzen die sprachrichtigen Labels. Die zusätzliche Zeile mit der
-  Höchststufe wird nicht Teil des Namens. Technische Namen wie `DNT` werden
-  nicht als Spielertexte übernommen.
-- `level` und `maxLevel` bleiben als getrennte, rohe Quellenmetadaten erhalten.
-  Sie sind **kein** bestätigtes Minimum/Maximum und kein Setfilter.
-- Fehlende Gegenstände bleiben als Verweis mit `available: false` im Set.
-  Fehlende Gegenstandsdaten, Übersetzungen und widersprüchliche Rückverweise
-  werden separat gemeldet. Nicht verfügbare Teile dürfen keinen Detailseitenlink
-  bekommen.
-- Filtermerkmale bleiben pro Teil erhalten. Ein Klassenwert von Teil A darf
-  nicht mit der Rüstungsart oder Stufe von Teil B einen Scheintreffer ergeben.
-- Leere/unbenennbare Sets bleiben im vollständigen Modell und Prüfbericht,
-  fehlen aber im Listenindex. Eine fehlende Klassenauflösung wird nicht als
-  zuverlässig bekannt oder als „alle Klassen“ ausgegeben.
-- Bonusgruppen erhalten ihre Teileanzahl und alle ursprünglichen Definitionen.
-  Konstanten, Skalierungsverweise, Operatoren, Beschreibungen und Effekte werden
-  nicht miteinander verrechnet oder still entfernt.
-- `display_ready` gilt für vollständige, übersetzte Effekt-/Overridebeschreibungen
-  und typisierte Konstanten (`INTEGER` oder ausdrücklich `isPercentage`).
-  `SUBSTRACT` kehrt das Vorzeichen um; `SET` wird nicht als Addition angezeigt.
-  Prozentwerte werden als gespeicherte Prozentpunkte angezeigt, nicht mit 100
-  multipliziert. Andere Operatoren und nicht endliche Werte bleiben gesperrt.
-- Ein übersetzter Statname allein belegt keine Einheit. Skalierungskurven werden
-  nicht mit dem unklaren Set-Level oder einer beliebigen Gegenstandsstufe
-  ausgewertet. Solche Werte erhalten einen ausdrücklichen Hinweis.
-- Mehrfachklassen aus der Quelle (z. B. `Burglar;Corsair`) sind einzelne Filterwerte.
-  Geschmeide wird über die ItemClass 49 des Clients erkannt; Enum-Labels kommen
-  aus der Quelle, nicht aus Setnamen.
+- New public set IDs: eight-character upper-case hex of the game ID.
+  The decimal source ID remains additionally. Names are no identity;
+  sets with the same name are not merged.
+- Set names use the language-correct labels. The additional line with the
+  maximum level does not become part of the name. Technical names like `DNT` are
+  not adopted as player texts.
+- `level` and `maxLevel` remain as separate, raw source metadata.
+  They are **no** confirmed minimum/maximum and no set filter.
+- Missing items remain as a reference with `available: false` in the set.
+  Missing item data, translations and contradictory back references
+  are reported separately. Unavailable parts may get no detail page
+  link.
+- Filter features remain per part. A class value of part A may
+  not produce a false hit with the armour type or level of part B.
+- Empty/unnamable sets remain in the complete model and test report,
+  but are missing from the list index. A missing class resolution is not output as
+  reliably known or as „alle Klassen“.
+- Bonus groups receive their part count and all original definitions.
+  Constants, scaling references, operators, descriptions and effects are
+  not offset against each other or silently removed.
+- `display_ready` applies to complete, translated effect/override descriptions
+  and typed constants (`INTEGER` or explicitly `isPercentage`).
+  `SUBSTRACT` flips the sign; `SET` is not shown as an addition.
+  Percentages are shown as stored percentage points, not multiplied
+  by 100. Other operators and non-finite values remain locked.
+- A translated stat name alone proves no unit. Scaling curves are
+  not evaluated with the unclear set level or an arbitrary item level.
+  Such values receive an explicit note.
+- Multiple classes from the source (e.g. `Burglar;Corsair`) are individual filter values.
+  Jewellery is recognised via ItemClass 49 of the client; enum labels come
+  from the source, not from set names.
 
-## Prüfstand des integrierten Baus
+## Test record of the integrated build
 
-2.223 Setdefinitionen, 2.218 Listeneinträge, 11.159 Teileverweise und 4.479
-Bonusgruppen. Vier Sets sind leer, ein Set hat nur einen technischen Namen.
-498 Teileverweise aus 46 Sets fehlen im aktuellen Gegenstandskatalog.
-672 Teileverweise haben keine Detaildaten. 52 Bonusgruppen haben eine
-auffällige Teileanzahl. 1.997 Statdefinitionen bleiben ohne sichere vollständige
-Darstellung; bei 885 Bonusbestandteilen fehlen brauchbare Labels in mindestens
-einer Sprache. Diese Zahlen sind Prüfstände, keine dauerhaften Katalogzahlen.
+2.223 set definitions, 2.218 list entries, 11.159 part references and 4.479
+bonus groups. Four sets are empty, one set has only a technical name.
+498 part references from 46 sets are missing in the current item catalogue.
+672 part references have no detail data. 52 bonus groups have a
+conspicuous part count. 1.997 stat definitions remain without a safe complete
+rendering; for 885 bonus components usable labels are missing in at least
+one language. These numbers are test records, no permanent catalogue numbers.
 
-## Oberfläche und Integration
+## Interface and integration
 
-- Liste: `/de/set/`, `/en/set/`, `/fr/ensemble/`; Detail mit stabiler Hex-ID,
-  z. B. `/de/set/70069B64/` für das Umbar-Set mit den acht Teilen.
-- GET-Filter: `q`, `class[]`, `category[]`, `armour[]`, `from`, `to`, `page`.
-  Mehrfachwerte einer Gruppe gelten als Oder, verschiedene Gruppen als Und.
-  Alle Kriterien müssen durch dasselbe verfügbare Teil erfüllt sein. Fehlende
-  Angaben gelten nicht als passende Werte. Klassenspezifische Filter schließen
-  nachweislich uneingeschränkte Teile ein, nicht jedoch unbekannte Klassenangaben.
-- Facetten zählen Sets ohne die eigene Filterauswahl, mit allen anderen
-  Kriterien. Gewählte Nulltreffer bleiben sichtbar. Je Seite 30 Ergebnisse.
-- Suche/Filter/Pagination funktionieren serverseitig ohne JavaScript. Mobil
-  klappt `sets.js` die Filter ein; ohne JS bleiben sie bedienbar offen.
-  Mit JavaScript übernehmen Checkboxen und Stufenänderungen die Filter sofort:
-  Treffer und Facetten werden nachgeladen, ohne Filterposition/Fokus zu verlieren.
-  „Anwenden“ ist dann ausgeblendet; ohne JS bleibt der Knopf erhalten.
-  Überholte Anfragen werden abgebrochen, Zurück/Vorwärts stellt die Filter wieder
-  her. Sprachlinks und Canonical-/Robots-Angaben folgen dem aktuellen Filterstand.
-- Details verwenden vorhandene Item-Viewmodel-Werte. Kein zweiter Statsrechner,
-  keine Besitz-/Vollständigkeitsbehauptung über importierte Charaktere.
-- `Sets.php` liefert die gemeinsame PHP/Twig-Hülle und DE/EN/FR-Texte.
-  `tools/set_viewmodel.py` erzeugt Setshards und ersetzt die alte Set-Minianzeige
-  am Gegenstand durch verlinkte Setnamen, ohne den falschen Stufenbereich.
-- Menüeintrag in `Shell.php` und `menue.js`, zentrale Suche mit Typ `s` in
-  `build_suche.py`/`suche.js`. Suchdaten nach dem Setbau für alle Sprachen erneuern.
-- Setlisten und Details stehen in den Sprachsitemaps. Gefilterte Listen tragen
-  `noindex,follow` und eine normalisierte eigene Canonical-URL. Sprachwechsel
-  erhält die Filter, beginnt aber auf Seite 1, da Suchbegriffe sprachabhängig sind.
-- Der Release prüft Setassets, Templates und alle drei Filterindizes. Tracking
-  kommt unverändert aus der gemeinsamen Hülle; keine Spielstände im Release.
+- List: `/de/set/`, `/en/set/`, `/fr/ensemble/`; detail with stable hex ID,
+  e.g. `/de/set/70069B64/` for the Umbar set with the eight parts.
+- GET filter: `q`, `class[]`, `category[]`, `armour[]`, `from`, `to`, `page`.
+  Multiple values of one group count as OR, different groups as AND.
+  All criteria must be met by the same available part. Missing
+  data do not count as matching values. Class-specific filters include
+  demonstrably unrestricted parts, but not unknown class data.
+- Facets count sets without their own filter selection, with all other
+  criteria. Selected zero hits remain visible. 30 results per page.
+- Search/filter/pagination work server-side without JavaScript. On mobile
+  `sets.js` collapses the filters; without JS they remain open and operable.
+  With JavaScript, checkboxes and level changes take over the filter immediately:
+  hits and facets are reloaded without losing filter position/focus.
+  „Anwenden“ is then hidden; without JS the button remains.
+  Outdated requests are aborted, back/forward restores the filters.
+  Language links and canonical/robots data follow the current filter state.
+- Details use existing item viewmodel values. No second stats calculator,
+  no ownership/completeness claim about imported characters.
+- `Sets.php` provides the common PHP/Twig shell and DE/EN/FR texts.
+  `tools/set_viewmodel.py` creates set shards and replaces the old set mini-view
+  on the item with linked set names, without the wrong level range.
+- Menu entry in `Shell.php` and `menue.js`, central search with type `s` in
+  `build_suche.py`/`suche.js`. Refresh search data after the set build for all languages.
+- Set lists and details stand in the language sitemaps. Filtered lists carry
+  `noindex,follow` and a normalised own canonical URL. Language switching
+  keeps the filters, but starts on page 1, since search terms are language-dependent.
+- The release checks set assets, templates and all three filter indices. Tracking
+  comes unchanged from the common shell; no character progress in the release.
 
-## Prüfung und verbleibende Grenzen
+## Check and remaining limits
 
-Generator-, PHP-Filter-/Routing- und Viewmodeltests prüfen Vorzeichen, unsichere
-Skalierung, Textvorlagen, gleiche Filterzeugen, Mehrfachklassen, echte 404,
-Namensgleichheit und fehlende Teile. Browserprüfung lokal in DE/EN/FR auf Desktop
-und Mobil: Filter/Neuladen, Umbar mit acht Karten und drei Bonusstufen,
-unvollständiges Set, Gegenstandsverweis, Suche/Details ohne JavaScript.
+Generator, PHP filter/routing and viewmodel tests check signs, unsafe
+scaling, text templates, the same filter witnesses, multiple classes, real 404,
+name equality and missing parts. Browser check locally in DE/EN/FR on desktop
+and mobile: filter/reload, Umbar with eight cards and three bonus levels,
+incomplete set, item reference, search/details without JavaScript.
 
-Die vollständige Python-Suite hat weiterhin den bereits vorher vorhandenen
-Fehler in `test_katalogseiten.test_one_public_address_per_entity`: sie erwartet
-den früheren Apache-Block `LLB ENTITY URLS` statt des PHP-Blocks. Daraus keine
-vollständige grüne Testsuite behaupten.
+The complete Python suite still has the already existing
+error in `test_katalogseiten.test_one_public_address_per_entity`: it expects
+the earlier Apache block `LLB ENTITY URLS` instead of the PHP block. Do not claim
+a complete green test suite from that.
 
-Noch nicht aufgelöste Stat-/Effektangaben sind Datenlücken, keine stillen Nullen.
-Eine weitergehende Zahlenberechnung benötigt belegte Einheiten und die korrekte
-Bezugsstufe.
+Not yet resolved stat/effect data are data gaps, no silent zeros.
+A further number calculation needs proven units and the correct
+reference level.
 
-## Veröffentlichung 09.11.2026
+## Publication 09.11.2026
 
-Release aus `~/.cache/llb-release`: zuerst 2.309 Datendateien (191,6 MB), danach
-18 Anwendungs-/Assetdateien (15,4 MB) per bestehendem FTPS-Uploader übertragen.
-Betroffene kompilierte Twig-Vorlagen wurden gezielt geleert; `.htaccess` blieb
-unverändert. Keine Charakterdaten veröffentlicht.
+Release from `~/.cache/llb-release`: first 2.309 data files (191,6 MB), then
+18 application/asset files (15,4 MB) transferred via the existing FTPS uploader.
+Affected compiled Twig templates were cleared deliberately; `.htaccess` stayed
+unchanged. No character data published.
 
-Live geprüft: Listen und Sofortfilter in DE/EN/FR, Desktop/Mobil, Umbar mit acht
-Teilen und drei Bonusstufen, zentrale Set-Suchtreffer und Gegenstandsverweis.
-Alle drei Set-Sitemaps liefern je 2.219 URLs. Kleinschreibung und `.html` werden
-per 301 kanonisiert; unbekannte Sets liefern 404, der private Setindex 403.
-Die allgemeinen Live-URL-Checks bestehen ebenfalls. Die Besucherzähler waren
-im isolierten Browser-Test blockiert; deren tatsächliche Übermittlung wurde
-damit nicht getestet. Eine zusätzliche Startseitenankündigung war nicht Teil
-dieses Releases.
+Live checked: lists and immediate filter in DE/EN/FR, desktop/mobile, Umbar with eight
+parts and three bonus levels, central set search hits and item reference.
+All three set sitemaps return 2.219 URLs each. Lower case and `.html` are
+canonicalised via 301; unknown sets return 404, the private set index 403.
+The general live URL checks pass as well. The visitor counters were
+blocked in the isolated browser test; their actual transmission was
+therefore not tested. An additional home page announcement was not part of
+this release.

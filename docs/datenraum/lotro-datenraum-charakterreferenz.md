@@ -1,24 +1,24 @@
-# Charakterreferenz-Entitäten und Decoder-Klassen
+# Character reference entities and decoder classes
 
-## Klassenbelege des verwendeten DAT-Decoders
+## Class evidence from the DAT decoder in use
 
-Quelle: `delta-lotro-dat-utils-11.13.jar`, interne Ressource `delta/games/lotro/dat/wlib/classes/io/classes.xml`. JAR-SHA-256 im JSON-Beleg. Zusätzlich bestätigt `javap -constants ... delta.games.lotro.dat.WStateClass` die Konstanten MOB=1723 und NPC=1724.
+Source: `delta-lotro-dat-utils-11.13.jar`, internal resource `delta/games/lotro/dat/wlib/classes/io/classes.xml`. JAR SHA-256 in the JSON evidence. `javap -constants ... delta.games.lotro.dat.WStateClass` additionally confirms the constants MOB=1723 and NPC=1724.
 
-| Klassenindex | Decoder-Klassenname |
+| Class index | Decoder class name |
 | --- | --- |
 | 1723 | MonsterTemplate |
 | 1724 | NPCTemplate |
 | 796 | IItem |
 
-Damit sind die zuvor numerisch dokumentierten Auftraggeberziele genauer belegt: Klasse 796 heißt im Decoder IItem, Klasse 1723 MonsterTemplate. Ein Auftraggeber ist somit eine Rolle über mehreren Quellobjektklassen. Das rechtfertigt keine Einstufung jedes IItem als tragbarer Gegenstand oder jedes MonsterTemplate als feindlicher Gegner.
+This documents the quest giver targets that were previously described only by number more precisely: class 796 is called IItem in the decoder, class 1723 MonsterTemplate. A quest giver is therefore a role across several source object classes. That does not justify classifying every IItem as a wearable item or every MonsterTemplate as a hostile mob.
 
-Der NPC-Extractor `MainDatNPCsLoader.useId` akzeptiert ausschließlich `WStateClass.NPC`. Sein `load` liest Name, OccupationTitle und Effekte; Geschlecht wird aus Markup im Namen abgeleitet. Das ist keine unabhängige Geschlechts-Property aus diesem Exporter.
+The NPC extractor `MainDatNPCsLoader.useId` accepts exclusively `WStateClass.NPC`. Its `load` reads name, OccupationTitle and effects; gender is derived from markup in the name. That is not an independent gender property from this exporter.
 
-## Typisierte Referenzprüfungen
+## Typed reference checks
 
-Nichtnumerische IDs (Klassen-Key, Herkunft-Code, Tat-Key) werden ausdrücklich gegen die richtige Zielspalte geprüft. Null Treffer heißt keine Evidenz; offene Werte sind nicht automatisch ungültig.
+Non-numeric IDs (class key, origin code, deed key) are explicitly checked against the correct target column. Zero hits mean no evidence; open values are not automatically invalid.
 
-| Quelle | Ziel | Vorkommen | Aufgelöst | Offen |
+| Source | Target | Occurrences | Resolved | Open |
 | --- | --- | --- | --- | --- |
 | races.xml `.//nationality/@id` | ('nationalities.xml', './nationality', 'code') | 28 | 28 | 0 |
 | races.xml `.//allowedClass/@id` | ('classes.xml', './class', 'key') | 69 | 69 | 0 |
@@ -39,15 +39,15 @@ Nichtnumerische IDs (Klassen-Key, Herkunft-Code, Tat-Key) werden ausdrücklich g
 | crafting.xml `.//proficiency/@titleId` | ('titles.xml', './title', 'id') | 160 | 160 | 0 |
 | crafting.xml `.//recipe/@id` | ('recipes.xml', './recipe', 'id') | 1733 | 1733 | 0 |
 | crafting.xml `./profession/@guildFaction` | ('factions.xml', './*', 'id') | 7 | 7 | 0 |
-| factions.xml `.//level/@deedKey` | Union deed/@key und deed/@id | 358 | 358 | 0 |
+| factions.xml `.//level/@deedKey` | Union of deed/@key and deed/@id | 358 | 358 | 0 |
 | traitTrees.xml `.//cell/@traitId` | ('traits.xml', './trait', 'identifier') | 1201 | 1201 | 0 |
 | traitTrees.xml `.//step/@traitId` | ('traits.xml', './trait', 'identifier') | 270 | 270 | 0 |
 | traitTrees.xml `.//*[@mainTraitId]/@mainTraitId` | ('traits.xml', './trait', 'identifier') | 36 | 36 | 0 |
 
-## Offene Kartenlink-Ziele
+## Open map link targets
 
-Die zwei im Geometriebestand nicht gefundenen Ziel-IDs wurden zusätzlich gegen die Kartenlabels DE/EN/FR geprüft. Die tatsächlichen Treffer und eingehenden Linkattribute stehen unverändert im JSON. Fehlende Geometrie wird nicht aus einem Namen oder einer Linkposition rekonstruiert.
+The two target IDs not found in the geometry set were additionally checked against the DE/EN/FR map labels. The actual hits and incoming link attributes are listed unchanged in the JSON. Missing geometry is not reconstructed from a name or a link position.
 
-## Reproduktion
+## Reproduction
 
-`python3 lotro_datenraum_charakterreferenz.py`. Alle Ergebnisse und Eingabehashes: `lotro-datenraum-charakterreferenz.json`.
+`python3 lotro_datenraum_charakterreferenz.py`. All results and input hashes: `lotro-datenraum-charakterreferenz.json`.

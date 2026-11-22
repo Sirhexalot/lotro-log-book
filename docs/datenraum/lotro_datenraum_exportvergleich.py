@@ -58,7 +58,7 @@ for name, data, buckets in [
         else:
             walk(v, '$.' + k, stats)
     profiles += ['## ' + name, '',
-                 table(['Propertypfad (`<id>` = dynamischer Schlüssel)', 'Typen/Vorkommen'],
+                 table(['Property path (`<id>` = dynamic key)', 'Types/occurrences'],
                        [('`' + k + '`', ', '.join(f'{t}: {n}' for t, n in sorted(s.items())))
                         for k, s in sorted(stats.items())]), '']
 
@@ -80,15 +80,15 @@ def check(label, values, target):
                    'resolved': sum(v in target for v in vals), 'missing': dict(missing)})
 
 
-check('Itemexport-ID → Companion-Item', items['items'], xi)
-check('Companion-Item → Itemexport-ID (Abdeckung)', xi, items['items'])
-check('Setexport-ID → Companion-Set', items['sets'], xs)
-check('Itemexport.set → Setexport-ID', [r['set'] for r in items['items'].values() if 'set' in r], items['sets'])
-check('Setexport.i[] → Itemexport-ID', [i for r in items['sets'].values() for i in r['i']], items['items'])
-check('Rezeptexport.id → Companion-Rezept', [r['id'] for r in recipes['recipes']], xr)
-check('Rezeptexport.p → exportierter Beruf', [r['p'] for r in recipes['recipes'] if 'p' in r], recipes['professions'])
-check('Rezeptexport.t → exportierte Stufe', [r['t'] for r in recipes['recipes'] if 't' in r], recipes['tiers'])
-check('Rezeptexport.c → exportierte Kategorie', [r['c'] for r in recipes['recipes'] if 'c' in r], recipes['categories'])
+check('Item export ID → Companion item', items['items'], xi)
+check('Companion item → item export ID (coverage)', xi, items['items'])
+check('Set export ID → Companion set', items['sets'], xs)
+check('Item export set → set export ID', [r['set'] for r in items['items'].values() if 'set' in r], items['sets'])
+check('Set export i[] → item export ID', [i for r in items['sets'].values() for i in r['i']], items['items'])
+check('Recipe export id → Companion recipe', [r['id'] for r in recipes['recipes']], xr)
+check('Recipe export p → exported profession', [r['p'] for r in recipes['recipes'] if 'p' in r], recipes['professions'])
+check('Recipe export t → exported tier', [r['t'] for r in recipes['recipes'] if 't' in r], recipes['tiers'])
+check('Recipe export c → exported category', [r['c'] for r in recipes['recipes'] if 'c' in r], recipes['categories'])
 for kind in ['r', 'cr', 'i', 'o']:
     vals = []
     for r in recipes['recipes']:
@@ -97,8 +97,8 @@ for kind in ['r', 'cr', 'i', 'o']:
                 vals.append(r[kind][0])
         else:
             vals.extend(row[0] for row in r.get(kind, []))
-    check('Rezept.' + kind + ' → Rezept-Itembestand', vals, recipes['items'])
-    check('Rezept.' + kind + ' → vollständiger Itemexport', vals, items['items'])
+    check('Recipe ' + kind + ' → recipe item set', vals, recipes['items'])
+    check('Recipe ' + kind + ' → complete item export', vals, items['items'])
 for kind, target in [('fixed', 'items'), ('choice', 'items'), ('titles', 'titles'),
                      ('traits', 'traits'), ('virtues', 'virtues'), ('emotes', 'emotes')]:
     vals = []
@@ -108,8 +108,8 @@ for kind, target in [('fixed', 'items'), ('choice', 'items'), ('titles', 'titles
             if kind == 'emotes':
                 val = hexid(val)
             vals.append(val)
-    check('Belohnung.' + kind + ' → exportierter ' + target + '-Bestand', vals, rewards[target])
-check('Rezeptquellen-Schlüssel → exportierte Rezept-ID', recipe_sources['sources'],
+    check('Reward ' + kind + ' → exported ' + target + ' set', vals, rewards[target])
+check('Recipe source key → exported recipe ID', recipe_sources['sources'],
       {r['id'] for r in recipes['recipes']})
 
 comparisons = []
@@ -150,12 +150,12 @@ for fn in ['quests.json', 'deeds.json']:
 
 omitted_items = sorted(set(xi) - set(items['items']))
 omitted_items_empty_names = [i for i in omitted_items if xi[i].get('name') == '']
-virtue_missing = next(r['missing'] for r in checks if r['relation'].startswith('Belohnung.virtues'))
+virtue_missing = next(r['missing'] for r in checks if r['relation'].startswith('Reward virtues'))
 stat_labels = {lang: {e.get('key'): e.get('value') for e in xml('labels/' + lang + '/stats.xml')}
                for lang in ['de', 'en', 'fr']}
 virtue_missing_labels = {i: {lang: labels.get(i) for lang, labels in stat_labels.items()}
                          for i in virtue_missing}
-source_recipe_missing = next(r['missing'] for r in checks if r['relation'].startswith('Rezeptquellen-Schlüssel'))
+source_recipe_missing = next(r['missing'] for r in checks if r['relation'].startswith('Recipe source key'))
 source_recipe_in_companion = {i: i in xr for i in source_recipe_missing}
 payload = {'checks': checks, 'item_field_comparisons': comparisons,
            'set_membership_mismatches': setchecks, 'multiple_set_memberships': multiple,
@@ -165,63 +165,63 @@ payload = {'checks': checks, 'item_field_comparisons': comparisons,
            'source_recipe_not_exported_companion_presence': source_recipe_in_companion}
 (OUT / 'lotro-datenraum-exportvergleich.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2))
 text = [
-    '# Verdichtete Exporte: Properties, ID-Referenzen und Datenverluste', '',
-    'Geprüft werden die gespeicherten historischen Exporte gegen die aktive lokale '
-    'Companion-Lore. Unterschiede beweisen ohne gemeinsamen Quellzeitpunkt keinen '
-    'Spiel-/Decoderfehler. Alle offenen Werte und Feldabweichungen stehen vollständig '
+    '# Compacted exports: properties, ID references and data loss', '',
+    'The stored historical exports are checked against the active local '
+    'Companion lore. Without a shared source timestamp, differences do not prove a '
+    'game or decoder error. All open values and field deviations are listed in full '
     'in `lotro-datenraum-exportvergleich.json`.', '',
-    '## Vollständige Struktur der geprüften kompakten Bestände', '',
-    *profiles, '## ID-Prüfungen', '',
-    table(['Beziehung', 'Vorkommen', 'Aufgelöst', 'Offen', 'Eindeutig offen'],
+    '## Complete structure of the checked compact sets', '',
+    *profiles, '## ID checks', '',
+    table(['Relation', 'Occurrences', 'Resolved', 'Open', 'Distinct open'],
           [(r['relation'], r['occurrences'], r['resolved'], sum(r['missing'].values()), len(r['missing']))
            for r in checks]), '',
-    '## Feldvergleich Gegenstandsexport ↔ Companion', '',
-    'Verglichen werden ausschließlich auf beiden Seiten tatsächlich vorhandene Felder. '
-    'Nicht verglichene Werte gelten nicht als identisch. Die Mindeststufe wird wegen '
-    'der dokumentierten Fallbacklogik nicht als direktes Gleichheitsfeld behandelt.', '',
-    table(['Kompaktfeld', 'Companion-Attribut', 'Verglichen', 'Identisch', 'Abweichend'],
+    '## Field comparison item export ↔ Companion', '',
+    'Only fields actually present on both sides are compared. '
+    'Uncompared values do not count as identical. Because of the documented fallback '
+    'logic, the minimum level is not treated as a direct equality field.', '',
+    table(['Compact field', 'Companion attribute', 'Compared', 'Identical', 'Deviating'],
           [(r['compact'], r['original'], r['compared'], r['equal'], len(r['mismatches']))
            for r in comparisons]), '',
-    '## Set-Mitgliedschaft', '',
-    f'{len(multiple)} Gegenstands-IDs sind im Companion-Bestand mehreren Sets zugeordnet. '
-    'Die kompakte Itemstruktur besitzt nur einen skalaren `set`-Wert; sie kann diese '
-    'Relation nicht verlustfrei abbilden. Die Set-Mitgliederlisten sind die '
-    'maßgebliche vollständige Gegenrichtung im geprüften Datenstand. '
-    f'{len(setchecks)} ausgegebene Item-Set-Zuordnungen widersprechen der Mitgliedsliste.', '',
-    '## Klassifikation der offenen Referenzen', '',
-    f'- Alle {len(omitted_items)} im Itemexport fehlenden Companion-IDs haben '
-    f'im geprüften Companion-Stand einen leeren Namen '
-    f'({len(omitted_items_empty_names)} tatsächlich geprüft). Das allein beweist '
-    'nicht die genaue Ursache ihres Fehlens im historischen DAT-Export.',
-    f'- {len(virtue_missing)} verschiedene Referenzen aus `tables[].virtues` '
-    'fehlen im kompakten Tugendkatalog. Ihre tatsächlichen Stats-Labels stehen '
-    'vollständig im JSON. Kein Join über gleichnamige Tugenden und keine '
-    'stillschweigende Interpretation dieser Stats als reguläre Tugendobjekte.',
-    f'- {len(source_recipe_missing)} Rezeptquellen-Schlüssel fehlen im Rezeptexport; '
-    f'{sum(source_recipe_in_companion.values())} davon existieren im Companion-Rezeptbestand. '
-    'Damit sind getrennte Exportfilter/-zeitstände zu prüfen, nicht automatisch '
-    'die Quellreferenzen zu löschen.', '',
-    '## Aufgaben/Taten → verdichtete Belohnungstabellen', '',
-    'Der Exporter filtert Tabellen ohne für ihn nutzbare Belohnungsarten. Fehlender '
-    'Tabellenschlüssel im kompakten Export beweist deshalb keine kaputte DAT-Referenz.', '',
-    table(['Quelle', 'Tabellenverweise', 'Kompakt auflösbar', 'Nicht enthalten'],
+    '## Set membership', '',
+    f'{len(multiple)} item IDs are assigned to several sets in the Companion set. '
+    'The compact item structure has only one scalar `set` value; it cannot represent '
+    'this relation without loss. The set member lists are the '
+    'authoritative complete reverse direction in the checked data state. '
+    f'{len(setchecks)} emitted item-set assignments contradict the member list.', '',
+    '## Classification of the open references', '',
+    f'- All {len(omitted_items)} Companion IDs missing from the item export have '
+    f'an empty name in the checked Companion state '
+    f'({len(omitted_items_empty_names)} actually checked). That alone does not prove '
+    'the exact cause of their absence from the historical DAT export.',
+    f'- {len(virtue_missing)} distinct references from `tables[].virtues` '
+    'are missing from the compact virtue catalogue. Their actual stat labels are '
+    'listed in full in the JSON. No join across identically named virtues and no '
+    'silent interpretation of these stats as regular virtue objects.',
+    f'- {len(source_recipe_missing)} recipe source keys are missing from the recipe export; '
+    f'{sum(source_recipe_in_companion.values())} of them exist in the Companion recipe set. '
+    'So separate export filters or timestamps must be checked, not automatically '
+    'the source references deleted.', '',
+    '## Quests/deeds → compacted reward tables', '',
+    'The exporter filters tables without reward kinds it can use. A missing '
+    'table key in the compact export therefore does not prove a broken DAT reference.', '',
+    table(['Source', 'Table references', 'Resolvable in compact set', 'Not included'],
           [(r['source'], r['references'], r['in_compact_reward_export'],
             sum(r['not_in_compact_reward_export'].values())) for r in achievable_checks]), '',
-    '## Nachgewiesene Code-Transformationen (nicht mit Rohdaten verwechseln)', '',
-    '- `export_rewards.py:export`: feste/wählbare Titel werden in derselben Liste '
-    'zusammengeführt; dasselbe gilt für Emotes. Ohne Rohtabellen ist die ursprüngliche '
-    'Auswahlrolle nicht rekonstruierbar.',
-    '- `export_items.py:main`: Item-IDs stammen aus `items.xml`, nicht aus einer '
-    'vollständigen Neubestimmung aller Item-Klassen. Set-Zuordnung überschreibt bei '
-    'Mehrfachmitgliedschaft den vorigen skalaren Wert.',
-    '- `export_items.py:compact`: Bindung 0/1/2, Mindeststufen-Fallbacks, '
-    '0-/Leerstring-Defaults sowie Kurvenberechnung sind Transformationen.',
-    '- `export_recipes.py:export`: Rezept ohne aufgelöstes Ergebnis oder ohne '
-    'aufgelöste Zutaten wird verworfen; fehlende Mengen können zu 1 werden.',
-    '', '## Reproduktion', '',
-    '`python3 lotro_datenraum_exportvergleich.py`. Kein Clientzugriff und keine '
-    'Schreiboperation außerhalb des Planordners. SHA-256 sämtlicher hier verwendeter '
-    'Eingaben im JSON-Beleg.', ''
+    '## Proven code transformations (not to be confused with raw data)', '',
+    '- `export_rewards.py:export`: fixed and selectable titles are merged into one list; '
+    'the same applies to emotes. Without the raw tables the original '
+    'selection role cannot be reconstructed.',
+    '- `export_items.py:main`: item IDs come from `items.xml`, not from a '
+    'complete re-determination of all item classes. With multiple memberships, set '
+    'assignment overwrites the previous scalar value.',
+    '- `export_items.py:compact`: binding 0/1/2, minimum-level fallbacks, '
+    '0/empty-string defaults and curve computation are transformations.',
+    '- `export_recipes.py:export`: a recipe without a resolved result or without '
+    'resolved ingredients is dropped; missing quantities can become 1.',
+    '', '## Reproduction', '',
+    '`python3 lotro_datenraum_exportvergleich.py`. No client access and no '
+    'write operation outside the plan folder. SHA-256 of all inputs used here '
+    'is in the JSON evidence.', ''
 ]
 (OUT / 'lotro-datenraum-exportvergleich.md').write_text('\n'.join(text))
 print('checks', len(checks), 'item properties', len(comparisons), 'multiple sets', len(multiple),

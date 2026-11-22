@@ -1,10 +1,10 @@
-# Fachbereiche
+# Subject areas
 
-- [Abenteuerüberblick](abenteuerberater.md) und [Mordor-Projektion](abenteuer-mordor-projektion.md)
-- [Auftraggeber](auftraggeber.md)
-- [Epische Geschichte](epische-geschichte.md)
-- [Geländeansicht](gelaende.md)
-- [Instanzenfinder: Datenquelle und Reproduktion](instanzenfinder-dat.md)
+- [Adventure overview](abenteuerberater.md) and [Mordor projection](abenteuer-mordor-projektion.md)
+- [Quest giver](auftraggeber.md)
+- [Epic story](epische-geschichte.md)
+- [Terrain view](gelaende.md)
+- [Instance finder: data source and reproduction](instanzenfinder-dat.md)
 - [Sets](sets.md)
 
-Datierte Prüf- und Veröffentlichungsabschnitte sind Momentaufnahmen. Übergreifende Datenregeln stehen im [Datenraum](../datenraum/README.md).
+Dated verification and publication sections are snapshots. Cross-cutting data rules are in the [data space](../datenraum/README.md).

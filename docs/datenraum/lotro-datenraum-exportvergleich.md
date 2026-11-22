@@ -1,12 +1,12 @@
-# Verdichtete Exporte: Properties, ID-Referenzen und Datenverluste
+# Compacted exports: properties, ID references and data loss
 
-Geprüft werden die gespeicherten historischen Exporte gegen die aktive lokale Companion-Lore. Unterschiede beweisen ohne gemeinsamen Quellzeitpunkt keinen Spiel-/Decoderfehler. Alle offenen Werte und Feldabweichungen stehen vollständig in `lotro-datenraum-exportvergleich.json`.
+The stored historical exports are checked against the active local Companion lore. Without a shared source timestamp, differences do not prove a game or decoder error. All open values and field deviations are listed in full in `lotro-datenraum-exportvergleich.json`.
 
-## Vollständige Struktur der geprüften kompakten Bestände
+## Complete structure of the checked compact sets
 
 ## items
 
-| Propertypfad (`<id>` = dynamischer Schlüssel) | Typen/Vorkommen |
+| Property path (`<id>` = dynamic key) | Types/occurrences |
 | --- | --- |
 | `$.items.<id>` | dict: 152088 |
 | `$.items.<id>.ar` | int: 152088 |
@@ -74,7 +74,7 @@ Geprüft werden die gespeicherten historischen Exporte gegen die aktive lokale C
 
 ## rewards
 
-| Propertypfad (`<id>` = dynamischer Schlüssel) | Typen/Vorkommen |
+| Property path (`<id>` = dynamic key) | Types/occurrences |
 | --- | --- |
 | `$.emotes.<id>` | dict: 18 |
 | `$.emotes.<id>.n` | dict: 18 |
@@ -141,7 +141,7 @@ Geprüft werden die gespeicherten historischen Exporte gegen die aktive lokale C
 
 ## recipes
 
-| Propertypfad (`<id>` = dynamischer Schlüssel) | Typen/Vorkommen |
+| Property path (`<id>` = dynamic key) | Types/occurrences |
 | --- | --- |
 | `$.categories.<id>` | dict: 513 |
 | `$.categories.<id>.de` | str: 513 |
@@ -194,7 +194,7 @@ Geprüft werden die gespeicherten historischen Exporte gegen die aktive lokale C
 
 ## recipe-sources
 
-| Propertypfad (`<id>` = dynamischer Schlüssel) | Typen/Vorkommen |
+| Property path (`<id>` = dynamic key) | Types/occurrences |
 | --- | --- |
 | `$.created_utc` | str: 1 |
 | `$.recipes_with_source` | int: 1 |
@@ -206,40 +206,40 @@ Geprüft werden die gespeicherten historischen Exporte gegen die aktive lokale C
 | `$.sources.<id>[].name` | str: 23701 |
 | `$.sources.<id>[].titel` | str: 23701 |
 
-## ID-Prüfungen
+## ID checks
 
-| Beziehung | Vorkommen | Aufgelöst | Offen | Eindeutig offen |
+| Relation | Occurrences | Resolved | Open | Distinct open |
 | --- | --- | --- | --- | --- |
-| Itemexport-ID → Companion-Item | 152088 | 152088 | 0 | 0 |
-| Companion-Item → Itemexport-ID (Abdeckung) | 152100 | 152088 | 12 | 12 |
-| Setexport-ID → Companion-Set | 2223 | 2223 | 0 | 0 |
-| Itemexport.set → Setexport-ID | 11159 | 11159 | 0 | 0 |
-| Setexport.i[] → Itemexport-ID | 11159 | 11159 | 0 | 0 |
-| Rezeptexport.id → Companion-Rezept | 7924 | 7924 | 0 | 0 |
-| Rezeptexport.p → exportierter Beruf | 7924 | 7924 | 0 | 0 |
-| Rezeptexport.t → exportierte Stufe | 7815 | 7815 | 0 | 0 |
-| Rezeptexport.c → exportierte Kategorie | 7924 | 7924 | 0 | 0 |
-| Rezept.r → Rezept-Itembestand | 7924 | 7924 | 0 | 0 |
-| Rezept.r → vollständiger Itemexport | 7924 | 7924 | 0 | 0 |
-| Rezept.cr → Rezept-Itembestand | 4557 | 4557 | 0 | 0 |
-| Rezept.cr → vollständiger Itemexport | 4557 | 4557 | 0 | 0 |
-| Rezept.i → Rezept-Itembestand | 20810 | 20810 | 0 | 0 |
-| Rezept.i → vollständiger Itemexport | 20810 | 20810 | 0 | 0 |
-| Rezept.o → Rezept-Itembestand | 8197 | 8197 | 0 | 0 |
-| Rezept.o → vollständiger Itemexport | 8197 | 8197 | 0 | 0 |
-| Belohnung.fixed → exportierter items-Bestand | 9498 | 9498 | 0 | 0 |
-| Belohnung.choice → exportierter items-Bestand | 5631 | 5631 | 0 | 0 |
-| Belohnung.titles → exportierter titles-Bestand | 2551 | 2551 | 0 | 0 |
-| Belohnung.traits → exportierter traits-Bestand | 252 | 252 | 0 | 0 |
-| Belohnung.virtues → exportierter virtues-Bestand | 704 | 660 | 44 | 44 |
-| Belohnung.emotes → exportierter emotes-Bestand | 20 | 20 | 0 | 0 |
-| Rezeptquellen-Schlüssel → exportierte Rezept-ID | 4230 | 4224 | 6 | 6 |
+| Item export ID → Companion item | 152088 | 152088 | 0 | 0 |
+| Companion item → item export ID (coverage) | 152100 | 152088 | 12 | 12 |
+| Set export ID → Companion set | 2223 | 2223 | 0 | 0 |
+| Item export set → set export ID | 11159 | 11159 | 0 | 0 |
+| Set export i[] → item export ID | 11159 | 11159 | 0 | 0 |
+| Recipe export id → Companion recipe | 7924 | 7924 | 0 | 0 |
+| Recipe export p → exported profession | 7924 | 7924 | 0 | 0 |
+| Recipe export t → exported tier | 7815 | 7815 | 0 | 0 |
+| Recipe export c → exported category | 7924 | 7924 | 0 | 0 |
+| Recipe r → recipe item set | 7924 | 7924 | 0 | 0 |
+| Recipe r → complete item export | 7924 | 7924 | 0 | 0 |
+| Recipe cr → recipe item set | 4557 | 4557 | 0 | 0 |
+| Recipe cr → complete item export | 4557 | 4557 | 0 | 0 |
+| Recipe i → recipe item set | 20810 | 20810 | 0 | 0 |
+| Recipe i → complete item export | 20810 | 20810 | 0 | 0 |
+| Recipe o → recipe item set | 8197 | 8197 | 0 | 0 |
+| Recipe o → complete item export | 8197 | 8197 | 0 | 0 |
+| Reward fixed → exported items set | 9498 | 9498 | 0 | 0 |
+| Reward choice → exported items set | 5631 | 5631 | 0 | 0 |
+| Reward titles → exported titles set | 2551 | 2551 | 0 | 0 |
+| Reward traits → exported traits set | 252 | 252 | 0 | 0 |
+| Reward virtues → exported virtues set | 704 | 660 | 44 | 44 |
+| Reward emotes → exported emotes set | 20 | 20 | 0 | 0 |
+| Recipe source key → exported recipe ID | 4230 | 4224 | 6 | 6 |
 
-## Feldvergleich Gegenstandsexport ↔ Companion
+## Field comparison item export ↔ Companion
 
-Verglichen werden ausschließlich auf beiden Seiten tatsächlich vorhandene Felder. Nicht verglichene Werte gelten nicht als identisch. Die Mindeststufe wird wegen der dokumentierten Fallbacklogik nicht als direktes Gleichheitsfeld behandelt.
+Only fields actually present on both sides are compared. Uncompared values do not count as identical. Because of the documented fallback logic, the minimum level is not treated as a direct equality field.
 
-| Kompaktfeld | Companion-Attribut | Verglichen | Identisch | Abweichend |
+| Compact field | Companion attribute | Compared | Identical | Deviating |
 | --- | --- | --- | --- | --- |
 | q | quality | 149265 | 149265 | 0 |
 | l | level | 149591 | 149591 | 0 |
@@ -251,32 +251,32 @@ Verglichen werden ausschließlich auf beiden Seiten tatsächlich vorhandene Feld
 | rc | requiredClass | 31345 | 31345 | 0 |
 | rp | requiredProfession | 6630 | 6630 | 0 |
 
-## Set-Mitgliedschaft
+## Set membership
 
-0 Gegenstands-IDs sind im Companion-Bestand mehreren Sets zugeordnet. Die kompakte Itemstruktur besitzt nur einen skalaren `set`-Wert; sie kann diese Relation nicht verlustfrei abbilden. Die Set-Mitgliederlisten sind die maßgebliche vollständige Gegenrichtung im geprüften Datenstand. 0 ausgegebene Item-Set-Zuordnungen widersprechen der Mitgliedsliste.
+0 item IDs are assigned to several sets in the Companion set. The compact item structure has only one scalar `set` value; it cannot represent this relation without loss. The set member lists are the authoritative complete reverse direction in the checked data state. 0 emitted item-set assignments contradict the member list.
 
-## Klassifikation der offenen Referenzen
+## Classification of the open references
 
-- Alle 12 im Itemexport fehlenden Companion-IDs haben im geprüften Companion-Stand einen leeren Namen (12 tatsächlich geprüft). Das allein beweist nicht die genaue Ursache ihres Fehlens im historischen DAT-Export.
-- 44 verschiedene Referenzen aus `tables[].virtues` fehlen im kompakten Tugendkatalog. Ihre tatsächlichen Stats-Labels stehen vollständig im JSON. Kein Join über gleichnamige Tugenden und keine stillschweigende Interpretation dieser Stats als reguläre Tugendobjekte.
-- 6 Rezeptquellen-Schlüssel fehlen im Rezeptexport; 1 davon existieren im Companion-Rezeptbestand. Damit sind getrennte Exportfilter/-zeitstände zu prüfen, nicht automatisch die Quellreferenzen zu löschen.
+- All 12 Companion IDs missing from the item export have an empty name in the checked Companion state (12 actually checked). That alone does not prove the exact cause of their absence from the historical DAT export.
+- 44 distinct references from `tables[].virtues` are missing from the compact virtue catalogue. Their actual stat labels are listed in full in the JSON. No join across identically named virtues and no silent interpretation of these stats as regular virtue objects.
+- 6 recipe source keys are missing from the recipe export; 1 of them exist in the Companion recipe set. So separate export filters or timestamps must be checked, not automatically the source references deleted.
 
-## Aufgaben/Taten → verdichtete Belohnungstabellen
+## Quests/deeds → compacted reward tables
 
-Der Exporter filtert Tabellen ohne für ihn nutzbare Belohnungsarten. Fehlender Tabellenschlüssel im kompakten Export beweist deshalb keine kaputte DAT-Referenz.
+The exporter filters tables without reward kinds it can use. A missing table key in the compact export therefore does not prove a broken DAT reference.
 
-| Quelle | Tabellenverweise | Kompakt auflösbar | Nicht enthalten |
+| Source | Table references | Resolvable in compact set | Not included |
 | --- | --- | --- | --- |
 | quests.json | 14252 | 10440 | 3812 |
 | deeds.json | 5534 | 4452 | 1082 |
 
-## Nachgewiesene Code-Transformationen (nicht mit Rohdaten verwechseln)
+## Proven code transformations (not to be confused with raw data)
 
-- `export_rewards.py:export`: feste/wählbare Titel werden in derselben Liste zusammengeführt; dasselbe gilt für Emotes. Ohne Rohtabellen ist die ursprüngliche Auswahlrolle nicht rekonstruierbar.
-- `export_items.py:main`: Item-IDs stammen aus `items.xml`, nicht aus einer vollständigen Neubestimmung aller Item-Klassen. Set-Zuordnung überschreibt bei Mehrfachmitgliedschaft den vorigen skalaren Wert.
-- `export_items.py:compact`: Bindung 0/1/2, Mindeststufen-Fallbacks, 0-/Leerstring-Defaults sowie Kurvenberechnung sind Transformationen.
-- `export_recipes.py:export`: Rezept ohne aufgelöstes Ergebnis oder ohne aufgelöste Zutaten wird verworfen; fehlende Mengen können zu 1 werden.
+- `export_rewards.py:export`: fixed and selectable titles are merged into one list; the same applies to emotes. Without the raw tables the original selection role cannot be reconstructed.
+- `export_items.py:main`: item IDs come from `items.xml`, not from a complete re-determination of all item classes. With multiple memberships, set assignment overwrites the previous scalar value.
+- `export_items.py:compact`: binding 0/1/2, minimum-level fallbacks, 0/empty-string defaults and curve computation are transformations.
+- `export_recipes.py:export`: a recipe without a resolved result or without resolved ingredients is dropped; missing quantities can become 1.
 
-## Reproduktion
+## Reproduction
 
-`python3 lotro_datenraum_exportvergleich.py`. Kein Clientzugriff und keine Schreiboperation außerhalb des Planordners. SHA-256 sämtlicher hier verwendeter Eingaben im JSON-Beleg.
+`python3 lotro_datenraum_exportvergleich.py`. No client access and no write operation outside the plan folder. SHA-256 of all inputs used here is in the JSON evidence.

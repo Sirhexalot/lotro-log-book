@@ -1,61 +1,61 @@
-# Landmarken ohne Weltlage: Kartenzuordnung
+# Landmarks without world position: map assignment
 
-Prüfstand 21.11.2026. Anlass war die leere Seite von **Kankras Höhle**
-(`70056DD7`): Der Katalog führte den Ort ohne Position, obwohl der eigene
-Client-Export vier Punkte dafür enthält.
+Test record 21.11.2026. The occasion was the empty page of **Kankras Höhle**
+(`70056DD7`): the catalogue listed the place without a position, although the own
+client export contains four points for it.
 
-## Befund
+## Finding
 
-- Von 2.809 benannten Landmarken hatten 226 keine Position im Katalog.
-- Für **178** davon enthält `did-positions-2026-11-03/positions.jsonl`
-  Positionen, aber nur auf Inhalts-Ebenen (`layer` ungleich 0), nicht auf der
-  Weltlage. Der Generator übernahm bisher ausschließlich die Weltlage.
-- Für die übrigen **48** enthält der Export gar keinen Positionseintrag.
-- Getrennt davon hatten 70 Landmarken mit Weltlage-Koordinaten keine Karte,
-  weil ihr Punkt außerhalb aller Kartenrahmen derselben Spielregion liegt.
+- Of 2.809 named landmarks, 226 had no position in the catalogue.
+- For **178** of them `did-positions-2026-11-03/positions.jsonl` contains
+  positions, but only on content layers (`layer` not equal to 0), not on the
+  world position. The generator so far took over exclusively the world position.
+- For the remaining **48** the export contains no position entry at all.
+- Separately from that, 70 landmarks with world position coordinates had no map,
+  because their point lies outside all map frames of the same game region.
 
-## Gegenprüfung mit LotroCompanion
+## Cross-check with LotroCompanion
 
-Verglichen mit dem Stand `9b404ffacb096c9c9b354e428e671e4bc78db9e5` von
+Compared with state `9b404ffacb096c9c9b354e428e671e4bc78db9e5` of
 [`LotroCompanion/lotro-data`](https://github.com/LotroCompanion/lotro-data):
 
-- `lore/landmarks.xml` und `lore/labels/de/landmarks.xml`: IDs sowie deutsche
-  und englische Namen aller geprüften Landmarken stimmen überein.
-- `lore/parchmentMaps.xml`: Die in Frage kommenden Karten und ihre
-  Spielregionen sind bestätigt, darunter Shelob's Lair (`268453438`) unter
-  Morgul Vale (`268453364`) in Region 4.
-- `lore/dungeons.xml`: Einzelne namensgleiche Dungeons tragen teils eigene
-  Positionen; diese stimmen nicht mit den Landmarkenpunkten überein und wurden
-  nicht als Ersatz verwendet.
-- Die Companion-Landmarkenliste enthält selbst **keine Koordinaten**. Die
-  Punkte stammen aus dem eigenen Client-Export; Companion belegt Name, Karte
-  und Region, nicht den Pin.
+- `lore/landmarks.xml` and `lore/labels/de/landmarks.xml`: IDs as well as German
+  and English names of all checked landmarks agree.
+- `lore/parchmentMaps.xml`: The maps in question and their
+  game regions are confirmed, among them Shelob's Lair (`268453438`) under
+  Morgul Vale (`268453364`) in region 4.
+- `lore/dungeons.xml`: Individual dungeons with the same name partly carry their own
+  positions; these do not agree with the landmark points and were
+  not used as a replacement.
+- The Companion landmark list itself contains **no coordinates**. The
+  points come from the own client export; Companion verifies name, map
+  and region, not the pin.
 
-## Übernommene Regel
+## Adopted rule
 
-`tools/build_landmarken.py` nutzt jetzt auch Inhalts-Ebenen, aber nur
-zurückhaltend:
+`tools/build_landmarken.py` now also uses content layers, but only
+restrainedly:
 
-1. Eine Weltlage-Position hat weiterhin Vorrang und behält ihr bisheriges
-   Verhalten.
-2. Ohne Weltlage-Position werden die Punkte aller Inhalts-Ebenen gesammelt
-   (Instanzkopien entfallen).
-3. Eine Karte wird nur gesetzt, wenn **eine** Karte alle Punkte hält: entweder
-   als einzige gemeinsame Karte oder als einzige tiefste Karte aller Punkte.
-   Eine reine Kontinent-/Regionsübersicht zählt nicht.
-4. Sonst bleiben die Koordinaten ohne Karte und ohne Pin erhalten.
+1. A world position still takes precedence and keeps its previous
+   behaviour.
+2. Without a world position the points of all content layers are collected
+   (instance copies are dropped).
+3. A map is only set when **one** map holds all points: either
+   as the only shared map or as the only deepest map of all points.
+   A pure continent/region overview does not count.
+4. Otherwise the coordinates remain without map and without pin.
 
-## Ergebnis
+## Result
 
-- 75 Landmarken erhalten neu einen Pin; die Zahl der Landmarken mit Karte
-  steigt von 2.513 auf **2.588**.
-- 2.761 Landmarken haben eine Position, 48 keine.
-- 221 Landmarken stehen ohne Landschaft in der Liste (vorher 296).
-- Bestehende Pins ändern sich nicht.
+- 75 landmarks newly receive a pin; the number of landmarks with a map
+  rises from 2.513 to **2.588**.
+- 2.761 landmarks have a position, 48 none.
+- 221 landmarks stand without a landscape in the list (previously 296).
+- Existing pins do not change.
 
-Zugeordnete Karten:
+Assigned maps:
 
-| Karte | Zahl | Landmarken (DE) |
+| Map | Count | Landmarks (DE) |
 | --- | ---: | --- |
 | Angmar (`268437615`) | 24 | Aughaire, Búth Luikh, Búth Sánkhas, Faelbenns Bollwerk, Iorelens Lager, Mittleres Bollwerk von Aughaire, Morroval-Lager, Nord-Bollwerk, Nördliches Bollwerk, Nördliches Bollwerk von Aughaire, Nördlichstes Bollwerk, Ork-Lager, Rammas Deluon, Süd-Bollwerk, Südliches Bollwerk, Südliches Bollwerk von Aughaire, Tor der Schatten, Tor der Schatten, Tor von Aughaire, Uruk-Lager, Zauberin der Feigheit[n], Zauberin der Schmerzen[n], Zauberin der Verzweiflung[n], Zauberin des Schreckens[n] |
 | The Angle of Mitheithel (`268453878`) | 7 | Die Bruinenfurt, Eitheldir, Feste Waeren, Gaerond, Glynafon, Tham Lumren, Tornhad |
@@ -88,22 +88,22 @@ Zugeordnete Karten:
 | Urash Dâr (`268454627`) | 1 | Khûn Sagaz |
 | Wildermore (`268449335`) | 1 | Drû Vádokan |
 
-## Ohne Karte geblieben
+## Remained without a map
 
-Von den 178 Landmarken mit Inhalts-Ebenen-Punkten bleiben 103 ohne Pin:
+Of the 178 landmarks with content layer points, 103 remain without a pin:
 
-- **53** liegen in mehreren gleichrangigen Karten; keine ist belegbar die
-  richtige. Darunter **Kaserne** (`7002A6EA`) und **Küche** (`7002A6ED`), deren
-  Punkte sich auf **Isengard Depths** und die überflutete Variante verteilen.
-  Eine Landmarke hat im Datenmodell nur einen Ort; eine Aufteilung auf zwei
-  Karten wäre eine Schemaänderung.
-- **49** haben mindestens einen Punkt außerhalb aller Kartenrahmen ihrer
-  Spielregion, überwiegend Innenräume (z. B. Kammer von Mazarbul,
+- **53** lie in several equally ranked maps; none is verifiably the
+  right one. Among them **Kaserne** (`7002A6EA`) and **Küche** (`7002A6ED`), whose
+  points spread over **Isengard Depths** and the flooded variant.
+  A landmark has only one location in the data model; a split over two
+  maps would be a schema change.
+- **49** have at least one point outside all map frames of their
+  game region, predominantly interiors (e.g. Kammer von Mazarbul,
   Die Einundzwanzigste Halle).
-- **1** hat als einzige gemeinsame Karte nur die Kontinentübersicht Eriador
-  (**Zauberin des Zweifels[n]**, `7000FC21`). Ihre beiden Punkte liegen in
-  Bree-land/Lone-Lands und in Angmar; ein Pin auf Eriador wäre ohne Aussage.
+- **1** has as its only shared map just the continent overview Eriador
+  (**Zauberin des Zweifels[n]**, `7000FC21`). Its two points lie in
+  Bree-land/Lone-Lands and in Angmar; a pin on Eriador would be without meaning.
 
-Die Koordinaten dieser Landmarken bleiben im Datensatz, aber ohne Karte und
-ohne Pin. Eine spätere Erweiterung könnte je Landmarke mehrere belegte Orte
-zulassen; das ist nicht Teil dieses Stands.
+The coordinates of these landmarks remain in the dataset, but without a map and
+without a pin. A later extension could permit several verified locations per landmark;
+that is not part of this state.

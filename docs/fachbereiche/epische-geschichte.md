@@ -1,68 +1,89 @@
-# Epische Geschichte: Instanzen, Zwischenspiele, Prologe
+# Epic story: instances, interludes, prologues
 
-Stand 14.11.2026. Grundlage sind die Aufgaben aus dem eigenen Client-Export
-(`full-dat-en-de-fr-2026-11-03/quests.json`), nicht Wiki- oder Tracker-Listen.
+Status as of 14.11.2026. The basis are the quests from the own client export
+(`full-dat-en-de-fr-2026-11-03/quests.json`), not wiki or tracker lists.
 
-## Was die Spieldaten hergeben
+## What the game data provides
 
-- **`Quest_Category`** ist die offizielle Buchzuordnung („Epos - Band I, Buch 1:
-  Aufruhr in der Finsternis“), in allen drei Sprachen. Sie deckt sich 1:1 mit der
-  Gruppierung `a` der Webdaten; die Buchreihenfolge muss nicht aus Namen geraten
-  werden.
-- **`Quest_IsInstanceQuest`** markiert die Instanzzeile. Das Kapitel trägt
-  `Quest_ContainsInstanceQuest`. Die Kapitelzeile nennt ihren Instanznamen
-  („Instanz: Othrongroth“ gehört zu „Buch 1, Kapitel 11: Othrongroth“).
-- **`Quest_IsSessionQuest`** markiert Sitzungsspiele: Sie erscheinen nie im
-  Journal und zählen nicht.
-- **`Usage_Operator 2` mit Status „abgeschlossen“** heißt „X darf nicht
-  abgeschlossen sein“. Damit ist eine Variante dauerhaft ausgeschlossen, sobald
-  die andere gespielt wurde (z. B. „4. Zwischenspiel: Halros' Wache“ in zwei
-  Fassungen).
-- **`Quest_IsCompletionTracked = 0`** ist **kein** Beleg für „nicht
-  abschließbar“: Der Charakterstand enthält 247 solcher Einträge als erledigt.
-  Die Kennzeichnung wird deshalb nicht ausgewertet.
+- **`Quest_Category`** is the official book assignment („Epos - Band I, Buch 1:
+  Aufruhr in der Finsternis“), in all three languages. It matches 1:1 the
+  grouping `a` of the web data; the book order does not have to be guessed
+  from names.
+- **`Quest_IsInstanceQuest`** marks the instance row. The chapter carries
+  `Quest_ContainsInstanceQuest`. The chapter row names its instance name
+  („Instanz: Othrongroth“ belongs to „Buch 1, Kapitel 11: Othrongroth“).
+- **`Quest_IsSessionQuest`** marks session play: they never appear in the
+  journal and do not count.
+- **`Usage_Operator 2` with status „abgeschlossen“** means „X darf nicht
+  abgeschlossen sein“. Thereby a variant is permanently excluded as soon as
+  the other was played (e.g. „4. Zwischenspiel: Halros' Wache“ in two
+  versions).
+- **`Quest_IsCompletionTracked = 0`** is **no** proof for „nicht
+  abschließbar“: the character progress contains 247 such entries as completed.
+  The marker is therefore not evaluated.
 
-## Umsetzung
+## Implementation
 
-`tools/build_questmerkmale.py` liest den Export und schreibt
-`daten/questmerkmale.json` (nicht eingecheckt, wie alle `daten/*.json`):
+`tools/build_questmerkmale.py` reads the export and writes
+`daten/questmerkmale.json` (not checked in, like all `daten/*.json`):
 
-- `instanzen`: Instanzzeile → Kapitel. Nur eindeutige Paare: genau ein Kapitel
-  mit gleichem Titel in derselben Buchkategorie, und dieses Kapitel beansprucht
-  nur eine Instanz. Alles Mehrdeutige bleibt eine eigene Zeile.
-- `ausgeschlossen`: Aufgabe → Abschlüsse, die sie unmöglich machen.
+- `instanzen`: instance row → chapter. Only unambiguous pairs: exactly one chapter
+  with the same title in the same book category, and this chapter claims
+  only one instance. Everything ambiguous remains its own row.
+- `ausgeschlossen`: quest → completions that make it impossible.
 
-`build_daten.py` hängt beides an die Aufgabendaten: `ie` (Kapitel der
-Instanzzeile) und zusätzliche Einträge in `e`.
+`build_daten.py` attaches both to the quest data: `ie` (chapter of the
+instance row) and additional entries in `e`.
 
-Die Oberfläche (`web/app.js`):
+## The view (`tools/build_epik.py` → `epik-<sprache>.js`, `web/epik.js`)
 
-- Instanzzeilen der epischen Geschichte verschwinden aus der Liste; das Kapitel
-  trägt den Vermerk „Instanz“ bzw. den abweichenden Instanznamen. Sie zählen
-  nicht doppelt, bleiben aber über ihre ID erreichbar.
-- Sitzungsspiele, die nur eine bereits vorhandene Aufgabe nacherzählen
-  (Zwischenspiele), werden nicht als zweite Zeile gezeigt.
-- Ein Prolog-Block sagt oben, dass er in ein Buch führt, aber nicht zu dessen
-  Fortschritt zählt.
-- Zwischenspiele sortieren nach ihrer Nummer („1.“, „2.“ …).
+The epic is a view of its own; it uses the map but is not part of the map's
+catalogue path.
 
-## Grenzen
+- `tools/build_epik.py` reads the client path (`theme:epic` → `volume` →
+  `category`) from the plugin export, the built rows from `daten-<sprache>.js`
+  and the instance pairs from `daten/questmerkmale.json`. It writes the
+  finished tree: 10 groups (volumes I–V, Before the Shadow, four story arcs),
+  57 book sections and 1.551 quests.
+- Book labels are cleaned at build time: the client's `Epos/Episch/Epic/Épique -`
+  marker and a leading `Band/Vol./Volume X,` are dropped because the volume is a
+  group of its own.
+- Places are only proven ones: the quest giver's spot, the objectives of the
+  step that names the chapter, or the chapter's place for an instance part
+  (1412 of 1551 chapters). Nothing is estimated.
+- `web/epik.js` renders the tree, owns folding, the prologue note, instance
+  folding and counters, and asks the map app only for its list, filter,
+  markers, map and detail pane (`SONDER` registry and host). It follows the
+  stored map view (game map by default); only while the terrain is active, the
+  drawn map of Middle-earth (`karten/<sprache>/268437554.webp`) lies behind
+  the stage. The list title opens the view's own address
+  (`?gebiet=Epische Geschichte`) and resets it; the generic list paging skips
+  special views, so scrolling does not flatten the tree into a plain list.
+- Instance rows disappear from the list; the chapter carries the note
+  „Instanz“ or the deviating instance name. Session play that only retells an
+  existing quest is not shown twice. A prologue block says that it leads into a
+  book but does not count towards its progress.
 
-- Die Instanzzuordnung ist eine Titelzuordnung innerhalb desselben Buchs, keine
-  direkte Verknüpfung im Client. 668 von 1.282 Instanzen sind eindeutig; der
-  Rest bleibt sichtbar.
-- Der Fortschritt belegt nur, was der importierte Spielstand enthält. Ohne
-  Import bleiben Zahlen und Markierungen leer; es wird nichts angenommen.
-- Aus „Buch abgeschlossen“ folgt **nicht**, dass der Prolog erledigt ist. Nur
-  der Prolog „Vor dem Schatten“, Kapitel 6, ist harte Voraussetzung des neuen
-  Buch 1 Kapitel 1; die alten Volks-Prologe sind eigene Ketten.
+## Limits
 
-## Prüfung
+- The instance assignment is a title assignment within the same book, not a
+  direct link in the client. 668 of 1.282 instances are unambiguous; the
+  rest remains visible.
+- The progress proves only what the imported character progress contains. Without an
+  import, numbers and markers remain empty; nothing is assumed.
+- From „book completed“ does **not** follow that the prologue is done. Only
+  the prologue „Vor dem Schatten“, chapter 6, is a hard prerequisite of the new
+  book 1 chapter 1; the old people's prologues are their own chains.
+
+## Check
 
 ```bash
+python3 -m unittest tests.test_epik
 python3 -m unittest tests.test_questmerkmale
-LLB_URL=http://127.0.0.1:8914 NODE_PATH=<global node_modules> node tests/browser_epik.js
+LLB_URL=http://127.0.0.1:8817 NODE_PATH=<global node_modules> node tests/browser_epik.js
 ```
 
-Neu bauen nach Datenänderungen: `python3 tools/build_questmerkmale.py`, dann
-`build_daten.py` je Sprache, danach `tools/build_php_data.py` und der Release.
+Rebuild after data changes: `python3 tools/build_questmerkmale.py`, then
+`build_daten.py` per language, then `tools/build_epik.py`,
+`tools/build_php_data.py` and the release. `tools/build_release.py` runs
+`build_epik.py` itself before copying the web files.

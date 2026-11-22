@@ -1,134 +1,133 @@
-# TODO: Komponentenbasierte Releases und inkrementeller Upload
+# TODO: Component-based releases and incremental upload
 
-**Projekt:** LOTRO Log Book, ausschließlich Website
-**Stand:** 17. November 2026
-**Status:** Lokale Umsetzung vorhanden; vollständige Liveabnahme und
-Veröffentlichungsfreigabe noch offen
-**Vorgesehener Projektpfad:** `lotro-log-book/docs/todos/release-komponenten.md`
+**Project:** LOTRO Log Book, website only
+**Status as of:** 17 November 2026
+**Status:** local implementation present; full live acceptance and
+publication approval still open
+**Intended project path:** `lotro-log-book/docs/todos/release-komponenten.md`
 
-Plugin, persönliche Charakterdaten und Spielinstallation bleiben unberührt.
+Plugin, personal character data and game installation stay untouched.
 
-Die lokale Umsetzung besteht aus `tools/release_components.py`, dem erweiterten
-`tools/build_release.py` und dem manifestbasierten Pfad in `upload.py`.
-Ein echter Upload oder eine Hostingänderung ist damit nicht freigegeben.
+The local implementation consists of `tools/release_components.py`, the extended
+`tools/build_release.py` and the manifest-based path in `upload.py`.
+A real upload or a hosting change is not approved by it.
 
-## 1. Ziel
+## 1. Goal
 
-Programm-, Daten- und Assetupdates getrennt erkennen und veröffentlichen.
-Ein CSS-Update darf weder alle Geländekacheln lokal durchlaufen noch deren
-Verzeichnisse rekursiv per FTPS auflisten müssen.
+Detect and publish program, data and asset updates separately.
+A CSS update must neither run through all terrain tiles locally nor have to
+list their directories recursively via FTPS.
 
-Der vollständige Release bleibt prüfbar und reproduzierbar. Teiluploads
-bestätigen ausschließlich die tatsächlich veröffentlichten Komponenten.
-Manuelle „Assets geändert“- oder „Daten geändert“-Flags sind nicht nötig.
+The complete release stays checkable and reproducible. Partial uploads
+confirm exclusively the components actually published.
+Manual „Assets geändert“ or „Daten geändert“ flags are not needed.
 
-## 2. Geprüfter Ausgangspunkt
+## 2. Checked starting point
 
-- `tools/build_release.py` erstellt einen vollständigen Releaseordner.
-  Es kopiert Webdateien, Karten, Gelände, PHP, Bibliotheken und `phpdata`,
-  erzeugt Vorschauen, Tracking und eine leere Fortschrittsdatei.
-- `upload.py` hat SHA-256-Vergleich und einen lokalen Uploadstand unter
+- `tools/build_release.py` creates a complete release folder.
+  It copies web files, maps, terrain, PHP, libraries and `phpdata`,
+  creates previews, tracking and an empty progress file.
+- `upload.py` has a SHA-256 comparison and a local upload state under
   `~/.config/mql-upload-state.json`.
-- Der bisherige Vergleich liest rekursiv den Remote-Bestand per `LIST`.
-  `--nur` und `--ohne` filtern lokale Dateien nach oberstem Pfadsegment,
-  begrenzen bisher aber nicht automatisch diese vollständige Remote-Inventur.
-- `phpdata/manifest.json` beschreibt Datenformat, Sprachen und Katalogarten,
-  nicht den vollständigen veröffentlichten Dateibestand.
-- Das Geländemanifest hat eine eigene fachliche Version. Diese bleibt erhalten.
-- Daten werden nicht automatisch vollständig neu exportiert, nur weil ein
-  Release gebaut wird.
-- Bei der Prüfung am 16.11. hatte ein Release rund 97.780 ausgewählte Dateien;
-  ein kompletter Vorabvergleich meldete 4.300 Änderungen und 223,6 MB.
-- Eine spätere Bestandsaufnahme zeigte zusätzlich verschachtelte Ordner
-  `release-2026-11-16` und `release-2026-11-17` im Releaseziel. Ursprung und
-  aktuelle Nutzung vor weiterer Arbeit klären; nicht ungeprüft löschen.
-- Größen und Dateizahlen sind datierte Beobachtungen, keine festen Sollwerte.
+- The previous comparison reads the remote state recursively via `LIST`.
+  `--nur` and `--ohne` filter local files by top path segment,
+  but so far do not automatically limit this complete remote inventory.
+- `phpdata/manifest.json` describes the data format, languages and catalogue kinds,
+  not the complete published file set.
+- The terrain manifest has its own domain version. This is retained.
+- Data is not automatically exported completely anew just because a
+  release is built.
+- In the check on 16.11. a release had around 97.780 selected files;
+  a complete pre-comparison reported 4.300 changes and 223,6 MB.
+- A later stocktaking additionally showed nested folders
+  `release-2026-11-16` and `release-2026-11-17` in the release target. Clarify origin and
+  current use before further work; do not delete unchecked.
+- Sizes and file counts are dated observations, not fixed target values.
 
-### Laufzeit bleibt unverändert
+### Runtime stays unchanged
 
-Eine Item-URL wird durch PHP aufgelöst. `Data::page()` liest den passenden
-JSON-Shard, `Page::render()` übergibt das Modell an Twig. Es gibt nicht für
-jedes Item eine eigene PHP-Datei. Die Änderung betrifft Bau und Veröffentlichung,
-nicht dieses Renderingmodell.
+An item URL is resolved by PHP. `Data::page()` reads the matching
+JSON shard, `Page::render()` passes the model to Twig. There is not
+a separate PHP file for every item. The change concerns build and publication,
+not this rendering model.
 
-## 3. Abgrenzung
+## 3. Scope
 
-Enthalten:
+Included:
 
-- zentrale Dateiklassifikation;
-- deterministisches Build-Manifest;
-- serverseitiger bestätigter Deploymentstand;
-- Auswahl und Upload geänderter Dateien ohne globale FTP-Inventur;
-- Fehlerbehandlung, Wiederaufnahme, Sperre, Versionierung;
-- Tests, Betriebsdokumentation und Migration.
+- central file classification;
+- deterministic build manifest;
+- server-side confirmed deployment state;
+- selection and upload of changed files without a global FTP inventory;
+- error handling, resumption, lock, versioning;
+- tests, operational documentation and migration.
 
-Nicht enthalten:
+Not included:
 
-- Umstellung auf Datenbank oder anderes Hosting;
-- Zusammenlegen der JSON-Shards;
-- neuer DAT-Export;
-- automatisches Löschen alter Serverdateien;
-- atomare Umschaltung der ganzen Website;
-- ungefragter Upload oder Wechsel der aktuellen Veröffentlichung;
-- vorgezogene Änderungen am Plugin.
+- switch to a database or other hosting;
+- merging the JSON shards;
+- new DAT export;
+- automatic deletion of old server files;
+- atomic switchover of the whole website;
+- unrequested upload or change of the current publication;
+- early changes to the plugin.
 
-## 4. Zentrale Komponentenregeln
+## 4. Central component rules
 
-Ein gemeinsames Pythonmodul wird von Builder und Uploader verwendet.
-Es klassifiziert relative Veröffentlichungspfade ausdrücklich.
-Keine voneinander abweichenden Listen in mehreren Werkzeugen.
+One shared Python module is used by builder and uploader.
+It classifies relative publication paths explicitly.
+No lists that differ from each other in several tools.
 
-### Programm
+### Program
 
-- PHP-Code, Twig-Templates und deploybarer Einstiegspunkt;
-- Composer-Laufzeitbibliotheken unter `vendor/`;
-- CSS und tatsächlich ausführbarer Anwendungs-JavaScript-Code;
-- Seitenhülle, Fehlerseite, Rechtstexte, Tracking und `robots.txt`.
+- PHP code, Twig templates and deployable entry point;
+- Composer runtime libraries under `vendor/`;
+- CSS and actually executable application JavaScript code;
+- page shell, error page, legal texts, tracking and `robots.txt`.
 
-### Daten
+### Data
 
-- `phpdata/` einschließlich fachlichem Datenmanifest;
-- erzeugte Katalog-, Such-, Rezept-, Ruf-, Gebiets- und Instanzdaten;
-- erzeugte kompakte Kartendaten und Sprachkataloge, soweit sie Daten sind;
-- `vorkommen/`, `notizen/` und ihre erzeugten Einstiegsskripte.
+- `phpdata/` including the domain data manifest;
+- generated catalogue, search, recipe, reputation, area and instance data;
+- generated compact map data and language catalogues, insofar as they are data;
+- `vorkommen/`, `notizen/` and their generated entry scripts.
 
 ### Assets
 
-- `bild/`, Item-Symbole, Social-Vorschauen;
-- `karten/` einschließlich Vorschaubildern;
-- `gelaende/` einschließlich fachlicher Geländemanifeste.
+- `bild/`, item icons, social previews;
+- `karten/` including preview images;
+- `gelaende/` including domain terrain manifests.
 
-### Sonderregeln
+### Special rules
 
-- `*.js` ist keine ausreichende Programmregel: `app.js` ist Code,
-  `daten-de.js` ist Daten.
-- UI-Übersetzungen gehören zusammen mit dem zugehörigen Programmcode versioniert;
-  fachliche übersetzte Kataloge gehören zu Daten.
-- Die leere `fortschritt.js` ist ein definierter Programm-Stub.
-- Fachliche Manifeste bleiben Teil ihrer Komponente.
-- Das neue Release-Manifest wird nicht in seine eigenen Inhaltsversionen
-  eingerechnet.
-- Laufzeitcache, Statistikdateien, Zugangsdaten, Uploadjournale, persönliche
-  Fortschritte, Tests und alte Releasekopien werden nicht ausgeliefert.
-- Jeder zulässige Releasepfad gehört genau einer Komponente an.
-- Unbekannte oder mehrdeutige Pfade blockieren den Build mit konkreter Meldung.
-- Alle aktuellen Rootdateien vor Umsetzung inventarisieren. Vorstehende Gruppen
-  sind fachliche Regeln, keine bereits vollständige technische Allowlist.
+- `*.js` is not a sufficient program rule: `app.js` is code,
+  `daten-de.js` is data.
+- UI translations belong versioned together with the associated program code;
+  domain translated catalogues belong to data.
+- The empty `fortschritt.js` is a defined program stub.
+- Domain manifests remain part of their component.
+- The new release manifest is not counted into its own content versions.
+- Runtime cache, statistics files, credentials, upload journals, personal
+  progress, tests and old release copies are not delivered.
+- Every permitted release path belongs to exactly one component.
+- Unknown or ambiguous paths block the build with a concrete message.
+- Inventory all current root files before implementation. The preceding groups
+  are domain rules, not an already complete technical allowlist.
 
-## 5. Build-Manifest und Versionsbildung
+## 5. Build manifest and version formation
 
-Neue Datei im Build: `release-manifest.json`.
+New file in the build: `release-manifest.json`.
 
-Inhalt:
+Content:
 
-- Manifestformat-Version;
-- Build-Kennung und UTC-Erstellungszeit als Metadaten;
-- je Komponente Inhaltsversion und Anzahl/Bytes;
-- je Datei normalisierter relativer Pfad, Komponente, Größe, SHA-256;
-- explizite Datenformat-/Kompatibilitätsanforderungen;
-- bei Bedarf explizite erforderliche Veröffentlichungspfade.
+- manifest format version;
+- build identifier and UTC creation time as metadata;
+- per component content version and count/bytes;
+- per file normalised relative path, component, size, SHA-256;
+- explicit data format/compatibility requirements;
+- where needed, explicit required publication paths.
 
-Beispielstruktur, genaue Serialisierung bei Umsetzung festlegen:
+Example structure, fix the exact serialisation at implementation:
 
 ```json
 {
@@ -150,42 +149,41 @@ Beispielstruktur, genaue Serialisierung bei Umsetzung festlegen:
 }
 ```
 
-Version = SHA-256 einer kanonisch serialisierten, nach Pfad sortierten Liste
-aus Pfad, Größe und Dateihash einer Komponente. Zeitstempel, Build-Kennung,
-absolute Pfade und Dateisystemreihenfolge beeinflussen die Version nicht.
-Vollständige Hashes speichern, für Anzeigen kurze Präfixe verwenden.
+Version = SHA-256 of a canonically serialised list of path, size and file hash
+of a component, sorted by path. Timestamps, build identifier,
+absolute paths and file system order do not influence the version.
+Store complete hashes, use short prefixes for displays.
 
-Der Builder hasht Dateien, der Uploader übernimmt diese Hashes. Vor dem Senden
-verifizieren, dass die ausgewählte Datei noch dem Manifest entspricht.
-Ein während des Uploads veränderter Build darf nicht bestätigt werden.
+The builder hashes files, the uploader takes over these hashes. Before sending,
+verify that the selected file still matches the manifest.
+A build changed during the upload must not be confirmed.
 
-## 6. Veröffentlichter Serverstand
+## 6. Published server state
 
-Deployment-Metadaten in einem eigenen privaten Verzeichnis ablegen.
-Bevorzugt außerhalb des Documentroots, wenn der FTPS-Zugang dies erlaubt.
-Alternativ explizit per Hostingkonfiguration geschützter Pfad im Documentroot.
-Den konkreten Pfad anhand des Hostings verifizieren, nicht voraussetzen.
+Store deployment metadata in a separate private directory.
+Preferably outside the document root, if the FTPS access permits this.
+Alternatively a path in the document root explicitly protected by hosting configuration.
+Verify the concrete path against the hosting, do not assume it.
 
-Speichern:
+Store:
 
-- Metadatenformat-Version und Revision des Deploymentstands;
-- zuletzt vollständig bestätigte Version pro Komponente;
-- Dateihashes des bestätigten Bestands;
-- Buildherkunft und Bestätigungszeit je Komponente;
-- unvollständiger Upload mit Transaktionskennung und Fortschritt.
+- metadata format version and revision of the deployment state;
+- last completely confirmed version per component;
+- file hashes of the confirmed stock;
+- build origin and confirmation time per component;
+- incomplete upload with transaction identifier and progress.
 
-Ein Teilrelease kann Komponenten verschiedener Builds kombinieren. Der
-Serverstand muss das ausdrücken; nicht einen alten Gesamtbuild als aktuell
-deklarieren.
+A partial release can combine components of different builds. The
+server state must express that; not declare an old overall build as current.
 
-Schreibweise: neue Metadaten unter temporärem Namen hochladen und nach Prüfung
-umbenennen. Verhalten des Hosts bei Rename/Ersetzen testen. Der letzte gültige
-Stand muss bei Schreibfehler erhalten bleiben. Die Metadatenbestätigung ist
-keine Zusicherung eines atomaren gesamten Websiteupdates.
+Writing mode: upload new metadata under a temporary name and rename after checking.
+Test the behaviour of the host on rename/replace. The last valid
+state must be retained on a write error. The metadata confirmation is
+no assurance of an atomic update of the whole website.
 
-## 7. Änderungserkennung und CLI
+## 7. Change detection and CLI
 
-Vorgeschlagene Schnittstelle:
+Proposed interface:
 
 ```bash
 python3 upload.py --quelle <release> --gruppe programm --dry-run
@@ -195,95 +193,95 @@ python3 upload.py --quelle <release> --gruppe programm,daten
 python3 upload.py --quelle <release> --gruppe alle
 ```
 
-Ohne Gruppenauswahl: alle geänderten Komponenten des geprüften Builds anbieten.
-Ein unveränderter Komponentenhash beendet den Vergleich dieser Komponente.
-Bei Änderungen nur Manifest-Dateieinträge vergleichen, keine vollständige
-Remote-Verzeichnisauflistung.
+Without a group selection: offer all changed components of the checked build.
+An unchanged component hash ends the comparison of this component.
+On changes, compare only manifest file entries, no complete
+remote directory listing.
 
-Vorschau zeigt:
+The preview shows:
 
-- gewählte, unveränderte und ausgeschlossene Komponenten;
-- Dateiänderungen, neue Dateien und Übertragungsbytes;
-- Abhängigkeiten und blockierende Konflikte;
-- entfallene Pfade als Meldung, ohne Löschung;
-- Hinweis auf unvollständige oder anderweitig veränderte Serverstände.
+- selected, unchanged and excluded components;
+- file changes, new files and transfer bytes;
+- dependencies and blocking conflicts;
+- dropped paths as a message, without deletion;
+- a note about incomplete or otherwise changed server states.
 
-`--nur`/`--ohne` erhalten oder kontrolliert ablösen. Kombinationen mit
-`--gruppe` nicht stillschweigend mehrdeutig auswerten. Ein Einzeldateiupload
-markiert eine Komponente nur dann vollständig, wenn ihr gesamter Sollbestand
-nachweislich erreicht wurde; andernfalls als Teilstand erfassen.
+`--nur`/`--ohne` retain or replace in a controlled way. Do not evaluate
+combinations with `--gruppe` silently ambiguously. A single file upload
+marks a component as complete only if its entire target stock
+has demonstrably been reached; otherwise record it as a partial state.
 
-`--dry-run` darf weder Remotezustand noch Sperren oder lokale bestätigte
-Versionsstände verändern.
+`--dry-run` must change neither remote state nor locks or local confirmed
+version states.
 
-## 8. Abhängigkeiten und Veröffentlichungsreihenfolge
+## 8. Dependencies and publication order
 
-Keine pauschale Annahme „Programm kann immer alleine hochgeladen werden“.
+No blanket assumption „Programm kann immer alleine hochgeladen werden“.
 
-- Datenformatvertrag: Programm deklariert unterstützte Schemaversionen;
-  Daten deklarieren ihr Format.
-- Neue referenzierte Asset-/Datenpfade: Existenz im bestätigten Serverbestand
-  oder in derselben Uploadauswahl nachweisen.
-- Alle betroffenen Komponenten einer Änderung explizit im Vorschauplan nennen.
-- Die automatische Pfadprüfung kennt nur erfasste Abhängigkeiten. Sie ersetzt
-  weder Tests noch eine Abnahme; dynamische JavaScript-Referenzen sind nicht
-  durch beliebiges Textdurchsuchen vollständig beweisbar.
+- Data format contract: program declares supported schema versions;
+  data declares its format.
+- New referenced asset/data paths: prove existence in the confirmed server stock
+  or in the same upload selection.
+- Name all affected components of a change explicitly in the preview plan.
+- The automatic path check only knows recorded dependencies. It replaces
+  neither tests nor an acceptance; dynamic JavaScript references are not
+  completely provable by searching arbitrary text.
 
-Neue Abhängigkeiten vor ihren Konsumenten veröffentlichen:
+Publish new dependencies before their consumers:
 
-1. benötigte neue Bilder/Kacheln/Datenblöcke;
-2. darauf verweisende Indizes, Programme und Templates;
-3. aktivierende Manifeste, soweit die vorhandene Anwendung das unterstützt;
-4. Deploymentbestätigung nach Abschluss und Prüfung.
+1. required new images/tiles/data blocks;
+2. indices, programs and templates referring to them;
+3. activating manifests, insofar as the existing application supports that;
+4. deployment confirmation after completion and check.
 
-Das fachliche Geländemanifest erst nach seinen referenzierten Kacheln
-veröffentlichen. Neue referenzierte Item-Symbole vor den zugehörigen Daten.
-Bei zyklischen oder inkompatiblen Schemaänderungen abbrechen und eigenen
-abwärtskompatiblen Migrationsablauf verlangen.
+Publish the domain terrain manifest only after its referenced tiles.
+New referenced item icons before the associated data.
+On cyclic or incompatible schema changes, abort and require a separate
+backward-compatible migration procedure.
 
-## 9. Upload, Fehler und Wiederaufnahme
+## 9. Upload, errors and resumption
 
-Vor Schreiboperationen einen exklusiven serverseitigen Upload-Lock erwerben.
-Eine geeignete FTPS-Operation und deren Exklusivität auf dem Host prüfen
-(z. B. Verzeichnisanlage). Nicht nur lokal sperren.
+Acquire an exclusive server-side upload lock before write operations.
+Check a suitable FTPS operation and its exclusivity on the host
+(e.g. directory creation). Do not lock only locally.
 
-Lock enthält Kennung, Startzeit und vorgesehene Komponenten, keine Geheimnisse.
-Paralleler Upload wird abgewiesen. Verwaiste Locks nur nach ausdrücklicher
-Prüfung/Freigabe entfernen; kein automatisches gewaltsames Übernehmen.
+The lock contains identifier, start time and intended components, no secrets.
+A parallel upload is rejected. Remove orphaned locks only after express
+checking/approval; no automatic forceful takeover.
 
-Für geänderte Dateien:
+For changed files:
 
-- soweit unterstützt, temporär im Zielverzeichnis hochladen und umbenennen;
-- erfolgreiche FTPS-Antwort und finale Remote-Größe prüfen;
-- Ergebnis im Wiederaufnahmejournal erfassen;
-- keine neue Gruppenversion nach Fehlern bestätigen.
+- where supported, upload temporarily in the target directory and rename;
+- check successful FTPS response and final remote size;
+- record the result in the resumption journal;
+- do not confirm a new group version after errors.
 
-Dateiübertragung ist bei Threadfehlern insgesamt fehlgeschlagen. Exceptions
-aus Workern müssen im Hauptprozess ankommen und einen Exitcode ungleich null
-erzwingen. Keine bloße Erfolgsmeldung nach gescheitertem Hintergrundworker.
+File transfer has failed overall on thread errors. Exceptions
+from workers must arrive in the main process and force an exit code not equal to zero.
+No mere success message after a failed background worker.
 
-Bei Abbruch bleibt die bestätigte Vorgängerversion erhalten, aber der Zustand
-wird als teilweise verändert/unvollständig ausgewiesen. Der Server kann
-bereits gemischte Dateien enthalten. Wiederaufnahme verifiziert Journaleinträge
-mindestens gegen Remote-Größe und vorgesehenen Hashstand; nicht blind skippen.
+On abort the confirmed previous version is retained, but the state
+is reported as partly changed/incomplete. The server can
+already contain mixed files. Resumption verifies journal entries
+at least against remote size and intended hash state; do not skip blindly.
 
-Remote-SHA-256 nur behaupten, wenn der Host eine verlässlich geprüfte
-Hashfunktion bietet. FTPS-Erfolg plus Größe ist keine vollständige unabhängige
-Remote-Inhaltsprüfung. Ergänzend HTTP-Prüfungen und optionaler Downloadvergleich.
+Claim remote SHA-256 only if the host offers a reliably checked
+hash function. FTPS success plus size is no complete independent
+remote content check. Additionally HTTP checks and optional download comparison.
 
-## 10. Bedeutung von „synchronisiert“
+## 10. Meaning of „synchronisiert“
 
-Eine Komponente ist synchronisiert, wenn ihr vollständiger gebauter Sollbestand
-erfolgreich veröffentlicht und geprüft wurde und ihre Version bestätigt ist.
+A component is synchronised when its complete built target stock
+has been published and checked successfully and its version is confirmed.
 
-Das sagt nicht:
+That does not say:
 
-- dass Quelldaten frisch aus dem Spiel exportiert wurden;
-- dass ausgeschlossene Komponenten ebenfalls aktuell sind;
-- dass unverwaltete Altdateien gelöscht wurden;
-- dass niemand nachträglich manuell Serverdateien geändert hat.
+- that source data was freshly exported from the game;
+- that excluded components are also current;
+- that unmanaged old files were deleted;
+- that nobody changed server files manually afterwards.
 
-Beispielanzeige:
+Example display:
 
 ```text
 Programm: synchronisiert, Version …
@@ -292,149 +290,149 @@ Assets: nicht ausgewählt; bestätigte Version …
 Upload: erfolgreich, 1 Datei übertragen
 ```
 
-Fehlende Komponentenbestätigung niemals als „alles aktuell“ darstellen.
+Never present a missing component confirmation as „alles aktuell“.
 
-## 11. Migration und vollständiger Kontrolllauf
+## 11. Migration and full control run
 
-- Vorhandene lokale Uploadhistorie bewahren und sichern.
-- Bestehende fachliche Manifeste nicht durch das Deploymentmanifest ersetzen.
-- Bei fehlendem Servermanifest initialen Bestandsabgleich explizit ausführen.
-- Ein lokaler Hash plus gleiche Remote-Größe beweist keinen identischen
-  Remoteinhalt. Für eine belastbare Erstbestätigung Dateien verifizieren
-  (Download/Hash) oder bewusst neu übertragen. Vertrauensübernahme aus der
-  bisherigen Historie nur als ausdrücklich gekennzeichnete schwächere Option.
-- Beschädigte oder unbekannte Manifestversion blockiert den schnellen Upload.
-  Kein stiller Fallback auf „synchronisiert“.
-- Gesonderter Auditmodus für manuelle Serveränderungen: Inventur und nach
-  Bedarf Inhaltsvergleich, mit Aufwandshinweis.
-- Teilupdates löschen nichts. Verwaistenprüfung nur aus vollständigem
-  Sollbestand; Löschung bleibt eigene ausdrücklich freigegebene Operation.
-- Rückfall: alte Deploymentmetadaten und passende Releasequellen aufbewahren.
-  Ein echtes Rollback erfordert Rückübertragung alter Dateien, nicht bloß
-  Zurücksetzen einer Versionsnummer.
+- Preserve and back up the existing local upload history.
+- Do not replace existing domain manifests by the deployment manifest.
+- If the server manifest is missing, run an initial stock comparison explicitly.
+- A local hash plus equal remote size does not prove identical
+  remote content. For a reliable first confirmation, verify files
+  (download/hash) or deliberately transfer them anew. Taking trust from the
+  previous history only as an expressly marked weaker option.
+- A damaged or unknown manifest version blocks the fast upload.
+  No silent fallback to „synchronisiert“.
+- Separate audit mode for manual server changes: inventory and, as
+  needed, content comparison, with a note on effort.
+- Partial updates delete nothing. Orphan check only from the complete
+  target stock; deletion remains its own expressly approved operation.
+- Fallback: keep old deployment metadata and matching release sources.
+  A real rollback requires retransferring old files, not merely
+  resetting a version number.
 
-## 12. Buildstrategie und Sicherheit
+## 12. Build strategy and safety
 
-Stufe 1 behält den vollständigen Build und seine Prüfungen. Schneller Upload
-und schneller Build sind getrennte Ziele.
+Stage 1 keeps the complete build and its checks. Fast upload
+and fast build are separate goals.
 
-Vorher prüfen:
+Check beforehand:
 
-- nur dedizierte, entbehrliche Buildziele verwenden;
-- Quelle/Ziel/Unterverzeichnis-Konflikte vor dem bisherigen `rmtree` abweisen;
-- alte Releasekopien, Cache und Laufzeitdaten nicht rekursiv mitnehmen;
-- vollständigen Release vor Erzeugen des Manifests prüfen;
-- Manifest nach Abschluss aller inhaltlichen Generatoren erstellen.
+- use only dedicated, dispensable build targets;
+- reject source/target/subdirectory conflicts before the previous `rmtree`;
+- do not include old release copies, cache and runtime data recursively;
+- check the complete release before creating the manifest;
+- create the manifest only after completion of all content generators.
 
-Keine Löschung unbekannter Bestände als Teil dieses Vorhabens.
+No deletion of unknown stocks as part of this work order.
 
-Stufe 2 erst nach Messung: inkrementelles Zusammenstellen unveränderter Assets
-und belastbares Hash-Caching. Immer einen vollständigen Vorschau-/Prüfbestand
-erhalten; nicht drei unvollständige Websites als Testgrundlage verwenden.
+Stage 2 only after measurement: incremental assembly of unchanged assets
+and reliable hash caching. Always retain a complete preview/check stock;
+do not use three incomplete websites as a test basis.
 
-## 13. Testkonzept
+## 13. Test concept
 
-### Unit-Tests: Klassifikation und Manifest
+### Unit tests: classification and manifest
 
-- [x] Jeder zulässige Pfad gehört genau einer Komponente an.
-- [x] Programm-JavaScript und generierte Daten-JavaScripts korrekt getrennt.
-- [x] Vorkommen/Kartennotizen Daten; Bilder und Geländemanifest Assets.
-- [x] Unbekannte und mehrdeutige Pfade werden abgelehnt.
-- [x] Gleicher Inhalt ergibt trotz anderer Reihenfolge/Zeitstempel gleiche Version.
-- [x] Änderung nur einer Komponente ändert nur deren Version.
-- [x] Neuer und entfallener Pfad ändern die passende Version.
-- [x] Manifest hat keinen Selbstbezug; kanonische Serialisierung stabil.
-- [x] Absolute Pfade, `..`, Symlinks außerhalb des Builds und private Daten abweisen.
-- [x] Verschachtelte Releasekopien und Laufzeitcache werden nicht ausgeliefert.
-- [x] Während des Uploads veränderte Builddatei wird erkannt.
+- [x] Every permitted path belongs to exactly one component.
+- [x] Program JavaScript and generated data JavaScripts correctly separated.
+- [x] Resource occurrences/map notes data; images and terrain manifest assets.
+- [x] Unknown and ambiguous paths are rejected.
+- [x] Identical content yields the same version despite different order/timestamps.
+- [x] A change of only one component changes only its version.
+- [x] New and dropped path change the matching version.
+- [x] Manifest has no self-reference; canonical serialisation stable.
+- [x] Reject absolute paths, `..`, symlinks outside the build and private data.
+- [x] Nested release copies and runtime cache are not delivered.
+- [x] A build file changed during the upload is detected.
 
-### Integration: simulierter FTPS-Server
+### Integration: simulated FTPS server
 
-Tests müssen ohne produktive Zugangsdaten und ohne Live-Schreibzugriffe laufen.
-Ein instrumentierter Fake prüft Aufrufe; ein lokaler FTP/FTPS-Testserver
-prüft insbesondere Rename, Fehlerantworten und Wiederaufnahme realitätsnah.
+Tests must run without production credentials and without live write access.
+An instrumented fake checks calls; a local FTP/FTPS test server
+checks in particular rename, error responses and resumption realistically.
 
-- [x] Unveränderter Release: null Dateiübertragungen.
-- [x] Eine CSS-Änderung: nur eine Programmdatei plus nötige Deploymentmetadaten.
-- [x] Itemänderung: nur tatsächlich geänderte Daten-Dateien.
-- [ ] Neues Item-Symbol vor dem darauf verweisenden Datenstand.
-- [x] Zeitstempeländerung allein: null Dateiübertragungen.
-- [x] Programmupdate ruft keine rekursive Asset-Inventur auf.
-- [x] Teilupdate erhält die Versionsstände aller anderen Komponenten.
-- [ ] Einzeldateiupload behauptet keinen vollständigen Komponentenstand.
-- [x] Netzwerkabbruch, falsche Remote-Größe und Renamefehler verhindern Bestätigung.
-- [x] Workerfehler führen zu Fehlerexitcode und keinem falschen Erfolg.
-- [x] Wiederaufnahme sendet fehlende Dateien und prüft vorhandene Journaleinträge.
-- [x] Während eines Uploads geänderter Serverstand wird als Konflikt erkannt.
-- [x] Paralleler Lock wird abgewiesen; verwaister Lock nicht automatisch entfernt.
-- [x] Fehlendes/beschädigtes Manifest verlangt Migration oder Fehlerbehandlung.
-- [x] Unterbrochene Metadatenbestätigung lässt den letzten gültigen Stand erhalten.
-- [x] Teilupdates löschen keine Remote-Dateien.
-- [x] Dry-run schreibt weder Lock noch Journal/Bestätigung.
-- [x] Fehlende deklarierte Abhängigkeiten blockieren Upload.
-- [ ] Fachliches Geländemanifest wird erst nach seinen Kacheln aktiviert.
+- [x] Unchanged release: zero file transfers.
+- [x] One CSS change: only one program file plus necessary deployment metadata.
+- [x] Item change: only actually changed data files.
+- [ ] New item icon before the data state referring to it.
+- [x] Timestamp change alone: zero file transfers.
+- [x] Program update calls no recursive asset inventory.
+- [x] Partial update retains the version states of all other components.
+- [ ] Single file upload does not claim a complete component state.
+- [x] Network abort, wrong remote size and rename errors prevent confirmation.
+- [x] Worker errors lead to an error exit code and no false success.
+- [x] Resumption sends missing files and checks existing journal entries.
+- [x] A server state changed during an upload is detected as a conflict.
+- [x] A parallel lock is rejected; an orphaned lock is not removed automatically.
+- [x] Missing/damaged manifest requires migration or error handling.
+- [x] An interrupted metadata confirmation leaves the last valid state retained.
+- [x] Partial updates delete no remote files.
+- [x] Dry-run writes neither lock nor journal/confirmation.
+- [x] Missing declared dependencies block the upload.
+- [ ] The domain terrain manifest is only activated after its tiles.
 
-### Bestehende Website-Tests
+### Existing website tests
 
-- [ ] Bestehende Python-/Node-/PHP-Tests unverändert weiterführen.
-- [ ] Builderprüfung um Manifest, Ausschlüsse und Komponentenabdeckung erweitern.
-- [ ] Vollständigen gebauten Release lokal in DE/EN/FR prüfen.
-- [ ] Item, Aufgabe, Suche, Aufgabenfinder, Abenteuer und Handwerk stichprobenartig.
-- [ ] Bei sichtbaren Änderungen Desktop/Mobil und relevante Importzustände prüfen.
-- [ ] Persönliche Spielstände weder überschreiben noch in Artefakte übernehmen.
+- [ ] Continue existing Python/Node/PHP tests unchanged.
+- [ ] Extend the builder check by manifest, exclusions and component coverage.
+- [ ] Check the complete built release locally in DE/EN/FR.
+- [ ] Sample item, quest, search, quest finder, adventure and crafting.
+- [ ] On visible changes check desktop/mobile and relevant import states.
+- [ ] Neither overwrite personal character progress nor take it into artefacts.
 
-### Erste freigegebene Liveabnahme
+### First approved live acceptance
 
-- [ ] Schutz der Deploymentmetadaten über HTTP prüfen, ohne Inhalte offenzulegen.
-- [ ] Exklusiver Lock und atomarer Metadatenersatz auf dem Host verifiziert.
-- [ ] Reines Programmupdate: CSS/PHP/JS laden; keine fehlenden Assets.
-- [ ] Datenupdate: Item und Aufgabe samt Verweisen, DE/EN/FR.
-- [ ] Assetupdate: Symbol, Spielkarte und Gelände inklusive neuem Manifest.
-- [ ] Bei Twigänderungen Cache nach Upload leeren und Seiten erneut prüfen.
-- [ ] Erfolgsstatus gegen Servermanifest und ausgewählte Dateien abgleichen.
+- [ ] Check the protection of the deployment metadata via HTTP, without exposing contents.
+- [ ] Exclusive lock and atomic metadata replacement verified on the host.
+- [ ] Pure program update: load CSS/PHP/JS; no missing assets.
+- [ ] Data update: item and quest including references, DE/EN/FR.
+- [ ] Asset update: icon, game map and terrain including the new manifest.
+- [ ] On Twig changes, clear the cache after upload and check pages again.
+- [ ] Compare the success status against the server manifest and selected files.
 
-### Leistungsmessung
+### Performance measurement
 
-- [ ] Buildzeit getrennt von Vergleich, Netzwerk und Übertragung protokollieren.
-- [ ] Anzahl `LIST`-, `SIZE`-, `STOR`- und Metadatenoperationen erfassen.
-- [ ] Unveränderten, CSS-, Daten- und Assetfall mit gleichem Bestand vergleichen.
-- [ ] Für Programmupdates nachweisen: keine Operationen auf unveränderten
-      Asset-Dateibäumen; Aufwand hängt nicht von deren Dateizahl ab.
-- [ ] Keine konkrete Beschleunigung versprechen, bevor Messwerte vorliegen.
+- [ ] Log build time separately from comparison, network and transfer.
+- [ ] Record the number of `LIST`, `SIZE`, `STOR` and metadata operations.
+- [ ] Compare the unchanged, CSS, data and asset case with the same stock.
+- [ ] Prove for program updates: no operations on unchanged
+      asset file trees; effort does not depend on their file count.
+- [ ] Do not promise a concrete speedup before measured values exist.
 
-## 14. Umsetzungsphasen
+## 14. Implementation phases
 
-1. **Inventur:** aktuelle Quelldateien, Build-/Releasepfade, Datenarten und
-   vorhandene Tests prüfen; fremde Änderungen bewahren.
-2. **Vertrag:** Komponentenregeln, Manifestformate und Kompatibilitätsfelder
-   festlegen; Unit-Tests schreiben.
-3. **Builder:** vollständigen Release sicher erzeugen und manifestieren.
-4. **Planung:** Manifestvergleich, Gruppenoptionen und reine Vorschau.
-5. **Upload:** begrenzte Dateiübertragung, Journale, Lock und Fehlerpropagation.
-6. **Bestätigung:** geschützten Serverstand und Verifikation integrieren.
-7. **Migration/Audit:** vorhandenen Bestand übernehmen und Rückfall dokumentieren.
-8. **Abnahme:** Tests, Messungen, lokale Gesamtprüfung; Livebetrieb nur auf
-   ausdrücklichen Veröffentlichungsauftrag.
-9. **Dokumentation:** README, AGENTS.md und dieses Projekt-TODO mit tatsächlichen
-   Befehlen, Prüfergebnissen und Betriebsregeln aktualisieren.
+1. **Inventory:** check current source files, build/release paths, data kinds and
+   existing tests; preserve foreign changes.
+2. **Contract:** define component rules, manifest formats and compatibility fields;
+   write unit tests.
+3. **Builder:** create and manifest the complete release safely.
+4. **Planning:** manifest comparison, group options and pure preview.
+5. **Upload:** limited file transfer, journals, lock and error propagation.
+6. **Confirmation:** integrate the protected server state and verification.
+7. **Migration/audit:** adopt the existing stock and document the fallback.
+8. **Acceptance:** tests, measurements, local overall check; live operation only on
+   express publication order.
+9. **Documentation:** update README, AGENTS.md and this project TODO with actual
+   commands, check results and operational rules.
 
-Voraussichtlich betroffen: `upload.py`, `tools/build_release.py`, ein neues
-gemeinsames Release-Modul, `tests/test_upload.py`, zusätzliche Manifest-/
-Release-/Integrationstests und die Release-Dokumentation. Konkrete Namen erst
-nach Prüfung vorhandener Muster festlegen.
+Presumably affected: `upload.py`, `tools/build_release.py`, a new
+shared release module, `tests/test_upload.py`, additional manifest/
+release/integration tests and the release documentation. Determine concrete names only
+after checking existing patterns.
 
-## 15. Abnahmekriterien
+## 15. Acceptance criteria
 
-Das Vorhaben ist erst fertig, wenn:
+The work order is only done when:
 
-- automatische Inhaltsversionen manuelle Änderungsflags ersetzen;
-- alle Release-Dateien eindeutig klassifiziert und private Daten ausgeschlossen sind;
-- ein Programmupdate unveränderte Assetverzeichnisse nicht inventarisiert;
-- erfolgreiche Teilupdates ausschließlich ihren tatsächlichen Stand bestätigen;
-- abgebrochene Uploads wiederaufnehmbar und ausdrücklich unvollständig sind;
-- keine neue Version nach Übertragungs-, Worker- oder Prüfungsfehlern bestätigt wird;
-- Abhängigkeiten, Grenzen der FTP-Verifikation und nicht-atomare Gesamtupdates
-  wahrheitsgemäß behandelt und dokumentiert sind;
-- Migration und vollständiger Kontrolllauf verfügbar sind;
-- sämtliche neuen automatisierten Tests und relevante Websiteprüfungen bestehen;
-- keine Löschung, Veröffentlichung oder Hostingänderung ohne Freigabe erfolgt.
+- automatic content versions replace manual change flags;
+- all release files are classified unambiguously and private data is excluded;
+- a program update does not inventory unchanged asset directories;
+- successful partial updates confirm exclusively their actual state;
+- aborted uploads are resumable and expressly incomplete;
+- no new version is confirmed after transfer, worker or check errors;
+- dependencies, limits of the FTP verification and non-atomic overall updates
+  are handled and documented truthfully;
+- migration and a full control run are available;
+- all new automated tests and relevant website checks pass;
+- no deletion, publication or hosting change happens without approval.
