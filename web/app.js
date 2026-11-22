@@ -172,10 +172,17 @@
 	});
 
 	var ANSICHT_JE_SEITE = 200;
-	// The epic story spans all of Middle-earth and has no map of its own. Its
-	// chapters open on the largest game map; a chosen chapter still jumps to its
-	// own region, because every region has its own coordinate space.
-	var WELTKARTE = 268437557;
+
+	// Special views own their data, list and map rules. The map app only asks
+	// them; it knows nothing about their internals.
+	var SONDER = [];
+	if (window.MQL_EPIK_ANSICHT) { SONDER.push(window.MQL_EPIK_ANSICHT); }
+	function sonderFuer(knoten) {
+		for (var index = 0; index < SONDER.length; index += 1) {
+			if (SONDER[index].passt && SONDER[index].passt(knoten)) { return SONDER[index]; }
+		}
+		return null;
+	}
 
 	// Catalogue rooms without geography get a readable name.
 	var ABSCHNITTE = (window.MQL_TEXTE && window.MQL_TEXTE[sprache] &&
@@ -285,8 +292,7 @@
 	function gezaehlt(quest) {
 		var zustand = zustandVon(quest);
 		// An instance row of an old story section is a part of its chapter, not a
-		// task of its own: the chapter decides whether the step is done. The epic
-		// theme applies the same rule to its own entries in Epik.zaehlbar().
+		// task of its own: the chapter decides whether the step is done.
 		if (quest.z === 'story' && quest.ie) { return false; }
 		return zustand !== 'sitzung' && zustand !== 'ausgeschlossen' && zustand !== 'monster';
 	}
@@ -617,6 +623,8 @@
 	}
 	function zaehlEintraege(knoten) {
 		if (!knoten) { return []; }
+		// A special view counts what it shows, not the summary of the map data.
+		if (knoten.eigeneZaehlung) { return knoten.quests || []; }
 		var nachPfad = zusammenfassungNachPfad[knoten.schluessel];
 		if (nachPfad) { return nachPfad; }
 		// Areas that the game nests deeper than the shared list shows (Isengart
@@ -1042,11 +1050,15 @@
 		starte();
 	}
 
-	/** The map a node opens on. A node's own map wins; the epic story spans all
-	 * of Middle-earth without a map of its own, so it opens on the large one. */
+	/** The map a node opens on. A node's own map wins; a special view names its
+	 * map itself, otherwise the best map of its entries is used. */
 	function karteFuerKnoten(knoten) {
 		if (knoten.karte != null && karteNachIndex[knoten.karte]) { return knoten.karte; }
-		if (Epik.istWurzel(knoten) && karteNachIndex[Epik.karte()]) { return Epik.karte(); }
+		var sonder = sonderFuer(knoten);
+		if (sonder && sonder.karte) {
+			var index = sonder.karte();
+			if (index != null && karteNachIndex[index]) { return index; }
+		}
 		return besteKarte(knoten.quests, knoten.name);
 	}
 
@@ -1069,9 +1081,12 @@
 		zustand.sichtbar = ANSICHT_JE_SEITE;
 		var index = karteFuerKnoten(knoten);
 		zustand.gebietsKarte = index;
-		// The epic story is a special view: it shows the terrain map, without
-		// changing the stored map view of the other pages.
-		if (gelaende) { gelaende.setView(Epik.istWurzel(knoten) ? 'gelaende' : null); }
+		// A special view may pin a map mode (terrain) for itself without touching
+		// the stored view of the other pages.
+		if (gelaende) {
+			var sonder = sonderFuer(knoten);
+			gelaende.setView(sonder && sonder.ansicht ? sonder.ansicht() : null);
+		}
 		if (index != null) {
 			zeigeKarte(index);
 		} else {
@@ -1089,7 +1104,9 @@
 	}
 
 	function waehleKnoten(knoten, alsListe, ohneVerlauf) {
-		if (!knoten || knoten === WURZEL || knoten.gebietsDatenGeladen) {
+		// A special view brings its own entries; the map shard loader must not
+		// pour area data into its node.
+		if (!knoten || knoten === WURZEL || knoten.gebietsDatenGeladen || sonderFuer(knoten)) {
 			waehleKnotenSofort(knoten, alsListe, ohneVerlauf);
 			return;
 		}
@@ -2066,15 +2083,7 @@
 		detail.appendChild(ul);
 	}
 
-	/** A prologue opens a book and an epilogue closes it; neither belongs in the
-	 * numbered sequence of its chapters. */
-	function abschnittRang(name) {
-		if (/prolog|vorwort|introduction|prologue/i.test(name)) { return -1; }
-		if (/epilog|nachwort|afterword|épilogue/i.test(name)) { return 1; }
-		return 0;
-	}
-
-	function zeigeListeIn(ziel, titel, eintraege, abschnittPrefix, abschnittHinweise) {
+	function zeigeListeIn(ziel, titel, eintraege, abschnittPrefix) {
 		abschnittPrefix = abschnittPrefix || '';
 		if (ziel === liste) {
 			zustand.treffer = eintraege;
@@ -2111,8 +2120,6 @@
 				return 0;
 			}
 			if (reihe[ax] !== reihe[ay]) { return reihe[ax] - reihe[ay]; }
-			var rangX = abschnittRang(ax), rangY = abschnittRang(ay);
-			if (rangX !== rangY) { return rangX - rangY; }
 			return MQL_SORT.compare(ax, ay);
 		});
 		// Only the main list feeds the map; a nested book list must not replace
@@ -2166,16 +2173,9 @@
 				kopf.appendChild(zahlKopf);
 				kopf.addEventListener('click', function () {
 					zu[abschnittPrefix + abschnitt] = !zu[abschnittPrefix + abschnitt];
-					zeigeListeIn(ziel, titel, eintraege, abschnittPrefix, abschnittHinweise);
+					zeigeListeIn(ziel, titel, eintraege, abschnittPrefix);
 				});
 				ziel.appendChild(kopf);
-				if (!zu[abschnittPrefix + abschnitt] && abschnittHinweise &&
-					abschnittHinweise[abschnitt]) {
-					var hinweisZeile = eltern('li', null);
-					hinweisZeile.className = 'listen-hinweis schwach';
-					hinweisZeile.textContent = abschnittHinweise[abschnitt];
-					ziel.appendChild(hinweisZeile);
-				}
 			}
 			if (mitAbschnitten && zu[abschnittPrefix + abschnitt]) { return; }
 			var zeile = eltern('li', null);
@@ -2209,7 +2209,7 @@
 				questName.appendChild(geber);
 			}
 			zeile.appendChild(questName);
-			if (Epik.istKapitel(quest)) {
+			if (quest.z === 'story' && !quest.ie) {
 				var instanzen = instanzenVon(quest.i);
 				if (instanzen.length) {
 					var teile = instanzen.map(function (eintrag) {
@@ -2252,131 +2252,6 @@
 		zeigeListeIn(liste, titel, eintraege, '');
 	}
 
-	// --- Epic story: one topic with its own list and map rules ---------------
-	// Everything that treats the epic differently from a landscape lives in this
-	// block. The generic list, filter and map code asks it instead of testing
-	// the theme itself, so the special case stays in one place.
-	var Epik = (function () {
-		var offen = {};  // folded volumes
-		var PROLOG = /prolog|vorwort|introduction|prologue/i;
-
-		/** The theme root itself, not a volume below it. */
-		function istWurzel(knoten) {
-			return !!knoten && istThemenWurzel(knoten) &&
-				(knoten.quests[0] || {}).th === 'epic';
-		}
-
-		/** An instance row is a part of its chapter, not a task of its own
-		 * (`ie` names the chapter). The chapter stands for it. */
-		function istInstanz(quest) {
-			return !!quest && quest.th === 'epic' && !!quest.ie;
-		}
-
-		/** A chapter row: the epic entry that counts and carries its instances. */
-		function istKapitel(quest) {
-			return !!quest && quest.th === 'epic' && !quest.ie;
-		}
-
-		/** Chapters known in the loaded data; the loaded set changes with the
-		 * shards, so the index follows its size. */
-		var kapitelIndex = null, kapitelStand = -1;
-		function kapitel() {
-			if (kapitelIndex && kapitelStand === quests.length) { return kapitelIndex; }
-			kapitelIndex = {};
-			quests.forEach(function (quest) {
-				if (istKapitel(quest)) { kapitelIndex[quest.i] = true; }
-			});
-			kapitelStand = quests.length;
-			return kapitelIndex;
-		}
-
-		/** A part whose chapter is not in the list has nothing to hang on; it
-		 * stays a row of its own rather than disappearing. */
-		function istVerwaist(quest) {
-			return istInstanz(quest) && !kapitel()[quest.ie];
-		}
-
-		/** A part that its chapter represents: hidden from the list and the count. */
-		function istTeil(quest) {
-			return istInstanz(quest) && !istVerwaist(quest);
-		}
-
-		/** A prologue chain is the introduction to a book and never counts
-		 * towards its progress. */
-		function istProlog(quest) {
-			return !!quest && quest.th === 'epic' && PROLOG.test(quest.a || '');
-		}
-
-		/** Sections that open a book, with the hint that they do not count. */
-		function hinweise(eintraege) {
-			var karten = {};
-			eintraege.forEach(function (quest) {
-				if (istProlog(quest) && quest.a) { karten[quest.a] = t('prolog_hinweis'); }
-			});
-			return karten;
-		}
-
-		/** The epic spans all of Middle-earth; its chapters open on the large
-		 * overview map, a chosen chapter still jumps to its own region. */
-		function karte() { return WELTKARTE; }
-
-		/** The list base for the theme, also for the filter numbers: chapters,
-		 * orphan parts and prologue chains, never a part its chapter carries. */
-		function basis(knoten) {
-			return knoten.quests.filter(function (quest) { return !istTeil(quest); });
-		}
-
-		/** What the theme counts: no parts, no prologue chains. */
-		function zaehlbar(quest) { return !istTeil(quest) && !istProlog(quest); }
-
-		/** The ten volumes stay; opening one shows its books and chapters
-		 * underneath, so the volume list never disappears. */
-		function zeichne(knoten) {
-			var alle = gefiltert(basis(knoten));
-			zustand.treffer = alle;
-			listeTitel.textContent = knoten.name;
-			liste.textContent = '';
-			zeilen = {};
-			knoten.reihenfolge.forEach(function (band) {
-				var eigene = gefiltert(basis(band));
-				if (!eigene.length) { return; }
-				// A search opens the volumes with a hit, otherwise the hit stays hidden.
-				var aufgeklappt = offen[band.schluessel] === true || !!zustand.q;
-				if (zustand.q) {
-					var abschnitte = {};
-					eigene.forEach(function (quest) { abschnitte[quest.a || ''] = true; });
-					Object.keys(abschnitte).forEach(function (name) {
-						zu[band.schluessel + '|' + name] = false;
-					});
-				}
-				var kopf = eltern('li', null);
-				kopf.className = 'abschnitt epik-band' + (aufgeklappt ? '' : ' zu');
-				kopf.appendChild(eltern('span', (aufgeklappt ? '▾ ' : '▸ ') + band.name));
-				var kz = zaehle(zaehlEintraege(band).filter(zaehlbar));
-				var stand = eltern('span', zahl(kz.erledigt, kz.gesamt));
-				stand.className = 'stufe';
-				kopf.appendChild(stand);
-				kopf.addEventListener('click', function () {
-					offen[band.schluessel] = !aufgeklappt;
-					zeichneListe();
-				});
-				liste.appendChild(kopf);
-				if (!aufgeklappt) { return; }
-				var buecher = eltern('ul', null);
-				buecher.className = 'epik-buecher';
-				liste.appendChild(buecher);
-				zeigeListeIn(buecher, band.name, eigene, band.schluessel + '|', hinweise(eigene));
-			});
-			zeichneKartenBreadcrumb();
-			zeichneMarker();
-			aktualisiereFilterZahlen();
-		}
-
-		return { istWurzel: istWurzel, istInstanz: istInstanz, istKapitel: istKapitel,
-			istTeil: istTeil, istVerwaist: istVerwaist, istProlog: istProlog,
-			zaehlbar: zaehlbar, karte: karte, basis: basis, hinweise: hinweise,
-			zeichneListe: zeichne };
-	})();
 
 	/**
 	 * Can the active character take this now, as far as the data says? Open, not
@@ -2479,22 +2354,9 @@
 	 * does not, so a chosen state keeps its number after selecting it. Without
 	 * imported progress only the total is a fact; the states stay unnumbered.
 	 */
-	function aktualisiereFilterZahlen() {
-		var felder = filterLeiste.querySelectorAll('[data-filterzahl]');
-		if (!felder.length) { return; }
-		var anzeigen = function (werte) {
-			felder.forEach(function (feld) {
-				var wert = werte[feld.dataset.filterzahl];
-				feld.textContent = wert == null ? '' : String(wert);
-				feld.hidden = wert == null;
-			});
-		};
-		if (!zustand.knoten) { anzeigen({}); return; }
-		var alt = zustand.filter;
-		zustand.filter = 'alle';
-		var liste = gefiltert(Epik.istWurzel(zustand.knoten) && !zustand.suchliste
-			? Epik.basis(zustand.knoten) : listeVon(zustand.knoten));
-		zustand.filter = alt;
+	/** Facet counts over a list: all entries, plus the states when progress is
+	 * imported. The chosen progress filter itself does not narrow the base. */
+	function zaehleListe(liste) {
 		var werte = { alle: liste.length };
 		if (hatFortschritt) {
 			werte.offen = werte.laufend = werte.erledigt = werte.machbar = 0;
@@ -2506,7 +2368,60 @@
 				if (machbar(quest)) { werte.machbar += 1; }
 			});
 		}
-		anzeigen(werte);
+		return werte;
+	}
+
+	function aktualisiereFilterZahlen() {
+		var felder = filterLeiste.querySelectorAll('[data-filterzahl]');
+		if (!felder.length) { return; }
+		var anzeigen = function (werte) {
+			felder.forEach(function (feld) {
+				var wert = werte[feld.dataset.filterzahl];
+				feld.textContent = wert == null ? '' : String(wert);
+				feld.hidden = wert == null;
+			});
+		};
+		if (!zustand.knoten) { anzeigen({}); return; }
+		var sonder = sonderFuer(zustand.knoten);
+		if (sonder && sonder.zahlen) { anzeigen(sonder.zahlen()); return; }
+		var alt = zustand.filter;
+		zustand.filter = 'alle';
+		var liste = gefiltert(listeVon(zustand.knoten));
+		zustand.filter = alt;
+		anzeigen(zaehleListe(liste));
+	}
+
+	/** What a special view may use from the map app. */
+	function sonderHost() {
+		return {
+			liste: liste,
+			titel: function (text) { listeTitel.textContent = text; },
+			filtere: function (rows, ohneFortschritt) {
+				var alt = zustand.filter;
+				if (ohneFortschritt) { zustand.filter = 'alle'; }
+				var ergebnis = gefiltert(rows);
+				zustand.filter = alt;
+				return ergebnis;
+			},
+			zaehle: zaehleListe,
+			fortschritt: function (rows) {
+				var z = zaehle(rows);
+				return { erledigt: z.erledigt, gesamt: z.gesamt };
+			},
+			status: function (quest) {
+				var lage = zustandVon(quest);
+				return { lage: lage, status: listenStatus(lage, quest),
+					nichtGezahlt: !gezaehlt(quest) };
+			},
+			aktiv: function (id) {
+				return !!(zustand.auswahl && zustand.auswahl.i === id);
+			},
+			waehle: function (quest) { waehle(quest); },
+			setzeTreffer: function (rows) { zustand.treffer = rows; },
+			zeichneMarker: zeichneMarker,
+			merke: function (quest) { questNachId[quest.i] = quest; },
+			suche: function () { return zustand.q || ''; }
+		};
 	}
 
 	function kartenfilterAnwenden() {
@@ -2535,8 +2450,13 @@
 			aktualisiereFilterZahlen();
 			return;
 		}
-		if (Epik.istWurzel(zustand.knoten) && !zustand.suchliste) {
-			Epik.zeichneListe(zustand.knoten);
+		var sonder = sonderFuer(zustand.knoten);
+		if (sonder && !zustand.suchliste) {
+			sonder.montiere(sonderHost());
+			sonder.zeichneListe();
+			zeichneKartenBreadcrumb();
+			zeichneMarker();
+			aktualisiereFilterZahlen();
 			return;
 		}
 		var listeGefiltert = gefiltert(quelle);
@@ -2645,15 +2565,12 @@
 					unter.className = 'kennung';
 					detail.appendChild(unter);
 				}
-				var zaehlquelle = Epik.istWurzel(k)
-					? zaehlEintraege(k).filter(Epik.zaehlbar) : zaehlEintraege(k);
-				var z = zaehle(zaehlquelle);
+				var z = zaehle(zaehlEintraege(k));
 				var werte = [[t('detail_gesamt'), z.gesamt]];
 				if (hatFortschritt) {
 					var nOffen = 0, nLauf = 0, nAnn = 0;
 					k.quests.forEach(function (q) {
 						if (!gezaehlt(q)) { return; }
-						if (Epik.istWurzel(k) && !Epik.zaehlbar(q)) { return; }
 						var lage = zustandVon(q);
 						if (lage === 'offen') { nOffen += 1; }
 						if (lage === 'laufend') { nLauf += 1; }
@@ -3143,7 +3060,8 @@
 		aktionenBox.appendChild(aktionen);
 
 		// The compact map payload has no description; the detail shard does.
-		if (!hatDetails(quest)) {
+		// Without a shard for this entry there is nothing to reload.
+		if (!hatDetails(quest) && detailDatei(quest)) {
 			ladeDetails(quest, function () {
 				if (zustand.auswahl && zustand.auswahl.i === quest.i) { zeichneDetail(); }
 			});
@@ -4046,7 +3964,7 @@
 				});
 				var karteUrl = new URL(({de:'/de/karte/',en:'/en/map/',fr:'/fr/carte/'}[sprache] || '/de/karte/'),window.location.origin);
 				if (root) { karteUrl.searchParams.set('gebiet',root.schluessel.replace(/^\|/,'')); }
-				else if ((window.MQL_KARTEN_SUMMARY || []).some(function (row) { return (row.f || [])[0] === epikName; })) {
+				else if ((window.MQL_KARTEN_SUMMARY || []).some(function (row) { return row.th === 'epic'; })) {
 					karteUrl.searchParams.set('gebiet',epikName);
 				}
 				link.href = karteUrl.pathname + karteUrl.search;
@@ -4595,26 +4513,38 @@
 	haupt.classList.remove('karte-laedt');
 	}
 
-	// The epic tile opens the map, not the finder. Its chapter entries come from
-	// their own small file; load it before the tree is built.
-	var themaGebiet = '';
-	try { themaGebiet = (new URLSearchParams(window.location.search).get('gebiet') || '').toLowerCase(); } catch (fehler) { themaGebiet = ''; }
-	var epikName = {de:'Epische Geschichte',en:'Epic Story',fr:'Histoire épique'}[sprache] || 'Epic Story';
-	if (themaGebiet === epikName.toLowerCase() && !findeKnoten(WURZEL, '|' + epikName) && !window.MQL_THEMA_GELADEN) {
-		var themaSkript = document.createElement('script');
-		themaSkript.src = 'thema-epic-' + sprache + '.js?v=' + (window.MQL_STAND || '0');
-		themaSkript.onload = function () {
-			window.MQL_THEMA_GELADEN = true;
-			(window.MQL_THEMA_DATEN || []).forEach(function (quest) {
-				eintragen(quest.f && quest.f.length ? quest.f : [], quest);
-			});
-			sortiere(WURZEL);
-			baueBaum();
-			starteAnsicht();
-		};
-		themaSkript.onerror = function () { starteAnsicht(); };
-		document.head.appendChild(themaSkript);
-	} else {
+	// A special view brings its own node. Its data loads before the tree is
+	// built when the address names it; the map app does not inspect it.
+	function ergaenzeSonderansichten() {
+		SONDER.forEach(function (ansicht) {
+			if (!ansicht.knoten) { return; }
+			var eigener = ansicht.knoten();
+			if (!eigener) { return; }
+			var vorhanden = findeKnoten(WURZEL, eigener.schluessel);
+			if (vorhanden) {
+				vorhanden.quests = eigener.quests;
+				vorhanden.eigeneZaehlung = true;
+				return;
+			}
+			WURZEL.kinder[eigener.schluessel] = eigener;
+			WURZEL.reihenfolge.push(eigener);
+		});
+		sortiere(WURZEL);
+	}
+	function starteMitSonderansichten() {
+		var zuLaden = SONDER.filter(function (ansicht) {
+			return ansicht.brauchtDaten && ansicht.brauchtDaten();
+		});
+		if (zuLaden.length) {
+			zuLaden[0].laden(function () {
+				ergaenzeSonderansichten();
+				baueBaum();
+				starteAnsicht();
+			}, function () { starteAnsicht(); });
+			return;
+		}
+		ergaenzeSonderansichten();
 		starteAnsicht();
 	}
+	starteMitSonderansichten();
 })();

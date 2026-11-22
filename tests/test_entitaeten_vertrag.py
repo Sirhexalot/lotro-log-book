@@ -101,7 +101,7 @@ class ListenzeilenRegelTest(unittest.TestCase):
         self.assertIn('data-filter-results', text)
 
     def test_item_keeps_recipe_directions_apart(self):
-        twig = (ROOT / 'php/templates/entity/item.twig').read_text(encoding='utf-8')
+        twig = (ROOT / 'php/templates/entity/_item_group.twig').read_text(encoding='utf-8')
         self.assertIn('data-recipe-filter-group', twig)
         js = (ROOT / 'web/entitaeten-listen.js').read_text(encoding='utf-8')
         self.assertIn('recipe_made', js)
@@ -123,7 +123,8 @@ class ListenzeilenRegelTest(unittest.TestCase):
     def test_contract_is_referenced_by_the_project_rules(self):
         agents = (ROOT / 'AGENTS.md').read_text(encoding='utf-8')
         self.assertIn('lotro-datenraum-entitaeten.json', agents)
-        self.assertIn('Listenzeile', agents)
+        self.assertTrue('Listenzeile' in agents or 'List row' in agents,
+                        'Listenzeilen-Regel fehlt')
 
 
 if __name__ == '__main__':

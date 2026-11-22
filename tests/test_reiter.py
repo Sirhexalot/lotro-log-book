@@ -66,15 +66,20 @@ class ReiterComponentTest(unittest.TestCase):
         doc = ROOT / 'docs' / 'oberflaeche' / 'reiter.md'
         self.assertTrue(doc.is_file(), 'docs/oberflaeche/reiter.md fehlt')
         text = doc.read_text(encoding='utf-8')
-        for needle in ('**Regel:**', 'MQL_REITER.mount', 'onShow', 'tests/test_reiter.py',
-                       'tests/browser_reiter.js', '## Neue Seite mit Reitern'):
+        for needle in ('MQL_REITER.mount', 'onShow', 'tests/test_reiter.py',
+                       'tests/browser_reiter.js'):
             self.assertIn(needle, text)
+        # The doc may be German or English.
+        self.assertTrue('**Regel:**' in text or '**Rule:**' in text, 'Regel/Rule fehlt')
+        self.assertTrue('## Neue Seite mit Reitern' in text or '## New page with tabs' in text,
+                        'Anleitung für neue Reiter fehlt')
         index = (ROOT / 'docs' / 'oberflaeche' / 'README.md').read_text(encoding='utf-8')
         self.assertIn('(reiter.md)', index)
         bausteine = (ROOT / 'docs' / 'oberflaeche' / 'bausteine.md').read_text(encoding='utf-8')
         self.assertIn('(reiter.md)', bausteine)
         agents = (ROOT / 'AGENTS.md').read_text(encoding='utf-8')
-        self.assertIn('**Reiter – ein Baustein', agents)
+        self.assertTrue('**Reiter – ein Baustein' in agents or
+                        '**Tabs – one building block' in agents, 'Baustein-Regel fehlt')
         self.assertIn('docs/oberflaeche/reiter.md', agents)
 
 

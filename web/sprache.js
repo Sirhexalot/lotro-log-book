@@ -268,7 +268,8 @@
 			// navigation; a missing file leaves the tree as the entries built it.
 			ladeParallel([
 				'gebiete-' + sprache + '.js' + stempel(),
-				'fortschritt.js' + stempel()
+				'fortschritt.js' + stempel(),
+				'epik.js' + stempel()
 			], function () {
 				lade('app.js' + stempel(), function () {
 					// The app draws in the same task; one frame later the page stands.

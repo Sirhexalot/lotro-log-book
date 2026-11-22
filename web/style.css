@@ -1104,11 +1104,6 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 #liste li.abschnitt { background: var(--fläche-hell); color: var(--gold); font-size: var(--text-klein); padding: 5px 12px; position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--rand); }
 #liste li.abschnitt span:first-child { flex: 1 1 auto; }
 #liste li.abschnitt.zu { color: var(--schwach); }
-/* Epic story: volumes open in place; their books sit indented underneath and
-   keep no sticky header of their own. */
-#liste ul.epik-buecher { list-style: none; margin: 0; padding: 0 0 0 18px; }
-#liste ul.epik-buecher > li.abschnitt { position: static; padding-left: 4px; }
-#liste ul.epik-buecher > li { border-bottom: 0; }
 #liste li.listenhinweis { color: var(--schwach); font-size: var(--text-mikro); font-style: italic; cursor: default; }
 .gebietsliste { list-style: none; padding: 0; margin: 10px 0; }
 .gebietsliste li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--rand); cursor: pointer; font-size: var(--text-kompakt); }

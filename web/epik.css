@@ -1,0 +1,5 @@
+/* Epic story view: volumes open in place, their books sit indented underneath
+   and keep no sticky header of their own. */
+#liste ul.epik-buecher { list-style: none; margin: 0; padding: 0 0 0 18px; }
+#liste ul.epik-buecher > li.abschnitt { position: static; padding-left: 4px; }
+#liste ul.epik-buecher > li { border-bottom: 0; }

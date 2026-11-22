@@ -105,6 +105,12 @@ def baue_karten_kurz(ziel: Path) -> None:
                      ziel / ('karten-kurz-taten-%s.js' % sprache))
 
 
+def baue_epik() -> None:
+    """Generate the epic story's own view; it is not part of the map data."""
+    subprocess.run([sys.executable, str(HIER / 'tools' / 'build_epik.py')],
+                   cwd=str(HIER), check=True)
+
+
 def baue_stand(ziel: Path) -> None:
     """Give cached map scripts and lazy shards a content-based version stamp."""
     dateien = list(ziel.glob('*.js')) + list(ziel.glob('*.css'))
@@ -208,7 +214,9 @@ def pruefen(ziel: Path) -> list[str]:
                   'instanzen.css', 'php/templates/instances/detail.twig',
                   'php/templates/instances/list.twig',
                   'klassen.css', 'klassen.js', 'php/templates/app/klassen.twig',
-                 'flaeche.css', 'php/templates/components/flaeche.twig', 'fakten.css',
+                 'flaeche.css', 'php/templates/components/flaeche.twig', 'fakten.css', 'kachel.css', 'hinweis.css', 'knopf.css', 'karte.css',
+                 'php/templates/components/karte.twig',
+                 'klappe.css', 'klappe.js',
                   'phpdata/manifest.json', 'sets.css', 'sets.js', 'php/src/Sets.php',
                  'php/templates/sets/list.twig', 'php/templates/sets/detail.twig',
                  'auftraggeber.css', 'auftraggeber.js', 'php/src/Givers.php',
@@ -271,6 +279,7 @@ def main() -> int:
     ziel.mkdir(parents=True)
 
     baue_karten_kurz(ziel)
+    baue_epik()
     # Generate the start files and both shard trees before copying web/.
     # Otherwise a release could contain stale shards from the previous build.
     baue_gegenstandssuche()

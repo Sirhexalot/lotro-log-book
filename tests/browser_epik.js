@@ -77,7 +77,7 @@ async function zustand(page) {
 				assert.equal(stand.ansicht, true, design + ': Kartenumschalter fehlt');
 				assert.equal(stand.legende, true, design + ': Legende fehlt');
 				assert.ok(stand.punkte > 0, design + ': keine Kartenpunkte');
-				assert.ok(Number(stand.zahlen.alle) > 150 && Number(stand.zahlen.alle) <= 225,
+				assert.ok(Number(stand.zahlen.alle) > 1000 && Number(stand.zahlen.alle) <= 1600,
 					design + ': Zahl aller Kapitel unplausibel: ' + stand.zahlen.alle);
 				assert.equal(stand.zahlen.erledigt, '1', design + ': Zahl der erledigten Kapitel');
 
