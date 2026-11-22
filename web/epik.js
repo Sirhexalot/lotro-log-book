@@ -142,8 +142,11 @@
 		if (!gruppeRows.length) { return []; }
 		var gefiltert = host.filtere(gruppeRows, false);
 		var suchbegriff = suche();
-		if (suchbegriff && !gefiltert.length) { return []; }
-		var aufgeklappt = offen[gruppe.name] === true || !!suchbegriff;
+		// A progress filter narrows the tree just like a search term: groups and
+		// books without a match disappear and the way to the hits opens itself.
+		var eingegrenzt = !!suchbegriff || !!(host.filterAktiv && host.filterAktiv());
+		if (eingegrenzt && !gefiltert.length) { return []; }
+		var aufgeklappt = offen[gruppe.name] === true || eingegrenzt;
 		var kopf = leseKopf(gruppe.name, fortschritt(gruppeRows), aufgeklappt, function () {
 			offen[gruppe.name] = !aufgeklappt;
 			zeichnen();
@@ -157,9 +160,9 @@
 				var buchRows = buch.ids.map(function (id) { return daten.quests[id]; }).filter(Boolean);
 				if (!buchRows.length) { return; }
 				var buchGefiltert = host.filtere(buchRows, false);
-				if (suchbegriff && !buchGefiltert.length) { return; }
+				if (eingegrenzt && !buchGefiltert.length) { return; }
 				var schluessel = gruppe.name + '|' + buch.name;
-				var buchOffen = offen[schluessel] === true || !!suchbegriff;
+				var buchOffen = offen[schluessel] === true || eingegrenzt;
 				var anzahl = istProlog(buch.name) ? String(buchRows.length) : fortschritt(buchRows);
 				var buchKopf = leseKopf(buch.name, anzahl, buchOffen, (function (schluessel, buchOffen) {
 					return function () {

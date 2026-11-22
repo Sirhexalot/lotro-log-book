@@ -2444,7 +2444,14 @@
 			setzeTreffer: function (rows) { zustand.treffer = rows; },
 			zeichneMarker: zeichneMarker,
 			merke: function (quest) { questNachId[quest.i] = quest; },
-			suche: function () { return zustand.q || ''; }
+			suche: function () { return zustand.q || ''; },
+			// Whether anything other than the full list is asked for. The epic view
+			// narrows its tree with it, so a progress filter works like a search.
+			filterAktiv: function () {
+				if ((zustand.q || '').trim()) { return true; }
+				if (zustand.filter !== 'alle') { return true; }
+				return window.MQL_ART === 'taten' && zustand.belohnung !== 'alle';
+			}
 		};
 	}
 

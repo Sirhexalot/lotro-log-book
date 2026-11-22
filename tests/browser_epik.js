@@ -139,6 +139,27 @@ async function zustand(page) {
 			assert.ok(treffer.baender >= 1 && treffer.baender < 10, design + ': Suche filtert die Bände nicht');
 			assert.equal(treffer.buecher, treffer.baender, design + ': Treffer-Band nicht aufgeklappt');
 
+			/* Der Fortschrittsfilter grenzt den Baum genauso ein wie die Suche:
+			   Bände und Bücher ohne Treffer verschwinden, der Weg zu den Treffern
+			   öffnet sich, und „Alle“ stellt den Baum wieder her. */
+			await page.fill('#aufgaben-suche', '');
+			await page.waitForTimeout(400);
+			await page.click('#filter-knopf');
+			await page.check('input[name="kartenfortschritt"][value="erledigt"]');
+			await page.waitForTimeout(600);
+			const gefiltertStand = await page.evaluate(() => ({
+				baender: document.querySelectorAll('#liste li.epik-band').length,
+				zeilen: document.querySelectorAll('#liste li[data-id]').length }));
+			assert.ok(gefiltertStand.baender < 10, design + ': Filter grenzt die Bände nicht ein');
+			assert.ok(gefiltertStand.zeilen > 0, design + ': Filter zeigt keine Treffer');
+			await page.check('input[name="kartenfortschritt"][value="alle"]');
+			await page.waitForTimeout(500);
+			assert.equal(await page.evaluate(() =>
+				document.querySelectorAll('#liste li.epik-band').length), 10,
+				design + ': Filter zurücksetzen stellt die Bände nicht her');
+			await page.click('#filter-knopf');
+			await page.waitForTimeout(250);
+
 			/* Der Prolog ist ein Einstiegsblock mit Hinweis; seine Instanz hängt
 			   am Kapitel und steht nicht als eigene Aufgabe in der Liste. */
 			await page.fill('#aufgaben-suche', '');

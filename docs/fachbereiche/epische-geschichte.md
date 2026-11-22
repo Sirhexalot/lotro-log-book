@@ -74,6 +74,11 @@ catalogue path.
   selection, because the chosen quest may sit in a folded volume or book. The
   row is marked and scrolled into view, so a click never looks as if nothing
   happened.
+- **A progress filter narrows the tree (22.11.2026).** Groups and books without
+  a match disappear and the path to the hits opens, exactly as a search term
+  does; `filterAktiv()` on the host reports whether anything except the full
+  list is asked for. Without a filter the ten volumes stay folded. The numbers
+  on the group heads stay progress counts (`erledigt/gesamt`), not match counts.
 - **The epic data is generated and never versioned.** `web/epik-<sprache>.js`
   is listed in `.gitignore` like `web/daten-<sprache>.js`. `build_release.py`
   runs `build_epik.py` before copying `web/`, `pruefen()` refuses a release
