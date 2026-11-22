@@ -94,6 +94,25 @@ const base = process.argv[2] || 'http://127.0.0.1:8814';
 		await page.locator('.landschaft-suche').waitFor();
 		assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false,
 			'Übersicht läuft mobil seitlich über');
+		/* Alte Geschichten: eine Karte ohne einen einzigen Eintrag ist eine
+		   Sackgasse und steht nicht in der Liste; ihr Direktlink lebt weiter. */
+		await page.setViewportSize({ width: 1280, height: 900 });
+		await page.goto(base + '/de/karte/?gebiet=Alte+Geschichten', { waitUntil: 'load' });
+		await page.waitForTimeout(1200);
+		const alte = await page.evaluate(() => ({
+			namen: [...document.querySelectorAll('#liste li')].map(li => li.textContent),
+			baum: [...document.querySelectorAll('#baum .ast')]
+				.filter(e => /Nud-melek/.test(e.textContent) && e.offsetParent !== null).length }));
+		assert.ok(alte.namen.some(text => /Azanulbizar/.test(text)), 'Alte Geschichten ohne Azanulbizar');
+		assert.ok(alte.namen.some(text => /Belagertes Mordor/.test(text)), 'Alte Geschichten ohne Belagertes Mordor');
+		assert.equal(alte.namen.some(text => /Nud-melek/.test(text)), false,
+			'leere Karte steht in der Liste');
+		assert.equal(alte.baum, 0, 'leere Karte steht im Baum');
+		await page.goto(base + '/de/karte/#map-268453582', { waitUntil: 'load' });
+		await page.waitForTimeout(1500);
+		assert.match(await page.evaluate(() => document.getElementById('bild').getAttribute('src') || ''),
+			/268453582/, 'Direktlink auf die leere Karte führt nirgends hin');
+
 		assert.deepEqual(errors, [], 'JavaScript-Fehler: ' + errors.join(' | '));
 		console.log('Kartenübersicht: Sprungmarken, Gebietszeilen, Karte und Budget ok');
 	} finally {

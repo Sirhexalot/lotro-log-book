@@ -51,6 +51,14 @@ async function zeilen(page) {
 			assert.equal(await zeilen(page), 81, design + ': Kartenadresse zeigt die Liste nicht');
 			assert.equal(await page.locator('#liste-titel').innerText(), 'Belagertes Mordor');
 
+			/* Filter button and search field share one height; a 4 px step made the
+			   row look crooked. */
+			const hoehen = await page.evaluate(() => ({
+				knopf: document.querySelector('#filter-knopf').getBoundingClientRect().height,
+				suche: document.querySelector('.aufgaben-suche').getBoundingClientRect().height }));
+			assert.equal(Math.round(hoehen.knopf), Math.round(hoehen.suche),
+				design + ': Filterknopf und Suchfeld sind unterschiedlich hoch');
+
 			/* Numbers per state; "Alle" is the whole map list. */
 			let stand = await zahlen(page);
 			assert.equal(stand.alle, '81', design + ': Zahl aller Einträge');

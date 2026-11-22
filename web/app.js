@@ -621,8 +621,16 @@
 			var passend = quests.filter(function (quest) {
 				return (quest.fk || []).some(function (mapId) { return Number(mapId) === id; });
 			});
+			// Nud-melek, 1981 T.A. has no quest and no deed in the client. The map
+			// is authored scenery: as a list entry it would open an empty list and
+			// a map without dots. It keeps its node, so a hash or direct link still
+			// resolves, but the tree hides it. Landscape areas keep the older rule
+			// (visible, count 0), because there quests and deeds are two views of
+			// the same area.
+			var bekannt = (zusammenfassungNachKarte[String(id)] || []).concat(passend);
+			var leer = !bekannt.length;
 			var knoten = {schluessel:schluessel,name:karte.name,tiefe:2,quests:passend,eigene:passend.slice(),
-				kinder:{},reihenfolge:[],karte:id};
+				kinder:{},reihenfolge:[],karte:id,versteckt:leer};
 			wurzel.kinder[schluessel] = knoten;
 			wurzel.reihenfolge.push(knoten);
 		});
@@ -810,6 +818,9 @@
 	function zeichneAst(knoten) {
 		var wrapper = eltern('div', null);
 		wrapper.className = 'ast tiefe' + knoten.tiefe;
+		// An authored map without a single entry stays reachable by its address
+		// (hash, direct link) but does not appear as a dead end in the tree.
+		if (knoten.versteckt) { wrapper.hidden = true; }
 
 		var zahlen = zaehle(zaehlEintraege(knoten));
 		var blatt = knoten.reihenfolge.length === 0;
@@ -2160,6 +2171,9 @@
 		var hier = zustand.knoten;
 		if (ziel === liste && hier && !zustand.suchliste && hier.reihenfolge && hier.reihenfolge.length && hier.eigene) {
 			hier.reihenfolge.forEach(function (kind) {
+				// An authored map without entries stays reachable by address, not
+				// as a dead end in the list.
+				if (kind.versteckt) { return; }
 				var ort = eltern('li', null);
 				ort.className = 'unterkarte';
 				ort.appendChild(eltern('span', '▸ ' + kind.name));

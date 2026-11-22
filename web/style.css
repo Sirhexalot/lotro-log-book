@@ -129,14 +129,14 @@ main {
 
 /* Task list tools: filter button, active state and local search in one row. */
 .listenwerkzeuge { position: relative; flex: 0 0 auto; border-bottom: 1px solid var(--rand); }
-.filter-kopf { display: flex; align-items: center; flex-wrap: nowrap; gap: 6px; padding: 6px 10px; min-height: 34px; }
-.filter-knopf { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-klein); padding: 3px 8px; flex: 0 0 auto; }
+.filter-kopf { display: flex; align-items: stretch; flex-wrap: nowrap; gap: 6px; padding: 6px 10px; min-height: 34px; }
+.filter-knopf { display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: var(--text-klein); padding: 3px 8px; flex: 0 0 auto; }
 .filter-knopf svg { width: 14px; height: 14px; }
 .filter-knopf.aktiv { border-color: var(--gold); color: var(--gold); }
 #filter-anzahl { font-weight: var(--gewicht-medium); white-space: nowrap; }
 /* A word would take 92px of a 380px list column; the cross keeps the search
    next to the filter. The full wording stays for screen readers. */
-.filter-reset { flex: 0 0 auto; width: 22px; height: 24px; padding: 0; border: 0; background: none;
+.filter-reset { flex: 0 0 auto; align-self: center; width: 22px; height: 24px; padding: 0; border: 0; background: none;
 	color: var(--schwach); font-size: var(--text-normal); line-height: var(--zeile-einfach); cursor: pointer; }
 .filter-reset:hover { color: var(--gold); }
 .aufgaben-suche {
@@ -182,6 +182,7 @@ main {
 
 
 .ast { display: block; }
+.ast[hidden] { display: none; }
 
 .zweig {
 	position: relative;
