@@ -63,4 +63,24 @@ assert.equal(encoded.searchParams.get('tracking'),'x');
 assert.equal(url.searchParams.has('q'),false);
 config.urlCodec.encode = () => new URL('https://other.test/');
 assert.throws(() => api.encode(config,selected,url),/preserve origin/);
+
+// One top-level category at a time: a branch of another category replaces the
+// previous one, while sibling branches of the same category stay OR-linked.
+const rootConfig = {
+	groups: [{id:'tree',kind:'tree',exclusiveRoot:'kat',pathLabel:p => p.art,
+		validatePath:p => !!(p && p.kat)}],
+	pagination: {size:50},
+	defaults: () => ({q:'',filters:{tree:[]},sort:'name',pagination:{kind:'limit',limit:50}})
+};
+let rootState = rootConfig.defaults();
+rootState = api.reduce(rootConfig,rootState,{type:'togglePath',groupId:'tree',path:{kat:'ARMOUR',art:'MEDIUM'}}).state;
+rootState = api.reduce(rootConfig,rootState,{type:'togglePath',groupId:'tree',path:{kat:'WEAPON',art:'BOW'}}).state;
+assert.equal(rootState.filters.tree.length,1);
+assert.equal(rootState.filters.tree[0].kat,'WEAPON');
+rootState = api.reduce(rootConfig,rootState,{type:'togglePath',groupId:'tree',path:{kat:'WEAPON',art:'SWORD'}}).state;
+assert.equal(rootState.filters.tree.length,2,'sibling branches of one category stay OR-linked');
+rootState = api.reduce(rootConfig,rootState,{type:'togglePath',groupId:'tree',path:{kat:'WEAPON'}}).state;
+assert.equal(rootState.filters.tree.length,1,'a parent replaces its children');
+assert.equal(rootState.filters.tree[0].art,undefined);
+
 console.log('Filter state: normalization, validation, branch deduplication, reset and pagination passed.');

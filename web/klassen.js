@@ -4,11 +4,66 @@
 	if (!data) { return; }
 	var lang = document.documentElement.lang || 'de';
 	var text = {
-		de: { intro: 'Wähle Klasse, Volk und Stufe. Das Profil zeigt die vom Spiel belegten Waffen- und Rüstungskenntnisse.', classLabel: 'Klasse', raceLabel: 'Volk', levelLabel: 'Stufe', mine: 'Mein Charakter', imported: 'Aus deinem importierten Spielstand', manual: 'Manuell gewählt', noCharacter: 'Kein importierter Charakter – wähle deine Kombination aus.', match: 'Diese Kombination ist spielbar.', noMatch: 'Diese Kombination ist laut Spieldaten nicht verfügbar.', armour: 'Rüstung', weapons: 'Waffen', quests: 'Aufgaben', deeds: 'Taten', items: 'Gegenstände', catalogue: 'Aufgaben, Taten und Gegenstände' },
-		en: { intro: 'Choose a class, race and level. The profile shows the weapon and armour proficiencies recorded by the game.', classLabel: 'Class', raceLabel: 'Race', levelLabel: 'Level', mine: 'My character', imported: 'From your imported character', manual: 'Chosen manually', noCharacter: 'No imported character — choose a combination.', match: 'This combination is playable.', noMatch: 'This combination is not available according to the game data.', armour: 'Armour', weapons: 'Weapons', quests: 'Quests', deeds: 'Deeds', items: 'Items', catalogue: 'Quests, deeds and items' },
-		fr: { intro: 'Choisissez une classe, une race et un niveau. Le profil indique les maîtrises d’armes et d’armures enregistrées dans le jeu.', classLabel: 'Classe', raceLabel: 'Race', levelLabel: 'Niveau', mine: 'Mon personnage', imported: 'D’après votre personnage importé', manual: 'Choix manuel', noCharacter: 'Aucun personnage importé — choisissez une combinaison.', match: 'Cette combinaison est jouable.', noMatch: 'Cette combinaison n’est pas disponible selon les données du jeu.', armour: 'Armure', weapons: 'Armes', quests: 'Quêtes', deeds: 'Prouesses', items: 'Objets', catalogue: 'Quêtes, prouesses et objets' }
+		de: {
+			intro: 'Wähle Klasse, Volk und Stufe, oder übernimm deinen importierten Charakter. Oben siehst du, welche Rüstung und Waffen deine Klasse lernen kann. Unten findest du Aufgaben, Taten und Gegenstände für diese Stufe.',
+			classLabel: 'Klasse', raceLabel: 'Volk', levelLabel: 'Stufe', mine: 'Mein Charakter',
+			mineTitle: 'Übernimmt Klasse, Volk und Stufe aus deinem importierten Spielstand.',
+			imported: 'Stufe {level} aus deinem importierten Spielstand. Die Listen unten richten sich nach dieser Stufe.',
+			manual: 'Stufe {level} von Hand gewählt. Die Listen unten richten sich nach dieser Stufe.',
+			noCharacter: 'Kein Charakter importiert. Die Listen unten gelten für Stufe {level}. Wähle Klasse, Volk und Stufe von Hand oder ',
+			importLink: 'importiere deinen Spielstand',
+			match: 'Klasse und Volk passen zusammen.', noMatch: 'Diese Kombination gibt es im Spiel nicht.',
+			legend: 'Was deine Klasse erst auf einer höheren Stufe lernt, steht blass da.',
+			itemsHint: 'Die Gegenstandsstufe zeigt, wie stark ein Gegenstand ist. Die Mindeststufe sagt, ab welcher Stufe du ihn tragen kannst.',
+			countQuests: '%s Aufgaben bis Stufe {level}', countDeeds: '%s Taten bis Stufe {level}',
+			countItems: '%s Gegenstände für Stufe {level}',
+			emptyQuests: 'Zu Stufe {level} passt keine Aufgabe zu dieser Auswahl. Prüfe die Filter oder ändere oben die Stufe.',
+			emptyDeeds: 'Zu Stufe {level} passt keine Tat zu dieser Auswahl. Prüfe die Filter oder ändere oben die Stufe.',
+			emptyItems: 'Zu Stufe {level} passt kein Gegenstand zu dieser Auswahl. Prüfe die Filter oder ändere oben die Stufe.',
+			armour: 'Rüstung', weapons: 'Waffen', quests: 'Aufgaben', deeds: 'Taten', items: 'Gegenstände',
+			catalogue: 'Aufgaben, Taten und Gegenstände'
+		},
+		en: {
+			intro: 'Choose a class, race and level, or use your imported character. Above you see which armour and weapons your class can learn. Below you find quests, deeds and items for that level.',
+			classLabel: 'Class', raceLabel: 'Race', levelLabel: 'Level', mine: 'My character',
+			mineTitle: 'Fills class, race and level from your imported character.',
+			imported: 'Level {level} from your imported character. The lists below follow this level.',
+			manual: 'Level {level} chosen by hand. The lists below follow this level.',
+			noCharacter: 'No character imported. The lists below apply to level {level}. Choose class, race and level by hand, or ',
+			importLink: 'import your progress',
+			match: 'Class and race match.', noMatch: 'This combination does not exist in the game.',
+			legend: 'What your class learns at a higher level is shown faded.',
+			itemsHint: 'Item level shows how strong an item is. Minimum level shows when you can wear it.',
+			countQuests: '%s quests up to level {level}', countDeeds: '%s deeds up to level {level}',
+			countItems: '%s items for level {level}',
+			emptyQuests: 'No quest for level {level} matches this selection. Check the filters or change the level above.',
+			emptyDeeds: 'No deed for level {level} matches this selection. Check the filters or change the level above.',
+			emptyItems: 'No item for level {level} matches this selection. Check the filters or change the level above.',
+			armour: 'Armour', weapons: 'Weapons', quests: 'Quests', deeds: 'Deeds', items: 'Items',
+			catalogue: 'Quests, deeds and items'
+		},
+		fr: {
+			intro: 'Choisissez une classe, une race et un niveau, ou reprenez votre personnage importé. En haut, vous voyez les armures et armes que votre classe peut apprendre. En bas, les quêtes, prouesses et objets pour ce niveau.',
+			classLabel: 'Classe', raceLabel: 'Race', levelLabel: 'Niveau', mine: 'Mon personnage',
+			mineTitle: 'Reprend classe, race et niveau de votre personnage importé.',
+			imported: 'Niveau {level} d’après votre personnage importé. Les listes ci-dessous suivent ce niveau.',
+			manual: 'Niveau {level} choisi à la main. Les listes ci-dessous suivent ce niveau.',
+			noCharacter: 'Aucun personnage importé. Les listes ci-dessous correspondent au niveau {level}. Choisissez classe, race et niveau à la main, ou ',
+			importLink: 'importez votre progression',
+			match: 'La classe et la race correspondent.', noMatch: 'Cette combinaison n’existe pas dans le jeu.',
+			legend: 'Ce que votre classe apprend à un niveau supérieur apparaît en pâle.',
+			itemsHint: 'Le niveau d’objet indique la puissance d’un objet. Le niveau minimum indique à partir de quand vous pouvez le porter.',
+			countQuests: '%s quêtes jusqu’au niveau {level}', countDeeds: '%s prouesses jusqu’au niveau {level}',
+			countItems: '%s objets pour le niveau {level}',
+			emptyQuests: 'Aucune quête du niveau {level} ne correspond à cette sélection. Vérifiez les filtres ou changez le niveau ci-dessus.',
+			emptyDeeds: 'Aucune prouesse du niveau {level} ne correspond à cette sélection. Vérifiez les filtres ou changez le niveau ci-dessus.',
+			emptyItems: 'Aucun objet du niveau {level} ne correspond à cette sélection. Vérifiez les filtres ou changez le niveau ci-dessus.',
+			armour: 'Armure', weapons: 'Armes', quests: 'Quêtes', deeds: 'Prouesses', items: 'Objets',
+			catalogue: 'Quêtes, prouesses et objets'
+		}
 	}[lang] || {};
 	function $(id) { return document.getElementById(id); }
+	function fillWert(template, level) { return String(template).replace(/\{level\}/g, String(level)); }
 	function versionedAsset(path) {
 		var source = Array.prototype.find.call(document.scripts, function (script) {
 			return script.src.indexOf('/klassen.js') >= 0;
@@ -72,8 +127,20 @@
 		renderCatalogue(classKey, raceKey, level);
 		var active = activeCharacter();
 		var matches = active && active.klasse === classKey && active.race === raceKey && active.level === level;
-		$('klassen-charakter-status').textContent = !active ? text.noCharacter : matches ? text.imported : text.manual;
+		var status = $('klassen-charakter-status');
+		status.replaceChildren();
+		if (!active) {
+			status.appendChild(document.createTextNode(fillWert(text.noCharacter, level)));
+			var importLink = document.createElement('a');
+			importLink.href = '/' + lang + '/' + ({de:'spielstand',en:'progress',fr:'progression'}[lang]) + '/';
+			importLink.textContent = text.importLink;
+			status.appendChild(importLink);
+			status.appendChild(document.createTextNode('.'));
+		} else {
+			status.textContent = fillWert(matches ? text.imported : text.manual, level);
+		}
 		$('klassen-mein-charakter').disabled = !active;
+		$('klassen-mein-charakter').title = text.mineTitle;
 		var url = new URL(location.href);
 		url.searchParams.set('klasse', classKey);
 		url.searchParams.set('volk', raceKey);
@@ -158,7 +225,13 @@
 		if (filterControllers[name]) { return; }
 		var rows = filteredTaskRows(kind === 'q' ? 'quests' : 'deeds', classKey, raceKey, level);
 		if (reiter) { reiter.zahl(name, rows.length); }
-		var setup = window.MQL_TASK_FILTER_SETUP(rows, kind);
+		var setup = window.MQL_TASK_FILTER_SETUP(rows, kind, {
+			level: false,
+			defaultSort: 'levelDesc',
+			descendingSort: true,
+			countLabel: fillWert(kind === 'q' ? text.countQuests : text.countDeeds, level),
+			emptyLabel: fillWert(kind === 'q' ? text.emptyQuests : text.emptyDeeds, level)
+		});
 		mountFilter(name, filterRoots[name], scopedSetup(setup, name, signature));
 	}
 	function ensureCatalogue() {
@@ -189,6 +262,13 @@
 				if (profileSignature === itemSignature && chosenTab === 'items') {
 					renderItems(classKey, raceKey, level, itemSignature);
 				}
+			}).catch(function (error) { console.error(error); });
+			// The task tab badges must follow the level even while the item tab
+			// is open; their data is already loaded from the first visit.
+			ready.then(function () { return ensureCatalogue(); }).then(function () {
+				if (profileSignature !== itemSignature || !reiter) { return; }
+				reiter.zahl('quests', filteredTaskRows('quests', classKey, raceKey, level).length);
+				reiter.zahl('deeds', filteredTaskRows('deeds', classKey, raceKey, level).length);
 			}).catch(function (error) { console.error(error); });
 			return;
 		}
@@ -228,9 +308,9 @@
 		var classToolKeys = new Set(equipment.classToolKeys || []);
 		function requirements(row) { return (row[10] || '').split(';').filter(function (key) { return playerClasses.indexOf(key) >= 0; }); }
 		function eligible(row) { var req = requirements(row); return (!req.length || req.indexOf(classKey) >= 0) && (!row[11] || row[11] === raceKey); }
-		var classItems = equipment.e.filter(function (row) { var req = requirements(row), itemClass = equipment.klasseKey[row[8]]; return equipment.katKey[row[3]] === 'ITEM' && classToolKeys.has(itemClass) && req.length && eligible(row) && row[7] <= level && row[14] <= level; });
+		var classItems = equipment.e.filter(function (row) { var req = requirements(row), itemClass = equipment.klasseKey[row[8]]; return equipment.katKey[row[3]] === 'ITEM' && classToolKeys.has(itemClass) && req.length && eligible(row) && row[14] <= level; });
 		var gear = equipment.e.filter(function (row) {
-				var category = equipment.katKey[row[3]]; if (row[15] || !eligible(row) || row[7] > level) { return false; }
+				var category = equipment.katKey[row[3]]; if (row[15] || !eligible(row)) { return false; }
 				if (category === 'ARMOUR') { return Object.prototype.hasOwnProperty.call(armour, row[12]) && armour[row[12]] <= level && row[14] <= level; }
 				if (category === 'WEAPON' || category === 'LEGENDARY_WEAPON') { return Object.prototype.hasOwnProperty.call(weapons, row[13]) && weapons[row[13]] <= level && row[14] <= level; }
 				return false;
@@ -243,16 +323,24 @@
 		var gebaut = itemRowsFor(classKey, raceKey, level), rows = gebaut.rows, requirements = gebaut.requirements;
 		if (reiter) { reiter.zahl('items', rows.length); }
 		var signature = profileSignature.replace(/[^a-zA-Z0-9_-]/g, '-');
-		if (!rows.length || filterControllers.items) { return; }
-		var setup = window.MQL_ITEM_FILTER_SETUP(equipment, {area:'klassen-items', ids:rows.map(function (row) { return row[0]; })});
+		if (filterControllers.items) { return; }
+		var setup = window.MQL_ITEM_FILTER_SETUP(equipment, {
+			area: 'klassen-items',
+			ids: rows.map(function (row) { return row[0]; }),
+			levelGroups: false,
+			defaultSort: 'itemLevelDesc',
+			descendingSort: true,
+			countLabel: fillWert(text.countItems, level),
+			emptyLabel: fillWert(text.emptyItems, level)
+		});
 		var renderResults = setup.adapter.renderResults;
 		setup.adapter.renderResults = function (result, target) {
 			var before = new Map(result.payload.map(function (row) { return [row[0], row]; }));
 			renderResults(result, target);
-			target.querySelectorAll('a.gs-zeile').forEach(function (link) {
+			target.querySelectorAll('a.mql-row-hit, a.gs-zeile').forEach(function (link) {
 				var row = before.get(link.href.split('/').filter(Boolean).pop()); if (!row) { return; }
 				var others = requirements(row).filter(function (key) { return key !== classKey; }).map(function (key) { return data.classes[key].names[lang]; });
-				if (others.length) { var meta = link.querySelector('.gs-meta'); if (meta) { meta.textContent += ' · ' + others.join(', '); } }
+				if (others.length) { var meta = link.querySelector('.mql-row-meta, .gs-meta'); if (meta) { meta.textContent += ' · ' + others.join(', '); } }
 			});
 		};
 		mountFilter('items', filterRoots.items, scopedSetup(setup, 'i-items', signature));
@@ -263,6 +351,8 @@
 		'label-klasse': { text: text.classLabel }, 'label-volk': { text: text.raceLabel },
 		'label-stufe': { text: text.levelLabel }, 'label-ruestung': { text: text.armour },
 		'label-waffen': { text: text.weapons },
+		'klassen-legende': { text: text.legend },
+		'klassen-item-hinweis': { text: text.itemsHint },
 		'klassen-mein-charakter': { text: text.mine }
 	};
 	Object.keys(tx).forEach(function (id) { $(id).textContent = tx[id].text; });

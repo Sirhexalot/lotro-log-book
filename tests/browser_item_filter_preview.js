@@ -48,7 +48,8 @@ const base=process.env.LLB_ITEM_PREVIEW || 'http://127.0.0.1:8924';
 				const first=document.querySelector('#gs-ergebnis li'), title=rect(first.querySelector('.gs-name')),meta=rect(first.querySelector('.gs-meta'));
 				const list=rect(document.querySelector('.filter-results-home')),header=rect(document.querySelector('.filter-result-header'));
 				if(!near(title.left,meta.left)){failures.push('result text');}
-				if(!near(list.top-header.bottom,16)){failures.push('result gap');}
+				const gap=parseFloat(getComputedStyle(document.querySelector('.filter-grid')).rowGap)||0;
+				if(!near(list.top-header.bottom,gap)){failures.push('result gap');}
 				if(!near(rect(document.querySelector('.filter-result-toolbar')).left,list.left)){failures.push('count edge');}
 				// Deliberately wrap a label: controls stay on its first text line.
 				const span=reference.querySelector('span'),original=span.textContent;

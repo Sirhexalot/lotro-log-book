@@ -101,9 +101,20 @@ def catalogue_data(lang: str) -> dict:
             raw = source.get(row['i'])
             if raw is None:
                 continue
+            # The class page promises the level shown in its own column. For
+            # quests and deeds that is the catalogue level `l`, not the
+            # prerequisite `minLevel` from the client XML: the latter kept
+            # level-130 deeds in a level-123 list.
             try:
-                level = int(raw.get('minLevel') or raw.get('level') or row.get('l') or 0)
-            except ValueError:
+                level = int(float(row.get('l') or 0))
+            except (TypeError, ValueError):
+                level = 0
+            if level <= 0:
+                try:
+                    level = int(float(raw.get('minLevel') or raw.get('level') or 0))
+                except (TypeError, ValueError):
+                    level = 0
+            if level < 0:
                 level = 0
             rewards = sorted({str(reward[0]) for reward in row.get('rw') or []
                               if reward and reward[0]})

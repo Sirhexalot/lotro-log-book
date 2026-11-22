@@ -4,6 +4,7 @@
 - [Embedded entity lists](entitaeten-listen.md)
 - [Common filter component](filter-komponente.md)
 - [Filter memory and sorting](filter-sortierung.md)
+- [Class profile](klassenprofil.md)
 - [Tabs](reiter.md)
 - [Links and type](linkgestaltung.md)
 

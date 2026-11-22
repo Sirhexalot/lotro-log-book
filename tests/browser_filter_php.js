@@ -26,6 +26,27 @@ const base=process.env.LLB_FILTER_PHP || 'http://127.0.0.1:8927';
 					await page.reload();await page.waitForSelector('.filter-ui');
 					await page.waitForFunction(()=>!document.querySelector('[data-filter-results]').hasAttribute('aria-busy'));
 					assert.equal(await page.locator('.filter-panel input:checked').count(),1);
+				}else if(kind===item){
+					// A branch in another top-level category replaces the previous
+					// category; siblings inside one category stay OR-linked.
+					await page.evaluate(async()=>{await window.MQL_ITEM_FILTER.dispatch({type:'togglePath',groupId:'tree',path:{kat:'ARMOUR',art:'MEDIUM'}});});
+					await page.evaluate(async()=>{await window.MQL_ITEM_FILTER.dispatch({type:'togglePath',groupId:'tree',path:{kat:'WEAPON',art:'BOW',platz:'RANGED_ITEM'}});});
+					await page.waitForFunction(()=>!document.querySelector('[data-filter-results]').hasAttribute('aria-busy'));
+					const tree=await page.evaluate(()=>window.MQL_ITEM_FILTER.getState().filters.tree);
+					assert.equal(tree.length,1,'another category replaces the first branch');
+					assert.equal(tree[0].kat,'WEAPON');
+					await page.evaluate(async()=>{await window.MQL_ITEM_FILTER.dispatch({type:'reset'});});
+					await page.waitForFunction(()=>!document.querySelector('[data-filter-results]').hasAttribute('aria-busy'));
+					const count=page.locator('.filter-result-toolbar [role=status]'),before=await count.innerText();
+					const max=page.locator('details[data-key="minLevel"] input[data-bound="max"]');
+					assert.equal(await max.count(),1,'minimum level range exists');
+					await max.fill('50');await max.dispatchEvent('change');
+					await page.waitForFunction(()=>!document.querySelector('[data-filter-results]').hasAttribute('aria-busy'));
+					assert.match(await page.evaluate(()=>location.search),/[?&]mbis=50/);
+					assert.notEqual(await count.innerText(),before,'minimum level narrows the list');
+					await page.locator('.filter-chips button').filter({hasText:/Mindeststufe|Minimum level|Niveau minimum/}).click();
+					await page.waitForFunction(()=>!document.querySelector('[data-filter-results]').hasAttribute('aria-busy'));
+					assert.doesNotMatch(await page.evaluate(()=>location.search),/[?&]mbis=/);
 				}
 				await page.setViewportSize({width:390,height:844});await page.locator('.filter-open').click();
 				await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('dialog').open);

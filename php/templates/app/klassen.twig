@@ -30,6 +30,7 @@
 			<section><h4 id="label-ruestung" data-label-ruestung>Rüstung</h4><ul id="klassen-ruestung"></ul></section>
 			<section><h4 id="label-waffen" data-label-waffen>Waffen</h4><ul id="klassen-waffen"></ul></section>
 		</div>
+		<p id="klassen-legende" class="klassen-legende" data-klassen-legende></p>
 	</section>
 	<section class="klassen-katalog" aria-label="Aufgaben, Taten und Gegenstände">
 		{% set kt = {de: {q: 'Aufgaben', d: 'Taten', i: 'Gegenstände', label: 'Aufgaben, Taten und Gegenstände'},
@@ -49,6 +50,7 @@
 			<ol id="klassen-taten" class="related-results" data-filter-results></ol>
 		</div>
 		<div id="liste-gegenstaende" role="tabpanel" aria-labelledby="klassen-items" hidden>
+			<p id="klassen-item-hinweis" class="klassen-hinweis" data-klassen-item-hinweis></p>
 			<div id="filter-gegenstaende" class="klassen-filter related-list">
 				<p class="klassen-filter-fehler" data-filter-error hidden></p>
 				<ol id="klassen-gegenstaende" class="related-results" data-filter-results></ol>

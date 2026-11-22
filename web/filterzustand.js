@@ -89,8 +89,14 @@
 			var paths = next.filters[group.id], found = paths.some(function (p) { return key(p) === key(action.path); });
 			if (found) {
 				next.filters[group.id] = paths.filter(function (p) { return key(p) !== key(action.path); });
-			} else if (group.exclusivePaths) {
+			} else if (group.exclusivePaths || group.exclusiveRoot) {
+				// A new branch replaces its own ancestors/descendants. With
+				// exclusiveRoot it also replaces every branch of another
+				// top-level category, while sibling branches of the same
+				// category stay OR-linked.
+				var root = group.exclusiveRoot;
 				next.filters[group.id] = paths.filter(function (p) {
+					if (root && p[root] !== action.path[root]) { return false; }
 					return !enthaeltPfad(p,action.path) && !enthaeltPfad(action.path,p);
 				}).concat([action.path]);
 			} else {

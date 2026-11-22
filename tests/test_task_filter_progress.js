@@ -17,7 +17,7 @@ const context = {
 };
 context.window = context;
 vm.createContext(context);
-for (const file of ['speicher', 'filteradapter', 'aufgaben-filter']) {
+for (const file of ['sortierung', 'speicher', 'filteradapter', 'aufgaben-filter']) {
 	vm.runInContext(fs.readFileSync(`web/${file}.js`, 'utf8'), context);
 }
 
@@ -33,10 +33,9 @@ for (const file of ['speicher', 'filteradapter', 'aufgaben-filter']) {
 	let result = await adapter.load(state, {});
 	assert.equal(result.total, 1);
 	assert.equal(result.payload[0].id, '70000001');
-	assert.equal(reads, 2, 'setup and load each read one snapshot, not one per row');
-	character.manuell = {quests:{'70000002':'fertig'}};
+	assert.equal(reads, 1, 'setup reads the character once and the store keeps it for the load');
 	result = await adapter.load(state, {});
-	assert.equal(result.total, 2, 'the next load picks up manual changes');
-	assert.equal(reads, 3);
-	console.log('Aufgaben-/Tatenfilter: ein Spielstandzugriff pro Ladevorgang');
+	assert.equal(result.total, 1);
+	assert.equal(reads, 1, 'the cached character is reused, not read per row');
+	console.log('Aufgaben-/Tatenfilter: ein Spielstandzugriff, kein Zugriff pro Zeile');
 })().catch(error => { console.error(error); process.exitCode = 1; });

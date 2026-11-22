@@ -23,7 +23,7 @@ class Handler(SimpleHTTPRequestHandler):
         if urlsplit(self.path).path in ('/', '/gegenstaende.html'):
             html = (WEB / 'gegenstaende.html').read_text()
             scripts = ''.join('<script src="%s.js"></script>' % name for name in
-                              ('filterzustand', 'filteradapter', 'filter-ui', 'gegenstaende-filter'))
+                              ('sortierung', 'filterzustand', 'filteradapter', 'filter-ui', 'gegenstaende-filter'))
             html = html.replace('<script src="gegenstaende.js"></script>', scripts)
             html = html.replace('</head>', '<link rel="stylesheet" href="filter-ui.css"></head>')
             def version(match):

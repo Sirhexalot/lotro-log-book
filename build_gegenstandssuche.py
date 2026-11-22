@@ -2,7 +2,8 @@
 """One compact search file per language for the item browser.
 
 The item pages stay as they are; this file only carries what a shop-like list
-needs: id, name, symbol, category, quality, slot, type and level. Filter values
+needs: id, name, symbol, category, quality, slot, type, level, class/race,
+minimum level and further conditions for the class profile. Filter values
 are numbers into small label arrays so a language file stays small; nothing is
 guessed, unknown values stay empty.
 
@@ -233,6 +234,24 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
         if not isinstance(stufe, int) or stufe <= 0:
             stufe = 0
 
+        # Die Mindeststufe fehlt im Client-Katalog bei 7.495 Gegenständen, im
+        # vollständigen Export steht sie als "ml". Der Katalog bleibt erste
+        # Quelle, weil die Detailseite ihn ebenfalls zeigt; der Export füllt
+        # nur die Lücke. 0 heißt danach: keine Mindeststufe belegt.
+        min_stufe = klassen.get(ident, {}).get('minLevel') or 0
+        try:
+            min_stufe = int(min_stufe)
+        except (TypeError, ValueError):
+            min_stufe = 0
+        if min_stufe <= 0:
+            ersatz = quelle.get('ml') or item.get('ml') or 0
+            try:
+                ersatz = int(ersatz)
+            except (TypeError, ValueError):
+                ersatz = 0
+            if ersatz > 0:
+                min_stufe = ersatz
+
         eintraege.append([ident, name, quelle.get('ic') or item.get('ic') or 0, kat,
                           qualitaet(quelle.get('q') or item.get('q')),
                           platz_id, art_id, stufe, klasse_id, gattung_id,
@@ -240,7 +259,7 @@ def sprache_datei(sprache, items, typen, roh, klassen, klasse_namen, gattung_nam
                           klassen.get(ident, {}).get('requiredRace', ''),
                           klassen.get(ident, {}).get('armourType', ''),
                           klassen.get(ident, {}).get('weaponType', ''),
-                          int(klassen.get(ident, {}).get('minLevel') or 0),
+                          min_stufe,
                           bool(klassen.get(ident, {}).get('hasExtraRequirement'))])
 
     eintraege.sort(key=lambda zeile: (schluessel(zeile[1]), zeile[0]))

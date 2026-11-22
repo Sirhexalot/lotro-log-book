@@ -115,6 +115,7 @@
         "name",
         "seltenheit",
         "stufe",
+        "mindeststufe",
         "art"
       ],
       "filter": [
@@ -124,6 +125,7 @@
         "klasse",
         "gattung",
         "seltenheit",
+        "mindeststufe",
         "stufe"
       ],
       "relationen": [

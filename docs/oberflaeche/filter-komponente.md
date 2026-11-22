@@ -36,6 +36,23 @@ Domain filter predicates, sorting and facets remain in the data adapter.
 The public server adapter serialises only the configured URL codec,
 never the character context.
 
+Page-specific options (class profile, 22.11.2026):
+
+- `MQL_ITEM_FILTER_SETUP(data, {ids, area, levelGroups, defaultSort,
+  descendingSort, countLabel, emptyLabel})`; `levelGroups:false` removes the item
+  and minimum level ranges together with their URL fields; an explicit empty
+  `ids` list renders the empty state instead of the whole index.
+- `MQL_TASK_FILTER_SETUP(rows, kind, {level, defaultSort, descendingSort,
+  countLabel, emptyLabel})`; `level:false` removes the level range and its
+  fields.
+
+The wording and the level behaviour are in
+[Class profile](klassenprofil.md).
+
+Tree groups may set `exclusivePaths` (a branch replaces its ancestors and
+descendants) or `exclusiveRoot` (a branch in another top-level key replaces the
+previous category); the item search uses `exclusiveRoot:'kat'`.
+
 Server response: exactly one root with `data-filter-area="<bereich>"` and
 `data-filter-schema="1"`, in it a JSON script
 `type="application/json" data-filter-model` and exactly one

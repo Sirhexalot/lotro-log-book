@@ -8,7 +8,8 @@ Reads `recipes.json` (export_recipes.py) and writes `web/rezepte-<language>.js`:
                                [[optional, quantity, critical bonus, symbol, item ID], …],
                                critical result name, profession key, recipe ID,
                                tier, crit %, time, crit %, time, result symbol,
-                               critical symbol, result item ID, critical item ID], …]}
+                               critical symbol, result item ID, critical item ID,
+                               [[result item ID, name, level, symbol], …]], …]}
 
     .../.venv/bin/python build_rezepte.py --sprache de --quelle <rezepte-dir>
 """
@@ -17,10 +18,54 @@ import html
 import json
 import re
 import sys
+import xml.etree.ElementTree as ElementTree
 from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
 STANDARD = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/rezepte-2026-11-06/recipes.json')
+CLIENT_LORE = Path('/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore')
+
+
+def result_variants(lore: Path) -> dict:
+    """All result item ids per recipe, from the client's recipe list.
+
+    The recipe export carries only the first normal and critical result. The
+    client lists every variant of a recipe (the same recipe can yield several
+    differently named items); the item page needs all of them to answer
+    "where from".
+    """
+    path = lore / 'recipes.xml'
+    if not path.is_file():
+        return {}
+    variants = {}
+    for recipe in ElementTree.parse(path).getroot().iter('recipe'):
+        raw_id = recipe.get('id')
+        if not raw_id:
+            continue
+        recipe_id = '%08X' % (int(raw_id) & 0xffffffff)
+        found = {}
+        for result in recipe.iter('result'):
+            critical = (result.get('critical') or '').lower() == 'true'
+            level = result.get('itemLevel')
+            for item in result.findall('resultItem'):
+                raw_item = item.get('itemId')
+                if not raw_item:
+                    continue
+                item_id = '%08X' % (int(raw_item) & 0xffffffff)
+                entry = found.setdefault(item_id, {
+                    'id': item_id, 'name': item.get('name') or '',
+                    'level': 0, 'normal': False, 'critical': False,
+                })
+                entry['normal'] = entry['normal'] or not critical
+                entry['critical'] = entry['critical'] or critical
+                if level and not entry['level']:
+                    try:
+                        entry['level'] = int(level)
+                    except (TypeError, ValueError):
+                        pass
+        if found:
+            variants[recipe_id] = list(found.values())
+    return variants
 
 
 def sauber(text):
@@ -46,9 +91,10 @@ def name(record, sprache):
     return sauber(texte.get(sprache) or texte.get('en') or '')
 
 
-def baue(quelle, sprache):
+def baue(quelle, sprache, variants=None):
     data = json.loads(quelle.read_text(encoding='utf-8'))
     items = data.get('items') or {}
+    variants = variants if variants is not None else result_variants(CLIENT_LORE)
     # Symbol per item, from the shared item model. The recipe data then carries
     # the file name directly and no page needs a second lookup.
     seite = json.loads((HIER / 'daten' / 'items.json').read_text(encoding='utf-8')).get('items') or {}
@@ -80,6 +126,31 @@ def baue(quelle, sprache):
         # The client's profession key ("WOODWORKER") lets the page match the
         # character's professions from Companion, which are stored as keys.
         key = re.sub(r'[^A-Za-z]', '', profession.get('en') or '').upper()
+        variant_rows = variants.get(recipe['id']) or []
+        if not variant_rows:
+            variant_rows = []
+            if recipe.get('r') and recipe['r'][0]:
+                variant_rows.append({'id': recipe['r'][0], 'name': '',
+                                     'level': 0, 'normal': True, 'critical': False})
+            if recipe.get('cr') and recipe['cr'][0]:
+                variant_rows.append({'id': recipe['cr'][0], 'name': '',
+                                     'level': 0, 'normal': False, 'critical': True})
+        result_rows = []
+        seen = set()
+        for variant in variant_rows:
+            item_id = str(variant.get('id') or '').upper()
+            if not item_id or item_id in seen:
+                continue
+            seen.add(item_id)
+            item = seite.get(item_id) or items.get(item_id) or {}
+            item_name = name(item, sprache) or sauber(variant.get('name') or '')
+            if not item_name:
+                continue
+            try:
+                item_level = int(item.get('l') or variant.get('level') or 0)
+            except (TypeError, ValueError):
+                item_level = 0
+            result_rows.append([item_id, item_name, item_level, symbol(item_id)])
         zeilen.append([
             result_name,
             int(result.get('q') or 0),
@@ -103,6 +174,7 @@ def baue(quelle, sprache):
             symbol((recipe.get('cr') or [''])[0]),
             recipe['r'][0],
             (recipe.get('cr') or [''])[0],
+            result_rows,
         ])
     zeilen.sort(key=lambda row: (row[0].lower(), row[3], row[1]))
     return zeilen
@@ -116,7 +188,7 @@ def main():
     args = parser.parse_args()
     if not args.quelle.is_file():
         raise SystemExit('Rezeptexport fehlt: %s' % args.quelle)
-    zeilen = baue(args.quelle, args.sprache)
+    zeilen = baue(args.quelle, args.sprache, result_variants(CLIENT_LORE))
     text = json.dumps({'r': zeilen}, ensure_ascii=False, separators=(',', ':'))
     ziel = args.ziel / ('rezepte-%s.js' % args.sprache)
     ziel.write_text('/* Written by build_rezepte.py. */\nwindow.MQL_REZEPTE = %s;\n' % text,

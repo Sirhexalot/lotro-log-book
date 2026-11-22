@@ -265,9 +265,9 @@ final class Page
                 'title' => ['de' => 'Klassen und Völker in HdRO', 'en' => 'LOTRO classes and races',
                     'fr' => 'Classes et races de SdAO'][$lang],
                 'description' => [
-                    'de' => 'Sieh, welche Völker die einzelnen Klassen spielen können und welche Waffen und Rüstungsarten sie beherrschen.',
-                    'en' => 'See which races can play each class and which weapons and armour they can use.',
-                    'fr' => 'Découvrez quelles races peuvent jouer chaque classe et quelles armes et armures elles maîtrisent.',
+                    'de' => 'Wähle Klasse, Volk und Stufe: Sieh, welche Rüstung und Waffen deine Klasse lernt, und finde Aufgaben, Taten und Gegenstände für deine Stufe.',
+                    'en' => 'Choose class, race and level: see which armour and weapons your class learns, and find quests, deeds and items for your level.',
+                    'fr' => 'Choisissez classe, race et niveau : découvrez les armures et armes de votre classe et les quêtes, prouesses et objets de votre niveau.',
                 ][$lang],
             ];
         }

@@ -53,6 +53,19 @@ A `?lang=de` does not count as a filter and is replaced.
 - The sorting is stored like a filter and carried along in language links,
   pagination and canonical. Sorted lists remain `noindex`.
 
+## Class profile (22.11.2026)
+
+The class profile has no level range in its filter panels: the level above the
+lists is the only level control. Its sort values are page-scoped in `kf-…sort`:
+
+- `levelDesc` for quests and deeds (highest level first, name as tie-breaker).
+- `itemLevelDesc` for items (item level descending, then minimum level
+  descending, then name).
+
+The default value is not written to the address. A level change clears all
+`kf-` parameters and rebuilds the lists. The tab badges and result counts name
+the level.
+
 ## Tests
 
 ```bash

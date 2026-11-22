@@ -101,6 +101,13 @@ The filter record is a position-based array:
 [ID, Name, Icon, Category, Quality, Slot, Type, Level, ItemClass, EquipmentCategory]
 ```
 
+Since 22.11.2026 the rows carry six more fields for the class profile
+(required class, race, armour type, weapon type, minimum level, further
+condition). The minimum level at index 14 is taken from `items.xml`, otherwise
+from the complete export (`ml`). That fills 7.495 rows the catalogue left at 0;
+164 remain without a value (fields, plants, three special cases). A 0 means "no
+stated minimum level": such a row passes a `bis` limit but not a `mvon` limit.
+
 The filter page turns the values into search rows; the PHP data build additionally splits
 the same rows for relational lists into `filter-i` shards. That does not change the search page set.
 
@@ -121,11 +128,13 @@ Besides that there are:
 
 - name/ID search, with diacritic-insensitive normalisation;
 - multiple selection quality;
-- level range;
+- item level range;
+- minimum level range (`mvon`/`mbis`): the wear requirement, separate from the
+  item level; a row without a stated minimum level counts as usable at any level;
 - sorting by name or item level;
 - 50 hits per load section;
 - facet counters, each calculated without its own filter group;
-- URL state (`q`, `qual`, `von`, `bis`, `sort`, filter branch `k`);
+- URL state (`q`, `qual`, `mvon`, `mbis`, `von`, `bis`, `sort`, filter branch `k`);
 - shared filter memory via the existing filter component.
 
 The search invents no types: unknown category is omitted,
@@ -133,7 +142,7 @@ unknown quality gets the value 0. Within the current data there are
 165 rows with quality 0 and 157 rows without a positive item level. With an active
 level filter, items without a positive level are not considered.
 
-**Not part of the search filters are:** binding, minimum usage level, scaling,
+**Not part of the search filters are:** binding, scaling,
 Unique, stats, set, vendor, rewards, recipe roles and resource occurrences.
 That is today's functional scope, not a statement that these filters would be
 impossible in domain terms.
@@ -335,3 +344,24 @@ The inventory changes neither generator nor page presentation. It
 proves no game server availability and no complete semantics of all
 item effects. The Item Scanner remains an ID discovery source, not a
 property or relation authority.
+
+## 8. Change 22.11.2026: minimum level
+
+- `build_gegenstandssuche.py` now falls back to the full export's `ml` when the
+  client catalogue has no minimum level. 52.716 of 52.880 search rows carry one;
+  164 remain without (fields, plants, three special cases).
+- The item search has a second level range (`mvon`/`mbis`) next to the item
+  level range (`von`/`bis`). A row without a stated minimum level passes a
+  `bis` limit but not a `von` limit.
+- The class profile uses the minimum level as the wear gate and no longer the
+  item level. Its filter panels carry no level range; the level above the lists
+  is the only level control. Quests and deeds are filtered by their **displayed**
+  level (`l`), with the client prerequisite as fallback; default sorting is
+  descending.
+- A recipe can produce several named results. All variants from `recipes.xml`
+  are linked to the recipe on the item page; the recipe page lists every variant
+  and the recipe's own vendor/barter sources. Item pages no longer present a
+  recipe source as an item source.
+- Verification: `tests/test_gegenstandssuche.py`,
+  `tests/test_class_data.py`, `tests/browser_klassen_stufe.js`,
+  `tests/browser_filter_php.js`.

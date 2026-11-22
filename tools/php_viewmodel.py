@@ -642,9 +642,15 @@ def landmark_view(builder: ViewBuilder, entry: dict) -> dict:
 
 # --- recipes -----------------------------------------------------------
 
-def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None) -> dict:
+def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None,
+                sources=None, vendor_names=None, vendor_ids=None) -> dict:
     """One recipe page. `ohne_herkunft` names item ids whose page answers
-    neither "Vorkommen" nor "Woher"; their ingredient link carries no toggle."""
+    neither "Vorkommen" nor "Woher"; their ingredient link carries no toggle.
+
+    `sources` is the recipe's own provenance (vendor, barter). It belongs to
+    this page, not to every item the recipe can produce. `row[20]` carries all
+    result variants the client lists for the recipe.
+    """
     w, lang = builder.w, builder.lang
     profession = row[9]
     entry = builder.professions.get(profession) or {}
@@ -672,6 +678,43 @@ def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None) -> dict:
             item['chance'] = round(entry[2] * 100, 2)
         optional.append(item)
 
+    results = []
+    for variant in (row[20] if len(row) > 20 and row[20] else []):
+        if not variant or not variant[0] or variant[0] not in builder.items:
+            continue
+        results.append({'id': variant[0], 'name': variant[1],
+                        'level': variant[2] or None,
+                        'symbol': variant[3] if len(variant) > 3 else None,
+                        'url': route(lang, 'i', variant[0])})
+    if not results:
+        for ident in (row[18] if len(row) > 18 else None,
+                      row[19] if len(row) > 19 else None):
+            if ident and ident in builder.items:
+                results.append({'id': ident,
+                                'name': builder_name(builder, builder.items[ident]),
+                                'level': builder.items[ident].get('l') or None,
+                                'symbol': row[16] if ident == row[18] else row[17],
+                                'url': route(lang, 'i', ident)})
+
+    def vendor_key(raw):
+        text = str(raw or '').strip()
+        return '%08X' % (int(text) & 0xffffffff) if text.isdigit() else text.upper()
+    provenance = []
+    names = vendor_names or {}
+    known = vendor_ids or set()
+    for source in sources or []:
+        ident = vendor_key(source.get('id'))
+        vendor = names.get(ident) or {}
+        source_name = (vendor.get(lang) or vendor.get('en') or vendor.get('de')
+                       or source.get('name') or ident)
+        provenance.append({
+            'id': ident,
+            'name': source_name,
+            'label': w['source_vendors'] if source.get('art') == 'haendler'
+                     else w['source_barters'],
+            'url': vendor_url(lang, ident) if ident in known else '',
+        })
+
     return {
         'kind': 'recipe',
         'id': row[10],
@@ -685,6 +728,8 @@ def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None) -> dict:
         'level': row[2] or None,
         'ingredients': ingredients,
         'optional': optional,
+        'results': results,
+        'sources': provenance,
         'critical': row[8] or '',
         'critical_id': row[19] if len(row) > 19 and row[19] else None,
         'critical_symbol': row[17] if len(row) > 17 else None,
@@ -1086,13 +1131,14 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
         rid = relation['recipe']
         # Identity and classification only. Ingredients and the exact variant
         # belong to the recipe page, never to the list row.
-        teile = [row[3], row[5]]
+        teile = [row[0], row[3], row[5]]
         if row[2]:
             teile.append('%s %s' % (w['level'], row[2]))
         label = ' · '.join(str(teil) for teil in teile if teil)
         role_label = w['critical_result'] if relation.get('role') == 'critical_result' else w['regular_result']
-        normal_id = row[18] if len(row) > 18 and row[18] else None
-        critical_id = row[19] if len(row) > 19 and row[19] else None
+        relation_result = str(relation.get('result') or '').upper()
+        normal_id = relation_result or (row[18] if len(row) > 18 and row[18] else None)
+        critical_id = relation_result or (row[19] if len(row) > 19 and row[19] else None)
 
         def result_info(result_id):
             result_item = builder.items.get(result_id) if result_id else None

@@ -45,8 +45,10 @@ class ItemModelTests(unittest.TestCase):
 
     def test_recipe_roles_are_not_mixed(self):
         critical = ITEMS['7001C51E']
-        self.assertIn({'recipe': '7001C164', 'role': 'critical_result', 'quantity': 1},
-                      critical['herstellung'])
+        entry = next(row for row in critical['herstellung']
+                     if row['recipe'] == '7001C164' and row['role'] == 'critical_result')
+        self.assertEqual(entry['quantity'], 1)
+        self.assertEqual(entry.get('result'), '7001C51E')
         self.assertNotIn('7001C164', critical['zutat'])
         optional = [
             item for item in ITEMS.values()
@@ -117,11 +119,10 @@ class ItemModelTests(unittest.TestCase):
         self.assertEqual(groups['Händler'][0]['text'], 'Karlo Schwarzhain')
 
 
-    def test_barterers_have_a_page_and_link_from_the_item(self):
+    def test_barterers_have_a_page_and_the_recipe_links_them(self):
         """Pure barterers live in barters.xml, not in the vendor export.
 
-        Before they existed as pages, their name stood as plain text under
-        "Woher" and could not be opened.
+        The barter source belongs to the recipe, not to the crafted item.
         """
         ident = '7001F07E'
         for lang, name in (('de', 'Heilziest Gruber'), ('en', 'Betony Diggins'),
@@ -139,12 +140,19 @@ class ItemModelTests(unittest.TestCase):
         shard = __import__('hashlib').md5(item.encode()).hexdigest()[:2]
         page = json.loads((DATEN / ('de/page-i/%s.json' % shard)).read_text(
             encoding='utf-8'))['entities'][item]
-        group = next(group for group in page['where_groups'] if group.get('barter_filter'))
-        self.assertTrue(group['entries'])
-        self.assertTrue(all(entry.get('url') for entry in group['entries']))
-        self.assertTrue(all('/de/haendler/' in entry['url'] for entry in group['entries']))
-        # The client's occupation is English-only; the row must not repeat it.
-        self.assertTrue(all(entry.get('extra') == '' for entry in group['entries']))
+        self.assertFalse(any(group.get('barter_filter') for group in page['where_groups']))
+        self.assertTrue(any(group['label'] == 'Herstellung' for group in page['where_groups']))
+
+        recipe_id = '70021427'
+        shard = __import__('hashlib').md5(recipe_id.encode()).hexdigest()[:2]
+        recipe = json.loads((DATEN / ('de/page-recipe/%s.json' % shard)).read_text(
+            encoding='utf-8'))['entities'][recipe_id]
+        sources = {source['id']: source for source in recipe['sources']}
+        self.assertIn('7001F07E', sources)
+        self.assertEqual(sources['7001F07E']['url'], '/de/haendler/7001F07E/')
+        self.assertEqual(sources['7001F07E']['label'], 'Tauschhändler')
+        self.assertTrue(all('/de/haendler/' in source['url']
+                            for source in recipe['sources'] if source['url']))
 
     def test_barter_vendor_page_names_its_goods(self):
         source = (ROOT / 'php/src/Vendors.php').read_text(encoding='utf-8')
@@ -155,6 +163,43 @@ class ItemModelTests(unittest.TestCase):
             self.assertIn(needle, source)
         template = (ROOT / 'php/templates/vendors/detail.twig').read_text(encoding='utf-8')
         self.assertIn('{{ vendor.items_label }}', template)
+
+    def test_recipe_variants_link_to_the_recipe_and_its_sources(self):
+        """A recipe can produce several named results; all belong to it.
+
+        The recipe export only carried the first result. The plain
+        "Crossbow of the Vales" (`70052A0F`) therefore had no source while its
+        sibling `70052A0A` did.
+        """
+        recipe_id = '700529FC'
+        for ident in ('70052A0F', '70052A13'):
+            item = ITEMS[ident]
+            entries = [entry for entry in item.get('herstellung') or []
+                       if entry.get('recipe') == recipe_id]
+            self.assertEqual({entry['role'] for entry in entries},
+                             {'regular_result', 'critical_result'})
+            self.assertTrue(all(entry.get('result') == ident for entry in entries))
+        self.assertEqual(ITEMS['70052A0A'].get('tausch'), [])
+
+        import hashlib
+        recipe_shard = hashlib.md5(recipe_id.encode()).hexdigest()[:2]
+        recipe = json.loads((DATEN / 'de' / 'page-recipe' / (recipe_shard + '.json')).read_text(
+            encoding='utf-8'))['entities'][recipe_id]
+        result_ids = {entry['id'] for entry in recipe['results']}
+        self.assertTrue({'70052A0A', '700529EE', '70052A0F', '70052A13'} <= result_ids)
+        sources = {entry['id']: entry for entry in recipe['sources']}
+        self.assertEqual(sources['70020870']['url'], '/de/haendler/70020870/')
+        self.assertEqual(sources['70020870']['label'], 'Händler')
+        self.assertEqual(sources['70053663']['url'], '/de/haendler/70053663/')
+        self.assertEqual(sources['70053663']['label'], 'Tauschhändler')
+
+        item_shard = hashlib.md5(b'70052A0F').hexdigest()[:2]
+        page = json.loads((DATEN / 'de' / 'page-i' / (item_shard + '.json')).read_text(
+            encoding='utf-8'))['entities']['70052A0F']
+        groups = {group['label']: group for group in page['where_groups']}
+        self.assertIn('Herstellung', groups)
+        self.assertEqual(len(groups['Herstellung']['entries']), 2)
+        self.assertNotIn('Tauschhändler', groups)
 
     def test_vendor_entity_has_map_and_item_links_in_all_languages(self):
         for lang, name, path in (

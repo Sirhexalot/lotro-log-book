@@ -6,7 +6,9 @@
 		settings=settings||{};
 		var lang = window.MQL_SPRACHE || document.documentElement.lang || 'de', T = window.MQL_T;
 		if (!data || !data.e) { return; }
-		if (settings.ids && settings.ids.length) {
+		// An explicit id list also means "none" when it is empty; the class
+		// profile uses that to show its empty state instead of the whole index.
+		if (Array.isArray(settings.ids)) {
 			var erlaubt = new Set(settings.ids);
 			data = Object.assign({}, data, {e: data.e.filter(function (row) { return erlaubt.has(row[0]); })});
 		}
@@ -35,22 +37,52 @@
 		var nodes=tree(data.e,['kat'],{});
 		nodes.forEach(function (n) { n.children=tree(data.e.filter(function (r) { return matchesPath(r,n.path); }),levels(n.path.kat),n.path); });
 		var extra={
-			de:['Schließen','%s Treffer anzeigen','Ergebnisse nicht aktualisiert.','Erneut versuchen','Als Seite öffnen','Ungültiger Stufenbereich','Gegenstandsstufe'],
-			en:['Close','Show %s results','Results not updated.','Try again','Open page','Invalid level range','Item level'],
-			fr:['Fermer','Afficher %s résultats','Résultats non actualisés.','Réessayer','Ouvrir la page','Plage de niveaux incorrecte','Niveau d’objet']
+			de:['Schließen','%s Treffer anzeigen','Ergebnisse nicht aktualisiert.','Erneut versuchen','Als Seite öffnen','Ungültiger Stufenbereich','Gegenstandsstufe','Mindeststufe','Gegenstandsstufe absteigend'],
+			en:['Close','Show %s results','Results not updated.','Try again','Open page','Invalid level range','Item level','Minimum level','Item level, descending'],
+			fr:['Fermer','Afficher %s résultats','Résultats non actualisés.','Réessayer','Ouvrir la page','Plage de niveaux incorrecte','Niveau d’objet','Niveau minimum','Niveau d’objet décroissant']
 		}[lang];
-		var labels={search:T('gs_suchen'),filter:T('gs_filter'),close:extra[0],sort:T('gs_sort'),reset:T('gs_reset'),more:T('gs_mehr'),count:T('gs_viele'),show:extra[1],loading:T('gs_lade'),error:extra[2],retry:extra[3],fallback:extra[4],invalidRange:extra[5],min:T('gs_von'),max:T('gs_bis'),placeholder:T('gs_platzhalter')};
-		var config={area:settings.area||'gegenstaende',lang:lang,rootUrl:location.origin+location.pathname,labels:labels,search:{submit:'debounce',debounceMs:200},
-			groups:[{id:'tree',kind:'tree',label:T('gs_kategorie'),options:nodes,validatePath:function (p) { return paths.has(JSON.stringify(p,Object.keys(p).sort())); },pathLabel:function (p) { return ['kat','art','platz','klasse','gattung'].filter(function (k) { return p[k]!==undefined; }).map(function (k) { return label(k,p[k]); }).join(' › '); }},
-				{id:'quality',kind:'multi',label:T('gs_qualitaet'),options:[0,1,2,3,4,5].map(function (v) { return {value:v,label:T('gs_qual_'+v)}; })},
-				{id:'level',kind:'range',label:extra[6],rangeLabel:function (r) { return extra[6]+' '+(r.min===null?'…':r.min)+'–'+(r.max===null?'…':r.max); }}],
-			sort:{options:[{value:'name',label:T('gs_sort_name')},{value:'itemLevel',label:extra[6]}]},pagination:{kind:'limit',size:50},
-			defaults:function () { return {q:'',filters:{tree:[],quality:[],level:{min:null,max:null},source:[]},sort:'name',pagination:{kind:'limit',limit:50}}; }};
-		if(showSource){config.groups.push({id:'source',kind:'multi',label:sourceLabels[0],
+		var labels={search:T('gs_suchen'),filter:T('gs_filter'),close:extra[0],sort:T('gs_sort'),reset:T('gs_reset'),more:T('gs_mehr'),count:settings.countLabel||T('gs_viele'),show:extra[1],loading:T('gs_lade'),error:extra[2],retry:extra[3],fallback:extra[4],invalidRange:extra[5],min:T('gs_von'),max:T('gs_bis'),placeholder:T('gs_platzhalter')};
+		function rangeLabel(prefix) {
+			return function (range) {
+				return prefix+' '+(range.min===null?'…':range.min)+'–'+(range.max===null?'…':range.max);
+			};
+		}
+		var groups=[
+			{id:'tree',kind:'tree',label:T('gs_kategorie'),exclusiveRoot:'kat',options:nodes,validatePath:function (p) { return paths.has(JSON.stringify(p,Object.keys(p).sort())); },pathLabel:function (p) { return ['kat','art','platz','klasse','gattung'].filter(function (k) { return p[k]!==undefined; }).map(function (k) { return label(k,p[k]); }).join(' › '); }},
+			{id:'quality',kind:'multi',label:T('gs_qualitaet'),options:[0,1,2,3,4,5].map(function (v) { return {value:v,label:T('gs_qual_'+v)}; })}];
+		// The class profile already fixes the character level above the list;
+		// there the level ranges would be a second, contradicting control.
+		if (settings.levelGroups !== false) {
+			groups.push({id:'minLevel',kind:'range',label:extra[7],rangeLabel:rangeLabel(extra[7])},
+				{id:'level',kind:'range',label:extra[6],rangeLabel:rangeLabel(extra[6])});
+		}
+		if(showSource){groups.push({id:'source',kind:'multi',label:sourceLabels[0],
 			options:[{value:'instanztruhe',label:sourceLabels[1]}]});}
-		var codecFields=[{param:'q',path:['q']},{param:'qual',path:['filters','quality'],type:'csv'},
-			{param:'von',path:['filters','level','min'],type:'number'},{param:'bis',path:['filters','level','max'],type:'number'},
-			{param:'sort',path:['sort'],omit:'name',decode:function (v) { return v==='stufe'?'itemLevel':'name'; },encode:function (v) { return v==='itemLevel'?'stufe':null; }}];
+		function defaults() {
+			var filters={tree:[],quality:[],source:[]};
+			if (settings.levelGroups !== false) {
+				filters.minLevel={min:null,max:null}; filters.level={min:null,max:null};
+			}
+			return {q:'',filters:filters,sort:settings.defaultSort||'name',pagination:{kind:'limit',limit:50}};
+		}
+		var sortOptions=[{value:'name',label:T('gs_sort_name')},{value:'itemLevel',label:extra[6]}];
+		if (settings.descendingSort) { sortOptions.push({value:'itemLevelDesc',label:extra[8]}); }
+		var config={area:settings.area||'gegenstaende',lang:lang,rootUrl:location.origin+location.pathname,labels:labels,search:{submit:'debounce',debounceMs:200},
+			groups:groups,sort:{options:sortOptions},pagination:{kind:'limit',size:50},
+			defaults:defaults};
+		var codecFields=[{param:'q',path:['q']},{param:'qual',path:['filters','quality'],type:'csv'}];
+		if (settings.levelGroups !== false) {
+			codecFields.push({param:'mvon',path:['filters','minLevel','min'],type:'number'},
+				{param:'mbis',path:['filters','minLevel','max'],type:'number'},
+				{param:'von',path:['filters','level','min'],type:'number'},
+				{param:'bis',path:['filters','level','max'],type:'number'});
+		}
+		codecFields.push({param:'sort',path:['sort'],
+			decode:function (v) { return v==='stufe'?'itemLevel':v==='stufe-ab'?'itemLevelDesc':'name'; },
+			encode:function (v) {
+				if (v===(settings.defaultSort||'name')) { return null; }
+				return v==='itemLevel'?'stufe':v==='itemLevelDesc'?'stufe-ab':'name';
+			}});
 		if(showSource){codecFields.push({param:'quelle',path:['filters','source'],
 			decode:function (v) { return [v]; },encode:function (v) { return v[0]||null; }});}
 		var baseCodec=A.codec(codecFields,config.defaults);
@@ -86,13 +118,31 @@
 		});
 		var lastQuery=null,words=[];
 		function searchMatches(row,q){if(q!==lastQuery){lastQuery=q;words=fold(q).split(/\s+/).filter(Boolean);}var name=searchIndex.get(row[0]);return words.every(function(w){return name.includes(w);});}
-		function matches(row,s,skip){return (skip==='tree'||!s.filters.tree.length||s.filters.tree.some(function(p){return matchesPath(row,p);})) &&
-			(skip==='source'||!(s.filters.source||[]).length||chestIds.has(row[0])) &&
-			(skip==='quality'||!s.filters.quality.length||s.filters.quality.includes(row[4])) &&
-			(skip==='level'||(s.filters.level.min===null&&s.filters.level.max===null)||(row[7]>0&&(s.filters.level.min===null||row[7]>=s.filters.level.min)&&(s.filters.level.max===null||row[7]<=s.filters.level.max))) &&
-			searchMatches(row,s.q);}
+		function matches(row,s,skip){
+			var quality=s.filters.quality, source=s.filters.source, level=s.filters.level, minLevel=s.filters.minLevel;
+			return (skip==='tree'||!s.filters.tree.length||s.filters.tree.some(function(p){return matchesPath(row,p);})) &&
+				(skip==='source'||!(source||[]).length||chestIds.has(row[0])) &&
+				(skip==='quality'||!quality.length||quality.includes(row[4])) &&
+				(skip==='minLevel'||!minLevel||(minLevel.min===null&&minLevel.max===null)||((row[14]||0)>=(minLevel.min===null?-Infinity:minLevel.min)&&(row[14]||0)<=(minLevel.max===null?Infinity:minLevel.max))) &&
+				(skip==='level'||!level||(level.min===null&&level.max===null)||(row[7]>0&&(level.min===null||row[7]>=level.min)&&(level.max===null||row[7]<=level.max))) &&
+				searchMatches(row,s.q);
+		}
+		function compare(a,b,sort){
+			if (sort==='itemLevel') {
+				var la=a[7]||Infinity, lb=b[7]||Infinity;
+				if (la!==lb) { return la-lb; }
+				var ma=a[14]||Infinity, mb=b[14]||Infinity;
+				if (ma!==mb) { return ma-mb; }
+			} else if (sort==='itemLevelDesc') {
+				var da=a[7]||0, db=b[7]||0;
+				if (da!==db) { return db-da; }
+				var dm=a[14]||0, dmb=b[14]||0;
+				if (dm!==dmb) { return dmb-dm; }
+			}
+			return MQL_SORT.compare(a[1],b[1])||a[0].localeCompare(b[0]);
+		}
 		var adapter=A.client({rows:data.e,id:function(r){return r[0];},matches:matches,
-			compare:function(a,b,sort){return (sort==='itemLevel'?(a[7]||Infinity)-(b[7]||Infinity):0)||MQL_SORT.compare(a[1],b[1])||a[0].localeCompare(b[0]);},
+			compare:compare,
 			facets:function(rows,s){
 				var counts=new Map(),qualityCounts=[0,0,0,0,0,0],chestCount=0;
 				rows.forEach(function(row){
@@ -110,6 +160,7 @@
 					if(rowUI){
 						var parts=[label('kat',key('kat',row[3])),T('gs_qual_'+row[4])];
 						['art','gattung','klasse','platz'].forEach(function(dim){if(row[fields[dim]]>=0){parts.push(label(dim,key(dim,row[fields[dim]])));}});
+						if(row[14]>0&&row[14]!==row[7]){parts.push(extra[7]+' '+row[14]);}
 						target.appendChild(rowUI.row(target,{
 							image:row[2],icon:'gegenstand',name:row[1],
 							href:'/'+lang+'/'+({de:'gegenstand',en:'item',fr:'objet'}[lang])+'/'+row[0]+'/',
@@ -129,10 +180,11 @@
 					var parts=[label('kat',key('kat',row[3])),T('gs_qual_'+row[4])];
 					['art','gattung','klasse','platz'].forEach(function(dim){if(row[fields[dim]]>=0){parts.push(label(dim,key(dim,row[fields[dim]])));}});
 					if(row[7]>0){parts.push(extra[6]+' '+row[7]);}
+					if(row[14]>0&&row[14]!==row[7]){parts.push(extra[7]+' '+row[14]);}
 					var meta=document.createElement('span');meta.className='gs-meta';meta.textContent=parts.join(' · ');a.appendChild(meta);
 					li.appendChild(a);target.appendChild(li);
 				});
-				if(!r.total){var empty=document.createElement('li');empty.className='gs-leer';empty.textContent=T('gs_keine');target.appendChild(empty);}
+				if(!r.total){var empty=document.createElement('li');empty.className='gs-leer';empty.textContent=settings.emptyLabel||T('gs_keine');target.appendChild(empty);}
 			}
 		});
 		return {config:config,adapter:adapter};
@@ -141,7 +193,7 @@
 		var main=document.querySelector('main.gs,[data-item-filter-root]');
 		if(controller||!main||!window.MQL_GEGENSTAENDE){return;}
 		var ids=(main.dataset.itemIds||'').split(',').filter(Boolean);
-		var setup=window.MQL_ITEM_FILTER_SETUP(window.MQL_GEGENSTAENDE,{area:ids.length?'haendler':'gegenstaende',ids:ids});
+		var setup=window.MQL_ITEM_FILTER_SETUP(window.MQL_GEGENSTAENDE,{area:ids.length?'haendler':'gegenstaende',ids:ids.length?ids:null});
 		var list=main.querySelector('#gs-ergebnis');list.dataset.filterResults='';
 		main.appendChild(list);main.querySelector('.gs-raster').remove();main.querySelector('#gs-suche').remove();
 		controller=window.MQL_FILTER_UI.mount(main,setup);window.MQL_ITEM_FILTER=controller;

@@ -14,7 +14,7 @@
 			more: 'Weitere anzeigen', count: '%s Einträge', show: '%s Treffer anzeigen', loading: 'Lade …',
 			error: 'Ergebnisse nicht aktualisiert.', retry: 'Erneut versuchen', fallback: 'Als Seite öffnen',
 			invalidRange: 'Ungültiger Bereich', min: 'Von', max: 'Bis',
-			flag: 'Merkmale', geography: 'Region und Gebiet', region: 'Region', area: 'Gebiet', level: 'Stufe', status: 'Abschluss',
+			flag: 'Merkmale', geography: 'Region und Gebiet', region: 'Region', area: 'Gebiet', level: 'Stufe', levelDesc: 'Stufe absteigend', status: 'Abschluss',
 			all: 'Alle', done: 'Erledigt', rest: 'Nicht als erledigt importiert',
 			name: 'Name', kind: 'Art', reward: 'Belohnung', points: 'LOTRO-Punkte', virtue: 'Tugend', title: 'Titel',
 			item: 'Gegenstand', doneMark: 'Erledigt',
@@ -25,7 +25,7 @@
 			more: 'Show more', count: '%s entries', show: 'Show %s results', loading: 'Loading …',
 			error: 'Results not updated.', retry: 'Try again', fallback: 'Open page',
 			invalidRange: 'Invalid range', min: 'From', max: 'To',
-			flag: 'Properties', geography: 'Region and area', region: 'Region', area: 'Area', level: 'Level', status: 'Completion',
+			flag: 'Properties', geography: 'Region and area', region: 'Region', area: 'Area', level: 'Level', levelDesc: 'Level descending', status: 'Completion',
 			all: 'All', done: 'Completed', rest: 'Not imported as completed',
 			name: 'Name', kind: 'Type', reward: 'Reward', points: 'LOTRO Points', virtue: 'Virtue', title: 'Title',
 			item: 'Item', doneMark: 'Completed',
@@ -36,7 +36,7 @@
 			more: 'Afficher davantage', count: '%s entrées', show: 'Afficher %s résultats', loading: 'Chargement …',
 			error: 'Résultats non actualisés.', retry: 'Réessayer', fallback: 'Ouvrir la page',
 			invalidRange: 'Plage incorrecte', min: 'De', max: 'À',
-			flag: 'Caractéristiques', geography: 'Région et zone', region: 'Région', area: 'Zone', level: 'Niveau', status: 'Achèvement',
+			flag: 'Caractéristiques', geography: 'Région et zone', region: 'Région', area: 'Zone', level: 'Niveau', levelDesc: 'Niveau décroissant', status: 'Achèvement',
 			all: 'Tous', done: 'Terminé', rest: 'Non importé comme terminé',
 			name: 'Nom', kind: 'Type', reward: 'Récompense', points: 'Points LOTRO', virtue: 'Vertu', title: 'Titre',
 			item: 'Objet', doneMark: 'Terminé',
@@ -48,7 +48,8 @@
 		d: { de: 'tat', en: 'deed', fr: 'prouesse' }
 	};
 
-	window.MQL_TASK_FILTER_SETUP = function (rows, kind) {
+	window.MQL_TASK_FILTER_SETUP = function (rows, kind, options) {
+		options = options || {};
 		var lang = document.documentElement.lang, A = window.MQL_FILTERADAPTER, w = WORDS[lang] || WORDS.de;
 		var progress = window.MQL_STATUS_UI?.words?.(lang) || {progress:'Fortschritt',all:'Alle',open:'Nicht begonnen',running:'Begonnen',done:'Erledigt'};
 		var labels = {};
@@ -56,6 +57,7 @@
 			'retry', 'fallback', 'invalidRange', 'min', 'max', 'placeholder'].forEach(function (key) { labels[key] = w[key]; });
 		// A deed-only list searches deeds, not "quest or deed".
 		labels.placeholder = (kind === 'd' ? w.placeholder_d : w.placeholder_q) || w.placeholder;
+		if (options.countLabel) { labels.count = options.countLabel; }
 
 		var character = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv();
 		var dataset = kind === 'd' ? 'deeds' : 'quests';
@@ -139,7 +141,7 @@
 		} : null;
 		if (geography) { groups.push(geography); }
 		var levels = new Set(rows.map(function (r) { return r.level; }).filter(function (v) { return v !== null; }));
-		if (levels.size > 1) {
+		if (options.level !== false && levels.size > 1) {
 			groups.push({id: 'level', kind: 'range', label: w.level,
 				rangeLabel: function (r) { return w.level+' '+(r.min ?? '…')+'–'+(r.max ?? '…'); }});
 		}
@@ -153,19 +155,21 @@
 		groups.forEach(function (g) {
 			filters[g.id] = g.kind === 'single' ? 'all' : g.kind === 'range' ? { min: null, max: null } : [];
 		});
+		var sortOptions = [{ value: 'name', label: w.name }, { value: 'level', label: w.level }];
+		if (options.descendingSort) { sortOptions.push({ value: 'levelDesc', label: w.levelDesc }); }
 		var config = {
 			area: kind === 'd' ? 'taten' : 'aufgaben', lang: lang, labels: labels,
 			rootUrl: location.origin + location.pathname, groups: groups,
 			search: { submit: 'debounce', debounceMs: 200 },
-			sort: { options: [{ value: 'name', label: w.name }, { value: 'level', label: w.level }] },
+			sort: { options: sortOptions },
 			pagination: { kind: 'limit', size: 50 },
 			defaults: function () {
-				return { q: '', filters: JSON.parse(JSON.stringify(filters)), sort: 'name',
+				return { q: '', filters: JSON.parse(JSON.stringify(filters)), sort: options.defaultSort || 'name',
 					pagination: { kind: 'limit', limit: 50 } };
 			}
 		};
 
-		var fields = [{ param: 'q', path: ['q'] }, { param: 'sort', path: ['sort'], omit: 'name' }];
+		var fields = [{ param: 'q', path: ['q'] }, { param: 'sort', path: ['sort'], omit: options.defaultSort || 'name' }];
 		groups.forEach(function (g) {
 			if (g.kind === 'range') {
 				fields.push({ param: 'von', path: ['filters', g.id, 'min'], type: 'number' },
@@ -243,6 +247,11 @@
 			id: function (row) { return row.id; },
 			matches: matches,
 			compare: function (a, b, sort) {
+				if (sort === 'levelDesc') {
+					var al = a.level === null ? -Infinity : a.level;
+					var bl = b.level === null ? -Infinity : b.level;
+					if (al !== bl) { return bl - al; }
+				}
 				return (sort === 'level' ? (a.level || Infinity) - (b.level || Infinity) : 0)
 					|| MQL_SORT.compare(a.name, b.name) || a.id.localeCompare(b.id);
 			},
@@ -325,6 +334,12 @@
 					}
 					target.appendChild(line);
 				});
+				if (!result.payload.length && options.emptyLabel) {
+					var empty = document.createElement('li');
+					empty.className = 'gs-leer';
+					empty.textContent = options.emptyLabel;
+					target.appendChild(empty);
+				}
 			}
 		});
 		var load = adapter.load;

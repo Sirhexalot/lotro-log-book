@@ -60,6 +60,7 @@ SITEMAP_KINDS = ('q', 'd', 'i', 'area', 'region', 'recipe', 'title', 'virtue', '
 GIVER_SOURCE: dict | None = None
 QUEST_GIVERS: dict = {}
 VENDOR_SOURCE: dict | None = None
+RECIPE_SOURCE: dict | None = None
 
 
 def read_assignment(path: Path, variable: str):
@@ -745,6 +746,8 @@ ITEM_BONI: dict | None = None
 
 BONI_DATEI = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
                   '/items-stats-2026-11-08/items-stats.json')
+RECIPE_SOURCE_DATEI = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
+                           '/recipe-sources-2026-11-06/recipe-sources.json')
 # Der vollständige Gegenstands-Export: Symbol, Art und ein sauberer Name.
 VOLL_DATEI = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
                   '/items-2026-11-08/items.json')
@@ -876,7 +879,7 @@ def main() -> int:
     instance_data = instanzdaten(instanz_source, DATEN / 'instanzen-roh.jsonl')
     from set_viewmodel import set_pages, link_items
 
-    global GIVER_SOURCE, QUEST_GIVERS, VENDOR_SOURCE
+    global GIVER_SOURCE, QUEST_GIVERS, VENDOR_SOURCE, RECIPE_SOURCE
     if not (DATEN / 'auftraggeber.json').is_file():
         raise SystemExit('MISSING: daten/auftraggeber.json (run python3 build_auftraggeber.py first)')
     GIVER_SOURCE = json.loads((DATEN / 'auftraggeber.json').read_text(encoding='utf-8'))
@@ -885,6 +888,8 @@ def main() -> int:
     if not (DATEN / 'haendler.json').is_file():
         raise SystemExit('MISSING: daten/haendler.json (run python3 build_haendler.py first)')
     VENDOR_SOURCE = json.loads((DATEN / 'haendler.json').read_text(encoding='utf-8'))
+    RECIPE_SOURCE = (json.loads(RECIPE_SOURCE_DATEI.read_text(encoding='utf-8'))
+                     if RECIPE_SOURCE_DATEI.is_file() else {'sources': {}})
     region_ids = {
         int(row['region']): int(row['idx'])
         for row in json.loads((DATEN / 'karten.json').read_text(encoding='utf-8'))
@@ -1045,7 +1050,13 @@ def main() -> int:
         (folder / 'zutaten-ohne.json').write_text(
             json.dumps({'ids': ohne_herkunft}, ensure_ascii=False,
                        separators=(',', ':')), encoding='utf-8')
-        recipe_pages = {ident: recipe_view(builder, row, set(ohne_herkunft))
+        vendor_names = {vid: (v.get('name') or {})
+                        for vid, v in (VENDOR_SOURCE or {}).get('vendors', {}).items()}
+        vendor_ids = set(vendor_names)
+        recipe_sources = (RECIPE_SOURCE or {}).get('sources') or {}
+        recipe_pages = {ident: recipe_view(builder, row, set(ohne_herkunft),
+                                           recipe_sources.get(ident, []),
+                                           vendor_names, vendor_ids)
                         for ident, row in data['recipe'].items()}
         counts['page-recipe'] = len(recipe_pages)
         write_pages(target, lang, 'recipe', recipe_pages)

@@ -20,6 +20,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from itemnamen import sauberer_name
+from build_rezepte import result_variants
 
 HIER = Path(__file__).resolve().parent
 WEB = HIER / 'web'
@@ -29,8 +30,6 @@ REZEPTE = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-ex
                '/rezepte-2026-11-06/recipes.json')
 VENDOR_ITEMS = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
                     '/vendor-items-2026-11-08/vendor-items.json')
-RECIPE_SOURCES = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
-                      '/recipe-sources-2026-11-06/recipe-sources.json')
 # Full item export: supplies the client icon ID (`ic`) for every item.
 VOLL = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
             '/items-2026-11-08/items.json')
@@ -153,9 +152,9 @@ def baue():
 
     # 3. Rezepte: Ergebnis und Zutaten, mit IDs
     item_stufen = {}
-    recipe_results = {}
     if REZEPTE.is_file():
         rezepte = json.loads(REZEPTE.read_text(encoding='utf-8'))
+        variants = result_variants(ITEM_LORE.parent)
         for rezept_id, zeile in rezepte['items'].items():
             e = eintrag(rezept_id)
             namen = zeile.get('n') if isinstance(zeile, dict) else None
@@ -165,20 +164,30 @@ def baue():
                         e['n'].setdefault(sprache, namen[sprache])
         for rezept in rezepte['recipes']:
             recipe_id = str(rezept['id']).upper()
-            rid = rezept['r'][0]
             stufe = int(rezept.get('t') or 0)
-            recipe_results[recipe_id] = [
-                str(result_id).upper() for result_id in
-                ([(rid)] if rid else []) +
-                ([rezept['cr'][0]] if rezept.get('cr') and rezept['cr'][0] else [])
-            ]
-            if rid:
-                result = eintrag(rid)
-                result['rezepte'].append(recipe_id)
-                result['herstellung'].append({
-                    'recipe': recipe_id, 'role': 'regular_result',
-                    'quantity': rezept['r'][1] if len(rezept['r']) > 1 else None,
-                })
+            variant_rows = variants.get(recipe_id) or []
+            if not variant_rows:
+                variant_rows = []
+                if rezept.get('r') and rezept['r'][0]:
+                    variant_rows.append({'id': rezept['r'][0], 'normal': True, 'critical': False})
+                if rezept.get('cr') and rezept['cr'][0]:
+                    variant_rows.append({'id': rezept['cr'][0], 'normal': False, 'critical': True})
+            seen = set()
+            for variant in variant_rows:
+                result_id = str(variant.get('id') or '').upper()
+                if not result_id or result_id in seen or result_id not in items:
+                    continue
+                seen.add(result_id)
+                result = eintrag(result_id)
+                if recipe_id not in result['rezepte']:
+                    result['rezepte'].append(recipe_id)
+                for role, flag in (('regular_result', 'normal'), ('critical_result', 'critical')):
+                    if not variant.get(flag):
+                        continue
+                    entry = {'recipe': recipe_id, 'role': role,
+                             'quantity': 1, 'result': result_id}
+                    if entry not in result['herstellung']:
+                        result['herstellung'].append(entry)
 
             for teil in rezept.get('i') or []:
                 if teil and teil[0]:
@@ -199,14 +208,8 @@ def baue():
                         'criticalBonus': teil[2] if len(teil) > 2 else None,
                     })
                     item_stufen.setdefault(str(teil[0]).upper(), set()).add(stufe)
-            if rezept.get('cr') and rezept['cr'][0]:
-                result = eintrag(rezept['cr'][0])
-                result['herstellung'].append({
-                    'recipe': recipe_id, 'role': 'critical_result',
-                    'quantity': rezept['cr'][1] if len(rezept['cr']) > 1 else None,
-                })
 
-    # 3b. Concrete vendor and barter sources from the Companion exports.
+    # 3b. Concrete vendor sources from the Companion exports.
     if VENDOR_ITEMS.is_file():
         vendor_data = json.loads(VENDOR_ITEMS.read_text(encoding='utf-8'))
         vendors = vendor_data.get('vendors') or {}
@@ -222,22 +225,6 @@ def baue():
                     'id': str(vendor_id).upper(),
                     'name': vendor.get('n') or {},
                 })
-    if RECIPE_SOURCES.is_file():
-        source_data = json.loads(RECIPE_SOURCES.read_text(encoding='utf-8'))
-        for recipe_id, sources in (source_data.get('sources') or {}).items():
-            result_ids = recipe_results.get(str(recipe_id).upper(), [])
-            if not result_ids:
-                continue
-            for source in sources:
-                if source.get('art') != 'tausch':
-                    continue
-                for result_id in result_ids:
-                    eintrag(result_id)['tausch'].append({
-                        'id': str(source.get('id') or ''),
-                        'name': source.get('name') or '',
-                        'title': source.get('titel') or '',
-                        'area': source.get('gebiet') or '',
-                    })
 
     # 4. Ressourcen: Spawn-Tabelle nennt keine Item-IDs, nur Namen und Beruf.
     # Direct names cover the few exact matches. Wood logs and ore are named

@@ -128,6 +128,26 @@ class GegenstandssucheTests(unittest.TestCase):
                         if label == class_item)
             self.assertIn(code, english['classToolKeys'], class_item)
 
+    def test_minimum_level_is_complete_and_kept(self):
+        """The client catalogue misses the minimum level for many items.
+
+        The full export carries it as "ml". The search rows must fall back to
+        it; otherwise a level-130 ring looks usable at level 1.
+        """
+        for sprache in SPRACHEN:
+            daten = lies(sprache)
+            for zeile in daten['e']:
+                self.assertIsInstance(zeile[14], int, (sprache, zeile))
+                self.assertGreaterEqual(zeile[14], 0, (sprache, zeile))
+            mit_stufe = [z for z in daten['e'] if z[14] > 0]
+            self.assertGreater(len(mit_stufe), 52000, sprache)
+            self.assertLess(len(daten['e']) - len(mit_stufe), 500, sprache)
+        ring = next(z for z in lies('de')['e'] if z[0] == '7005FE09')
+        self.assertEqual(ring[7], 456)
+        self.assertEqual(ring[14], 130)
+        cosmetic = next(z for z in lies('de')['e'] if z[0] == '70047CE1')
+        self.assertEqual(cosmetic[14], 100)
+
     def test_every_category_names_its_children(self):
         """A category may never show a count its children cannot add up to."""
         for sprache in SPRACHEN:

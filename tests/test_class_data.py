@@ -51,5 +51,39 @@ class ClassDataTest(unittest.TestCase):
         self.assertIn("mountFilter('items', filterRoots.items", script)
 
 
+    def test_profile_items_use_minimum_level_not_item_level(self):
+        """The class profile asks "can I wear it", not "is it strong for me"."""
+        script = Path('web/klassen.js').read_text()
+        self.assertNotIn('row[7] <= level', script)
+        self.assertNotIn('row[7] > level', script)
+        self.assertIn('row[14] <= level', script)
+        self.assertIn('levelGroups: false', script)
+        self.assertIn("defaultSort: 'itemLevelDesc'", script)
+        self.assertIn("defaultSort: 'levelDesc'", script)
+        # Quests and deeds keep their evidenced level ceiling.
+        self.assertIn('row[2] <= level', script)
+
+
+    def test_profile_levels_match_the_displayed_level(self):
+        rows = build_class_data.catalogue_data('de')
+        deeds = {row[0]: row for row in rows['deeds']}
+        # "Die Neun" is a level-130 deed, "Zurück und wieder hin" level 125.
+        self.assertEqual(deeds['70054875'][2], 130)
+        self.assertEqual(deeds['70066AE3'][2], 125)
+        for kind, path in (('deeds', build_class_data.WEB / 'daten-taten-de.js'),
+                           ('quests', build_class_data.WEB / 'daten-de.js')):
+            real = {row['i']: row
+                    for row in build_class_data.catalogue_rows(path, 'MQL_QUESTS')}
+            for row in rows[kind]:
+                if row[3] and row[3] != 'Hunter':
+                    continue
+                if row[4] and row[4] != 'hobbit':
+                    continue
+                actual = int(float((real.get(row[0]) or {}).get('l') or 0))
+                if (row[2] or 0) <= 123:
+                    self.assertLessEqual(actual, 123,
+                                         (kind, row[0], row[1], row[2], actual))
+
+
 if __name__ == '__main__':
     unittest.main()
