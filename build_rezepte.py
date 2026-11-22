@@ -9,7 +9,13 @@ Reads `recipes.json` (export_recipes.py) and writes `web/rezepte-<language>.js`:
                                critical result name, profession key, recipe ID,
                                tier, crit %, time, crit %, time, result symbol,
                                critical symbol, result item ID, critical item ID,
-                               [[result item ID, name, level, symbol], …]], …]}
+                               [[result item ID, name, level, symbol], …]], …],
+                           b: [[bucket key, bucket label], …],
+                           k: {category name: [bucket key, base key, base type,
+                                               leaf label], …}}
+
+The category tree in `b`/`k` comes from `tools/rezeptkategorien.py`; it lets the
+filter group the flat client categories into bucket → base type → category.
 
     .../.venv/bin/python build_rezepte.py --sprache de --quelle <rezepte-dir>
 """
@@ -20,6 +26,8 @@ import re
 import sys
 import xml.etree.ElementTree as ElementTree
 from pathlib import Path
+
+from tools.rezeptkategorien import REST, anzeigename, baum, basis, unbekannt
 
 HIER = Path(__file__).resolve().parent
 STANDARD = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter/rezepte-2026-11-06/recipes.json')
@@ -109,6 +117,12 @@ def baue(quelle, sprache, variants=None):
     professions = data.get('professions') or {}
     tiers = data.get('tiers') or {}
     categories = data.get('categories') or {}
+    buendel, kategorie_baum, kategorie_hinweise = baum(categories, sprache)
+    # A base type from a client update must not disappear silently.
+    fehlend = unbekannt(basis((eintrag.get('en') or '')) for eintrag in categories.values())
+    if fehlend:
+        kategorie_hinweise.insert(0, 'Ohne Bereich (landet in %s): %s'
+                                  % (REST, ', '.join(fehlend)))
     zeilen = []
     for recipe in data.get('recipes') or []:
         result = items.get(recipe['r'][0])
@@ -163,7 +177,7 @@ def baue(quelle, sprache, variants=None):
             int(result.get('l') or 0),
             profession.get(sprache) or profession.get('en') or '',
             STUFEN_KORREKTUR.get(sprache, {}).get(tier.get(sprache) or '', tier.get(sprache) or tier.get('en') or ''),
-            category.get(sprache) or category.get('en') or '',
+            anzeigename(category, sprache),
             zutaten,
             optional,
             critical,
@@ -185,7 +199,7 @@ def baue(quelle, sprache, variants=None):
             anforderungen(recipe['r'][0]),
         ])
     zeilen.sort(key=lambda row: (row[0].lower(), row[3], row[1]))
-    return zeilen
+    return zeilen, buendel, kategorie_baum, kategorie_hinweise
 
 
 def main():
@@ -196,12 +210,16 @@ def main():
     args = parser.parse_args()
     if not args.quelle.is_file():
         raise SystemExit('Rezeptexport fehlt: %s' % args.quelle)
-    zeilen = baue(args.quelle, args.sprache, result_variants(CLIENT_LORE))
-    text = json.dumps({'r': zeilen}, ensure_ascii=False, separators=(',', ':'))
+    zeilen, buendel, kategorie_baum, kategorie_hinweise = baue(
+        args.quelle, args.sprache, result_variants(CLIENT_LORE))
+    text = json.dumps({'r': zeilen, 'b': buendel, 'k': kategorie_baum},
+                      ensure_ascii=False, separators=(',', ':'))
     ziel = args.ziel / ('rezepte-%s.js' % args.sprache)
     ziel.write_text('/* Written by build_rezepte.py. */\nwindow.MQL_REZEPTE = %s;\n' % text,
                     encoding='utf-8')
     print('%d Rezepte -> %s (%.1f MB)' % (len(zeilen), ziel.name, ziel.stat().st_size / 1048576))
+    for hinweis in kategorie_hinweise:
+        print('Kategorie: %s' % hinweis)
 
 
 if __name__ == '__main__':

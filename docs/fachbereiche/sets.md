@@ -8,8 +8,9 @@ missing values, effects and items are visibly treated as incomplete.
 
 ```bash
 python3 build_sets.py
-python3 tools/build_php_data.py --ziel "$HOME/.cache/llb-php/phpdata"
-python3 -m unittest tests.test_sets tests.test_sets_php tests.test_set_viewmodel -v
+python3 tools/build_sets_client.py
+python3 tools/build_php_data.py --ziel "$HOME/.cache/llb-php/phpdata" --sprache alle
+python3 -m unittest tests.test_sets tests.test_sets_php tests.test_set_viewmodel tests.test_sets_seite tests.test_sets_client -v
 ```
 
 `build_sets.py` reads `sets.xml`, `stats.xml`, `classes.xml` and the
@@ -24,6 +25,11 @@ Output (generated game material, excluded from Git):
 - `daten/sets-suche-de.json`, `…-en.json`, `…-fr.json`: language-correct
   list indices with filter features per part.
 - `daten/sets-pruefung.json`: machine-readable test report.
+- `web/sets-de.js`, `…-en.js`, `…-fr.js` (from `tools/build_sets_client.py`):
+  browser data of the list — the index rows plus the grouped wear requirements
+  of the pieces (`[min, klasse, volk, armour, waffe, extra, scalable, anzahl]`
+  per distinct requirement, from `tools/eignung_teile.py`). ~1.1 MB per
+  language, ~107 KB gzipped.
 
 Source and target paths can be overridden with `--quelle`, `--items`, `--details` and
 `--ziel`. A dedicated target folder is created, but not
@@ -41,10 +47,18 @@ emptied. Mandatory sources do not go missing silently: the build then aborts.
   They are **no** confirmed minimum/maximum and no set filter.
 - Missing items remain as a reference with `available: false` in the set.
   Missing item data, translations and contradictory back references
-  are reported separately. Unavailable parts may get no detail page
-  link.
+  are reported separately. A part without catalogue data keeps its item link
+  when an item page exists (chest loot, barter or another evidenced source),
+  but shows neither rarity colour nor values: the card stays empty, the row is
+  the linked name only. A part without any item page stays plain text and
+  counts repeated names in one row.
 - Filter features remain per part. A class value of part A may
   not produce a false hit with the armour type or level of part B.
+- **Suitability of a set (22.11.2026):** the pieces' wear requirements are
+  grouped per set (`tools/eignung_teile.py`) and judge the set as a whole:
+  „Passt · 3 von 6“, „Zu hoch“, „Nicht für dich“. A piece without a minimum
+  level is not counted, and without an imported character there is no chip.
+  Rules: `docs/oberflaeche/eignung.md`.
 - Empty/unnamable sets remain in the complete model and test report,
   but are missing from the list index. A missing class resolution is not output as
   reliably known or as „alle Klassen“.
@@ -77,20 +91,25 @@ one language. These numbers are test records, no permanent catalogue numbers.
 
 - List: `/de/set/`, `/en/set/`, `/fr/ensemble/`; detail with stable hex ID,
   e.g. `/de/set/70069B64/` for the Umbar set with the eight parts.
-- GET filter: `q`, `class[]`, `category[]`, `armour[]`, `from`, `to`, `page`.
+- GET filter: `q`, `class[]`, `category[]`, `armour[]`, `from`, `to`, `page`,
+  and `eig` (suitability states as `eig=passt,zu-hoch`).
   Multiple values of one group count as OR, different groups as AND.
   All criteria must be met by the same available part. Missing
   data do not count as matching values. Class-specific filters include
   demonstrably unrestricted parts, but not unknown class data.
 - Facets count sets without their own filter selection, with all other
   criteria. Selected zero hits remain visible. 30 results per page.
-- Search/filter/pagination work server-side without JavaScript. On mobile
-  `sets.js` collapses the filters; without JS they remain open and operable.
-  With JavaScript, checkboxes and level changes take over the filter immediately:
-  hits and facets are reloaded without losing filter position/focus.
-  „Anwenden“ is then hidden; without JS the button remains.
-  Outdated requests are aborted, back/forward restores the filters.
-  Language links and canonical/robots data follow the current filter state.
+- **Filtering happens in the browser** (`web/sets-filter.js`, data
+  `web/sets-<sprache>.js`): suitability depends on the imported character, which
+  never leaves the browser. The same GET form with the same parameters is the
+  answer without JavaScript and for search engines; it stays as the fallback and
+  the browser takes over on load (`filter-ui`). The old server filter
+  (`filter-server.js`) no longer mounts on this page. Language links,
+  canonical and `noindex` still come from the server; the server keeps `eig`
+  for them but does not judge it. Filter memory (`mql.filter.sets.<sprache>`)
+  and the address carry search, class, equipment type, armour type, level range,
+  suitability and page number; outdated requests are aborted, back/forward
+  restores the filters.
 - Details use existing item viewmodel values. No second stats calculator,
   no ownership/completeness claim about imported characters.
 - `Sets.php` provides the common PHP/Twig shell and DE/EN/FR texts.
@@ -108,14 +127,19 @@ one language. These numbers are test records, no permanent catalogue numbers.
 
 Generator, PHP filter/routing and viewmodel tests check signs, unsafe
 scaling, text templates, the same filter witnesses, multiple classes, real 404,
-name equality and missing parts. Browser check locally in DE/EN/FR on desktop
-and mobile: filter/reload, Umbar with eight cards and three bonus levels,
-incomplete set, item reference, search/details without JavaScript.
+name equality and missing parts. `tests/test_sets_seite.py` renders a set page
+with all three member shapes (full card, item page without data, unresolved
+name) in DE/EN/FR, so a part without a card can no longer break the page, and
+holds the browser markers of list and set head. `tests/test_sets_client.py`
+checks the browser data (row shape, part count, grouped requirements), and
+`tests/browser_sets.js` checks chips, the share of a half-wearable set, the
+suitability filter in the address and panel, the set head and the phone dialog
+in DE/EN/FR.
 
-The complete Python suite still has the already existing
-error in `test_katalogseiten.test_one_public_address_per_entity`: it expects
-the earlier Apache block `LLB ENTITY URLS` instead of the PHP block. Do not claim
-a complete green test suite from that.
+On 22.11.2026 the complete Python suite runs green (527 tests, including
+`tests/test_katalogseiten.py`, whose earlier note about the Apache block
+`LLB ENTITY URLS` no longer applies to the PHP block). Do not carry that old
+warning forward.
 
 Not yet resolved stat/effect data are data gaps, no silent zeros.
 A further number calculation needs proven units and the correct

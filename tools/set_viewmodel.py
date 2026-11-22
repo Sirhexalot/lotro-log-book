@@ -1,11 +1,17 @@
 """Render-ready set records. Reuse item models; never calculate stats twice."""
-import seo
+try:  # build_php_data inserts tools/ on sys.path; tests import the package.
+    import seo
+    from eignung_teile import anforderungen, gruppiere
+except ImportError:  # pragma: no cover - import path of the test suite
+    from . import seo
+    from .eignung_teile import anforderungen, gruppiere
 
 SEGMENT = {'de': 'set', 'en': 'set', 'fr': 'ensemble'}
 ITEM = {'de': 'gegenstand', 'en': 'item', 'fr': 'objet'}
 
 
-def set_pages(source, lang, item_pages):
+def set_pages(source, lang, item_pages, gegenstaende=None):
+    gegenstaende = gegenstaende or {}
     pages = {}
     for sid, entry in source['sets'].items():
         if not entry['listable']:
@@ -32,6 +38,9 @@ def set_pages(source, lang, item_pages):
                 'id': member['id'], 'name': member['name'][lang],
                 'url': '/%s/%s/%s/' % (lang, ITEM[lang], member['id']),
                 'count': 1, 'missing': False,
+                # Wear requirements for the set chip in the head; empty when the
+                # piece has no minimum level, so nothing is judged without data.
+                'eignung': anforderungen(gegenstaende.get(member['id'])) or {},
                 'card': {key: card.get(key) for key in (
                     'chips', 'armour', 'values', 'bonuses', 'scale', 'symbol',
                     'head_class', 'required_class')} if card else None,
@@ -54,6 +63,7 @@ def set_pages(source, lang, item_pages):
                       'bonuses': bonuses, 'parts': len(entry['members']),
                       'seo': seo.set_(lang, name=entry['name'][lang], parts=len(members),
                                       first=members[0]['name'] if members else ''),
+                      'teile': gruppiere([member['eignung'] for member in members if member.get('eignung')]),
                       'available_parts': sum(bool(m['card']) for m in members)}
     return pages
 

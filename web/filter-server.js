@@ -38,10 +38,15 @@
 		return groups;
 	}
 	var config={area:area,lang:lang,rootUrl:form.action,labels:labels,search:{submit:'enter'},groups:groupsFrom(root),pagination:{kind:'page',size:30},
-		defaults:function(){var filters={};config.groups.forEach(function(g){filters[g.id]=g.kind==='range'?{min:null,max:null}:g.kind==='boolean'?false:[];});return {q:'',filters:filters,sort:'name',pagination:{kind:'page',page:1}};}};
+		defaults:function(){var filters={};config.groups.forEach(function(g){filters[g.id]=g.kind==='range'?{min:null,max:null}:g.kind==='boolean'?false:[];});if(stufeStart){filters.stufe=stufeStart;}return {q:'',filters:filters,sort:'name',pagination:{kind:'page',page:1}};}};
 	var sortLinks=Array.from(root.querySelectorAll('.sets-sort a'));
 	if(sortLinks.length){config.sort={options:sortLinks.map(function(a){return {value:new URL(a.href).searchParams.get('sort')||'name',label:a.textContent};})};}
 	var fields=[{param:'q',path:['q']},{param:'page',path:['pagination','page'],type:'number',omit:1}];
+	/* Eine Stufe, die nicht aus diesem Filter stammt (etwa „Ware für meine
+	   Stufe“ aus dem Spielstand), bleibt beim Filtern in der Adresse. Ohne sie
+	   würde jede Änderung den Filter stillschweigend aufheben. */
+	var stufeStart=Number(new URL(location.href).searchParams.get('stufe'))||null;
+	if(stufeStart){fields.push({param:'stufe',path:['filters','stufe'],type:'number'});}
 	config.groups.forEach(function(g){if(g.kind==='range'){
 		var names=Array.from(form.querySelectorAll('input[type=number]')).map(function(n){return n.name;});
 		fields.push({param:names[0],path:['filters','level','min'],type:'number'},{param:names[1],path:['filters','level','max'],type:'number'});

@@ -34,7 +34,7 @@ final class Titles
                 'title' => 'Titel', 'intro' => 'Alle Titel aus Mittelerde – mit der Tat oder Aufgabe, die sie verleiht.',
                 'search' => 'Titel suchen', 'filter' => 'Filter', 'apply' => 'Anwenden',
                 'reset' => 'Zurücksetzen', 'region' => 'Region', 'area' => 'Landschaft',
-                'wo' => 'Region und Landschaft', 'kind' => 'Herkunft', 'art' => 'Art',
+                'wo' => 'Region und Landschaft', 'kind' => 'Herkunft', 'art' => 'Tatart', 'cat' => 'Titelart',
                 'count' => '%s Titel', 'count_one' => '1 Titel',
                 'empty' => 'Kein passender Titel gefunden.', 'previous' => 'Zurück', 'next' => 'Weiter',
                 'page' => 'Seite %s von %s',
@@ -47,7 +47,7 @@ final class Titles
                 'title' => 'Titles', 'intro' => 'Every title in Middle-earth – with the deed or quest that grants it.',
                 'search' => 'Search for a title', 'filter' => 'Filters', 'apply' => 'Apply',
                 'reset' => 'Reset', 'region' => 'Region', 'area' => 'Landscape',
-                'wo' => 'Region and landscape', 'kind' => 'Origin', 'art' => 'Kind',
+                'wo' => 'Region and landscape', 'kind' => 'Origin', 'art' => 'Deed kind', 'cat' => 'Title kind',
                 'count' => '%s titles', 'count_one' => '1 title',
                 'empty' => 'No matching title found.', 'previous' => 'Previous', 'next' => 'Next',
                 'page' => 'Page %s of %s',
@@ -60,7 +60,7 @@ final class Titles
                 'title' => 'Titres', 'intro' => 'Tous les titres de la Terre du Milieu – avec la prouesse ou la quête qui les accorde.',
                 'search' => 'Chercher un titre', 'filter' => 'Filtres', 'apply' => 'Appliquer',
                 'reset' => 'Réinitialiser', 'region' => 'Région', 'area' => 'Pays',
-                'wo' => 'Région et zone', 'kind' => 'Origine', 'art' => 'Type',
+                'wo' => 'Région et zone', 'kind' => 'Origine', 'art' => 'Type de prouesse', 'cat' => 'Type de titre',
                 'count' => '%s titres', 'count_one' => '1 titre',
                 'empty' => 'Aucun titre correspondant.', 'previous' => 'Précédent', 'next' => 'Suivant',
                 'page' => 'Page %s sur %s',
@@ -83,6 +83,9 @@ final class Titles
             return false;
         }
         if (($f['art'] ?? []) && !array_intersect($row['arten'], $f['art'])) {
+            return false;
+        }
+        if (($f['cat'] ?? []) && !array_intersect($row['cats'] ?? [], $f['cat'])) {
             return false;
         }
         if (($f['region'] ?? []) && !array_intersect($row['regions'], $f['region'])) {
@@ -118,9 +121,10 @@ final class Titles
     private function query(array $input, array $rows): array
     {
         $out = ['q' => is_string($input['q'] ?? '') ? mb_substr(trim($input['q'] ?? ''), 0, 200) : ''];
-        $erlaubt = ['region' => [], 'area' => [], 'art' => []];
+        $erlaubt = ['region' => [], 'area' => [], 'art' => [], 'cat' => []];
         foreach ($rows as $row) {
-            foreach (['region' => 'regions', 'area' => 'areas', 'art' => 'arten'] as $key => $field) {
+            foreach (['region' => 'regions', 'area' => 'areas', 'art' => 'arten',
+                      'cat' => 'cats'] as $key => $field) {
                 foreach ($row[$field] as $wert) {
                     $erlaubt[$key][$wert] = true;
                 }
@@ -136,6 +140,12 @@ final class Titles
         $values = $input['art'] ?? [];
         $values = is_array($values) ? $values : [$values];
         $out['art'] = array_values(array_filter(array_keys($erlaubt['art']),
+            static fn ($v) => in_array($v, $values, true)));
+        $erlaubte_arten = array_keys($erlaubt['cat']);
+        $values = $input['cat'] ?? [];
+        $values = is_array($values) ? $values : [$values];
+        $values = array_map('strval', $values);
+        $out['cat'] = array_values(array_filter($erlaubte_arten,
             static fn ($v) => in_array($v, $values, true)));
         $values = $input['kind'] ?? [];
         $values = is_array($values) ? $values : [$values];
@@ -247,6 +257,20 @@ final class Titles
         }
         $facets['kind'] = $herkunft;
 
+        $arten_titel = [];
+        foreach (array_keys($labels['cat'] ?? []) as $value) {
+            $candidate = $filters;
+            $candidate['cat'] = [$value];
+            $count = count(array_filter($rows, fn ($row) => self::matches($row, $candidate)));
+            $checked = in_array($value, $filters['cat'], true);
+            if ($count || $checked) {
+                $arten_titel[] = ['value' => $value, 'label' => $labels['cat'][$value],
+                                  'count' => $count, 'checked' => $checked];
+            }
+        }
+        usort($arten_titel, static fn ($a, $b) => Sortierung::name($a['label'], $b['label']));
+        $facets['cat'] = $arten_titel;
+
         $area_by_region = [];
         $area_rest = [];
         foreach ($facets['area'] as $option) {
@@ -282,7 +306,11 @@ final class Titles
                 $teile[] = implode(' · ', $namen);
             }
             if ($row['deeds'] + $row['quests'] === 0) {
-                // No origin to list.
+                // No quest or deed awards it: the client's title kind is the
+                // only statement the catalogue can make.
+                foreach (array_slice($row['cats'] ?? [], 0, 2) as $kategorie) {
+                    $teile[] = $kategorie;
+                }
             }
             $row['meta'] = implode(' · ', $teile);
         }

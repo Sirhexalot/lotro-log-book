@@ -21,6 +21,8 @@ brings its own tabs.
 | Companion (`app/companion.twig`) | `companion` | Windows · macOS |
 | Character progress (`app/spielstand.twig`) | `ordner` | Windows · macOS |
 | Crafting (`app/handwerk.twig`) | `handwerk` | Recipes · Resources |
+| Vendor (`vendors/detail.twig`) | `haendler` | Wo · Was |
+| Advisor (`app/ratgeber.twig`) | `rat` | Ausrüstung · Taschen & Bank · Weiterspielen |
 
 ## Files
 
@@ -44,6 +46,9 @@ itself.
 ```
 
 - `kennung` becomes the prefix of the tab IDs (`item-woher`).
+- `titel` (second parameter) is the accessible label of the tab bar: it names
+  the group of tabs („Händlerangaben“, „Quests, deeds and items“), never the
+  entity whose page carries them.
 - `panel` is the ID of the `[role="tabpanel"]`; several tabs may point to the same
   panel (the area page re-renders it).
 - `zahl` is optional. It is rendered only for values greater than zero, as a

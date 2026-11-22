@@ -129,6 +129,18 @@ const VAULT = `<?xml version="1.0" encoding="UTF-8"?>
 		/* Bags: rows, then the search narrows them. */
 		await page.click('[data-reiter-knopf="taschen"]');
 		await page.waitForTimeout(300);
+		/* The panel surface belongs to the tab component (`reiter.css`), so every
+		   panel is framed and lifted off the page background. */
+		const flaeche = await page.evaluate(() => {
+			const btn = document.querySelector('.llb-reiter [aria-selected="true"]');
+			const panel = document.getElementById(btn.getAttribute('aria-controls'));
+			const stil = getComputedStyle(panel);
+			return { rand: stil.borderTopWidth, ton: stil.backgroundColor,
+				seite: getComputedStyle(document.body).backgroundColor };
+		});
+		assert.equal(flaeche.rand, '1px', 'Panel ohne Rahmen');
+		assert.notEqual(flaeche.ton, 'rgba(0, 0, 0, 0)', 'Panel ohne Fläche');
+		assert.notEqual(flaeche.ton, flaeche.seite, 'Panel hebt sich nicht vom Hintergrund ab');
 		assert.equal(await page.locator('.rat-stueck').count(), 2, 'Taschenzeilen fehlen');
 		await page.fill('#rat-suche-feld', 'Ersatz');
 		await page.waitForTimeout(300);

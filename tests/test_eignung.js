@@ -111,4 +111,32 @@ assert.equal(E.zeile(row, E.charakter()).title, 'Mindeststufe 120 · passt zu St
 row[14] = 130;
 assert.equal(E.zeile(row, E.charakter()).code, 'zu-hoch', 'scalable row above the character');
 
-console.log('eignung: thresholds, blocks, not-judgeable and catalogue rows passed');
+// --- set verdict --------------------------------------------------------
+// Grouped entries: [min, klasse, volk, armour, waffe, extra, scalable, anzahl].
+// The word says what the set is, the share says how much of it is wearable now.
+function setVerdict(list) {
+	const result = E.teile(list, E.charakter());
+	return result ? result.label + '|' + result.code : 'kein Chip';
+}
+assert.equal(setVerdict([[120, 'Hunter', '', '', '', 0, 0, 6]]), 'Passt|passt',
+	'every piece fits: one word');
+assert.equal(setVerdict([[120, 'Hunter', '', '', '', 0, 0, 3], [135, 'Hunter', '', '', '', 0, 0, 3]]),
+	'Passt · 3 von 6|passt', 'half the set fits: word plus share');
+assert.equal(setVerdict([[135, 'Hunter', '', '', '', 0, 0, 6]]), 'Zu hoch|zu-hoch',
+	'no piece wearable yet');
+assert.equal(setVerdict([[120, 'Guardian', '', 'HEAVY', '', 0, 0, 6]]), 'Nicht für dich|falsch',
+	'no piece for the class');
+assert.equal(setVerdict([[111, 'Hunter', '', '', '', 0, 0, 6]]), 'Älter|aelter',
+	'every piece 12 levels older');
+assert.equal(setVerdict([[103, 'Hunter', '', '', '', 0, 0, 6]]), 'Überholt|ueberholt',
+	'every piece 20 levels older');
+assert.equal(setVerdict([[120, 'Hunter', '', '', '', 1, 0, 6]]), 'Passt, aber prüfen|achtung',
+	'further requirement only instead of green');
+assert.equal(setVerdict([]), 'kein Chip', 'no piece without requirements');
+assert.equal(E.teile([[120, 'Hunter', '', '', '', 0, 0, 6]], null), null,
+	'no character means no verdict');
+character = {level: '', klasse: '', race: ''};
+assert.equal(E.teile([[120, 'Hunter', '', '', '', 0, 0, 6]], E.charakter()), null,
+	'a character without a level cannot judge');
+
+console.log('eignung: thresholds, blocks, not-judgeable, catalogue rows and set verdicts passed');

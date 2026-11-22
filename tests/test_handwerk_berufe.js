@@ -18,12 +18,16 @@ function run(file, active) {
 	const window = { MQL_SPRACHE: 'de', MQL_T: k => k === 'locale' ? 'de' : k,
 		MQL_SPEICHER: { aktiv: () => active } };
 	const context = vm.createContext({window, document: {
+		documentElement: new Element('html'),
 		getElementById: id => nodes[id], createElement: tag => new Element(tag),
 		createTextNode: text => { const el = new Element('text'); el.textContent = text; return el; }
-	}, URLSearchParams, location: { search: '' }});
-	for (const data of ['referenz.js', 'rezepte-de.js', 'vorkommen-de.js', file]) {
+	}, getComputedStyle: () => ({getPropertyValue: () => ''}),
+	URLSearchParams, location: { search: '' }});
+	for (const data of ['sortierung.js', 'referenz.js', 'rezepte-de.js', 'vorkommen-de.js', file]) {
 		vm.runInContext(fs.readFileSync(path.join(root, 'web', data), 'utf8'), context);
 	}
+	// The page gets MQL_SORT as a global; in the sandbox it lives on window.
+	context.MQL_SORT = window.MQL_SORT;
 	return {nodes, window};
 }
 function all(el) { return [el].concat(el.children.flatMap(all)); }

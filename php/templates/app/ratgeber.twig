@@ -6,7 +6,6 @@
 {% block stile %}
 <link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
-<link rel="stylesheet" href="/reiter.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/ratgeber.css?v={{ asset_stand }}">
 {% endblock %}
@@ -60,6 +59,11 @@
 					<p id="rat-kandidaten-anzahl" class="rat-quiet"></p>
 					<p id="rat-kandidaten-hinweis" class="rat-quiet"></p>
 					<ul id="rat-kandidaten-liste" class="mql-row-list"></ul>
+					<section id="rat-kandidaten-gesperrt" class="rat-kandidaten" hidden aria-live="polite">
+						<h5 id="rat-gesperrt-titel"></h5>
+						<p id="rat-gesperrt-hinweis" class="rat-quiet"></p>
+						<ul id="rat-gesperrt-liste" class="mql-row-list"></ul>
+					</section>
 				</section>
 			</section>
 		</section>

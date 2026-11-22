@@ -1078,7 +1078,7 @@ def main() -> int:
         counts['page-recipe'] = len(recipe_pages)
         write_pages(target, lang, 'recipe', recipe_pages)
 
-        sets = set_pages(set_source, lang, item_pages)
+        sets = set_pages(set_source, lang, item_pages, builder.items)
         data['set'] = {sid: {'id': sid, 'name': row['name']} for sid, row in sets.items()}
         write_shards(target, lang, 'set', data['set'])
         write_pages(target, lang, 'set', sets)

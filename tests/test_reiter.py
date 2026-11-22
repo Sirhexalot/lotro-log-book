@@ -21,6 +21,8 @@ SEITEN = {
     'app/companion.twig': "reiter.reiter('companion'",
     'app/spielstand.twig': "reiter.reiter('ordner'",
     'app/handwerk.twig': "reiter.reiter('handwerk'",
+    'app/ratgeber.twig': "reiter.reiter('rat'",
+    'vendors/detail.twig': "reiter.reiter('haendler'",
 }
 
 
@@ -56,6 +58,21 @@ class ReiterComponentTest(unittest.TestCase):
                            ('web/klassen.css', '.klassen-reiter'),
                            ('web/style.css', '.reiter {')):
             self.assertNotIn(alt, (ROOT / datei).read_text(encoding='utf-8'), datei)
+
+    def test_the_bar_is_not_fenced_off_from_its_panels(self):
+        """The panel surface comes from `.llb-reiter ~ [role="tabpanel"]`, so the
+        bar and its panels have to be siblings. A page that wraps only the bar in
+        its own div (the vendor page did) leaves the panel without frame, surface
+        and padding - it then reads as loose text on the page background."""
+        for name, needle in SEITEN.items():
+            for line in (TEMPLATES / name).read_text(encoding='utf-8').splitlines():
+                if needle in line:
+                    self.assertNotIn('<div', line, name)
+                    self.assertNotIn('</div>', line, name)
+        vendor = (TEMPLATES / 'vendors' / 'detail.twig').read_text(encoding='utf-8')
+        self.assertNotIn('vendor-reiter', vendor)
+        self.assertNotIn('vendor-reiter',
+                         (ROOT / 'web' / 'haendler.css').read_text(encoding='utf-8'))
 
     def test_counts_are_optional(self):
         twig = COMPONENT.read_text(encoding='utf-8')

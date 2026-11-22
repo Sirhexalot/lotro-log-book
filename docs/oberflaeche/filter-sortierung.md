@@ -1,7 +1,8 @@
 # Filter memory and sorting
 
 Status as of 10.11.2026, published. Applies to **items**, **quest givers**
-and **recipes**.
+and **recipes**; since 22.11.2026 also to the **sets** (their list filters in
+the browser like the item search).
 
 ## Behaviour
 
@@ -22,7 +23,7 @@ along now.
 ## Store
 
 - Key: `mql.filter.<bereich>.<sprache>`, content `{"q": "<query>"}`
-- Areas: `gegenstaende`, `auftraggeber`, `rezepte`
+- Areas: `gegenstaende`, `auftraggeber`, `rezepte`, `sets`
 - Only the query string is stored (search, filter, level,
   sorting). No character data, no identifiers.
 - Private mode or full store: reading/writing fails silently, the
@@ -52,6 +53,26 @@ A `?lang=de` does not count as a filter and is replaced.
   without JavaScript and when paging.
 - The sorting is stored like a filter and carried along in language links,
   pagination and canonical. Sorted lists remain `noindex`.
+
+## Recipe categories (22.11.2026)
+
+The client's recipe categories are flat names with a qualifier
+(„Leichte Rüstung (Stufe 40)“, „… (Gilde)“, „… (Lossoth)“), 491 of them.
+The filter groups them into three levels:
+
+| Level | Parameter | Example | Values |
+| --- | --- | --- | --- |
+| Bucket | `ziel` | Rüstung | 14, fixed order |
+| Base type | `grund` | Leichte Rüstung | English key, label per language |
+| Category | `kategorie` | Gilde | the exact client name |
+
+Every level is a checkbox with its own counter; a bucket or base type selects
+all categories below it. The three levels are separate filter groups, so they
+combine with AND like any other pair of groups; the deeper level narrows.
+Buckets start collapsed, a fresh link opens the way to its selection.
+`kategorie` keeps the full category name, so older links and the stored filter
+state keep working. Data: `b` and `k` in `web/rezepte-<sprache>.js`, written by
+`build_rezepte.py` from `tools/rezeptkategorien.py`.
 
 ## Class profile (22.11.2026)
 

@@ -10,6 +10,8 @@ Currently open are:
   entries.
 - [`entitaetenvertrag-abgleich.md`](entitaetenvertrag-abgleich.md) –
   reconcile the entity contract per entity and UI appearance against code and tests.
+- [`flaechen-auftraggeber-landmarke.md`](flaechen-auftraggeber-landmarke.md) –
+  frame quest giver and landmark sections with the shared surface.
 - [`gebietsansicht-gemeinsam.md`](gebietsansicht-gemeinsam.md) – shared
   area view for map and overviews.
 - [`gegenstandsseite-quellgruppen.md`](gegenstandsseite-quellgruppen.md) –

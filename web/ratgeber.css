@@ -35,6 +35,9 @@
 .rat-detail h3 { margin: 0 0 4px; }
 .rat-detail h4 { margin: 10px 0 3px; font-size: var(--text-klein); color: var(--gold); }
 .rat-kandidaten { margin-top: 12px; }
+/* Die gesperrten Stücke stehen als eigener Block unter den Vorschlägen. */
+#rat-kandidaten-gesperrt { margin-top: 18px; border-top: 1px solid var(--rand); padding-top: 12px; }
+#rat-kandidaten-gesperrt h5 { margin: 0 0 4px; font-size: var(--text-klein); color: var(--gold); }
 /* Die Zeilen selbst kommen aus treffer-zeile.js und filter-ui.css; hier bleibt
    nur der Abstand. Keine eigenen Rahmen, sonst zeichnet die Liste doppelt. */
 .rat-kandidaten .mql-row-list { margin-top: 6px; }

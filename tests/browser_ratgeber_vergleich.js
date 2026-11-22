@@ -124,6 +124,21 @@ const GEAR = `<?xml version="1.0" encoding="UTF-8"?>
 		assert.match(haupt.hinweis, /449/, 'nächste Gegenstandsstufe fehlt');
 		assert.equal(haupt.zeilen.length, 0, 'legendäre Waffe bekommt eine Ersatzliste');
 
+		/* Höhere Katalogware wird nicht verschwiegen: sie steht als eigener
+		 * Block darunter, mit dem Grund (Mindeststufe über dem Charakter). */
+		assert.equal(await page.locator('#rat-kandidaten-gesperrt').evaluate((n) => n.hidden), false,
+			'gesperrte Stücke fehlen bei der legendären Waffe');
+		const gesperrt = await page.locator('#rat-gesperrt-liste li.mql-row').evaluateAll((ns) => ns.map((n) => ({
+			text: n.textContent.trim(),
+			stufe: Number((n.textContent.match(/Gegenstandsstufe:\s*([\d.]+)/) || [])[1]?.replace(/\./g, '') || 0),
+			min: Number((n.textContent.match(/Mindeststufe\s*([\d.]+)/) || [])[1]?.replace(/\./g, '') || 0)
+		})));
+		assert.ok(gesperrt.length > 0, 'gesperrte Liste ist leer');
+		gesperrt.forEach((zeile) => {
+			assert.ok(zeile.min > 123, 'gesperrtes Stück ohne Mindeststufe über dem Charakter: ' + zeile.text);
+			assert.ok(zeile.stufe > 415, 'gesperrtes Stück nicht besser als der Bogen: ' + zeile.text);
+		});
+
 		/* A dagger in the client is EITHER_HAND: the off hand must offer items. */
 		const neben = await oeffne('OTHER_MELEE');
 		assert.ok(neben.zeilen.length > 0, 'Nebenhand bleibt leer');

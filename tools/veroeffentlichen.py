@@ -6,7 +6,8 @@ The upload is intentionally opt-in:
     python3 tools/veroeffentlichen.py --ziel "$HOME/.cache/llb-release/current" \
         --daten "$HOME/.cache/llb-php/phpdata" --upload
 
-Sequence: build, upload, clear Twig cache, then the complete live gate.
+Sequence: build, entity status run, upload, clear Twig cache, then the
+complete live gate.
 """
 from __future__ import annotations
 
@@ -36,6 +37,10 @@ def main() -> int:
     parser.add_argument('--migration', action='store_true',
                         help='fehlenden Serverstand initial durch vollständigen Upload anlegen')
     parser.add_argument('--browser', choices=('chromium', 'webkit'), default='chromium')
+    parser.add_argument('--basis', default='http://127.0.0.1:8817',
+                        help='Basis der Entitätenprüfung (Standard: lokale Vorschau)')
+    parser.add_argument('--stichprobe', type=int, default=0,
+                        help='nur so viele Adressen der Entitätenprüfung prüfen')
     parser.add_argument('--upload', action='store_true',
                         help='tatsächlich veröffentlichen; ohne Option wird abgebrochen')
     args = parser.parse_args()
@@ -47,6 +52,13 @@ def main() -> int:
     python = sys.executable
     run([python, 'tools/build_release.py', '--ziel', str(args.ziel),
          '--daten', str(args.daten)])
+    # Every published address must answer 200 before anything goes up: a page
+    # that fails here would fail on the host too, only later and in public.
+    pruefung = [python, 'tools/pruefe_entitaeten.py',
+                '--basis', args.basis, '--daten', str(args.daten)]
+    if args.stichprobe:
+        pruefung += ['--stichprobe', str(args.stichprobe)]
+    run(pruefung)
     upload = [python, 'upload.py', '--quelle', str(args.ziel),
               '--workers', str(args.workers), '--gruppe', args.gruppe]
     if args.migration:

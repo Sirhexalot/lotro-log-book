@@ -40,13 +40,17 @@ async function ready(p){await p.waitForSelector('.filter-ui');await p.waitForFun
 			}
 			const context=await browser.newContext(),p=await context.newPage(),errors=[];p.on('pageerror',e=>errors.push(String(e)));
 			await p.goto(base+'/'+lang+'/'+routes[lang][4]+'/',{waitUntil:'domcontentloaded'});await ready(p);
-			for(const tab of ['rezepte','rohstoffe','berufe']){
+			for(const tab of ['rezepte','rohstoffe']){
 				await p.locator('[data-reiter-knopf="'+tab+'"]').click();await p.waitForFunction(t=>location.hash==='#'+t,tab);await ready(p);
 				assert.equal(await p.locator('.filter-ui').count(),1);
 				if(tab==='rohstoffe'){
+					/* The resource tab keeps only the questions it can answer:
+					   profession, tier and where to gather. */
 					const resourceGroups=await p.evaluate(()=>MQL_CRAFT_FILTER.config.groups.map(g=>g.id));
-					assert.ok(resourceGroups.includes('aktuell'),'resource filter has current-tier limit');
-					assert.ok(resourceGroups.includes('gemeistert'),'resource filter has mastered-tier exclusion');
+					for(const entfernt of ['quelle','optional','aktuell','gemeistert']){
+						assert.equal(resourceGroups.includes(entfernt),false,'resource filter has no '+entfernt+' group');
+					}
+					assert.ok(resourceGroups.includes('region'),'resource filter keeps the gathering area');
 				}
 				for(const width of [390,901,1440]){await p.setViewportSize({width,height:900});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}
 				await p.locator('.filter-panel input[type=checkbox]').first().check();await ready(p);assert.ok(await p.locator('.filter-chips button').count());

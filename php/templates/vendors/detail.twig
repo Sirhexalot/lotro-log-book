@@ -10,12 +10,12 @@
 {% set hat_wo = vendor.places|length > 0 %}
 {% set hat_was = vendor.item_total > 0 or vendor.offer_total > 0 %}
 {% set beide = hat_wo and hat_was %}
-{% if beide %}<div class="vendor-reiter">{{ reiter.reiter('haendler', vendor.name, [
+{% if beide %}{{ reiter.reiter('haendler', gw.tab_label, [
     {key:'wo', label: gw.tab_where, panel:'haendler-tab-wo', zahl: vendor.places|length},
     {key:'was', label: gw.tab_goods, panel:'haendler-tab-was', zahl: vendor.item_total + vendor.offer_total}
-], 'was') }}</div>{% endif %}
+], 'was') }}{% endif %}
 
-{% if hat_wo %}<section id="haendler-tab-wo" class="katalog-abschnitt vendor-places"{% if beide %} role="tabpanel" aria-labelledby="haendler-wo" tabindex="0" hidden{% endif %}>
+{% if hat_wo %}<section id="haendler-tab-wo" class="katalog-abschnitt vendor-places{% if not beide %} llb-flaeche{% endif %}"{% if beide %} role="tabpanel" aria-labelledby="haendler-wo" tabindex="0" hidden{% endif %}>
 <h2>{{ gw.places }}</h2>
 {% set erst = vendor.places|first %}
 <div class="vendor-ortsicht" data-ort-karte>
@@ -32,7 +32,7 @@
 </div>
 </section>{% endif %}
 
-{% if hat_was %}<section id="haendler-tab-was" class="katalog-abschnitt vendor-goods"{% if beide %} role="tabpanel" aria-labelledby="haendler-was" tabindex="0"{% endif %}>
+{% if hat_was %}<section id="haendler-tab-was" class="katalog-abschnitt vendor-goods{% if not beide %} llb-flaeche{% endif %}"{% if beide %} role="tabpanel" aria-labelledby="haendler-was" tabindex="0"{% endif %}>
 {% if vendor.item_total %}<h2>{{ vendor.items_label }}</h2>
 {% if vendor.item_total > 5 %}<div class="vendor-items" data-item-filter-root data-item-ids="{{ vendor.item_ids }}" data-filter-area="haendler">
 <ul class="gs-ergebnis" data-filter-results>{% for item in vendor.items %}<li><a class="gs-zeile" href="{{ item.url }}"><span class="gs-name">{{ item.name }}</span>{% if item.level %}<span class="gs-meta">{{ gw.level }} {{ item.level }}</span>{% endif %}</a></li>{% endfor %}</ul>

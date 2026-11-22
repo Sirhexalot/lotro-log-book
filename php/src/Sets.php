@@ -10,6 +10,9 @@ require_once __DIR__ . '/Sortierung.php';
 final class Sets
 {
     private const PAGE_SIZE = 30;
+    /** Suitability states of `web/eignung.js`, valid in `?eig=` as well. */
+    private const EIGNUNG = ['passt', 'achtung', 'aelter', 'ueberholt', 'zu-hoch',
+        'falsch', 'unklar'];
 
     public function __construct(
         private Catalogue $catalogue,
@@ -40,6 +43,21 @@ final class Sets
                 'scale' => 'Die Werte gelten für den vorliegenden Datenstand. Der Gegenstand ist skalierbar.',
                 'details_description' => 'Setteile, Gegenstandswerte und belegte Bonusangaben.',
                 'filter_note' => 'Filter beziehen sich auf die belegten Angaben der Setteile.',
+                /* Texte der Browser-Liste (web/sets-filter.js); ohne JavaScript
+                   bleiben die Wörter oben in Formular und Seitenzahlen sichtbar. */
+                'klient' => [
+                    'search' => 'Set suchen', 'filter' => 'Filter', 'close' => 'Schließen',
+                    'sort' => 'Sortierung', 'reset' => 'Zurücksetzen', 'more' => 'Weitere anzeigen',
+                    'count' => '%s Sets', 'show' => '%s Sets anzeigen', 'loading' => 'Lade …',
+                    'error' => 'Ergebnisse nicht aktualisiert.', 'retry' => 'Erneut versuchen',
+                    'fallback' => 'Als Seite öffnen', 'invalidRange' => 'Ungültiger Stufenbereich',
+                    'min' => 'Von', 'max' => 'Bis', 'placeholder' => 'Name des Sets oder Setteils',
+                    'category' => 'Ausrüstungsart', 'eignung' => 'Eignung', 'class' => 'Klasse',
+                    'armour' => 'Rüstungsart', 'level' => 'Benötigte Charakterstufe',
+                    'parts' => '%s Teile', 'empty' => 'Keine passenden Sets gefunden.',
+                    'page' => 'Seite %s von %s', 'previous' => 'Zurück', 'next' => 'Weiter',
+                    'pageAria' => 'Seitenzahlen',
+                ],
             ],
             'en' => [
                 'title' => 'Sets', 'intro' => 'Matching equipment and its set bonuses.',
@@ -58,6 +76,19 @@ final class Sets
                 'scale' => 'Values reflect the available data. This item scales with level.',
                 'details_description' => 'Set pieces, item stats and recorded bonus information.',
                 'filter_note' => 'Filters use the recorded properties of the set pieces.',
+                'klient' => [
+                    'search' => 'Search for a set', 'filter' => 'Filters', 'close' => 'Close',
+                    'sort' => 'Sort', 'reset' => 'Reset', 'more' => 'Show more',
+                    'count' => '%s sets', 'show' => 'Show %s sets', 'loading' => 'Loading …',
+                    'error' => 'Results not updated.', 'retry' => 'Try again',
+                    'fallback' => 'Open page', 'invalidRange' => 'Invalid level range',
+                    'min' => 'From', 'max' => 'To', 'placeholder' => 'Name of the set or a piece',
+                    'category' => 'Equipment type', 'eignung' => 'Suitability', 'class' => 'Class',
+                    'armour' => 'Armour type', 'level' => 'Required character level',
+                    'parts' => '%s pieces', 'empty' => 'No matching sets found.',
+                    'page' => 'Page %s of %s', 'previous' => 'Previous', 'next' => 'Next',
+                    'pageAria' => 'Page numbers',
+                ],
             ],
             'fr' => [
                 'title' => 'Ensembles', 'intro' => 'Les pièces d’équipement assorties et leurs bonus d’ensemble.',
@@ -76,6 +107,19 @@ final class Sets
                 'scale' => 'Les valeurs reflètent les données disponibles. Cet objet évolue avec le niveau.',
                 'details_description' => 'Pièces, caractéristiques des objets et bonus attestés.',
                 'filter_note' => 'Les filtres utilisent les propriétés attestées des pièces.',
+                'klient' => [
+                    'search' => 'Chercher un ensemble', 'filter' => 'Filtres', 'close' => 'Fermer',
+                    'sort' => 'Tri', 'reset' => 'Réinitialiser', 'more' => 'Afficher davantage',
+                    'count' => '%s ensembles', 'show' => 'Afficher %s ensembles', 'loading' => 'Chargement …',
+                    'error' => 'Résultats non actualisés.', 'retry' => 'Réessayer',
+                    'fallback' => 'Ouvrir la page', 'invalidRange' => 'Plage de niveaux incorrecte',
+                    'min' => 'De', 'max' => 'À', 'placeholder' => 'Nom de l’ensemble ou d’une pièce',
+                    'category' => 'Type d’équipement', 'eignung' => 'Compatibilité', 'class' => 'Classe',
+                    'armour' => 'Type d’armure', 'level' => 'Niveau de personnage requis',
+                    'parts' => '%s pièces', 'empty' => 'Aucun ensemble correspondant.',
+                    'page' => 'Page %s sur %s', 'previous' => 'Précédent', 'next' => 'Suivant',
+                    'pageAria' => 'Numéros de page',
+                ],
             ],
         ][$lang];
     }
@@ -117,6 +161,14 @@ final class Sets
             $v = $input[$key] ?? '';
             $out[$key] = is_scalar($v) && preg_match('/^\d{1,3}$/', (string) $v) ? (string) (int) $v : '';
         }
+        // The suitability is judged in the browser (the character stays there).
+        // The server knows only the value, and keeps it so that a filtered list
+        // stays noindex and names itself in the canonical address.
+        $eignung = $input['eig'] ?? '';
+        $eignung = is_array($eignung) ? implode(',', array_map('strval', $eignung)) : (string) $eignung;
+        $out['eig'] = implode(',', array_values(array_filter(
+            array_map('trim', explode(',', $eignung)),
+            static fn ($v) => in_array($v, self::EIGNUNG, true))));
         return $out;
     }
 

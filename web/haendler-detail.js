@@ -27,7 +27,7 @@
 	/* ---- tabs ------------------------------------------------------------ */
 
 	function tabs() {
-		var host = document.querySelector('.vendor-reiter .llb-reiter');
+		var host = document.querySelector('.vendor-detail .llb-reiter');
 		if (host && window.MQL_REITER) {
 			window.MQL_REITER.mount(host, { aktiv: 'was', hash: false });
 		}

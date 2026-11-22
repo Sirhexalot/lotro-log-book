@@ -2,6 +2,8 @@
 (function () {
 	'use strict';
 	if (document.querySelector('[data-filter-schema="1"]')) { return; }
+	// Die Set-Liste filtert im Browser (sets-filter.js): kein zweiter Lader.
+	if (document.querySelector('[data-set-browser]')) { return; }
 	var filters = document.querySelector('.sets-filters');
 	if (!filters) { return; }
 	var mobile = window.matchMedia('(max-width: 900px)');

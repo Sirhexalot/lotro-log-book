@@ -128,7 +128,7 @@
 			if (group.kind === 'multi' || group.kind === 'tree') {
 				(value || []).forEach(function (v, i) {
 					var option = (group.options || []).find(function (o) { return o.value === v; });
-					var label = group.kind === 'tree' ? group.pathLabel(v) : option.label;
+					var label = group.kind === 'tree' ? group.pathLabel(v) : (option.chipLabel || option.label);
 					add(JSON.stringify(v), label, value.filter(function (_, n) { return n !== i; }));
 				});
 			} else if (group.kind === 'range' && (value.min !== null || value.max !== null)) {

@@ -32,6 +32,9 @@
 .sets-preview img { flex: 0 0 auto; }
 .sets-preview strong { flex: 1 1 12rem; }
 .sets-pagination { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin: 1.5rem 0; font-size: var(--text-bedienung); }
+/* Der Set-Kopf nennt die Teilezahl und daneben die Eignung für den Charakter. */
+.set-kopf .set-eignung { margin-left: .5rem; }
+.sets-leer { color: var(--schwach); padding: .75rem .25rem; }
 .set-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 1rem; align-items: start; }
 .katalog-inhalt article.set-detail { max-width: none; }
 .set-card { min-width: 0; background: var(--fläche); border-radius: 3px; padding: 1rem; overflow-wrap: anywhere; }

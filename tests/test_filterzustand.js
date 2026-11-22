@@ -83,4 +83,29 @@ rootState = api.reduce(rootConfig,rootState,{type:'togglePath',groupId:'tree',pa
 assert.equal(rootState.filters.tree.length,1,'a parent replaces its children');
 assert.equal(rootState.filters.tree[0].art,undefined);
 
+// Nested options keep one value per level in its own group (crafting category
+// tree: bucket → base type → category). A chip names the exact category even
+// when the tree shows only its qualifier.
+const baum = {
+	groups: [
+		{id:'ziel',kind:'multi',options:[{value:'ruestung',label:'Rüstung',children:[
+			{value:'leichte-ruestung',label:'Leichte Rüstung',groupId:'grund'}]}]},
+		{id:'grund',kind:'multi',nestedOnly:true,options:[{value:'leichte-ruestung',label:'Leichte Rüstung',children:[
+			{value:'Leichte Rüstung (Gilde)',label:'Gilde',chipLabel:'Leichte Rüstung (Gilde)',groupId:'kategorie'}]}]},
+		{id:'kategorie',kind:'multi',nestedOnly:true,options:[
+			{value:'Leichte Rüstung (Gilde)',label:'Gilde',chipLabel:'Leichte Rüstung (Gilde)'}]}
+	],
+	pagination: {size:50},
+	defaults: () => ({q:'',filters:{ziel:[],grund:[],kategorie:[]},sort:'name',pagination:{kind:'limit',limit:50}})
+};
+const baumState = api.normalize(baum,{filters:{ziel:['ruestung'],grund:['leichte-ruestung'],
+	kategorie:['Leichte Rüstung (Gilde)','Unbekannt']}}).state;
+assert.deepEqual(baumState.filters.ziel,['ruestung']);
+assert.deepEqual(baumState.filters.grund,['leichte-ruestung']);
+assert.deepEqual(baumState.filters.kategorie,['Leichte Rüstung (Gilde)']);
+assert.deepEqual(api.chips(baum,baumState).map(chip => chip.label),
+	['Rüstung','Leichte Rüstung','Leichte Rüstung (Gilde)']);
+const ohneBlatt = api.reduce(baum,baumState,api.chips(baum,baumState)[2].action).state;
+assert.deepEqual(ohneBlatt.filters.kategorie,[]);
+
 console.log('Filter state: normalization, validation, branch deduplication, reset and pagination passed.');

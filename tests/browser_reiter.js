@@ -21,7 +21,10 @@ const seiten = [
 	{ pfad: '/de/gebiet/268437576/', reiter: 3 },
 	{ pfad: '/de/handwerk/rezepte/', reiter: 2 },
 	{ pfad: '/de/companion/', reiter: 2 },
-	{ pfad: '/de/spielstand/', reiter: 2 }
+	{ pfad: '/de/spielstand/', reiter: 2 },
+	/* The vendor page (Wo/Was) must carry the panel surface too; its bar used to
+	   sit in an own wrapper, so the panel lost frame and background. */
+	{ pfad: '/de/haendler/70022A75/', reiter: 2 }
 ];
 
 async function zustand(page) {

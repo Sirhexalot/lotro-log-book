@@ -125,7 +125,11 @@
 				if (v===(settings.defaultSort||'name')) { return null; }
 				return v==='itemLevel'?'stufe':v==='itemLevelDesc'?'stufe-ab':'name';
 			}});
-		if(zeigeEignung){codecFields.push({param:'eig',path:['filters','eignung'],type:'csv'});}
+		/* Eignungswerte sind Wörter, keine Zahlen: der gemeinsame Codec würde
+		   `csv` in Zahlen wandeln und `eig=passt` verlieren. */
+		if(zeigeEignung){codecFields.push({param:'eig',path:['filters','eignung'],
+			decode:function (wert) { return String(wert).split(',').filter(Boolean); },
+			encode:function (werte) { return werte && werte.length ? werte.join(',') : null; }});}
 		if(showSource){codecFields.push({param:'quelle',path:['filters','source'],
 			decode:function (v) { return [v]; },encode:function (v) { return v[0]||null; }});}
 		if(zeigeSchaden){codecFields.push({param:'schaden',path:['filters','schaden'],

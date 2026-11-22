@@ -120,6 +120,12 @@ def baue_epik() -> None:
                    cwd=str(HIER), check=True)
 
 
+def baue_sets_client() -> None:
+    """Browser data of the set list; the suitability filter lives in the browser."""
+    subprocess.run([sys.executable, str(HIER / 'tools' / 'build_sets_client.py')],
+                   cwd=str(HIER), check=True)
+
+
 def baue_stand(ziel: Path) -> None:
     """Give cached map scripts and lazy shards a content-based version stamp."""
     dateien = list(ziel.glob('*.js')) + list(ziel.glob('*.css'))
@@ -249,6 +255,10 @@ def pruefen(ziel: Path) -> list[str]:
             fehler.append('fehlt: klassen-katalog-%s.js' % sprache)
         if not (ziel / ('gegenstaende-%s.js' % sprache)).is_file():
             fehler.append('fehlt: gegenstaende-%s.js' % sprache)
+        # Browser data of the set list (tools/build_sets_client.py); the
+        # suitability filter needs the piece requirements in the browser.
+        if not (ziel / ('sets-%s.js' % sprache)).is_file():
+            fehler.append('fehlt: sets-%s.js' % sprache)
         if not (ziel / 'phpdata' / sprache / 'sets-index.json').is_file():
             fehler.append('fehlt: phpdata/' + sprache + '/sets-index.json')
         if not (ziel / 'phpdata' / sprache / 'givers-index.json').is_file():
@@ -297,6 +307,7 @@ def main() -> int:
 
     baue_karten_kurz(ziel)
     baue_epik()
+    baue_sets_client()
     # Generate the start files and both shard trees before copying web/.
     # Otherwise a release could contain stale shards from the previous build.
     baue_gegenstandssuche()

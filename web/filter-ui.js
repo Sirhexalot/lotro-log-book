@@ -103,6 +103,14 @@
 			if (group.kind === 'tree') { return v.some(function (p) { return JSON.stringify(p) === JSON.stringify(value); }); }
 			return Array.isArray(v) ? v.indexOf(value)>=0 : v === value;
 		}
+		/** Is this node or one of its children selected? Keeps a deep link visible. */
+		function selectedBelow(option, group) {
+			var effective = option.groupId ? config.groups.find(function (g) { return g.id === option.groupId; }) : group;
+			if (!effective) { return false; }
+			var value = effective.kind === 'tree' ? option.path : option.value;
+			if (selected(effective, value)) { return true; }
+			return (option.children || []).some(function (child) { return selectedBelow(child, group); });
+		}
 		function markWrappedOptions() {
 			groups.querySelectorAll('.filter-option').forEach(function (label) {
 				var span = label.querySelector(':scope > span');
@@ -175,7 +183,11 @@
 							label.append(input,node('span',option.label),node('small',facet ? facet.count.toLocaleString(config.lang) : ''));
 							if (option.children && option.children.length) {
 								var branch = node('details'); branch.dataset.key = group.id+':'+JSON.stringify(value); branch.className = 'filter-branch'; branch.style.setProperty('--depth',depth);
-								branch.open = openStates.get(branch.dataset.key) === true;
+								// A branch the user opened or closed keeps that state; on a fresh
+								// link the way to a selected value opens itself.
+								branch.open = openStates.has(branch.dataset.key)
+									? openStates.get(branch.dataset.key) === true
+									: selectedBelow(option, group);
 								var summary = node('summary'); summary.style.setProperty('--depth',depth);
 								summary.append(arrow(),label); branch.appendChild(summary);
 								draw(option.children,branch,depth+1); parent.appendChild(branch);

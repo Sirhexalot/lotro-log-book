@@ -1,11 +1,9 @@
 /* Vendor detail page: the where/what tabs, the place picker and the barter list.
  *
- * The rows reuse the catalogue row markup (`gs-zeile`), so only the place
- * picker needs its own rules: one map, a compact list of every known spot. */
-
-.vendor-reiter {
-	margin: 0 0 18px;
-}
+ * The tab bar and its panels come from the shared component (`reiter.css`,
+ * `components/reiter.twig`); nothing in this file frames or colours a tab. The
+ * rows reuse the catalogue row markup (`gs-zeile`), so only the place picker
+ * needs its own rules: one map, a compact list of every known spot. */
 
 .vendor-ortsicht {
 	display: grid;
@@ -86,7 +84,9 @@
 	.ort-aktionen { flex-direction: column; gap: 2px; }
 }
 
-.vendor-goods h2 {
+/* The first heading stands on the panel's own padding; only the second block
+   needs air above it. */
+.vendor-goods h2:not(:first-child) {
 	margin-top: 18px;
 }
 

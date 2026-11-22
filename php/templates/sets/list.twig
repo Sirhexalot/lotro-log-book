@@ -1,7 +1,10 @@
 {% extends 'layout.twig' %}
 {% import 'entity/_result_row.twig' as result %}
+{# Die Liste filtert im Browser (`web/sets-filter.js`), weil die Eignung am
+   importierten Charakter hängt und der im Browser bleibt. Das GET-Formular
+   bleibt die Antwort ohne JavaScript und die Fassung für Suchmaschinen. #}
 {% block inhalt %}
-<div class="sets-browser" data-filter-schema="1" data-filter-area="sets" data-filter-total="{{ count }}">
+<div class="sets-browser" data-set-browser data-filter-area="sets" data-set-texte="{{ sw.klient|json_encode|e('html_attr') }}">
 <h1>{{ sw.title }}</h1><p>{{ sw.intro }}</p>
 <form method="get" action="{{ list_url }}" class="sets-form" data-filter-fallback>
     <div class="sets-search"><label for="set-query">{{ sw.search }}</label><div><input type="search" id="set-query" name="q" value="{{ filters.q }}"><button type="submit">{{ sw.search }}</button></div></div>
@@ -27,4 +30,8 @@
     </div>
 </form>
 </div>
+{% endblock %}
+{% block page_scripts %}
+<script src="/sets-{{ lang }}.js?v={{ asset_stand }}" defer></script>
+<script src="/sets-filter.js?v={{ asset_stand }}" defer></script>
 {% endblock %}

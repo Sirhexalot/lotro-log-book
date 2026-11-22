@@ -373,6 +373,135 @@
 		return ref.kat || '';
 	}
 
+
+	/** Passt die Art des Katalogeintrags zu der des getragenen Stücks? */
+	function artPasst(row, daten, ref) {
+		var art = vergleichsart(ref);
+		if (art === 'ARMOUR') {
+			if (daten.katKey[row[3]] !== 'ARMOUR') { return false; }
+			return !(ref.at && row[12] && row[12] !== ref.at);
+		}
+		if (art === 'WEAPON' || art === 'LEGENDARY_WEAPON' || art === 'LEGENDARY_WEAPON2') {
+			return daten.katKey[row[3]] === 'WEAPON';
+		}
+		return !art || daten.katKey[row[3]] === art;
+	}
+
+	/** Mehrere Klassen oder Völker stehen durch Semikolon getrennt im Katalog. */
+	function passtZu(wert, eigen) {
+		if (!wert) { return true; }
+		var eigenes = String(eigen || '').toLowerCase();
+		if (!eigenes) { return false; }
+		return String(wert).toLowerCase().split(/[;,]/).some(function (teil) {
+			return teil.trim() === eigenes;
+		});
+	}
+
+	/**
+	 * Die Auswahl für einen Platz, getrennt von der Darstellung.
+	 *
+	 * `kandidaten` sind tragbar und besser als die Bezugsstufe. `gesperrt` sind
+	 * besser, aber noch nicht tragbar – zu hohe Mindeststufe, andere Klasse oder
+	 * anderes Volk. Beide Listen sind nach wirksamer Gegenstandsstufe sortiert.
+	 */
+	function waehleKandidaten(daten, ref, stufe, plaetze) {
+		var kandidaten = [], gesperrt = [], gesehen = {}, gesehenSperr = {};
+		daten.e.forEach(function (row) {
+			if (row[5] < 0 || plaetze.indexOf(daten.platzKey[row[5]]) < 0) { return; }
+			// Ohne Mindeststufe ist keine Tragevoraussetzung belegt: kein Vorschlag.
+			if (!row[14]) { return; }
+			if (!artPasst(row, daten, ref)) { return; }
+			var wirksam = wirksameStufe(row, stufe);
+			var eignung = window.MQL_EIGNUNG && window.MQL_EIGNUNG.zeile(row,
+				{stufe: stufe, klasse: charakter.klasse || '', volk: charakter.race || ''});
+			var gruende = [];
+			if (row[14] && row[14] > stufe) { gruende.push(['stufe', row[14]]); }
+			if (row[10] && !passtZu(row[10], charakter.klasse)) { gruende.push(['klasse', row[10]]); }
+			if (row[11] && !passtZu(row[11], charakter.race)) { gruende.push(['volk', row[11]]); }
+			if (!gruende.length && eignung && eignung.code === 'zu-hoch' && row[14]) {
+				gruende.push(['stufe', row[14]]);
+			}
+			var schluessel = sauber(row[1]) + '|' + wirksam;
+			if (gruende.length) {
+				// Gesperrt zählt nur, wenn das Stück ohne das Hindernis besser wäre.
+				if (!ref.level || wirksam <= ref.level) { return; }
+				// Eine Zeile je Art, Stufe und Klasse: die Katalogfamilien
+				// unterscheiden sich nur im Beinamen und würden die Liste füllen.
+				var gruppe = row[6] + '|' + wirksam + '|' + (row[10] || '');
+				if (gesehenSperr[gruppe]) { return; }
+				gesehenSperr[gruppe] = true;
+				gesperrt.push({row: row, wirksam: wirksam, gruende: gruende,
+					nieTragbar: gruende.some(function (grund) { return grund[0] !== 'stufe'; })});
+				return;
+			}
+			if (eignung && ['falsch', 'zu-hoch', 'unklar'].indexOf(eignung.code) >= 0) { return; }
+			// Die Bezugsstufe entscheidet: ein Stück mit 402 schlägt keins mit 400.
+			if (ref.level && wirksam <= ref.level) { return; }
+			if (gesehen[schluessel]) { return; }
+			gesehen[schluessel] = true;
+			kandidaten.push(row);
+		});
+		function reihenfolge(a, b) {
+			var links = a.wirksam || wirksameStufe(a, stufe);
+			var rechts = b.wirksam || wirksameStufe(b, stufe);
+			return rechts - links ||
+				(Number((b.row || b)[14]) || 0) - (Number((a.row || a)[14]) || 0) ||
+				String((a.row || a)[1]).localeCompare(String((b.row || b)[1]), sprache);
+		}
+		kandidaten.sort(reihenfolge);
+		// Stücke einer fremden Klasse oder eines fremden Volkes passen nie; sie
+		// stehen nur dann da, wenn es sonst nichts Höheres gibt.
+		var spaeter = gesperrt.filter(function (eintrag) { return !eintrag.nieTragbar; });
+		if (spaeter.length) { gesperrt = spaeter; }
+		// Gesperrtes nach Stärke, bei Gleichstand die früher erreichbare Stufe.
+		gesperrt.sort(function (a, b) {
+			return b.wirksam - a.wirksam ||
+				(Number(a.row[14]) || 0) - (Number(b.row[14]) || 0) ||
+				String(a.row[1]).localeCompare(String(b.row[1]), sprache);
+		});
+		return {kandidaten: kandidaten, gesperrt: gesperrt};
+	}
+
+	/** „Höher, aber noch nicht tragbar“: was der Katalog bietet und warum es wartet. */
+	function zeigeGesperrt(daten, ref, stufe) {
+		var abschnitt = el('rat-kandidaten-gesperrt');
+		var liste = el('rat-gesperrt-liste');
+		if (!abschnitt || !liste) { return; }
+		var rowUI = window.MQL_TREFFERZEILE;
+		var auswahl = waehleKandidaten(daten, ref, stufe,
+			KATALOG_PLATZ[gewaehlterPlatz] || []).gesperrt.slice(0, 5);
+		liste.textContent = '';
+		if (!auswahl.length || !rowUI) { abschnitt.hidden = true; return; }
+		abschnitt.hidden = false;
+		text('rat-gesperrt-titel', t('rat_gesperrt_titel'));
+		text('rat-gesperrt-hinweis', t('rat_gesperrt_hinweis'));
+		rowUI.header(liste, {progress: false, levelHeading: rowUI.words.itemLevel});
+		auswahl.forEach(function (eintrag) {
+			var row = eintrag.row, meta = [];
+			eintrag.gruende.forEach(function (grund) {
+				if (grund[0] === 'stufe') {
+					meta.push(t('rat_mindeststufe') + ' ' + zahl(grund[1]));
+				} else if (grund[0] === 'klasse') {
+					meta.push(t('rat_gesperrt_klasse').replace('{klasse}', grund[1]));
+				} else {
+					meta.push(t('rat_gesperrt_volk').replace('{volk}', grund[1]));
+				}
+			});
+			if (row[18] >= 0) { meta.push(t('rat_skaliert').replace('{stufe}', zahl(stufe))); }
+			liste.appendChild(rowUI.row(liste, {
+				href: '/' + sprache + '/gegenstand/' + row[0] + '/',
+				image: row[2] || null,
+				icon: 'gegenstand',
+				name: sauber(row[1]),
+				meta: meta.filter(Boolean).join(' · '),
+				levelHeading: rowUI.words.itemLevel,
+				values: [{label: rowUI.words.itemLevel, value: zahl(eintrag.wirksam)}],
+				eignung: null,
+				progress: null
+			}));
+		});
+	}
+
 	/** Legendäre Waffen vergleicht man nicht mit Katalogware, sondern über das Umschmieden. */
 	function zeigeUmschmieden(ref, liste, hinweis) {
 		ladeUmschmieden().then(function (tabelle) {
@@ -404,50 +533,26 @@
 		bereich.hidden = false;
 		text('rat-kandidaten-hinweis', t('rat_kandidaten_laden'));
 		liste.textContent = '';
+		var gesperrt = el('rat-kandidaten-gesperrt');
+		if (gesperrt) { gesperrt.hidden = true; }
 		var aktuell = aktuelleAusrustung;
 		Promise.all([ladeGegenstandskatalog(), ladeSkalierung()]).then(function (geladen) {
 			var daten = geladen[0];
 			/* The full catalogue loads only after the player asks for candidates. */
 			if (!bereich.isConnected || bereich.hidden || !charakter) { return; }
 			var ref = bezug(aktuell && aktuell[1], aktuell, daten);
+			var stufe = Number(charakter.level) || 0;
 			if (ref.kat === 'LEGENDARY_WEAPON' || ref.kat === 'LEGENDARY_WEAPON2') {
 				text('rat-kandidaten-titel', t('rat_umschmieden_titel'));
 				zeigeUmschmieden(ref, liste, 'rat-kandidaten-hinweis');
+				// Höhere Katalogware gibt es trotzdem; sie wird genannt, nicht verschwiegen.
+				zeigeGesperrt(daten, ref, stufe);
 				return;
 			}
 			text('rat-kandidaten-titel', t(ref.level
 				? 'rat_kandidaten_titel' : 'rat_kandidaten_titel_platz'));
 			var erlaubtePlaetze = KATALOG_PLATZ[gewaehlterPlatz] || [];
-			var stufe = Number(charakter.level) || 0;
-			var gesehen = {};
-			var kandidaten = daten.e.filter(function (row) {
-				if (row[5] < 0 || erlaubtePlaetze.indexOf(daten.platzKey[row[5]]) < 0) { return false; }
-				if (!row[14] || row[14] > stufe) { return false; }
-				// Dieselbe Art wie das getragene Stück: mittelschwere Rüstung bleibt
-				// mittelschwer, Waffen bleiben Waffen, Schmuck bleibt Schmuck.
-				var art = vergleichsart(ref);
-				if (art === 'ARMOUR') {
-					if (daten.katKey[row[3]] !== 'ARMOUR') { return false; }
-					if (ref.at && row[12] && row[12] !== ref.at) { return false; }
-				} else if (art === 'WEAPON' || art === 'LEGENDARY_WEAPON' || art === 'LEGENDARY_WEAPON2') {
-					if (daten.katKey[row[3]] !== 'WEAPON') { return false; }
-				} else if (art && daten.katKey[row[3]] !== art) {
-					return false;
-				}
-				var eignung = window.MQL_EIGNUNG && window.MQL_EIGNUNG.zeile(row,
-					{stufe: stufe, klasse: charakter.klasse || '', volk: charakter.race || ''});
-				if (eignung && ['falsch', 'zu-hoch', 'unklar'].indexOf(eignung.code) >= 0) { return false; }
-				// Die Bezugsstufe entscheidet: ein Stück mit 402 schlägt keins mit 400.
-				if (ref.level && wirksameStufe(row, stufe) <= ref.level) { return false; }
-				var schluessel = sauber(row[1]) + '|' + wirksameStufe(row, stufe) + '|' + row[12] + '|' + row[13];
-				if (gesehen[schluessel]) { return false; }
-				gesehen[schluessel] = true;
-				return true;
-			}).sort(function (a, b) {
-				return wirksameStufe(b, stufe) - wirksameStufe(a, stufe) ||
-					(Number(b[14]) || 0) - (Number(a[14]) || 0) ||
-					String(a[1]).localeCompare(String(b[1]), sprache);
-			});
+			var kandidaten = waehleKandidaten(daten, ref, stufe, erlaubtePlaetze).kandidaten;
 			var gesamt = kandidaten.length;
 			kandidaten = kandidaten.slice(0, 8);
 			/* Die Zeilen kommen aus demselben Baustein wie jede andere Liste:
@@ -458,10 +563,13 @@
 				text('rat-kandidaten-anzahl', '');
 				text('rat-kandidaten-hinweis', t(!ref.level ? 'rat_kandidaten_ohne_stand'
 					: (ref.stufeQuelle === 'import' ? 'rat_kandidaten_ohne' : 'rat_kandidaten_ohne_ref')));
+				// Auch ohne Vorschlag bleibt sichtbar, was der Katalog Höheres hat.
+				zeigeGesperrt(daten, ref, stufe);
 				return;
 			}
 			text('rat-kandidaten-hinweis', t(ref.level ? 'rat_kandidaten_hinweis'
 				: 'rat_kandidaten_ohne_vergleich'));
+			zeigeGesperrt(daten, ref, stufe);
 			text('rat-kandidaten-anzahl', t('rat_kandidaten_anzahl')
 				.replace('{gezeigt}', zahl(kandidaten.length))
 				.replace('{gesamt}', zahl(gesamt)));

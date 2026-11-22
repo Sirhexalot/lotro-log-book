@@ -21,6 +21,9 @@
 	var SPIELGRENZE = 160;
 	var GRUEN_BIS = 10;
 	var GRAU_AB = 15;
+	/* Was „jetzt tragbar“ heißt, entscheidet das Set-Urteil (teile()). */
+	var IST_JETZT = {passt: 1, achtung: 1, aelter: 1, ueberholt: 1};
+	var TEIL_GRUND = {volk: 'teilVolk', ruestung: 'teilRuestung', waffe: 'teilWaffe'};
 
 	var W = {
 		de: {
@@ -45,7 +48,20 @@
 			titelSkaliert: 'Skalierbarer Gegenstand; die passende Ausbaustufe fehlt im Katalog.',
 			chipPasst: 'Passt', chipAchtung: 'Passt, aber prüfen', chipAelter: 'Älter',
 			chipUeberholt: 'Überholt', chipZuHoch: 'Zu hoch', chipFalsch: 'Nicht für dich',
-			chipUnklar: 'Unklar'
+			chipUnklar: 'Unklar',
+			teil: 'Passt · {n} von {m}', teilTitel: '{n} von {m} Teilen passen jetzt · {grund}',
+			alle: 'Alle {m} Teile passen zu Stufe {stufe}',
+			alleAchtung: 'Alle {m} Teile tragbar · weitere Voraussetzung (Ruf, Tugend, Effekt oder Handwerk)',
+			alleStufe: 'Alle {m} Teile tragbar · {text}',
+			zuHochAlle: 'Kein Teil jetzt tragbar · {grund}',
+			keinTeil: 'Kein Teil für deine Klasse oder Rüstungsart · {grund}',
+			stueckTeil: 'Teil', stueckTeile: 'Teile', abStufe: 'ab Stufe {ml}',
+			stufeUnklar: 'Stufe unklar', mitVoraussetzung: 'mit weiterer Voraussetzung',
+			teilVolk: 'nicht für dein Volk',
+			teilRuestung: 'in einer Rüstungsart, die deine Klasse nicht trägt',
+			teilWaffe: 'mit einer Waffenart, die deine Klasse nicht führt',
+			teilAllgemein: 'nicht tragbar',
+			teileSkaliert: 'Die Teile skalieren über deiner Stufe; ihr Wert ist hier nicht bestimmbar.'
 		},
 		en: {
 			passt: 'fits level {stufe}', achtung: 'check requirement',
@@ -69,7 +85,20 @@
 			titelSkaliert: 'Scalable item; the matching scale step is missing from the catalogue.',
 			chipPasst: 'Fits', chipAchtung: 'Fits, check', chipAelter: 'Older',
 			chipUeberholt: 'Outdated', chipZuHoch: 'Too high', chipFalsch: 'Not for you',
-			chipUnklar: 'Unclear'
+			chipUnklar: 'Unclear',
+			teil: 'Fits · {n} of {m}', teilTitel: '{n} of {m} pieces fit now · {grund}',
+			alle: 'All {m} pieces fit level {stufe}',
+			alleAchtung: 'All {m} pieces wearable · further requirement (reputation, virtue, effect or craft)',
+			alleStufe: 'All {m} pieces wearable · {text}',
+			zuHochAlle: 'No piece wearable yet · {grund}',
+			keinTeil: 'No piece for your class or armour type · {grund}',
+			stueckTeil: 'piece', stueckTeile: 'pieces', abStufe: 'from level {ml}',
+			stufeUnklar: 'level unclear', mitVoraussetzung: 'with a further requirement',
+			teilVolk: 'not for your race',
+			teilRuestung: 'in an armour type your class does not wear',
+			teilWaffe: 'with a weapon type your class does not use',
+			teilAllgemein: 'not wearable',
+			teileSkaliert: 'The pieces scale above your level; their value cannot be judged here.'
 		},
 		fr: {
 			passt: 'convient au niveau {stufe}', achtung: 'vérifier la condition',
@@ -93,7 +122,20 @@
 			titelSkaliert: 'Objet évolutif ; le palier correspondant manque au catalogue.',
 			chipPasst: 'Convient', chipAchtung: 'Convient, à vérifier', chipAelter: 'Ancien',
 			chipUeberholt: 'Dépassé', chipZuHoch: 'Trop haut', chipFalsch: 'Pas pour vous',
-			chipUnklar: 'Incertain'
+			chipUnklar: 'Incertain',
+			teil: 'Convient · {n} sur {m}', teilTitel: '{n} pièces sur {m} conviennent maintenant · {grund}',
+			alle: 'Les {m} pièces conviennent au niveau {stufe}',
+			alleAchtung: 'Les {m} pièces portables · condition supplémentaire (réputation, vertu, effet ou métier)',
+			alleStufe: 'Les {m} pièces portables · {text}',
+			zuHochAlle: 'Aucune pièce portable pour l’instant · {grund}',
+			keinTeil: 'Aucune pièce pour votre classe ou type d’armure · {grund}',
+			stueckTeil: 'pièce', stueckTeile: 'pièces', abStufe: 'à partir du niveau {ml}',
+			stufeUnklar: 'niveau incertain', mitVoraussetzung: 'avec une condition supplémentaire',
+			teilVolk: 'pas pour votre race',
+			teilRuestung: 'd’un type d’armure que votre classe ne porte pas',
+			teilWaffe: 'd’un type d’arme que votre classe n’utilise pas',
+			teilAllgemein: 'non portable',
+			teileSkaliert: 'Les pièces évoluent au-dessus de votre niveau ; leur valeur ne peut pas être déterminée ici.'
 		}
 	};
 	var w = W[SPRACHE] || W.de;
@@ -227,6 +269,92 @@
 		}, ch);
 	}
 
+	/**
+	 * Eignung eines ganzen Sets aus seinen Setteilen.
+	 *
+	 * Die Teile tragen eigene Anforderungen (Gruppe wie in
+	 * `tools/eignung_teile.py`: Mindeststufe, Klasse, Volk, Rüstungs- und
+	 * Waffenart, weitere Voraussetzung, skalierbar, Anzahl). Ein einzelnes Wort
+	 * wäre bei einem Set gelogen: Es kann halb tragbar sein. Deshalb nennt der
+	 * Chip Wort und Anteil („Passt · 3 von 6“), und die Farbe folgt dem, was
+	 * jetzt geht — grün, sobald mindestens ein Teil passt, rot nur, wenn kein
+	 * Teil jetzt tragbar ist.
+	 *
+	 * Regeln (22.11.2026 mit dem Nutzer festgelegt):
+	 *   alle Teile tragbar   Wort des stärksten Teils (Passt / Älter / Überholt)
+	 *   einige tragbar       „Passt · n von m“, Tooltip nennt die fehlenden
+	 *   kein Teil tragbar    „Zu hoch“ (nur Stufe) vor „Nicht für dich“ (Klasse)
+	 *   nur skalierbar       „Unklar“
+	 */
+	function teile(liste, ch) {
+		if (!Array.isArray(liste) || !liste.length || !ch) { return null; }
+		var gruppen = [], gesamt = 0, jetzt = 0;
+		liste.forEach(function (eintrag) {
+			var anzahl = Math.max(1, Math.round(Number(eintrag[7]) || 1));
+			var eignung = ton({ml: eintrag[0], rk: eintrag[1], rr: eintrag[2],
+				at: eintrag[3], wt: eintrag[4], ex: eintrag[5], sc: eintrag[6]}, ch);
+			if (!eignung) { return; }
+			gesamt += anzahl;
+			if (IST_JETZT[eignung.code]) { jetzt += anzahl; }
+			gruppen.push({eignung: eignung, anzahl: anzahl, ml: zahl(eintrag[0])});
+		});
+		if (!gesamt) { return null; }
+		function grund(gruppe) {
+			var code = gruppe.eignung.code;
+			if (code === 'zu-hoch') { return fuellen(w.abStufe, {ml: gruppe.ml}); }
+			if (code === 'achtung') { return w.mitVoraussetzung; }
+			if (code === 'unklar') { return w.stufeUnklar; }
+			var schluessel = gruppe.eignung.grund;
+			if (schluessel === 'klasse') { return gruppe.eignung.text; }
+			return w[TEIL_GRUND[schluessel]] || w.teilAllgemein;
+		}
+		function gruende(auswahl) {
+			return auswahl.map(function (gruppe) {
+				return stueck(gruppe.anzahl) + ' ' + grund(gruppe);
+			}).join(' · ');
+		}
+		var offen = gruppen.filter(function (gruppe) { return !IST_JETZT[gruppe.eignung.code]; });
+		if (!offen.length) {
+			/* Alle Teile tragbar: das stärkste Teil bestimmt das Wort, denn ein
+			 * Set beurteilt man an dem Teil, das man zuletzt anlegen kann. */
+			var staerkstes = gruppen.slice().sort(function (a, b) { return b.ml - a.ml; })[0];
+			var achtung = gruppen.filter(function (gruppe) {
+				return gruppe.eignung.code === 'achtung'; })[0];
+			if (achtung) {
+				return ergebnis('achtung', 'voraussetzung', w.achtung,
+					fuellen(w.alleAchtung, {m: gesamt}));
+			}
+			if (staerkstes.eignung.code === 'passt') {
+				return ergebnis('passt', '', fuellen(w.passt, {stufe: ch.stufe}),
+					fuellen(w.alle, {m: gesamt, stufe: ch.stufe}));
+			}
+			return ergebnis(staerkstes.eignung.code, staerkstes.eignung.grund,
+				staerkstes.eignung.text,
+				fuellen(w.alleStufe, {m: gesamt, text: staerkstes.eignung.text}));
+		}
+		if (jetzt) {
+			var teil = ergebnis('passt', 'teilweise', fuellen(w.passt, {stufe: ch.stufe}),
+				fuellen(w.teilTitel, {n: jetzt, m: gesamt, grund: gruende(offen)}));
+			teil.label = fuellen(w.teil, {n: jetzt, m: gesamt});
+			return teil;
+		}
+		var zuHoch = gruppen.filter(function (gruppe) {
+			return gruppe.eignung.code === 'zu-hoch'; });
+		if (zuHoch.length) {
+			return ergebnis('zu-hoch', '', w.zuHoch,
+				fuellen(w.zuHochAlle, {grund: gruende(gruppen)}));
+		}
+		if (gruppen.some(function (gruppe) { return gruppe.eignung.code === 'falsch'; })) {
+			return ergebnis('falsch', '', w.chipFalsch,
+				fuellen(w.keinTeil, {grund: gruende(gruppen)}));
+		}
+		return ergebnis('unklar', 'skaliert', w.chipUnklar, w.teileSkaliert);
+	}
+
+	function stueck(anzahl) {
+		return anzahl + ' ' + (anzahl === 1 ? w.stueckTeil : w.stueckTeile);
+	}
+
 	function anforderungen(el) {
 		return {
 			ml: Number(el.getAttribute('data-eignung-min')) || 0,
@@ -261,31 +389,76 @@
 		var marke = chip(eignung);
 		var eltern = el.parentNode;
 		if (!eltern) { return null; }
+		/* The inserted nodes are remembered so that a character switch can take
+		 * them away again, separator included. */
+		var knoten = [];
+		function leer() { var t = document.createTextNode(' '); knoten.push(t); return t; }
+		function trenner() { var t = document.createTextNode(' · '); knoten.push(t); return t; }
 		if (el.classList && el.classList.contains('katalog-gabe')) {
-			el.appendChild(document.createTextNode(' '));
+			el.appendChild(leer());
 			el.appendChild(marke);
 		} else if (eltern.classList && eltern.classList.contains('katalog-metazeile')) {
 			/* A meta line joins its parts with " · ": the chip goes in front of
 			 * the level and brings the separator with it. */
 			eltern.insertBefore(marke, el);
-			eltern.insertBefore(document.createTextNode(' · '), el);
+			eltern.insertBefore(trenner(), el);
 		} else if (eltern.classList && eltern.classList.contains('set-card-meta')) {
-			eltern.appendChild(document.createTextNode(' '));
+			eltern.appendChild(leer());
 			eltern.appendChild(marke);
 		} else {
 			eltern.insertBefore(marke, el.nextSibling);
-			eltern.insertBefore(document.createTextNode(' '), marke);
+			eltern.insertBefore(leer(), marke);
 		}
+		knoten.push(marke);
 		el.__eignungChip = marke;
+		el.__eignungKnoten = knoten;
 		return eignung;
+	}
+
+	/** Set-Chip in ein bereitgestelltes Fach (Zeile, Set-Kopf) setzen. */
+	function legeTeile(el, liste, ch) {
+		if (!el || el.__eignungChip) { return null; }
+		var eignung = teile(liste, ch || charakter());
+		if (!eignung) { return null; }
+		var marke = chip(eignung);
+		el.appendChild(marke);
+		el.__eignungChip = marke;
+		el.__eignungKnoten = [marke];
+		return eignung;
+	}
+
+	/** Die Teileliste aus dem Datenattribut; kaputtes JSON gibt kein Urteil. */
+	function teileVon(el) {
+		try {
+			var liste = JSON.parse(el.getAttribute('data-eignung-teile') || '[]');
+			return Array.isArray(liste) ? liste : null;
+		} catch (error) {
+			return null;
+		}
 	}
 
 	/** Alle Elemente mit Datenattributen bekommen ihren Chip; auch später geladene. */
 	function faerbeSeite(wurzel) {
 		var ch = charakter();
-		(wurzel || document).querySelectorAll('[data-eignung-min]').forEach(function (el) {
+		var bereich = wurzel || document;
+		bereich.querySelectorAll('[data-eignung-min]').forEach(function (el) {
 			lege(el, anforderungen(el), ch);
 		});
+		bereich.querySelectorAll('[data-eignung-teile]').forEach(function (el) {
+			legeTeile(el, teileVon(el), ch);
+		});
+	}
+
+	/** Der Charakter hat gewechselt: alle eigenen Chips neu rechnen. */
+	function neuFaerben() {
+		document.querySelectorAll('[data-eignung-min], [data-eignung-teile]').forEach(function (el) {
+			(el.__eignungKnoten || []).forEach(function (knoten) {
+				if (knoten.parentNode) { knoten.parentNode.removeChild(knoten); }
+			});
+			delete el.__eignungKnoten;
+			delete el.__eignungChip;
+		});
+		faerbeSeite();
 	}
 
 	window.MQL_EIGNUNG = {
@@ -294,10 +467,21 @@
 		charakter: charakter,
 		ton: ton,
 		zeile: zeile,
+		teile: teile,
 		lege: lege,
+		legeTeile: legeTeile,
 		faerbeSeite: faerbeSeite,
+		neuFaerben: neuFaerben,
 		chip: chip
 	};
+
+	/* Listen tauschen ihre Zeilen aus (Filter) oder wechseln den Charakter;
+	 * beides braucht frische Chips, ohne dass jede Liste es selbst aufruft. */
+	document.addEventListener('mql:filterchange', function () { faerbeSeite(); });
+	document.addEventListener('mql:characterchange', neuFaerben);
+	document.addEventListener('change', function (event) {
+		if (event.target && event.target.id === 'katalog-charakter') { neuFaerben(); }
+	});
 
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', function () { faerbeSeite(); });

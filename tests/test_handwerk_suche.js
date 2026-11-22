@@ -27,8 +27,11 @@ function page(query = '', character = null) {
     MQL_SPRACHE: 'en', MQL_REZEPTE: {r: data}, MQL_SPEICHER: {aktiv: () => character}, location };
   const document = {getElementById: id => id === 'rezepte-liste' ? root : find(root, id),
     createElement: tag => new Element(tag), createTextNode: text => new Element(text), querySelectorAll: () => []};
+  // The page gets MQL_SORT as a global from sortierung.js; the sandbox needs
+  // the same global, not only window.MQL_SORT.
+  vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname, '../web/sortierung.js'), 'utf8'), {window});
   vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname, '../web/rezepte.js'), 'utf8'), {
-    window, document, location, URL, URLSearchParams,
+    window, MQL_SORT: window.MQL_SORT, document, location, URL, URLSearchParams,
     history: {replaceState(_a, _b, url) { location.href = new URL(url, location.href).href; }}
   });
   return {root, get: id => find(root, id), location};

@@ -22,6 +22,7 @@ web/fortschritt.js
 web/stand.js
 web/karten-start-*.js
 web/karten-kurz-*.js
+web/sets-*.js
 web/thema-*.js
 web/epik-*.js
 web/karten-daten/

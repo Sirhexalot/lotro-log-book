@@ -183,7 +183,7 @@ This grid meanwhile applies to all migrated pages documented below.
 `tests/browser_filter_php.js` checks item search and sets in DE/EN/FR,
 390/901/1440 px, set selection/reload, dialog and no-JS search with real data.
 The local test run is green; besides, 198 Python tests in the current state.
-The sets keep their server-side predicate and the GET forms. The
+At that time the sets kept their server-side predicate and the GET forms. The
 server adapter reads structured form fields plus `data-filter-total`,
 instead of parsing counters from translated texts. On migrated roots
 the old sets.js controller ends before binding listeners.
@@ -192,6 +192,17 @@ The current local PHP server on port 8927 uses an isolated
 Composer autoloader under `~/.cache/llb-php/filter-vendor-r4d4wh8c` and data
 under `~/.cache/llb-php/phpdata`; existing shared vendor files remained
 unchanged. Local addresses: `/de/gegenstandssuche/` and `/de/set/`.
+
+### The sets filter in the browser (22.11.2026)
+
+The set list moved from the server adapter to the client adapter: the
+suitability of a set depends on the imported character, which never leaves the
+browser (`web/sets-filter.js`, data `web/sets-<sprache>.js` from
+`tools/build_sets_client.py`). The same GET form stays as the answer without
+JavaScript and for search engines; the root carries `data-set-browser` instead
+of `data-filter-schema`, so `filter-server.js` and `sets.js` no longer mount
+there. PHP keeps `eig` only for `noindex` and the canonical address and does not
+judge it. Details: `docs/fachbereiche/sets.md`, `docs/oberflaeche/eignung.md`.
 
 While preparing the next wave, Factions::query was corrected: the
 method now receives the already loaded faction rows for the permitted
@@ -203,10 +214,26 @@ The reference phase above is meanwhile extended: `filter-server.js` reads
 the existing GET forms of sets, quest givers, landmarks, factions
 and instances. Geography remains region → landscape; nested options
 can refer to the domain-separate landscape group via `groupId`.
+The crafting category tree uses the same mechanism for three levels
+(bucket → base type → category, see below).
 Thereby the previous AND/OR predicates remain in the PHP. Sorting,
 number ranges, proof checkbox and pagination remain normal GET parameters.
 On migrated lists neither sets.js nor auftraggeber.js runs as a second
 filter controller. Quest giver details use their previous progress logic.
+
+### Nested options and their own groups (22.11.2026)
+
+`filter-ui.js` draws `option.children` as a branch for every kind; a child may
+name another group via `groupId`, so each level stores its value in the group
+that owns it (geography: region → landscape → area, crafting: bucket → base
+type → category). Two additions came with the crafting tree:
+
+- `chips()` uses `option.chipLabel` when present. A tree shows only the leaf
+  qualifier („Gilde“) because the parent names the base type; the chip still
+  names the full category („Leichte Rüstung (Gilde)“).
+- A branch opens itself when it or a value below it is selected, so a fresh
+  link shows where its selection sits. A branch the user opened or closed keeps
+  that state; the auto-open only applies while no state is known for it.
 
 `handwerk-filter.js` manages exactly one active filter instance for professions,
 recipes and resources. Tabs and URL remain on switch/reload;

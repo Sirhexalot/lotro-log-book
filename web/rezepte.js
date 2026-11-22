@@ -524,9 +524,34 @@
 		kategorieFeld.textContent = '';
 		var alle = eltern('option', t('hw_alle_kategorien')); alle.value = ''; kategorieFeld.appendChild(alle);
 		if (kategorie && !kategorien[kategorie]) { kategorien[kategorie] = 0; }
-		Object.keys(kategorien).sort().forEach(function (name) {
-			var option = eltern('option', name + ' (' + kategorien[name] + ')');
-			option.value = name; kategorieFeld.appendChild(option);
+		// The select groups the flat client categories the way the filter tree
+		// does: bucket as optgroup, the category itself as option.
+		var kategorieDaten = (window.MQL_REZEPTE || {}).k || {};
+		var buendel = (window.MQL_REZEPTE || {}).b || [];
+		var gruppen = new Map();
+		Object.keys(kategorien).forEach(function (name) {
+			var eintrag = kategorieDaten[name];
+			var schluessel = eintrag ? eintrag[0] : 'sonstiges';
+			if (!gruppen.has(schluessel)) { gruppen.set(schluessel, []); }
+			gruppen.get(schluessel).push(name);
+		});
+		function option(name) {
+			var eintrag = eltern('option', name + ' (' + kategorien[name] + ')');
+			eintrag.value = name;
+			return eintrag;
+		}
+		buendel.forEach(function (paar) {
+			var namen = gruppen.get(paar[0]);
+			if (!namen) { return; }
+			var gruppe = eltern('optgroup');
+			gruppe.label = paar[1];
+			namen.sort(MQL_SORT.compare).forEach(function (name) { gruppe.appendChild(option(name)); });
+			kategorieFeld.appendChild(gruppe);
+			gruppen.delete(paar[0]);
+		});
+		// Without the generated tree (old data) the list stays flat.
+		gruppen.forEach(function (namen) {
+			namen.sort(MQL_SORT.compare).forEach(function (name) { kategorieFeld.appendChild(option(name)); });
 		});
 		kategorieFeld.value = kategorie;
 		basis = basis.filter(function (wert) { return !kategorie || wert[5] === kategorie; });

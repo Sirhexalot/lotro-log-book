@@ -15,6 +15,7 @@
 {% if page.has_values %}<section class="katalog-abschnitt katalog-werteflaeche llb-flaeche" data-ton="hell">
 <h2>{{ w.values }}</h2>
 {% if page.chips %}<p class="katalog-metazeile">{% for chip in page.chips %}{% if not loop.first %} · {% endif %}<span class="{{ chip.cls }}"{{ eignung.attribute(chip.eignung|default({})) }}>{{ chip.text }}</span>{% endfor %}</p>{% endif %}
+{% if page.values_note|default(false) %}<p class="katalog-metazeile">{{ page.values_note }}</p>{% endif %}
 {% if page.required_class|default(false) %}<p class="katalog-metazeile">{{ w.required_class }}: {{ page.required_class }}</p>{% endif %}
 {% if page.armour %}<p class="katalog-grundwert"><span>{{ w.armour }}</span><b>{{ page.armour }}</b></p>{% endif %}
 {% if page.values %}<dl class="katalog-werte-raster">{% for row in page.values %}<div><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>{% endfor %}</dl>{% endif %}

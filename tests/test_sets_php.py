@@ -46,6 +46,15 @@ class SetsPHPTest(unittest.TestCase):
             self.assertEqual(set(lang), set(words[0]))
             self.assertTrue(all(lang.values()))
             for key, value in lang.items():
+                # The browser texts travel as a nested block (web/sets-filter.js);
+                # they need the same keys and the same placeholders as well.
+                if isinstance(value, dict):
+                    self.assertEqual(set(value), set(words[0][key]))
+                    self.assertTrue(all(value.values()))
+                    for inner, text in value.items():
+                        self.assertEqual(text.count('%s'),
+                                         words[0][key][inner].count('%s'))
+                    continue
                 self.assertEqual(value.count('%s'), words[0][key].count('%s'))
 
     def test_routes_and_real_404(self):
