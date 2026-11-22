@@ -37,6 +37,12 @@ and to every existing file as soon as it is touched.
 [AGENTS.md](../AGENTS.md) holds the binding work rules; this folder holds the
 reasoning behind them.
 
+A PDF is built from the Markdown, never maintained beside it:
+`python3 tools/build_doc_pdf.py docs/datenraum/entity-model.md --ziel output/<name>.pdf`.
+Mermaid diagrams are written inside the document and rendered by a local Chrome,
+so the diagram cannot drift from the text. The result lands in the ignored
+`output/` folder; only the Markdown is versioned.
+
 ## Glossary for English documentation
 
 German game and project terms have one fixed English equivalent. Use it, do not
