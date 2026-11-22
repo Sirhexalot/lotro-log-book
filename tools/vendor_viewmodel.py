@@ -1,7 +1,9 @@
 """Render-ready vendor pages."""
 from __future__ import annotations
 
+import json
 from collections import defaultdict
+from pathlib import Path
 
 import seo
 try:
@@ -12,6 +14,24 @@ from build_katalogseiten import route
 from giver_viewmodel import _place_view, area_of, place_label, region_of
 
 SEGMENT = {'de': 'haendler', 'en': 'vendor', 'fr': 'marchand'}
+
+# Mindeststufen der Ware: ein Händler hat Ware „ab Stufe X“. Die Zahl steht im
+# Gegenstandsbestand; fehlt sie, bleibt der Händler ohne Angabe.
+MIT_STUFE = Path(__file__).resolve().parents[1] / 'daten' / 'items.json'
+_STUFEN = None
+
+
+def item_min_levels() -> dict:
+    """Gegenstand → Mindeststufe (Tragevoraussetzung), einmal je Lauf gelesen."""
+    global _STUFEN
+    if _STUFEN is None:
+        _STUFEN = {}
+        if MIT_STUFE.is_file():
+            for ident, eintrag in json.loads(MIT_STUFE.read_text(encoding='utf-8'))['items'].items():
+                stufe = int(eintrag.get('ml') or 0)
+                if stufe > 0:
+                    _STUFEN[str(ident).upper()] = stufe
+    return _STUFEN
 
 
 def vendor_url(lang: str, ident: str) -> str:
@@ -187,11 +207,20 @@ def vendor_index(source: dict, lang: str, maps: dict) -> dict:
         # beiden Gruppen und wird in beiden gezählt.
         typen = (['vendor', 'barter'] if vendor.get('type') == 'both'
                  else [vendor.get('type', 'vendor')])
+        stufen = [stufe for stufe in
+                  (item_min_levels().get(str(iid).upper())
+                   for iid in vendor.get('items') or []) if stufe]
         rows.append({'id': ident, 'name': name, 'title': title,
                      'search': (name + ' ' + title).casefold(),
                      'type': vendor.get('type', 'vendor'), 'types': typen,
                      'regions': regions_for_vendor, 'areas': areas_for_vendor,
-                     'places': places, 'count': len(vendor.get('items') or [])})
+                     'places': places, 'count': len(vendor.get('items') or []),
+                     # „ab Stufe“ für die Spalte und die belegten Stufen selbst
+                     # für den Filter. Eine Spanne allein würde Händler mit
+                     # Lücken fälschlich als passend zählen.
+                     'ml_min': min(stufen) if stufen else None,
+                     'ml_max': max(stufen) if stufen else None,
+                     'ml_levels': sorted(set(stufen))})
     rows.sort(key=lambda row: (schluessel(row['name']), row['id']))
     vorhanden = {art for row in rows for art in row['types']}
     types = {art: art for art in ('vendor', 'barter') if art in vorhanden}

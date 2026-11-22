@@ -32,11 +32,24 @@
             <fieldset><legend>{{ attribute(gw, key) }}</legend>
                 {% for option in options %}<label class="sets-option"><input type="checkbox" name="{{ key }}[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
             </fieldset>{% endif %}{% endfor %}
+            <fieldset><legend>{{ gw.ware }}</legend><div class="sets-range"><label>{{ gw.from }}<input type="number" name="from" min="0" max="999" inputmode="numeric" value="{{ filters.from }}"></label><label>{{ gw.to }}<input type="number" name="to" min="0" max="999" inputmode="numeric" value="{{ filters.to }}"></label></div></fieldset>
             <div class="sets-filter-actions"><button type="submit">{{ gw.apply }}</button><a href="{{ list_url }}">{{ gw.reset }}</a></div>
         </details>
         <section class="sets-results" data-filter-results aria-label="{{ gw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? gw.count_one : gw.count)|replace({'%s': count}) }}</p>
-            <ul class="sets-list mql-row-list">{% if vendors %}{{ result.heading(lang) }}{% endif %}{% for row in vendors %}{{ result.row(lang, row.url, row.name, [attribute(gw, 'type_' ~ row.type), row.meta]|filter(v => v)|join(' · '), entity_symbol) }}{% else %}<li>{{ gw.empty }}</li>{% endfor %}</ul>
+            <div class="sets-sort"><span>{{ gw.sort }}</span>
+                <a href="{{ sort_name_url }}"{% if sort_active == '' %} aria-current="true"{% endif %}>{{ gw.sort_name }}</a>
+                <a href="{{ sort_level_url }}"{% if sort_active == 'stufe' %} aria-current="true"{% endif %}>{{ gw.sort_level }}</a>
+            </div>
+            {# Stufe als Verweis: der Server filtert, die Zahl steht in der Adresse.
+               Ein Kästchen im Formular landete im Filtermodul als Wahrheitswert. #}
+            <p class="sets-turn" id="vendor-level-field" data-vorlage="{{ gw.stufe_filter }}" hidden>
+                <a class="sets-option-link" id="vendor-level-link" href="#"></a>
+            </p>
+            {% if filters.stufe %}<p class="sets-turn">
+                <a class="sets-option-link" href="{{ list_url }}">{{ gw.stufe_all }}</a>
+            </p>{% endif %}
+            <ul class="sets-list mql-row-list">{% if vendors %}{{ result.heading(lang, gw.stufe_heading) }}{% endif %}{% for row in vendors %}{{ result.row(lang, row.url, row.name, [attribute(gw, 'type_' ~ row.type), row.meta]|filter(v => v)|join(' · '), entity_symbol, '', gw.stufe_heading, row.level_from is not null ? row.level_from|number_format(0, ',', '.') : '') }}{% else %}<li>{{ gw.empty }}</li>{% endfor %}</ul>
             {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ gw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ gw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>
@@ -46,4 +59,5 @@
     </div>
 </form>
 </div>
+<script src="/haendler-liste.js?v={{ asset_stand }}" defer></script>
 {% endblock %}

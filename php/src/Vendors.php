@@ -28,6 +28,14 @@ final class Vendors
                      'type_barter' => 'Tauschhändler', 'type_both' => 'Händler und Tauschhändler',
                      'type_filter_vendor' => 'Normale Händler', 'type_filter_barter' => 'Tauschhändler',
                      'level' => 'Gegenstandsstufe', 'from' => 'von', 'to' => 'bis',
+                     'stufe_heading' => 'Ware ab Stufe',
+                     'stufe_filter' => 'Ware für Stufe %s',
+                     'stufe_filter_title' => 'Ware für meine Stufe',
+                     'stufe_all' => 'Alle Händler zeigen',
+                     'stufe_filter_hint' => 'Zeigt Händler, deren Ware zu deiner Stufe passt.',
+                     'stufe_filter_count' => '%s Händler',
+                     'sort' => 'Sortierung', 'sort_name' => 'Name', 'sort_level' => 'Ware ab Stufe',
+                     'ware' => 'Ware',
                      'filter_items' => 'Anwenden', 'reset_items' => 'Alle Gegenstände',
                      'wo' => 'Region und Landschaft', 'empty' => 'Keinen passenden Händler gefunden.',
                      'previous' => 'Zurück', 'next' => 'Weiter', 'page' => 'Seite %s von %s',
@@ -47,6 +55,14 @@ final class Vendors
                       'type_barter' => 'Barterer', 'type_both' => 'Vendor and barterer',
                       'type_filter_vendor' => 'Regular vendors', 'type_filter_barter' => 'Barterers',
                      'level' => 'Item level', 'from' => 'from', 'to' => 'to',
+                     'stufe_heading' => 'Stock from level',
+                     'stufe_filter' => 'Stock for level %s',
+                     'stufe_filter_title' => 'Stock for my level',
+                     'stufe_all' => 'Show all vendors',
+                     'stufe_filter_hint' => 'Shows vendors whose stock fits your level.',
+                     'stufe_filter_count' => '%s vendors',
+                     'sort' => 'Sort', 'sort_name' => 'Name', 'sort_level' => 'Stock from level',
+                     'ware' => 'Stock',
                      'filter_items' => 'Apply', 'reset_items' => 'All items',
                      'wo' => 'Region and landscape', 'empty' => 'No matching vendor found.',
                      'previous' => 'Previous', 'next' => 'Next', 'page' => 'Page %s of %s',
@@ -66,6 +82,14 @@ final class Vendors
                       'type_barter' => 'Marchand troqueur', 'type_both' => 'Marchand et troqueur',
                       'type_filter_vendor' => 'Marchands normaux', 'type_filter_barter' => 'Marchands troqueurs',
                      'level' => 'Niveau des objets', 'from' => 'de', 'to' => 'à',
+                     'stufe_heading' => 'Stock dès le niveau',
+                     'stufe_filter' => 'Stock pour le niveau %s',
+                     'stufe_filter_title' => 'Stock pour mon niveau',
+                     'stufe_all' => 'Afficher tous les marchands',
+                     'stufe_filter_hint' => 'Montre les marchands dont le stock correspond à votre niveau.',
+                     'stufe_filter_count' => '%s marchands',
+                     'sort' => 'Tri', 'sort_name' => 'Nom', 'sort_level' => 'Stock dès le niveau',
+                     'ware' => 'Marchandises',
                      'filter_items' => 'Appliquer', 'reset_items' => 'Tous les objets',
                      'wo' => 'Région et pays', 'empty' => 'Aucun marchand correspondant.',
                      'previous' => 'Précédent', 'next' => 'Suivant', 'page' => 'Page %s sur %s',
@@ -123,13 +147,87 @@ final class Vendors
         if ($filters['type'] && !array_intersect($row['types'], $filters['type'])) {
             return false;
         }
+        // Ausdrückliche Spanne: irgendein Stück mit Mindeststufe im Band.
+        // Sie gewinnt gegen die Abkürzung „Ware für meine Stufe“.
+        $von = (string) ($filters['from'] ?? '');
+        $bis = (string) ($filters['to'] ?? '');
+        if ($von !== '' || $bis !== '') {
+            $passt = false;
+            foreach ($row['ml_levels'] ?? [] as $stufe) {
+                if (($von === '' || $stufe >= (int) $von) && ($bis === '' || $stufe <= (int) $bis)) {
+                    $passt = true;
+                    break;
+                }
+            }
+            if (!$passt) {
+                return false;
+            }
+        } elseif (($filters['stufe'] ?? null) !== null) {
+            // Dieselben zehn Stufen wie beim Eignungs-Chip: irgendein Stück mit
+            // Mindeststufe zwischen Stufe-10 und Stufe.
+            $passt = false;
+            foreach ($row['ml_levels'] ?? [] as $stufe) {
+                if ($stufe >= $filters['stufe'] - 10 && $stufe <= $filters['stufe']) {
+                    $passt = true;
+                    break;
+                }
+            }
+            if (!$passt) {
+                return false;
+            }
+        }
         return true;
+    }
+
+    /**
+     * Name oder „Ware ab Stufe“. Händler ohne belegte Stufe stehen am Ende,
+     * gleiche Stufen fallen auf den Namen zurück. Sortiert vor der Seitenwahl.
+     */
+    public static function sorted(array $rows, string $sort): array
+    {
+        usort($rows, static function (array $a, array $b) use ($sort): int {
+            if ($sort === 'stufe') {
+                $al = $a['ml_min'] ?? null;
+                $bl = $b['ml_min'] ?? null;
+                if ($al === null && $bl !== null) {
+                    return 1;
+                }
+                if ($al !== null && $bl === null) {
+                    return -1;
+                }
+                if ($al !== $bl) {
+                    return $al <=> $bl;
+                }
+            }
+            return Sortierung::name($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']);
+        });
+        return $rows;
     }
 
     private function query(array $input, array $rows): array
     {
         $query = $input['q'] ?? '';
+        // Die Spielstufe kommt aus dem importierten Spielstand, nicht vom Server.
+        // Sie steht als Zahl in der Adresse, damit Zählung und Seiten stimmen.
+        $stufe_raw = $input['stufe'] ?? null;
+        $stufe = is_scalar($stufe_raw) && preg_match('/^\d{1,3}$/', (string) $stufe_raw)
+            ? (int) $stufe_raw : null;
+        if ($stufe !== null && ($stufe < 1 || $stufe > 160)) {
+            $stufe = null;
+        }
+        // Spanne der Warenstufe; eine verdrehte Eingabe wird gedreht.
+        $grenze = static function ($value): string {
+            return is_scalar($value) && preg_match('/^\d{1,3}$/', (string) $value)
+                ? (string) (int) $value : '';
+        };
+        $von = $grenze($input['from'] ?? '');
+        $bis = $grenze($input['to'] ?? '');
+        if ($von !== '' && $bis !== '' && (int) $von > (int) $bis) {
+            [$von, $bis] = [$bis, $von];
+        }
+        $sort = ($input['sort'] ?? '') === 'stufe' ? 'stufe' : '';
         $filters = ['q' => is_string($query) ? mb_substr(trim($query), 0, 200) : '',
+                    'stufe' => $stufe, 'from' => $von, 'to' => $bis, 'sort' => $sort,
                     'region' => [], 'area' => [], 'type' => []];
         foreach (['region', 'area', 'type'] as $key) {
             $allowed = [];
@@ -154,7 +252,8 @@ final class Vendors
 
     private function params(array $filters, int $page = 1): array
     {
-        $params = array_filter($filters, static fn ($value) => $value !== '' && $value !== []);
+        $params = array_filter($filters,
+            static fn ($value) => $value !== '' && $value !== [] && $value !== null);
         if ($page > 1) {
             $params['page'] = $page;
         }
@@ -206,8 +305,7 @@ final class Vendors
         $rows = $index['vendors'];
         $filters = $this->query($input, $rows);
         $selected = array_values(array_filter($rows, fn ($row) => self::matches($row, $filters)));
-        usort($selected, static fn ($a, $b): int =>
-            Sortierung::name($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
+        $selected = self::sorted($selected, $filters['sort']);
         $pages = max(1, (int) ceil(count($selected) / self::PAGE_SIZE));
         $page_input = $input['page'] ?? 1;
         $page = is_scalar($page_input) ? filter_var($page_input, FILTER_VALIDATE_INT) : false;
@@ -256,8 +354,18 @@ final class Vendors
                     $total === 1 ? $words['items_count_one'] : $words['items_count']);
             }
             $row['meta'] = implode(' · ', $meta);
+            // Rechte Spalte: ab welcher Stufe es hier Ware gibt.
+            $row['level_from'] = isset($row['ml_min']) && $row['ml_min'] !== null
+                ? (int) $row['ml_min'] : null;
         }
         unset($row);
+
+        // Zahl neben dem Stufen-Filter: wie viele Händler er übrig lässt.
+        $stufe_count = null;
+        if (($filters['stufe'] ?? null) !== null) {
+            $stufe_count = count(array_filter($rows,
+                static fn ($row) => self::matches($row, $filters)));
+        }
 
         $alternates = array_map(
             fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang)],
@@ -265,11 +373,17 @@ final class Vendors
         $context = $this->context(
             $page > 1 ? $words['title'] . ' – ' . sprintf($words['page'], $page, $pages) : $words['title'],
             $words['intro'], $this->url($filters, $page), $alternates,
-            (bool) array_filter($filters, static fn ($value) => $value !== '' && $value !== []));
+            (bool) array_filter($filters,
+                static fn ($value, $key) => $key !== 'sort' && $value !== '' && $value !== [],
+                ARRAY_FILTER_USE_BOTH));
         return $this->view->render('vendors/list.twig', $context + [
             'vendors' => $page_rows, 'filters' => $filters, 'facets' => $facets,
             'area_by_region' => $area_by_region, 'area_rest' => $area_rest,
-            'count' => count($selected), 'page_label' => sprintf($words['page'], $page, $pages),
+            'count' => count($selected), 'stufe_count' => $stufe_count,
+            'sort_name_url' => $this->url(array_merge($filters, ['sort' => '']), 1),
+            'sort_level_url' => $this->url(array_merge($filters, ['sort' => 'stufe']), 1),
+            'sort_active' => $filters['sort'],
+            'page_label' => sprintf($words['page'], $page, $pages),
             'previous_url' => $page > 1 ? $this->url($filters, $page - 1) : null,
             'next_url' => $page < $pages ? $this->url($filters, $page + 1) : null,
             'words' => $words,

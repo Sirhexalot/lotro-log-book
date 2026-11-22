@@ -41,6 +41,10 @@ before it links a barter row to a vendor page.
   1,188 offers stay around 40 KB.
 - Without JavaScript the first 50 offers remain readable, with a note that the
   filter needs JavaScript.
+- **The list filters goods by level range** (`from`/`to`): a vendor stays when at
+  least one of its goods has a minimum level inside the band. The explicit range
+  wins over the „Ware für meine Stufe“ shortcut. The list sorts by name or by
+  stock level (`sort=stufe`, lowest goods level first, vendors without one last).
 - **The list filter has two groups only.** „Normale Händler“ contains every
   vendor that sells (1.469), „Tauschhändler“ every vendor that barters (1.088);
   a vendor that does both is counted in both. There is no third category –
@@ -77,3 +81,21 @@ sells and barters the types `vendor` and `barter`, so it appears in both.
 their counts, the place picker swapping the map, the level and quality filters,
 a pure barterer without tabs, 390 px without overflow, and the 50-row fallback
 without JavaScript.
+
+## Ware ab Stufe und der Filter für die eigene Stufe (22.11.2026)
+
+- `vendor_index()` schreibt je Händler `ml_min` (kleinste Mindeststufe seiner
+  Ware), `ml_max` und `ml_levels` (die belegten Stufen). Grundlage ist
+  `daten/items.json`; Händler ohne Ware oder ohne bekannte Stufe bleiben ohne
+  Angabe. 1.898 von 2.287 Händlern haben eine Spanne.
+- Die Liste zeigt „Ware ab Stufe X“ als eigene Spalte. Der Spaltenkopf ist
+  `gw.stufe_heading`; die Zeile nutzt die Wertspalte von `_result_row.twig`.
+- Der Filter „Ware für Stufe %s“ ist ein **Verweis**, kein Kästchen: das
+  Filtermodul macht aus einem Kästchen einen Wahrheitswert, die Stufe muss aber
+  als Zahl in der Adresse stehen (`?stufe=123`). `filter-server.js` behält den
+  Parameter bei jeder weiteren Auswahl, damit Filtern die Stufe nicht aufhebt.
+- Regel: dasselbe gleitende Fenster von zehn Stufen wie beim Eignungs-Chip –
+  eine Ware mit Mindeststufe zwischen Stufe−10 und Stufe. Ohne das Fenster
+  träfe fast jeder Händler zu (1.813 von 2.287 bei Stufe 123 statt 390).
+- Ohne importierten Spielstand bleibt der Verweis unsichtbar (`web/haendler-liste.js`).
+  Geprüft mit `tests/test_vendor_stufe.py` und `tests/browser_haendler_stufe.js`.

@@ -61,15 +61,53 @@ const base = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 			const quality = await page.locator('[data-tausch-root] [role=status]').first().textContent();
 			assert.notEqual(quality, total, 'quality filter did not narrow the list');
 
-			// Pure barterer without a place: no tabs, list directly.
+			// Barterer with places (since the position export knows them): tabs.
 			const plain = await page.goto(`${base}/${lang}/${seg}/70007997/`);
 			assert.equal(plain.status(), 200);
-			assert.equal(await page.locator('.llb-reiter').count(), 0);
+			assert.equal(await page.locator('.llb-reiter').count(), 1);
+			assert.match((await page.locator('.llb-reiter [data-reiter-knopf]').allTextContents()).join(' '), /\d/);
 			assert.ok(await page.locator('[data-tausch-root] li.mql-row').count() > 0);
 
 			assert.deepEqual(errors, []);
 			await context.close();
 			console.log(lang, 'tabs, place picker, level filter, quality filter, pure barterer OK');
+		}
+
+		/* Händlerliste: Spanne der Warenstufe und Sortierung. */
+		for (const [lang, seg, sortLabel] of [['de', 'haendler', 'Ware ab Stufe'],
+			['en', 'vendor', 'Stock from level'], ['fr', 'marchand', 'Stock dès le niveau']]) {
+			const context = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+			await context.route('**/*', r => r.request().url().startsWith(base + '/') ? r.continue() : r.abort());
+			const page = await context.newPage();
+			const answer = await page.goto(`${base}/${lang}/${seg}/?type[]=barter`);
+			assert.equal(answer.status(), 200);
+			await page.waitForFunction(() => /\d/.test((document.querySelector('[role=status]') || {}).textContent || ''));
+			const total = Number(((await page.locator('[role=status]').first().textContent()) || '').replace(/\D/g, ''));
+			assert.ok(total > 900, `${lang}: ${total}`);
+
+			const sort = page.locator('select[aria-label]').last();
+			await sort.selectOption({ label: sortLabel });
+			await page.waitForTimeout(700);
+			assert.match(decodeURIComponent(page.url()), /sort=stufe/);
+			const stufen = (await page.locator('.mql-row-value b').allTextContents()).map(Number);
+			assert.ok(stufen.length > 1, lang);
+			const sortiert = stufen.slice().sort((a, b) => a - b);
+			assert.deepEqual(stufen, sortiert, `${lang}: not ascending`);
+
+			const felder = page.locator('.filter-ui input[type=number]');
+			assert.equal(await felder.count(), 2, lang);
+			await felder.nth(0).fill('100');
+			await felder.nth(0).dispatchEvent('change');
+			await felder.nth(1).fill('120');
+			await felder.nth(1).dispatchEvent('change');
+			await page.waitForTimeout(900);
+			const url = decodeURIComponent(page.url());
+			assert.match(url, /from=100/);
+			assert.match(url, /to=120/);
+			const eng = Number(((await page.locator('[role=status]').first().textContent()) || '').replace(/\D/g, ''));
+			assert.ok(eng > 0 && eng < total, `${lang}: ${eng} of ${total}`);
+			await context.close();
+			console.log(lang, 'listing: range 100–120 and sort by stock level OK');
 		}
 
 		// Mobile: no horizontal overflow, the filter stays usable.
