@@ -3,3 +3,12 @@
 #liste ul.epik-buecher { list-style: none; margin: 0; padding: 0 0 0 18px; }
 #liste ul.epik-buecher > li.abschnitt { position: static; padding-left: 4px; }
 #liste ul.epik-buecher > li { border-bottom: 0; }
+
+/* The drawn map of Middle-earth behind the terrain: the client's terrain
+   leaves gaps, and they show the drawing instead of black. */
+#buehne.epik-grund {
+	background-image: var(--epik-grund);
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}

@@ -80,6 +80,13 @@ async function zustand(page) {
 				assert.ok(Number(stand.zahlen.alle) > 1000 && Number(stand.zahlen.alle) <= 1600,
 					design + ': Zahl aller Kapitel unplausibel: ' + stand.zahlen.alle);
 				assert.equal(stand.zahlen.erledigt, '1', design + ': Zahl der erledigten Kapitel');
+				/* Die Mittelerde-Karte liegt fest hinter der Geländeansicht. */
+				assert.equal(await page.evaluate(() =>
+					document.getElementById('buehne').classList.contains('epik-grund')),
+					true, design + ': Mittelerde-Grund fehlt');
+				assert.match(await page.evaluate(() =>
+					getComputedStyle(document.getElementById('buehne')).backgroundImage),
+					/268437554/, design + ': falsches Grundbild');
 
 				/* Die Epik ist eine Sonderansicht: sie startet im Gelände, die
 				   Spielkarte bleibt umschaltbar, die Punkte bleiben. */
@@ -166,6 +173,29 @@ async function zustand(page) {
 				(document.getElementById('bild').getAttribute('src') || '').match(/(\d+)\.webp/)?.[1] || '');
 			assert.notEqual(karte, '268437557', design + ': Epik-Aufgabe springt nicht auf ihre Karte');
 			assert.ok(karte, design + ': Epik-Aufgabe ohne Karte');
+
+			/* Weit scrollen darf die Sonderansicht nicht in eine flache Liste
+			   umschalten: das generische Nachladen bleibt hier aus. */
+			await page.fill('#aufgaben-suche', '');
+			await page.waitForTimeout(500);
+			const bandKopf = page.locator('#liste li.epik-band').first();
+			if ((await bandKopf.getAttribute('class')).includes('zu')) {
+				await bandKopf.click();
+				await page.waitForTimeout(300);
+			}
+			const prologKopf = page.locator('#liste ul.epik-buecher > li.abschnitt').filter({ hasText: /Prolog/ }).first();
+			if ((await prologKopf.getAttribute('class')).includes('zu')) {
+				await prologKopf.click();
+				await page.waitForTimeout(300);
+			}
+			await page.evaluate(() => {
+				const liste = document.getElementById('liste');
+				liste.scrollTop = liste.scrollHeight;
+			});
+			await page.waitForTimeout(700);
+			const nachScroll = await zustand(page);
+			assert.ok(nachScroll.baender >= 10, design + ': Liste wird beim Scrollen flach');
+			assert.ok(nachScroll.buecher >= 1, design + ': Buchabschnitte fehlen nach dem Scrollen');
 
 			assert.deepEqual(fehler, [], 'JS-Fehler: ' + fehler.join(' | '));
 			await context.close();

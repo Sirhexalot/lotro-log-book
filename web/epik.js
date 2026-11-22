@@ -203,11 +203,26 @@
 		}
 	}
 
+	/** The drawn map of Middle-earth lies behind the terrain; its gaps show it. */
+	function grundLegen() {
+		if (!host || !host.buehne) { return; }
+		var sprache = window.MQL_SPRACHE || 'de';
+		host.buehne.classList.add('epik-grund');
+		host.buehne.style.setProperty('--epik-grund',
+			"url('/karten/" + sprache + "/268437554.webp')");
+	}
+	function grundEntfernen() {
+		if (!host || !host.buehne) { return; }
+		host.buehne.classList.remove('epik-grund');
+		host.buehne.style.removeProperty('--epik-grund');
+	}
+
 	function montiere(neuerHost) {
 		host = neuerHost;
 		if (!daten) { return; }
 		vorbereiten();
 		Object.keys(daten.quests).forEach(function (id) { host.merke(daten.quests[id]); });
+		grundLegen();
 	}
 
 	function setzeDaten(neueDaten) {
@@ -265,6 +280,7 @@
 			document.head.appendChild(skript);
 		},
 		montiere: montiere,
+		verlasse: grundEntfernen,
 		zeichneListe: zeichnen,
 		zahlen: function () {
 			return zahlen(host.filtere(sichtbar(alle()), true));

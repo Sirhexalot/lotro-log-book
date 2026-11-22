@@ -1083,8 +1083,11 @@
 		zustand.gebietsKarte = index;
 		// A special view may pin a map mode (terrain) for itself without touching
 		// the stored view of the other pages.
+		var sonder = sonderFuer(knoten);
+		SONDER.forEach(function (ansicht) {
+			if (ansicht !== sonder && ansicht.verlasse) { ansicht.verlasse(); }
+		});
 		if (gelaende) {
-			var sonder = sonderFuer(knoten);
 			gelaende.setView(sonder && sonder.ansicht ? sonder.ansicht() : null);
 		}
 		if (index != null) {
@@ -2395,6 +2398,7 @@
 	function sonderHost() {
 		return {
 			liste: liste,
+			buehne: buehne,
 			titel: function (text) { listeTitel.textContent = text; },
 			filtere: function (rows, ohneFortschritt) {
 				var alt = zustand.filter;
@@ -3599,6 +3603,8 @@
 
 	// The list grows while scrolling instead of a "more" button.
 	liste.addEventListener('scroll', function () {
+		// A special view renders its whole list; generic paging would flatten it.
+		if (sonderFuer(zustand.knoten)) { return; }
 		if (zustand.sichtbar >= zustand.treffer.length) { return; }
 		if (liste.scrollTop + liste.clientHeight < liste.scrollHeight - 200) { return; }
 		zustand.sichtbar += ANSICHT_JE_SEITE;
