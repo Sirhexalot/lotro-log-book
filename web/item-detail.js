@@ -82,7 +82,7 @@
                 {param:'truhen.n',path:['pagination','limit'],type:'number',omit:30}],defaults)};
         var adapter = A.client({rows:rows, size:30, id:function (r) { return r.node; },
             matches:function (r,s) { return r.name.toLocaleLowerCase(lang).includes(s.q.toLocaleLowerCase(lang)); },
-            compare:function (a,b) { return a.name.localeCompare(b.name,lang); },
+            compare:function (a,b) { return MQL_SORT.compare(a.name,b.name); },
             facets:function () { return {}; },
             renderResults:function (r,target) {
                 target.replaceChildren();

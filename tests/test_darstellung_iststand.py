@@ -131,7 +131,6 @@ class DarstellungIststandTest(unittest.TestCase):
             text = read(page)
             self.assertNotIn('.katalog-knopf', text, page)
             self.assertNotIn('.katalog-aktionen', text, page)
-            self.assertNotIn('.detail-aktionen', text, page)
         for source in ('php/templates', 'build_katalogseiten.py', 'build_aufgaben.py',
                        'build_taten.py', 'build_gegenstaende.py'):
             path = ROOT / source
@@ -202,10 +201,11 @@ class DarstellungIststandTest(unittest.TestCase):
     def test_detail_and_item_surfaces(self):
         grid = read('php/templates/entity/_detail_grid.twig')
         item = read('php/templates/entity/item.twig')
+        item_group = read('php/templates/entity/_item_group.twig')
         quest = read('php/templates/entity/quest.twig')
         self.assertIn('entity-detail-grid', grid)
-        self.assertIn('data-item-task-direct', item)
-        self.assertIn('result.heading', item)
+        self.assertIn('data-item-task-direct', item_group)
+        self.assertIn('result.heading', item_group)
         self.assertIn("include('entity/_detail_grid.twig')", quest)
 
     def test_map_detail_panel_has_labelled_facts_and_sections(self):
@@ -214,6 +214,23 @@ class DarstellungIststandTest(unittest.TestCase):
                        'detail_was_tun', 'detail_ziele_karte', 'questNachId'):
             self.assertIn(needle, js)
         self.assertIn('Object.keys(questNachId).forEach', js)
+
+    def test_map_panel_has_one_label_per_section(self):
+        """Objectives are one disclosure, progress one label, actions last."""
+        js = read('web/app.js')
+        self.assertIn("'ziele-kopf'", js)
+        self.assertIn("'detail-ziele-inhalt'", js)
+        self.assertIn("abschnitt('detail-aktionen')", js)
+        # Choice rewards use the shared reward row, not a bare symbol.
+        self.assertIn("wahlListe.className = 'detail-reward-liste'", js)
+        self.assertIn("wahlBild.className = 'detail-reward-symbol'", js)
+        # The panel's progress control has no duplicate label.
+        self.assertIn("quest.i, null, 'panel')", js)
+        self.assertIn("context === 'panel'", read('web/status.js'))
+        css = read('web/style.css')
+        self.assertIn('.ziele-kopf', css)
+        self.assertIn('.detail-aktionen .llb-aktionen { margin: 0; }', css)
+        self.assertNotIn('.ziele-schalter', css)
 
     def test_overview_reuses_loaded_tree_without_fetch(self):
         js = read('web/app.js')

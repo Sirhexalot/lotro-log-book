@@ -33,10 +33,15 @@
 		wrapper.dataset.id = id;
 		var label = document.createElement('span');
 		label.className = 'manueller-status-label';
-		label.textContent = context === 'quest' ? w.questStatus : context === 'deed' ? w.deedStatus : w.status;
+		// The map panel already carries a "Fortschritt" heading; there the
+		// control keeps only its accessible name.
+		label.textContent = context === 'panel' ? ''
+			: context === 'quest' ? w.questStatus : context === 'deed' ? w.deedStatus : w.status;
+		label.hidden = !label.textContent;
 		var select = document.createElement('select');
 		select.className = 'manueller-status-auswahl';
-		select.setAttribute('aria-label', label.textContent.replace(/\s*:$/, ''));
+		select.setAttribute('aria-label',
+			(label.textContent || (art === 'deeds' ? w.deedStatus : w.questStatus)).replace(/\s*:$/, ''));
 		var reset = document.createElement('button');
 		reset.type = 'button';
 		reset.className = 'manueller-status-zurueck';

@@ -44,7 +44,7 @@
 					tabelle.className = 'tabelle bl-quellen';
 					var koerper = eltern('tbody');
 					nachZone[zone]
-						.sort(function (a, b) { return a[2].localeCompare(b[2], t('locale')); })
+						.sort(function (a, b) { return MQL_SORT.compare(a[2], b[2]); })
 						.forEach(function (q) {
 							var tr = eltern('tr');
 							var name = eltern('td');

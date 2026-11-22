@@ -39,6 +39,10 @@ sys.path.insert(0, str(HIER / 'tools'))
 from itemnamen import sauberer_name  # noqa: E402
 from gebietssicht import display_name, group_for, map_tree  # noqa: E402
 from instanzbeute_items import beute_ergaenzen, lade_beute, truhen_ids  # noqa: E402
+try:
+    from .sortierung import schluessel  # noqa: E402
+except ImportError:
+    from sortierung import schluessel  # noqa: E402
 
 SPRACHEN = ('de', 'en', 'fr')
 SCHEMA = 1
@@ -253,7 +257,7 @@ def write_landmark_index(target: Path, lang: str, landmarks: dict, maps: dict) -
                      # lower(), not casefold(): casefold turns ß into ss and the
                      # PHP side lowercases the query without that change.
                      'search': ' '.join(teil for teil in teile if teil).lower()})
-    rows.sort(key=lambda row: row['name'].casefold())
+    rows.sort(key=lambda row: schluessel(row['name']))
     payload = {'schema': 1, 'lang': lang, 'labels': labels, 'landmarks': rows}
     (target / lang / 'landmarks-index.json').write_text(
         json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
@@ -308,7 +312,7 @@ def write_faction_index(target: Path, lang: str, factions: dict,
                      'regions': sorted(regionen), 'areas': sorted(gebiete),
                      'quests': aufgaben, 'deeds': taten,
                      'search': ' '.join(teil for teil in teile if teil).lower()})
-    rows.sort(key=lambda row: row['name'].lower())
+    rows.sort(key=lambda row: schluessel(row['name']))
     payload = {'schema': 1, 'lang': lang, 'labels': labels, 'factions': rows}
     (target / lang / 'factions-index.json').write_text(
         json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
@@ -383,7 +387,7 @@ def write_title_index(target: Path, lang: str, titles: dict,
                      'regions': sorted(regionen), 'areas': sorted(gebiete),
                      'quests': aufgaben, 'deeds': taten, 'arten': sorted(arten),
                      'search': ' '.join(teil for teil in teile if teil).lower()})
-    rows.sort(key=lambda row: row['name'].lower())
+    rows.sort(key=lambda row: schluessel(row['name']))
     # Deed kinds arrive already localised from the page models; they are their
     # own labels.
     labels['art'] = {art: art for row in rows for art in row['arten']}
@@ -437,7 +441,7 @@ def write_instance_index(target: Path, lang: str, instanzen: dict, maps: dict) -
                       # Never link a quest absent from the published catalogue.
                       'quest': None,
                      'search': ' '.join(teil for teil in teile if teil).lower()})
-    rows.sort(key=lambda row: row['name'].lower())
+    rows.sort(key=lambda row: schluessel(row['name']))
     payload = {'schema': 2, 'lang': lang, 'labels': labels, 'instances': rows}
     (target / lang / 'instances-index.json').write_text(
         json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
@@ -492,7 +496,7 @@ def chest_source_rows(sources, lang, item_id):
             ))))
         href = url + '?' + urlencode({'truhenbeute.q': item_id}) + '#truhenbeute'
         result.append({'text': name, 'url': href, 'conditions': lines})
-    return sorted(result, key=lambda row: (row['text'].casefold(), row['url']))
+    return sorted(result, key=lambda row: (schluessel(row['text']), row['url']))
 
 
 def write_instance_details(target: Path, lang: str, instanzen: dict, quests: dict,
@@ -609,7 +613,7 @@ def write_instance_details(target: Path, lang: str, instanzen: dict, quests: dic
                      'chance': p,
                 }
         chest_loot = []
-        for drop in sorted(loot_items.values(), key=lambda row: (row['name'].casefold(), row['id'])):
+        for drop in sorted(loot_items.values(), key=lambda row: (schluessel(row['name']), row['id'])):
             conditions = drop.pop('conditions')
             chances = sorted(set().union(*conditions.values()), reverse=True)
             chest_loot.append(dict(drop, chance=' / '.join(chest_chance(p, lang) for p in chances),
@@ -799,7 +803,8 @@ def load_item_context(builder, model, lang):
     boni = ITEM_BONI.get('items') or {}
     boni_labels = (ITEM_BONI.get('labels') or {}).get(lang) or {}
     return ItemContext(builder, ITEM_DETAILS, ITEM_SETS, ITEM_LABELS, ITEM_TYPEN,
-                       vorkommen, boni, boni_labels, referenz, ITEM_FULL, DAMAGE_TYPES.get(lang, {}))
+                       vorkommen, boni, boni_labels, referenz, ITEM_FULL, DAMAGE_TYPES.get(lang, {}),
+                       vendor_ids=set((VENDOR_SOURCE or {}).get('vendors') or {}))
 
 
 DEED_CATEGORIES: dict | None = None
@@ -958,7 +963,7 @@ def main() -> int:
         # once so its search and filters cover the whole catalogue. Same rows as
         # the embedded relation lists, sorted by name.
         index_rows = [deed_rows[ident] for ident in sorted(
-            deed_rows, key=lambda key: (deed_rows[key]['name'].casefold(), key))]
+            deed_rows, key=lambda key: (schluessel(deed_rows[key]['name']), key))]
         (WEB / ('taten-index-%s.js' % lang)).write_text(
             'window.MQL_INDEX_ROWS=' + json.dumps({'kind': 'd', 'rows': index_rows},
                                                   ensure_ascii=False, separators=(',', ':')) + ';\n',

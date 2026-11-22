@@ -13,6 +13,7 @@ from collections import Counter
 from pathlib import Path
 
 from itemnamen import sauberer_name
+from tools.sortierung import schluessel
 
 ROOT = Path(__file__).resolve().parent
 LORE = Path.home() / 'Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore'
@@ -247,7 +248,7 @@ def build(lore, items, details):
             'members': [{key: m[key] for key in (
                 'id', 'available', 'category', 'armour', 'class', 'classes', 'class_known', 'min_level')}
                         | {'name': m['name'][lang]} for m in s['members']],
-        } for s in sorted(catalogue.values(), key=lambda s: (s['name'][lang].casefold(), s['id']))
+        } for s in sorted(catalogue.values(), key=lambda s: (schluessel(s['name'][lang]), s['id']))
             if s['listable']]}
     return {'schema': 1, 'sets': catalogue}, report, indexes
 

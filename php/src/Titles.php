@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Llb;
 
+require_once __DIR__ . '/Sortierung.php';
+
 /**
  * Title browser under the same segment as the title pages.
  *
@@ -109,7 +111,7 @@ final class Titles
     public static function sorted(array $rows): array
     {
         usort($rows, static fn (array $a, array $b): int =>
-            strnatcasecmp($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
+            Sortierung::name($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
         return $rows;
     }
 
@@ -216,7 +218,7 @@ final class Titles
                                   'count' => $count, 'checked' => $checked];
                 }
             }
-            usort($options, static fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
+            usort($options, static fn ($a, $b) => Sortierung::name($a['label'], $b['label']));
             $facets[$key] = $options;
         }
         $arten = [];
@@ -230,7 +232,7 @@ final class Titles
                             'count' => $count, 'checked' => $checked];
             }
         }
-        usort($arten, static fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
+        usort($arten, static fn ($a, $b) => Sortierung::name($a['label'], $b['label']));
         $facets['art'] = $arten;
 
         $herkunft = [];

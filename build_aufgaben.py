@@ -104,8 +104,8 @@ class Renderer(katalog.Renderer):
                 return ''
             # No sentence about the missing giver position: the two ways to the
             # place are what matters here, and they work without it.
-            inhalt = '<p class="katalog-aktionen">%s %s</p>' % (
-                katalog.a(katalog.old_link(self.lang, 'q', quest['i']), w['map'], class_='katalog-knopf'),
+            inhalt = '<p class="llb-aktionen">%s %s</p>' % (
+                katalog.a(katalog.old_link(self.lang, 'q', quest['i']), w['map'], class_='llb-knopf'),
                 self.reise_link('q', quest))
             return abschnitt(w['place'], inhalt)
         karte = self.model['maps'].get(punkt[0])
@@ -130,10 +130,10 @@ class Renderer(katalog.Renderer):
                                        karte['name'])
             zeile += ' · ' + katalog.a('/index.html?vorkarte=%s&lang=%s' % (punkt[0], self.lang),
                                        w['occurrences'])
-        zeilen = ['<p class="katalog-hinweis">%s</p>' % zeile]
+        zeilen = ['<p class="llb-hinweis">%s</p>' % zeile]
         # The two ways to the place belong in this section, not at the top.
-        zeilen.append('<p class="katalog-aktionen">%s %s</p>' % (
-            katalog.a(katalog.old_link(self.lang, 'q', quest['i']), w['map'], class_='katalog-knopf'),
+        zeilen.append('<p class="llb-aktionen">%s %s</p>' % (
+            katalog.a(katalog.old_link(self.lang, 'q', quest['i']), w['map'], class_='llb-knopf'),
             self.reise_link('q', quest)))
         return abschnitt(w['place'], '<div class="katalog-ort-flex">%s<div>%s</div></div>'
                          % (bild, ''.join(zeilen)))
@@ -226,7 +226,7 @@ class Renderer(katalog.Renderer):
                 '<li>%s</li>' % self.link('q', other['i'], other['n']) for other in braucht[:12]))
             if len(braucht) > 12:
                 inhalt += katalog.paragraph(w['more_in_list'].replace('%s', str(len(braucht) - 12)),
-                                            'katalog-hinweis')
+                                            'llb-hinweis')
         return abschnitt(w['rewards'], inhalt)
 
     def zusammenhang(self, quest):

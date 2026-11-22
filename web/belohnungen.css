@@ -1,14 +1,11 @@
 /* Compact reward rows, matching the item-search result rhythm. */
 .bl-ergebnis { list-style:none; margin:0; padding:0; }
 .bl-ergebnis-zeile {
-	display:grid; grid-template-columns:32px minmax(0,1fr); gap:2px 12px;
+	display:grid; grid-template-columns:64px minmax(0,1fr); gap:2px 12px;
 	border-bottom:1px solid var(--rand); padding:12px 4px;
 }
-.bl-symbol {
-	grid-row:1 / span 2; align-self:start; display:grid; place-items:center;
-	width:26px; height:26px; color:var(--gold);
-}
-.bl-symbol-svg { width:22px; height:22px; }
+/* Frame and size from `.mql-row-icon` (kachel.css); the type tints it. */
+.bl-symbol { grid-row:1 / span 2; align-self:start; }
 .bl-art-v .bl-symbol { color:var(--llb-palette-8eb6d8); }
 .bl-art-t .bl-symbol { color:var(--llb-palette-e0c15c); }
 .bl-art-g .bl-symbol { color:var(--llb-palette-6fc3c3); }
@@ -21,3 +18,7 @@
 .bl-name.q4 { color:var(--llb-palette-6fc3c3); }
 .bl-name.q5 { color:var(--llb-palette-e6a94d); }
 .bl-meta { display:block; color:var(--schwach); font-size: var(--text-klein); overflow-wrap:anywhere; }
+
+@media (max-width: 700px) {
+	.bl-ergebnis-zeile { grid-template-columns: 54px minmax(0, 1fr); padding-inline: 0; }
+}

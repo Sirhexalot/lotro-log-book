@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 from urllib.parse import urlencode
 from build_sitemaps import add_sections
+from tools.sortierung import schluessel
 
 BASE = 'https://llb.sirhexalot.de'
 PILOT = 268441569  # The Old Forest, a game map ID shared by all languages.
@@ -390,7 +391,8 @@ class Renderer:
         self.selected = self.model['selected']
         self.paths = []
         self.asset_tags = []
-        for asset in ('style.css', 'gemeinsam.css', 'katalog.css', 'flaeche.css', 'fakten.css', 'theme-light.css'):
+        for asset in ('style.css', 'gemeinsam.css', 'katalog.css', 'flaeche.css', 'fakten.css',
+                      'kachel.css', 'hinweis.css', 'knopf.css', 'karte.css', 'theme-light.css'):
             digest = hashlib.sha256((target / asset).read_bytes()).hexdigest()[:10]
             self.asset_tags.append('<link rel="stylesheet" href="/%s?v=%s">' % (asset, digest))
         self.scripts = '\n'.join('<script src="/%s?v=%s" defer></script>' % (
@@ -530,7 +532,8 @@ class Renderer:
         return value['name'] if kind in ('area', 'region') else value['n']
 
     def list_entries(self, kind, rows=None):
-        rows = sorted(self.selected[kind].items() if rows is None else rows, key=lambda row: self.name(kind, row[1]).casefold())
+        rows = sorted(self.selected[kind].items() if rows is None else rows,
+                      key=lambda row: schluessel(self.name(kind, row[1])))
         def eintrag(key, value):
             symbol = self.symbol(value.get('ic')) if kind == 'i' else ''
             return '<li>%s%s</li>' % (symbol, self.link(kind, key, self.name(kind, value)))
@@ -671,8 +674,8 @@ class Renderer:
             facts.append((w['location'], coords))
         if q.get('lp'):
             facts.append((w['points'], str(q['lp'])))
-        body = '<p class="katalog-aktionen">%s %s</p>' % (
-            a(old_link(self.lang, kind, q['i']), w['map'], class_='katalog-knopf'),
+        body = '<p class="llb-aktionen">%s %s</p>' % (
+            a(old_link(self.lang, kind, q['i']), w['map'], class_='llb-knopf'),
             self.reise_link(kind, q))
         body += '<dl class="katalog-fakten">' + ''.join('<dt>%s</dt><dd>%s</dd>' % (escape(k), escape(str(v))) for k, v in facts if v) + '</dl>'
         if kind == 'q' and not q.get('gt'):
@@ -756,7 +759,7 @@ class Renderer:
                 gruppen.append(({o: route(o, 'i') + ARTEN[art][o] + '/' + WORDS[o]['qualityslug'] + '/'
                                  + GUETE_SLUG[wert][o] + '/' for o in LANGS}, titel, zeilen))
         for pfade, titel, zeilen in gruppen:
-            zeilen.sort(key=lambda r: self.name('i', r[1]).casefold())
+            zeilen.sort(key=lambda r: schluessel(self.name('i', r[1])))
             seiten = max(1, (len(zeilen) + PAGE_SIZE - 1) // PAGE_SIZE)
             for nummer in range(1, seiten + 1):
                 teil = zeilen[(nummer - 1) * PAGE_SIZE:nummer * PAGE_SIZE]
@@ -817,14 +820,14 @@ class Renderer:
                 w['used_count'].replace('%s', str(len(zutaten))),
                 ''.join('<li>%s</li>' % x for x in zutaten[:50])))
             if len(zutaten) > 50:
-                body += paragraph(w['more_in_list'].replace('%s', str(len(zutaten))), 'katalog-hinweis')
+                body += paragraph(w['more_in_list'].replace('%s', str(len(zutaten))), 'llb-hinweis')
 
         if item.get('vor'):
             body += section(w['occurrences'], '<ul>%s</ul>' % ''.join(
                 '<li>%s · %s</li>' % (escape(v[1]), escape(str(v[2] or ''))) for v in item['vor']))
 
         if not quellen and not herstellbar and not zutaten:
-            body += paragraph(w['item_lonely'], 'katalog-hinweis')
+            body += paragraph(w['item_lonely'], 'llb-hinweis')
         self.write('i', ident, name, '%s: %s. %s' % (w['ilabel'], name, w['item_intro']), body,
                    symbol=item.get('ic'))
 
@@ -845,16 +848,17 @@ class Renderer:
                 group = [(ident, row) for ident, row in rows if row[11] == tier]
                 body += section(group[0][1][4], self.list_entries('recipe', group))
             self.write('p', key, self.name('p', profession), w['overview'], body)
-        intro = paragraph(w['pilot'] if self.model['pilot'] else w['overview'], 'katalog-hinweis')
+        intro = paragraph(w['pilot'] if self.model['pilot'] else w['overview'], 'llb-hinweis')
         for kind in ('q', 'd', 'i', 'area', 'region', 'p', 'recipe', 'title', 'virtue'):
-            rows = sorted(self.selected[kind].items(), key=lambda row: self.name(kind, row[1]).casefold())
+            rows = sorted(self.selected[kind].items(),
+                          key=lambda row: schluessel(self.name(kind, row[1])))
             count = max(1, (len(rows) + PAGE_SIZE - 1) // PAGE_SIZE)
             for number in range(1, count + 1):
                 body = intro + self.list_entries(kind, rows[(number - 1) * PAGE_SIZE:number * PAGE_SIZE])
                 if kind == 'i' and number == 1:
                     # The searchable browser is the way in; this page stays as the
                     # plain, crawlable list of every item.
-                    body = ('<p class="katalog-hinweis">%s</p>'
+                    body = ('<p class="llb-hinweis">%s</p>'
                             % a('/gegenstaende.html?lang=' + self.lang, w['item_search'])) + body
                 if count > 1:
                     pages = []
@@ -881,9 +885,9 @@ class Renderer:
                     rows = self.members[ekind][area['idx']]
                     if rows:
                         body += section('%s (%d)' % (w[ekind + 'list'], len(rows)), self.list_entries(ekind,
-                            sorted(rows, key=lambda row: self.name(ekind, row[1]).casefold())[:PAGE_SIZE]))
+                            sorted(rows, key=lambda row: schluessel(self.name(ekind, row[1])))[:PAGE_SIZE]))
                         if len(rows) > PAGE_SIZE:
-                            body += paragraph(w['excerpt'], 'katalog-hinweis')
+                            body += paragraph(w['excerpt'], 'llb-hinweis')
                 self.write(kind, ident, area['name'], '%s: %s – LOTRO Log Book.' % (w['cataloglabel'], area['name']), body)
         self.gegenstandslisten()
         craft = intro + section(w['plist'], self.list_entries('p')) + '<p>%s</p>' % a(route(self.lang, 'recipe'), w['recipelist'])
@@ -904,7 +908,7 @@ class Renderer:
                                               ' · ' + escape(zusatz) if zusatz else ''))
         body = section(w['sources'], '<ul>%s</ul>' % ''.join(quellen))
         if re.search(r'\bRANK\b|\bNAME\b|\bSURNAME\b', name):
-            body += paragraph(w['ranked'], 'katalog-hinweis')
+            body += paragraph(w['ranked'], 'llb-hinweis')
         self.write(art, ident, name, '%s: %s' % (w[art + 'label'], name), body,
                    icon='titel' if art == 'title' else 'tugend')
 
@@ -1030,7 +1034,8 @@ def build(target, source=None, pilot=False):
         ids = [set(models[lang]['selected'][kind]) for lang in LANGS]
         if not all(ids[0] == other for other in ids[1:]):
             raise ValueError('Catalogue IDs differ between languages: ' + kind)
-    for asset in ('katalog.css', 'flaeche.css', 'fakten.css', 'katalog.js', 'theme-light.css', 'theme.js'):
+    for asset in ('katalog.css', 'flaeche.css', 'fakten.css', 'kachel.css', 'hinweis.css', 'knopf.css',
+                  'karte.css', 'katalog.js', 'theme-light.css', 'theme.js'):
         (target / asset).write_bytes((Path(__file__).parent / 'web' / asset).read_bytes())
     from build_aufgaben import pages as aufgabenseiten
     from build_taten import pages as tatenseiten

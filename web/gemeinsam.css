@@ -532,15 +532,15 @@ button:disabled:hover { background: var(--fläche-hell); }
 
 /* Text links in editorial/app content: link meaning is not carried by gold
    alone. Whole-row cards and button-like links keep their component styling. */
-.seite-text main :is(p, li, dd, td) a:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .mql-row-hit, .hinweis-link, .hinweis-karte, .karte-gebiete a)),
-.seite-start main :is(p, li) a:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .mql-row-hit)) {
+.seite-text main :is(p, li, dd, td) a:not(:where(.llb-knopf, .gs-zeile, .related-result, .mql-row-hit, .hinweis-link, .hinweis-karte, .karte-gebiete a)),
+.seite-start main :is(p, li) a:not(:where(.llb-knopf, .gs-zeile, .related-result, .mql-row-hit)) {
 	color: var(--gold);
 	text-decoration-line: underline;
 	text-decoration-thickness: .08em;
 	text-underline-offset: .16em;
 }
-.seite-text main :is(p, li, dd, td) a:visited:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .mql-row-hit, .hinweis-link, .hinweis-karte, .karte-gebiete a)),
-.seite-start main :is(p, li) a:visited:not(:where(.knopf, .katalog-knopf, .gs-zeile, .related-result, .mql-row-hit)) {
+.seite-text main :is(p, li, dd, td) a:visited:not(:where(.llb-knopf, .gs-zeile, .related-result, .mql-row-hit, .hinweis-link, .hinweis-karte, .karte-gebiete a)),
+.seite-start main :is(p, li) a:visited:not(:where(.llb-knopf, .gs-zeile, .related-result, .mql-row-hit)) {
 	color: var(--gold);
 }
 
@@ -563,7 +563,7 @@ button:disabled:hover { background: var(--fläche-hell); }
  * readable control size as navigation, tabs and table actions. */
 body[data-seite] button, body[data-seite] input, body[data-seite] select,
 .menue a, .charakterwahl select,
-.sprachen button, .sprachen a, .knopf, .knopf.klein {
+.sprachen button, .sprachen a {
 	font-family: var(--schrift); font-size: var(--text-bedienung); line-height: var(--zeile-normal);
 	letter-spacing: normal; text-transform: none;
 }
@@ -682,8 +682,6 @@ body[data-seite="start"] main { max-width: var(--huelle); margin-inline: auto; p
 /* Same reading measure as the text pages. */
 .intro p, .neuigkeiten li, .plugin p, .funktionen p { max-width: 72ch; }
 .einstieg { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-.knopf.sekundaer { color: var(--gold); background: var(--fläche); }
-.knopf.sekundaer:hover { background: var(--fläche-hell); }
 .neuigkeiten { padding: 20px 24px; background: var(--fläche); border-radius: 4px; margin-top: 28px; }
 .neuigkeiten h3 { margin-bottom: 4px; }
 .neuigkeiten .datum { color: var(--schwach); margin: 0 0 12px; }

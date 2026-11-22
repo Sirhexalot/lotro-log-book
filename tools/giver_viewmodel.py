@@ -10,6 +10,10 @@ import re
 from collections import defaultdict
 
 import seo
+try:
+    from .sortierung import schluessel
+except ImportError:
+    from sortierung import schluessel
 
 SEGMENT = {'de': 'auftraggeber', 'en': 'quest-giver', 'fr': 'donneur-de-quete'}
 QUEST = {'de': 'aufgabe', 'en': 'quest', 'fr': 'quete'}
@@ -132,7 +136,7 @@ def giver_index(source: dict, lang: str, quests: dict, maps: dict) -> dict:
                                + [quests[ident]['n'] for ident in giver['quests']
                                   if ident in quests]).casefold(),
         })
-    rows.sort(key=lambda row: (row['name'].casefold(), row['id']))
+    rows.sort(key=lambda row: (schluessel(row['name']), row['id']))
     return {
         'schema': 1, 'lang': lang,
         'labels': {'kind': {key: key for key in KINDS},
@@ -231,7 +235,7 @@ def giver_pages(source: dict, lang: str, quests: dict, maps: dict,
         if not rows:
             continue
         rows.sort(key=lambda row: (int(row['level']) if str(row['level']).isdigit() else 0,
-                                   row['name'].casefold()))
+                                   schluessel(row['name'])))
         places = [_place_view(spot, lang, maps, app_url, coords)
                   for spot in giver['places']]
         levels = _levels([[row['id'], int(row['level']) if str(row['level']).isdigit() else 0]

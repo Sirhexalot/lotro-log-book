@@ -1,0 +1,62 @@
+/* One icon tile: entity symbol or item picture in a square frame.
+ *
+ * Lists show it at 64 px, detail heads and phones at 54 px. Entity symbols sit
+ * on the plain surface, item pictures on the item tone. The tile owns frame,
+ * centring and picture fit; the surrounding list or panel owns grid, flex and
+ * margins. */
+.llb-kachel,
+.mql-row-icon,
+.detail-symbol,
+.detail-reward-symbol {
+	box-sizing: border-box;
+	width: var(--llb-kachel, 64px);
+	height: var(--llb-kachel, 64px);
+	display: grid;
+	place-items: center;
+	color: var(--gold);
+	background: var(--fläche);
+	border: 1px solid var(--llb-icon-tile-border);
+	border-radius: 4px;
+}
+
+/* Item pictures get the item tone, entity symbols stay on the surface. */
+.llb-kachel[data-art="gegenstand"],
+.mql-row-icon-item,
+.detail-symbol,
+.detail-reward-symbol { background: var(--llb-icon-tile-bg); }
+
+.llb-kachel img,
+.mql-row-icon img,
+.detail-reward-symbol img {
+	width: 75%;
+	height: 75%;
+	object-fit: contain;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	filter: var(--llb-icon-item-filter);
+}
+
+.llb-kachel svg,
+.mql-row-icon svg {
+	width: 27px;
+	height: 27px;
+	margin: 0;
+	padding: 0;
+	background: none;
+	box-shadow: none;
+	filter: none;
+}
+
+/* Size scale */
+.detail-symbol,
+.detail-reward-symbol { --llb-kachel: 54px; }
+.detail-symbol svg { width: 24px; height: 24px; }
+
+@media (max-width: 700px) {
+	.mql-row-icon { --llb-kachel: 54px; }
+	.mql-row-icon svg { width: 24px; height: 24px; }
+}

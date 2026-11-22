@@ -18,7 +18,7 @@
 	function text(wert) { return wert ? (wert[sprache] || wert.en || '') : ''; }
 	function zahl(wert) { return Number(wert).toLocaleString(t('locale')); }
 	function nachName(a, b) {
-		return text((berufe[a] || {}).n || { en: a }).localeCompare(text((berufe[b] || {}).n || { en: b }), t('locale'));
+		return MQL_SORT.compare(text((berufe[a] || {}).n || { en: a }), text((berufe[b] || {}).n || { en: b }));
 	}
 
 	var ziel = el('berufe');

@@ -1,4 +1,5 @@
 {% extends 'layout.twig' %}
+{% import 'components/karte.twig' as karte %}
 
 {# Quest page: title with icon, chips, then description · place · where from ·
    rewards · context. Objectives stay behind a closed <details>. #}
@@ -13,7 +14,7 @@
 {% set has_requirements = page.requirements.level or page.requirements.all or page.requirements.one or page.requirements.extra %}
 {% set show_area_trail = page.area_trail and not page.place.map_name|default('') %}
 {% if page.giver or show_area_trail or has_requirements %}
-<section class="quest-herkunft" aria-labelledby="quest-herkunft">
+<section class="quest-herkunft llb-flaeche" aria-labelledby="quest-herkunft">
 <h2 id="quest-herkunft">{{ w.where_from }}</h2>
 {% if page.giver or show_area_trail %}<dl class="llb-fakten">
 {% if page.giver %}<dt>{{ w.giver }}</dt><dd><a href="{{ page.giver.url }}">{{ page.giver.text }}</a></dd>{% endif %}
@@ -28,21 +29,21 @@
 </section>{% endif %}
 {% endset %}
 {% set place_panel %}
-{% if page.place %}<section class="quest-detail-ort" aria-labelledby="quest-ort">
+{% if page.place %}<section class="quest-detail-ort llb-flaeche" aria-labelledby="quest-ort">
 <h2 id="quest-ort">{{ w.place }}</h2>
-{% if page.place.image %}<a class="katalog-ortlink" href="{{ page.place.map_link }}" aria-label="{{ w.map }}"><figure class="katalog-ort"><img src="/karten/{{ lang }}/{{ page.place.image|replace({'.png': '.webp'}) }}" alt="" width="320" height="240" loading="lazy" decoding="async"><i class="katalog-pin" style="left:{{ page.place.pin_x|pin }}%;top:{{ page.place.pin_y|pin }}%"></i></figure></a>{% endif %}
-{% if page.place.coords or page.place.map_name %}<p class="katalog-hinweis">{% if page.place.map_name %}<a href="{{ page.place.area_url|default(page.place.map_url) }}">{{ page.place.map_name }}</a>{% endif %}{% if page.place.coords %}{% if page.place.map_name %} · {% endif %}{{ page.place.coords }}{% endif %}{% if page.place.points %} · {{ w.points_count|replace({'%s': page.place.points}) }}{% endif %}</p>{% endif %}
-<p class="katalog-aktionen"><a href="{{ page.place.map_link }}" class="katalog-knopf">{{ w.map }}</a></p>
+{% if page.place.image %}{{ karte.karte(lang, page.place.image, page.place.map_link, page.place.pin_x, page.place.pin_y, '', false, w.map) }}{% endif %}
+{% if page.place.coords or page.place.map_name %}<p class="llb-hinweis">{% if page.place.map_name %}<a href="{{ page.place.area_url|default(page.place.map_url) }}">{{ page.place.map_name }}</a>{% endif %}{% if page.place.coords %}{% if page.place.map_name %} · {% endif %}{{ page.place.coords }}{% endif %}{% if page.place.points %} · {{ w.points_count|replace({'%s': page.place.points}) }}{% endif %}</p>{% endif %}
+<p class="llb-aktionen"><a href="{{ page.place.map_link }}" class="llb-knopf">{{ w.map }}</a></p>
 {% if page.place.travel_url or page.place.occurrences_url %}<p class="quest-ort-nebenlinks">{% if page.place.travel_url %}<a href="{{ page.place.travel_url }}">{{ w.route }}</a>{% endif %}{% if page.place.occurrences_url %}<a href="{{ page.place.occurrences_url }}">{{ w.occurrences }}</a>{% endif %}</p>{% endif %}
 </section>{% endif %}
 {% endset %}
 {% set reading_panel %}
 {{ introductory_sections }}
-{% if page.reward_groups %}<section class="katalog-abschnitt katalog-flaeche"><h2>{{ w.rewards }}</h2><div class="katalog-gaben">{% for group in page.reward_groups %}<div class="katalog-geben"><div class="katalog-geben-art">{{ group.label }}</div>{% for item in group.items %}<div class="katalog-gabe">{% if item.icon %}<span class="mql-row-icon mql-row-icon-item" aria-hidden="true"><img src="/bild/items/{{ item.icon }}.webp" alt="" width="48" height="48" loading="lazy" decoding="async"></span>{% elseif item.symbol %}<span class="mql-row-icon mql-row-icon-entity" aria-hidden="true">{{ symbol(item.symbol)|raw }}</span>{% endif %}<span>{% if item.qty > 1 %}{{ item.qty }} × {% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}</span></div>{% endfor %}</div>{% endfor %}</div></section>{% endif %}
-{% if page.steps %}<details class="katalog-ziele" data-nosnippet><summary>{{ w.objectives }}</summary><ol>{% for step in page.steps %}<li>{% for paragraph in step.paragraphs %}<p class="katalog-text">{{ paragraph }}</p>{% endfor %}<ul>{% for goal in step.objectives %}<li>{{ goal }}</li>{% endfor %}</ul></li>{% endfor %}</ol></details>{% endif %}
+{% if page.reward_groups %}<section class="katalog-abschnitt llb-flaeche" data-ton="hell"><h2>{{ w.rewards }}</h2><div class="katalog-gaben">{% for group in page.reward_groups %}<div class="katalog-geben"><div class="katalog-geben-art">{{ group.label }}</div>{% for item in group.items %}<div class="katalog-gabe">{% if item.icon %}<span class="mql-row-icon mql-row-icon-item" aria-hidden="true"><img src="/bild/items/{{ item.icon }}.webp" alt="" width="48" height="48" loading="lazy" decoding="async"></span>{% elseif item.symbol %}<span class="mql-row-icon mql-row-icon-entity" aria-hidden="true">{{ symbol(item.symbol)|raw }}</span>{% endif %}<span>{% if item.qty > 1 %}{{ item.qty }} × {% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}</span></div>{% endfor %}</div>{% endfor %}</div></section>{% endif %}
+{% if page.steps %}<details class="katalog-ziele llb-flaeche" data-nosnippet><summary>{{ w.objectives }}</summary><ol>{% for step in page.steps %}<li>{% for paragraph in step.paragraphs %}<p class="katalog-text">{{ paragraph }}</p>{% endfor %}<ul>{% for goal in step.objectives %}<li>{{ goal }}</li>{% endfor %}</ul></li>{% endfor %}</ol></details>{% endif %}
 {% endset %}
 {{ include('entity/_detail_grid.twig') }}
-{% for group in related_lists|default([]) %}{% if group.fallback is defined %}<section class="katalog-abschnitt"><h2>{{ {de: 'Aufgaben, die diese Aufgabe voraussetzen', en: 'Quests that require this quest', fr: 'Quêtes qui nécessitent cette quête'}[lang] }}</h2><ul data-quellen-liste>{% for entry in group.fallback %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul><ul class="related-results" data-filter-results hidden></ul></section>{% endif %}{% endfor %}
-{% if page.context_columns %}<section class="katalog-abschnitt"><h2>{{ {de: 'Weitere Aufgabenbezüge', en: 'Other quest connections', fr: 'Autres liens entre quêtes'}[lang] }}</h2><div class="katalog-zwei">{% for column in page.context_columns %}<dl class="llb-fakten">{% for row in column %}<dt>{{ row.label }}</dt><dd>{% for item in row['items'] %}{% if not loop.first %}{{ row.separator }}{% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}{% endfor %}</dd>{% endfor %}</dl>{% endfor %}</div></section>{% endif %}
+{% for group in related_lists|default([]) %}{% if group.fallback is defined %}<section class="katalog-abschnitt llb-flaeche"><h2>{{ {de: 'Aufgaben, die diese Aufgabe voraussetzen', en: 'Quests that require this quest', fr: 'Quêtes qui nécessitent cette quête'}[lang] }}</h2><ul data-quellen-liste>{% for entry in group.fallback %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul><ul class="related-results" data-filter-results hidden></ul></section>{% endif %}{% endfor %}
+{% if page.context_columns %}<section class="katalog-abschnitt llb-flaeche"><h2>{{ {de: 'Weitere Aufgabenbezüge', en: 'Other quest connections', fr: 'Autres liens entre quêtes'}[lang] }}</h2><div class="katalog-zwei">{% for column in page.context_columns %}<dl class="llb-fakten">{% for row in column %}<dt>{{ row.label }}</dt><dd>{% for item in row['items'] %}{% if not loop.first %}{{ row.separator }}{% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}{% endfor %}</dd>{% endfor %}</dl>{% endfor %}</div></section>{% endif %}
 </article>
 {% endblock %}

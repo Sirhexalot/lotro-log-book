@@ -231,7 +231,7 @@ class Renderer(katalog.Renderer):
                         katalog.escape(str(k)))
                     for k, v in zeilen)
         if scale and scale[0]:
-            inhalt += katalog.paragraph('%s %s' % (w['scalable'], scale[0]), 'katalog-hinweis')
+            inhalt += katalog.paragraph('%s %s' % (w['scalable'], scale[0]), 'llb-hinweis')
         return katalog.section(w['values'], inhalt)
 
     def vorkommen_abschnitt(self, item):
@@ -338,7 +338,7 @@ class Renderer(katalog.Renderer):
         inhalt += '<ul>%s</ul>' % ''.join('<li>%s</li>' % x for x in zutaten[:50])
         if len(zutaten) > 50:
             inhalt += katalog.paragraph(w['more_in_list'].replace('%s', str(len(zutaten) - 50)),
-                                        'katalog-hinweis')
+                                        'llb-hinweis')
         return katalog.section({'de': 'Wofür', 'en': 'Used for', 'fr': 'Utilisation'}[self.lang], inhalt)
 
     def auspraegungen(self, item, ident):
@@ -358,7 +358,7 @@ class Renderer(katalog.Renderer):
                 katalog.escape(w['level']), stufe or '?'))
         inhalt = katalog.paragraph(w['variants_count'] % (len(andere) + 1))
         inhalt += '<p class="katalog-chips">%s</p>' % ''.join(chips)
-        inhalt += katalog.paragraph(w['variant_note'], 'katalog-hinweis')
+        inhalt += katalog.paragraph(w['variant_note'], 'llb-hinweis')
         return katalog.section(w['variants'], inhalt)
 
     def zusammenhang(self, item, details):
@@ -420,7 +420,7 @@ class Renderer(katalog.Renderer):
         parameter = 'lang=%s&kat=%s&platz=%s' % (self.lang, kat, platz)
         return katalog.section(w['browse'], '<p>%s</p><p>%s</p>' % (
             katalog.escape(w['browse_text']),
-            katalog.a('/gegenstaende.html?' + parameter, w['browse_link'], class_='katalog-knopf')))
+            katalog.a('/gegenstaende.html?' + parameter, w['browse_link'], class_='llb-knopf')))
 
     def item_page(self, item):
         w = self.w

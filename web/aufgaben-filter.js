@@ -68,15 +68,18 @@
 			return known.has(row.id) ? 'fertig' : null;
 		}
 		var meta = (character && character.importMeta) || {};
+		// Same rule as the recipe lists: the import flag of the file counts, an
+		// optional dataset marker may confirm it.
 		var evidence = meta.datasets && meta.datasets[dataset];
-		var hasImportedStatus = evidence ? evidence.status !== 'unknown' : meta[dataset] === true;
+		var hasImportedStatus = meta[dataset] === true ||
+			!!(evidence && evidence.status && evidence.status !== 'unknown');
 		var hasStatus = known.size > 0 || hasImportedStatus || !!(character && store && rows.some(function (row) { return status(row) !== null; }));
 
 		/* A filter that cannot separate anything is noise: a group needs at least
 		   two values in this relation, a range at least two distinct levels. */
 		function multi(id, label, values) {
 			var distinct = Array.from(new Set(values.filter(Boolean)))
-				.sort(function (a, b) { return a.localeCompare(b, lang); });
+				.sort(MQL_SORT.compare);
 			if (distinct.length < 2) { return null; }
 			return { id: id, kind: 'multi', label: label,
 				options: distinct.map(function (value) { return { value: value, label: value }; }) };
@@ -99,21 +102,21 @@
 			var present = new Set();
 			rows.forEach(function (r) { r.flags.forEach(function (key) { present.add(key); }); });
 			var flags = Array.from(present)
-				.sort(function (a, b) { return w[a].localeCompare(w[b], lang); })
+				.sort(function (a, b) { return MQL_SORT.compare(w[a], w[b]); })
 				.map(function (key) { return { value: key, label: w[key] }; });
 			if (flags.length > 1) {
 				groups.push({ id: 'flag', kind: 'multi', label: w.flag, options: flags });
 			}
 		}
 		var regions = Array.from(new Set(rows.map(function (r) { return r.region; }).filter(Boolean)))
-			.sort(function (a, b) { return a.localeCompare(b, lang); });
+			.sort(MQL_SORT.compare);
 		var geographyMap = {};
 		regions.forEach(function (regionName) {
 			geographyMap[regionName] = Array.from(new Set(rows.filter(function (r) {
 				return r.region === regionName;
 			}).map(function (r) { return r.area; }).filter(function (areaName) {
 				return areaName && !/^karte\s+\d+/i.test(areaName);
-			}))).sort(function (a, b) { return a.localeCompare(b, lang); });
+			}))).sort(MQL_SORT.compare);
 		});
 		var geography = regions.length ? {
 			id: 'geography', kind: 'tree', label: w.geography,
@@ -241,7 +244,7 @@
 			matches: matches,
 			compare: function (a, b, sort) {
 				return (sort === 'level' ? (a.level || Infinity) - (b.level || Infinity) : 0)
-					|| a.name.localeCompare(b.name, lang) || a.id.localeCompare(b.id);
+					|| MQL_SORT.compare(a.name, b.name) || a.id.localeCompare(b.id);
 			},
 			facets: function (all, state) {
 				var facets = {};

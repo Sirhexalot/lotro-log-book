@@ -16,11 +16,6 @@ body { background: var(--grund); color: var(--text); }
 	background: var(--fläche); border: 1px solid var(--rand); border-radius: 3px; padding: 10px 12px;
 }
 .gs-suche input[type="search"]:focus { border-color: var(--gold); outline: none; }
-.gs-suche .knopf {
-	background: var(--gold); color: var(--llb-palette-14110e); border: 1px solid var(--gold);
-	border-radius: 3px; padding: 10px 18px; font: inherit; font-weight: var(--gewicht-bold); cursor: pointer;
-}
-.gs-suche .knopf:hover { background: var(--llb-palette-e6c46d); }
 
 .gs-raster { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 28px; align-items: start; }
 
@@ -86,11 +81,6 @@ body { background: var(--grund); color: var(--text); }
 .gs-meta { grid-column: 2; color: var(--schwach); font-size: var(--text-klein); }
 .gs-leer { padding: 14px 4px; color: var(--schwach); }
 .gs-mehr-feld { margin: 16px 0 0; }
-.gs-mehr-feld .knopf {
-	border: 1px solid var(--rand); color: var(--gold); background: var(--llb-palette-transparent);
-	border-radius: 3px; padding: 8px 16px; font: inherit; cursor: pointer;
-}
-.gs-mehr-feld .knopf:hover { background: var(--fläche); }
 
 @media (max-width: 900px) {
 	.gs-raster { grid-template-columns: minmax(0, 1fr); }
@@ -109,7 +99,7 @@ body { background: var(--grund); color: var(--text); }
 	}
 	.gs-suche { flex-wrap: wrap; }
 	.gs-suche input[type="search"] { flex: 1 1 100%; }
-	.gs-suche .knopf { flex: 1 1 100%; text-align: center; }
+	.gs-suche .llb-knopf { flex: 1 1 100%; text-align: center; }
 }
 
 /* The result rows are the place where the symbol has to carry the eye. */

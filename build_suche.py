@@ -14,6 +14,7 @@ Context is the area for quests and deeds, "profession · tier" for recipes.
 import argparse
 import json
 from pathlib import Path
+from tools.sortierung import schluessel
 
 HIER = Path(__file__).resolve().parent
 BASIS = Path('/Users/adrian/Documents/07_Hobbys/Lotro')
@@ -126,7 +127,7 @@ def baue(katalog_dir, sprache):
         name = (eintrag.get('name') or {}).get(sprache) or (eintrag.get('name') or {}).get('en') or ''
         if name.strip():
             rows.append(['l', ident, name.strip(), '', ''])
-    rows.sort(key=lambda r: (r[2].lower(), r[0]))
+    rows.sort(key=lambda r: (schluessel(r[2]), r[0]))
     return rows
 
 

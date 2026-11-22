@@ -1,12 +1,11 @@
 /* One framed section: the surface behind a heading and its content.
  *
- * Catalogue pages and the map's detail panel must show the same thing the same
- * way, so the surface lives here and not in a page stylesheet. The heading size
- * stays with the page: h2 on a catalogue page, h3 inside the map panel, because
- * the panel already carries the entity title.
- *
- * Aliases at the bottom keep sections that still rely on their page structure.
- * They go away as each page adds `llb-flaeche` itself (see AGENTS.md). */
+ * Catalogue pages and the map's detail panel show the same thing the same way:
+ * same frame, same padding, same heading, same gap. The heading level follows
+ * the document (h2 on a catalogue page, h3 in the panel), its look does not.
+ * `data-ton="hell"` is the lighter ground for rewards and values. */
+:root { --llb-flaechen-abstand: 12px; }
+
 .llb-flaeche {
 	box-sizing: border-box;
 	min-width: 0;
@@ -16,19 +15,39 @@
 	background: var(--llb-flaechen-ton);
 }
 
-/* The map's detail column is about 360 px wide; the catalogue's generous
- * padding would dwarf its content. */
-.llb-flaeche[data-dichte="kompakt"] { padding: 10px 12px; }
+.llb-flaeche[data-ton="hell"] { background: var(--fläche); }
 
-/* Aliases: sections whose surface came from their page structure until now. */
-.entity-detail-reading > :is(section, details),
-.entity-detail-place > section,
-.entity-detail-layout > section,
-.item-seite .entity-detail-grid > section {
-	box-sizing: border-box;
-	min-width: 0;
-	padding: var(--llb-flaechen-innen);
-	border: 1px solid var(--llb-flaechen-rand);
-	border-radius: var(--llb-flaechen-radius);
-	background: var(--llb-flaechen-ton);
+/* One heading look for every section, whatever its level. */
+.llb-flaeche > :is(h2, h3, h4) {
+	margin: 0 0 8px;
+	font-size: var(--text-abschnitt);
+	line-height: var(--zeile-kompakt);
+	font-weight: var(--gewicht-medium);
+	letter-spacing: normal;
+	text-transform: none;
+	color: var(--text);
 }
+
+/* A disclosure reads as the section's heading and keeps its triangle. */
+.llb-flaeche > summary {
+	margin: 0;
+	font-size: var(--text-abschnitt);
+	line-height: var(--zeile-kompakt);
+	font-weight: var(--gewicht-medium);
+	color: var(--text);
+	cursor: pointer;
+	list-style-position: outside;
+}
+.llb-flaeche > details > summary {
+	margin: 0;
+	font-size: var(--text-abschnitt);
+	line-height: var(--zeile-kompakt);
+	font-weight: var(--gewicht-medium);
+	color: var(--text);
+	cursor: pointer;
+}
+.llb-flaeche > details > summary:hover,
+.llb-flaeche > details > summary:focus-visible { color: var(--gold); }
+.llb-flaeche > summary:hover,
+.llb-flaeche > summary:focus-visible { color: var(--gold); }
+.llb-flaeche > summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }

@@ -18,6 +18,9 @@ import json
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools.sortierung import schluessel
+
 HIER = Path(__file__).resolve().parents[1]
 SPRACHEN = ('de', 'en', 'fr')
 sys.path.insert(0, str(HIER / 'tools'))
@@ -50,9 +53,9 @@ def sammle(sprache):
                 if karten[nummer]:
                     gebiet['unter'].setdefault(karten[nummer], labels[nummer])
     liste = []
-    for name in sorted(regionen, key=lambda text: (text.casefold(), text)):
+    for name in sorted(regionen, key=schluessel):
         gebiete = []
-        for gebiet_name in sorted(regionen[name], key=lambda text: (text.casefold(), text)):
+        for gebiet_name in sorted(regionen[name], key=schluessel):
             gebiet = regionen[name][gebiet_name]
             if not gebiet['karte'] and not gebiet['unter']:
                 continue

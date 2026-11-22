@@ -4,6 +4,10 @@ from __future__ import annotations
 from collections import defaultdict
 
 import seo
+try:
+    from .sortierung import schluessel
+except ImportError:
+    from sortierung import schluessel
 from build_katalogseiten import route
 from giver_viewmodel import _place_view, area_of, place_label, region_of
 
@@ -41,7 +45,7 @@ def vendor_pages(source: dict, lang: str, items: dict, maps: dict,
                 'url': route(lang, 'i', item_id),
                 'level': item.get('l') or '',
             })
-        rows.sort(key=lambda row: (str(row['name']).casefold(), row['id']))
+        rows.sort(key=lambda row: (schluessel(str(row['name'])), row['id']))
         places = []
         for spot in vendor.get('places') or []:
             place = _place_view(spot, lang, maps, app_url, coords)
@@ -112,7 +116,7 @@ def vendor_index(source: dict, lang: str, maps: dict) -> dict:
                      'type': vendor.get('type', 'vendor'),
                      'regions': regions_for_vendor, 'areas': areas_for_vendor,
                      'places': places, 'count': len(vendor.get('items') or [])})
-    rows.sort(key=lambda row: (row['name'].casefold(), row['id']))
+    rows.sort(key=lambda row: (schluessel(row['name']), row['id']))
     types = {row['type']: row['type'] for row in rows}
     return {'schema': 1, 'lang': lang,
             'labels': {'region': regions, 'area': areas, 'area_region': area_region,

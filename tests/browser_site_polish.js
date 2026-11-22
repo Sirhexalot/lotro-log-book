@@ -31,7 +31,7 @@ async page => {
       if (report.lang !== lang || report.missing.length || report.small.length ||
           report.footer.length !== 2 || report.overflow) throw Error(JSON.stringify({ name, lang, report }));
       if (name === 'start') {
-        const action = await page.locator('.einstieg .knopf').first().boundingBox();
+        const action = await page.locator('.einstieg .llb-knopf').first().boundingBox();
         if (action.y + action.height > 900) throw Error('Map action below the fold: ' + lang);
         await page.screenshot({ path: 'output/playwright/start-polish-' + lang + '.png' });
       }
@@ -77,8 +77,8 @@ async page => {
       results.push({ name, lang, title: report.title });
     }
     await page.goto(base + 'index.html?art=taten&lang=' + lang + '&id=70005BD2');
-    await page.waitForSelector('.ziele-schalter');
-    await page.locator('.ziele-schalter').click();
+    await page.waitForSelector('.ziele-kopf');
+    await page.locator('.ziele-kopf').click();
     await page.waitForSelector('.jagdpunkt');
     const tinyControls = await page.evaluate(() => [...document.querySelectorAll('main *')].filter(el =>
       !el.children.length && el.textContent.trim() && el.getBoundingClientRect().width &&

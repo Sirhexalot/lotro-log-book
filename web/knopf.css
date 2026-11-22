@@ -1,0 +1,67 @@
+/* One action button and one row of actions.
+ *
+ * Three arts:
+ *   default          quiet surface button (catalogue, secondary actions)
+ *   data-art="haupt" filled gold, the page's main action
+ *   data-art="rand"  gold outline on dark ground (import, plugin, feedback)
+ *
+ * Three sizes, chosen by context:
+ *   default  8/14 px, inherits the surrounding type
+ *   gross    9/18 px, bold, at least 44 px tall — the main action of a page
+ *   klein    6/10 px, compact type — side column and secondary rows
+ *
+ * The button owns its look; the page owns place and spacing. */
+.llb-knopf {
+	display: inline-block;
+	padding: 8px 14px;
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	background: var(--fläche-hell);
+	color: var(--gold);
+	font: inherit;
+	text-decoration: none;
+	cursor: pointer;
+}
+.llb-knopf:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.llb-knopf[data-art="haupt"] {
+	background: var(--gold);
+	border-color: var(--gold);
+	color: var(--grund);
+}
+.llb-knopf[data-art="haupt"]:hover { background: var(--gold-knopf-hover); border-color: var(--gold-knopf-hover); }
+
+.llb-knopf[data-art="rand"] {
+	background: var(--llb-palette-3a2f1c);
+	border-color: var(--gold);
+	color: var(--gold);
+}
+.llb-knopf[data-art="rand"]:hover { background: var(--gold-knopf-hover); }
+
+.llb-knopf[data-groesse="gross"] {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 9px 18px;
+	font-size: var(--text-fliesstext-kompakt);
+	font-weight: var(--gewicht-bold);
+}
+.llb-knopf[data-groesse="klein"] {
+	padding: 6px 10px;
+	border-radius: 4px;
+	font-size: var(--text-kompakt);
+}
+
+.llb-aktionen {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin: 4px 0 0;
+}
+.llb-aktionen a { color: var(--gold); }
+.llb-aktionen[data-dichte="kompakt"] {
+	gap: 4px 14px;
+	margin: 0 0 12px;
+	font-size: var(--text-kompakt);
+}

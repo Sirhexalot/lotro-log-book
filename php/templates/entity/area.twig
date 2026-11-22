@@ -1,4 +1,5 @@
 {% extends 'layout.twig' %}
+{% import 'components/karte.twig' as karte %}
 
 {# Area or region page: map entry point, parent, sub-areas and what lies here.
    The three content groups are real tabs. The page carries the complete member
@@ -6,8 +7,8 @@
    excerpt. Without JavaScript the server-rendered links below stay usable. #}
 {% block inhalt %}
 <article class="gebiet">{{ include('entity/_heading.twig') }}
-{% if page.image %}<figure class="katalog-karte-gross"><img src="/karten/{{ lang }}/{{ page.image|replace({'.png': '.webp'}) }}" alt="{{ page.name }}" width="640" height="480" loading="lazy" decoding="async"></figure>{% endif %}
-<p class="katalog-aktionen"><a class="katalog-knopf" href="{{ page.map_url }}">{{ w.area_map }}</a></p>
+{% if page.image %}{{ karte.karte(lang, page.image, '', null, null, '', true, '', page.name) }}{% endif %}
+<p class="llb-aktionen"><a class="llb-knopf" href="{{ page.map_url }}">{{ w.area_map }}</a></p>
 {% if page.parent %}<p><a href="{{ page.parent.url }}">{{ page.parent.text }}</a></p>{% endif %}
 {% if page.children %}<section><h2>{{ page.children_title }}</h2><ul class="katalog-liste">{% for child in page.children %}<li><a href="{{ child.url }}">{{ child.text }}</a></li>{% endfor %}</ul></section>{% endif %}
 

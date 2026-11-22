@@ -538,7 +538,7 @@
 				if (la && !lb) { return -1; }
 				if (la !== lb) { return la - lb; }
 			}
-			return String(a[0]).localeCompare(String(b[0]), sprache);
+			return MQL_SORT.compare(String(a[0]), String(b[0]));
 		});
 		if (sortFeld) { sortFeld.value = sort || 'name'; }
 		inhalt.textContent = '';

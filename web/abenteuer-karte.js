@@ -180,7 +180,7 @@
 				if (ra !== rb) { return rb - ra; }
 				var la = a.level_min === null || a.level_min === undefined ? 999 : a.level_min;
 				var lb = b.level_min === null || b.level_min === undefined ? 999 : b.level_min;
-				return la - lb || String(a.name).localeCompare(String(b.name), lang);
+				return la - lb || MQL_SORT.compare(String(a.name), String(b.name));
 			});
 	}
 
@@ -211,7 +211,7 @@
 			if (ra.ready !== rb.ready) { return rb.ready - ra.ready; }
 			var la = ra.level_min === null ? 999 : ra.level_min;
 			var lb = rb.level_min === null ? 999 : rb.level_min;
-			return la - lb || groupName(a).localeCompare(groupName(b), lang, { numeric: true });
+			return la - lb || MQL_SORT.compare(groupName(a), groupName(b));
 		});
 	}
 
@@ -238,7 +238,7 @@
 				var cb = b.coverage === null || b.coverage === undefined ? Infinity : b.coverage;
 				if (ca !== cb) { return ca < cb ? -1 : 1; }
 			}
-			return String(a.name).localeCompare(String(b.name), lang, { numeric: true });
+			return MQL_SORT.compare(String(a.name), String(b.name));
 		}).forEach(function (area) {
 			var item = el('li');
 			var row = el('div', 'welt-gebiet');

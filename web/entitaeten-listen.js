@@ -161,7 +161,7 @@
 					(skip==='location'||locationMatch) &&
 					(skip==='type'||!s.filters.type.length||s.filters.type.includes(r.type));
 			},
-			compare:function(a,b){return a.name.localeCompare(b.name,lang)||a.id.localeCompare(b.id);},
+			compare:function(a,b){return MQL_SORT.compare(a.name,b.name)||a.id.localeCompare(b.id);},
 			facets:function(all,s){
 				var locationRows=all.filter(function(r){return nameMatches(r,s.q) &&
 					(!s.filters.type.length||s.filters.type.includes(r.type));});

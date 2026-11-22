@@ -12,6 +12,7 @@ web/belohnungen-*.js
 web/rezepte-*.js
 web/notizen-*.js
 web/notizen/
+web/epik-*.js
 web/abenteuer-de.js
 web/abenteuer-en.js
 web/abenteuer-fr.js

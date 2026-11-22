@@ -545,18 +545,6 @@
 .welt-detail [data-vorschau-meta] { margin: 2px 0 8px; }
 .welt-detail p { font-size: var(--text-fliesstext-kompakt); }
 .welt-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-.welt-knopf {
-	display: inline-block;
-	padding: 6px 12px;
-	border: 1px solid var(--gold);
-	border-radius: 3px;
-	background: var(--gold);
-	color: var(--llb-palette-14110e);
-	font-size: var(--text-bedienung, .875rem);
-	text-decoration: none;
-}
-.welt-knopf.zweit { background: var(--llb-palette-transparent); color: var(--gold); border-color: var(--rand); }
-.welt-knopf:hover { text-decoration: none; }
 .welt-legende { margin: 8px 0 0; font-size: var(--text-mikro); }
 
 @media (max-width: 900px) {
@@ -686,7 +674,7 @@
 .region-liste li { border-top: 1px solid var(--rand); }
 .region-liste li:first-child { border-top: 0; }
 /* A link inside the detail panel must not take the page's gold link colour. */
-.abenteuer-welt a.welt-knopf { color: var(--llb-palette-14110e); }
-.abenteuer-welt a.welt-knopf.zweit { color: var(--gold); }
-.abenteuer-welt a.welt-knopf:hover { color: var(--llb-palette-14110e); }
-.abenteuer-welt a.welt-knopf.zweit:hover { color: var(--gold); }
+.abenteuer-welt a.llb-knopf[data-art="haupt"] { color: var(--grund); }
+.abenteuer-welt a.llb-knopf { color: var(--gold); }
+.abenteuer-welt a.llb-knopf[data-art="haupt"]:hover { color: var(--grund); }
+.abenteuer-welt a.llb-knopf:hover { color: var(--gold); }

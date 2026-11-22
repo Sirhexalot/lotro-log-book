@@ -3,8 +3,8 @@
 {# Overview page: intro, optional search hint, entries, pagination.
    Craft and catalogue hubs carry sections or plain links instead. #}
 {% block inhalt %}
-<article><div class="katalog-kopf"><h1>{{ icon|raw }}{{ page.title }}</h1></div>{% if page.search_hint %}<p class="katalog-hinweis"><a href="{{ page.search_hint.url }}">{{ page.search_hint.text }}</a></p>{% endif %}
-{% if page.intro %}<p class="katalog-hinweis">{{ page.intro }}</p>{% endif %}
+<article><div class="katalog-kopf"><h1>{{ icon|raw }}{{ page.title }}</h1></div>{% if page.search_hint %}<p class="llb-hinweis"><a href="{{ page.search_hint.url }}">{{ page.search_hint.text }}</a></p>{% endif %}
+{% if page.intro %}<p class="llb-hinweis">{{ page.intro }}</p>{% endif %}
 {# The deed index shows the filter from the first paint; the alphabetical
    server list stays in the source for search engines but never appears on
    screen, so the page does not switch from list to filter and back. #}

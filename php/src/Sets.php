@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Llb;
 
+require_once __DIR__ . '/Sortierung.php';
+
 /** Server-rendered set catalogue: small index for filters, shards for details. */
 final class Sets
 {
@@ -175,7 +177,7 @@ final class Sets
                 $checked = in_array($value, $filters[$key], true);
                 if ($count || $checked) { $options[] = compact('value', 'label', 'count', 'checked'); }
             }
-            usort($options, static fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
+            usort($options, static fn ($a, $b) => Sortierung::name($a['label'], $b['label']));
             $facets[$key] = $options;
         }
         // A translated search term may have fewer hits; never link to a page

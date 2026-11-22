@@ -224,7 +224,7 @@
 				var liste = eltern('p', null);
 				liste.className = 'roh-ohne';
 				liste.textContent = stufen[stufe]
-					.sort(function (a, b) { return a[1].localeCompare(b[1], t('locale')); })
+					.sort(function (a, b) { return MQL_SORT.compare(a[1], b[1]); })
 					.map(function (eintrag) { return eintrag[1]; }).join(' · ');
 				ziel.appendChild(liste);
 			});
@@ -236,7 +236,7 @@
 		nummern.forEach(function (stufe) {
 			ziel.appendChild(stufenTitel(stufe));
 			ziel.appendChild(tabelle(beruf, stufe, stufen[stufe].sort(function (a, b) {
-				return a[1].localeCompare(b[1], t('locale'));
+				return MQL_SORT.compare(a[1], b[1]);
 			})).rahmen);
 		});
 	}
@@ -267,7 +267,7 @@
 		hinweis.className = 'schwach'; ziel.appendChild(hinweis);
 		var stufe = null, liste;
 		Object.keys(zutaten).map(function (id) { return zutaten[id]; }).sort(function (a, b) {
-			return a.stufe - b.stufe || a.name.localeCompare(b.name, t('locale'));
+			return a.stufe - b.stufe || MQL_SORT.compare(a.name, b.name);
 		}).forEach(function (z) {
 			if (stufe !== z.stufe) {
 				stufe = z.stufe;

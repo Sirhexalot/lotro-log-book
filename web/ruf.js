@@ -45,7 +45,7 @@
 			start: info ? info.start : null,
 			bekannt: !!info
 		};
-	}).sort(function (a, b) { return a.name.localeCompare(b.name, t('locale')); });
+	}).sort(function (a, b) { return MQL_SORT.compare(a.name, b.name); });
 
 	/** Started means: above the faction's own starting tier, or points earned.
 	 *  Comparing for inequality counted every faction, because a character that

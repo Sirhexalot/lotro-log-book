@@ -1,0 +1,8 @@
+/* Muted note: the quiet line under a heading, a hint beside a map or an
+ * explanatory sentence that belongs to the content, not to the control.
+ *
+ * `data-groesse` picks the step from the shared type scale; without it the
+ * note follows the surrounding text. */
+.llb-hinweis { color: var(--schwach); }
+.llb-hinweis[data-groesse="bedienung"] { font-size: var(--text-bedienung); }
+.llb-hinweis[data-groesse="klein"] { font-size: var(--text-klein); }

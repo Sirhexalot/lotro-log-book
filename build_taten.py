@@ -148,13 +148,13 @@ class Renderer(katalog.Renderer):
             if len(punkte) == 1:
                 _, lat, lon = punkte[0][:3]
                 inhalt += katalog.paragraph('%.1f°%s, %.1f°%s' % (
-                    abs(lat), 'S' if lat < 0 else 'N', abs(lon), 'W' if lon < 0 else 'E'), 'katalog-hinweis')
+                    abs(lat), 'S' if lat < 0 else 'N', abs(lon), 'W' if lon < 0 else 'E'), 'llb-hinweis')
             else:
-                inhalt += katalog.paragraph(w['points_count'].replace('%s', str(len(punkte))), 'katalog-hinweis')
+                inhalt += katalog.paragraph(w['points_count'].replace('%s', str(len(punkte))), 'llb-hinweis')
         else:
             inhalt += katalog.paragraph('%s · %s' % (
                 w['points_count'].replace('%s', str(len(punkte))),
-                w['maps_count'].replace('%s', str(len(karten)))), 'katalog-hinweis')
+                w['maps_count'].replace('%s', str(len(karten)))), 'llb-hinweis')
         return katalog.section(w['place'], inhalt)
 
     def woher(self, deed):
@@ -210,7 +210,7 @@ class Renderer(katalog.Renderer):
                     ''.join('<li>%s</li>' % self.link('d', q['i'], q['n']) for q in andere[:8]))
                 if len(andere) > 8:
                     inhalt += katalog.paragraph(w['more_in_list'].replace('%s', str(len(andere) - 8)),
-                                                'katalog-hinweis')
+                                                'llb-hinweis')
         if deed.get('a') and deed['a'] not in ('Allgemein',):
             andere = [q for q in self._art_index.get(deed['a'], []) if q['i'] != deed['i']]
             if andere:
@@ -219,7 +219,7 @@ class Renderer(katalog.Renderer):
                     ''.join('<li>%s</li>' % self.link('d', q['i'], q['n']) for q in andere[:6]))
                 if len(andere) > 6:
                     inhalt += katalog.paragraph(w['more_in_list'].replace('%s', str(len(andere) - 6)),
-                                                'katalog-hinweis')
+                                                'llb-hinweis')
         if not inhalt:
             return ''
         return katalog.section({'de': 'Zusammenhang', 'en': 'Context', 'fr': 'Contexte'}[self.lang], inhalt)
@@ -227,8 +227,8 @@ class Renderer(katalog.Renderer):
     def deed(self, deed):
         w = self.w
         body = self.chips(deed)
-        body += '<p class="katalog-aktionen">%s</p>' % katalog.a(
-            katalog.old_link(self.lang, 'd', deed['i']), w['map'], class_='katalog-knopf')
+        body += '<p class="llb-aktionen">%s</p>' % katalog.a(
+            katalog.old_link(self.lang, 'd', deed['i']), w['map'], class_='llb-knopf')
         if deed.get('d'):
             body += katalog.section(w['description'], katalog.paragraph(deed['d'], 'katalog-text'))
         body += self.ort(deed)

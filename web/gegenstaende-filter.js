@@ -25,7 +25,7 @@
 		function tree(rows,dims,path) {
 			if (!dims.length) { return []; }
 			var dim=dims[0], values=Array.from(new Set(rows.map(function (r) { return r[fields[dim]]; }).filter(function (v) { return v>=0; })));
-			return values.sort(function (a,b) { return label(dim,key(dim,a)).localeCompare(label(dim,key(dim,b)),lang); }).map(function (v) {
+			return values.sort(function (a,b) { return MQL_SORT.compare(label(dim,key(dim,a)),label(dim,key(dim,b))); }).map(function (v) {
 				var p=Object.assign({},path);p[dim]=key(dim,v);
 				var sorted={};Object.keys(p).sort().forEach(function (k) { sorted[k]=p[k]; });paths.add(JSON.stringify(sorted));
 				var children=tree(rows.filter(function (r) { return r[fields[dim]]===v; }),dims.slice(1),sorted);
@@ -92,7 +92,7 @@
 			(skip==='level'||(s.filters.level.min===null&&s.filters.level.max===null)||(row[7]>0&&(s.filters.level.min===null||row[7]>=s.filters.level.min)&&(s.filters.level.max===null||row[7]<=s.filters.level.max))) &&
 			searchMatches(row,s.q);}
 		var adapter=A.client({rows:data.e,id:function(r){return r[0];},matches:matches,
-			compare:function(a,b,sort){return (sort==='itemLevel'?(a[7]||Infinity)-(b[7]||Infinity):0)||a[1].localeCompare(b[1],lang)||a[0].localeCompare(b[0]);},
+			compare:function(a,b,sort){return (sort==='itemLevel'?(a[7]||Infinity)-(b[7]||Infinity):0)||MQL_SORT.compare(a[1],b[1])||a[0].localeCompare(b[0]);},
 			facets:function(rows,s){
 				var counts=new Map(),qualityCounts=[0,0,0,0,0,0],chestCount=0;
 				rows.forEach(function(row){

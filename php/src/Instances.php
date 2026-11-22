@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Llb;
 
+require_once __DIR__ . '/Sortierung.php';
+
 /**
  * Instance finder: explicit client picker membership, clusters and settings.
  * Character unlocks and current server availability are not inferred.
@@ -173,7 +175,7 @@ final class Instances
     public static function sorted(array $rows): array
     {
         usort($rows, static fn (array $a, array $b): int =>
-            strnatcasecmp($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
+            Sortierung::name($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
         return $rows;
     }
 
@@ -305,7 +307,7 @@ final class Instances
                 }
             }
             if ($key === 'cluster' || $key === 'art') {
-                usort($options, static fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
+                usort($options, static fn ($a, $b) => Sortierung::name($a['label'], $b['label']));
             }
             $facets[$key] = $options;
         }

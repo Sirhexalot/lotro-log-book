@@ -179,8 +179,8 @@ class ThemeTest(unittest.TestCase):
 
     def test_light_theme_gold_buttons_have_contrasting_text(self):
         css = read('web/theme-light.css')
-        button = css.split('html[data-theme="light"] .knopf-gold {', 1)[1].split('}', 1)[0]
-        hover = css.split('html[data-theme="light"] .knopf-gold:hover,', 1)[1].split('}', 1)[0]
+        button = css.split('html[data-theme="light"] .llb-knopf[data-art="rand"] {', 1)[1].split('}', 1)[0]
+        hover = css.split('html[data-theme="light"] .llb-knopf[data-art="rand"]:hover,', 1)[1].split('}', 1)[0]
         self.assertIn('background: var(--gold)', button)
         self.assertIn('color: var(--fläche)', button)
         self.assertIn('background: var(--gold-knopf-hover)', hover)

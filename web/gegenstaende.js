@@ -269,7 +269,7 @@
 			if (ib < 0) { ib = rang.length; }
 			if (ia !== ib) { return ia - ib; }
 		}
-		return beschriftung(dimension, a).localeCompare(beschriftung(dimension, b), sprache);
+		return MQL_SORT.compare(beschriftung(dimension, a), beschriftung(dimension, b));
 	}
 
 	/** Entries that carry a label on this level – no empty knots. */
@@ -331,7 +331,7 @@
 			// the frequent ones come first.
 			reihe.sort(function (a, b) {
 				return gruppen[b] - gruppen[a]
-					|| beschriftung('klasse', a).localeCompare(beschriftung('klasse', b), sprache);
+					|| MQL_SORT.compare(beschriftung('klasse', a), beschriftung('klasse', b));
 			});
 		} else {
 			reihe.sort(function (a, b) { return reihenfolge(dimension, a, b); });
@@ -475,7 +475,7 @@
 				if (la && !lb) { return -1; }
 				if (la !== lb) { return la - lb; }
 			}
-			return a[0].localeCompare(b[0], sprache);
+			return MQL_SORT.compare(a[1], b[1]);
 		});
 		liste.textContent = '';
 		var menge = treffer.length;

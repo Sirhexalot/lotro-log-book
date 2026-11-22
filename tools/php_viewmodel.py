@@ -22,6 +22,7 @@ from build_katalogseiten import WORDS, route, escape  # noqa: E402
 from giver_viewmodel import giver_url  # noqa: E402
 from vendor_viewmodel import vendor_url  # noqa: E402
 import seo  # noqa: E402
+from tools.sortierung import schluessel  # noqa: E402
 
 
 def klarer_name(text) -> str:
@@ -742,7 +743,7 @@ def area_view(builder: ViewBuilder, entry: dict, kind: str, members: dict) -> di
     komplett = {}
     for member_kind in ('q', 'd', 'i'):
         rows = members[member_kind].get(entry.get('idx')) or members[member_kind].get(ident) or []
-        rows = sorted(rows, key=lambda row: builder.name_of(member_kind, row[1]).casefold())
+        rows = sorted(rows, key=lambda row: schluessel(builder.name_of(member_kind, row[1])))
         komplett[member_kind] = [[str(row[0]), builder.name_of(member_kind, row[1]),
                                   row[1].get('ic') if member_kind == 'i' else None]
                                  for row in rows]
@@ -790,7 +791,7 @@ def area_view(builder: ViewBuilder, entry: dict, kind: str, members: dict) -> di
         'map_url': app_url(lang, 'karte', vorkarte=ident),
         'parent': parent_link,
         'children': [{'url': route(lang, 'area', key), 'text': value.get('name') or ''}
-                     for key, value in sorted(body_children, key=lambda row: (row[1].get('name') or '').casefold())],
+                     for key, value in sorted(body_children, key=lambda row: schluessel(row[1].get('name') or ''))],
         'children_title': w['arealist'],
         'sections': sections,
         'members': komplett,
@@ -807,7 +808,7 @@ def profession_view(builder: ViewBuilder, key: str, entry: dict, recipes: list) 
         groups.append({
             'title': group[0][1][4],
             'entries': [{'url': route(lang, 'recipe', ident), 'text': row[0]}
-                        for ident, row in sorted(group, key=lambda row: row[1][0].casefold())],
+                        for ident, row in sorted(group, key=lambda row: schluessel(row[1][0]))],
         })
     levels = [row[2] for _ident, row in recipes if row[2]]
     seo_block = seo.profession(lang, name=entry.get('name') or key, recipes=len(recipes),
@@ -1321,7 +1322,7 @@ def _entries(builder: ViewBuilder, kind: str, rows: list) -> list:
 
 
 def _sorted(builder: ViewBuilder, kind: str, rows) -> list:
-    return sorted(rows, key=lambda row: builder.name_of(kind, row[1]).casefold())
+    return sorted(rows, key=lambda row: schluessel(builder.name_of(kind, row[1])))
 
 
 def _nav(w, lang: str, kind: str, number: int, seiten: int, base: dict | None = None) -> dict:

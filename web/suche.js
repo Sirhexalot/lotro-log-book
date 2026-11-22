@@ -169,7 +169,7 @@
 					? t('su_weniger')
 					: ersetze(t('su_alle'), [eigene.length]));
 				knopf.type = 'button';
-				knopf.className = 'knopf sekundaer su-mehr';
+				knopf.className = 'llb-knopf su-mehr';
 				knopf.addEventListener('click', function () {
 					geoeffnet[art] = !offen;
 					zeichne();

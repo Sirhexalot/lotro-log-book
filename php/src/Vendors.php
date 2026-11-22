@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Llb;
 
+require_once __DIR__ . '/Sortierung.php';
+
 final class Vendors
 {
     private const PAGE_SIZE = 30;
@@ -197,7 +199,7 @@ final class Vendors
         $filters = $this->query($input, $rows);
         $selected = array_values(array_filter($rows, fn ($row) => self::matches($row, $filters)));
         usort($selected, static fn ($a, $b): int =>
-            strnatcasecmp($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
+            Sortierung::name($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
         $pages = max(1, (int) ceil(count($selected) / self::PAGE_SIZE));
         $page_input = $input['page'] ?? 1;
         $page = is_scalar($page_input) ? filter_var($page_input, FILTER_VALIDATE_INT) : false;
@@ -218,7 +220,7 @@ final class Vendors
                               'checked' => in_array($key === 'type' ? (string) $value : (int) $value,
                                                    $filters[$key], true)];
             }
-            usort($options, static fn ($a, $b): int => strnatcasecmp($a['label'], $b['label']));
+            usort($options, static fn ($a, $b): int => Sortierung::name($a['label'], $b['label']));
             $facets[$key] = array_values(array_filter($options,
                 static fn ($option) => $option['count'] || $option['checked']));
         }

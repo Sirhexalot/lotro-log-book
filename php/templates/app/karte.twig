@@ -6,6 +6,8 @@
 <link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/flaeche.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/fakten.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/hinweis.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/klappe.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/landschaft.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/gelaende.css?v={{ asset_stand }}">
@@ -100,15 +102,15 @@
 			<div class="kartenkopf">
 				<div class="kartenkopf-links">
 					<div class="notizen" id="notizen">
-						<button type="button" id="notizen-knopf" aria-expanded="false" data-t="notizen">Filter</button>
-						<div class="notizen-feld" id="notizen-feld" hidden>
+						<button type="button" id="notizen-knopf" aria-expanded="false" aria-controls="notizen-feld" data-t="notizen">Filter</button>
+						<div class="notizen-feld llb-klappe-feld" id="notizen-feld" hidden>
 							<div class="notizen-alle"><button type="button" id="notizen-alle" data-t="notizen_alle">Alle auswählen</button><button type="button" id="notizen-keine" data-t="notizen_keine">Alles löschen</button></div>
 							<ul id="notizen-liste"></ul>
 						</div>
 					</div>
 					<div class="notizen" id="vorkommen">
-						<button type="button" id="vorkommen-knopf" aria-expanded="false" data-t="vorkommen">Vorkommen</button>
-						<div class="notizen-feld vorkommen-feld" id="vorkommen-feld" hidden>
+						<button type="button" id="vorkommen-knopf" aria-expanded="false" aria-controls="vorkommen-feld" data-t="vorkommen">Vorkommen</button>
+						<div class="notizen-feld vorkommen-feld llb-klappe-feld" id="vorkommen-feld" hidden>
 							<div class="notizen-alle"><button type="button" id="vorkommen-alle" data-t="notizen_alle">Alle auswählen</button><button type="button" id="vorkommen-keine" data-t="notizen_keine">Alles löschen</button></div>
 							<div id="vorkommen-liste" class="vorkommen-zeilen"></div>
 						</div>
@@ -141,8 +143,8 @@
 					<span class="legende-eintrag" id="legende-aufgabenort" hidden><i class="legende-symbol gepunktet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></i><span data-t="legende_aufgabenort">Gepunktet: Ort der zugehörigen Aufgaben (Tat)</span></span>
 					<span class="legende-eintrag" id="legende-vorkommen" hidden></span>
 				</div>
-				<button type="button" class="legende-mehr aus" id="legende-mehr" aria-expanded="false" aria-label="Ganze Zeichenerklärung" title="Ganze Zeichenerklärung">?</button>
-				<div class="legende-voll" id="legende-voll" hidden></div>
+				<button type="button" class="legende-mehr aus" id="legende-mehr" aria-expanded="false" aria-controls="legende-voll" aria-label="Ganze Zeichenerklärung" title="Ganze Zeichenerklärung">?</button>
+				<div class="legende-voll llb-klappe-feld" id="legende-voll" hidden></div>
 			</div>
 			<div class="leiste-aktionen">
 				<button type="button" id="gebietskarte" class="gebietskarte" hidden></button>
@@ -161,6 +163,7 @@
 {% block fuss %}{% endblock %}
 
 {% block skripte %}
+<script src="/klappe.js?v={{ asset_stand }}" defer></script>
 <script src="/gelaende.js?v={{ asset_stand }}" defer></script>
 <script src="/texte.js?v={{ asset_stand }}" defer></script>
 <script src="/texte-spielstand.js?v={{ asset_stand }}" defer></script>

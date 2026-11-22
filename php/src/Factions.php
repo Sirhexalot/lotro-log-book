@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Llb;
 
+require_once __DIR__ . '/Sortierung.php';
+
 /**
  * Faction browser: a filter index plus the catalogue pages behind it.
  *
@@ -96,7 +98,7 @@ final class Factions
     public static function sorted(array $rows): array
     {
         usort($rows, static fn (array $a, array $b): int =>
-            strnatcasecmp($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
+            Sortierung::name($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
         return $rows;
     }
 
@@ -196,7 +198,7 @@ final class Factions
                                   'count' => $count, 'checked' => $checked];
                 }
             }
-            usort($options, static fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
+            usort($options, static fn ($a, $b) => Sortierung::name($a['label'], $b['label']));
             $facets[$key] = $options;
         }
         $area_by_region = [];

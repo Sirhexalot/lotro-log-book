@@ -30,6 +30,7 @@ import sys
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 from pathlib import Path
+from tools.sortierung import schluessel
 
 from itemnamen import sauberer_name
 
@@ -298,7 +299,7 @@ def search_rows(givers: dict, quests: dict, lang: str) -> dict:
         level = min(levels) if levels else ''
         title = (row.get('title') or {}).get(lang, '')
         rows.append([entity, row['name'][lang], title, context, level])
-    rows.sort(key=lambda entry: (entry[1].casefold(), entry[0]))
+    rows.sort(key=lambda entry: (schluessel(entry[1]), entry[0]))
     return {'schema': 1, 'lang': lang, 'rows': rows}
 
 

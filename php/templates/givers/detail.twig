@@ -1,4 +1,5 @@
 {% extends 'layout.twig' %}
+{% import 'components/karte.twig' as karte %}
 {# Quest-giver page: who it is, where it stands, and every quest it gives.
    Completion comes from the imported character in the browser; the page works
    without one and then claims nothing about progress. #}
@@ -15,11 +16,11 @@
 {% if giver.places %}<section class="katalog-abschnitt"><h2>{{ gw.places }}</h2>
 {% for place in giver.places %}
     <div class="katalog-ort-flex">
-        {% if place.image %}<a class="katalog-ortlink" href="{{ place.map_url }}"><figure class="katalog-ort"><img src="/karten/{{ lang }}/{{ place.image|replace({'.png': '.webp'}) }}" alt="" width="320" height="240" loading="lazy" decoding="async"><i class="katalog-pin" style="left:{{ place.pin_x|pin }}%;top:{{ place.pin_y|pin }}%"></i></figure></a>{% endif %}
+        {% if place.image %}{{ karte.karte(lang, place.image, place.map_url, place.pin_x, place.pin_y) }}{% endif %}
         <div>
-            {% if place.chain %}<p class="katalog-hinweis giver-weg">{% for part in place.chain %}{% if not loop.first %} › {% endif %}<a href="{{ part.url }}">{{ part.name }}</a>{% endfor %}</p>{% endif %}
-            {% if place.coords %}<p class="katalog-hinweis">{{ place.coords }}</p>{% endif %}
-            <p class="katalog-aktionen">{% if place.map_url %}<a href="{{ place.map_url }}" class="katalog-knopf">{{ gw.map }}</a> {% endif %}<a href="{{ place.travel_url }}" class="katalog-link">{{ gw.route }}</a></p>
+            {% if place.chain %}<p class="llb-hinweis giver-weg">{% for part in place.chain %}{% if not loop.first %} › {% endif %}<a href="{{ part.url }}">{{ part.name }}</a>{% endfor %}</p>{% endif %}
+            {% if place.coords %}<p class="llb-hinweis">{{ place.coords }}</p>{% endif %}
+            <p class="llb-aktionen">{% if place.map_url %}<a href="{{ place.map_url }}" class="llb-knopf">{{ gw.map }}</a> {% endif %}<a href="{{ place.travel_url }}" class="katalog-link">{{ gw.route }}</a></p>
         </div>
     </div>
 {% endfor %}
@@ -30,8 +31,8 @@
          data-progress="{{ gw.progress }}" data-unknown="{{ gw.progress_unknown }}"
          data-hide-label="{{ gw.hide_done }}">
     <h2>{{ gw.quests_heading }}</h2>
-    <p class="katalog-hinweis giver-total">{{ (giver.total == 1 ? gw.quests_one : gw.quests)|replace({'%s': giver.total}) }}</p>
-    <p class="giver-progress katalog-hinweis" role="status" hidden></p>
+    <p class="llb-hinweis giver-total">{{ (giver.total == 1 ? gw.quests_one : gw.quests)|replace({'%s': giver.total}) }}</p>
+    <p class="giver-progress llb-hinweis" role="status" hidden></p>
     <label class="giver-hide" hidden><input type="checkbox"> <span>{{ gw.hide_done }}</span></label>
     <input type="search" class="giver-suche" id="giver-suche" placeholder="{{ gw.search }}" aria-label="{{ gw.search }}" autocomplete="off">
     <ul class="giver-list" data-nosnippet>

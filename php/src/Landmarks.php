@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Llb;
 
+require_once __DIR__ . '/Sortierung.php';
+
 /**
  * Landmark browser: a filter index plus the catalogue pages behind it.
  *
@@ -99,7 +101,7 @@ final class Landmarks
     public static function sorted(array $rows): array
     {
         usort($rows, static fn (array $a, array $b): int =>
-            strnatcasecmp($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
+            Sortierung::name($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
         return $rows;
     }
 
@@ -195,7 +197,7 @@ final class Landmarks
                                   'count' => $count, 'checked' => $checked];
                 }
             }
-            usort($options, static fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
+            usort($options, static fn ($a, $b) => Sortierung::name($a['label'], $b['label']));
             $facets[$key] = $options;
         }
         $area_by_region = [];
@@ -220,7 +222,7 @@ final class Landmarks
         }
         foreach ($area_groups_by_region as &$groups) {
             $groups = array_values($groups);
-            usort($groups, static fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
+            usort($groups, static fn ($a, $b) => Sortierung::name($a['label'], $b['label']));
         }
         unset($groups);
 

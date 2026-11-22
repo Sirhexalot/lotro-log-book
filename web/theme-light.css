@@ -1,12 +1,13 @@
 /* Light-theme adaptations for the handful of surfaces that intentionally use
  * fixed dark-map and game-art colours in the default theme. */
-html[data-theme="light"] .knopf-gold {
+/* Gold-outline action turns into a filled gold button on the light surface. */
+html[data-theme="light"] .llb-knopf[data-art="rand"] {
 	background: var(--gold);
 	border-color: var(--gold);
 	color: var(--fläche);
 }
-html[data-theme="light"] .knopf-gold:hover,
-html[data-theme="light"] .knopf-gold:focus-visible {
+html[data-theme="light"] .llb-knopf[data-art="rand"]:hover,
+html[data-theme="light"] .llb-knopf[data-art="rand"]:focus-visible {
 	background: var(--gold-knopf-hover);
 	color: var(--text);
 }
@@ -47,7 +48,6 @@ html[data-theme="light"] .notizen-feld {
 }
 html[data-theme="light"] .detail h2,
 html[data-theme="light"] .detail .wechseln,
-html[data-theme="light"] .ziele-schalter,
 html[data-theme="light"] .detail .gebietsprung:hover { color: var(--gold); }
 html[data-theme="light"] .filter button[aria-pressed="true"],
 html[data-theme="light"] .zweig.aktiv,
@@ -95,3 +95,46 @@ html[data-theme="light"] .seite code,
 html[data-theme="light"] .seite kbd,
 html[data-theme="light"] code,
 html[data-theme="light"] .befehl { color: var(--text); }
+
+/* The travel planner's controls follow the selected theme, while its map
+   stage deliberately stays dark in both themes. */
+html[data-theme="light"] .reise-panel {
+	background: linear-gradient(180deg, var(--llb-palette-fffdf8), var(--llb-palette-f4f0e6));
+}
+html[data-theme="light"] .reise-karten-titel { color: var(--llb-palette-d6b35a); }
+html[data-theme="light"] .reise-welt-hinweis {
+	color: var(--llb-palette-e8e1d5);
+	background: var(--llb-palette-rgba-20-17-14-p78);
+	border-color: var(--llb-palette-5b5348);
+}
+html[data-theme="light"] .reise-karten-leer {
+	color: var(--llb-palette-a89c8a);
+	background: var(--llb-palette-rgba-20-17-14-p8);
+	border-color: var(--llb-palette-5b5348);
+}
+html[data-theme="light"] .reise-marker[data-art="start"] {
+	background: var(--llb-palette-e8e1d5);
+	color: var(--llb-palette-29261f);
+}
+
+/* Region labels sit on dark game art; keep their text and muted subline light.
+   A selected label switches to a light surface, so restore normal text there. */
+html[data-theme="light"] .welt-marke {
+	color: var(--llb-palette-e8e1d5);
+	border-color: var(--llb-palette-5b5348);
+}
+html[data-theme="light"] .welt-marke:hover { background: var(--llb-palette-rgba-42-37-31-p95); }
+html[data-theme="light"] .welt-marke[aria-pressed="true"] {
+	background: var(--fläche-hell);
+	color: var(--text);
+	border-color: var(--rand);
+}
+html[data-theme="light"] .welt-marke.passt { color: var(--llb-palette-d6b35a); }
+html[data-theme="light"] .welt-marke.drueber { color: var(--llb-palette-f0a63c); }
+html[data-theme="light"] .welt-text small { color: var(--llb-palette-a89c8a); }
+html[data-theme="light"] .welt-marke[aria-pressed="true"] .welt-text small { color: var(--schwach); }
+html[data-theme="light"] .welt-marke[aria-pressed="true"].passt { color: var(--gold); }
+html[data-theme="light"] .welt-marke[aria-pressed="true"].drueber { color: var(--offen); }
+html[data-theme="light"] .welt-marke .welt-ring circle:first-child {
+	stroke: var(--llb-palette-5b5348);
+}

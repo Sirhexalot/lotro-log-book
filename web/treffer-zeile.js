@@ -145,15 +145,23 @@
 			progress: options.progress, progressColumn: options.progressColumn
 		});
 	}
+	/** Did the import really read the recipe file? The Companion import records
+	 * this as `importMeta.recipes`; newer imports may also mark the dataset as
+	 * complete. Without the flag an old backup stays conservative: its missing
+	 * recipes are not called "not learned". */
+	function recipesComplete(character) {
+		var meta = (character && character.importMeta) || {};
+		var dataset = meta.datasets && meta.datasets.recipes;
+		return (dataset && dataset.status === 'complete') || meta.recipes === true;
+	}
+
 	function characterKnowsRecipes() {
 		var store = window.MQL_SPEICHER, character = store && store.aktiv && store.aktiv();
 		if (!character) { return { character: null, known: false, complete: false }; }
-		var meta = character.importMeta || {};
-		var dataset = meta.datasets && meta.datasets.recipes;
 		return {
 			character: character,
 			known: !!((character.rezepte || []).length),
-			complete: !!(dataset && dataset.status === 'complete')
+			complete: recipesComplete(character)
 		};
 	}
 	function recipeProgress(id) {

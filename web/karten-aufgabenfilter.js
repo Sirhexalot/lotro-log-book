@@ -26,10 +26,10 @@
 		var classMarker = 'themeClass', originMarker = 'themeOrigin';
 		var classValues = Array.from(new Set(quests.filter(function (q) {
 			return q.th === 'class' && q.f && q.f[0] === classMarker;
-		}).map(function (q) { return q.f[1]; }).filter(Boolean))).sort(function (a,b) { return a.localeCompare(b,lang); });
+		}).map(function (q) { return q.f[1]; }).filter(Boolean))).sort(MQL_SORT.compare);
 		var originValues = Array.from(new Set(quests.filter(function (q) {
 			return q.th === 'origin' && q.f && q.f[0] === originMarker;
-		}).map(function (q) { return q.f[1]; }).filter(Boolean))).sort(function (a,b) { return a.localeCompare(b,lang); });
+		}).map(function (q) { return q.f[1]; }).filter(Boolean))).sort(MQL_SORT.compare);
 		var replaced = window.MQL_REPLACED || {}, store = window.MQL_SPEICHER;
 		var known, manual, hasQuestProgress, hasMachbar, laufend, characterLevel, progressCache;
 		var searchIndex = new Map(), searchQuery = null, searchNeedle = '';
@@ -76,7 +76,7 @@
 				node = node.children[name];
 			});
 		});
-		var regions = Object.keys(geoTree).sort(function (a, b) { return a.localeCompare(b, lang); });
+		var regions = Object.keys(geoTree).sort(MQL_SORT.compare);
 		// Deep tree labels repeat their group ("Ost-Rohan: Die Steppe"). The
 		// heading already names the group, so the option keeps the short name.
 		function geoLabel(name) {
@@ -85,7 +85,7 @@
 			return name.replace(/^[^:]{2,32}:\s+/, '');
 		}
 		function geoKinder(node, region, path, tiefe, area) {
-			return Object.keys(node.children).sort(function (a, b) { return a.localeCompare(b, lang); }).map(function (name) {
+			return Object.keys(node.children).sort(MQL_SORT.compare).map(function (name) {
 				var kind = node.children[name];
 				var next = Object.assign({}, path);
 				var nextArea = area || name;
@@ -252,7 +252,7 @@
 		}
 		var adapter = window.MQL_FILTERADAPTER.client({
 			rows:quests,id:function (q) { return String(q.i); },matches:matches,
-			compare:function (a,b,sort) { return (sort === 'level' ? (Number(a.l)||Infinity)-(Number(b.l)||Infinity) : 0) || a.n.localeCompare(b.n,lang) || String(a.i).localeCompare(String(b.i)); },
+			compare:function (a,b,sort) { return (sort === 'level' ? (Number(a.l)||Infinity)-(Number(b.l)||Infinity) : 0) || MQL_SORT.compare(a.n,b.n) || String(a.i).localeCompare(String(b.i)); },
 			facets:function (all,state) {
 				var result={};
 				groups.forEach(function (group) {

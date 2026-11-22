@@ -94,7 +94,7 @@
 			if (rang >= 0) { treffer.push({ ort: ort, rang: rang }); }
 		}
 		treffer.sort(function (a, b) {
-			return a.rang - b.rang || a.ort.n.localeCompare(b.ort.n, t('locale'));
+			return a.rang - b.rang || MQL_SORT.compare(a.ort.n, b.ort.n);
 		});
 		return treffer.slice(0, grenze || 8).map(function (e) { return e.ort; });
 	}

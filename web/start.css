@@ -152,23 +152,6 @@ code {
 	padding: 1px 5px;
 }
 
-.knopf {
-	display: inline-block;
-	padding: 9px 20px;
-	border: 1px solid var(--gold);
-	border-radius: 3px;
-	color: var(--grund);
-	background: var(--gold);
-	text-decoration: none;
-	font-size: var(--text-fliesstext-kompakt);
-}
-
-.knopf:hover { background: var(--llb-palette-e6c46d); }
-
-.knopf.klein {
-	padding: 4px 12px;
-	font-size: var(--text-kompakt);
-}
 
 .weiter { margin: 40px 0 0; }
 
@@ -247,11 +230,11 @@ body.landing .lead { font-size: var(--text-zwischen); max-width: 720px; margin: 
 	padding: 10px 12px;
 }
 .suche-start input[type="search"]:focus { border-color: var(--gold); outline: none; }
-.suche-start .knopf { border: 1px solid var(--gold); }
+.suche-start .llb-knopf { border-color: var(--gold); }
 
 /* gemeinsam.css makes this a flex row; centre it like the search field above. */
 body.landing .einstieg { margin: 0 auto; justify-content: center; flex-wrap: wrap; }
-body.landing .einstieg .knopf { margin: 0 4px; }
+body.landing .einstieg .llb-knopf { margin: 0 4px; }
 
 /* The game's whole Middle-earth map behind the opening. On tablets and small
  * screens it stays a quiet, blurred texture: a phone would pay 200 kB for a
@@ -315,12 +298,6 @@ body.landing .einstieg .knopf { margin: 0 4px; }
 }
 
 
-.knopf.sekundaer {
-	color: var(--gold);
-	background: var(--llb-palette-transparent);
-	border-color: var(--rand);
-}
-.knopf.sekundaer:hover { background: var(--fläche-hell); }
 
 /* Size of the catalogue: one row of numbers, not a marketing grid.
  * Both rules belong to the row itself: the hero is wider than its content,
@@ -391,7 +368,7 @@ body.landing section { margin-top: 34px; }
 	body.landing .lead { font-size: var(--text-fliesstext-kompakt); }
 	.suche-start { flex-wrap: wrap; }
 	.suche-start input[type="search"] { flex: 1 1 100%; }
-	.suche-start .knopf { flex: 1 1 100%; text-align: center; }
+	.suche-start .llb-knopf { flex: 1 1 100%; text-align: center; }
 	.zahlen { gap: 8px 18px; }
 	.zahlen span { font-size: var(--text-zwischen); }
 	.zahlen small { font-size: var(--text-bedienung); }

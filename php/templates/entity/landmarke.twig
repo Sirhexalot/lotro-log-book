@@ -1,4 +1,5 @@
 {% extends 'layout.twig' %}
+{% import 'components/karte.twig' as karte %}
 
 {# Landmark page: the spot on its map and the quests that lead there.
    No category and no description: the client export leaves both empty. #}
@@ -6,9 +7,9 @@
 <article>{{ include('entity/_heading.twig') }}
 {% if page.place.image %}
 <section class="katalog-abschnitt"><h2>{{ w.place }}</h2>
-<figure class="katalog-ort"><img src="/karten/{{ lang }}/{{ page.place.image|replace({'.png': '.webp'}) }}" alt="" width="320" height="240" loading="lazy" decoding="async"><i class="katalog-pin" style="left:{{ page.place.pin_x|pin }}%;top:{{ page.place.pin_y|pin }}%"></i></figure>
-<p class="katalog-hinweis">{{ page.place.coords }}{% if page.place.map_name %} · {% if page.place.map_url %}<a href="{{ page.place.map_url }}">{{ page.place.map_name }}</a>{% else %}{{ page.place.map_name }}{% endif %}{% endif %}{% if page.place.region %} · <a href="{{ page.place.region.url }}">{{ page.place.region.text }}</a>{% endif %}</p>
-<p class="katalog-aktionen"><a href="{{ page.map_link }}" class="katalog-knopf">{{ w.map }}</a></p></section>
+{{ karte.karte(lang, page.place.image, '', page.place.pin_x, page.place.pin_y) }}
+<p class="llb-hinweis">{{ page.place.coords }}{% if page.place.map_name %} · {% if page.place.map_url %}<a href="{{ page.place.map_url }}">{{ page.place.map_name }}</a>{% else %}{{ page.place.map_name }}{% endif %}{% endif %}{% if page.place.region %} · <a href="{{ page.place.region.url }}">{{ page.place.region.text }}</a>{% endif %}</p>
+<p class="llb-aktionen"><a href="{{ page.map_link }}" class="llb-knopf">{{ w.map }}</a></p></section>
 {% endif %}
 {% if page.quests %}<section><h2>{{ w.landmark_here }}</h2>
 <ul class="katalog-liste quellen-liste" data-quellen-liste>{% for goal in page.quests %}<li data-kind="{{ goal.art }}" data-url="{{ goal.url }}"><a href="{{ goal.url }}">{{ goal.text }}</a></li>{% endfor %}</ul>

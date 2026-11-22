@@ -45,11 +45,8 @@
 .mql-row-hit:is(button) { width:100%; padding:0; border:0; background:var(--llb-palette-transparent); color:inherit; text-align:left; font:inherit; cursor:pointer; }
 .mql-row-hit:hover .mql-row-name { color:var(--gold); text-decoration:underline; }
 .mql-row-hit:focus-visible { outline:2px solid var(--gold); outline-offset:3px; border-radius:3px; }
-.mql-row-icon { box-sizing:border-box; width:64px; height:64px; display:grid; place-items:center; color:var(--gold); background:var(--fläche); border:1px solid var(--llb-icon-tile-border); border-radius:4px; }
-.mql-row-icon-item { background:var(--llb-icon-tile-bg); border-color:var(--llb-icon-tile-border); }
-.mql-row-icon img { width:75%; height:75%; object-fit:contain; margin:0; padding:0; background:none; border:0; box-shadow:none; border-radius:0; filter:var(--llb-icon-item-filter); }
+/* Tile look and size from kachel.css. */
 .mql-row-icon-missing img { display:none; }
-.mql-row-icon svg { width:27px; height:27px; margin:0; padding:0; background:none; box-shadow:none; filter:none; }
 .mql-row-body { min-width:0; }
 .mql-row .mql-row-name { display:block; color:var(--text); font-weight: var(--gewicht-medium); line-height: var(--zeile-label); overflow-wrap:anywhere; }
 .mql-row-hit:focus-visible .mql-row-name,.mql-row-hit:hover .mql-row-name { color:var(--gold); }
@@ -79,8 +76,7 @@
 	.mql-row-heading { padding-inline:10px; }
 	.mql-row-hit { display:contents; }
 	.sets-list.mql-row-list > li > .mql-row-hit { display:contents; }
-	.mql-row-icon { grid-column:1; grid-row:1 / span 3; width:54px; height:54px; }
-	.mql-row-icon svg { width:24px; height:24px; }
+	.mql-row-icon { grid-column:1; grid-row:1 / span 3; }
 	.mql-row-body { grid-column:2; }
 	.mql-row-hit:focus-visible .mql-row-body { outline:2px solid var(--gold); outline-offset:3px; }
 	.mql-row-levels,.mql-row-progress { grid-column:2; }

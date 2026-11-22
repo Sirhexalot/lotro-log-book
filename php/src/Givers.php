@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Llb;
 
+require_once __DIR__ . '/Sortierung.php';
+
 /**
  * Server-rendered quest givers: a small filter index, shards for the details.
  *
@@ -196,7 +198,7 @@ final class Givers
                     return $al <=> $bl;
                 }
             }
-            return strnatcasecmp($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']);
+            return Sortierung::name($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']);
         });
         return $rows;
     }
@@ -315,7 +317,7 @@ final class Givers
                     $options[] = compact('value', 'label', 'count', 'checked');
                 }
             }
-            usort($options, static fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
+            usort($options, static fn ($a, $b) => Sortierung::name($a['label'], $b['label']));
             $facets[$key] = $options;
         }
         $page_rows = array_slice($selected, ($page - 1) * self::PAGE_SIZE, self::PAGE_SIZE);

@@ -107,7 +107,7 @@
 		var adapter = A.client({
 			rows:rows, size:30, id:function (r) { return r.id; },
 			matches:function (r,s) { return searchMatches(r,s.q) && (!loot || !!matchingConditions(r,s.filters).length); },
-			compare:function (a,b) { return a.name.localeCompare(b.name,lang) || (a.quest || '').localeCompare(b.quest || '',lang); },
+			compare:function (a,b) { return MQL_SORT.compare(a.name,b.name) || MQL_SORT.compare(a.quest || '',b.quest || ''); },
 			facets:function (all,s) {
 				var facets = {};
 				groups.filter(function (g) { return g.kind === 'multi'; }).forEach(function (g) {

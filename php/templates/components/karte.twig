@@ -1,0 +1,18 @@
+/* Map cut with a pin: the client map picture with one marked place.
+ *
+ * Same frame everywhere: 4:3, dark ground behind transparent edges, one pin.
+ * The page decides the width (columns, flex rows) and whether a link wraps it.
+ *
+ * karte(lang, bild, link, pin_x, pin_y, klasse, gross, label, alt)
+ *   bild    file name under /karten/<lang>/, .png or .webp
+ *   link    wraps the figure in a link to the map application
+ *   pin     omitted for a map without a marked place
+ *   gross   the large map at the top of an area page (640 px) */
+{% macro karte(lang, bild, link = '', pin_x = null, pin_y = null, klasse = '', gross = false, label = '', alt = '') %}
+{% if link %}<a class="katalog-ortlink" href="{{ link }}"{% if label %} aria-label="{{ label }}"{% endif %}>{% endif %}
+<figure class="llb-karte{{ klasse ? ' ' ~ klasse : '' }}"{% if gross %} data-groesse="gross"{% endif %}>
+<img src="/karten/{{ lang }}/{{ bild|replace({'.png': '.webp'}) }}" alt="{{ alt }}" width="{{ gross ? 640 : 320 }}" height="{{ gross ? 480 : 240 }}" loading="lazy" decoding="async">
+{% if pin_x is not null and pin_y is not null %}<i class="llb-karte-pin" style="left:{{ pin_x|pin }}%;top:{{ pin_y|pin }}%"></i>{% endif %}
+</figure>
+{% if link %}</a>{% endif %}
+{% endmacro %}

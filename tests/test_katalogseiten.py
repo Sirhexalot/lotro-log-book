@@ -138,7 +138,8 @@ class CatalogueTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             target = Path(temp)
             for name in ('style.css', 'gemeinsam.css', 'katalog.css', 'flaeche.css', 'fakten.css',
-                         'theme-light.css', 'theme.js', 'speicher.js', 'katalog.js', 'index.html'):
+                         'kachel.css', 'hinweis.css', 'knopf.css', 'karte.css', 'theme-light.css',
+                         'theme.js', 'speicher.js', 'katalog.js', 'index.html'):
                 shutil.copy2(self.target / name, target / name)
             for lang in LANGS:
                 renderer = Renderer(target, lang, models)

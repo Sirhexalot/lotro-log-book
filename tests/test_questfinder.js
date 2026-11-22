@@ -51,10 +51,12 @@ function finder(imported) {
 		documentElement: { lang: 'de' },
 		createElement: fakeElement
 	};
-	const context = {
+  const context = {
 		window, document, location: { origin: 'https://example.test', pathname: '/de/aufgabenfinder/' },
 		URL, Set, Array, String, Number, Object, Math, JSON
 	};
+	vm.runInNewContext(fs.readFileSync('web/sortierung.js', 'utf8'), context);
+	context.MQL_SORT = window.MQL_SORT;
 	vm.runInNewContext(fs.readFileSync('web/karten-aufgabenfilter.js', 'utf8'), context);
 	const root = {};
 	const quests = [

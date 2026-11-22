@@ -23,7 +23,9 @@
 		var article = node('article');
 		article.className = 'bl-ergebnis-zeile bl-art-g';
 		var icon = node('span');
-		icon.className = 'symbol symbol-svg bl-symbol';
+		// Same icon tile as every result row (kachel.css); the reward type only
+		// tints the symbol.
+		icon.className = 'bl-symbol mql-row-icon mql-row-icon-entity';
 		icon.innerHTML = window.MQL_SYMBOL ? window.MQL_SYMBOL('gegenstand', 'bl-symbol-svg') : '';
 		article.appendChild(icon);
 		var heading = node('div');
@@ -65,7 +67,7 @@
 			row.sources.forEach(function (source) { add(sourcePath(source), 0, null); });
 		});
 		function clean(options) {
-			options.sort(function (a, b) { return a.label.localeCompare(b.label, lang); });
+			options.sort(function (a, b) { return MQL_SORT.compare(a.label, b.label); });
 			options.forEach(function (option) {
 				if (!option.children.length) { delete option.children; }
 				else { clean(option.children); }
@@ -198,7 +200,7 @@
 		}
 		var adapter = A.client({
 			rows: rows, id: function (row) { return row.id; }, matches: matches, facets: facets,
-			compare: function (a, b) { return a.name.localeCompare(b.name, lang) || a.id.localeCompare(b.id); },
+			compare: function (a, b) { return MQL_SORT.compare(a.name, b.name) || a.id.localeCompare(b.id); },
 			renderResults: function (result, target) {
 				target.replaceChildren();
 				result.payload.forEach(function (row) { target.appendChild(renderRow(row)); });

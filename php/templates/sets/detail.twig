@@ -3,7 +3,7 @@
 <article class="set-detail">
 {% import 'entity/_header.twig' as heading %}
 {{ heading.detail(kind, lang, w, set.name, icon, '', '', entity_filter_url|default(''), entity_filter_label|default('')) }}<p>{{ sw.parts|replace({'%s': set.parts}) }}</p>
-<p class="katalog-aktionen"><a class="katalog-knopf" href="#setteile">{{ sw.pieces }}</a> <a class="katalog-knopf" href="#setboni">{{ sw.bonuses }}</a></p>
+<p class="llb-aktionen"><a class="llb-knopf" href="#setteile">{{ sw.pieces }}</a> <a class="llb-knopf" href="#setboni">{{ sw.bonuses }}</a></p>
 <section id="setteile"><h2>{{ sw.pieces }}</h2>
 <div class="set-cards">
 {% for member in set.members|filter(member => member.name) %}

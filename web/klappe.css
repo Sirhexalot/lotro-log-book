@@ -1,0 +1,20 @@
+/* One popover: a button that opens a panel next to it.
+ *
+ * The look of the panel (surface, border, shadow, scrolling) lives in
+ * klappe.css; where it opens and what it contains belongs to the page.
+ * Behaviour (toggle, close on outside click and Escape, aria-expanded) comes
+ * from klappe.js, so every panel behaves the same.
+ *
+ * Usage:
+ *   <button aria-expanded="false" aria-controls="id">…</button>
+ *   <div id="id" class="llb-klappe-feld" hidden>…</div> */
+.llb-klappe-feld {
+	position: absolute;
+	z-index: 30;
+	max-height: 60vh;
+	overflow-y: auto;
+	background: var(--fläche);
+	border: 1px solid var(--rand);
+	box-shadow: 0 4px 14px var(--llb-palette-rgba-0-0-0-p5);
+}
+.llb-klappe-feld[hidden] { display: none; }
