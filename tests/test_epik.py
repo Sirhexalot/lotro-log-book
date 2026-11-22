@@ -106,6 +106,20 @@ class EpikTest(unittest.TestCase):
                     self.assertRegex(quest['ie'], r'^[0-9A-F]{8}$', lang)
                     self.assertIn(quest['ie'], ids, (lang, quest.get('n')))
 
+    def test_release_refuses_a_build_without_the_epic_data(self):
+        """The data is generated and never versioned, so the builder must demand it.
+
+        Without this guard a failed or reordered generator step would ship a
+        release whose epic view loads a missing script.
+        """
+        release = (ROOT / 'tools' / 'build_release.py').read_text(encoding='utf-8')
+        guard = release.split('def pruefen(', 1)[1].split('\ndef ', 1)[0]
+        self.assertIn("'epik.js'", guard)
+        self.assertIn("'epik.css'", guard)
+        self.assertIn("('epik-%s.js' % sprache)", guard)
+        for lang in LANGS:
+            self.assertTrue((ROOT / 'web' / ('epik-%s.js' % lang)).is_file(), lang)
+
 
 if __name__ == '__main__':
     unittest.main()

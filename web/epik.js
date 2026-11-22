@@ -27,7 +27,7 @@
 	/** What the view counts: chapters and orphan parts, no prologue chains. */
 	function zaehlbar(quests) {
 		return quests.filter(function (quest) {
-			return !istTeil(quest) && !istProlog(quest.n);
+			return !istTeil(quest) && !quest.pr;
 		});
 	}
 	function sichtbar(quests) {
@@ -69,13 +69,17 @@
 		return alle_rows;
 	}
 
-	function leseZeile(quest) {
+	function leseZeile(quest, ohneStatus) {
 		var lage = host.status(quest);
 		var li = document.createElement('li');
-		li.className = lage.status === 'fertig' ? 'erledigt' : 'offen';
+		li.dataset.id = quest.i;
+		// A prologue chain has no status of its own: it never counts towards the
+		// book's progress, so a mark would contradict the hint above it.
+		li.className = ohneStatus ? 'offen' : (lage.status === 'fertig' ? 'erledigt' : 'offen');
 		if (lage.nichtGezahlt) { li.className = 'nicht-gezaehlt'; }
 		if (host.aktiv(kennung(quest))) { li.classList.add('aktiv'); }
-		var symbol = { fertig: ['✓', 'filter_erledigt'], laufend: ['◐', 'filter_laufend'], offen: ['○', 'filter_offen'] }[lage.status];
+		var symbol = ohneStatus ? null
+			: { fertig: ['✓', 'filter_erledigt'], laufend: ['◐', 'filter_laufend'], offen: ['○', 'filter_offen'] }[lage.status];
 		if (symbol) {
 			var marke = document.createElement('span');
 			marke.className = 'listen-status status-' + lage.lage;
@@ -109,6 +113,7 @@
 			li.appendChild(stufe);
 		}
 		li.addEventListener('click', function () { host.waehle(quest); });
+		if (host.merkeZeile) { host.merkeZeile(quest.i, li); }
 		return li;
 	}
 
@@ -171,12 +176,12 @@
 					kinder.appendChild(hinweis);
 				}
 				buchGefiltert.forEach(function (quest) {
-					if (!istTeil(quest)) { kinder.appendChild(leseZeile(quest)); }
+					if (!istTeil(quest)) { kinder.appendChild(leseZeile(quest, istProlog(buch.name))); }
 				});
 			});
 		} else {
 			gefiltert.forEach(function (quest) {
-				if (!istTeil(quest)) { kinder.appendChild(leseZeile(quest)); }
+				if (!istTeil(quest)) { kinder.appendChild(leseZeile(quest, false)); }
 			});
 		}
 		if (kinder.childElementCount) { inhalt.push(kinder); }
@@ -184,6 +189,37 @@
 	}
 
 	function kennung(quest) { return quest && quest.i; }
+
+	/** Open the path to a quest and scroll to it.
+	 *
+	 * A dot on the map selects a quest that may sit in a folded volume, book or
+	 * chapter. Without this the list looks as if a click did nothing.
+	 * Returns false when the quest is not part of this view.
+	 */
+	function zeige(quest) {
+		if (!daten || !quest) { return false; }
+		var ziel = null;
+		var kennungZiel = quest.i;
+		if (istTeil(quest)) { kennungZiel = quest.ie; }
+		daten.gruppen.forEach(function (gruppe) {
+			if ((gruppe.ids || []).indexOf(kennungZiel) >= 0) {
+				ziel = { gruppe: gruppe.name };
+			}
+			(gruppe.buecher || []).forEach(function (buch) {
+				if (buch.ids.indexOf(kennungZiel) >= 0) {
+					ziel = { gruppe: gruppe.name, buch: buch.name };
+				}
+			});
+		});
+		if (!ziel) { return false; }
+		offen[ziel.gruppe] = true;
+		if (ziel.buch) { offen[ziel.gruppe + '|' + ziel.buch] = true; }
+		zeichnen();
+		var zeile = host.liste.querySelector('li[data-id="' + quest.i + '"]');
+		if (!zeile) { zeile = host.liste.querySelector('li.aktiv'); }
+		if (zeile) { try { zeile.scrollIntoView({ block: 'center' }); } catch (fehler) {} }
+		return true;
+	}
 
 	function zeichnen() {
 		if (!host || !daten) { return; }
@@ -285,6 +321,7 @@
 		montiere: montiere,
 		verlasse: grundEntfernen,
 		zeichneListe: zeichnen,
+		zeige: zeige,
 		zahlen: function () {
 			return zahlen(host.filtere(sichtbar(alle()), true));
 		}

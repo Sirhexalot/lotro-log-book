@@ -63,6 +63,22 @@ catalogue path.
   „Instanz“ or the deviating instance name. Session play that only retells an
   existing quest is not shown twice. A prologue block says that it leads into a
   book but does not count towards its progress.
+- **Prologues have no status of their own (22.11.2026).** The generator marks
+  every quest of a prologue book with `pr: 1`; the view renders those rows
+  without a status mark and the detail pane shows the prologue note instead of
+  the progress choice. A mark would contradict the hint directly above it. The
+  flag comes from `tools/build_epik.py`, not from the quest name, so it holds in
+  all three languages.
+- **A click on a map dot opens the path in the tree (22.11.2026).**
+  `web/epik.js` exposes `zeige(quest)`; the map app calls it after every
+  selection, because the chosen quest may sit in a folded volume or book. The
+  row is marked and scrolled into view, so a click never looks as if nothing
+  happened.
+- **The epic data is generated and never versioned.** `web/epik-<sprache>.js`
+  is listed in `.gitignore` like `web/daten-<sprache>.js`. `build_release.py`
+  runs `build_epik.py` before copying `web/`, `pruefen()` refuses a release
+  without `epik.js`, `epik.css` and the three data files, and
+  `tests/test_epik.py` holds that guard.
 
 ## Limits
 
@@ -71,6 +87,11 @@ catalogue path.
   rest remains visible.
 - The progress proves only what the imported character progress contains. Without an
   import, numbers and markers remain empty; nothing is assumed.
+- **Lazily loaded details never delete a known place.** The region and detail
+  shards carry an empty `t` list for chapters; a plain merge would wipe the
+  place the map already knows and the map would stop following the selection.
+  `mergeDetails()` in `web/app.js` therefore treats an empty list or string as
+  "no new information", not as a correction.
 - From „book completed“ does **not** follow that the prologue is done. Only
   the prologue „Vor dem Schatten“, chapter 6, is a hard prerequisite of the new
   book 1 chapter 1; the old people's prologues are their own chains.

@@ -40,7 +40,7 @@
 			// Area shards carry their own objects; they need the full record too,
 			// otherwise a selected row keeps an empty description and no steps.
 			Object.keys(questNachId).forEach(function (id) {
-				if (nachId[id]) { Object.assign(questNachId[id], nachId[id]); }
+				if (nachId[id]) { mergeDetails(questNachId[id], nachId[id]); }
 			});
 			vollstaendig = true;
 			var wartende = vollstaendigLader; vollstaendigLader = null;
@@ -72,6 +72,24 @@
 		var datei = detailDatei(quest);
 		return !!(datei && detailGeladen[datei]);
 	}
+	/** Merge a lazily loaded detail record without deleting known values.
+	 *
+	 * The detail and region shards carry fields such as an empty `t` list. A plain
+	 * Object.assign would then wipe the place the map already knows, and the map
+	 * stops following the selection. An empty list or string is therefore treated
+	 * as "no new information", never as a correction.
+	 */
+	function mergeDetails(ziel, quelle) {
+		if (!quelle) { return ziel; }
+		Object.keys(quelle).forEach(function (feld) {
+			var wert = quelle[feld];
+			if (wert === null || wert === undefined || wert === '') { return; }
+			if (Array.isArray(wert) && !wert.length) { return; }
+			ziel[feld] = wert;
+		});
+		return ziel;
+	}
+
 	function ladeDetails(quest, callback) {
 		var datei = detailDatei(quest);
 		if (!datei || detailGeladen[datei]) { callback(); return; }
@@ -85,7 +103,7 @@
 			var rows = window.MQL_GEBIETS_DETAILS || {};
 			delete window.MQL_GEBIETS_DETAILS;
 			Object.keys(rows).forEach(function (id) {
-				if (questNachId[id]) { Object.assign(questNachId[id], rows[id]); }
+				if (questNachId[id]) { mergeDetails(questNachId[id], rows[id]); }
 			});
 			detailGeladen[datei] = true;
 			var wartende = detailLader[datei]; delete detailLader[datei];
@@ -2420,6 +2438,8 @@
 			aktiv: function (id) {
 				return !!(zustand.auswahl && zustand.auswahl.i === id);
 			},
+			merkeZeile: function (id, zeile) { zeilen[id] = zeile; },
+			gewaehlt: function () { return zustand.auswahl; },
 			waehle: function (quest) { waehle(quest); },
 			setzeTreffer: function (rows) { zustand.treffer = rows; },
 			zeichneMarker: zeichneMarker,
@@ -2715,13 +2735,15 @@
 		var fortschrittZeile = eltern('div', null);
 		fortschrittZeile.className = 'detail-fortschritt';
 		fortschrittZeile.appendChild(eltern('span', t('detail_fortschritt')));
-		var status = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(
+		// A prologue chain has no status: it never counts towards a book's progress.
+		var status = !quest.pr && window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(
 			loesung ? 'deeds' : 'quests', quest.i, null, 'panel');
 		if (status) {
 			status.addEventListener('click', function (event) { event.stopPropagation(); });
 			fortschrittZeile.appendChild(status);
 		}
-		var lageHinweis = lage === 'sitzung' ? t('sitzungsspiel')
+		var lageHinweis = quest.pr ? t('prolog_hinweis')
+			: lage === 'sitzung' ? t('sitzungsspiel')
 			: lage === 'monster' ? t('monster_hinweis')
 			: lage === 'ausgeschlossen' ? t('nicht_moeglich') : '';
 		if (lageHinweis) {
@@ -3161,6 +3183,10 @@
 		if (quest.a !== undefined || zu[quest.a || ''] !== undefined) { zu[quest.a || ''] = false; }
 		folgeKarte(quest);
 		zeichneListe();
+		// A view with a folded tree opens the path to the chosen quest, so a
+		// dot on the map and its row stay in step.
+		var sonder = sonderFuer(zustand.knoten);
+		if (sonder && typeof sonder.zeige === 'function') { sonder.zeige(quest); }
 		zeichneMarker();
 		zeichneDetail();
 		aktualisiereStand();

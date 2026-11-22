@@ -159,6 +159,25 @@ async function zustand(page) {
 					.filter((zeile) => /^\s*(?:○|✓|◐)?\s*Instanz:\s*Hilfe für einen Waldläufer/i.test(zeile.textContent)).length);
 			assert.equal(doppelt, 0, design + ': Instanz steht doppelt neben ihrem Kapitel');
 
+			/* Ein Prolog hat keinen eigenen Status: die Kette zählt nicht. */
+			const prologStand = await page.evaluate(() => {
+				const zeilen = Array.from(document.querySelectorAll('#liste ul.epik-buecher > li'))
+					.filter((li) => /^Prolog:/.test(li.querySelector('.qname')?.textContent || ''));
+				return { zeilen: zeilen.length,
+					marken: zeilen.filter((li) => li.querySelector('.listen-status')).length };
+			});
+			assert.ok(prologStand.zeilen > 0, design + ': keine Prolog-Zeilen');
+			assert.equal(prologStand.marken, 0, design + ': Prolog-Zeile trägt einen Status');
+			await kapitelZeile.click();
+			await page.waitForTimeout(500);
+			const prologDetail = await page.evaluate(() => ({
+				auswahl: document.querySelectorAll('.detail-fortschritt select').length,
+				hinweis: document.querySelector('.detail-fortschritt .llb-hinweis')?.textContent || '',
+			}));
+			assert.equal(prologDetail.auswahl, 0, design + ': Fortschrittsauswahl beim Prolog');
+			assert.match(prologDetail.hinweis, /zählt aber nicht|counts|compte/i,
+				design + ': Prolog-Hinweis in der Detailspalte fehlt');
+
 			/* Eine gewählte Aufgabe springt auf ihre genaue Karte, nicht auf die
 			   große Übersicht. */
 			await page.fill('#aufgaben-suche', 'Buch 1, Kapitel 1:');
@@ -192,6 +211,23 @@ async function zustand(page) {
 			const nachScroll = await zustand(page);
 			assert.ok(nachScroll.baender >= 10, design + ': Liste wird beim Scrollen flach');
 			assert.ok(nachScroll.buecher >= 1, design + ': Buchabschnitte fehlen nach dem Scrollen');
+
+			/* Ein Klick auf einen Kartenpunkt öffnet den Weg im Baum und markiert
+			   die Zeile. Ohne das wirkt der Klick, als wäre nichts passiert. */
+			await page.goto(base + START, { waitUntil: 'load' });
+			await bereit(page);
+			const zugeklappt = await page.evaluate(() =>
+				document.querySelectorAll('#liste li[data-id]').length);
+			assert.equal(zugeklappt, 0, design + ': Liste startet nicht zugeklappt');
+			await page.locator('#marker .punkt:not(.stapel)').first().click({ force: true });
+			await page.waitForTimeout(900);
+			const nachKlick = await page.evaluate(() => ({
+				zeilen: document.querySelectorAll('#liste li[data-id]').length,
+				aktiv: document.querySelector('#liste li.aktiv .qname')?.textContent || '',
+				baender: document.querySelectorAll('#liste li.epik-band').length }));
+			assert.ok(nachKlick.zeilen > 0, design + ': Kartenklick öffnet den Baum nicht');
+			assert.equal(nachKlick.baender, 10, design + ': Bände fehlen nach dem Kartenklick');
+			assert.ok(nachKlick.aktiv.length > 0, design + ': gewählte Zeile nicht markiert');
 
 			/* Der Listentitel öffnet die Epik selbst über ihre Adresse. */
 			await page.locator('#liste-titel').click();

@@ -83,6 +83,11 @@ def roman(value: str) -> int:
     return total
 
 
+def ist_prolog(label: str) -> bool:
+    """A prologue book (Prolog, Prologue, Vorwort) never counts as progress."""
+    return bool(PROLOG.match(label or ''))
+
+
 def buch_rang(label: str) -> tuple:
     if PROLOG.match(label):
         return (-1, 0, '')
@@ -241,6 +246,11 @@ def baue(lang: str) -> dict:
         buecher = []
         for buchname, ids in gruppe['buecher'].items():
             ids.sort(key=lambda k: (kapitel_rang(rows[k].get('n', '')), rows[k].get('n', '')))
+            # A prologue chain is the introduction to a book: it has no status of
+            # its own, because it never counts towards that book's progress.
+            if ist_prolog(buchname):
+                for kennung in ids:
+                    rows[kennung]['pr'] = 1
             buecher.append({'name': buchname, 'ids': ids})
         buecher.sort(key=lambda buch: buch_rang(buch['name']))
         gruppe['buecher'] = buecher
