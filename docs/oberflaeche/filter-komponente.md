@@ -78,11 +78,13 @@ paging mode; the rest describes this response. `filter-server.js` builds its
 config from the definition and hands the response to the shared adapter, so
 nothing is scraped from the markup any more.
 
-Titles are the reference list. The result is a real table whose head is a link
-without JavaScript (`?sort=-name`, PHP sorts) and a button-like sort target with
-JavaScript. A changed question resets page-based lists to page 1. Lists without
-a model keep the older scan of form and response until they are migrated one by
-one.
+Titles are the reference list; factions followed on the same day. The result
+is a real table whose head is a link without JavaScript (`?sort=-name`, PHP
+sorts) and a button-like sort target with JavaScript. A changed question
+resets page-based lists to page 1. Personal columns such as the faction
+reputation appear only when the import carries the data; the server writes the
+hidden head and cell, the browser fills and shows them. Lists without a model
+keep the older scan of form and response until they are migrated one by one.
 
 ## Reproducible tests
 

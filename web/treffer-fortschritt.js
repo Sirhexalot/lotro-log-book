@@ -31,7 +31,9 @@
 		});
 		document.querySelectorAll('[data-progress-heading="reputation"]').forEach(function (header) {
 			header.hidden = !any;
-			header.previousElementSibling.hidden = any;
+			// The row lists carried two headings, one generic and one for the
+			// progress; a table has real columns, so only its own head moves.
+			if (!header.closest('table')) { header.previousElementSibling.hidden = any; }
 		});
 	}
 

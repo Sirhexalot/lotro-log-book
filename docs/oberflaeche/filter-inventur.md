@@ -162,7 +162,7 @@ markup, so order, labels and sort keys exist once per list.
 | A Cleanup | order and wording only, scheduled run 22.11.2026 23:00, no commit | `web/aufgaben-filter.js`, `givers/list.twig`, `titles/list.twig`, texts, vendor and instance labels | marked as a transition step |
 | B Reference | item search: configuration, table head, sorting, scrolling | `web/listen/gegenstaende.js`, `treffer-tabelle.js`, `filter-ui.js`, `filterzustand.js`, `gegenstaende-filter.js`, CSS | result axis and the reference state |
 | C Rollout | quest/deed lists, crafting, class profile; the filter order moves into the configuration | `aufgaben-filter.js`, `handwerk-filter.js`, `klassen.js`, `klassenprofil.md` | quests/deeds, finder and crafting done |
-| D Server lists | PHP model as `data-filter-model`, Twig renders from it, scraping goes | `php/src/*`, `php/templates/*`, `filter-server.js` | titles done as reference, five lists open |
+| D Server lists | PHP model as `data-filter-model`, Twig renders from it, scraping goes | `php/src/*`, `php/templates/*`, `filter-server.js` | titles and factions done, four lists open |
 | E Contract test | configuration against the entity JSON | `tests/test_listen_config.py` | deviations become findings |
 
 B is implemented locally on 22.11.2026: `web/listen/gegenstaende.js`,
@@ -191,8 +191,9 @@ definition holds group order, labels, sort keys, columns and paging, so
 `filter-server.js` no longer collects them from the markup. The result list is
 the shared table: the head is a link without JavaScript (`?sort=-name`, PHP
 sorts) and sorts in place with JavaScript. A changed question returns to page
-1. Vendors, factions, landmarks, instances and quest givers keep the old form
-scan until their turn.
+Factions follow the same way: place tree, „with reputation sources“ and the
+table; the reputation column appears only with an imported reputation. Vendors,
+landmarks, instances and quest givers keep the old form scan until their turn.
 
 ## Step 1 - cleanup (safe, no new data)
 

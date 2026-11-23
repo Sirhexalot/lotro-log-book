@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Llb;
 
+require_once __DIR__ . '/FilterModel.php';
 require_once __DIR__ . '/Sortierung.php';
 
 /**
@@ -31,7 +32,7 @@ final class Factions
     {
         return [
             'de' => [
-                'title' => 'Fraktionen', 'intro' => 'Wessen Gunst du gewinnen kannst – mit Stufen, Beschreibung und allen Aufgaben und Taten, die Ruf bringen.',
+                'title' => 'Fraktionen', 'name' => 'Name', 'intro' => 'Wessen Gunst du gewinnen kannst – mit Stufen, Beschreibung und allen Aufgaben und Taten, die Ruf bringen.',
                 'search' => 'Fraktion suchen', 'filter' => 'Filter', 'apply' => 'Anwenden',
                 'reset' => 'Zurücksetzen', 'region' => 'Region', 'area' => 'Landschaft',
                 'wo' => 'Region und Landschaft',
@@ -45,7 +46,7 @@ final class Factions
                 'none' => 'Keine Rufquelle belegt', 'nowhere' => 'Kein Ort belegt',
             ],
             'en' => [
-                'title' => 'Factions', 'intro' => 'Whose favour you can earn – with tiers, description and every quest and deed that brings reputation.',
+                'title' => 'Factions', 'name' => 'Name', 'intro' => 'Whose favour you can earn – with tiers, description and every quest and deed that brings reputation.',
                 'search' => 'Search for a faction', 'filter' => 'Filters', 'apply' => 'Apply',
                 'reset' => 'Reset', 'region' => 'Region', 'area' => 'Landscape',
                 'wo' => 'Region and landscape',
@@ -59,7 +60,7 @@ final class Factions
                 'none' => 'No reputation source recorded', 'nowhere' => 'No place recorded',
             ],
             'fr' => [
-                'title' => 'Factions', 'intro' => 'Trouvez les quêtes et les prouesses qui vous font gagner de la réputation auprès de chaque faction.',
+                'title' => 'Factions', 'name' => 'Nom', 'intro' => 'Trouvez les quêtes et les prouesses qui vous font gagner de la réputation auprès de chaque faction.',
                 'search' => 'Chercher une faction', 'filter' => 'Filtres', 'apply' => 'Appliquer',
                 'reset' => 'Réinitialiser', 'region' => 'Région', 'area' => 'Pays',
                 'wo' => 'Région et zone',
@@ -95,10 +96,15 @@ final class Factions
     }
 
     /** Name, then the id so equal names keep a stable order. */
-    public static function sorted(array $rows): array
+    public static function sorted(array $rows, string $dir = 'asc'): array
     {
-        usort($rows, static fn (array $a, array $b): int =>
-            Sortierung::name($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
+        usort($rows, static function (array $a, array $b) use ($dir): int {
+            $name = Sortierung::name($a['name'], $b['name']);
+            if ($name !== 0) {
+                return $dir === 'desc' ? -$name : $name;
+            }
+            return strcmp($a['id'], $b['id']);
+        });
         return $rows;
     }
 
@@ -123,18 +129,22 @@ final class Factions
         return $out;
     }
 
-    private function params(array $f, int $page = 1): array
+    private function params(array $f, int $page = 1, string $sort = 'name', string $dir = 'asc'): array
     {
         $params = array_filter($f, static fn ($value) => $value !== '' && $value !== []);
         if ($page > 1) {
             $params['page'] = $page;
         }
+        if ($sort !== 'name' || $dir === 'desc') {
+            $params['sort'] = ($dir === 'desc' ? '-' : '') . $sort;
+        }
         return $params;
     }
 
-    private function url(array $filters, int $page = 1, ?string $lang = null): string
+    private function url(array $filters, int $page = 1, ?string $lang = null,
+                         string $sort = 'name', string $dir = 'asc'): string
     {
-        $params = $this->params($filters, $page);
+        $params = $this->params($filters, $page, $sort, $dir);
         return $this->catalogue->appRoute($lang ?? $this->lang, 'factions')
             . ($params ? '?' . http_build_query($params) : '');
     }
@@ -177,8 +187,17 @@ final class Factions
         $labels = $index['labels'];
         $rows = $index['factions'];
         $filters = $this->query($input, $labels, $rows);
+        // Only the name is a sortable column; an unknown key is no page.
+        $sort = 'name';
+        $sort_dir = 'asc';
+        $raw_sort = is_string($input['sort'] ?? '') ? trim($input['sort'] ?? '') : '';
+        if ($raw_sort === '-name') {
+            $sort_dir = 'desc';
+        } elseif ($raw_sort !== '' && $raw_sort !== 'name') {
+            return null;
+        }
         $selected = array_values(array_filter($rows, fn ($row) => self::matches($row, $filters)));
-        $selected = self::sorted($selected);
+        $selected = self::sorted($selected, $sort_dir);
         $pages = max(1, (int) ceil(count($selected) / self::PAGE_SIZE));
         $page = is_scalar($input['page'] ?? 1) ? filter_var($input['page'] ?? 1, FILTER_VALIDATE_INT) : false;
         if ($page === false || $page < 1 || $page > $pages) {
@@ -193,7 +212,15 @@ final class Factions
                 $candidate[$key] = [(int) $value];
                 $count = count(array_filter($rows, fn ($row) => self::matches($row, $candidate)));
                 $checked = in_array((int) $value, $filters[$key], true);
-                if ($count || $checked) {
+                // A checked area must keep its parent region visible even when
+                // the region itself has no hit under the other filters.
+                $holds_checked_area = $key === 'region' && array_reduce(
+                    $filters['area'],
+                    static fn (bool $found, $area): bool => $found
+                        || (string) ($labels['area_region'][(string) $area] ?? '') === (string) $value,
+                    false
+                );
+                if ($count || $checked || $holds_checked_area) {
                     $options[] = ['value' => $value, 'label' => $labels[$key][$value],
                                   'count' => $count, 'checked' => $checked];
                 }
@@ -226,21 +253,83 @@ final class Factions
         }
         unset($row);
 
+        // The same definition the no-JS form is built from; the browser reads
+        // it instead of collecting order and labels from the markup.
+        $toOption = static fn (array $option): array => [
+            'value' => (string) $option['value'],
+            'label' => $option['label'],
+            'count' => (int) $option['count'],
+            'checked' => (bool) $option['checked'],
+        ];
+        $region_options = [];
+        foreach ($facets['region'] as $entry) {
+            $children = array_map(
+                static fn (array $child): array => $toOption($child) + ['groupId' => 'area'],
+                $area_by_region[(string) $entry['value']] ?? []
+            );
+            $region_options[] = $toOption($entry) + ['children' => $children];
+        }
+        $definition = [
+            'area' => 'fraktion',
+            'lang' => $this->lang,
+            'groups' => [
+                ['id' => 'region', 'kind' => 'multi', 'label' => $words['wo'],
+                 'options' => $region_options],
+                ['id' => 'area', 'kind' => 'multi', 'label' => $words['area'], 'nestedOnly' => true,
+                 'options' => array_map($toOption, $area_rest)],
+                ['id' => 'mit', 'kind' => 'boolean', 'label' => $words['mit']],
+            ],
+            'sort' => ['standard' => 'name', 'keys' => ['name'],
+                       'ersteRichtung' => ['name' => 'asc'], 'options' => []],
+            'columns' => [['label' => $words['name'], 'sortierung' => 'name']],
+            'pagination' => ['kind' => 'page', 'size' => self::PAGE_SIZE],
+            'countLabel' => $words['count'],
+        ];
+        $model_facets = [];
+        foreach (['region', 'area'] as $id) {
+            $model_facets[$id] = array_map(
+                static fn (array $option): array =>
+                    ['value' => (string) $option['value'], 'count' => (int) $option['count']],
+                $facets[$id] ?? []
+            );
+        }
+        $model = FilterModel::response(
+            $definition,
+            [
+                'q' => $filters['q'],
+                'filters' => [
+                    'region' => array_map('strval', $filters['region']),
+                    'area' => array_map('strval', $filters['area']),
+                    'mit' => $filters['mit'] === '1',
+                ],
+                'sort' => $sort,
+                'sortDir' => $sort_dir,
+                'pagination' => ['kind' => 'page', 'page' => $page],
+            ],
+            $model_facets,
+            count($selected),
+            ['kind' => 'page', 'page' => $page, 'pages' => $pages, 'hasMore' => $page < $pages],
+        );
+
         $alternates = array_map(
-            fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang)],
+            fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang, $sort, $sort_dir)],
             Catalogue::LANGS);
         return $this->view->render('factions/list.twig', $this->context(
             // Folgeseiten nennen ihre Seite, sonst tragen sie den Text der ersten.
             $page > 1 ? $words['title'] . ' – ' . sprintf($words['page'], $page, $pages) : $words['title'],
             $page > 1 ? $words['intro'] . ' ' . sprintf($words['page'], $page, $pages) . '.' : $words['intro'],
-            $this->url($filters, $page), $alternates,
-            (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
+            $this->url($filters, $page, null, $sort, $sort_dir), $alternates,
+            $sort_dir === 'desc' || (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
         ) + [
             'filters' => $filters, 'facets' => $facets, 'factions' => $page_rows,
             'area_by_region' => $area_by_region, 'area_rest' => $area_rest,
             'count' => count($selected), 'page_label' => sprintf($words['page'], $page, $pages),
-            'previous_url' => $page > 1 ? $this->url($filters, $page - 1) : null,
-            'next_url' => $page < $pages ? $this->url($filters, $page + 1) : null,
+            'previous_url' => $page > 1 ? $this->url($filters, $page - 1, null, $sort, $sort_dir) : null,
+            'next_url' => $page < $pages ? $this->url($filters, $page + 1, null, $sort, $sort_dir) : null,
+            'filter_model_json' => FilterModel::json($model),
+            'sort_url' => $this->url($filters, 1, null, $sort, $sort_dir === 'asc' ? 'desc' : 'asc'),
+            'sort_aria' => $sort_dir === 'asc' ? 'ascending' : 'descending',
+            'sort_arrow' => $sort_dir === 'asc' ? '↑' : '↓',
         ]);
     }
 }
