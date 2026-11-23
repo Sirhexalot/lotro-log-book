@@ -9,6 +9,7 @@
 <section class="katalog-abschnitt"><h2>{{ w.place }}</h2>
 {{ karte.karte(lang, page.place.image, '', page.place.pin_x, page.place.pin_y) }}
 <p class="llb-hinweis">{{ page.place.coords }}{% if page.place.map_name %} · {% if page.place.map_url %}<a href="{{ page.place.map_url }}">{{ page.place.map_name }}</a>{% else %}{{ page.place.map_name }}{% endif %}{% endif %}{% if page.place.region %} · <a href="{{ page.place.region.url }}">{{ page.place.region.text }}</a>{% endif %}</p>
+{% if page.place.map_name %}<p class="llb-aktionen"><a class="llb-knopf" data-art="rand" href="{{ page.map_link }}">{{ w.area_map }}</a></p>{% endif %}
 <p class="llb-aktionen"><a href="{{ page.map_link }}" class="llb-knopf">{{ w.map }}</a></p></section>
 {% endif %}
 {% if page.quests %}<section><h2>{{ w.landmark_here }}</h2>

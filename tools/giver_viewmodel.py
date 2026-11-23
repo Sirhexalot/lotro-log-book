@@ -161,7 +161,7 @@ def _chips(quest: dict, words: dict, lang: str) -> list[str]:
     return chips
 
 
-def _place_view(spot: dict, lang: str, maps: dict, app_url, coords) -> dict:
+def _place_view(spot: dict, lang: str, maps: dict, app_url, coords, name: str = '') -> dict:
     entry = _map(maps, spot.get('map'))
     chain = chain_of(maps, spot.get('map'))
     image = pin_x = pin_y = None
@@ -174,8 +174,9 @@ def _place_view(spot: dict, lang: str, maps: dict, app_url, coords) -> dict:
             pin_y = round(min(100.0, max(0.0, (entry['north'] - spot['lat']) / height * 100)), 1)
     if spot.get('map') is None:
         map_url = None
-    elif spot.get('quest'):
-        map_url = app_url(lang, 'karte', id=spot['quest'])
+    elif spot.get('lat') is not None and spot.get('lon') is not None:
+        map_url = app_url(lang, 'karte', vorkarte=spot['map'],
+                           punkt='%.5f,%.5f' % (spot['lat'], spot['lon']), name=name)
     else:
         map_url = app_url(lang, 'karte', vorkarte=spot['map'])
     return {
@@ -236,7 +237,7 @@ def giver_pages(source: dict, lang: str, quests: dict, maps: dict,
             continue
         rows.sort(key=lambda row: (int(row['level']) if str(row['level']).isdigit() else 0,
                                    schluessel(row['name'])))
-        places = [_place_view(spot, lang, maps, app_url, coords)
+        places = [_place_view(spot, lang, maps, app_url, coords, (giver.get('name') or {}).get(lang) or '')
                   for spot in giver['places']]
         levels = _levels([[row['id'], int(row['level']) if str(row['level']).isdigit() else 0]
                           for row in rows])

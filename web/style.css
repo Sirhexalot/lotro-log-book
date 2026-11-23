@@ -1482,3 +1482,25 @@ body main { grid-template-columns: clamp(280px, var(--listenbreite, 390px), calc
 .detail-bedingungen li.sprung, .detail-kette-liste li.sprung { cursor: pointer; }
 .detail-bedingungen li.sprung:hover, .detail-kette-liste li.sprung:hover { color: var(--gold); text-decoration: underline; }
 .detail-kartenaktion { margin: 12px 0; }
+
+/* One place named by a detail page: a temporary marker, not a quest dot. */
+.punkt.ortspunkt {
+	background: var(--gold);
+	cursor: default;
+	box-shadow: 0 0 0 2px var(--llb-palette-rgba-13-11-9-p85), 0 0 0 3px var(--llb-palette-rgba-255-244-214-p72), 0 2px 5px var(--llb-palette-rgba-0-0-0-p7);
+}
+.ortspunkt-label {
+	position: absolute;
+	transform: translate(16px, -50%);
+	max-width: 220px;
+	padding: 3px 7px;
+	border: 1px solid var(--rand);
+	border-radius: 4px;
+	background: var(--fläche);
+	color: var(--text);
+	font-size: var(--text-bedienung);
+	line-height: var(--zeile-zusatz);
+	white-space: normal;
+	z-index: 7;
+	pointer-events: none;
+}

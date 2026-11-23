@@ -58,6 +58,31 @@ def app_url(lang: str, page: str, **params) -> str:
     return url + ('?' + urlencode(params) if params else '')
 
 
+def vendor_key(raw) -> str:
+    """Vendor ids are decimal in the item export and eight hex digits here."""
+    text = str(raw or '').strip()
+    return '%08X' % (int(text) & 0xffffffff) if text.isdigit() else text.upper()
+
+
+def vendor_map_places(source: dict | None, lang: str, maps: dict) -> dict:
+    """Every mapped place of every vendor, as a label and a map link."""
+    out = {}
+    for ident, vendor in ((source or {}).get('vendors') or {}).items():
+        key = vendor_key(ident)
+        places, seen = [], set()
+        for spot in vendor.get('places') or []:
+            map_id = spot.get('map')
+            if map_id is None or str(map_id) in seen:
+                continue
+            seen.add(str(map_id))
+            name = ((maps.get(str(map_id)) or {}).get('name') or '')
+            places.append({'label': name,
+                           'url': app_url(lang, 'karte', vorkarte=map_id, haendler=key)})
+        if places:
+            out[key] = places
+    return out
+
+
 def beruf_url(lang: str, key: str | None = None) -> str:
     """Profession addresses are 301s to the crafting page: link that directly.
 
@@ -641,8 +666,12 @@ def landmark_view(builder: ViewBuilder, entry: dict) -> dict:
         'quests': ziele,
         # Open the map at this area, not at the overview: `vorkarte` is the
         # map id the app already understands (it preselects the area).
-        'map_link': app_url(lang, 'karte', vorkarte=entry['map'])
-            if entry.get('map') else app_url(lang, 'karte'),
+        'map_link': (
+            app_url(lang, 'karte', vorkarte=entry['map'],
+                    punkt='%.5f,%.5f' % (entry['lat'], entry['lon']), name=name)
+            if entry.get('map') and entry.get('lat') is not None and entry.get('lon') is not None
+            else app_url(lang, 'karte', vorkarte=entry['map'])
+            if entry.get('map') else app_url(lang, 'karte')),
         'seo': seo.landmark(lang, name=name, area=ort.get('map_name') or '',
                             region=(ort.get('region') or {}).get('text') or '',
                             quests=len(ziele)),
@@ -652,7 +681,8 @@ def landmark_view(builder: ViewBuilder, entry: dict) -> dict:
 # --- recipes -----------------------------------------------------------
 
 def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None,
-                sources=None, vendor_names=None, vendor_ids=None) -> dict:
+                sources=None, vendor_names=None, vendor_ids=None,
+                vendor_places=None) -> dict:
     """One recipe page. `ohne_herkunft` names item ids whose page answers
     neither "Vorkommen" nor "Woher"; their ingredient link carries no toggle.
 
@@ -724,6 +754,7 @@ def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None,
             'label': w['source_vendors'] if source.get('art') == 'haendler'
                      else w['source_barters'],
             'url': vendor_url(lang, ident) if ident in known else '',
+            'map_places': (vendor_places or {}).get(ident, []),
         })
 
     return {
@@ -1074,7 +1105,8 @@ def builder_name(builder: ViewBuilder, item: dict) -> str:
     return klarer_name(names.get(builder.lang) or names.get('en') or '')
 
 
-def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) -> dict:
+def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict,
+              vendor_places: dict | None = None) -> dict:
     w, lang = builder.w, builder.lang
     details = ctx.details.get(ident) or {}
     name = builder_name(builder, item)
@@ -1294,17 +1326,14 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
     vendor_entries = []
     for vendor in item.get('haendler') or []:
         names = vendor.get('name') or {}
+        vendor_id = vendor.get('id')
         vendor_entries.append({'text': names.get(lang) or names.get('en')
-                               or names.get('de') or vendor.get('id'),
-                               'url': vendor_url(lang, vendor.get('id'))})
+                               or names.get('de') or vendor_id,
+                               'url': vendor_url(lang, vendor_id),
+                               'map_places': (vendor_places or {}).get(vendor_key(vendor_id), [])})
     if vendor_entries:
         where_groups.append({'label': w['source_vendors'], 'filter': None,
                              'vendor_filter': True, 'entries': vendor_entries})
-    def vendor_key(raw):
-        """The item export writes NPC keys in decimal; vendor pages use 8 hex digits."""
-        text = str(raw or '').strip()
-        return '%08X' % (int(text) & 0xffffffff) if text.isdigit() else text.upper()
-
     barter_entries = []
     for source in item.get('tausch') or []:
         haendler = vendor_key(source.get('id'))
@@ -1340,6 +1369,7 @@ def item_view(builder: ViewBuilder, ctx: ItemContext, ident: str, item: dict) ->
             'text': haendler_name,
             'extra': extra,
             'url': vendor_url(lang, haendler) if haendler in ctx.vendor_ids else '',
+            'map_places': (vendor_places or {}).get(haendler, []),
         })
     if barter_entries:
         where_groups.append({'label': w['source_barters'], 'filter': None,

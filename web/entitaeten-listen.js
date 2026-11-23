@@ -88,6 +88,16 @@
 		};
 		return setup;
 	}
+	function woListe(places){
+		var details=document.createElement('details');details.className='wo-liste';
+		var summary=document.createElement('summary');summary.textContent={de:'Wo',en:'Where',fr:'Où'}[lang];details.appendChild(summary);
+		var ul=document.createElement('ul');
+		(places||[]).forEach(function(place){
+			var li=document.createElement('li'),a=document.createElement('a');
+			a.href=place.url;a.textContent=place.label||'';li.appendChild(a);ul.appendChild(li);
+		});
+		details.appendChild(ul);return details;
+	}
 	function vendorSetup(data,barterOnly){
 		var A=window.MQL_FILTERADAPTER;
 		var rows=data.rows, labels=data.labels||{}, regionLabels=labels.region||{}, areaLabels=labels.area||{}, areaRegion=labels.area_region||{};
@@ -179,7 +189,9 @@
 				result.payload.forEach(function(r){
 					var names=[];(r.areas||[]).slice(0,3).forEach(function(id){var n=areaLabels[String(id)]||regionLabels[String(id)];if(n&&names.indexOf(n)<0)names.push(n);});
 					var metaText=[typeLabels[r.type],names.join(' · ')||r.extra].filter(Boolean).join(' · ');
-					target.appendChild(rowUI.row(target,{href:r.url,name:r.name,icon:'haendler',meta:metaText,levels:false}));
+					var li=rowUI.row(target,{href:r.url,name:r.name,icon:'haendler',meta:metaText,levels:false});
+					if(r.places&&r.places.length){li.appendChild(woListe(r.places));}
+					target.appendChild(li);
 				});
 				var nav=document.createElement('nav');nav.className='sets-pagination';nav.setAttribute('aria-label',entityWord);
 				if(result.pagination.page>1){var prev=document.createElement('a');prev.href='#';prev.dataset.filterPage=String(result.pagination.page-1);prev.textContent='‹ '+(lang==='de'?'Zurück':lang==='fr'?'Précédent':'Previous');nav.appendChild(prev);}

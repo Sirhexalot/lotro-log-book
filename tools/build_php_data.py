@@ -1019,8 +1019,11 @@ def main() -> int:
             target, lang, instanz_source, data['q'], maps, data['i'], quest_pages, instance_loot,
             instance_maps, instance_data)
 
+        from php_viewmodel import vendor_map_places
+        vendor_places = vendor_map_places(VENDOR_SOURCE, lang, maps)
         item_ctx = load_item_context(builder, model, lang)
-        item_pages = {ident: item_view(builder, item_ctx, ident, item)
+        item_pages = {ident: item_view(builder, item_ctx, ident, item,
+                                       vendor_places=vendor_places)
                        for ident, item in data['i'].items()}
         instance_label = {'de': 'Truhenbeute aus Instanzen',
                           'en': 'Instance chest loot',
@@ -1073,7 +1076,7 @@ def main() -> int:
         recipe_sources = (RECIPE_SOURCE or {}).get('sources') or {}
         recipe_pages = {ident: recipe_view(builder, row, set(ohne_herkunft),
                                            recipe_sources.get(ident, []),
-                                           vendor_names, vendor_ids)
+                                           vendor_names, vendor_ids, vendor_places)
                         for ident, row in data['recipe'].items()}
         counts['page-recipe'] = len(recipe_pages)
         write_pages(target, lang, 'recipe', recipe_pages)

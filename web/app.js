@@ -1211,6 +1211,26 @@
 
 
 	// --- Marker --------------------------------------------------------
+	/** One temporary place from a detail page, on its own map. */
+	function zeichneOrtspunkt(karte, breite, hoehe) {
+		if (!ortspunkt || String(karte.idx) !== String(ortspunkt.map)) { return; }
+		var stelle = anteil(karte, ortspunkt.lat, ortspunkt.lon);
+		if (!stelle) { return; }
+		var dot = eltern('div', '');
+		dot.className = 'punkt ortspunkt';
+		dot.title = ortspunkt.name || '';
+		dot.style.left = (stelle.x * 100) + '%';
+		dot.style.top = (stelle.y * 100) + '%';
+		marker.appendChild(dot);
+		if (ortspunkt.name) {
+			var label = eltern('span', ortspunkt.name);
+			label.className = 'ortspunkt-label';
+			label.style.left = (stelle.x * 100) + '%';
+			label.style.top = (stelle.y * 100) + '%';
+			marker.appendChild(label);
+		}
+	}
+
 	function zeichneMarker() {
 		marker.textContent = '';
 		if (!zustand.karte) { return; }
@@ -1346,15 +1366,27 @@
 				marker.appendChild(zeichen);
 			});
 		}
+		var haendlerAnzahl = zeichneHaendler(karte, breite, hoehe);
+		zeichneOrtspunkt(karte, breite, hoehe);
+		// In the vendor view the legend explains one square only: quest giver,
+		// objective and progress entries would describe dots that are not there.
+		if (legende) {
+			legende.classList.toggle('nur-haendler',
+				!stellen.length && !ringe && haendlerAnzahl > 0);
+		}
 		zeigeLegende(ringe > 0, stellen.length > 0,
 			zustand.treffer.some(function (q) { return q.h && q.h.length; }),
-			zustand.treffer.some(function (q) { return q.hz && q.hz.length; }));
+			zustand.treffer.some(function (q) { return q.hz && q.hz.length; }),
+			haendlerAnzahl > 0);
 		zeichneNotizen();
 		zeichneVorkommen();
 	}
 
 	// --- Dots, stacks and the list: one gesture on either side ------------
 	var markerVon = {};
+	// A detail page may name one place (`?vorkarte=…&punkt=lat,lon`): draw a
+	// single temporary marker, independent of the quest and vendor layers.
+	var ortspunkt = null;
 	var haufenFeld = null;
 
 	function hebeZeilen(quests, an) {
@@ -4569,6 +4601,18 @@
 	var wunschkarte = 0;
 	try { wunschkarte = parseInt(new URLSearchParams(window.location.search).get('vorkarte'), 10) || 0; } catch (fehler) { wunschkarte = 0; }
 	if (!start && wunschkarte) { start = knotenMitKarte(WURZEL, wunschkarte); }
+	// One temporary point from a detail page (landmark, quest giver).
+	ortspunkt = null;
+	try {
+		var punktRoh = new URLSearchParams(window.location.search).get('punkt') || '';
+		var punktTeile = punktRoh.split(',');
+		if (wunschkarte && punktTeile.length === 2 &&
+				isFinite(Number(punktTeile[0])) && isFinite(Number(punktTeile[1]))) {
+			ortspunkt = {map: String(wunschkarte), lat: Number(punktTeile[0]),
+				lon: Number(punktTeile[1]),
+				name: new URLSearchParams(window.location.search).get('name') || ''};
+		}
+	} catch (fehler) { ortspunkt = null; }
 	WURZEL.reihenfolge.forEach(function (ast) {
 		if (start) { return; }
 		ast.reihenfolge.forEach(function (gebiet) {

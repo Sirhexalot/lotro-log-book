@@ -56,3 +56,22 @@ After CSS changes on catalogue pages check in particular
 that no links fall back to browser default blue.
 
 The implementation lies in `web/gemeinsam.css` and the area CSS files.
+
+## Map actions on detail pages (23.11.2026)
+
+A place that the game data really records may offer a map action. The address
+carries the target in the query, so it is shareable and survives a reload:
+
+- Quest or deed: `?id=<ID>` opens the area, selects the entry and jumps to its
+  most precise map.
+- Vendor: `?vorkarte=<map>&haendler=<ID>` turns the vendor layer on, limits the
+  view to that vendor and marks it. A vendor detail links every recorded place;
+  a vendor source on an item or recipe page offers all mapped places as an
+  expandable "Wo" list. A vendor list row keeps only its detail link.
+- Landmark or quest giver: `?vorkarte=<map>&punkt=<lat>,<lon>&name=<name>`
+  draws one temporary marker. It is not a quest dot and does not change the
+  list or the filter. Without a recorded coordinate no link and no pin exist.
+
+The "Wo" list is a `<details>` element, so it works without JavaScript. On an
+item page it sits after the source row, outside the row link; a result row
+never nests a second link inside its detail link.

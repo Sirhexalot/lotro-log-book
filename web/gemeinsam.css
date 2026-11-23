@@ -961,3 +961,12 @@ html .eignung-chip[data-eignung="unklar"] { border-style: dashed; }
 }
 [data-eignung="achtung"] .eignung-zeichen::after { content: '!'; }
 [data-eignung="unklar"] .eignung-zeichen { background: none; border: 1.5px solid currentColor; }
+
+/* Vendor source: every mapped place stays one click away without a nested
+ * link inside the result row. */
+.wo-liste { margin: 6px 0 0; }
+.wo-liste summary { cursor: pointer; color: var(--gold); font-size: var(--text-bedienung); }
+.wo-liste ul { margin: 4px 0 0; padding-left: 1.1em; }
+.wo-liste li { margin: 2px 0; }
+.mql-row > .wo-liste { grid-column: 1 / -1; margin: 0 0 8px 76px; }
+@media (max-width: 700px) { .mql-row > .wo-liste { margin-left: 0; } }
