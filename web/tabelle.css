@@ -15,7 +15,7 @@
 	border-bottom: 1px solid var(--rand);
 	padding: 0;
 }
-.llb-tabelle th button {
+.llb-tabelle th :is(button,a) {
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -29,11 +29,12 @@
 	cursor: pointer;
 	text-align: inherit;
 	white-space: nowrap;
+	text-decoration: none;
 }
 .llb-tabelle th.llb-zahl { width: 10ch; min-width: 10ch; text-align: right; }
-.llb-tabelle th.llb-zahl button { justify-content: flex-end; }
-.llb-tabelle th button .llb-sort-pfeil { color: var(--gold); }
-.llb-tabelle th button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.llb-tabelle th.llb-zahl :is(button,a) { justify-content: flex-end; }
+.llb-tabelle th :is(button,a) .llb-sort-pfeil { color: var(--gold); }
+.llb-tabelle th :is(button,a):focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 .llb-tabelle td {
 	border-top: 1px solid var(--rand);
 	padding: 9px 0;
@@ -51,7 +52,7 @@
 }
 @media (max-width: 700px) {
 	.llb-tabelle th { font-size: var(--text-klein); }
-	.llb-tabelle th button { padding: 8px 4px 8px 6px; }
+	.llb-tabelle th :is(button,a) { padding: 8px 4px 8px 6px; }
 	.llb-tabelle th.llb-zahl,
 	.llb-tabelle td.llb-zahl { width: 8ch; }
 	.llb-tabelle td { padding: 8px 0; }

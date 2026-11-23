@@ -1,4 +1,10 @@
-/* Shared server-list bootstrap. Existing GET forms remain the no-JS source. */
+/* Shared server-list bootstrap. Existing GET forms remain the no-JS source.
+ *
+ * A migrated list writes its definition and the current response into
+ * `<script type="application/json" data-filter-model>`; the filter is built
+ * from that model. Lists without a model keep the older scan of the form and
+ * of the fetched markup until they are migrated one by one.
+ */
 (function () {
 	'use strict';
 	var root=document.querySelector('.sets-browser[data-filter-schema="1"]');
@@ -12,6 +18,14 @@
 	}[lang];
 	var labels={};['search','filter','close','sort','reset','more','count','show','loading','error','retry','fallback','invalidRange','min','max'].forEach(function(k,i){labels[k]=words[i];});
 	labels.count=root.dataset.filterCountLabel || labels.count;
+
+	/* The inline model of this response, or null on a non-migrated list. */
+	function modelFrom(container){
+		var script=container.querySelector('script[type="application/json"][data-filter-model]');
+		if(!script){return null;}
+		try{return JSON.parse(script.textContent);}catch(e){return null;}
+	}
+
 	function groupsFrom(container){
 		var groups=[], map=new Map();
 		function option(input){var label=input.closest('label'),small=label.querySelector('small');return {value:input.value,label:label.querySelector('span').textContent,count:small?Number(small.textContent):undefined};}
@@ -37,23 +51,111 @@
 		});
 		return groups;
 	}
-	var config={area:area,lang:lang,rootUrl:form.action,labels:labels,search:{submit:'enter'},groups:groupsFrom(root),pagination:{kind:'page',size:30},
-		defaults:function(){var filters={};config.groups.forEach(function(g){filters[g.id]=g.kind==='range'?{min:null,max:null}:g.kind==='boolean'?false:[];});if(stufeStart){filters.stufe=stufeStart;}return {q:'',filters:filters,sort:'name',pagination:{kind:'page',page:1}};}};
-	var sortLinks=Array.from(root.querySelectorAll('.sets-sort a'));
-	if(sortLinks.length){config.sort={options:sortLinks.map(function(a){return {value:new URL(a.href).searchParams.get('sort')||'name',label:a.textContent};})};}
-	var fields=[{param:'q',path:['q']},{param:'page',path:['pagination','page'],type:'number',omit:1}];
+
+	function defaultFilters(groups){
+		var filters={};
+		groups.forEach(function(g){
+			filters[g.id]=g.kind==='range'?{min:null,max:null}
+				:g.kind==='boolean'?false
+				:g.kind==='single'?(g.defaultValue||'alle'):[];
+		});
+		return filters;
+	}
+
 	/* Eine Stufe, die nicht aus diesem Filter stammt (etwa „Ware für meine
 	   Stufe“ aus dem Spielstand), bleibt beim Filtern in der Adresse. Ohne sie
 	   würde jede Änderung den Filter stillschweigend aufheben. */
 	var stufeStart=Number(new URL(location.href).searchParams.get('stufe'))||null;
+
+	var inline=modelFrom(root), config;
+	if(inline && inline.definition){
+		var definition=inline.definition;
+		if(definition.countLabel){labels.count=definition.countLabel;}
+		config={area:definition.area||area,lang:definition.lang||lang,rootUrl:form.action,labels:labels,
+			search:{submit:'enter'},groups:definition.groups||[],
+			sort:definition.sort||{standard:'name',keys:['name'],ersteRichtung:{name:'asc'},options:[]},
+			pagination:definition.pagination||{kind:'page',size:30},
+			defaults:function(){
+				var filters=defaultFilters(config.groups);
+				if(stufeStart){filters.stufe=stufeStart;}
+				var first=config.sort.standard||'name';
+				return {q:'',filters:filters,sort:first,
+					sortDir:((config.sort.ersteRichtung||{})[first])||'asc',
+					pagination:{kind:'page',page:1}};
+			}};
+	}else{
+		var formGroups=groupsFrom(root);
+		var numbers=Array.from(form.querySelectorAll('input[type=number]')).map(function(n){return n.name;});
+		var levelGroup=formGroups.find(function(g){return g.id==='level';});
+		if(levelGroup){levelGroup.paramMin=numbers[0];levelGroup.paramMax=numbers[1];}
+		config={area:area,lang:lang,rootUrl:form.action,labels:labels,search:{submit:'enter'},groups:formGroups,
+			pagination:{kind:'page',size:30},
+			defaults:function(){
+				var filters=defaultFilters(config.groups);
+				if(stufeStart){filters.stufe=stufeStart;}
+				return {q:'',filters:filters,sort:'name',
+					sortDir:'asc',pagination:{kind:'page',page:1}};
+			}};
+		var sortLinks=Array.from(root.querySelectorAll('.sets-sort a'));
+		if(sortLinks.length){config.sort={standard:'name',keys:sortLinks.map(function(a){return new URL(a.href).searchParams.get('sort')||'name';}),ersteRichtung:{},options:sortLinks.map(function(a){return {value:new URL(a.href).searchParams.get('sort')||'name',label:a.textContent};})};}
+	}
+
+	var fields=[{param:'q',path:['q']},{param:'page',path:['pagination','page'],type:'number',omit:1}];
 	if(stufeStart){fields.push({param:'stufe',path:['filters','stufe'],type:'number'});}
-	config.groups.forEach(function(g){if(g.kind==='range'){
-		var names=Array.from(form.querySelectorAll('input[type=number]')).map(function(n){return n.name;});
-		fields.push({param:names[0],path:['filters','level','min'],type:'number'},{param:names[1],path:['filters','level','max'],type:'number'});
-	}else{fields.push({param:g.id,path:['filters',g.id],type:g.kind==='boolean'?'boolean':'multi'});}});
-	if(config.sort){fields.push({param:'sort',path:['sort'],omit:'name'});}
-	config.urlCodec=A.codec(fields,config.defaults);
+	config.groups.forEach(function(g){
+		if(g.kind==='range'){
+			fields.push({param:g.paramMin,path:['filters',g.id,'min'],type:'number'},
+				{param:g.paramMax,path:['filters',g.id,'max'],type:'number'});
+		}else{
+			fields.push({param:g.id,path:['filters',g.id],
+				type:g.kind==='boolean'?'boolean':g.kind==='single'?'text':'multi',
+				omit:g.kind==='single'?(g.defaultValue||'alle'):undefined});
+		}
+	});
+	var baseCodec=A.codec(fields,config.defaults);
+	config.urlCodec={
+		decode:function(url){
+			var parsed=baseCodec.decode(url);
+			var raw=url.searchParams.get('sort');
+			if(raw){
+				var dir=raw.charAt(0)==='-'?'desc':'asc', key=dir==='desc'?raw.slice(1):raw;
+				if(((config.sort&&config.sort.keys)||[]).indexOf(key)>=0){parsed.state.sort=key;parsed.state.sortDir=dir;}
+				parsed.explicit=true;
+			}
+			return parsed;
+		},
+		encode:function(state,url){
+			url=baseCodec.encode(state,url);
+			url.searchParams.delete('sort');
+			var first=(config.sort&&config.sort.standard)||'name';
+			if(state.sort!==first||state.sortDir==='desc'){
+				url.searchParams.set('sort',(state.sortDir==='desc'?'-':'')+state.sort);
+			}
+			return url;
+		}
+	};
+
 	function readModel(container,url){
+		var model=modelFrom(container);
+		if(model){
+			// The response may add an option that had no count before; keep the
+			// panel in step with the definition the server just wrote.
+			(model.definition&&model.definition.groups||[]).forEach(function(fresh){
+				var known=config.groups.find(function(g){return g.id===fresh.id;});
+				if(!known){config.groups.push(fresh);return;}
+				known.label=fresh.label;known.kind=fresh.kind;known.options=fresh.options;
+				if(fresh.nestedOnly){known.nestedOnly=true;}
+			});
+			var fragment=container.querySelector('[data-filter-results]');
+			if(fragment){
+				// The shared shell owns count, sort and pagination chrome.
+				fragment.querySelectorAll('.sets-count,.sets-sort').forEach(function(n){n.remove();});
+				fragment.querySelectorAll('.sets-pagination a').forEach(function(a){
+					a.dataset.filterPage=new URL(a.getAttribute('href'),url).searchParams.get('page')||'1';
+				});
+			}
+			return model;
+		}
 		var fresh=groupsFrom(container),facets={};
 		config.groups.forEach(function(g){if(g.options){facets[g.id]=g.options.map(function(o){return {value:o.value,count:0};});}});
 		// Merge known choices to retain selected zero-count options between responses.

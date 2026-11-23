@@ -1,10 +1,10 @@
 {% extends 'layout.twig' %}
-{% import 'entity/_result_row.twig' as result %}
 {# Title browser: same filter shell as the factions and quest givers.
    The list filters immediately through the shared component; without
    JavaScript the GET form stays usable. #}
 {% block inhalt %}
 <div class="sets-browser" data-filter-schema="1" data-filter-area="titel" data-filter-total="{{ count }}" data-filter-count-label="{{ tw.count }}">
+<script type="application/json" data-filter-model>{{ filter_model_json|raw }}</script>
 <h1>{{ tw.title }}</h1><p>{{ tw.intro }}</p>
 <form method="get" action="{{ list_url }}" class="sets-form" data-filter-fallback>
     <div class="sets-search"><label for="title-query">{{ tw.search }}</label><div><input type="search" id="title-query" name="q" value="{{ filters.q }}"><button type="submit">{{ tw.search }}</button></div></div>
@@ -49,7 +49,24 @@
         </details>
         <section class="sets-results" data-filter-results aria-label="{{ tw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? tw.count_one : tw.count)|replace({'%s': count}) }}</p>
-            <ul class="sets-list mql-row-list">{% if titles %}{{ result.heading(lang) }}{% endif %}{% for row in titles %}{{ result.row(lang, row.url, row.name, row.meta, entity_symbol) }}{% else %}<li>{{ tw.empty }}</li>{% endfor %}</ul>
+            <div class="tabellen-rahmen">
+            <table class="llb-tabelle">
+                <thead><tr>
+                    <th scope="col" role="columnheader" aria-sort="{{ sort_aria }}"><a href="{{ sort_url }}" data-sort-key="name">{{ tw.name }} <span class="llb-sort-pfeil" aria-hidden="true">{{ sort_arrow }}</span></a></th>
+                </tr></thead>
+                <tbody>
+                {% for row in titles %}
+                    <tr role="row"><td role="cell"><a class="gs-zeile" href="{{ row.url }}">
+                        <span class="mql-row-icon mql-row-icon-entity">{{ entity_symbol|raw }}</span>
+                        <span class="gs-name">{{ row.name }}</span>
+                        {% if row.meta %}<span class="gs-meta">{{ row.meta }}</span>{% endif %}
+                    </a></td></tr>
+                {% else %}
+                    <tr role="row"><td role="cell">{{ tw.empty }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
             {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ tw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ tw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>

@@ -60,6 +60,10 @@ clicking a column head (22.11.2026).
   23.11.2026: recipes by result name (`name`), crafting tier (`tier`) and
   result item level (`stufe`), materials by name and crafting tier. The old
   selects are gone; `sort=stufe` keeps its meaning.
+- A server list renders its head as a link (`?sort=-name`) for the no-JS page
+  and lets the shared shell intercept the same click; PHP returns the sorted
+  page. The title browser is the reference (23.11.2026); a changed question
+  returns to page 1.
 - Items and recipes sort in the browser before "mehr laden" or the 50 limit.
 - Quest givers are sorted by the server (`Givers::sorted`) before the page split;
   „Stufe“ there is the lowest quest of the quest giver. Works also

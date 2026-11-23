@@ -151,9 +151,9 @@ Five places, one job each:
 The inventory is prose and never read at runtime; that is why it may name the
 order without competing with the configuration. The contract answers what is
 allowed, not how a list looks. `web/listen/<bereich>.js` is authored for client
-lists; for server lists the PHP definition renders the no-JS markup and the
-build writes the same structure into that file, so neither side is kept by hand
-twice.
+lists. A server list carries its definition in PHP (`php/src/FilterModel.php`
+and the list class) and writes it as `data-filter-model` next to the no-JS
+markup, so order, labels and sort keys exist once per list.
 
 ## Roadmap
 
@@ -162,7 +162,7 @@ twice.
 | A Cleanup | order and wording only, scheduled run 22.11.2026 23:00, no commit | `web/aufgaben-filter.js`, `givers/list.twig`, `titles/list.twig`, texts, vendor and instance labels | marked as a transition step |
 | B Reference | item search: configuration, table head, sorting, scrolling | `web/listen/gegenstaende.js`, `treffer-tabelle.js`, `filter-ui.js`, `filterzustand.js`, `gegenstaende-filter.js`, CSS | result axis and the reference state |
 | C Rollout | quest/deed lists, crafting, class profile; the filter order moves into the configuration | `aufgaben-filter.js`, `handwerk-filter.js`, `klassen.js`, `klassenprofil.md` | quests/deeds, finder and crafting done |
-| D Server lists | PHP model as `data-filter-model`, Twig renders from it, scraping goes | `php/src/*`, `php/templates/*`, `filter-server.js` | one paging mode |
+| D Server lists | PHP model as `data-filter-model`, Twig renders from it, scraping goes | `php/src/*`, `php/templates/*`, `filter-server.js` | titles done as reference, five lists open |
 | E Contract test | configuration against the entity JSON | `tests/test_listen_config.py` | deviations become findings |
 
 B is implemented locally on 22.11.2026: `web/listen/gegenstaende.js`,
@@ -184,6 +184,15 @@ keeps its meaning for bookmarks. Ingredients, the critical success and the
 category tree stay in the filters and on the recipe page, not in table
 columns. The professions entry keeps the retired tab's order; the personal
 profession overview is not a filter list.
+
+Step D starts with the title browser on 23.11.2026. `php/src/FilterModel.php`
+writes `definition`, `state`, `facets`, `total` and `pagination`; the
+definition holds group order, labels, sort keys, columns and paging, so
+`filter-server.js` no longer collects them from the markup. The result list is
+the shared table: the head is a link without JavaScript (`?sort=-name`, PHP
+sorts) and sorts in place with JavaScript. A changed question returns to page
+1. Vendors, factions, landmarks, instances and quest givers keep the old form
+scan until their turn.
 
 ## Step 1 - cleanup (safe, no new data)
 

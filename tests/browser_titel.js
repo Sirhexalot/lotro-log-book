@@ -1,10 +1,13 @@
 'use strict';
-/* Titles: client catalogue, title kind filter and pages without a source.
+/* Titles: client catalogue, title kind filter, the shared result table and
+ * pages without a source.
  *
  *   node tests/browser_titel.js http://127.0.0.1:8817
  *
- * The pages exist in DE/EN/FR. The filter values are localised (like the deed
- * kinds), so the English list uses "Crafting" where German says "Handwerk".
+ * The filter values are localised (like the deed kinds), so the English list
+ * uses "Crafting" where German says "Handwerk". The list is the reference for
+ * the server-side filter model: the definition is written by PHP and read by
+ * filter-server.js, the head sorts in place and stays a link without JS.
  */
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
@@ -17,6 +20,12 @@ const SPRACHEN = [
 	{ lang: 'fr', pfad: '/fr/titre/', filter: 'Type de titre', handwerk: 'Artisanat', entwurf: 'Prouesse' },
 ];
 
+async function sortiere(page) {
+	await page.evaluate(() => {
+		document.querySelector('.filter-ui table.llb-tabelle thead [data-sort-key]').click();
+	});
+}
+
 (async () => {
 	const browser = await chromium.launch();
 	try {
@@ -28,8 +37,33 @@ const SPRACHEN = [
 			page.on('pageerror', (e) => fehler.push(e.message));
 
 			await page.goto(base + sprache.pfad, { waitUntil: 'networkidle' });
-			const zahl = (await page.locator('[role=status]').first().innerText()).replace(/[^0-9]/g, '');
+			await page.waitForSelector('.filter-ui table.llb-tabelle tbody tr');
+			const zahl = (await page.locator('.filter-result-toolbar [role=status]').first().innerText()).replace(/[^0-9]/g, '');
 			assert.ok(Number(zahl) > 3000, sprache.lang + ': Titelkatalog zu klein: ' + zahl);
+
+			/* The server writes the definition; the shell reads it. */
+			const model = await page.evaluate(() => {
+				const script = document.querySelector('.sets-browser script[data-filter-model]');
+				return script ? JSON.parse(script.textContent) : null;
+			});
+			assert.ok(model && model.definition, sprache.lang + ': Filtermodel fehlt');
+			assert.deepEqual(model.definition.groups.map((g) => g.id),
+				['region', 'area', 'kind', 'cat', 'art'], sprache.lang + ': Gruppenreihenfolge');
+			assert.equal(model.definition.columns[0].sortierung, 'name', sprache.lang + ': Namensspalte');
+
+			/* One table, one sortable head, the active direction in the head. */
+			assert.equal(await page.locator('.filter-ui table.llb-tabelle').count(), 1, sprache.lang + ': Tabelle');
+			assert.equal(await page.locator('.filter-ui table.llb-tabelle thead th').count(), 1, sprache.lang + ': eine Spalte');
+			assert.equal(await page.locator('.filter-ui table.llb-tabelle thead th').getAttribute('aria-sort'), 'ascending', sprache.lang + ': Ausgangsrichtung');
+			assert.equal(await page.locator('.filter-ui table.llb-tabelle tbody tr').count(), 30, sprache.lang + ': 30 pro Seite');
+
+			/* Clicking the head sorts in place and names the address. */
+			await sortiere(page);
+			await page.waitForFunction(() => document.querySelector('.filter-ui table.llb-tabelle thead th')?.getAttribute('aria-sort') === 'descending');
+			assert.match(page.url(), /[?&]sort=-name(&|#|$)/, sprache.lang + ': Sortieradresse');
+			await sortiere(page);
+			await page.waitForFunction(() => document.querySelector('.filter-ui table.llb-tabelle thead th')?.getAttribute('aria-sort') === 'ascending');
+			assert.doesNotMatch(page.url(), /sort=-name/, sprache.lang + ': Rückrichtung');
 
 			/* The title kind is its own group; the deed kind keeps its name. */
 			const gruppe = page.locator('.filter-ui details.filter-group').filter({ hasText: sprache.filter }).first();
@@ -39,9 +73,9 @@ const SPRACHEN = [
 			const handwerk = gruppe.locator('label').filter({ hasText: sprache.handwerk }).first();
 			await handwerk.locator('input').check();
 			await page.waitForFunction(
-				(erwartet) => document.querySelector('[role=status]')?.textContent.includes(erwartet),
+				(erwartet) => document.querySelector('.filter-result-toolbar [role=status]')?.textContent.includes(erwartet),
 				'328', { timeout: 20000 });
-			const zeilen = await page.locator('.mql-row .mql-row-meta').allInnerTexts();
+			const zeilen = await page.locator('.filter-ui .gs-meta').allInnerTexts();
 			assert.ok(zeilen.length, sprache.lang + ': keine Zeilen nach dem Filter');
 			// A few crafting titles are also awarded by a deed; those rows name
 			// the source instead of the kind. Every row says one of the two.
@@ -65,13 +99,26 @@ const SPRACHEN = [
 			/* Mobile: one column, no horizontal overflow. */
 			await page.setViewportSize({ width: 390, height: 844 });
 			await page.goto(base + sprache.pfad, { waitUntil: 'networkidle' });
+			await page.waitForSelector('.filter-ui table.llb-tabelle tbody tr');
 			assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false,
 				sprache.lang + ': Titelliste läuft mobil seitlich über');
 
 			assert.deepEqual(fehler, [], sprache.lang + ': JavaScript-Fehler: ' + fehler.join(' | '));
 			await context.close();
-			console.log(sprache.lang + ': Titelkatalog, Titelart-Filter und Seiten ohne Quelle ok');
+			console.log(sprache.lang + ': Titelkatalog, Filtermodel, Tabelle, Sortierung und Seiten ohne Quelle ok');
 		}
+
+		/* Without JavaScript the head is a link and the server sorts. */
+		const context = await browser.newContext({ javaScriptEnabled: false });
+		const page = await context.newPage();
+		await page.goto(base + '/de/titel/', { waitUntil: 'domcontentloaded' });
+		assert.equal(await page.locator('table.llb-tabelle tbody tr').count(), 30);
+		await page.locator('table.llb-tabelle thead a[data-sort-key]').click();
+		await page.waitForLoadState('domcontentloaded');
+		assert.equal(await page.locator('table.llb-tabelle thead th').getAttribute('aria-sort'), 'descending');
+		assert.match(page.url(), /sort=-name/);
+		await context.close();
+		console.log('ohne JavaScript: Kopf ist ein Link, der Server sortiert');
 	} finally {
 		await browser.close();
 	}

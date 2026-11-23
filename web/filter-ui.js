@@ -295,6 +295,11 @@
 			var next = core.reduce(config,state,action,context); notices = next.notices;
 			if (notices.length) { errorText.textContent = text('invalidRange'); retry.hidden = true; fallback.hidden = true; error.hidden = false; return; }
 			retry.hidden = false; fallback.hidden = false; state = next.state;
+			// A changed question starts at the first page, not on page 5.
+			if (state.pagination && state.pagination.kind === 'page' &&
+				action.type !== 'page' && action.type !== 'more' && action.type !== 'retry') {
+				state.pagination.page = 1;
+			}
 			writeHistory(action.type === 'more' || action.type === 'searchInput' || (action.type === 'searchSubmit' && searching));
 			if (action.type === 'reset' && memory) { memory.clear(config.area,config.lang); }
 			renderGroups(); return load();
@@ -352,8 +357,12 @@
 		listen(search,'blur',function () { searching = false; });
 		listen(window,'resize',function () { markWrappedOptions(); setzeKopfHoehe(); });
 		listen(target,'click',function (e) {
-			var sortKnopf = e.target.closest('button[data-sort-key]');
-			if (sortKnopf) { e.preventDefault(); dispatch({type:'sortToggle',key:sortKnopf.dataset.sortKey}); return; }
+			var sortKnopf = e.target.closest('[data-sort-key]');
+			// Server tables render the head as a link for no-JS; with JS the
+			// same click sorts in place. A modified click keeps its link.
+			if (sortKnopf && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
+				e.preventDefault(); dispatch({type:'sortToggle',key:sortKnopf.dataset.sortKey}); return;
+			}
 			var link = e.target.closest('a[data-filter-page]');
 			if (link && !e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) { e.preventDefault(); dispatch({type:'page',value:Number(link.dataset.filterPage)}); }
 		});
