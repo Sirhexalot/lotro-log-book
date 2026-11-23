@@ -66,19 +66,18 @@ async function main() {
           const result = await page.evaluate(() => ({
             title: document.querySelector('main h1')?.textContent.trim() || '',
             breadcrumb: document.querySelector('.katalog-pfad')?.textContent.trim() || '',
-            icon: document.querySelectorAll('main h1 svg.symbol, main .giver-symbol svg').length,
-            itemImage: document.querySelectorAll('main h1 img.symbol-gross').length,
+            /* The head carries the icon tile beside the h1 (entity/_header.twig),
+             * the same tile the lists use: a symbol for entities, the game image
+             * for items and for recipes that show their result. */
+            icon: document.querySelectorAll(
+              'main .katalog-kopf .mql-row-icon svg.symbol, main .katalog-kopf .mql-row-icon img').length,
             sections: document.querySelectorAll('main h2').length,
             overflow: document.documentElement.scrollWidth > innerWidth + 1,
             footer: !!document.querySelector('footer.seitenfuss'),
           }));
           assert.ok(result.title, 'entity heading');
           assert.ok(result.breadcrumb, 'breadcrumb');
-          if (kind === 'item') {
-            assert.ok(result.itemImage > 0, 'item image');
-          } else {
-            assert.ok(result.icon > 0, 'entity icon');
-          }
+          assert.ok(result.icon > 0, 'entity icon');
           assert.equal(result.overflow, false, 'horizontal overflow');
           assert.equal(result.footer, true, 'shared footer');
           assert.deepEqual(errors, [], 'page errors');

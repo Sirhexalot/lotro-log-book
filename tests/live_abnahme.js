@@ -84,15 +84,20 @@ async function main() {
               const left = node?.querySelector('.footer-links-links')?.getBoundingClientRect();
               const middle = node?.querySelector('.sprachen')?.getBoundingClientRect();
               const right = node?.querySelector('.footer-rechts')?.getBoundingClientRect();
-              return { left: left && { x: left.x, y: left.y },
-                middle: middle && { x: middle.x, y: middle.y },
-                right: right && { x: right.x, y: right.y } };
+              return { left: left && { x: left.x, y: left.y, w: left.width },
+                middle: middle && { x: middle.x, y: middle.y, w: middle.width },
+                right: right && { x: right.x, y: right.y, w: right.width } };
             })(),
           }));
           assert.equal(state.overflow, false, 'horizontal overflow');
           assert.deepEqual(state.brokenImages, [], 'broken own images');
           assert.ok(state.footer.left && state.footer.middle && state.footer.right, 'footer columns');
-          if (viewport.width > 640) {
+          /* The footer is one three-column row above 900 px; below that the
+           * stylesheet puts the right column on its own row, and the map app
+           * hides the footer on small screens altogether. */
+          const footerSichtbar = state.footer.left.w > 0 && state.footer.middle.w > 0
+            && state.footer.right.w > 0;
+          if (footerSichtbar && viewport.width > 900) {
             assert.ok(state.footer.left.x < state.footer.middle.x, 'footer left alignment');
             assert.ok(state.footer.middle.x < state.footer.right.x, 'footer right alignment');
           }

@@ -53,10 +53,13 @@ async function main() {
         const page = await browser.newPage({ viewport });
         try {
           await open(page, `/${lang}/${finder}/`, errors, badResponses);
-          const firstQuest = await page.locator('.finder-treffer strong').first().innerText();
+          /* The finder shows the shared result table: one row per hit, the name
+           * in `.gs-name`. Searching the first name must leave exactly that row. */
+          const firstQuest = await page.locator('table.llb-tabelle tbody tr .gs-name').first().innerText();
           await page.locator('.filter-toolbar input').fill(firstQuest);
-          await page.waitForTimeout(250);
-          assert.equal(await page.locator('.finder-treffer').count(), 1, 'finder search result');
+          await page.waitForTimeout(400);
+          assert.equal(await page.locator('table.llb-tabelle tbody tr').count(), 1,
+            'finder search result');
           checks++;
 
           await open(page, `/${lang}/${adventure}/`, errors, badResponses);
@@ -79,9 +82,11 @@ async function main() {
           checks++;
 
           await open(page, `/${lang}/${crafting}/`, errors, badResponses);
-          await page.getByRole('button', { name: resourcesLabel, exact: true }).click();
+          /* The crafting areas are tabs of the shared tab component; their
+           * labels carry the counters, so the tab key selects them. */
+          await page.locator('[data-reiter-knopf="rohstoffe"]').click();
           await page.locator('#hw-rohstoffe').waitFor({ state: 'visible' });
-          await page.getByRole('button', { name: recipesLabel, exact: true }).click();
+          await page.locator('[data-reiter-knopf="rezepte"]').click();
           await page.locator('#hw-rezepte').waitFor({ state: 'visible' });
           checks++;
 

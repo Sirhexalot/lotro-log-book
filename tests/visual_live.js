@@ -41,13 +41,19 @@ async function main() {
       const page = await context.newPage();
       await page.goto(base + route, { waitUntil: 'networkidle', timeout: 30000 });
       // The map overview has lazy thumbnails that can finish decoding just
-      // after networkidle. Let the fixed viewport settle before capturing it.
+      // after networkidle. Let the fixed viewport settle before capturing it,
+      // and wait until every picture is decoded so a slow thumbnail cannot
+      // change the hash.
       await page.waitForTimeout(1500);
-      // The visitor statistic changes independently of the page layout. Keep
-      // visual references deterministic by leaving its reserved footer column
-      // empty instead of hashing a changing number.
+      await page.waitForFunction(() => [...document.images].every(image => image.complete),
+        null, {timeout: 15000}).catch(() => {});
+      // The visitor statistic changes independently of the page layout and its
+      // script unhides the counter whenever the answer arrives. Hide its whole
+      // footer line, so a late answer cannot bring a changing number back into
+      // the screenshot.
       await page.evaluate(() => {
-        const statistic = document.querySelector('[data-statistik-aktiv]');
+        const statistic = document.querySelector('footer .footer-statistik')
+          || document.querySelector('[data-statistik-aktiv]');
         if (statistic) statistic.hidden = true;
       });
       const buffer = await page.screenshot({ fullPage: false, animations: 'disabled' });

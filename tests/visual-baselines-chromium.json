@@ -1,31 +1,31 @@
 {
   "start-de": {
-    "sha256": "07f4c346be0fc0ffbe4f2e62ff42c9b446ecb52037070f10d612a34bcfe41554",
+    "sha256": "63c75acfa9286ed982844ed36444925071bc7c30e94a3e54b6e1224c6605f356",
     "width": 1440,
     "height": 900
   },
   "start-en": {
-    "sha256": "87881a04d1904d56651ef9fe766256924c46648f4ca9f63c19805d187431770b",
+    "sha256": "50d1198161b25d31c0885be7f779aa3e0ac0b1307d680fa4fd18b8e78fdeaf46",
     "width": 1440,
     "height": 900
   },
   "start-fr": {
-    "sha256": "675a47f50baf2c49dccfee144adc3682de8a9da14bbbbf7340fed808b4ace825",
+    "sha256": "338f3aa21967edd8d52c786b28b218c65ac4d3df72f8716ea1750d4368f6f824",
     "width": 1440,
     "height": 900
   },
   "item-de-mobile": {
-    "sha256": "5f7b88ee4264b1ef1134dc65b4125c16a6dbe0f590349bf60265b7727fa67d4a",
+    "sha256": "54e852299030bd61471c3540a8604d207ebb863d60de2684c0eb132baeb944c3",
     "width": 390,
     "height": 844
   },
   "adventure-de": {
-    "sha256": "a63623d9110ea648d74be7d676ec2b074c775a9c00ec60591d8fbc794d6ebb0c",
+    "sha256": "d0b8efdcf88a97816f96c998a5539b96196afbfe4c3c5bf121c13c69447c2d76",
     "width": 1440,
     "height": 900
   },
   "finder-de": {
-    "sha256": "7725d8dd3096230e9d8f1806d4b3a722a885e770fe60aa96de4fc5d895bbef45",
+    "sha256": "f12dfdd36849be57d3dd51a33a60410a2f60ccbc17adcb2ff318bbce1bae77cf",
     "width": 390,
     "height": 844
   }
