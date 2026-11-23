@@ -99,7 +99,10 @@ class PageTest(unittest.TestCase):
         self.assertEqual(place['image'], '268437700.png')
         self.assertEqual((place['pin_x'], place['pin_y']), (50.0, 50.0))
         self.assertEqual(place['coords'], '34.0°S, 75.0°W')
-        self.assertIn('id=70000003', place['map_url'])
+        # The giver place is marked itself; the old link selected one of its
+        # quests instead of telling the visitor where the giver stands.
+        self.assertIn('vorkarte=268437700', place['map_url'])
+        self.assertIn('punkt=', place['map_url'])
         self.assertEqual([row['id'] for row in page['quests']], ['70000003', '70000004'])
         self.assertIn('Täglich', page['quests'][0]['chips'])
         self.assertIn('Skaliert mit der Stufe', page['quests'][1]['chips'])
