@@ -358,7 +358,7 @@
 			var rowUI=window.MQL_TREFFERZEILE, TBL=window.MQL_TABELLE;
 			if(!TBL||!rowUI){ legacyRender(result,target); return; }
 			var spalten=[{label:w.name,sortierung:'name'},{label:rowUI.words.questLevel,sortierung:'level',zahl:true}];
-			if(hasQuestProgress){spalten.push({label:progress.progress});}
+			if(hasQuestProgress){spalten.push({label:progress.progress,breite:'18ch'});}
 			var bau=TBL.bauen(target,spalten,{key:result.state.sort,dir:result.state.sortDir});
 			if(!hasMachbar){
 				var help=document.createElement('p');help.className='mql-row-help';

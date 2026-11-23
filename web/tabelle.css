@@ -2,6 +2,8 @@
 .llb-tabelle {
 	width: 100%;
 	border-collapse: collapse;
+	/* The name takes the rest; the level column is sized from its label in
+	   treffer-tabelle.js, so German heads such as "Mindeststufe" fit. */
 	table-layout: fixed;
 }
 .llb-tabelle th {
@@ -26,9 +28,9 @@
 	padding: 9px 8px;
 	cursor: pointer;
 	text-align: inherit;
-	overflow-wrap: anywhere;
+	white-space: nowrap;
 }
-.llb-tabelle th.llb-zahl { width: 10ch; text-align: right; }
+.llb-tabelle th.llb-zahl { width: 10ch; min-width: 10ch; text-align: right; }
 .llb-tabelle th.llb-zahl button { justify-content: flex-end; }
 .llb-tabelle th button .llb-sort-pfeil { color: var(--gold); }
 .llb-tabelle th button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }

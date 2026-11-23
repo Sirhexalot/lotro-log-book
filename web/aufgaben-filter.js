@@ -336,7 +336,7 @@
 					{label: w.name, sortierung: 'name'},
 					{label: levelHeading, sortierung: 'level', zahl: true}
 				];
-				if (hasStatus) { spalten.push({label: progress.progress}); }
+				if (hasStatus) { spalten.push({label: progress.progress, breite: '18ch'}); }
 				var bau = TBL.bauen(target, spalten, {key: result.state.sort, dir: result.state.sortDir});
 				if (!hasImportedStatus) {
 					var help = document.createElement('p');

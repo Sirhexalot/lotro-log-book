@@ -36,6 +36,8 @@ async function bereit(page) {
 			await bereit(page);
 
 			assert.equal(await page.locator('#aufgabenfinder thead th').count(), 2, lang);
+			assert.ok(await page.locator('#aufgabenfinder thead th').evaluateAll((ths) =>
+				ths.every((th) => th.scrollWidth <= th.clientWidth)), lang + ': head labels fit');
 			assert.equal(await page.locator('#aufgabenfinder tbody tr').count(), 50, lang);
 			assert.equal(await page.locator('#aufgabenfinder th').first().getAttribute('aria-sort'), 'ascending', lang);
 			assert.equal(await page.locator('#aufgabenfinder .mql-row-help').count(), 1, lang);

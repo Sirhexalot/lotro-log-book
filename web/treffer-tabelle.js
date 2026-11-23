@@ -28,7 +28,15 @@
 			zelle.setAttribute('role', 'columnheader');
 			zelle.scope = 'col';
 			if (spalte.zahl) { zelle.className = 'llb-zahl'; }
-			if (spalte.breite) { zelle.style.width = spalte.breite; }
+			/* A numeric column is only as wide as its values, but its head
+			 * carries a word, not a number: "Mindeststufe" and
+			 * "Aufgabenstufe" would be cut in a fixed 10ch column. The label
+			 * length decides the width, in every language. */
+			var breite = spalte.breite;
+			if (!breite && spalte.zahl && spalte.label) {
+				breite = Math.max(10, String(spalte.label).length + 4) + 'ch';
+			}
+			if (breite) { zelle.style.width = breite; }
 			if (spalte.sortierung) {
 				var aktiv = sort && sort.key === spalte.sortierung;
 				zelle.setAttribute('aria-sort', aktiv ? (sort.dir === 'desc' ? 'descending' : 'ascending') : 'none');

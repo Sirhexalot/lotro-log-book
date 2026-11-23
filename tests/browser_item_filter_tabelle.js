@@ -38,6 +38,8 @@ function sortiert(werte, richtung) {
 		// One table, two column heads and 50 rows; the old sort select is gone.
 		assert.equal(await page.locator('#gs-ergebnis table[role="table"]').count(), 1);
 		assert.equal(await page.locator('#gs-ergebnis th[role="columnheader"]').count(), 2);
+		assert.ok(await page.locator('#gs-ergebnis th[role="columnheader"]').evaluateAll((ths) =>
+			ths.every((th) => th.scrollWidth <= th.clientWidth)), 'head labels fit');
 		assert.equal(await page.locator('#gs-ergebnis tbody tr').count(), 50);
 		assert.equal(await page.locator('#gs-ergebnis .gs-name').count(), 50);
 		assert.equal(await page.locator('#gs-ergebnis .gs-meta').count(), 50);
