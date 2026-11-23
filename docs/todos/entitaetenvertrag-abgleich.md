@@ -1,9 +1,16 @@
 # Entity contract: UI reconciliation for editing
 
-- **Status:** open; this audit describes target and current state, not yet a product change
+- **Status:** partly implemented. Since 23.11.2026 the **detail pages** of all
+  entities follow one skeleton and are listed per entity under `detailseiten` in
+  the contract (rules: [`docs/oberflaeche/entitaetsseiten.md`](../oberflaeche/entitaetsseiten.md),
+  check: `tests/test_detailseiten_vertrag.py`). The rows below remain the audit
+  of the other appearances (index, finder, map list, embedded relation list) and
+  are still open.
 - **Binding rules:** [`AGENTS.md`](../../AGENTS.md), section „Navigation, Karte und Darstellung“, and [`lotro-datenraum-entitaeten.json`](../datenraum/lotro-datenraum-entitaeten.json)
 - **Current-state overview:** [arc42, section 5.9](../arc42/05-building-block-view.md#59-concrete-presentation-and-filter-matrix-by-entity-and-place-of-occurrence)
-- **Work boundary:** code and JSON contract stay unchanged until the implementation is commissioned.
+- **Work boundary:** the detail pages are built; the rows of this audit that
+  describe index, finder, map and relation appearances are unchanged until they
+  are worked through one by one.
 
 ## How to work through the list
 
