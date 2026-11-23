@@ -163,7 +163,7 @@ markup, so order, labels and sort keys exist once per list.
 | B Reference | item search: configuration, table head, sorting, scrolling | `web/listen/gegenstaende.js`, `treffer-tabelle.js`, `filter-ui.js`, `filterzustand.js`, `gegenstaende-filter.js`, CSS | result axis and the reference state |
 | C Rollout | quest/deed lists, crafting, class profile; the filter order moves into the configuration | `aufgaben-filter.js`, `handwerk-filter.js`, `klassen.js`, `klassenprofil.md` | quests/deeds, finder and crafting done |
 | D Server lists | PHP model as `data-filter-model`, Twig renders from it, scraping goes | `php/src/*`, `php/templates/*`, `filter-server.js` | all six lists done |
-| E Contract test | configuration against the entity JSON | `tests/test_listen_config.py` | deviations become findings |
+| E Contract test | configuration against the entity JSON | `tests/test_listen_config.py` | client configs checked; server definitions via the model test |
 
 B is implemented locally on 22.11.2026: `web/listen/gegenstaende.js`,
 `web/treffer-tabelle.js`, the sort direction in `filterzustand.js`, head clicks
@@ -198,6 +198,18 @@ vendors add „Ware ab Stufe“; factions keep the personal reputation column,
 which appears only with an imported reputation; landmarks keep the grouped
 area tree (Rohan → area group → area) through non-selectable heading nodes.
 Instances keep their 200-entry page; the others use 30.
+
+Step E follows on 23.11.2026. `tests/test_listen_config.py` evaluates every
+`web/listen/*.js` definition and maps its filter and column ids to the contract
+vocabulary in `docs/datenraum/lotro-datenraum-entitaeten.json`. Unmapped ids,
+groups outside the entity's allowed set, unknown sort keys and a missing paging
+mode become findings. The contract grew where the lists had answered a real
+question the data room had not named yet: `eignung`, `quelle` and `schaden` for
+items, `belohnung` for deeds, `eigene` and `geografie` for recipes plus
+`fundstellen` as a raw-material row field, `titelart`/`tatart` for titles, and
+`stufe` for vendors. Server definitions are covered by
+`tests/test_filter_model.py` and the browser runs; they live in PHP, not in
+`web/listen/`.
 
 ## Step 1 - cleanup (safe, no new data)
 

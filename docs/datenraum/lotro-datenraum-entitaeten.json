@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "stand": "2026-11-17",
+  "stand": "2026-11-23",
   "regeln": {
     "komponente": "web/filter-ui.js mit filterzustand.js, filteradapter.js, filtergedaechtnis.js und filter-ui.css",
     "schwelle": 5,
@@ -84,7 +84,8 @@
         "geografie",
         "merkmale",
         "stufe",
-        "fortschritt"
+        "fortschritt",
+        "belohnung"
       ],
       "relationen": [
         "d",
@@ -126,7 +127,10 @@
         "gattung",
         "seltenheit",
         "mindeststufe",
-        "stufe"
+        "stufe",
+        "eignung",
+        "quelle",
+        "schaden"
       ],
       "relationen": [
         "recipe",
@@ -203,14 +207,17 @@
         "name",
         "beruf",
         "stufe",
-        "lernstand"
+        "lernstand",
+        "fundstellen"
       ],
       "filter": [
         "beruf",
         "stufe",
         "kategorie",
         "lernstand",
-        "quelle"
+        "quelle",
+        "eigene",
+        "geografie"
       ],
       "relationen": [
         "i"
@@ -311,7 +318,8 @@
       ],
       "filter": [
         "geografie",
-        "art"
+        "art",
+        "stufe"
       ],
       "relationen": [
         "i"
@@ -347,6 +355,7 @@
       "filter": [
         "geografie",
         "art",
+        "tatart",
         "herkunft"
       ],
       "relationen": [
