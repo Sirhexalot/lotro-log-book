@@ -18,6 +18,7 @@
 	align-items: center;
 	gap: 6px;
 	width: 100%;
+	min-width: 0;
 	font: inherit;
 	color: inherit;
 	background: none;
@@ -25,6 +26,7 @@
 	padding: 9px 8px;
 	cursor: pointer;
 	text-align: inherit;
+	overflow-wrap: anywhere;
 }
 .llb-tabelle th.llb-zahl { width: 10ch; text-align: right; }
 .llb-tabelle th.llb-zahl button { justify-content: flex-end; }
@@ -35,6 +37,7 @@
 	padding: 9px 0;
 	vertical-align: top;
 	min-width: 0;
+	overflow-wrap: anywhere;
 }
 .llb-tabelle td.llb-zahl {
 	width: 10ch;
@@ -61,7 +64,15 @@
 	gap: 2px 12px;
 	padding: 0 4px;
 	align-items: start;
+	color: inherit;
+	text-decoration: none;
 }
+.llb-tabelle .gs-name { font-size: var(--text-fliesstext-kompakt); }
+.llb-tabelle .gs-name.q1 { color: var(--llb-palette-d8d2c4); }
+.llb-tabelle .gs-name.q2 { color: var(--llb-palette-e0c15c); }
+.llb-tabelle .gs-name.q3 { color: var(--llb-palette-b98cd6); }
+.llb-tabelle .gs-name.q4 { color: var(--llb-palette-6fc3c3); }
+.llb-tabelle .gs-name.q5 { color: var(--llb-palette-e6a94d); }
 .llb-tabelle .gs-zeile > .mql-row-icon,
 .llb-tabelle .gs-zeile > .bl-symbol { grid-column: 1; grid-row: 1 / span 3; align-self: start; }
 .llb-tabelle .gs-zeile > .symbol { grid-column: 1; grid-row: 1 / span 2; align-self: start; width: 22px; height: 22px; }

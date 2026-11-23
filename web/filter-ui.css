@@ -104,6 +104,8 @@
 		overflow-y: auto;
 		overscroll-behavior: contain;
 		scrollbar-gutter: stable;
+		/* Facet counts end at the column edge otherwise. */
+		padding-inline-end: var(--filter-gap);
 	}
 }
 .filter-results-home { grid-column:4 / -1; grid-row:2; }

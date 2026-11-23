@@ -61,6 +61,15 @@ function sortiert(werte, richtung) {
 		assert.deepEqual(await kopf(page, '#rezepte-liste').allInnerTexts(),
 			['Ergebnis\n↑', 'Beruf', 'Handwerksstufe\n↕', 'Gegenstandsstufe\n↕']);
 		assert.equal(await kopf(page, '#rezepte-liste').first().getAttribute('aria-sort'), 'ascending');
+		// Long German heads stay inside their cell instead of overlapping.
+		assert.ok((await kopf(page, '#rezepte-liste').evaluateAll((ths) =>
+			ths.every((th) => th.scrollWidth <= th.clientWidth))), 'header labels fit');
+		// The row is a whole link: no permanent underline, name keeps its colour.
+		assert.equal(await page.locator('#rezepte-liste .gs-zeile').first()
+			.evaluate((a) => getComputedStyle(a).textDecorationLine), 'none');
+		// Facet counts keep their distance to the column edge.
+		assert.ok(await page.locator('#rezepte-liste .filter-home').evaluate((home) =>
+			parseFloat(getComputedStyle(home).paddingRight) >= 8), 'facet counts keep an edge gap');
 
 		// The result level sorts, both directions and with its address.
 		await sortiere(page, '#rezepte-liste', 'stufe');

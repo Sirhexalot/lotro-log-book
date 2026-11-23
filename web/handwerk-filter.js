@@ -301,7 +301,7 @@
 					var spalten=((def&&def.spalten)||[]).map(function(s){
 						return {label:T(s.labelKey||s.id),sortierung:s.sortierung,zahl:s.zahl,breite:s.breite};
 					});
-					if(fortschritt){spalten.push({label:ui.words.progress});}
+					if(fortschritt){spalten.push({label:ui.words.progress,breite:'16ch'});}
 					var bau=tabelle.bauen(target,spalten,{key:result.state.sort,dir:result.state.sortDir});
 					if(!result.total){
 						var leer=document.createElement('tr');leer.setAttribute('role','row');

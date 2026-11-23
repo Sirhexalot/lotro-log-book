@@ -16,8 +16,8 @@
 			spalten: [
 				{id: 'name', labelKey: 'hw_ergebnis', sortierung: 'name'},
 				{id: 'beruf', labelKey: 'hw_beruf', breite: '14ch'},
-				{id: 'tier', labelKey: 'hw_handwerksstufe', sortierung: 'tier', breite: '14ch'},
-				{id: 'stufe', labelKey: 'gs_gegenstandsstufe', sortierung: 'stufe', zahl: true}
+				{id: 'tier', labelKey: 'hw_handwerksstufe', sortierung: 'tier', breite: '17ch'},
+				{id: 'stufe', labelKey: 'gs_gegenstandsstufe', sortierung: 'stufe', breite: '20ch', zahl: true}
 			],
 			sortierung: {standard: 'name', erlaubt: ['name', 'tier', 'stufe'],
 				ersteRichtung: {name: 'asc', tier: 'asc', stufe: 'asc'}},
@@ -28,7 +28,7 @@
 			spalten: [
 				{id: 'name', labelKey: 'hw_roh_sorte', sortierung: 'name'},
 				{id: 'beruf', labelKey: 'hw_beruf', breite: '14ch'},
-				{id: 'tier', labelKey: 'hw_handwerksstufe', sortierung: 'tier', breite: '14ch'},
+				{id: 'tier', labelKey: 'hw_handwerksstufe', sortierung: 'tier', breite: '17ch'},
 				{id: 'fundstellen', labelKey: 'hw_roh_fundstellen', breite: '16ch'}
 			],
 			sortierung: {standard: 'name', erlaubt: ['name', 'tier'],
