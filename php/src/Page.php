@@ -88,6 +88,8 @@ final class Page
             'entity_filter_url' => $this->entityFilterUrl($kind),
             'entity_filter_label' => $this->entityFilterLabel($kind),
             'related_direct_list_max' => FilterRegeln::MAX_DIREKTLISTE,
+            // The "Wo" list names its two actions exactly like the vendor page.
+            'gw' => Vendors::words($this->lang),
             'related_lists' => $related,
             'related_icons_json' => json_encode(['q' => $this->shell->icon('aufgabe'), 'd' => $this->shell->icon('tat')], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
             'related_json' => json_encode($related, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR),

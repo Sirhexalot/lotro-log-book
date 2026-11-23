@@ -13,32 +13,6 @@ final class RelatedLists
         private ?Catalogue $catalogue = null,
     ) {}
 
-    /** Every mapped place of a vendor as a label and a map link. */
-    private function vendorPlaces(array $places, array $labels, string $id): array
-    {
-        $out = [];
-        $seen = [];
-        foreach ($places as $pair) {
-            if (!is_array($pair)) {
-                continue;
-            }
-            $map = (string) ($pair[0] ?? '');
-            $area = (string) ($pair[1] ?? '');
-            if ($map === '' || isset($seen[$map . '|' . $area])) {
-                continue;
-            }
-            $seen[$map . '|' . $area] = true;
-            $label = $labels['area'][$area] ?? $labels['region'][$area]
-                ?? $labels['region'][$map] ?? $labels['area'][$map] ?? '';
-            $out[] = [
-                'label' => $label,
-                'url' => $this->catalogue->appRoute($this->lang, 'karte')
-                    . '?vorkarte=' . rawurlencode($map) . '&haendler=' . rawurlencode($id),
-            ];
-        }
-        return $out;
-    }
-
     public function forPage(string $kind, array $page): array
     {
         $ids = [];
@@ -109,8 +83,6 @@ final class RelatedLists
                         'regions' => $row['regions'] ?? [],
                         'areas' => $row['areas'] ?? [],
                         'count' => $row['count'] ?? 0,
-                        'places' => $this->vendorPlaces(
-                            $row['places'] ?? [], $index['labels'] ?? [], (string) $row['id']),
                     ];
                 }
                 if ($rows) {
@@ -122,11 +94,6 @@ final class RelatedLists
                 continue;
             }
             if ($type === 'barter') {
-                $vendorIndex = $this->data->vendorIndex($this->lang);
-                $vendorRows = [];
-                foreach ($vendorIndex['vendors'] ?? [] as $vendorRow) {
-                    $vendorRows[(string) ($vendorRow['id'] ?? '')] = $vendorRow;
-                }
                 $by_id = [];
                 foreach ($page['barter_sources'] ?? [] as $entry) {
                     $id = (string) ($entry['id'] ?? '');
@@ -156,9 +123,6 @@ final class RelatedLists
                         'regions' => [],
                         'areas' => [],
                         'count' => 0,
-                        'places' => $this->vendorPlaces(
-                            $vendorRows[(string) $member]['places'] ?? [],
-                            $vendorIndex['labels'] ?? [], (string) $member),
                     ];
                 }
                 if ($rows) {

@@ -968,5 +968,12 @@ html .eignung-chip[data-eignung="unklar"] { border-style: dashed; }
 .wo-liste summary { cursor: pointer; color: var(--gold); font-size: var(--text-bedienung); }
 .wo-liste ul { margin: 4px 0 0; padding-left: 1.1em; }
 .wo-liste li { margin: 2px 0; }
-.mql-row > .wo-liste { grid-column: 1 / -1; margin: 0 0 8px 76px; }
-@media (max-width: 700px) { .mql-row > .wo-liste { margin-left: 0; } }
+/* One place in the "Wo" list: the name, its chain, the coordinates and the
+ * same two actions the vendor page offers. A source row never nests a second
+ * link in its own link, so the disclosure stands beside it. */
+.wo-liste .wo-ort { margin: 6px 0; }
+.wo-ort-name { display: block; color: var(--zeile-titel, var(--text)); }
+.wo-ort-meta { display: block; color: var(--schwach); font-size: var(--text-klein); }
+.wo-ort-aktionen { display: flex; gap: 10px; font-size: var(--text-klein); }
+.wo-ort-aktionen a { color: var(--text-bedienung); }
+@media (max-width: 700px) { .wo-ort-aktionen { flex-direction: column; gap: 2px; } }

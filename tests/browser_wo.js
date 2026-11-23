@@ -23,15 +23,34 @@ async function open(page, path) {
 		const fehler = [];
 		page.on('pageerror', (e) => fehler.push(e.message));
 
-		/* Item: a vendor source lists all mapped places behind "Wo". */
-		await open(page, '/de/gegenstand/7000EFC8/');
+		/* A source list with filters never carries "Wo": the item page of a
+		   widely traded commodity lists 333 vendors behind a filter. */
+		await open(page, '/de/gegenstand/700005D1/');
+		await page.waitForSelector('[data-filter-results]');
+		assert.equal(await page.locator('.wo-liste').count(), 0,
+			'"Wo" in der gefilterten Händlerliste');
+
+		/* A short source list shows the same places as the vendor page: same
+		   names, same coordinates, both actions. */
+		await open(page, '/de/gegenstand/7004A052/');
 		await page.waitForSelector('.wo-liste', { state: 'attached' });
-		const vendorWo = page.locator('.wo-liste:visible').first();
-		await vendorWo.locator('summary').click();
-		const vendorLinks = await vendorWo.locator('a').evaluateAll((as) => as.map((a) => a.href));
-		assert.ok(vendorLinks.length > 0, 'Händlerquelle ohne Standort');
-		assert.ok(vendorLinks.every((href) => /[?&]haendler=/.test(href) && /[?&]vorkarte=/.test(href)),
-			'Händler-Standortlink ohne haendler/vorkarte');
+		const sourceWo = page.locator('.wo-liste:visible').first();
+		await sourceWo.locator('summary').click();
+		const leseOrte = (root) => root.evaluateAll((lis) => lis.map((li) => {
+			const metas = [...li.querySelectorAll('.wo-ort-meta, .ort-meta')].map((m) => m.textContent.trim());
+			return {
+				name: li.querySelector('.wo-ort-name, .ort-name').textContent.replace(/\s+/g, ' ').trim(),
+				coords: metas.length ? metas[metas.length - 1] : '',
+				hrefs: [...li.querySelectorAll('.wo-ort-aktionen a, .ort-aktionen a')].map((a) => a.getAttribute('href')),
+			};
+		}));
+		const quelle = await leseOrte(sourceWo.locator('li.wo-ort'));
+		assert.ok(quelle.length > 1, 'Kurze Quelle ohne Standorte');
+		assert.ok(quelle.every((ort) => ort.hrefs.some((href) => href && href.includes('haendler='))),
+			'Händlerstandort ohne Kartenlink');
+		await open(page, '/de/haendler/7004C01A/');
+		const seite = await leseOrte(page.locator('.vendor-orte li'));
+		assert.deepEqual(quelle, seite, 'Quellenliste und Händlerseite zeigen nicht dieselben Orte');
 
 		/* Item: the barter tab uses the same list. */
 		await open(page, '/de/gegenstand/7002B017/');
@@ -43,7 +62,6 @@ async function open(page, path) {
 			assert.ok((await page.locator('.wo-liste:visible a').first().getAttribute('href')).includes('haendler='),
 				'Tauschhändlerlink ohne haendler');
 		}
-
 		/* Recipe: its vendor sources offer the same places. */
 		await open(page, '/de/rezept/70004E7E/');
 		await page.waitForSelector('.wo-liste');
@@ -79,13 +97,13 @@ async function open(page, path) {
 		assert.equal(await page.locator('.ortspunkt').count(), 0, 'Punkt ohne punkt-Parameter');
 
 		await page.setViewportSize({ width: 390, height: 844 });
-		await open(page, '/de/gegenstand/7000EFC8/');
+		await open(page, '/de/gegenstand/7004A052/');
 		assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false,
 			'Wо-Liste drückt die Seite mobil auseinander');
 
 		assert.deepEqual(fehler, [], 'JavaScript-Fehler: ' + fehler.join(' | '));
 		await context.close();
-		console.log('Wo-Links: Händlerquellen, Rezeptquellen, Landmarken- und Auftraggeberpunkt ok');
+		console.log('Wo-Links: kurze Quellen wie die Händlerseite, keine in Filterlisten, Kartenpunkte ok');
 	} finally {
 		await browser.close();
 	}

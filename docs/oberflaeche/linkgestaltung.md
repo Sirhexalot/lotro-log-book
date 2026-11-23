@@ -66,12 +66,22 @@ carries the target in the query, so it is shareable and survives a reload:
   most precise map.
 - Vendor: `?vorkarte=<map>&haendler=<ID>` turns the vendor layer on, limits the
   view to that vendor and marks it. A vendor detail links every recorded place;
-  a vendor source on an item or recipe page offers all mapped places as an
-  expandable "Wo" list. A vendor list row keeps only its detail link.
+  a short vendor source (up to five) on an item or recipe page offers the same
+  places as an expandable "Wo" list. A vendor list row keeps only its detail
+  link.
 - Landmark or quest giver: `?vorkarte=<map>&punkt=<lat>,<lon>&name=<name>`
   draws one temporary marker. It is not a quest dot and does not change the
   list or the filter. Without a recorded coordinate no link and no pin exist.
 
-The "Wo" list is a `<details>` element, so it works without JavaScript. On an
-item page it sits after the source row, outside the row link; a result row
-never nests a second link inside its detail link.
+**"Wo" never appears in a list with filters.** Each row of a filtered vendor or
+barter list carries identity and classification only; a "Wo" per row would
+repeat the same places hundreds of times. From six sources the filter list
+takes over and the places stay on the vendor page. The item model builds the
+same place entries the vendor page shows (`vendor_source_places` in
+`php_viewmodel.py`), so name, chain, coordinates and both actions read the same
+on both pages; nothing is merged, because the vendor page lists every recorded
+position as well.
+
+The "Wo" list is a `<details>` element (`components/wo_orte.twig`), so it works
+without JavaScript. On an item page it sits after the source row, outside the
+row link; a result row never nests a second link inside its detail link.

@@ -1,0 +1,21 @@
+{# The places behind "Wo": the same places, names, coordinates and actions as
+   the vendor page's place list, only without the picture. Item and recipe
+   pages show it inside a short source list; a list with filters never carries
+   it, because there a "Wo" would repeat itself in every row.
+
+   liste(lang, places, labels)
+     places  [{ort, chain (names), coords, map_url, travel_url}]
+     labels  the vendor words (`gw`): `map` and `route` #}
+{% macro liste(lang, places, labels) %}
+{% if places %}<details class="wo-liste">
+<summary>{{ {de: 'Wo', en: 'Where', fr: 'Où'}[lang] }}</summary>
+<ul>
+{% for place in places %}<li class="wo-ort">
+<span class="wo-ort-name">{% if place.ort %}{{ place.ort }}{% else %}{% for teil in place.chain %}{% if not loop.first %} › {% endif %}{{ teil }}{% endfor %}{% endif %}</span>
+{% if place.ort and place.chain %}<span class="wo-ort-meta">{% for teil in place.chain %}{% if not loop.first %} › {% endif %}{{ teil }}{% endfor %}</span>{% endif %}
+{% if place.coords %}<span class="wo-ort-meta">{{ place.coords }}</span>{% endif %}
+<span class="wo-ort-aktionen">{% if place.map_url %}<a href="{{ place.map_url }}">{{ labels.map }}</a>{% endif %}{% if place.travel_url %}<a href="{{ place.travel_url }}">{{ labels.route }}</a>{% endif %}</span>
+</li>{% endfor %}
+</ul>
+</details>{% endif %}
+{% endmacro %}

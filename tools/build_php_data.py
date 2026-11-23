@@ -959,7 +959,7 @@ def main() -> int:
         from php_viewmodel import (ItemContext, ViewBuilder, app_url, area_view, coords,
                                    deed_index, deed_view, faction_view, honor_view, item_view,
                                    landmark_view, list_pages, members_index, profession_view,
-                                   quest_view, recipe_view)
+                                   quest_view, recipe_view, vendor_source_places)
         builder = ViewBuilder(lang, model, maps)
         quest_pages = {ident: quest_view(builder, quest) for ident, quest in data['q'].items()}
         counts['page-q'] = len(quest_pages)
@@ -1019,8 +1019,13 @@ def main() -> int:
             target, lang, instanz_source, data['q'], maps, data['i'], quest_pages, instance_loot,
             instance_maps, instance_data)
 
-        from php_viewmodel import vendor_map_places
-        vendor_places = vendor_map_places(VENDOR_SOURCE, lang, maps)
+        # The vendor pages already resolve every place from the client's
+        # landblocks. Item and recipe sources show that same list, so "Wo"
+        # reads the same everywhere; built here because the pages need it and
+        # written further down with the vendor shards.
+        vendor_detail = vendor_pages(VENDOR_SOURCE, lang, data['i'], maps,
+                                     app_url, coords, builder.w, region_ids)
+        vendor_places = vendor_source_places(vendor_detail)
         item_ctx = load_item_context(builder, model, lang)
         item_pages = {ident: item_view(builder, item_ctx, ident, item,
                                        vendor_places=vendor_places)
@@ -1109,8 +1114,6 @@ def main() -> int:
         data['vendor'] = {row['id']: {'id': row['id'], 'name': row['name']}
                           for row in vendors['vendors']}
         write_shards(target, lang, 'vendor', data['vendor'])
-        vendor_detail = vendor_pages(VENDOR_SOURCE, lang, data['i'], maps,
-                                     app_url, coords, builder.w, region_ids)
         write_pages(target, lang, 'vendor', vendor_detail)
         counts['vendor'] = counts['page-vendor'] = len(vendor_detail)
 

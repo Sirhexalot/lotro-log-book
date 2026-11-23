@@ -64,22 +64,27 @@ def vendor_key(raw) -> str:
     return '%08X' % (int(text) & 0xffffffff) if text.isdigit() else text.upper()
 
 
-def vendor_map_places(source: dict | None, lang: str, maps: dict) -> dict:
-    """Every mapped place of every vendor, as a label and a map link."""
+def vendor_source_places(pages: dict | None) -> dict:
+    """Each vendor's places as a source list shows them.
+
+    The vendor page already resolved every place from the client's landblocks:
+    name, chain, coordinates and both links. A source row on an item or recipe
+    page offers the same places row for row, so "Wo" reads the same everywhere;
+    only the picture and the pin stay on the vendor page. Nothing is merged:
+    the vendor page shows every recorded position, and a source list that hid
+    one of them would answer the question differently.
+    """
     out = {}
-    for ident, vendor in ((source or {}).get('vendors') or {}).items():
-        key = vendor_key(ident)
-        places, seen = [], set()
-        for spot in vendor.get('places') or []:
-            map_id = spot.get('map')
-            if map_id is None or str(map_id) in seen:
-                continue
-            seen.add(str(map_id))
-            name = ((maps.get(str(map_id)) or {}).get('name') or '')
-            places.append({'label': name,
-                           'url': app_url(lang, 'karte', vorkarte=map_id, haendler=key)})
-        if places:
-            out[key] = places
+    for ident, page in (pages or {}).items():
+        rows = []
+        for place in page.get('places') or []:
+            chain = [teil['name'] for teil in place.get('chain') or [] if teil.get('name')]
+            rows.append({'ort': place.get('ort') or None, 'chain': chain,
+                         'coords': place.get('coords') or '',
+                         'map_url': place.get('map_url'),
+                         'travel_url': place.get('travel_url')})
+        if rows:
+            out[ident] = rows
     return out
 
 
