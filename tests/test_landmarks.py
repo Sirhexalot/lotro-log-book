@@ -121,12 +121,15 @@ class LandmarkFilterTest(unittest.TestCase):
         alle, treffer, region, gebiet, mit, nichts, ost_rohan, west_rohan = zahlen
         self.assertEqual(alle, len(rows))
         self.assertEqual(treffer, 1)          # „Alter Süßgrashof“ in Breeland
-        self.assertEqual(region, 863)         # Eriador
+        # Numbers of the built data. Since 23.11.2026 the landblock resolver
+        # names the landscape of a landmark, so an interior no longer borrows a
+        # landscape map: Eriador 863 → 829, West Rohan 58 → 56.
+        self.assertEqual(region, 829)         # Eriador
         self.assertEqual(gebiet, 51)          # Breeland
         self.assertEqual(mit, 1874)
         self.assertEqual(nichts, 0)
         self.assertEqual(ost_rohan, 17)
-        self.assertEqual(west_rohan, 58)
+        self.assertEqual(west_rohan, 56)
         self.assertLessEqual(erster, letzter)
 
 

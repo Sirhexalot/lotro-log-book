@@ -10,6 +10,9 @@ from vendor_viewmodel import vendor_index, vendor_pages
 MAPS = {
     '268437554': {'idx': 268437554, 'name': 'Mittelerde', 'tier': 0, 'region': 0},
     '268437557': {'idx': 268437557, 'name': 'Eriador', 'tier': 1, 'region': 1},
+    '268437653': {'idx': 268437653, 'name': 'Bree-land', 'tier': 2, 'region': 1,
+                  'north': -14.8, 'south': -38.03, 'west': -67.23, 'east': -36.32,
+                  'bild': '268437653.png', 'eltern': 268437557},
 }
 SOURCE = {'vendors': {
     '70000059': {
@@ -37,25 +40,89 @@ def coords(lat, lon):
 
 
 class VendorRegionFallbackTest(unittest.TestCase):
-    def test_unknown_map_links_to_known_region_in_all_languages(self):
-        for lang, expected_name, expected_route, expected_map in (
-                ('de', 'Eriador', '/de/region/268437557/',
-                 '/de/karte/?vorkarte=268437557'),
-                ('en', 'Eriador', '/en/region/268437557/',
-                 '/en/map/?vorkarte=268437557'),
-                ('fr', 'Eriador', '/fr/region/268437557/',
-                 '/fr/carte/?vorkarte=268437557')):
+    def test_position_without_a_map_keeps_the_region_but_no_dead_link(self):
+        """The region stays as orientation; a map link would land on an empty
+        map, and the coordinates are interior ones (see tools/zonen.py)."""
+        for lang, expected_name, expected_route in (
+                ('de', 'Eriador', '/de/region/268437557/'),
+                ('en', 'Eriador', '/en/region/268437557/'),
+                ('fr', 'Eriador', '/fr/region/268437557/')):
             with self.subTest(lang=lang):
-                page = vendor_pages(SOURCE, lang, {}, MAPS, app_url, coords, {})[
+                page = vendor_pages(SOURCE, lang, {}, MAPS, app_url, coords, {}, {})[
                     '70000059']
                 place = page['places'][0]
                 self.assertEqual(place['chain'], [{
                     'id': 268437557, 'name': expected_name, 'tier': 1,
                     'url': expected_route,
                 }])
-                self.assertEqual(place['map_url'], expected_map)
+                self.assertIsNone(place['map_url'])
+                self.assertIsNone(place['travel_url'])
                 self.assertIsNone(place['image'])
                 self.assertEqual(place['coords'], '-4.4, 50.7')
+
+    def test_named_interior_stands_in_the_place_row(self):
+        source = {'vendors': {'7003DFFE': {
+            'id': '7003DFFE', 'name': {'de': 'Squidtank'},
+            'type': 'both',
+            'places': [{'region': 1, 'lat': -1.17412, 'lon': 50.7024, 'map': None,
+                        'ort': {'de': 'Gasthaus „Zum Wachsamen Auge“',
+                                'en': 'Eyes and Guard Tavern',
+                                'fr': 'Taverne des Yeux du Garde'},
+                        'kette': [
+                            {'id': 1879049816, 'tier': 1, 'map': 268437557,
+                             'name': {'de': 'Eriador', 'en': 'Eriador', 'fr': 'Eriador'}},
+                            {'id': 1879049792, 'tier': 2, 'map': 268437653,
+                             'name': {'de': 'Breeland', 'en': 'Bree-land',
+                                      'fr': 'Pays de Bree'}},
+                        ]}],
+            'items': [],
+        }}}
+        for lang, name, kette, ziele in (
+                ('de', 'Gasthaus „Zum Wachsamen Auge“', ['Eriador', 'Breeland'],
+                 ['/de/region/268437557/', '/de/gebiet/268437653/']),
+                ('en', 'Eyes and Guard Tavern', ['Eriador', 'Bree-land'],
+                 ['/en/region/268437557/', '/en/area/268437653/']),
+                ('fr', 'Taverne des Yeux du Garde', ['Eriador', 'Pays de Bree'],
+                 ['/fr/region/268437557/', '/fr/zone/268437653/'])):
+            with self.subTest(lang=lang):
+                place = vendor_pages(source, lang, {}, MAPS, app_url, coords, {})[
+                    '7003DFFE']['places'][0]
+                self.assertEqual(place['ort'], name)
+                self.assertEqual([teil['name'] for teil in place['chain']], kette)
+                self.assertEqual([teil['url'] for teil in place['chain']], ziele)
+                self.assertIsNone(place['map_url'])
+                self.assertIsNone(place['travel_url'])
+
+    def test_area_without_a_catalogue_map_stays_text(self):
+        """A room's area is no map id: without a name match there is no page."""
+        source = {'vendors': {'70000001': {
+            'id': '70000001', 'name': {'de': 'Testhändler'}, 'type': 'vendor',
+            'places': [{'region': 1, 'lat': 1.0, 'lon': 2.0, 'map': None,
+                        'ort': {'de': 'Irgendein Raum'},
+                        'kette': [{'id': 1879000000, 'tier': 2, 'map': None,
+                                   'name': {'de': 'Unbekannt', 'en': 'Unknown',
+                                            'fr': 'Inconnu'}}]}],
+            'items': [],
+        }}}
+        place = vendor_pages(source, 'de', {}, MAPS, app_url, coords, {})[
+            '70000001']['places'][0]
+        self.assertEqual(place['chain'][0]['url'], '')
+
+    def test_vendor_with_a_map_frame_links_its_own_marker(self):
+        source = {'vendors': {'7001F025': {
+            'id': '7001F025', 'name': {'de': 'Händler in Bree'}, 'type': 'vendor',
+            'places': [{'region': 1, 'lat': -31.0, 'lon': -52.0, 'map': 268437653}],
+            'items': [],
+        }}}
+        for lang, expected in (
+                ('de', '/de/karte/?vorkarte=268437653&haendler=7001F025'),
+                ('en', '/en/map/?vorkarte=268437653&haendler=7001F025'),
+                ('fr', '/fr/carte/?vorkarte=268437653&haendler=7001F025')):
+            with self.subTest(lang=lang):
+                place = vendor_pages(source, lang, {}, MAPS, app_url, coords, {})[
+                    '7001F025']['places'][0]
+                self.assertEqual(place['map_url'], expected)
+                self.assertIsNotNone(place['travel_url'])
 
     def test_no_region_does_not_invent_a_link(self):
         source = {'vendors': {'70000060': {

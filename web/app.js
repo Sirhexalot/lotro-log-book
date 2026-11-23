@@ -1939,6 +1939,311 @@
 		} catch (fehler) { /* no URLSearchParams */ }
 	}
 
+	// --- Händler: where they stand, from daten/haendler.json ---------------
+	// The map is a quest map by default, so this layer stays off until asked.
+	// One dot per place, named on hover; a click opens the vendor page. A link
+	// from a vendor page (?haendler=<ID>) turns it on for that visit and marks
+	// the vendor it names.
+	var haendlerDaten = null, haendlerLaeuft = false, haendlerAn = false, haendlerWunsch = null;
+	// Coming from a vendor page, the map first shows that one vendor only: the
+	// quest dots of the whole landscape answer a question nobody asked there.
+	// `haendlerAnsichtAus` is the visitor's way back to the ordinary map.
+	var haendlerAnsichtAus = false;
+	var H_SEGMENT = { de: 'haendler', en: 'vendor', fr: 'marchand' };
+	var H_ART = { v: 'haendler_normal', b: 'haendler_tausch', k: 'haendler_beides' };
+	var haendlerKnopf = document.getElementById('haendler-schalter');
+	try {
+		haendlerAn = window.localStorage.getItem('mql.haendler') === '1';
+	} catch (fehler) { haendlerAn = false; }
+	try {
+		haendlerWunsch = (new URLSearchParams(window.location.search).get('haendler') || '').toUpperCase() || null;
+	} catch (fehler) { haendlerWunsch = null; }
+	if (haendlerWunsch) { haendlerAn = true; }
+
+	// Two callers ask for the layer while the script is on its way: the saved
+	// switch wants the dots, a link from a vendor page also wants the list.
+	// A second request must therefore not be dropped, or the map shows the
+	// quest list and the vendor dots at the same time.
+	var haendlerWartend = [];
+	function ladeHaendler(fertig) {
+		if (haendlerDaten) { fertig(); return; }
+		if (haendlerLaeuft) { haendlerWartend.push(fertig); return; }
+		haendlerLaeuft = true;
+		function geladen() {
+			haendlerLaeuft = false;
+			var wartend = haendlerWartend;
+			haendlerWartend = [];
+			fertig();
+			wartend.forEach(function (spaeter) { spaeter(); });
+		}
+		var skript = document.createElement('script');
+		skript.src = 'haendler-karte-' + sprache + '.js?v=' + (window.MQL_STAND || '0');
+		skript.onload = function () {
+			haendlerDaten = window.MQL_HAENDLER_KARTE || { m: {} };
+			geladen();
+		};
+		skript.onerror = function () {
+			haendlerDaten = { m: {} };
+			geladen();
+		};
+		document.head.appendChild(skript);
+	}
+
+	function haendlerSetzen(an, merken) {
+		haendlerAn = !!an;
+		if (haendlerKnopf) { haendlerKnopf.setAttribute('aria-pressed', haendlerAn ? 'true' : 'false'); }
+		if (merken) {
+			try { window.localStorage.setItem('mql.haendler', haendlerAn ? '1' : '0'); } catch (fehler) { /* private mode */ }
+		}
+		if (!haendlerAn) { zeichneMarker(); return; }
+		ladeHaendler(function () { zeichneMarker(); });
+	}
+
+	if (haendlerKnopf) {
+		haendlerKnopf.setAttribute('aria-pressed', haendlerAn ? 'true' : 'false');
+		haendlerKnopf.addEventListener('click', function () { haendlerSetzen(!haendlerAn, true); });
+	}
+	// A saved "on" or a link from a vendor page draws as soon as the data is there.
+	if (haendlerAn) { ladeHaendler(function () { zeichneMarker(); }); }
+	// A link names one vendor: show that one on a map of its own until the
+	// visitor asks for the quests again.
+	if (haendlerWunsch) {
+		ladeHaendler(function () {
+			if (haendlerEintrag(haendlerWunsch)) {
+				zeichneListe();
+				zeichneMarker();
+				zeichneDetail();
+			}
+		});
+	}
+
+	/** The row of one vendor, wherever it stands; null when it is not on a map
+	 * (a vendor inside a room has no map point and never reaches this view). */
+	function haendlerEintrag(id) {
+		if (!haendlerDaten) { return null; }
+		var karten = haendlerDaten.m || {};
+		var gefunden = null;
+		Object.keys(karten).forEach(function (karte) {
+			if (gefunden) { return; }
+			(karten[karte] || []).forEach(function (eintrag) {
+				if (!gefunden && eintrag[0] === id) { gefunden = eintrag; }
+			});
+		});
+		return gefunden;
+	}
+
+	/** Is the map of this vendor on screen, and has nobody asked for the quests? */
+	function haendlerAnsicht() {
+		if (haendlerAnsichtAus || !haendlerWunsch || !haendlerDaten || !zustand.karte) { return false; }
+		var reihe = (haendlerDaten.m || {})[String(zustand.karte.idx)] || [];
+		return reihe.some(function (eintrag) { return eintrag[0] === haendlerWunsch; });
+	}
+
+	function haendlerPunkte(karte) {
+		if (!haendlerAn || !haendlerDaten || !karte) { return []; }
+		var alle = (haendlerDaten.m || {})[String(karte.idx)] || [];
+		if (haendlerAnsicht() && karte.idx === zustand.karte.idx) {
+			return alle.filter(function (eintrag) { return eintrag[0] === haendlerWunsch; });
+		}
+		return alle;
+	}
+
+	function haendlerSeite(id) {
+		return '/' + sprache + '/' + H_SEGMENT[sprache] + '/' + id + '/';
+	}
+
+	/** Coordinate as the travel planner reads it ("31.2S, 68.4W"). */
+	function haendlerReiseZiel(lat, lon) {
+		return Math.abs(lat).toFixed(1) + (lat < 0 ? 'S' : 'N') + ',' +
+			Math.abs(lon).toFixed(1) + (lon < 0 ? 'W' : 'E');
+	}
+
+	/** Back to the ordinary map: quests again, all vendors of the area. */
+	function haendlerAnsichtBeenden(neuZeichnen) {
+		haendlerAnsichtAus = true;
+		try {
+			var adresse = new URLSearchParams(window.location.search);
+			if (adresse.get('haendler')) {
+				adresse.delete('haendler');
+				var rest = adresse.toString();
+				window.history.replaceState(window.history.state, '',
+					window.location.pathname + (rest ? '?' + rest : '') + window.location.hash);
+			}
+		} catch (fehler) { /* old browser */ }
+		if (neuZeichnen !== false) {
+			zeichneListe();
+			zeichneMarker();
+			zeichneDetail();
+			aktualisiereStand();
+		}
+	}
+
+	/** List column of the vendor view: what this map shows, and the way back. */
+	function zeigeHaendlerListe() {
+		var eintrag = haendlerEintrag(haendlerWunsch);
+		zustand.treffer = [];
+		zeilen = {};
+		liste.textContent = '';
+		listeTitel.textContent = t('haendler_ansicht');
+		var hinweis = eltern('li', null);
+		hinweis.className = 'listen-hinweis schwach';
+		hinweis.textContent = t('haendler_ansicht_text');
+		liste.appendChild(hinweis);
+		if (eintrag) {
+			var zeile = eltern('li', null);
+			var seite = eltern('a', eintrag[1]);
+			seite.href = haendlerSeite(eintrag[0]);
+			zeile.appendChild(seite);
+			var art = eltern('span', ' · ' + t(H_ART[eintrag[4]] || 'legende_haendler'));
+			art.className = 'stufe';
+			zeile.appendChild(art);
+			liste.appendChild(zeile);
+		}
+		var zurueck = eltern('li', null);
+		var knopf = eltern('button', t('haendler_alle_aufgaben'));
+		knopf.type = 'button';
+		knopf.className = 'listen-knopf';
+		knopf.addEventListener('click', function () { haendlerAnsichtBeenden(); });
+		zurueck.appendChild(knopf);
+		liste.appendChild(zurueck);
+	}
+
+	/** Detail column of the vendor view: the vendor and what to do with it. */
+	function zeigeHaendlerDetail() {
+		var eintrag = haendlerEintrag(haendlerWunsch);
+		detail.textContent = '';
+		if (!eintrag) { return; }
+		detail.appendChild(eltern('h2', eintrag[1]));
+		var art = eltern('p', t(H_ART[eintrag[4]] || 'legende_haendler') + ' · ' +
+			koordinatenText(eintrag[2], eintrag[3]));
+		art.className = 'kennung';
+		detail.appendChild(art);
+		var text = eltern('p', t('haendler_ansicht_text'));
+		text.className = 'leer';
+		detail.appendChild(text);
+		var aktionen = eltern('p', null);
+		aktionen.className = 'hinweis-aktionen';
+		var seite = eltern('a', t('haendler_seite_oeffnen'));
+		seite.className = 'llb-knopf';
+		seite.setAttribute('data-art', 'haupt');
+		seite.href = haendlerSeite(eintrag[0]);
+		aktionen.appendChild(seite);
+		var reise = eltern('a', t('hin_reise'));
+		reise.href = '/' + sprache + '/' + ({ de: 'reise', en: 'travel', fr: 'voyage' }[sprache]) +
+			'?nach=' + encodeURIComponent(haendlerReiseZiel(eintrag[2], eintrag[3]));
+		aktionen.appendChild(reise);
+		var alle = eltern('button', t('haendler_alle_aufgaben'));
+		alle.type = 'button';
+		alle.addEventListener('click', function () { haendlerAnsichtBeenden(); });
+		aktionen.appendChild(alle);
+		detail.appendChild(aktionen);
+	}
+
+	/** The vendor dots of the shown map, inside the marker layer so that they
+	 * follow the same frame as the quest dots (game map and terrain alike).
+	 * Several vendors stand in one crafting hall, so points on the same spot
+	 * become one dot with a count; dots that would still overlap are nudged
+	 * apart like the quest dots, and every one stays clickable. */
+	function zeichneHaendler(karte, breite, hoehe) {
+		var punkte = haendlerPunkte(karte);
+		var gezeichnet = 0;
+		var stellen = [];
+		punkte.forEach(function (eintrag) {
+			var stelle = anteil(karte, eintrag[2], eintrag[3]);
+			if (!stelle) { return; }
+			gezeichnet += 1;
+			var px = stelle.x * breite, py = stelle.y * hoehe;
+			var nah = null;
+			for (var i = 0; i < stellen.length; i += 1) {
+				var s = stellen[i];
+				if (Math.abs(s.x - px) <= 12 && Math.abs(s.y - py) <= 12) { nah = s; break; }
+			}
+			if (!nah) {
+				nah = { x: px, y: py, eintraege: [] };
+				stellen.push(nah);
+			}
+			nah.eintraege.push(eintrag);
+		});
+		var gesetzt = [];
+		var schuebe = [[0, 0], [16, -6], [-16, 6], [16, 12], [-16, -12], [0, 20], [0, -20]];
+		stellen.forEach(function (stelle) {
+			var platz = schuebe[0];
+			for (var versuch = 0; versuch < schuebe.length; versuch += 1) {
+				var p = schuebe[versuch];
+				var frei = true;
+				for (var i = 0; i < gesetzt.length; i += 1) {
+					if (Math.abs(gesetzt[i][0] - (stelle.x + p[0])) < 22 &&
+						Math.abs(gesetzt[i][1] - (stelle.y + p[1])) < 22) { frei = false; break; }
+				}
+				if (frei) { platz = p; break; }
+			}
+			stelle.platz = [stelle.x + platz[0], stelle.y + platz[1]];
+			gesetzt.push(stelle.platz);
+		});
+		stellen.forEach(function (stelle) {
+			var mehrfach = stelle.eintraege.length > 1;
+			var dot = eltern('div', mehrfach ? String(stelle.eintraege.length) : '');
+			dot.className = 'punkt haendler art-' + stelle.eintraege[0][4] + (mehrfach ? ' stapel' : '');
+			var gewaehlt = stelle.eintraege.some(function (eintrag) { return eintrag[0] === haendlerWunsch; });
+			if (gewaehlt) { dot.classList.add('hervor'); }
+			dot.style.left = stelle.platz[0] + 'px';
+			dot.style.top = stelle.platz[1] + 'px';
+			dot.title = mehrfach
+				? ersetze(t('haendler_haufen'), [stelle.eintraege.length]) + '\n' +
+					stelle.eintraege.slice(0, 8).map(function (eintrag) { return '· ' + eintrag[1]; }).join('\n')
+				: stelle.eintraege[0][1] + ' · ' + t(H_ART[stelle.eintraege[0][4]] || 'legende_haendler');
+			dot.setAttribute('role', 'link');
+			dot.setAttribute('aria-label', mehrfach
+				? ersetze(t('haendler_haufen'), [stelle.eintraege.length])
+				: stelle.eintraege[0][1]);
+			dot.addEventListener('click', function (ereignis) {
+				ereignis.stopPropagation();
+				if (mehrfach) { zeigeHaendlerHaufen(dot, stelle.eintraege); return; }
+				window.location.href = haendlerSeite(stelle.eintraege[0][0]);
+			});
+			marker.appendChild(dot);
+			// The vendor a page link named keeps its name on the map, so the
+			// jump from the page answers "where is he?" without a hover.
+			if (gewaehlt) {
+				var schild = eltern('span', stelle.eintraege.filter(function (eintrag) {
+					return eintrag[0] === haendlerWunsch;
+				})[0][1]);
+				schild.className = 'marker-schild';
+				schild.style.left = stelle.platz[0] + 'px';
+				schild.style.top = stelle.platz[1] + 'px';
+				marker.appendChild(schild);
+			}
+		});
+		var feld = document.getElementById('legende-haendler');
+		if (feld) { feld.hidden = gezeichnet === 0; }
+		if (haendlerKnopf) { haendlerKnopf.classList.toggle('an', haendlerAn && gezeichnet > 0); }
+		return gezeichnet;
+	}
+
+	/** The vendors sharing one spot, as a list at the dot. */
+	function zeigeHaendlerHaufen(dot, eintraege) {
+		schliesseHaufen();
+		var feld = eltern('div', null);
+		feld.className = 'haufen';
+		var stelle = dot.getBoundingClientRect();
+		feld.style.left = Math.round(stelle.right + 8) + 'px';
+		feld.style.top = Math.round(stelle.top) + 'px';
+		feld.appendChild(eltern('p', ersetze(t('haendler_haufen'), [eintraege.length])));
+		eintraege.forEach(function (eintrag) {
+			var link = eltern('a', eintrag[1] + ' · ' + t(H_ART[eintrag[4]] || 'legende_haendler'));
+			link.href = haendlerSeite(eintrag[0]);
+			feld.appendChild(link);
+		});
+		document.body.appendChild(feld);
+		var masse = feld.getBoundingClientRect();
+		if (masse.right > window.innerWidth - 8) {
+			feld.style.left = Math.max(8, Math.round(stelle.left - masse.width - 8)) + 'px';
+		}
+		if (masse.bottom > window.innerHeight - 8) {
+			feld.style.top = Math.max(8, Math.round(window.innerHeight - masse.height - 8)) + 'px';
+		}
+		haufenFeld = feld;
+	}
 	// Coordinate under the mouse, written like the game ("30.9S, 55.9W").
 	var koordinate = document.getElementById('koordinate');
 	if (koordinate) {
@@ -2119,13 +2424,15 @@
 
 	/** Legend: what every shape on the map means. Always visible while the map has
 	 * dots, because the shapes are not self-explanatory (07.11.2026). */
-	function zeigeLegende(mitRingen, mitPunkten, mitJagd, mitHinweis) {
+	function zeigeLegende(mitRingen, mitPunkten, mitJagd, mitHinweis, mitHaendler) {
 		if (!legende) { return; }
 		document.getElementById('legende-ziele').hidden = !mitRingen;
 		var jagd = document.getElementById('legende-jagd');
 		if (jagd) { jagd.hidden = !mitJagd; }
 		var hinweis = document.getElementById('legende-aufgabenort');
 		if (hinweis) { hinweis.hidden = !mitHinweis; }
+		var haendler = document.getElementById('legende-haendler');
+		if (haendler) { haendler.hidden = !mitHaendler; }
 		var laufend = document.getElementById('legende-laufend');
 		if (laufend) { laufend.hidden = !hatFortschritt; }
 		var teils = document.getElementById('legende-teils');
@@ -2133,7 +2440,7 @@
 		legende.querySelectorAll('.legende-fortschritt').forEach(function (eintrag) {
 			eintrag.hidden = !hatFortschritt;
 		});
-		legende.hidden = !mitPunkten && !mitRingen && !mitJagd && !mitHinweis;
+		legende.hidden = !mitPunkten && !mitRingen && !mitJagd && !mitHinweis && !mitHaendler;
 		legendeNeuMessen();
 	}
 
@@ -2536,6 +2843,13 @@
 	}
 
 	function zeichneListe() {
+		if (haendlerAnsicht()) {
+			zeigeHaendlerListe();
+			zeichneKartenBreadcrumb();
+			zeichneMarker();
+			aktualisiereFilterZahlen();
+			return;
+		}
 		var titel, quelle;
 		if (zustand.knoten) {
 			quelle = listeVon(zustand.knoten);
@@ -2658,6 +2972,7 @@
 	function zeichneDetail() {
 		detail.textContent = '';
 		var quest = zustand.auswahl;
+		if (!quest && haendlerAnsicht()) { zeigeHaendlerDetail(); return; }
 		if (!quest) {
 			if (zustand.knoten && zustand.knoten !== WURZEL) {
 				var k = zustand.knoten;
@@ -4597,10 +4912,13 @@
 	}
 	var start = (gewuenscht && gewuenscht.knoten && gewuenscht.knoten !== WURZEL ? gewuenscht.knoten : null) ||
 		wunschStart || knotenAusAdresse();
-	// A resource link from the crafting page names the map to open.
+	// A link that names a map (vendor view, landmark, resource occurrence)
+	// opens exactly that map. It wins over the area in the address, which is
+	// only the leftovers of the map the visitor looked at before; otherwise a
+	// shared link would land somewhere else after one visit of the map.
 	var wunschkarte = 0;
 	try { wunschkarte = parseInt(new URLSearchParams(window.location.search).get('vorkarte'), 10) || 0; } catch (fehler) { wunschkarte = 0; }
-	if (!start && wunschkarte) { start = knotenMitKarte(WURZEL, wunschkarte); }
+	if (wunschkarte) { start = knotenMitKarte(WURZEL, wunschkarte) || start; }
 	// One temporary point from a detail page (landmark, quest giver).
 	ortspunkt = null;
 	try {

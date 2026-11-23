@@ -36,7 +36,11 @@ before it links a barter row to a vendor page.
   shows no tab bar and frames that section with `llb-flaeche` instead.
 - „Wo“ shows **one** map for the picked place and a compact list of every known
   place (region › area, coordinates, map and route links); picking a row swaps
-  map and pin. Nine places no longer mean nine stacked map pictures.
+  map and pin. Nine places no longer mean nine stacked map pictures. A row
+  without a map image is a statement, not a button: it carries no pointer and no
+  hover, because there is nothing to swap. The same holds for a vendor with only
+  **one** picture (507 of them): that picture is already on screen, so the row
+  stays plain instead of looking clickable (23.11.2026).
 - „Was“: the sold goods with the shared item filter, then the barter table.
   Barter rows use the catalogue row (icon, name, price and quality, item level)
   and reuse the filter UI with **level range, quality, barter list** and search.
@@ -54,6 +58,48 @@ before it links a barter row to a vendor page.
   a vendor that does both is counted in both. There is no third category –
   it said nothing about what the page offers.
 - Location and map only if `did-positions` knows a position.
+- **Place from the landblocks (23.11.2026).** Every position in the geo export
+  carries a landblock (region, block X, block Y) and a cell. `landblocks.xml`
+  names the area of every block and a dungeon for some blocks and cells, so a
+  position resolves without guessing: 1,645 places have no landscape map and
+  1,539 of them get a room ("Gasthaus „Zum Wachsamen Auge“") or an area name from
+  the client. The chain above it comes from `geoAreas.xml`
+  (`Eriador › Breeland`), so the place is smaller than a region without
+  inventing a landscape. A chain part links only when its English client name
+  resolves uniquely to a catalogue map; a leading article may differ, and the
+  route uses the matched map's own tier. A GeoArea ID is never used as a public
+  map URL. 106 positions stay unnamed: the client's placeholder
+  "Unexplored Territory" names nothing, and such a place keeps the recorded
+  region only.
+  Such a place keeps neither a map link nor a travel link: its coordinates are
+  interior ones, and the travel planner used to route them to the nearest
+  stable-master anywhere (1.2S 50.7E landed at Hrimbarg in the Misty Mountains).
+  Where a landscape map exists, its chain stays the place name — the map is what
+  a player can open.
+- **The room's picture:** a dungeon names its basemap (`dungeons.xml`), and the
+  basemap's frame holds the position — then the page shows that interior map with
+  the pin, exactly like a landscape (1,271 places). `tools/hole_innenkarten.py`
+  exports exactly the needed pictures in DE/EN/FR from the client and crops each
+  to its drawn part (the client's interiors are 10–30 % floor plan on a black
+  canvas); the crop is recorded in `daten/innenkarten.json`, and
+  `tools/zonen.py` moves the frame onto the cut-out, so the pin still lands
+  correctly. `baue_webp.py` writes the WebP files, and
+  `tools/build_release.py::pruefen()` refuses a release whose `karten/<sprache>/`
+  lacks one of them.
+- A place with a map frame links `?vorkarte=<map>&haendler=<ID>`: the map opens
+  and marks that vendor. The map's own vendor layer (`Händler`, off by default)
+  draws every vendor of the shown map from `web/haendler-karte-<sprache>.js`
+  (3.012 points over 163 maps, 46 KB gzip, built by
+  `tools/build_haendler_karte.py`). The dot is a gold square so it never reads as
+  a quest status; hovering names vendor and kind, a click opens the page.
+- Arriving from a vendor page, the map opens as a **vendor view**: only that one
+  vendor is drawn, the landscape's quest dots and list stay away, the list column
+  names the vendor and the detail column offers "Händlerseite öffnen", the route
+  and "Alle Aufgaben zeigen". Any area change or that button leaves the view.
+  A **region overview** (tier 1, e.g. Eriador) does not count as a landscape: the
+  map app cannot open it, and its wide frame catches interior coordinates
+  ("DELETE ME!", "TBD - HITHAEGLIR …", Thorin's Hall at 92.7S), which would put a
+  pin at the bottom edge of a continent map.
 - **No** profession label for pure barter vendors: the client provides it
   only in English („Crafting“), and a German page invents no
   translation. The item entry under „Woher“ shows for the same reason
@@ -66,6 +112,14 @@ before it links a barter row to a vendor page.
 
 - Pure barter vendors have **no location** in the exports. The page remains
   without a map section instead of guessing a place.
+- A room name comes from a marker with the **same NPC id and the same
+  coordinates**. Positions whose markers sit in several zones (the client reuses
+  interior blocks) keep no name, and so do placeholder zones such as "Unexplored
+  Territory". Neither is guessed.
+- The room name says where a vendor stands, not where its entrance is; interiors
+  have no landscape map, and their coordinates live in a shared interior space
+  (the tavern's coordinates also fall inside the frame of Barad-dûr's dungeons,
+  which is why interior maps were rejected as map views).
 - There is no description for any vendor in the export.
 - Conditions of a barter (class, faction, quest) are not carried yet: the class
   sits on 159 vendors, faction and quest conditions on the profiles. Prices
@@ -84,9 +138,17 @@ sells and barters the types `vendor` and `barter`, so it appears in both.
 `tests/browser_haendler.js` checks the detail page in DE/EN/FR: both tabs and
 their counts, the place picker swapping the map, the level and quality filters,
 a pure barterer without tabs, 390 px without overflow, and the 50-row fallback
-without JavaScript.
+without JavaScript. `tests/test_vendor_viewmodel.py` pins the three location
+cases (region without a map, named interior, map frame with the vendor
+parameter), `tests/test_haendler_karte.py` the point rows and the room-name
+cleanup (subtitle, client quotes, placeholder names),
+`tests/browser_haendler_karte.js` the layer and the vendor view: the link from a
+vendor page (that vendor only, no quest dots, back via "Alle Aufgaben zeigen"),
+the switch, a stack of vendors on one spot, an interior place without map and
+route links, the travel planner's answer to interior coordinates, and the
+one-row tool bar on a phone.
 
-## Ware ab Stufe und der Filter für die eigene Stufe (22.11.2026)
+## Ware ab Stufe (22.11.2026)
 
 - `vendor_index()` schreibt je Händler `ml_min` (kleinste Mindeststufe seiner
   Ware), `ml_max` und `ml_levels` (die belegten Stufen). Grundlage ist
@@ -94,12 +156,9 @@ without JavaScript.
   Angabe. 1.898 von 2.287 Händlern haben eine Spanne.
 - Die Liste zeigt „Ware ab Stufe X“ als eigene Spalte. Der Spaltenkopf ist
   `gw.stufe_heading`; die Zeile nutzt die Wertspalte von `_result_row.twig`.
-- Der Filter „Ware für Stufe %s“ ist ein **Verweis**, kein Kästchen: das
-  Filtermodul macht aus einem Kästchen einen Wahrheitswert, die Stufe muss aber
-  als Zahl in der Adresse stehen (`?stufe=123`). `filter-server.js` behält den
-  Parameter bei jeder weiteren Auswahl, damit Filtern die Stufe nicht aufhebt.
-- Regel: dasselbe gleitende Fenster von zehn Stufen wie beim Eignungs-Chip –
-  eine Ware mit Mindeststufe zwischen Stufe−10 und Stufe. Ohne das Fenster
-  träfe fast jeder Händler zu (1.813 von 2.287 bei Stufe 123 statt 390).
-- Ohne importierten Spielstand bleibt der Verweis unsichtbar (`web/haendler-liste.js`).
-  Geprüft mit `tests/test_vendor_stufe.py` und `tests/browser_haendler_stufe.js`.
+- Der Von/Bis-Filter der Warenstufe steht im Filterfeld und filtert serverseitig.
+- Am 23.11.2026 ist der **Verweis „Ware für meine Stufe“ entfallen** (samt
+  `?stufe=`-Parameter und der zehnstufigen Sonderregel): er stand als zweite
+  Zeile neben dem Weg zurück und las sich wie ein festgeklemmter Filter. Die
+  Eignung eines Stücks beantwortet weiter der Eignungs-Chip, die Ware der
+  Von/Bis-Filter und die Spalte „Ware ab Stufe“.

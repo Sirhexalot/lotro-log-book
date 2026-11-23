@@ -10,6 +10,7 @@ import re
 from collections import defaultdict
 
 import seo
+from build_katalogseiten import route
 try:
     from .sortierung import schluessel
 except ImportError:
@@ -165,11 +166,14 @@ def _place_view(spot: dict, lang: str, maps: dict, app_url, coords, name: str = 
     entry = _map(maps, spot.get('map'))
     chain = chain_of(maps, spot.get('map'))
     image = pin_x = pin_y = None
+    # The picture belongs to the map, not to the pin: a map without bounds
+    # still shows its cut, only the marker stays away.
+    if entry:
+        image = entry.get('bild')
     if entry and all(entry.get(key) is not None for key in ('north', 'south', 'west', 'east')):
         width = entry['east'] - entry['west']
         height = entry['north'] - entry['south']
         if width > 0 and height > 0:
-            image = entry.get('bild')
             pin_x = round(min(100.0, max(0.0, (spot['lon'] - entry['west']) / width * 100)), 1)
             pin_y = round(min(100.0, max(0.0, (entry['north'] - spot['lat']) / height * 100)), 1)
     if spot.get('map') is None:
@@ -239,6 +243,37 @@ def giver_pages(source: dict, lang: str, quests: dict, maps: dict,
                                    schluessel(row['name'])))
         places = [_place_view(spot, lang, maps, app_url, coords, (giver.get('name') or {}).get(lang) or '')
                   for spot in giver['places']]
+        for place, spot in zip(places, giver['places']):
+            # The landblock names the room or the area (`build_auftraggeber.py`).
+            # A room has no world map: it shows its own picture instead.
+            place['ort'] = ((spot.get('ort') or {}).get(lang)
+                            if spot.get('map') is None else None)
+            # The chain a player can open comes from the map tree: every part
+            # carries its catalogue page, so the path is clickable. A place
+            # without a landscape map keeps the landblock chain (room and area
+            # names) and has no map to link to.
+            if spot.get('map') is not None:
+                baum = chain_of(maps, spot['map'])
+                place['chain'] = [
+                    {'id': teil['id'], 'tier': teil['tier'], 'name': teil['name'],
+                     'url': route(lang, 'region' if teil['tier'] == 1 else 'area',
+                                  str(teil['id']))}
+                    for teil in baum] or place['chain']
+            else:
+                place['chain'] = [
+                    {'id': teil['id'], 'tier': teil['tier'],
+                     'name': (teil['name'] or {}).get(lang) or '',
+                     'url': (route(lang, 'region' if teil.get('maptier') == 1 else 'area',
+                                   str(teil['map'])) if teil.get('map') is not None
+                             and teil.get('maptier') is not None else '')}
+                    for teil in (spot.get('kette') or [])
+                    if (teil['name'] or {}).get(lang)] or place['chain']
+            if spot.get('bild'):
+                place['image'] = spot['bild']
+                place['pin_x'] = spot.get('pin_x')
+                place['pin_y'] = spot.get('pin_y')
+            if spot.get('map') is None:
+                place['travel_url'] = None
         levels = _levels([[row['id'], int(row['level']) if str(row['level']).isdigit() else 0]
                           for row in rows])
         pages[entity] = {
@@ -273,3 +308,21 @@ def giver_pages(source: dict, lang: str, quests: dict, maps: dict,
 def quest_givers(source: dict) -> dict:
     """Quest id → the first bestower, as written into the entity data."""
     return source.get('quest_giver') or {}
+
+
+def giver_quest_map(source: dict, lang: str) -> dict:
+    """Quest id → every evidenced giver as {'url', 'text'}.
+
+    A quest can have several bestowers; the client records each of them and
+    the quest page names them all instead of only the first. The order is the
+    catalogue's name order, so the page reads the same on every build.
+    """
+    out: dict = {}
+    for entity, giver in (source.get('givers') or {}).items():
+        name = (giver.get('name') or {}).get(lang) or ''
+        entry = {'url': giver_url(lang, entity), 'text': name or entity}
+        for ident in giver.get('quests') or []:
+            out.setdefault(ident, []).append(entry)
+    for rows in out.values():
+        rows.sort(key=lambda row: (schluessel(row['text']), row['url']))
+    return out

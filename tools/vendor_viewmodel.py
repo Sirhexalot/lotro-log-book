@@ -11,7 +11,7 @@ try:
 except ImportError:
     from sortierung import schluessel
 from build_katalogseiten import route
-from giver_viewmodel import _place_view, area_of, place_label, region_of
+from giver_viewmodel import _place_view, area_of, chain_of, place_label, region_of
 
 SEGMENT = {'de': 'haendler', 'en': 'vendor', 'fr': 'marchand'}
 
@@ -138,10 +138,64 @@ def vendor_pages(source: dict, lang: str, items: dict, maps: dict,
         places = []
         for spot in vendor.get('places') or []:
             place = _place_view(spot, lang, maps, app_url, coords)
-            # Some NPC positions are known only at region scale: the client
-            # coordinates do not fit any of its named map frames. Keep the
-            # known region useful without inventing a landscape or a pin.
+            # The place comes from the client's landblocks (`build_haendler.py`).
+            # Where a landscape map exists, its chain stays the place name - the
+            # map is what a player can open. Without one, the landblock names the
+            # room or the area ("Gasthaus „Zum Wachsamen Auge“", "Breeland").
+            kette = spot.get('kette') or []
+            place['ort'] = None
             if spot.get('map') is None:
+                place['ort'] = (spot.get('ort') or {}).get(lang) or None
+                if kette:
+                    place['chain'] = []
+                    for teil in kette:
+                        name = (teil['name'] or {}).get(lang)
+                        if not name:
+                            continue
+                        ziel = teil.get('map')
+                        map_record = maps.get(str(ziel), {}) if ziel else {}
+                        map_tier = teil.get('maptier') or map_record.get('tier')
+                        place['chain'].append({
+                            'id': teil['id'], 'tier': teil['tier'], 'name': name,
+                            'url': route(lang, 'region' if map_tier == 1 else 'area',
+                                         str(ziel)) if ziel and map_tier else '',
+                        })
+                    # The landblock names the area, not the map. Without a map
+                    # id the place's own map tree still carries the evidenced
+                    # chain with ids, so its links are not lost.
+                    if spot.get('map') is not None and not any(p.get('url') for p in place['chain']):
+                        baum = chain_of(maps, spot['map'])
+                        if baum:
+                            place['chain'] = [
+                                {'id': teil['id'], 'tier': teil['tier'], 'name': teil['name'],
+                                 'url': route(lang, 'region' if teil['tier'] == 1 else 'area',
+                                              str(teil['id']))}
+                                for teil in baum]
+            if spot.get('map') is not None:
+                # A place with a landscape map: the chain a player can open
+                # comes from the map tree, so every part links to its page.
+                baum = chain_of(maps, spot['map'])
+                if baum:
+                    place['chain'] = [
+                        {'id': teil['id'], 'tier': teil['tier'], 'name': teil['name'],
+                         'url': route(lang, 'region' if teil['tier'] == 1 else 'area',
+                                      str(teil['id']))}
+                        for teil in baum]
+            if spot.get('map') is None:
+                # A room with its own picture: the page shows it with the pin.
+                place['image'] = spot.get('bild') or None
+                place['pin_x'] = spot.get('pin_x')
+                place['pin_y'] = spot.get('pin_y')
+            if place['map_url']:
+                # "Show on map" jumps to the map and names the vendor there; the
+                # map app draws the marker from that parameter.
+                place['map_url'] = app_url(lang, 'karte', vorkarte=spot['map'],
+                                           haendler=ident)
+            else:
+                place['travel_url'] = None
+            # Without a landblock area, the recorded region stays as the only
+            # honest statement about the place.
+            if not place['chain'] and spot.get('map') is None:
                 number = spot.get('region')
                 region_id = None
                 if region_ids and number is not None:
@@ -159,8 +213,6 @@ def vendor_pages(source: dict, lang: str, items: dict, maps: dict,
                         'tier': 1,
                         'url': route(lang, 'region', str(region_id)),
                     }]
-                    place['map_url'] = app_url(
-                        lang, 'karte', vorkarte=region_id)
             places.append(place)
         name = (vendor.get('name') or {}).get(lang) or (vendor.get('name') or {}).get('en') or ident
         pages[ident] = {

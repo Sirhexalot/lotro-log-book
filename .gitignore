@@ -23,6 +23,7 @@ web/stand.js
 web/karten-start-*.js
 web/karten-kurz-*.js
 web/sets-*.js
+web/haendler-karte-*.js
 web/thema-*.js
 web/epik-*.js
 web/karten-daten/

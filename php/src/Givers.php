@@ -489,8 +489,11 @@ final class Givers
         $words = self::words($this->lang);
         foreach ($giver['places'] as &$place) {
             foreach ($place['chain'] as &$part) {
-                $kind = $part['tier'] === 1 ? 'region' : 'area';
-                $part['url'] = $this->catalogue->route($this->lang, $kind, (string) $part['id']);
+                // The view model already names a catalogue page where the
+                // client's area has one. Its id is a landblock id, not a map
+                // id: building a route from it produced 404 addresses. A part
+                // without a resolved page stays text.
+                unset($part['id']);
             }
             unset($part);
         }

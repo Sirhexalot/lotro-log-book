@@ -131,7 +131,7 @@ def places_of(did: str, points: dict, maps) -> tuple[list[dict], Counter]:
     """Cluster one entity's game positions and attach a map where one exists."""
     stats = Counter()
     groups: list[dict] = []
-    for region, lat, lon in sorted(points.get(did, ())):
+    for region, lat, lon, bx, by, cell in sorted(points.get(did, ())):
         for group in groups:
             if group['region'] == region and abs(group['lat'] - lat) <= SPOT_LIMIT \
                     and abs(group['lon'] - lon) <= SPOT_LIMIT:
@@ -141,13 +141,17 @@ def places_of(did: str, points: dict, maps) -> tuple[list[dict], Counter]:
                 group['count'] = count + 1
                 break
         else:
-            groups.append({'region': region, 'lat': lat, 'lon': lon, 'count': 1})
+            # The block of the first point stands for the cluster: positions
+            # that close together share their landblock in the client's data.
+            groups.append({'region': region, 'lat': lat, 'lon': lon, 'count': 1,
+                           'block': [region, bx, by, cell]})
     spots = []
     for group in groups:
         lat, lon = round(group['lat'], 5), round(group['lon'], 5)
         map_id = maps.attribute(lat, lon, group['region'])
         stats['positions_on_map' if map_id is not None else 'positions_without_map'] += 1
-        spots.append({'region': group['region'], 'lat': lat, 'lon': lon, 'map': map_id})
+        spots.append({'region': group['region'], 'lat': lat, 'lon': lon, 'map': map_id,
+                      'block': group['block']})
     if not spots:
         stats['without_position'] += 1
     spots.sort(key=lambda spot: (spot['map'] is None, spot['map'] or 0,
@@ -177,7 +181,10 @@ def build(catalogue: set[str], maps, known_maps: set[int],
                 if row.get('did') in giver_quests and row.get('instance') == 0 \
                         and row.get('latitude') is not None and row.get('longitude') is not None:
                     points[row['did']].add((int(row.get('region') or 0),
-                                            float(row['latitude']), float(row['longitude'])))
+                                            float(row['latitude']), float(row['longitude']),
+                                            int(row.get('block_x') or 0),
+                                            int(row.get('block_y') or 0),
+                                            int(str(row.get('cell') or '0'), 16)))
 
     givers: dict[str, dict] = {}
     problems = []
@@ -268,6 +275,14 @@ def build(catalogue: set[str], maps, known_maps: set[int],
                                    if any(spot['map'] is not None for spot in row['places']))
     count['givers_with_title'] = sum(1 for row in givers.values() if row.get('title'))
     count['givers_with_greeting'] = sum(1 for row in givers.values() if row.get('greeting'))
+    sys.path.insert(0, str(ROOT / 'tools'))
+    from zonen import anreichern
+    anreichern([(int(ident, 16), spot) for ident, row in givers.items()
+                for spot in row['places']])
+    count['givers_with_ort'] = sum(1 for row in givers.values()
+                                   if any(spot.get('ort') for spot in row['places']))
+    count['places_with_bild'] = sum(1 for row in givers.values()
+                                    for spot in row['places'] if spot.get('bild'))
     count['givers_with_description'] = sum(1 for row in givers.values() if row.get('description'))
     count['multiple_givers'] = sum(1 for ids in links.values() if len(ids) > 1)
     count['kinds'] = dict(Counter(row['kind'] for row in givers.values()))

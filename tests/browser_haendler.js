@@ -41,10 +41,10 @@ const base = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 			assert.notEqual(panelStil.ton, 'rgba(0, 0, 0, 0)', 'Panel ohne Fläche');
 			assert.notEqual(panelStil.ton, panelStil.seite, 'Panel hebt sich nicht vom Hintergrund ab');
 			assert.equal(await page.locator('#haendler-tab-wo .llb-karte').count(), 1);
-			assert.equal(await page.locator('.vendor-orte li').count(), 9);
-			const before = await page.locator('#vendor-karte-bild').getAttribute('src');
-			await page.locator('.vendor-orte .ort-zeile').nth(2).click();
-			const after = await page.locator('#vendor-karte-bild').getAttribute('src');
+			assert.equal(await page.locator('.llb-ort-wahl-liste li').count(), 9);
+			const before = await page.locator('[data-ort-bild]').getAttribute('src');
+			await page.locator('.llb-ort-wahl-liste .ort-zeile').nth(2).click();
+			const after = await page.locator('[data-ort-bild]').getAttribute('src');
 			assert.notEqual(before, after, 'map did not change');
 
 			// „Was“: the barter list uses the standard rows and filters by level.

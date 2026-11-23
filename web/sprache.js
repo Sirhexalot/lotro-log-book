@@ -121,6 +121,8 @@
 		['#landschaft-orte', 'aria-label', 'nav_karten'],
 		['#legende-mehr', 'title', 'legende_mehr'],
 		['#legende-mehr', 'aria-label', 'legende_mehr'],
+		['#haendler-schalter', 'title', 'haendler_anzeigen_hinweis'],
+		['#haendler-schalter', 'aria-label', 'haendler_anzeigen_hinweis'],
 		['#zuklappen', 'title', 'alles_zuklappen'], ['#zum-baum', 'title', 'zurueck_gebiete']
 	];
 	attribute.forEach(function (a) {

@@ -37,14 +37,6 @@
         </details>
         <section class="sets-results" data-filter-results aria-label="{{ gw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? gw.count_one : gw.count)|replace({'%s': count}) }}</p>
-            {# Stufe als Verweis: der Server filtert, die Zahl steht in der Adresse.
-               Ein Kästchen im Formular landete im Filtermodul als Wahrheitswert. #}
-            <p class="sets-turn" id="vendor-level-field" data-vorlage="{{ gw.stufe_filter }}" hidden>
-                <a class="sets-option-link" id="vendor-level-link" href="#"></a>
-            </p>
-            {% if filters.stufe %}<p class="sets-turn">
-                <a class="sets-option-link" href="{{ list_url }}">{{ gw.stufe_all }}</a>
-            </p>{% endif %}
             {% set name_aria = sort_key == 'name' ? (sort_dir == 'asc' ? 'ascending' : 'descending') : 'none' %}
             {% set level_aria = sort_key == 'stufe' ? (sort_dir == 'asc' ? 'ascending' : 'descending') : 'none' %}
             <div class="tabellen-rahmen">
@@ -75,5 +67,4 @@
     </div>
 </form>
 </div>
-<script src="/haendler-liste.js?v={{ asset_stand }}" defer></script>
 {% endblock %}

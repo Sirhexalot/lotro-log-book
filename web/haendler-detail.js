@@ -1,4 +1,7 @@
-/* Vendor page: the where/what tabs, the place picker and the barter filter.
+/* Vendor page: the where/what tabs and the barter filter.
+ *
+ * The place picker is not this page's business any more: every place on the
+ * site comes from `components/ort.twig` and behaves through `web/ort.js`.
  *
  * The barter list reuses the shared filter UI: the offers arrive as compact
  * rows (goods id, list, price), the item facts come from the item index the
@@ -32,37 +35,6 @@
 		if (host && window.MQL_REITER) {
 			window.MQL_REITER.mount(host, { aktiv: 'was', hash: false });
 		}
-	}
-
-	/* ---- place picker ----------------------------------------------------- */
-
-	function orte() {
-		var bild = document.getElementById('vendor-karte-bild');
-		var pin = document.getElementById('vendor-karte-pin');
-		var knopfreihe = document.querySelectorAll('.vendor-orte .ort-zeile');
-		Array.prototype.forEach.call(knopfreihe, function (knopf) {
-			knopf.addEventListener('click', function () {
-				var datei = knopf.getAttribute('data-bild');
-				if (bild && datei) {
-					bild.src = '/karten/' + lang + '/' + datei.replace(/\.png$/, '.webp');
-				}
-				if (pin) {
-					var x = knopf.getAttribute('data-pin-x');
-					var y = knopf.getAttribute('data-pin-y');
-					if (x === '' || y === '') { pin.hidden = true; }
-					else {
-						pin.hidden = false;
-						pin.style.left = x + '%';
-						pin.style.top = y + '%';
-					}
-				}
-				Array.prototype.forEach.call(document.querySelectorAll('.vendor-orte li'), function (li) {
-					li.classList.remove('ist-aktiv');
-				});
-				var li = knopf.closest('li');
-				if (li) { li.classList.add('ist-aktiv'); }
-			});
-		});
 	}
 
 	/* ---- barter filter ---------------------------------------------------- */
@@ -281,7 +253,6 @@
 
 	function start() {
 		tabs();
-		orte();
 		tausch();
 	}
 

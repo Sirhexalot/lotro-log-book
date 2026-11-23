@@ -1,6 +1,6 @@
 # Quest giver
 
-Status as of 10.11.2026. **Published.** Overview and detail pages run in
+Status as of 23.11.2026. **Published.** Overview and detail pages run in
 DE/EN/FR, together with menu, central search, map links, tree filter and progress
 from the imported character.
 
@@ -16,12 +16,22 @@ added from names, wiki or guesses.
 | Activity | `lore/NPCs.xml` `title` → the same label set |
 | Greeting, description | `npcs-*/raw.jsonl` (`NPC_ActionPicker_GreetingString`, `Description`) |
 | Kind (person/creature/item) | `class_index` of the raw export; `NPC_IsInanimate` makes an object out of it |
-| Location | `did-positions-*/positions.jsonl` (instance-free), assignment to the map via `game_maps.GameMaps.attribute` |
+| Location | `did-positions-*/positions.jsonl` (instance-free), map via `game_maps.GameMaps.attribute`, room/area via `tools/zonen.py` and the newest client `landblocks.xml` |
 | Quests, level, features | existing web catalogue `daten/quests-<sprache>.json` |
 
 A location gets a map only if the game map lies in the own map stock.
 Coordinates remain even without a map; they are neither shifted nor averaged
 to „fit the map“.
+
+For places without a landscape map, `zonen.py` adds the client room or area
+name and its region/territory chain. A room picture is shown only when the
+client has a basemap whose frame contains the position. Such interior places
+have no map or travel action; their coordinates are not world-map coordinates.
+Places with a landscape map keep the map-derived place chain. An interior
+region/territory part links only when its English client name uniquely resolves
+to a catalogue map; the public URL uses that map's ID and actual tier, never the
+internal GeoArea ID. A leading article may differ between the client and map
+name.
 
 ## Rules
 
@@ -116,6 +126,15 @@ the build aborts with a note.
 - Kinds: 4.075 persons, 175 creatures, 347 items, 470 without proven kind
 - 171 without any location, 187 without a complete name, 22 level boards
 - Sitemaps: per language list plus 5.067 detail addresses
+
+## Landblock places (23.11.2026)
+
+The current data has 5,654 positions: 4,442 with a landscape map, 1,184
+map-less positions with a client room/area name, and 920 interior pictures with
+a pin. Only map-backed places offer map and travel actions. The data builder
+retains `block` for the shared resolver; it writes `ort`, `kette`, and, when
+the room frame contains the point, `bild`, `pin_x`, and `pin_y`. The same
+interior image exporter serves vendors, quest givers and landmarks.
 
 Tests:
 

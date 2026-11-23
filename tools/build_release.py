@@ -126,6 +126,12 @@ def baue_sets_client() -> None:
                    cwd=str(HIER), check=True)
 
 
+def baue_haendler_karte() -> None:
+    """Where the vendors stand, for the map layer the vendor pages link to."""
+    subprocess.run([sys.executable, str(HIER / 'tools' / 'build_haendler_karte.py'), '--still'],
+                   cwd=str(HIER), check=True)
+
+
 def baue_stand(ziel: Path) -> None:
     """Give cached map scripts and lazy shards a content-based version stamp."""
     dateien = list(ziel.glob('*.js')) + list(ziel.glob('*.css'))
@@ -221,6 +227,34 @@ def kopiere_app(ziel: Path, daten: Path) -> None:
 
 def pruefen(ziel: Path) -> list[str]:
     fehler = []
+    # Interior pictures used on vendor, quest-giver and landmark pages live in
+    # karten/<language>/; a missing one would only show up as a broken image.
+    bilddateien = (
+        ('haendler.json', 'vendors', True),
+        ('auftraggeber.json', 'givers', True),
+        ('landmarken.json', 'landmarken', False),
+    )
+    bilder = set()
+    for datei, schluessel, hat_orte in bilddateien:
+        pfad = HIER / 'daten' / datei
+        if not pfad.is_file():
+            continue
+        daten = json.loads(pfad.read_text(encoding='utf-8'))
+        for entity in (daten.get(schluessel) or {}).values():
+            rows = (place for row in entity.get('places') or []
+                    for place in [row]) if hat_orte else [entity]
+            bilder.update(place['bild'] for place in rows if place.get('bild'))
+    if bilder:
+        bilder = sorted(bilder)
+        for sprache in SPRACHEN:
+            fehlend = [bild for bild in bilder
+                       if not (ziel / ('karten/%s/%s.webp'
+                                       % (sprache, bild.rsplit('.', 1)[0]))).is_file()]
+            for bild in fehlend[:3]:
+                fehler.append('fehlt: karten/%s/%s.webp' % (sprache, bild.rsplit('.', 1)[0]))
+            if len(fehlend) > 3:
+                fehler.append('fehlt: %d weitere Innenraumkarten in karten/%s'
+                              % (len(fehlend) - 3, sprache))
     for name in ('index.php', 'tracking.html', 'style.css', 'gemeinsam.css',
                  '404.html', 'robots.txt', 'vendor/autoload.php',
                  'php/public/index.php', 'phpdata/labels.json',
@@ -259,6 +293,10 @@ def pruefen(ziel: Path) -> list[str]:
         # suitability filter needs the piece requirements in the browser.
         if not (ziel / ('sets-%s.js' % sprache)).is_file():
             fehler.append('fehlt: sets-%s.js' % sprache)
+        # Where the vendors stand (tools/build_haendler_karte.py); the map layer
+        # loads it on demand, so a missing file would only show up on a click.
+        if not (ziel / ('haendler-karte-%s.js' % sprache)).is_file():
+            fehler.append('fehlt: haendler-karte-%s.js' % sprache)
         if not (ziel / 'phpdata' / sprache / 'sets-index.json').is_file():
             fehler.append('fehlt: phpdata/' + sprache + '/sets-index.json')
         if not (ziel / 'phpdata' / sprache / 'givers-index.json').is_file():
@@ -308,6 +346,7 @@ def main() -> int:
     baue_karten_kurz(ziel)
     baue_epik()
     baue_sets_client()
+    baue_haendler_karte()
     # Generate the start files and both shard trees before copying web/.
     # Otherwise a release could contain stale shards from the previous build.
     baue_gegenstandssuche()

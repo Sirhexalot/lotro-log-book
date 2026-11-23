@@ -326,6 +326,30 @@ main {
 #liste li .vermerk.instanz-teil { display: block; margin: 1px 0 0; flex: 1 1 100%; }
 /* A one-line explanation above a list, e.g. that a prologue is no book progress. */
 #liste li.listen-hinweis { font-size: var(--text-klein); line-height: var(--zeile-zusatz); padding: 6px 2px 8px; border-bottom: 1px solid var(--rand); }
+/* The way back out of the vendor view (Händleransicht). */
+#liste li button.listen-knopf {
+	margin: 10px 0 4px;
+	padding: 6px 10px;
+	border: 1px solid var(--rand);
+	border-radius: 3px;
+	background: var(--fläche);
+	color: var(--text);
+	font: inherit;
+	cursor: pointer;
+}
+#liste li button.listen-knopf:hover { border-color: var(--gold); color: var(--gold); }
+/* Detail column of the vendor view: one action per line, no card around it. */
+.hinweis-aktionen { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 12px; }
+.hinweis-aktionen button {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--text-bedienung);
+	font: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+}
+.hinweis-aktionen button:hover { color: var(--gold); }
 /* Level range of a region, on its own small line under the name. */
 .zweig .name .bereich { display: block; color: var(--schwach); font-size: var(--text-mikro); line-height: var(--zeile-titel); }
 
@@ -434,7 +458,38 @@ main {
 	box-shadow: 0 0 0 2px var(--llb-palette-rgba-13-11-9-p9), 0 0 0 3px var(--llb-palette-rgba-255-244-214-p8), 0 2px 5px var(--llb-palette-rgba-0-0-0-p75);
 }
 .punkt.hervor { transform: scale(1.9); z-index: 7; box-shadow: 0 0 0 3px var(--llb-palette-rgba-240-166-60-p55); }
-#liste li.hervor { background: var(--llb-palette-rgba-240-166-60-p16); }
+
+/* Vendors are squares: a gold dot must never read as a quest status. They sit
+ * one step above the resting quest dots, so their layer stays visible; a hovered
+ * or selected quest dot still comes forward (z-index 5 and up). */
+.punkt.haendler {
+	width: 16px;
+	height: 16px;
+	margin: -8px 0 0 -8px;
+	border-radius: 3px;
+	background: var(--gold);
+	border: 2px solid var(--llb-palette-14100b);
+	box-shadow: 0 0 0 2px var(--llb-palette-rgba-255-244-214-p8), 0 1px 4px var(--llb-palette-rgba-0-0-0-p7);
+	z-index: 1;
+}
+.punkt.haendler.art-b { border-radius: 3px 3px 8px 8px; }
+.punkt.haendler.art-k { background: linear-gradient(135deg, var(--gold) 50%, var(--llb-palette-fff2d9) 50%); }
+.punkt.haendler.hervor { box-shadow: 0 0 0 3px var(--llb-palette-rgba-240-166-60-p85), 0 1px 4px var(--llb-palette-rgba-0-0-0-p7); z-index: 2; }
+
+/* Name of the vendor a page link named, right under its dot. */
+.marker-schild {
+	position: absolute;
+	transform: translate(-50%, 0);
+	margin-top: 12px;
+	padding: 1px 6px;
+	background: var(--llb-palette-rgba-13-11-9-p85);
+	color: var(--llb-palette-fff2d9);
+	font: var(--gewicht-bold) var(--text-mikro)/1.6 var(--schrift);
+	border-radius: 3px;
+	white-space: nowrap;
+	pointer-events: none;
+	z-index: 8;
+}#liste li.hervor { background: var(--llb-palette-rgba-240-166-60-p16); }
 
 /* The list behind a stack, right at its dot (a child of the marker layer, so the
  * dot's hover scale does not enlarge it). */
@@ -465,7 +520,19 @@ main {
 }
 .haufen button:hover { background: var(--fläche-hell); color: var(--gold); }
 .haufen button.fertig { color: var(--fertig); }
-
+/* Vendor stack: the rows are links to the pages, not buttons on the map. */
+.haufen a {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	text-align: left;
+	font-size: var(--text-klein);
+	padding: 4px 6px;
+	border-radius: 2px;
+	color: var(--text);
+	text-decoration: none;
+}
+.haufen a:hover { background: var(--fläche-hell); color: var(--gold); }
 /* The selected quest's dot pulses with a widening ring, so it is found at once
    among hundreds of dots. */
 .punkt.aktiv::after {
@@ -542,6 +609,8 @@ main {
 .legende-symbol.ring { border: 2px solid var(--offen); border-radius: 50%; color: var(--llb-palette-transparent); }
 .legende-symbol.gestrichelt { border: 2px dashed var(--llb-palette-f3bc65); border-radius: 50%; color: var(--llb-palette-f3bc65); padding: 1px; }
 .legende-symbol.gepunktet { border: 2px dotted var(--gold); border-radius: 50%; color: var(--gold); padding: 1px; }
+/* Vendors carry their own swatch: a square, so the entry never reads as a quest status. */
+.legende-symbol.haendler { width: 13px; height: 13px; border: 2px solid var(--gold); border-radius: 3px; background: var(--llb-palette-fff2d9); }
 
 .tupfen {
 	display: inline-block;
@@ -1001,6 +1070,9 @@ td.haken-zelle.teil { color: var(--laufend); }
    do not fit are dropped whole – a cut word looks like a defect. */
 .kartenleiste .legende > * { flex: 0 0 auto; white-space: nowrap; }
 .kartenleiste .legende > .zu-breit { display: none; }
+/* Vendor view: the legend explains the one square that is on the map. */
+.legende.nur-haendler > * { display: none; }
+.legende.nur-haendler > #legende-haendler { display: inline-flex; }
 .legende-mehr { flex: 0 0 auto; margin-left: auto; padding: 1px 7px; font-size: var(--text-mikro); line-height: var(--zeile-kompakt); }
 /* Without a visible legend there is nothing to expand: no lone question mark. */
 .legende[hidden] + .legende-mehr { display: none; }
@@ -1022,6 +1094,13 @@ td.haken-zelle.teil { color: var(--laufend); }
 .kartenkopf .geber-schalter { min-height: 30px; font-size: var(--text-bedienung); line-height: var(--zeile-einfach); }
 .kartenkopf .geber-schalter[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
 .kartenkopf .geber-schalter[aria-pressed="false"] { color: var(--schwach); }
+/* Same switch in the lower bar on a phone (ordneKartenwerkzeuge). */
+.kartenleiste .geber-schalter {
+	min-height: 32px; padding: 2px 6px; font-size: var(--text-klein);
+	line-height: var(--zeile-einfach); white-space: nowrap;
+}
+.kartenleiste .geber-schalter[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+.kartenleiste .geber-schalter[aria-pressed="false"] { color: var(--schwach); }
 .kartenleiste .koordinate { text-align: right; }
 
 /* List: notes and counters sit under the name, the level stays right. */
@@ -1292,6 +1371,9 @@ main { grid-template-columns: 310px minmax(320px, 1fr) 360px; }
 	.kartenkopf-links { flex-wrap: nowrap; gap: 4px; }
 	.kartenleiste { gap: 6px; padding: 4px 6px; }
 }
+/* Vendor locations remain available through "Auf Karte zeigen" on vendor
+   pages; keep the optional layer switch out of the map toolbar. */
+.kartenkopf .haendler-feld { display: none; }
 @media (max-width: 1000px) {
 	.kartenkopf button { min-height: 44px; }
 	.filter-kopf button, .aufgaben-suche input { min-height: 44px; }

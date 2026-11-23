@@ -36,6 +36,7 @@ DATEIEN = ('app.js', 'start.css', 'style.css', 'gemeinsam.css', 'sets.css', 'lan
             'suche.js', 'suche.html', 'ruf-quellen-de.js',
             'ruf-quellen-en.js', 'ruf-quellen-fr.js', 'handwerk.js',
             'stand.js', 'rohstoffe.js',
+            'haendler-karte-de.js', 'haendler-karte-en.js', 'haendler-karte-fr.js',
             'karten-start-de.js', 'karten-start-en.js', 'karten-start-fr.js',
             'karten-start-taten-de.js', 'karten-start-taten-en.js',
             'karten-start-taten-fr.js',

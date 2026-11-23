@@ -91,6 +91,21 @@ class LandmarkenTest(unittest.TestCase):
             self.assertGreaterEqual(eintrag['y'], 0, ident)
             self.assertLessEqual(eintrag['y'], 100, ident)
 
+    def test_mapless_places_use_localised_landblock_names(self):
+        benannt = [entry for entry in self.landmarken.values()
+                   if not entry.get('map') and entry.get('ort')]
+        self.assertGreater(len(benannt), 200)
+        for entry in benannt:
+            self.assertTrue(all((entry['ort'].get(lang) for lang in SPRACHEN)))
+            self.assertTrue(entry.get('kette'))
+            self.assertNotIn('area', entry)
+            self.assertNotIn('region', entry)
+        for entry in self.landmarken.values():
+            if entry.get('bild'):
+                self.assertIsNone(entry.get('map'))
+                self.assertIsNotNone(entry.get('pin_x'))
+                self.assertIsNotNone(entry.get('pin_y'))
+
     def test_a_landmark_without_position_gets_no_pin(self):
         # Nothing is invented: no coordinates, no map, no pin.
         for ident, eintrag in self.landmarken.items():

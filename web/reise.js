@@ -39,6 +39,9 @@
 	var karten = {};
 	var kartenListe = [];
 	var gewaehlt = { von: null, nach: null };
+	// How far a coordinate may be from the next stable before we stop calling it
+	// "the nearest station" (see naechsteStation).
+	var STATION_GRENZE = 10;
 
 	function normal(text) {
 		return String(text == null ? '' : text)
@@ -108,7 +111,11 @@
 			// A dock only sells boat trips; on foot it is rarely the way to go.
 			if (!ort.wasser && d < landAbstand) { landAbstand = d; land = ort; }
 		}
-		return land || bestes;
+		// Without a limit the "nearest" station of an interior coordinate lies
+		// several landscapes away (1.2S 50.7E used to route to the Misty
+		// Mountains). Ten coordinate units are more than any landscape, so a
+		// station beyond that is no answer at all.
+		return abstand <= STATION_GRENZE * STATION_GRENZE ? (land || bestes) : null;
 	}
 
 	/** What the user typed, as a station or as a free position. */
@@ -492,6 +499,13 @@
 		var nachOrt = ziel.ort || naechsteStation(ziel.lat, ziel.lon);
 		routeDaten = null;
 		ergebnisLeeren();
+		// A coordinate far from every stable is usually an interior position; a
+		// route from the closest station anywhere was pure fiction.
+		if ((!start.ort && start.lat !== undefined && !vonOrt) ||
+			(!ziel.ort && ziel.lat !== undefined && !nachOrt)) {
+			fehlerText(t('reise_keine_station'));
+			return;
+		}
 		if (!vonOrt || !nachOrt) { fehlerText(t('reise_kein_weg')); return; }
 
 		var charakter = window.MQL_SPEICHER && window.MQL_SPEICHER.aktiv ? window.MQL_SPEICHER.aktiv() : null;
@@ -582,12 +596,13 @@
 			if (nurZiel && (nurZiel.ort || nurZiel.lat !== undefined)) {
 				var zielOrt = nurZiel.ort || naechsteStation(nurZiel.lat, nurZiel.lon);
 				ergebnisLeeren();
+				if (!zielOrt) { fehlerText(t('reise_keine_station')); return; }
 				ergebnis.appendChild(eltern('h3', t('reise_ergebnis')));
-				ergebnis.appendChild(eltern('p', t('reise_ziel_ist') + ': ' + (zielOrt ? zielOrt.n : ''),
+				ergebnis.appendChild(eltern('p', t('reise_ziel_ist') + ': ' + zielOrt.n,
 					'reise-hinweis'));
 				ergebnis.appendChild(eltern('p', t('reise_start_fehlt')));
 				// The destination alone is worth a map: it answers "where is that?".
-				if (zielOrt) { kartenZeigen([{ ort: zielOrt, art: 'ziel', nr: null }]); }
+				kartenZeigen([{ ort: zielOrt, art: 'ziel', nr: null }]);
 				return;
 			}
 			if (!ergebnis.textContent) { fehlerText(t('reise_start_fehlt')); }

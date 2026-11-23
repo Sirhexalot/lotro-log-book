@@ -74,8 +74,11 @@ class BuiltGiverCatalogueTest(unittest.TestCase):
         for page in pages.values():
             for place in page['places']:
                 self.assertTrue(place['coords'])
-                self.assertTrue(place['travel_url'].startswith('/de/'))
-                if place['image']:
+                if place['map_url']:
+                    self.assertTrue(place['travel_url'].startswith('/de/'))
+                else:
+                    self.assertIsNone(place['travel_url'])
+                if place['image'] and place['travel_url']:
                     self.assertIsNotNone(place['map_url'],
                                          'a map preview without a way to the map')
 

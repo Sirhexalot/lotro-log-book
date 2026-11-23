@@ -40,7 +40,27 @@ def tausch_bestand() -> dict:
     return json.loads(TAUSCH.read_text(encoding='utf-8'))
 
 
+def orte_bestimmen(output: dict, lore) -> None:
+    """Give every place its evidenced location from the client's landblocks.
+
+    `tools/zonen.py` turns the block into room or area, chain and, where the
+    room has a picture, the picture and the pin. Nothing is guessed: a place
+    without a landblock stays without a name.
+    """
+    sys.path.insert(0, str(ROOT / 'tools'))
+    from zonen import anreichern
+
+    anreichern([(int(ident, 16), place)
+                for ident, row in output.items()
+                for place in row['places']])
+
+
 def places(ids: set[str], maps) -> dict[str, list[dict]]:
+    """Every recorded position of an NPC, with its landblock.
+
+    The block (region, block X, block Y) and the cell are what resolve the place
+    later: `tools/zonen.py` reads the area and the room from them.
+    """
     result: dict[str, set[tuple]] = defaultdict(set)
     if POSITIONS.is_file():
         with POSITIONS.open(encoding='utf-8') as handle:
@@ -49,12 +69,16 @@ def places(ids: set[str], maps) -> dict[str, list[dict]]:
                 if row.get('did') in ids and row.get('instance') == 0:
                     if row.get('latitude') is not None and row.get('longitude') is not None:
                         lat, lon = float(row['latitude']), float(row['longitude'])
-                        result[row['did']].add((int(row.get('region') or 0), lat, lon))
+                        zelle = int(str(row.get('cell') or '0'), 16)
+                        result[row['did']].add((int(row.get('region') or 0), lat, lon,
+                                                int(row.get('block_x') or 0),
+                                                int(row.get('block_y') or 0), zelle))
     out = {}
     for ident in ids:
         rows = []
-        for region, lat, lon in sorted(result.get(ident, ())):
+        for region, lat, lon, bx, by, zelle in sorted(result.get(ident, ())):
             rows.append({'region': region, 'lat': round(lat, 5), 'lon': round(lon, 5),
+                         'block': [region, bx, by, zelle],
                          'map': maps.attribute(lat, lon, region)})
         out[ident] = rows
     return out
@@ -159,7 +183,12 @@ def main() -> int:
     maps = GameMaps(Path.home() / 'Applications/LOTRO-Companion-Test/LotRO Companion/app/data/lore')
     # Auch reine Tauschhändler stehen im Positions-Export: 817 von 818.
     spots = places(set(vendors) | nur_barter, maps)
-    known = {str(row['idx']) for row in json.loads(MAPS.read_text(encoding='utf-8'))}
+    karten = json.loads(MAPS.read_text(encoding='utf-8'))
+    # Eine Regionsübersicht (Stufe 1, z. B. Eriador) ist keine Landschaft: die
+    # Kartenanwendung öffnet sie nicht, und ihr großer Rahmen fängt
+    # Innenraum-Koordinaten ein, die eigentlich in einen Raum gehören
+    # (Thorins Halle, unfertige Client-Inhalte). Ein Punkt darauf wäre erfunden.
+    known = {str(row['idx']) for row in karten if (row.get('tier') or 0) != 1}
     output = {}
     for ident, vendor in vendors.items():
         props = (raw.get(ident) or {}).get('properties') or {}
@@ -208,6 +237,7 @@ def main() -> int:
     if tausch:
         payload['barterProfiles'] = barter_profiles
         payload['barterNames'] = tausch.get('names') or {}
+    orte_bestimmen(output, LORE)
     ziel = getattr(args, 'ziel', None) or (ROOT / 'daten/haendler.json')
     ziel.parent.mkdir(parents=True, exist_ok=True)
     ziel.write_text(
@@ -218,6 +248,10 @@ def main() -> int:
               'mit Standort:', sum(bool(row['places']) for row in output.values()),
               'mit Karte:', sum(any(place['map'] is not None for place in row['places'])
                                 for row in output.values()),
+              'mit Raum:', sum(any(place.get('ort') for place in row['places'])
+                                for row in output.values()),
+              'mit Gebietskette:',
+              sum(any(place.get('kette') for place in row['places']) for row in output.values()),
               'mit Web-Items:', sum(bool(row['items']) for row in output.values()),
               'davon Tauschhändler:', sum(row['type'] == 'barter' for row in output.values()),
               'mit Angeboten:', sum(bool(row.get('offers')) for row in output.values()))

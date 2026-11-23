@@ -171,6 +171,12 @@ def baue(export: Path) -> dict:
             karte = gemeinsame_karte(gruppen, plaetze[ident])
         if ort:
             seite['lat'], seite['lon'], seite['game_region'] = lat, lon, ort.get('region')
+            seite['block'] = [
+                int(ort.get('region') or 0),
+                int(ort.get('block_x') or 0),
+                int(ort.get('block_y') or 0),
+                int(str(ort.get('cell') or '0'), 16),
+            ]
             if karte:
                 breite = karte['east'] - karte['west']
                 hoehe = karte['north'] - karte['south']
@@ -182,6 +188,12 @@ def baue(export: Path) -> dict:
         else:
             ohne_ort += 1
         seiten[ident] = seite
+
+    # Use the same client landblock resolver as vendors and quest givers.
+    import sys
+    sys.path.insert(0, str(HIER / 'tools'))
+    from zonen import anreichern
+    anreichern([(int(ident, 16), seite) for ident, seite in seiten.items()])
 
     return {'schema': 1, 'landmarken': seiten,
             'zaehler': {'gesamt': len(seiten), 'ohne_ort': ohne_ort,
