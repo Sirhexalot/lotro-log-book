@@ -6,6 +6,7 @@
     "require": {
         "php": ">=8.1",
         "ext-json": "*",
+        "jaybizzle/crawler-detect": "^1.4",
         "phpmailer/phpmailer": "^6.10",
         "twig/twig": "^3.8"
     },

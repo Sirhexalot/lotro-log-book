@@ -35,6 +35,10 @@ class ComposerStaticInit9ea7f741f588c70e9c81da7252e6d03b
         array (
             'Llb\\' => 4,
         ),
+        'J' =>
+        array (
+            'Jaybizzle\\CrawlerDetect\\' => 24,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -58,14 +62,25 @@ class ComposerStaticInit9ea7f741f588c70e9c81da7252e6d03b
         array (
             0 => __DIR__ . '/../..' . '/php/src',
         ),
+        'Jaybizzle\\CrawlerDetect\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src',
+        ),
     );
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Jaybizzle\\CrawlerDetect\\CrawlerDetect' => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src/CrawlerDetect.php',
+        'Jaybizzle\\CrawlerDetect\\Fixtures\\AbstractProvider' => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src/Fixtures/AbstractProvider.php',
+        'Jaybizzle\\CrawlerDetect\\Fixtures\\Crawlers' => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src/Fixtures/Crawlers.php',
+        'Jaybizzle\\CrawlerDetect\\Fixtures\\Exclusions' => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src/Fixtures/Exclusions.php',
+        'Jaybizzle\\CrawlerDetect\\Fixtures\\Headers' => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src/Fixtures/Headers.php',
         'Llb\\Adventures' => __DIR__ . '/../..' . '/php/src/Adventures.php',
         'Llb\\Catalogue' => __DIR__ . '/../..' . '/php/src/Catalogue.php',
         'Llb\\Data' => __DIR__ . '/../..' . '/php/src/Data.php',
         'Llb\\Factions' => __DIR__ . '/../..' . '/php/src/Factions.php',
+        'Llb\\Feedback' => __DIR__ . '/../..' . '/php/src/Feedback.php',
+        'Llb\\FilterModel' => __DIR__ . '/../..' . '/php/src/FilterModel.php',
         'Llb\\FilterRegeln' => __DIR__ . '/../..' . '/php/src/FilterRegeln.php',
         'Llb\\Givers' => __DIR__ . '/../..' . '/php/src/Givers.php',
         'Llb\\Instances' => __DIR__ . '/../..' . '/php/src/Instances.php',
@@ -76,6 +91,7 @@ class ComposerStaticInit9ea7f741f588c70e9c81da7252e6d03b
         'Llb\\Sets' => __DIR__ . '/../..' . '/php/src/Sets.php',
         'Llb\\Shell' => __DIR__ . '/../..' . '/php/src/Shell.php',
         'Llb\\Sitemap' => __DIR__ . '/../..' . '/php/src/Sitemap.php',
+        'Llb\\Sortierung' => __DIR__ . '/../..' . '/php/src/Sortierung.php',
         'Llb\\Sprache' => __DIR__ . '/../..' . '/php/src/Sprache.php',
         'Llb\\Statistics' => __DIR__ . '/../..' . '/php/src/Statistics.php',
         'Llb\\Titles' => __DIR__ . '/../..' . '/php/src/Titles.php',

@@ -14,10 +14,23 @@ namespace Llb;
 final class Statistics
 {
     private const START_IMPORTS = 150;
-    private const PRESENCE_TTL = 1080;
+    /** Five minutes: two heartbeats may be missed before a visitor drops out. */
+    private const PRESENCE_TTL = 300;
 
     public function __construct(private string $file)
     {
+    }
+
+    /**
+     * Anonymous visitor key without a cookie: a daily salted hash of address
+     * and browser string. The salt is the date, so the key cannot link one
+     * visitor across days, and the stored entry expires after five minutes.
+     */
+    public static function visitorKey(array $server): string
+    {
+        $ip = (string) ($server['REMOTE_ADDR'] ?? '');
+        $agent = (string) ($server['HTTP_USER_AGENT'] ?? '');
+        return 'v4-' . substr(hash('sha256', $ip . '|' . $agent . '|' . gmdate('Y-m-d')), 0, 32);
     }
 
     public function heartbeat(string $visitor): array
@@ -25,7 +38,7 @@ final class Statistics
         return $this->change(function (array $state) use ($visitor): array {
             $now = time();
             $this->clean($state, $now);
-            if (str_starts_with($visitor, 'v3-') && strlen($visitor) <= 100) {
+            if (str_starts_with($visitor, 'v4-') && strlen($visitor) <= 100) {
                 $state['visitors'][$visitor] = $now;
             }
             return [$state, $this->result($state, $now)];

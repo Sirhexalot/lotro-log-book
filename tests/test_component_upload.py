@@ -92,8 +92,12 @@ class FakeFTP:
 
 
 class ComponentUploadTests(unittest.TestCase):
-    def test_worker_limit_never_exceeds_four(self):
-        self.assertEqual(UPLOAD.MAX_WORKERS, 4)
+    def test_worker_limit_allows_eight_and_defaults_to_four(self):
+        # Four connections are the proven default; eight are allowed on
+        # explicit instruction (the classic upload keeps one per worker).
+        self.assertEqual(UPLOAD.MAX_WORKERS, 8)
+        quelle = (ROOT / 'upload.py').read_text(encoding='utf-8')
+        self.assertIn('choices=range(1, MAX_WORKERS + 1), default=4', quelle)
 
     def setUp(self):
         FakeFTP.instances.clear()

@@ -24,7 +24,13 @@ ROOT = Path(__file__).resolve().parents[1]
 PORT = 8817
 CACHE = Path.home() / '.cache' / 'llb-php' / 'twig'
 DATA = Path.home() / '.cache' / 'llb-php' / 'phpdata'
-VENDOR = Path.home() / '.cache' / 'llb-php' / 'vendor'
+# The release copies the repository's vendor/, so the preview uses the same
+# install: a package added with composer is never only in one of them. A
+# checkout without dependencies (vendor/ is mostly ignored) falls back to the
+# prepared install under ~/.cache.
+VENDOR = ROOT / 'vendor'
+if not (VENDOR / 'autoload.php').is_file():
+    VENDOR = Path.home() / '.cache' / 'llb-php' / 'vendor'
 
 
 def port_belegt() -> bool:

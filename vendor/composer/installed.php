@@ -3,13 +3,22 @@
         'name' => 'sirhexalot/lotro-log-book',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'c1e7fe3a02c135b4593f5d2e33ea321fd1141c9c',
+        'reference' => '174d46a411890257c519725c7614c332217f7531',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'dev' => true,
     ),
     'versions' => array(
+        'jaybizzle/crawler-detect' => array(
+            'pretty_version' => 'v1.4.3',
+            'version' => '1.4.3.0',
+            'reference' => '1a667c348758a38aa7ab82d596bdc11e2da63002',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../jaybizzle/crawler-detect',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'phpmailer/phpmailer' => array(
             'pretty_version' => 'v6.12.0',
             'version' => '6.12.0.0',
@@ -22,7 +31,7 @@
         'sirhexalot/lotro-log-book' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'c1e7fe3a02c135b4593f5d2e33ea321fd1141c9c',
+            'reference' => '174d46a411890257c519725c7614c332217f7531',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
