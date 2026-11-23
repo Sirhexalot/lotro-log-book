@@ -53,10 +53,10 @@
 {% if related_lists|default([]) %}
 <script type="application/json" id="related-lists">{{ related_json|raw }}</script>
 <script type="application/json" id="related-list-symbols">{{ related_icons_json|raw }}</script>
-{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','listen-sprache.js','referenz.js','symbole.js','treffer-zeile.js','treffer-tabelle.js','handwerk-filter.js','rezepte.js','gegenstaende-filter.js','aufgaben-filter.js','entitaeten-listen.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
+{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','listen-sprache.js','referenz.js','symbole.js','treffer-zeile.js','treffer-tabelle.js','handwerk-filter.js','rezepte.js','gegenstaende-filter.js','listen/aufgaben.js','aufgaben-filter.js','entitaeten-listen.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
 {% endif %}
 {% if index_filter|default(false) %}
-{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','filterzustand.js','filteradapter.js','filter-ui.js','symbole.js','treffer-zeile.js','treffer-tabelle.js','aufgaben-filter.js','taten-index.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
+{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','filterzustand.js','filteradapter.js','filter-ui.js','symbole.js','treffer-zeile.js','treffer-tabelle.js','listen/aufgaben.js','aufgaben-filter.js','taten-index.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
 <script src="/taten-index-{{ lang }}.js?v={{ asset_stand }}" defer></script>
 <script src="/taten-index.js?v={{ asset_stand }}" defer></script>
 {% endif %}

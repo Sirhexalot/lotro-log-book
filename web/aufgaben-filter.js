@@ -51,6 +51,8 @@
 	window.MQL_TASK_FILTER_SETUP = function (rows, kind, options) {
 		options = options || {};
 		var lang = document.documentElement.lang, A = window.MQL_FILTERADAPTER, w = WORDS[lang] || WORDS.de;
+		var L = (window.MQL_LISTEN || {}).aufgaben || null;
+		var liste = L ? (kind === 'd' ? L.deeds : L.quests) : null;
 		var progress = window.MQL_STATUS_UI?.words?.(lang) || {progress:'Fortschritt',all:'Alle',open:'Nicht begonnen',running:'Begonnen',done:'Erledigt'};
 		var labels = {};
 		['search', 'filter', 'close', 'sort', 'reset', 'more', 'count', 'show', 'loading', 'error',
@@ -154,17 +156,27 @@
 				options: ['all', 'open', 'running', 'done'].map(function (key) {
 					return {value:key,label:progress[key],keepVisible:true};
 				}) });
+		// The definition owns the visible order; an id it does not name is dropped.
+		if (liste && liste.filter) {
+			var nachId = {};
+			groups.forEach(function (group) { nachId[group.id] = group; });
+			groups = liste.filter.map(function (id) { return nachId[id]; }).filter(Boolean);
+		}
 
 		var filters = {};
 		groups.forEach(function (g) {
 			filters[g.id] = g.kind === 'single' ? 'all' : g.kind === 'range' ? { min: null, max: null } : [];
 		});
+		var sortErlaubt = (liste && liste.sortierung && liste.sortierung.erlaubt) || ['name', 'level'];
+		var ersteRichtung = (liste && liste.sortierung && liste.sortierung.ersteRichtung) || {name: 'asc', level: 'asc'};
+		var sortStandard = (liste && liste.sortierung && liste.sortierung.standard) || 'name';
+		var groesse = (liste && liste.blaettern && liste.blaettern.groesse) || 50;
 		/* The column head sends key and direction; `levelDesc` is the old
 		 * select value and stays readable for bookmarks. */
 		var sortVorgabe = (function () {
 			if (options.defaultSort === 'levelDesc') { return { key: 'level', dir: 'desc' }; }
 			if (options.defaultSort === 'level') { return { key: 'level', dir: 'asc' }; }
-			return { key: 'name', dir: 'asc' };
+			return { key: sortStandard, dir: ersteRichtung[sortStandard] || 'asc' };
 		})();
 		function sortLesen(roh) {
 			if (roh === 'levelDesc') { return { key: 'level', dir: 'desc' }; }
@@ -176,12 +188,12 @@
 			area: kind === 'd' ? 'taten' : 'aufgaben', lang: lang, labels: labels,
 			rootUrl: location.origin + location.pathname, groups: groups,
 			search: { submit: 'debounce', debounceMs: 200 },
-			sort: { keys: ['name', 'level'], ersteRichtung: { name: 'asc', level: 'asc' }, options: [] },
-			pagination: { kind: 'limit', size: 50 },
+			sort: { keys: sortErlaubt, ersteRichtung: ersteRichtung, options: [] },
+			pagination: { kind: 'limit', size: groesse },
 			defaults: function () {
 				return { q: '', filters: JSON.parse(JSON.stringify(filters)),
 					sort: sortVorgabe.key, sortDir: sortVorgabe.dir,
-					pagination: { kind: 'limit', limit: 50 } };
+					pagination: { kind: 'limit', limit: groesse } };
 			}
 		};
 

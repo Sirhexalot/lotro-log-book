@@ -16,6 +16,7 @@
 	}
 	function mount(root, quests, selectQuest) {
 		var lang = document.documentElement.lang, w = labels[lang] || labels.de, topics = topicNames[lang] || topicNames.de;
+		var L = (window.MQL_LISTEN || {}).aufgabenfinder || null;
 		var progressFallback = {
 			de:{progress:'Fortschritt',all:'Alle',open:'Nicht begonnen',running:'Begonnen',done:'Erledigt',available:'Voraussetzungen erfüllt'},
 			en:{progress:'Progress',all:'All',open:'Not started',running:'In progress',done:'Completed',available:'Requirements met'},
@@ -148,10 +149,19 @@
 		groups.forEach(function (group) { groupsById[group.id] = group; });
 		groups = [statusGroup,groupsById.level,groupsById.geography,groupsById.topic,
 			groupsById.class,groupsById.origin,groupsById.flag];
+		// The definition owns the visible order; an id it does not name is dropped.
+		if (L && L.filter) {
+			var geordnet = {};
+			groups.forEach(function (group) { geordnet[group.id] = group; });
+			groups = L.filter.map(function (id) { return geordnet[id]; }).filter(Boolean);
+		}
+		var sortErlaubt = (L && L.sortierung && L.sortierung.erlaubt) || ['name','level'];
+		var ersteRichtung = (L && L.sortierung && L.sortierung.ersteRichtung) || {name:'asc',level:'asc'};
+		var groesse = (L && L.blaettern && L.blaettern.groesse) || 50;
 		var defaults = function () {
 			var filters = {topic:[],class:[],origin:[],geography:[],flag:[],level:{min:null,max:null}};
 			filters.status = 'all';
-			return {q:'',filters:filters,sort:'name',sortDir:'asc',pagination:{kind:'limit',limit:50}};
+			return {q:'',filters:filters,sort:'name',sortDir:'asc',pagination:{kind:'limit',limit:groesse}};
 		};
 		var fields = [{param:'q',path:['q']}];
 		groups.forEach(function (group) {
@@ -174,8 +184,8 @@
 		var config = {
 			area:'karten-aufgabenfinder',lang:lang,labels:Object.assign({},w),rootUrl:location.origin+location.pathname,groups:groups,
 			search:{submit:'debounce',debounceMs:180},
-			sort:{keys:['name','level'],ersteRichtung:{name:'asc',level:'asc'},options:[]},
-			pagination:{kind:'limit',size:50},
+			sort:{keys:sortErlaubt,ersteRichtung:ersteRichtung,options:[]},
+			pagination:{kind:'limit',size:groesse},
 			defaults:defaults,
 			urlCodec:{
 				decode:function (url) {

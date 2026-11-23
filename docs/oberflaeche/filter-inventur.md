@@ -161,7 +161,7 @@ twice.
 | --- | --- | --- | --- |
 | A Cleanup | order and wording only, scheduled run 22.11.2026 23:00, no commit | `web/aufgaben-filter.js`, `givers/list.twig`, `titles/list.twig`, texts, vendor and instance labels | marked as a transition step |
 | B Reference | item search: configuration, table head, sorting, scrolling | `web/listen/gegenstaende.js`, `treffer-tabelle.js`, `filter-ui.js`, `filterzustand.js`, `gegenstaende-filter.js`, CSS | result axis and the reference state |
-| C Rollout | quest/deed lists, crafting, class profile; the filter order moves into the configuration | `aufgaben-filter.js`, `handwerk-filter.js`, `klassen.js`, `klassenprofil.md` | the order as end state |
+| C Rollout | quest/deed lists, crafting, class profile; the filter order moves into the configuration | `aufgaben-filter.js`, `handwerk-filter.js`, `klassen.js`, `klassenprofil.md` | quests/deeds and finder done, crafting open |
 | D Server lists | PHP model as `data-filter-model`, Twig renders from it, scraping goes | `php/src/*`, `php/templates/*`, `filter-server.js` | one paging mode |
 | E Contract test | configuration against the entity JSON | `tests/test_listen_config.py` | deviations become findings |
 
@@ -169,6 +169,10 @@ B is implemented locally on 22.11.2026: `web/listen/gegenstaende.js`,
 `web/treffer-tabelle.js`, the sort direction in `filterzustand.js`, head clicks
 and scrolling in `filter-ui.js`. Not published. Step A still changes no
 component, no adapter and no state module.
+
+The order of the quest/deed lists and the finder stands in
+`web/listen/aufgaben.js` and `web/listen/aufgabenfinder.js`; the modules only
+build the groups and listen to the definition.
 
 ## Step 1 - cleanup (safe, no new data)
 
