@@ -517,6 +517,10 @@ def verwaiste_dateien(fern, lokal):
             continue
         if pfad.split('/', 1)[0] in SCHONEN:
             continue
+        # The deployment state, journal and lock belong to the server and are
+        # never part of a build; a cleanup run must not remove them.
+        if pfad.startswith('.llb-') or '/.llb-' in pfad:
+            continue
         aus.append(pfad)
     return aus
 

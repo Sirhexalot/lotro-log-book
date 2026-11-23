@@ -53,8 +53,11 @@ class UploadTests(unittest.TestCase):
 
     def test_orphans_skip_the_keep_list(self):
         fern = {'.htaccess': 900, 'cgi-bin/x.php': 10, 'app.js': 5,
-                'alt/app.js': 5, 'app 2.js': 5}
+                'alt/app.js': 5, 'app 2.js': 5,
+                '.llb-deployment.json': 400, '.llb-upload.lock/owner.json': 40}
         lokal = {'app.js'}
+        # The deployment state, journal and lock belong to the server, never to
+        # a build; a cleanup run must not delete them.
         self.assertEqual(UPLOAD.verwaiste_dateien(fern, lokal),
                          ['alt/app.js', 'app 2.js'])
 
