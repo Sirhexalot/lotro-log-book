@@ -3,6 +3,21 @@
 	'use strict';
 	function copy(value) { return JSON.parse(JSON.stringify(value)); }
 	/** Sort keys a list offers: its column keys or its select options. */
+	/** Every selectable value of a group, including nested options that name it
+	 *  through `groupId` (the area leaves of a geography tree). */
+	function groupOptions(config, group) {
+		var out = (group.options || []).slice();
+		function walk(list) {
+			(list || []).forEach(function (option) {
+				if (option.groupId === group.id && !out.some(function (o) { return o.value === option.value; })) {
+					out.push(option);
+				}
+				if (option.children) { walk(option.children); }
+			});
+		}
+		(config.groups || []).forEach(function (g) { walk(g.options); });
+		return out;
+	}
 	function sortKeys(config) {
 		if (!config.sort) { return []; }
 		if (config.sort.keys) { return config.sort.keys; }
@@ -37,7 +52,7 @@
 				if (valid) { state.filters[group.id] = range; }
 				else { notices.push({groupId: group.id, code: 'invalid-range'}); }
 			} else {
-				var options = group.options || [];
+				var options = group.kind === 'multi' ? groupOptions(config, group) : (group.options || []);
 				if (group.kind === 'multi') {
 					state.filters[group.id] = options.map(function (o) { return o.value; }).filter(function (v) {
 						return Array.isArray(value) && value.indexOf(v) >= 0;
@@ -152,8 +167,9 @@
 					action: {type: group.kind === 'range' ? 'setRange' : 'setValues', groupId: group.id, value: replacement}});
 			}
 			if (group.kind === 'multi' || group.kind === 'tree') {
+				var options = group.kind === 'multi' ? groupOptions(config, group) : (group.options || []);
 				(value || []).forEach(function (v, i) {
-					var option = (group.options || []).find(function (o) { return o.value === v; });
+					var option = options.find(function (o) { return o.value === v; });
 					var label = group.kind === 'tree' ? group.pathLabel(v) : (option.chipLabel || option.label);
 					add(JSON.stringify(v), label, value.filter(function (_, n) { return n !== i; }));
 				});

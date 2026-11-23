@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Llb;
 
+require_once __DIR__ . '/FilterModel.php';
 require_once __DIR__ . '/Sortierung.php';
 
 /**
@@ -36,7 +37,7 @@ final class Givers
     {
         return [
             'de' => [
-                'title' => 'Auftraggeber', 'intro' => 'Wer welche Aufgaben vergibt – mit Standort, Karte und allen zugehörigen Aufgaben.',
+                'title' => 'Auftraggeber', 'name' => 'Name', 'intro' => 'Wer welche Aufgaben vergibt – mit Standort, Karte und allen zugehörigen Aufgaben.',
                 'search' => 'Auftraggeber oder Aufgabe suchen', 'filter' => 'Filter', 'apply' => 'Anwenden',
                 'reset' => 'Zurücksetzen', 'region' => 'Region', 'area' => 'Landschaft',
                 'kind' => 'Art', 'level' => 'Aufgabenstufe', 'from' => 'Von', 'to' => 'Bis',
@@ -66,7 +67,7 @@ final class Givers
                 'back' => 'Alle Auftraggeber', 'unnamed' => 'Name nicht belegt',
             ],
             'en' => [
-                'title' => 'Quest givers', 'intro' => 'Who gives which quests – with location, map and every related quest.',
+                'title' => 'Quest givers', 'name' => 'Name', 'intro' => 'Who gives which quests – with location, map and every related quest.',
                 'search' => 'Search for a quest giver or quest', 'filter' => 'Filters', 'apply' => 'Apply',
                 'reset' => 'Reset', 'region' => 'Region', 'area' => 'Landscape',
                 'kind' => 'Type', 'level' => 'Quest level', 'from' => 'From', 'to' => 'To',
@@ -96,7 +97,7 @@ final class Givers
                 'back' => 'All quest givers', 'unnamed' => 'Name not recorded',
             ],
             'fr' => [
-                'title' => 'Donneurs de quête', 'intro' => 'Qui donne quelles quêtes – avec lieu, carte et toutes les quêtes associées.',
+                'title' => 'Donneurs de quête', 'name' => 'Nom', 'intro' => 'Qui donne quelles quêtes – avec lieu, carte et toutes les quêtes associées.',
                 'search' => 'Chercher un donneur de quête ou une quête', 'filter' => 'Filtres', 'apply' => 'Appliquer',
                 'reset' => 'Réinitialiser', 'region' => 'Région', 'area' => 'Pays',
                 'kind' => 'Type', 'level' => 'Niveau de quête', 'from' => 'De', 'to' => 'À',
@@ -182,9 +183,9 @@ final class Givers
      * Name or quest level. A giver without a recorded level sorts last; equal
      * levels fall back to the name. Sorting happens before pagination.
      */
-    public static function sorted(array $rows, string $sort): array
+    public static function sorted(array $rows, string $sort, string $dir = 'asc'): array
     {
-        usort($rows, static function (array $a, array $b) use ($sort): int {
+        usort($rows, static function (array $a, array $b) use ($sort, $dir): int {
             if ($sort === 'stufe') {
                 $al = $a['low'];
                 $bl = $b['low'];
@@ -195,7 +196,7 @@ final class Givers
                     return -1;
                 }
                 if ($al !== $bl) {
-                    return $al <=> $bl;
+                    return ($al <=> $bl) * ($dir === 'desc' ? -1 : 1);
                 }
             }
             return Sortierung::name($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']);
@@ -223,26 +224,28 @@ final class Givers
             $out[$key] = is_scalar($value) && preg_match('/^\d{1,3}$/', (string) $value)
                 ? (string) (int) $value : '';
         }
-        $sort = $input['sort'] ?? '';
-        $out['sort'] = $sort === 'stufe' ? 'stufe' : '';
         // A region id is an integer in the index; keep the query strings equal.
         $out['region'] = array_map('intval', $out['region']);
         $out['area'] = array_map('intval', array_filter($out['area']));
         return $out;
     }
 
-    private function params(array $f, int $page = 1): array
+    private function params(array $f, int $page = 1, string $sort = 'name', string $dir = 'asc'): array
     {
         $params = array_filter($f, static fn ($value) => $value !== '' && $value !== []);
         if ($page > 1) {
             $params['page'] = $page;
         }
+        if ($sort !== 'name' || $dir === 'desc') {
+            $params['sort'] = ($dir === 'desc' ? '-' : '') . $sort;
+        }
         return $params;
     }
 
-    private function url(array $filters, int $page = 1, ?string $lang = null): string
+    private function url(array $filters, int $page = 1, ?string $lang = null,
+                         string $sort = 'name', string $dir = 'asc'): string
     {
-        $params = $this->params($filters, $page);
+        $params = $this->params($filters, $page, $sort, $dir);
         return $this->catalogue->appRoute($lang ?? $this->lang, 'givers')
             . ($params ? '?' . http_build_query($params) : '');
     }
@@ -288,8 +291,19 @@ final class Givers
         $labels = $index['labels'];
         $rows = $index['givers'];
         $filters = $this->query($input, $labels);
+        $sort = 'name';
+        $sort_dir = 'asc';
+        $raw_sort = is_string($input['sort'] ?? '') ? trim($input['sort'] ?? '') : '';
+        if ($raw_sort !== '') {
+            $key = str_starts_with($raw_sort, '-') ? substr($raw_sort, 1) : $raw_sort;
+            if (!in_array($key, ['name', 'stufe'], true)) {
+                return null;
+            }
+            $sort = $key;
+            $sort_dir = str_starts_with($raw_sort, '-') ? 'desc' : 'asc';
+        }
         $selected = array_values(array_filter($rows, fn ($row) => self::matches($row, $filters)));
-        $selected = self::sorted($selected, $filters['sort']);
+        $selected = self::sorted($selected, $sort, $sort_dir);
         $pages = max(1, (int) ceil(count($selected) / self::PAGE_SIZE));
         $page = is_scalar($input['page'] ?? 1) ? filter_var($input['page'] ?? 1, FILTER_VALIDATE_INT) : false;
         if ($page === false || $page < 1 || $page > $pages) {
@@ -311,7 +325,13 @@ final class Givers
                 $checked = in_array($key, ['region', 'area'], true)
                     ? in_array((int) $value, $filters[$key], true)
                     : in_array($value, $filters[$key], true);
-                if ($count || $checked) {
+                $holds_checked_area = $key === 'region' && array_reduce(
+                    $filters['area'],
+                    static fn (bool $found, $area): bool => $found
+                        || (string) ($labels['area_region'][(string) $area] ?? '') === (string) $value,
+                    false
+                );
+                if ($count || $checked || $holds_checked_area) {
                     $label = $key === 'region' || $key === 'area'
                         ? ($labels[$key][$value] ?? $value) : self::label($words, $value);
                     $options[] = compact('value', 'label', 'count', 'checked');
@@ -360,24 +380,103 @@ final class Givers
             $row['meta'] = implode(' · ', $parts);
         }
         unset($row);
+
+        $has_levels = (bool) array_filter($selected, static fn (array $row): bool => $row['low'] !== null);
+        $toOption = static fn (array $option): array => [
+            'value' => (string) $option['value'],
+            'label' => $option['label'],
+            'count' => (int) $option['count'],
+            'checked' => (bool) $option['checked'],
+        ];
+        $region_options = [];
+        foreach ($facets['region'] as $entry) {
+            $children = array_map(
+                static fn (array $child): array => $toOption($child) + ['groupId' => 'area'],
+                $area_by_region[(string) $entry['value']] ?? []
+            );
+            $region_options[] = $toOption($entry) + ['children' => $children];
+        }
+        $columns = [['label' => $words['name'], 'sortierung' => 'name']];
+        $sort_keys = ['name'];
+        if ($has_levels) {
+            $columns[] = ['label' => $words['level_short'], 'sortierung' => 'stufe', 'zahl' => true];
+            $sort_keys[] = 'stufe';
+        }
+        $definition = [
+            'area' => 'auftraggeber',
+            'lang' => $this->lang,
+            'groups' => [
+                ['id' => 'region', 'kind' => 'multi', 'label' => $words['wo'],
+                 'options' => $region_options],
+                ['id' => 'area', 'kind' => 'multi', 'label' => $words['area'], 'nestedOnly' => true,
+                 'options' => array_map($toOption, $area_rest)],
+                ['id' => 'kind', 'kind' => 'multi', 'label' => $words['kind'],
+                 'options' => array_map($toOption, $facets['kind'])],
+                ['id' => 'level', 'kind' => 'range', 'label' => $words['level'],
+                 'paramMin' => 'from', 'paramMax' => 'to', 'min' => 0, 'max' => 999],
+                ['id' => 'tag', 'kind' => 'multi', 'label' => $words['tag'],
+                 'options' => array_map($toOption, $facets['tag'])],
+            ],
+            'sort' => ['standard' => 'name', 'keys' => $sort_keys,
+                       'ersteRichtung' => ['name' => 'asc', 'stufe' => 'asc'], 'options' => []],
+            'columns' => $columns,
+            'pagination' => ['kind' => 'page', 'size' => self::PAGE_SIZE],
+            'countLabel' => $words['count'],
+        ];
+        $model_facets = [];
+        foreach (['region', 'area', 'kind', 'tag'] as $id) {
+            $model_facets[$id] = array_map(
+                static fn (array $option): array =>
+                    ['value' => (string) $option['value'], 'count' => (int) $option['count']],
+                $facets[$id] ?? []
+            );
+        }
+        $model = FilterModel::response(
+            $definition,
+            [
+                'q' => $filters['q'],
+                'filters' => [
+                    'region' => array_map('strval', $filters['region']),
+                    'area' => array_map('strval', $filters['area']),
+                    'kind' => array_values($filters['kind']),
+                    'tag' => array_values($filters['tag']),
+                    'level' => [
+                        'min' => $filters['from'] === '' ? null : (int) $filters['from'],
+                        'max' => $filters['to'] === '' ? null : (int) $filters['to'],
+                    ],
+                ],
+                'sort' => $sort,
+                'sortDir' => $sort_dir,
+                'pagination' => ['kind' => 'page', 'page' => $page],
+            ],
+            $model_facets,
+            count($selected),
+            ['kind' => 'page', 'page' => $page, 'pages' => $pages, 'hasMore' => $page < $pages],
+        );
+
         $alternates = array_map(
-            fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang)],
+            fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang, $sort, $sort_dir)],
             Catalogue::LANGS);
         return $this->view->render('givers/list.twig', $this->context(
             // Folgeseiten nennen ihre Seite, sonst tragen sie den Text der ersten.
             $page > 1 ? $words['title'] . ' – ' . sprintf($words['page'], $page, $pages) : $words['title'],
             $page > 1 ? $words['intro'] . ' ' . sprintf($words['page'], $page, $pages) . '.' : $words['intro'],
-            $this->url($filters, $page), $alternates,
-            (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
+            $this->url($filters, $page, null, $sort, $sort_dir), $alternates,
+            $sort_dir === 'desc' || (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
         ) + [
             'filters' => $filters, 'facets' => $facets, 'givers' => $page_rows,
             'area_by_region' => $area_by_region, 'area_rest' => $area_rest,
-            'sort_name_url' => $this->url(array_merge($filters, ['sort' => '']), 1),
-            'sort_level_url' => $this->url(array_merge($filters, ['sort' => 'stufe']), 1),
-            'sort_active' => $filters['sort'],
+            'has_levels' => $has_levels,
+            'sort_key' => $sort,
+            'sort_dir' => $sort_dir,
+            'sort_name_url' => $this->url($filters, 1, null, 'name',
+                $sort === 'name' && $sort_dir === 'asc' ? 'desc' : 'asc'),
+            'sort_level_url' => $this->url($filters, 1, null, 'stufe',
+                $sort === 'stufe' && $sort_dir === 'asc' ? 'desc' : 'asc'),
+            'filter_model_json' => FilterModel::json($model),
             'count' => count($selected), 'page_label' => sprintf($words['page'], $page, $pages),
-            'previous_url' => $page > 1 ? $this->url($filters, $page - 1) : null,
-            'next_url' => $page < $pages ? $this->url($filters, $page + 1) : null,
+            'previous_url' => $page > 1 ? $this->url($filters, $page - 1, null, $sort, $sort_dir) : null,
+            'next_url' => $page < $pages ? $this->url($filters, $page + 1, null, $sort, $sort_dir) : null,
         ]);
     }
 

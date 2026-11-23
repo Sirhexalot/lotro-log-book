@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Llb;
 
+require_once __DIR__ . '/FilterModel.php';
 require_once __DIR__ . '/Sortierung.php';
 
 /**
@@ -27,7 +28,7 @@ final class Instances
     {
         return [
             'de' => [
-                'title' => 'Instanzenfinder', 'intro' => 'Finde Instanzen, Schlachtzüge, Scharmützel und epische Schlachten für deine Stufe und Gruppengröße.',
+                'title' => 'Instanzenfinder', 'name' => 'Name', 'intro' => 'Finde Instanzen, Schlachtzüge, Scharmützel und epische Schlachten für deine Stufe und Gruppengröße.',
                 'cluster' => 'Instanzgruppe', 'no_cluster' => 'Ohne Gruppe',
                 'difficulty' => 'Schwierigkeit', 'tier' => 'T%s',
                 'type_scharmuetzel' => 'Scharmützel', 'type_schlacht' => 'Epische Schlacht', 'type_team' => 'Team',
@@ -60,7 +61,7 @@ final class Instances
                 'condition_level' => 'Stufe %s', 'condition_tier' => 'T%s',
             ],
             'en' => [
-                'title' => 'Instance Finder', 'intro' => 'Find instances, raids, skirmishes and epic battles for your level and group size.',
+                'title' => 'Instance Finder', 'name' => 'Name', 'intro' => 'Find instances, raids, skirmishes and epic battles for your level and group size.',
                 'cluster' => 'Instance group', 'no_cluster' => 'No group',
                 'difficulty' => 'Difficulty', 'tier' => 'T%s',
                 'type_scharmuetzel' => 'Skirmish', 'type_schlacht' => 'Epic battle', 'type_team' => 'Team',
@@ -93,7 +94,7 @@ final class Instances
                 'condition_level' => 'Level %s', 'condition_tier' => 'T%s',
             ],
             'fr' => [
-                'title' => 'Recherche d’instances', 'intro' => 'Trouvez des instances, raids, escarmouches et batailles épiques selon votre niveau et la taille de votre groupe.',
+                'title' => 'Recherche d’instances', 'name' => 'Nom', 'intro' => 'Trouvez des instances, raids, escarmouches et batailles épiques selon votre niveau et la taille de votre groupe.',
                 'cluster' => 'Groupe d’instances', 'no_cluster' => 'Sans groupe',
                 'difficulty' => 'Difficulté', 'tier' => 'T%s',
                 'type_scharmuetzel' => 'Escarmouche', 'type_schlacht' => 'Bataille épique', 'type_team' => 'Équipe',
@@ -172,10 +173,15 @@ final class Instances
     }
 
     /** Flat alphabetical list; cluster is already an explicit filter. */
-    public static function sorted(array $rows): array
+    public static function sorted(array $rows, string $dir = 'asc'): array
     {
-        usort($rows, static fn (array $a, array $b): int =>
-            Sortierung::name($a['name'], $b['name']) ?: strcmp($a['id'], $b['id']));
+        usort($rows, static function (array $a, array $b) use ($dir): int {
+            $name = Sortierung::name($a['name'], $b['name']);
+            if ($name !== 0) {
+                return $dir === 'desc' ? -$name : $name;
+            }
+            return strcmp($a['id'], $b['id']);
+        });
         return $rows;
     }
 
@@ -218,18 +224,22 @@ final class Instances
         return $values;
     }
 
-    private function params(array $f, int $page = 1): array
+    private function params(array $f, int $page = 1, string $sort = 'name', string $dir = 'asc'): array
     {
         $params = array_filter($f, static fn ($value) => $value !== '' && $value !== []);
         if ($page > 1) {
             $params['page'] = $page;
         }
+        if ($sort !== 'name' || $dir === 'desc') {
+            $params['sort'] = ($dir === 'desc' ? '-' : '') . $sort;
+        }
         return $params;
     }
 
-    private function url(array $filters, int $page = 1, ?string $lang = null): string
+    private function url(array $filters, int $page = 1, ?string $lang = null,
+                         string $sort = 'name', string $dir = 'asc'): string
     {
-        $params = $this->params($filters, $page);
+        $params = $this->params($filters, $page, $sort, $dir);
         return $this->catalogue->appRoute($lang ?? $this->lang, 'instances')
             . ($params ? '?' . http_build_query($params) : '');
     }
@@ -271,8 +281,15 @@ final class Instances
         $labels = $index['labels'];
         $rows = $index['instances'];
         $filters = $this->query($input, $labels, $rows);
+        $sort_dir = 'asc';
+        $raw_sort = is_string($input['sort'] ?? '') ? trim($input['sort'] ?? '') : '';
+        if ($raw_sort === '-name') {
+            $sort_dir = 'desc';
+        } elseif ($raw_sort !== '' && $raw_sort !== 'name') {
+            return null;
+        }
         $selected = array_values(array_filter($rows, fn ($row) => self::matches($row, $filters)));
-        $selected = self::sorted($selected);
+        $selected = self::sorted($selected, $sort_dir);
         $pages = max(1, (int) ceil(count($selected) / self::PAGE_SIZE));
         $page = is_scalar($input['page'] ?? 1) ? filter_var($input['page'] ?? 1, FILTER_VALIDATE_INT) : false;
         if ($page === false || $page < 1 || $page > $pages) {
@@ -333,21 +350,84 @@ final class Instances
             $row['meta'] = implode(' · ', $teile);
         }
         unset($row);
+
+        $toOption = static fn (array $option): array => [
+            'value' => (string) $option['value'],
+            'label' => $option['label'],
+            'count' => (int) $option['count'],
+            'checked' => (bool) $option['checked'],
+        ];
+        $definition = [
+            'area' => 'instanzen',
+            'lang' => $this->lang,
+            'groups' => [
+                ['id' => 'cluster', 'kind' => 'multi', 'label' => $words['cluster'],
+                 'options' => array_map($toOption, $facets['cluster'])],
+                ['id' => 'art', 'kind' => 'multi', 'label' => $words['art'],
+                 'options' => array_map($toOption, $facets['art'])],
+                ['id' => 'level', 'kind' => 'range', 'label' => $words['level'],
+                 'paramMin' => 'von', 'paramMax' => 'bis', 'min' => 0, 'max' => 999],
+                ['id' => 'spieler', 'kind' => 'multi', 'label' => $words['players'],
+                 'options' => array_map($toOption, $facets['spieler'])],
+                ['id' => 'tier', 'kind' => 'multi', 'label' => $words['difficulty'],
+                 'options' => array_map($toOption, $facets['tier'])],
+            ],
+            'sort' => ['standard' => 'name', 'keys' => ['name'],
+                       'ersteRichtung' => ['name' => 'asc'], 'options' => []],
+            'columns' => [['label' => $words['name'], 'sortierung' => 'name']],
+            'pagination' => ['kind' => 'page', 'size' => self::PAGE_SIZE],
+            'countLabel' => $words['count'],
+        ];
+        $model_facets = [];
+        foreach (['cluster', 'art', 'spieler', 'tier'] as $id) {
+            $model_facets[$id] = array_map(
+                static fn (array $option): array =>
+                    ['value' => (string) $option['value'], 'count' => (int) $option['count']],
+                $facets[$id] ?? []
+            );
+        }
+        $model = FilterModel::response(
+            $definition,
+            [
+                'q' => $filters['q'],
+                'filters' => [
+                    'cluster' => array_map('strval', $filters['cluster']),
+                    'art' => array_values($filters['art']),
+                    'spieler' => array_map('strval', $filters['spieler']),
+                    'tier' => array_map('strval', $filters['tier']),
+                    'level' => [
+                        'min' => $filters['von'] === '' ? null : (int) $filters['von'],
+                        'max' => $filters['bis'] === '' ? null : (int) $filters['bis'],
+                    ],
+                ],
+                'sort' => 'name',
+                'sortDir' => $sort_dir,
+                'pagination' => ['kind' => 'page', 'page' => $page],
+            ],
+            $model_facets,
+            count($selected),
+            ['kind' => 'page', 'page' => $page, 'pages' => $pages, 'hasMore' => $page < $pages],
+        );
+
         $alternates = array_map(
-            fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang)],
+            fn ($lang) => ['lang' => $lang, 'url' => $this->url($filters, 1, $lang, 'name', $sort_dir)],
             Catalogue::LANGS);
         return $this->view->render('instances/list.twig', $this->context(
             // Folgeseiten nennen ihre Seite, sonst tragen sie den Text der ersten.
             $page > 1 ? $words['title'] . ' – ' . sprintf($words['page'], $page, $pages) : $words['title'],
             $page > 1 ? $words['intro'] . ' ' . sprintf($words['page'], $page, $pages) . '.' : $words['intro'],
-            $this->url($filters, $page), $alternates,
-            (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
+            $this->url($filters, $page, null, 'name', $sort_dir), $alternates,
+            $sort_dir === 'desc' || (bool) array_filter($filters, static fn ($v) => $v !== '' && $v !== [])
         ) + [
             'filters' => $filters, 'facets' => $facets, 'instances' => $page_rows,
             'instance_groups' => [['name' => '', 'rows' => $page_rows]],
             'count' => count($selected), 'page_label' => sprintf($words['page'], $page, $pages),
-            'previous_url' => $page > 1 ? $this->url($filters, $page - 1) : null,
-            'next_url' => $page < $pages ? $this->url($filters, $page + 1) : null,
+            'previous_url' => $page > 1 ? $this->url($filters, $page - 1, null, 'name', $sort_dir) : null,
+            'next_url' => $page < $pages ? $this->url($filters, $page + 1, null, 'name', $sort_dir) : null,
+            'filter_model_json' => FilterModel::json($model),
+            'sort_url' => $this->url($filters, 1, null, 'name', $sort_dir === 'asc' ? 'desc' : 'asc'),
+            'sort_aria' => $sort_dir === 'asc' ? 'ascending' : 'descending',
+            'sort_arrow' => $sort_dir === 'asc' ? '↑' : '↓',
         ]);
     }
 

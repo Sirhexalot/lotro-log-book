@@ -1,9 +1,9 @@
 {% extends 'layout.twig' %}
-{% import 'entity/_result_row.twig' as result %}
 {# Shared filter-browser shell: the classes are the ones sets.css and sets.js
    already enhance, so checkboxes filter immediately in both catalogues. #}
 {% block inhalt %}
 <div class="sets-browser" data-filter-schema="1" data-filter-area="auftraggeber" data-filter-total="{{ count }}" data-filter-count-label="{{ gw.count }}">
+<script type="application/json" data-filter-model>{{ filter_model_json|raw }}</script>
 <h1>{{ gw.title }}</h1><p>{{ gw.intro }}</p>
 <form method="get" action="{{ list_url }}" class="sets-form" data-filter-fallback>
     <div class="sets-search"><label for="giver-query">{{ gw.search }}</label><div><input type="search" id="giver-query" name="q" value="{{ filters.q }}"><button type="submit">{{ gw.search }}</button></div></div>
@@ -43,15 +43,32 @@
         </details>
         <section class="sets-results" data-filter-results aria-label="{{ gw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? gw.count_one : gw.count)|replace({'%s': count}) }}</p>
-            <div class="sets-sort"><span>{{ gw.sort }}</span>
-                <a href="{{ sort_name_url }}"{% if sort_active == '' %} aria-current="true"{% endif %}>{{ gw.sort_name }}</a>
-                <a href="{{ sort_level_url }}"{% if sort_active == 'stufe' %} aria-current="true"{% endif %}>{{ gw.sort_level }}</a>
+            {% set name_aria = sort_key == 'name' ? (sort_dir == 'asc' ? 'ascending' : 'descending') : 'none' %}
+            {% set level_aria = sort_key == 'stufe' ? (sort_dir == 'asc' ? 'ascending' : 'descending') : 'none' %}
+            <div class="tabellen-rahmen">
+            <table class="llb-tabelle">
+                <thead><tr>
+                    <th scope="col" role="columnheader" aria-sort="{{ name_aria }}"><a href="{{ sort_name_url }}" data-sort-key="name">{{ gw.name }} <span class="llb-sort-pfeil" aria-hidden="true">{{ sort_key == 'name' ? (sort_dir == 'asc' ? '↑' : '↓') : '↕' }}</span></a></th>
+                    {% if has_levels %}
+                    <th scope="col" role="columnheader" class="llb-zahl" aria-sort="{{ level_aria }}"><a href="{{ sort_level_url }}" data-sort-key="stufe">{{ gw.level_short }} <span class="llb-sort-pfeil" aria-hidden="true">{{ sort_key == 'stufe' ? (sort_dir == 'asc' ? '↑' : '↓') : '↕' }}</span></a></th>
+                    {% endif %}
+                </tr></thead>
+                <tbody>
+                {% for row in givers %}
+                    {% set meta = [row.kind_text, row.title, row.places_text, (row.count == 1 ? gw.quests_one : gw.quests)|replace({'%s': row.count})]|filter(v => v)|join(' · ') %}
+                    <tr role="row"><td role="cell"><a class="gs-zeile" href="{{ row.url }}">
+                        <span class="mql-row-icon mql-row-icon-entity">{{ entity_symbol|raw }}</span>
+                        <span class="gs-name">{{ row.name }}</span>
+                        {% if meta %}<span class="gs-meta">{{ meta }}</span>{% endif %}
+                    </a></td>
+                    {% if has_levels %}<td role="cell" class="llb-zahl">{{ row.low is not null and row.high > row.low ? row.low ~ '–' ~ row.high : row.low|default('') }}</td>{% endif %}
+                    </tr>
+                {% else %}
+                    <tr role="row"><td role="cell" colspan="{{ has_levels ? 2 : 1 }}">{{ gw.empty }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
             </div>
-            {% set has_levels = givers|filter(row => row.low is not null)|length > 0 %}
-            <ul class="sets-list mql-row-list">{% if givers %}{{ result.heading(lang, has_levels ? gw.level_short : '') }}{% endif %}{% for row in givers %}
-                {% set level = row.low is not null and row.high > row.low ? row.low ~ '–' ~ row.high : row.low %}
-                {{ result.row(lang, row.url, row.name, [row.kind_text, row.title, row.places_text]|filter(v => v)|join(' · '), entity_symbol, '', has_levels ? gw.level_short : '', level) }}
-            {% else %}<li>{{ gw.empty }}</li>{% endfor %}</ul>
             {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ gw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ gw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>

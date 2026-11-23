@@ -78,13 +78,16 @@ paging mode; the rest describes this response. `filter-server.js` builds its
 config from the definition and hands the response to the shared adapter, so
 nothing is scraped from the markup any more.
 
-Titles are the reference list; factions followed on the same day. The result
-is a real table whose head is a link without JavaScript (`?sort=-name`, PHP
+All six server lists use the model since 23.11.2026: titles, factions,
+landmarks, vendors, instances and quest givers. The result is a real table
+whose head is a link without JavaScript (`?sort=-name` or `?sort=stufe`, PHP
 sorts) and a button-like sort target with JavaScript. A changed question
 resets page-based lists to page 1. Personal columns such as the faction
 reputation appear only when the import carries the data; the server writes the
-hidden head and cell, the browser fills and shows them. Lists without a model
-keep the older scan of form and response until they are migrated one by one.
+hidden head and cell, the browser fills and shows them. A grouped tree level
+without its own value (the landmark area groups) is a `heading` node: it is
+not selectable and appears with its children. The older form/markup scan stays
+in `filter-server.js` for lists without a model.
 
 ## Reproducible tests
 
@@ -250,7 +253,11 @@ filter controller. Quest giver details use their previous progress logic.
 `filter-ui.js` draws `option.children` as a branch for every kind; a child may
 name another group via `groupId`, so each level stores its value in the group
 that owns it (geography: region → landscape → area, crafting: bucket → base
-type → category). Two additions came with the crafting tree:
+type → category). `filterzustand` resolves a group's values through those nested
+options as well, so validation and chips keep an area selection that lives
+below its region. A `heading` node groups children without a value of its own
+(the landmark area groups) and is not selectable. Two additions came with the
+crafting tree:
 
 - `chips()` uses `option.chipLabel` when present. A tree shows only the leaf
   qualifier („Gilde“) because the parent names the base type; the chip still

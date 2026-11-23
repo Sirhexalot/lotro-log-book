@@ -49,6 +49,22 @@ class FilterModelTest(unittest.TestCase):
         encoded = json.loads(model['json'])
         self.assertEqual(encoded['definition']['columns'][0]['sortierung'], 'name')
 
+    def test_every_server_list_writes_its_model_and_table(self):
+        templates = {
+            'titles/list.twig': 'titel',
+            'factions/list.twig': 'fraktion',
+            'landmarks/list.twig': 'landmarke',
+            'vendors/list.twig': 'haendler',
+            'instances/list.twig': 'instanzen',
+            'givers/list.twig': 'auftraggeber',
+        }
+        for name, area in templates.items():
+            text = (ROOT / 'php' / 'templates' / name).read_text(encoding='utf-8')
+            self.assertIn('data-filter-model', text, name)
+            self.assertIn('data-filter-area="%s"' % area, text, name)
+            self.assertIn('class="llb-tabelle"', text, name)
+            self.assertIn('data-sort-key=', text, name)
+
     def test_title_order_follows_the_direction_and_keeps_ids_stable(self):
         order = self.php(r'''
         $rows = [

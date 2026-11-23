@@ -117,7 +117,11 @@ class ListenzeilenRegelTest(unittest.TestCase):
         js = (ROOT / 'web/entitaeten-listen.js').read_text(encoding='utf-8')
         self.assertIn("rowUI.row(target,{href:r.url,name:r.name,icon:'haendler'", js)
         twig = (ROOT / 'php/templates/vendors/list.twig').read_text(encoding='utf-8')
-        self.assertIn("result.row(lang, row.url, row.name", twig)
+        # The vendor list is one of the shared tables since 23.11.2026; its
+        # rows keep the same name/meta cells as every other result list.
+        self.assertIn('class="llb-tabelle"', twig)
+        self.assertIn('class="gs-zeile"', twig)
+        self.assertIn('class="gs-name"', twig)
         self.assertNotIn("result.heading(lang, 'Art und Ort')", twig)
 
     def test_contract_is_referenced_by_the_project_rules(self):

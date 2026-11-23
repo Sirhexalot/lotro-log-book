@@ -100,6 +100,13 @@
 		if(sortLinks.length){config.sort={standard:'name',keys:sortLinks.map(function(a){return new URL(a.href).searchParams.get('sort')||'name';}),ersteRichtung:{},options:sortLinks.map(function(a){return {value:new URL(a.href).searchParams.get('sort')||'name',label:a.textContent};})};}
 	}
 
+	// JSON cannot carry the label function; derive it from the group label.
+	config.groups.forEach(function(g){
+		if(g.kind==='range' && typeof g.rangeLabel!=='function'){
+			var title=g.label;
+			g.rangeLabel=function(r){return title+' '+(r.min===null?'…':r.min)+'–'+(r.max===null?'…':r.max);};
+		}
+	});
 	var fields=[{param:'q',path:['q']},{param:'page',path:['pagination','page'],type:'number',omit:1}];
 	if(stufeStart){fields.push({param:'stufe',path:['filters','stufe'],type:'number'});}
 	config.groups.forEach(function(g){

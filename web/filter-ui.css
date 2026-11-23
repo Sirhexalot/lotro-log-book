@@ -168,6 +168,9 @@ details[open]>.filter-group-heading>.filter-arrow,details[open]>summary>.filter-
 }
 .filter-panel .filter-branch .filter-branch:last-child::before { bottom:auto; height:calc(1.4em + 11px); }
 .filter-panel .filter-branch>summary,.filter-panel .filter-option { padding-left:calc(var(--depth,0) * var(--filter-indent)); font-size: var(--text-bedienung); line-height: var(--zeile-kompakt); }
+/* A heading inside a branch groups its children without a value of its own. */
+.filter-panel .filter-heading { padding-left:calc(var(--depth,0) * var(--filter-indent)); }
+.filter-panel .filter-heading-label { color: var(--gold,var(--llb-palette-d9b96f)); font-weight: var(--gewicht-semibold); font-size: var(--text-bedienung); }
 .filter-panel .filter-branch>summary>.filter-option { grid-column:2 / 5; grid-template-columns:var(--filter-control) minmax(0,1fr) var(--filter-count); padding-left:0; width:100%; }
 .filter-panel .filter-option>input { grid-column:2; width:var(--filter-control); height:var(--filter-control); margin:0; padding:0; accent-color:var(--gold,var(--llb-palette-d9b96f)); }
 .filter-panel .filter-option>span { grid-column:3; min-width:0; overflow-wrap:anywhere; text-indent:0; }

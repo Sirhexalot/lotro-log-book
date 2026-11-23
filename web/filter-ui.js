@@ -159,6 +159,8 @@
 			groups.replaceChildren();
 			function visibleOption(group, option) {
 				if (option.keepVisible) { return true; }
+				// A heading is not selectable; it appears with its children.
+				if (option.heading) { return (option.children||[]).some(function(child){return visibleOption(group,child);}); }
 				var effective=option.groupId?config.groups.find(function(g){return g.id===option.groupId;}):group;
 				var value=effective.kind==='tree'?option.path:option.value;
 				var facet=((result&&result.facets[effective.id])||[]).find(function(f){return JSON.stringify(f.value)===JSON.stringify(value);});
@@ -193,6 +195,22 @@
 				} else {
 					function draw(optionsList, parent, depth) {
 						(optionsList || []).forEach(function (option) {
+							if (option.heading) {
+								// A labelled subsection of a branch (e.g. the area
+								// groups of Rohan); no value of its own.
+								if (!visibleOption(group, option)) { return; }
+								var sub = node('details'); sub.className = 'filter-branch filter-heading-branch';
+								sub.dataset.key = group.id + ':heading:' + option.label;
+								sub.style.setProperty('--depth', depth);
+								sub.open = openStates.has(sub.dataset.key) ? openStates.get(sub.dataset.key) === true : true;
+								var subSummary = node('summary'); subSummary.className = 'filter-heading';
+								subSummary.style.setProperty('--depth', depth);
+								var subLabel = node('span', option.label); subLabel.className = 'filter-heading-label';
+								subSummary.append(arrow(), subLabel);
+								sub.appendChild(subSummary);
+								draw(option.children, sub, depth + 1); parent.appendChild(sub);
+								return;
+							}
 							var effective = option.groupId ? config.groups.find(function(g){return g.id===option.groupId;}) : group;
 							var value = effective.kind === 'tree' ? option.path : option.value;
 							var facet = ((result && result.facets[effective.id]) || []).find(function find(f) {

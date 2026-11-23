@@ -34,6 +34,20 @@ const chips = api.chips(config,selected);
 assert.equal(chips.length,5);
 assert.equal(api.reduce(config,selected,chips[0].action).state.filters.quality.length,1);
 assert.equal(api.reduce(config,selected,chips[3].action).state.filters.tree.length,1);
+// A nested leaf belongs to its own group through `groupId`; validation and
+// chips must find it there, not only in the flat option list.
+const nested = {
+	groups: [
+		{id:'region',kind:'multi',options:[{value:'r1',label:'Rohan',children:[
+			{value:'a1',label:'Die Norhofen',groupId:'area'}]}]},
+		{id:'area',kind:'multi',options:[]}
+	],
+	pagination:{size:50},
+	defaults:() => ({q:'',filters:{region:[],area:[]},sort:'name',pagination:{kind:'limit',limit:50}})
+};
+assert.deepEqual(api.normalize(nested,{filters:{area:['a1']}}).state.filters.area,['a1']);
+const nestedChips = api.chips(nested,{q:'',filters:{region:[],area:['a1']}});
+assert.equal(nestedChips[0].label,'Die Norhofen');
 // A single choice shows a chip for every value, including its neutral default;
 // only a non-default chip can be removed.
 const single = {

@@ -1,10 +1,10 @@
 {% extends 'layout.twig' %}
-{% import 'entity/_result_row.twig' as result %}
 {# Same filter-browser shell as the quest givers: the classes are the ones
    sets.css and sets.js already enhance, so checkboxes filter immediately and
    the tree opens in auftraggeber.js. #}
 {% block inhalt %}
 <div class="sets-browser" data-filter-schema="1" data-filter-area="landmarke" data-filter-total="{{ count }}" data-filter-count-label="{{ lw.count }}">
+<script type="application/json" data-filter-model>{{ filter_model_json|raw }}</script>
 <h1>{{ lw.title }}</h1><p>{{ lw.intro }}</p>
 <form method="get" action="{{ list_url }}" class="sets-form" data-filter-fallback>
     <div class="sets-search"><label for="landmark-query">{{ lw.search }}</label><div><input type="search" id="landmark-query" name="q" value="{{ filters.q }}"><button type="submit">{{ lw.search }}</button></div></div>
@@ -44,7 +44,24 @@
         </details>
         <section class="sets-results" data-filter-results aria-label="{{ lw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? lw.count_one : lw.count)|replace({'%s': count}) }}</p>
-            <ul class="sets-list mql-row-list">{% for row in landmarks %}{{ result.row(lang, row.url, row.name, row.meta, entity_symbol) }}{% else %}<li>{{ lw.empty }}</li>{% endfor %}</ul>
+            <div class="tabellen-rahmen">
+            <table class="llb-tabelle">
+                <thead><tr>
+                    <th scope="col" role="columnheader" aria-sort="{{ sort_aria }}"><a href="{{ sort_url }}" data-sort-key="name">{{ lw.name }} <span class="llb-sort-pfeil" aria-hidden="true">{{ sort_arrow }}</span></a></th>
+                </tr></thead>
+                <tbody>
+                {% for row in landmarks %}
+                    <tr role="row"><td role="cell"><a class="gs-zeile" href="{{ row.url }}">
+                        <span class="mql-row-icon mql-row-icon-entity">{{ entity_symbol|raw }}</span>
+                        <span class="gs-name">{{ row.name }}</span>
+                        {% if row.meta %}<span class="gs-meta">{{ row.meta }}</span>{% endif %}
+                    </a></td></tr>
+                {% else %}
+                    <tr role="row"><td role="cell">{{ lw.empty }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
             {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ lw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ lw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>

@@ -1,8 +1,8 @@
 {% extends 'layout.twig' %}
-{% import 'entity/_result_row.twig' as result %}
 {# Same filter browser as landmarks and quest givers. #}
 {% block inhalt %}
 <div class="sets-browser" data-filter-schema="1" data-filter-area="haendler" data-filter-total="{{ count }}" data-filter-count-label="{{ gw.count }}">
+<script type="application/json" data-filter-model>{{ filter_model_json|raw }}</script>
 <h1>{{ gw.title }}</h1><p>{{ gw.intro }}</p>
 <form method="get" action="{{ list_url }}" class="sets-form" data-filter-fallback>
     <div class="sets-search"><label for="vendor-query">{{ gw.search }}</label><div><input type="search" id="vendor-query" name="q" value="{{ filters.q }}"><button type="submit">{{ gw.search }}</button></div></div>
@@ -37,10 +37,6 @@
         </details>
         <section class="sets-results" data-filter-results aria-label="{{ gw.title }}">
             <p class="sets-count" role="status">{{ (count == 1 ? gw.count_one : gw.count)|replace({'%s': count}) }}</p>
-            <div class="sets-sort"><span>{{ gw.sort }}</span>
-                <a href="{{ sort_name_url }}"{% if sort_active == '' %} aria-current="true"{% endif %}>{{ gw.sort_name }}</a>
-                <a href="{{ sort_level_url }}"{% if sort_active == 'stufe' %} aria-current="true"{% endif %}>{{ gw.sort_level }}</a>
-            </div>
             {# Stufe als Verweis: der Server filtert, die Zahl steht in der Adresse.
                Ein Kästchen im Formular landete im Filtermodul als Wahrheitswert. #}
             <p class="sets-turn" id="vendor-level-field" data-vorlage="{{ gw.stufe_filter }}" hidden>
@@ -49,7 +45,27 @@
             {% if filters.stufe %}<p class="sets-turn">
                 <a class="sets-option-link" href="{{ list_url }}">{{ gw.stufe_all }}</a>
             </p>{% endif %}
-            <ul class="sets-list mql-row-list">{% if vendors %}{{ result.heading(lang, gw.ware) }}{% endif %}{% for row in vendors %}{{ result.row(lang, row.url, row.name, [attribute(gw, 'type_' ~ row.type), row.meta]|filter(v => v)|join(' · '), entity_symbol, '', gw.ware, row.level_range|default('')) }}{% else %}<li>{{ gw.empty }}</li>{% endfor %}</ul>
+            {% set name_aria = sort_key == 'name' ? (sort_dir == 'asc' ? 'ascending' : 'descending') : 'none' %}
+            {% set level_aria = sort_key == 'stufe' ? (sort_dir == 'asc' ? 'ascending' : 'descending') : 'none' %}
+            <div class="tabellen-rahmen">
+            <table class="llb-tabelle">
+                <thead><tr>
+                    <th scope="col" role="columnheader" aria-sort="{{ name_aria }}"><a href="{{ sort_name_url }}" data-sort-key="name">{{ gw.name }} <span class="llb-sort-pfeil" aria-hidden="true">{{ sort_key == 'name' ? (sort_dir == 'asc' ? '↑' : '↓') : '↕' }}</span></a></th>
+                    <th scope="col" role="columnheader" class="llb-zahl" aria-sort="{{ level_aria }}"><a href="{{ sort_level_url }}" data-sort-key="stufe">{{ gw.stufe_heading }} <span class="llb-sort-pfeil" aria-hidden="true">{{ sort_key == 'stufe' ? (sort_dir == 'asc' ? '↑' : '↓') : '↕' }}</span></a></th>
+                </tr></thead>
+                <tbody>
+                {% for row in vendors %}
+                    <tr role="row"><td role="cell"><a class="gs-zeile" href="{{ row.url }}">
+                        <span class="mql-row-icon mql-row-icon-entity">{{ entity_symbol|raw }}</span>
+                        <span class="gs-name">{{ row.name }}</span>
+                        <span class="gs-meta">{{ [attribute(gw, 'type_' ~ row.type), row.meta]|filter(v => v)|join(' · ') }}</span>
+                    </a></td><td role="cell" class="llb-zahl">{{ row.level_range|default('') }}</td></tr>
+                {% else %}
+                    <tr role="row"><td role="cell" colspan="2">{{ gw.empty }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
             {% if previous_url or next_url %}<nav class="sets-pagination" aria-label="{{ gw.title }}">
                 {% if previous_url %}<a href="{{ previous_url }}">‹ {{ gw.previous }}</a>{% endif %}
                 <span>{{ page_label }}</span>
