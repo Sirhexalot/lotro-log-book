@@ -4,6 +4,7 @@
 
 {% block stile %}<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/tabelle.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/belohnungen.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">{% endblock %}
 
@@ -28,7 +29,7 @@
 				<span data-t="bl_titel">Belohnungen</span>
 			</div>
 			<p class="gs-stand" role="status" data-t="gs_lade">Lade Belohnungen …</p>
-			<ul class="gs-ergebnis bl-ergebnis" id="bl-ergebnis" data-filter-results></ul>
+			<div class="gs-ergebnis bl-ergebnis" id="bl-ergebnis" data-filter-results></div>
 		</section>
 	</div>
 </main>
@@ -50,5 +51,7 @@
 <script src="/filterzustand.js?v={{ asset_stand }}" defer></script>
 <script src="/filteradapter.js?v={{ asset_stand }}" defer></script>
 <script src="/filter-ui.js?v={{ asset_stand }}" defer></script>
+<script src="/treffer-tabelle.js?v={{ asset_stand }}" defer></script>
+<script src="/listen/belohnungen.js?v={{ asset_stand }}" defer></script>
 <script src="/belohnungen.js?v={{ asset_stand }}" defer></script>
 {% endblock %}

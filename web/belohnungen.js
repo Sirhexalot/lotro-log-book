@@ -1,4 +1,6 @@
-/* Reward browser: compact results with the shared filter shell. */
+/* Reward browser: items from deeds and quests, on the shared result table.
+ * The list definition in web/listen/belohnungen.js owns order, labels, columns,
+ * sorting and paging; this file owns the predicates, the facets and the rows. */
 (function () {
 	'use strict';
 	var T = window.MQL_T || function (key) { return key; };
@@ -6,6 +8,8 @@
 	var main = document.getElementById('belohnungen');
 	if (!main || !window.MQL_FILTER_UI || !window.MQL_FILTERADAPTER) { return; }
 	var controller;
+	var L = (window.MQL_LISTEN || {}).belohnungen || null;
+	var EIGN = window.MQL_EIGNUNG || null;
 
 	function node(tag, text) {
 		var element = document.createElement(tag);
@@ -15,45 +19,6 @@
 	function sourcePath(source) {
 		return source[7] || [];
 	}
-	/* Only reward items live here. Titles and virtues have their own catalogue
-	 * pages in the Erfolge menu, and duplicating them produced two lists of the
-	 * same 2.500 entries. */
-	function renderRow(row) {
-		var li = node('li');
-		var article = node('article');
-		article.className = 'bl-ergebnis-zeile bl-art-g';
-		var icon = node('span');
-		// Same icon tile as every result row (kachel.css); the reward type only
-		// tints the symbol.
-		icon.className = 'bl-symbol mql-row-icon mql-row-icon-entity';
-		icon.innerHTML = window.MQL_SYMBOL ? window.MQL_SYMBOL('gegenstand', 'bl-symbol-svg') : '';
-		article.appendChild(icon);
-		var heading = node('div');
-		heading.className = 'bl-ergebnis-kopf';
-		var name = node('a', row.name);
-		name.className = 'bl-name q' + (row.raw[2] || 0);
-		name.href = '/' + lang + '/' +
-			({de: 'gegenstand', en: 'item', fr: 'objet'}[lang] || 'gegenstand') + '/' +
-			encodeURIComponent(row.raw[0]) + '/';
-		heading.appendChild(name);
-		var metadata = node('span');
-		metadata.className = 'bl-meta';
-		metadata.appendChild(document.createTextNode(T('bl_gegenstaende')));
-		if (row.raw[3]) { metadata.appendChild(document.createTextNode(' · ' + T('stufe') + ' ' + row.raw[3])); }
-		// The reward index carries the item's requirements (build_belohnungen.py).
-		// The level stays neutral; the state speaks as a chip next to it.
-		var stand = window.MQL_EIGNUNG && row.raw[7]
-			? window.MQL_EIGNUNG.ton(row.raw[7], window.MQL_EIGNUNG.charakter()) : null;
-		if (stand) {
-			metadata.appendChild(document.createTextNode(' · '));
-			metadata.appendChild(window.MQL_EIGNUNG.chip(stand));
-		}
-		heading.appendChild(metadata);
-		article.appendChild(heading);
-		li.appendChild(article);
-		return li;
-	}
-
 	function makeGeoTree(rows) {
 		var roots = [];
 		var known = new Map();
@@ -124,6 +89,41 @@
 			en: {close: 'Close', show: 'Show %s results', error: 'Results not updated.', retry: 'Try again', fallback: 'Open page'},
 			fr: {close: 'Fermer', show: 'Afficher %s résultats', error: 'Résultats non actualisés.', retry: 'Réessayer', fallback: 'Ouvrir la page'}
 		}[lang] || {};
+		function beschriftung(id, fallback) {
+			var treffer = null;
+			if (L && L.filter) { L.filter.forEach(function (def) { if (def.id === id) { treffer = def; } }); }
+			return treffer && treffer.labelKey ? T(treffer.labelKey) : fallback;
+		}
+		var eignungW = EIGN ? EIGN.woerter : null;
+		var eignungOptionen = eignungW ? [
+			{value: 'passt', label: eignungW.chipPasst}, {value: 'achtung', label: eignungW.chipAchtung},
+			{value: 'aelter', label: eignungW.chipAelter}, {value: 'ueberholt', label: eignungW.chipUeberholt},
+			{value: 'zu-hoch', label: eignungW.chipZuHoch}, {value: 'falsch', label: eignungW.chipFalsch},
+			{value: 'unklar', label: eignungW.chipUnklar}
+		] : [];
+		var zeigeEignung = eignungOptionen.length > 0 && !!(EIGN && EIGN.charakter());
+		var qualityOptions = [0, 1, 2, 3, 4, 5].map(function (value) {
+			return {value: value, label: T('gs_qual_' + value)};
+		});
+		var gruppen = {
+			art: {id: 'art', kind: 'multi', label: beschriftung('art', T('bl_tatart')), options: typeValues},
+			geo: {id: 'geo', kind: 'tree', label: beschriftung('geo', T('bl_region_gebiet')), options: tree,
+				exclusivePaths: true, validatePath: function (path) {
+					return Array.isArray(path.geo) && geoKeys.has(JSON.stringify(path.geo));
+				}, pathLabel: function (path) {
+					var labels = [], ids = path.geo || [];
+					ids.forEach(function (id, index) {
+						var pair = allGeoPaths.get(JSON.stringify(ids.slice(0, index + 1)));
+						if (pair && pair[index]) { labels.push(pair[index][1]); }
+					});
+					return labels.join(' › ');
+				}},
+			quality: {id: 'quality', kind: 'multi', label: beschriftung('quality', T('gs_qualitaet')), options: qualityOptions},
+			eignung: zeigeEignung ? {id: 'eignung', kind: 'multi', label: beschriftung('eignung', T('gs_eignung')), options: eignungOptionen} : null
+		};
+		var reihenfolge = L && L.filter ? L.filter : [{id: 'art'}, {id: 'geo'}, {id: 'quality'}, {id: 'eignung'}];
+		var groups = reihenfolge.map(function (def) { return gruppen[def.id] || null; }).filter(Boolean);
+		var groesse = (L && L.blaettern && L.blaettern.groesse) || 50;
 		var config = {
 			area: 'belohnungen', lang: lang, rootUrl: location.origin + location.pathname,
 			labels: {
@@ -133,31 +133,25 @@
 				loading: T('gs_lade'), error: extra.error, retry: extra.retry, fallback: extra.fallback,
 				min: T('gs_von'), max: T('gs_bis'), placeholder: T('bl_suche')
 			},
-			groups: [
-				{id: 'art', kind: 'multi', label: T('bl_art'), options: typeValues},
-				{id: 'geo', kind: 'tree', label: T('bl_region_gebiet'), options: tree,
-					exclusivePaths: true, validatePath: function (path) {
-						return Array.isArray(path.geo) && geoKeys.has(JSON.stringify(path.geo));
-					}, pathLabel: function (path) {
-						var labels = [], ids = path.geo || [];
-						ids.forEach(function (id, index) {
-							var pair = allGeoPaths.get(JSON.stringify(ids.slice(0, index + 1)));
-							if (pair && pair[index]) { labels.push(pair[index][1]); }
-						});
-						return labels.join(' › ');
-					}}
-			],
-			pagination: {kind: 'limit', size: 50},
+			groups: groups,
+			// One sortable column: the table head sorts, no select.
+			sort: {keys: ['name'], ersteRichtung: {name: 'asc'}, options: []},
+			pagination: {kind: 'limit', size: groesse},
 			defaults: function () {
-				return {q: '', filters: {art: [], geo: []},
-					pagination: {kind: 'limit', limit: 50}};
+				return {q: '', filters: {art: [], geo: [], quality: [], eignung: []}, sort: 'name', sortDir: 'asc',
+					pagination: {kind: 'limit', limit: groesse}};
 			}
 		};
 		// Deed kinds are labels, not numbers: a "csv" field would parse them to
-		// NaN and silently drop the filter on reload.
+		// NaN and silently drop the filter on reload. Suitability values are
+		// words too.
 		var baseCodec = A.codec([
 			{param: 'q', path: ['q']},
-			{param: 'art', path: ['filters', 'art'], type: 'multi'}
+			{param: 'art', path: ['filters', 'art'], type: 'multi'},
+			{param: 'qual', path: ['filters', 'quality'], type: 'csv'},
+			{param: 'eig', path: ['filters', 'eignung'],
+				decode: function (wert) { return String(wert).split(',').filter(Boolean); },
+				encode: function (werte) { return werte && werte.length ? werte.join(',') : null; }}
 		], config.defaults);
 		config.urlCodec = {
 			decode: function (url) {
@@ -166,14 +160,23 @@
 					return {geo: raw.split('>').filter(Boolean)};
 				});
 				if (url.searchParams.has('gebiet')) { parsed.explicit = true; }
+				// One sortable column; only the direction can differ from the default.
+				var sort = url.searchParams.get('sort');
+				if (sort === 'name' || sort === '-name') {
+					parsed.state.sort = 'name';
+					parsed.state.sortDir = sort === '-name' ? 'desc' : 'asc';
+					parsed.explicit = true;
+				}
 				return parsed;
 			},
 			encode: function (state, url) {
 				url = baseCodec.encode(state, url);
 				url.searchParams.delete('gebiet');
+				url.searchParams.delete('sort');
 				(state.filters.geo || []).forEach(function (path) {
 					url.searchParams.append('gebiet', (path.geo || []).join('>'));
 				});
+				if (state.sortDir === 'desc') { url.searchParams.set('sort', '-name'); }
 				return url;
 			}
 		};
@@ -182,39 +185,97 @@
 				return selected.geo.every(function (id, index) { return path[index] === id; });
 			});
 		}
+		function einstufung(row, charakter) {
+			return EIGN && zeigeEignung ? EIGN.ton(row.raw[7], charakter) : null;
+		}
 		function matches(row, state, skip) {
-			var filters = state.filters;
+			var filters = state.filters, charakter = EIGN ? EIGN.charakter() : null;
+			var eignung = filters.eignung || [];
+			var stand = eignung.length && charakter ? einstufung(row, charakter) : null;
 			return (!state.q || row.search.indexOf(state.q.toLocaleLowerCase()) >= 0) &&
-				(skip !== 'art' && filters.art.length ? row.sources.some(function (source) { return filters.art.indexOf(source[5]) >= 0; }) : true) &&
-				(skip !== 'geo' && filters.geo.length ? filters.geo.some(function (path) { return pathMatches(row, path); }) : true) &&
+				(skip === 'art' || !filters.art.length || row.sources.some(function (source) { return filters.art.indexOf(source[5]) >= 0; })) &&
+				(skip === 'geo' || !filters.geo.length || filters.geo.some(function (path) { return pathMatches(row, path); })) &&
+				(skip === 'quality' || !filters.quality.length || filters.quality.indexOf(row.raw[2]) >= 0) &&
+				(skip === 'eignung' || !eignung.length || !!(stand && eignung.indexOf(stand.code) >= 0)) &&
 				row.sources.length > 0;
 		}
 		function facets(rowsToCount, state) {
-			var artCandidates = rowsToCount.filter(function (row) { return matches(row, state, 'art'); });
-			var geoCandidates = rowsToCount.filter(function (row) { return matches(row, state, 'geo'); });
+			var charakter = EIGN ? EIGN.charakter() : null;
+			var artRows = rowsToCount.filter(function (row) { return matches(row, state, 'art'); });
+			var geoRows = rowsToCount.filter(function (row) { return matches(row, state, 'geo'); });
+			var qualityRows = rowsToCount.filter(function (row) { return matches(row, state, 'quality'); });
+			var eignungRows = rowsToCount.filter(function (row) { return matches(row, state, 'eignung'); });
 			var geoFacets = [];
 			allGeoPaths.forEach(function (path, key) {
 				var value = {geo: JSON.parse(key)};
-				geoFacets.push({value: value, count: geoCandidates.filter(function (row) { return pathMatches(row, value); }).length});
+				geoFacets.push({value: value, count: geoRows.filter(function (row) { return pathMatches(row, value); }).length});
 			});
 			return {
 				art: typeValues.map(function (option) {
-					return {value: option.value, count: artCandidates.filter(function (row) {
+					return {value: option.value, count: artRows.filter(function (row) {
 						return row.sources.some(function (source) { return source[5] === option.value; });
 					}).length};
 				}),
-				geo: geoFacets
+				geo: geoFacets,
+				quality: qualityOptions.map(function (option) {
+					return {value: option.value, count: qualityRows.filter(function (row) { return row.raw[2] === option.value; }).length};
+				}),
+				eignung: zeigeEignung ? eignungOptionen.map(function (option) {
+					return {value: option.value, count: eignungRows.filter(function (row) {
+						var stand = einstufung(row, charakter);
+						return stand && stand.code === option.value;
+					}).length};
+				}) : []
 			};
+		}
+		function zeileFuer(row) {
+			var link = node('a');
+			link.className = 'gs-zeile';
+			link.href = '/' + lang + '/' +
+				({de: 'gegenstand', en: 'item', fr: 'objet'}[lang] || 'gegenstand') + '/' + row.raw[0] + '/';
+			var icon = node('span');
+			// Same icon tile as every result row; the reward type only tints the symbol.
+			icon.className = 'bl-symbol mql-row-icon mql-row-icon-entity';
+			icon.innerHTML = window.MQL_SYMBOL ? window.MQL_SYMBOL('gegenstand', 'bl-symbol-svg') : '';
+			link.appendChild(icon);
+			var name = node('span', row.name);
+			name.className = 'gs-name q' + (row.raw[2] || 0);
+			link.appendChild(name);
+			var meta = node('span');
+			meta.className = 'gs-meta';
+			var teile = [];
+			if (row.raw[3] > 0) { teile.push(T('gs_gegenstandsstufe') + ' ' + row.raw[3]); }
+			meta.textContent = teile.join(' · ');
+			if (meta.textContent) { link.appendChild(meta); }
+			var stand = einstufung(row, EIGN ? EIGN.charakter() : null);
+			if (stand) {
+				var marke = node('span');
+				marke.className = 'mql-row-eignung';
+				marke.appendChild(EIGN.chip(stand));
+				link.appendChild(marke);
+			}
+			return link;
 		}
 		var adapter = A.client({
 			rows: rows, id: function (row) { return row.id; }, matches: matches, facets: facets,
-			compare: function (a, b) { return MQL_SORT.compare(a.name, b.name) || a.id.localeCompare(b.id); },
+			compare: function (a, b, sort, dir) {
+				var c = MQL_SORT.compare(a.name, b.name) || a.id.localeCompare(b.id);
+				return dir === 'desc' ? -c : c;
+			},
 			renderResults: function (result, target) {
 				target.replaceChildren();
-				result.payload.forEach(function (row) { target.appendChild(renderRow(row)); });
+				var spalten = [{label: T('gs_sort_name'), sortierung: 'name'}];
+				if (!window.MQL_TABELLE) { return; }
+				var bau = window.MQL_TABELLE.bauen(target, spalten, {key: result.state.sort, dir: result.state.sortDir});
 				if (!result.total) {
-					var empty = node('li', T('bl_keine')); empty.className = 'gs-leer'; target.appendChild(empty);
+					var leer = document.createElement('tr'); leer.setAttribute('role', 'row');
+					var zelle = document.createElement('td'); zelle.setAttribute('role', 'cell');
+					zelle.textContent = T('bl_keine'); leer.appendChild(zelle); bau.koerper.appendChild(leer);
+					return;
 				}
+				result.payload.forEach(function (row) {
+					bau.koerper.appendChild(window.MQL_TABELLE.zeile(spalten, [zeileFuer(row)]));
+				});
 			}
 		});
 		var target = document.getElementById('bl-ergebnis');

@@ -89,25 +89,48 @@
 		}
 		function defaults() {
 			return {q:'', filters:loot ? {level:{min:null,max:null},tier:[],players:[]} : {},
-				sort:'name', pagination:{kind:'limit',limit:30}};
+				sort:'name', sortDir:'asc', pagination:{kind:'limit',limit:50}};
 		}
-		var fields = [{param:'q',path:['q']}, {param:'n',path:['pagination','limit'],type:'number',omit:30}];
+		var fields = [{param:'q',path:['q']}, {param:'n',path:['pagination','limit'],type:'number',omit:50}];
 		if (loot) {
 			fields.push({param:'von',path:['filters','level','min'],type:'number'}, {param:'bis',path:['filters','level','max'],type:'number'});
 			groups.filter(function (g) { return g.kind === 'multi'; }).forEach(function (g) {
 				fields.push({param:g.id,path:['filters',g.id],type:'multi'});
 			});
 		}
+		var baseCodec = A.codec(fields,defaults);
 		var config = {area:key, lang:lang, labels:labels, groups:groups, rootUrl:location.pathname,
-			search:{submit:'debounce',debounceMs:200}, pagination:{kind:'limit',size:30},
-			urlCodec:A.codec(fields,defaults), defaults:defaults};
+			search:{submit:'debounce',debounceMs:200}, pagination:{kind:'limit',size:50},
+			sort:{keys:['name'],ersteRichtung:{name:'asc'},options:[]},
+			urlCodec:{
+				decode:function (url) {
+					var parsed = baseCodec.decode(url);
+					var sort = url.searchParams.get('sort');
+					if (sort === 'name' || sort === '-name') {
+						parsed.state.sort = 'name';
+						parsed.state.sortDir = sort === '-name' ? 'desc' : 'asc';
+						parsed.explicit = true;
+					}
+					return parsed;
+				},
+				encode:function (state, url) {
+					url = baseCodec.encode(state, url);
+					url.searchParams.delete('sort');
+					if (state.sortDir === 'desc') { url.searchParams.set('sort', '-name'); }
+					return url;
+				}
+			},
+			defaults:defaults};
 		function searchMatches(row,q) {
 			return !q || (row.name + ' ' + (loot ? row.id : row.quest)).toLocaleLowerCase(lang).includes(q.toLocaleLowerCase(lang));
 		}
 		var adapter = A.client({
-			rows:rows, size:30, id:function (r) { return r.id; },
+			rows:rows, size:50, id:function (r) { return r.id; },
 			matches:function (r,s) { return searchMatches(r,s.q) && (!loot || !!matchingConditions(r,s.filters).length); },
-			compare:function (a,b) { return MQL_SORT.compare(a.name,b.name) || MQL_SORT.compare(a.quest || '',b.quest || ''); },
+			compare:function (a,b,sort,dir) {
+				var c = MQL_SORT.compare(a.name,b.name) || MQL_SORT.compare(a.quest || '',b.quest || '');
+				return dir === 'desc' ? -c : c;
+			},
 			facets:function (all,s) {
 				var facets = {};
 				groups.filter(function (g) { return g.kind === 'multi'; }).forEach(function (g) {
@@ -123,23 +146,36 @@
 			},
 			renderResults:function (r,target) {
 				target.replaceChildren();
-				var heading = loot ? w.chance : w.quest;
+				var TBL = window.MQL_TABELLE;
+				if (!TBL) { return; }
+				var spalten = loot
+					? [{label:w.name,sortierung:'name'},{label:w.chance,breite:'15ch',zahl:true}]
+					: [{label:w.name,sortierung:'name'},{label:w.quest}];
+				var bau = TBL.bauen(target,spalten,{key:r.state.sort,dir:r.state.sortDir});
 				if (!r.payload.length) {
-					var empty = document.createElement('li'); empty.textContent = w.empty;
-					target.appendChild(empty); return;
+					var leer = document.createElement('tr'); leer.setAttribute('role','row');
+					var zelle = document.createElement('td'); zelle.setAttribute('role','cell');
+					zelle.colSpan = 2; zelle.textContent = w.empty;
+					leer.appendChild(zelle); bau.koerper.appendChild(leer); return;
 				}
-				rowsUI.header(target,{levelHeading:heading});
 				var ch = window.MQL_EIGNUNG && window.MQL_EIGNUNG.charakter();
 				r.payload.forEach(function (item) {
-					var row = rowsUI.row(target,{href:item.url,name:item.name,meta:item.meta,
-						icon:loot ? 'gegenstand' : item.icon,image:item.image,levelHeading:heading,
-						eignung:ch && item.eignung ? window.MQL_EIGNUNG.ton(item.eignung,ch) : null,
-						values:[{label:heading,value:loot ? chanceText(matchingConditions(item,r.state.filters),lang) : item.quest}]});
-					if (!loot) {
-						var link = document.createElement('a'); link.href = item.quest_url; link.textContent = item.quest;
-						row.querySelector('.mql-row-value b').replaceWith(link);
+					var link = document.createElement('a');
+					link.className = 'gs-zeile';
+					if (item.url) { link.href = item.url; }
+					var art = loot ? 'gegenstand' : (item.icon || 'gegenstand');
+					var symbol = rowsUI ? (item.image && rowsUI.itemIcon ? rowsUI.itemIcon(item.image,art) : rowsUI.entityIcon(art)) : null;
+					if (symbol) { link.appendChild(symbol); }
+					var name = document.createElement('span'); name.className = 'gs-name'; name.textContent = item.name; link.appendChild(name);
+					if (item.meta) { var meta = document.createElement('span'); meta.className = 'gs-meta'; meta.textContent = item.meta; link.appendChild(meta); }
+					if (ch && item.eignung) {
+						var stand = window.MQL_EIGNUNG.ton(item.eignung,ch);
+						if (stand) { var marke = document.createElement('span'); marke.className = 'mql-row-eignung'; marke.appendChild(window.MQL_EIGNUNG.chip(stand)); link.appendChild(marke); }
 					}
-					target.appendChild(row);
+					var wert;
+					if (loot) { wert = chanceText(matchingConditions(item,r.state.filters),lang); }
+					else { wert = document.createElement('a'); wert.href = item.quest_url; wert.textContent = item.quest; }
+					bau.koerper.appendChild(TBL.zeile(spalten,[link,wert]));
 				});
 			}
 		});

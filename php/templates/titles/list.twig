@@ -11,21 +11,6 @@
     <div class="sets-grid">
         <details class="sets-filters" open>
             <summary>{{ tw.filter }}</summary>
-            {% if facets.kind %}
-            <fieldset class="sets-option-group"><legend>{{ tw.kind }}</legend>
-                {% for option in facets.kind %}<label class="sets-option"><input type="checkbox" name="kind[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
-            </fieldset>
-            {% endif %}
-            {% if facets.cat %}
-            <fieldset class="sets-option-group"><legend>{{ tw.cat }}</legend>
-                {% for option in facets.cat %}<label class="sets-option"><input type="checkbox" name="cat[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
-            </fieldset>
-            {% endif %}
-            {% if facets.art %}
-            <fieldset class="sets-option-group"><legend>{{ tw.art }}</legend>
-                {% for option in facets.art %}<label class="sets-option"><input type="checkbox" name="art[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
-            </fieldset>
-            {% endif %}
             {% if facets.region %}
             <fieldset class="giver-tree"><legend>{{ tw.wo }}</legend>
                 {% for region in facets.region %}
@@ -43,6 +28,21 @@
                 {% if area_rest %}<fieldset><legend>{{ tw.area }}</legend>
                     {% for option in area_rest %}<label class="sets-option"><input type="checkbox" name="area[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
                 </fieldset>{% endif %}
+            </fieldset>
+            {% endif %}
+            {% if facets.kind %}
+            <fieldset class="sets-option-group"><legend>{{ tw.kind }}</legend>
+                {% for option in facets.kind %}<label class="sets-option"><input type="checkbox" name="kind[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+            </fieldset>
+            {% endif %}
+            {% if facets.cat %}
+            <fieldset class="sets-option-group"><legend>{{ tw.cat }}</legend>
+                {% for option in facets.cat %}<label class="sets-option"><input type="checkbox" name="cat[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+            </fieldset>
+            {% endif %}
+            {% if facets.art %}
+            <fieldset class="sets-option-group"><legend>{{ tw.art }}</legend>
+                {% for option in facets.art %}<label class="sets-option"><input type="checkbox" name="art[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
             </fieldset>
             {% endif %}
             <div class="sets-filter-actions"><button type="submit">{{ tw.apply }}</button><a href="{{ list_url }}">{{ tw.reset }}</a></div>

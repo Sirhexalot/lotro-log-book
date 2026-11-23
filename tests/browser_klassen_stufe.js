@@ -38,13 +38,14 @@ function digits(text) {
 			await page.waitForFunction(() => !document.querySelector('#klassen-aufgaben').hasAttribute('aria-busy'));
 			assert.equal(await page.locator('#liste-aufgaben details[data-key="level"]').count(), 0, 'no quest level range');
 			assert.match(await page.locator('#liste-aufgaben .filter-result-toolbar [role=status]').innerText(), /123/);
-			assert.equal(await page.locator('#liste-aufgaben .filter-result-toolbar select').inputValue(), 'levelDesc');
-			const questLevels = await page.locator('#klassen-aufgaben .mql-row-value b').evaluateAll(ns => ns.map(n => Number(n.textContent)));
+			assert.equal(await page.locator('#liste-aufgaben .filter-result-toolbar select').isHidden(), true);
+			assert.equal(await page.locator('#klassen-aufgaben th').nth(1).getAttribute('aria-sort'), 'descending', 'quests default to level descending');
+			const questLevels = await page.$$eval('#klassen-aufgaben td.llb-zahl', tds => tds.map(td => Number(td.textContent.trim()) || 0).filter(value => value > 0));
 			assert.ok(questLevels.every(value => value <= 123), 'no quest above the selected level');
 
 			// The tab counters come from the same level-filtered rows.
 			const counters = await page.locator('[role=tab]').allInnerTexts();
-			assert.deepEqual(counters.map(digits), [11512, 3685, 14806], counters.join(' | '));
+			assert.deepEqual(counters.map(digits), [11512, 3685, 16104], counters.join(' | '));
 			assert.ok(counters[0].includes(tabs[0]));
 
 			// Deeds use the visible deed level too: a level-130 deed stays out.
@@ -53,28 +54,32 @@ function digits(text) {
 			await page.waitForFunction(() => !document.querySelector('#klassen-taten').hasAttribute('aria-busy'));
 			assert.equal(await page.locator('#liste-taten details[data-key="level"]').count(), 0, 'no deed level range');
 			assert.match(await page.locator('#liste-taten .filter-result-toolbar [role=status]').innerText(), /123/);
-			assert.equal(await page.locator('#liste-taten .filter-result-toolbar select').inputValue(), 'levelDesc');
+			assert.equal(await page.locator('#liste-taten .filter-result-toolbar select').isHidden(), true);
+			assert.equal(await page.locator('#klassen-taten th').nth(1).getAttribute('aria-sort'), 'descending', 'deeds default to level descending');
 			assert.equal(await page.locator('#klassen-taten a[href*="70054875"]').count(), 0, 'level-130 deed stays out');
-			const deedLevels = await page.locator('#klassen-taten .mql-row-value b').evaluateAll(ns => ns.map(n => Number(n.textContent)));
+			const deedLevels = await page.$$eval('#klassen-taten td.llb-zahl', tds => tds.map(td => Number(td.textContent.trim()) || 0).filter(value => value > 0));
 			assert.ok(deedLevels.every(value => value <= 123), 'no deed above the selected level');
 
 			// Items: minimum level is the gate, item level is not.
 			await page.locator('#klassen-items').click();
 			await page.waitForSelector('#liste-gegenstaende:not([hidden])');
-			await page.waitForFunction(() => !!document.querySelector('#klassen-gegenstaende .mql-row'), { timeout: 30000 });
+			await page.waitForFunction(() => !!document.querySelector('#klassen-gegenstaende tbody tr'), { timeout: 30000 });
 			assert.equal(await page.locator('#filter-gegenstaende details[data-key="level"]').count(), 0, 'no item level range');
 			assert.equal(await page.locator('#filter-gegenstaende details[data-key="minLevel"]').count(), 0, 'no minimum level range');
-			assert.equal(await page.locator('#filter-gegenstaende .filter-result-toolbar select').inputValue(), 'itemLevelDesc');
+			// The table head sorts; the default is the wear requirement descending.
+			assert.equal(await page.locator('#filter-gegenstaende .filter-result-toolbar select').isHidden(), true);
+			assert.equal(await page.locator('#klassen-gegenstaende th').nth(1).getAttribute('aria-sort'), 'descending');
 			assert.match(await page.locator('#filter-gegenstaende .filter-result-toolbar [role=status]').innerText(), /123/);
 			assert.ok((await page.locator('#klassen-item-hinweis').innerText()).trim().length > 20, 'item level hint');
 			assert.equal(await page.locator('#klassen-gegenstaende a[href*="7005FE09"]').count(), 0, 'level-130 ring stays out');
-			const itemLevels = await page.locator('#klassen-gegenstaende .mql-row-value b').evaluateAll(ns => ns.map(n => Number(n.textContent)));
-			assert.ok(itemLevels.some(value => value > 123), 'usable gear above the character level stays visible');
-			const metaLevels = await page.locator('#klassen-gegenstaende .mql-row-meta').evaluateAll(ns => ns.map(n => {
-				const match = n.textContent.match(/(?:Mindeststufe|Minimum level|Niveau minimum) (\d+)/i);
+			const itemLevels = await page.locator('#klassen-gegenstaende .gs-meta').evaluateAll(ns => ns.map(n => {
+				const match = n.textContent.match(/(?:Gegenstandsstufe|Item level|Niveau d’objet) (\d+)/);
 				return match ? Number(match[1]) : null;
 			}).filter(value => value !== null));
-			assert.ok(metaLevels.every(value => value <= 123), 'every row is usable at level 123');
+			assert.ok(itemLevels.some(value => value > 123), 'usable gear above the character level stays visible');
+			const minLevels = await page.$$eval('#klassen-gegenstaende td.llb-zahl',
+				tds => tds.map(td => Number(td.textContent.trim()) || 0).filter(value => value > 0));
+			assert.ok(minLevels.length > 0 && minLevels.every(value => value <= 123), 'every row is usable at level 123');
 
 			// The state is a chip under the name, and the filter narrows by it.
 			assert.equal(await page.locator('#filter-gegenstaende details[data-key="eignung"]').count(), 1, 'suitability filter group');
@@ -100,10 +105,10 @@ function digits(text) {
 				const n = document.querySelector('#filter-gegenstaende .filter-result-toolbar [role=status]');
 				return n && n.textContent.includes('120');
 			}, { timeout: 30000 });
-			await page.waitForFunction(() => /14.?792/.test(document.querySelector('#klassen-items').textContent)
+			await page.waitForFunction(() => /15.?989/.test(document.querySelector('#klassen-items').textContent)
 				&& /11.?413/.test(document.querySelector('#klassen-quests').textContent), { timeout: 30000 });
 			assert.equal(await page.evaluate(() => [...new URLSearchParams(location.search).keys()].some(k => k.startsWith('kf-'))), false, 'scoped filters reset');
-			assert.deepEqual((await page.locator('[role=tab]').allInnerTexts()).map(digits), [11413, 3685, 14792]);
+			assert.deepEqual((await page.locator('[role=tab]').allInnerTexts()).map(digits), [11413, 3685, 15989]);
 
 			// Mobile: the same filter opens as a dialog.
 			await page.setViewportSize({ width: 390, height: 844 });

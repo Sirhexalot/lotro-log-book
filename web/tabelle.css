@@ -1,0 +1,87 @@
+/* Result table: heading row as table head, one line per entry. */
+.llb-tabelle {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+.llb-tabelle th {
+	text-align: left;
+	font-size: var(--text-bedienung);
+	font-weight: var(--gewicht-normal);
+	color: var(--schwach);
+	background: var(--fläche);
+	border-bottom: 1px solid var(--rand);
+	padding: 0;
+}
+.llb-tabelle th button {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	font: inherit;
+	color: inherit;
+	background: none;
+	border: 0;
+	padding: 9px 8px;
+	cursor: pointer;
+	text-align: inherit;
+}
+.llb-tabelle th.llb-zahl { width: 10ch; text-align: right; }
+.llb-tabelle th.llb-zahl button { justify-content: flex-end; }
+.llb-tabelle th button .llb-sort-pfeil { color: var(--gold); }
+.llb-tabelle th button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.llb-tabelle td {
+	border-top: 1px solid var(--rand);
+	padding: 9px 0;
+	vertical-align: top;
+	min-width: 0;
+}
+.llb-tabelle td.llb-zahl {
+	width: 10ch;
+	padding-inline-end: 8px;
+	padding-top: 13px;
+	text-align: right;
+	color: var(--text);
+	font-variant-numeric: tabular-nums;
+}
+@media (max-width: 700px) {
+	.llb-tabelle th { font-size: var(--text-klein); }
+	.llb-tabelle th button { padding: 8px 4px 8px 6px; }
+	.llb-tabelle th.llb-zahl,
+	.llb-tabelle td.llb-zahl { width: 8ch; }
+	.llb-tabelle td { padding: 8px 0; }
+	.llb-tabelle td.llb-zahl { padding-top: 11px; }
+}
+
+/* Row content: the icon keeps its own column, text and state align beside it.
+ * The item row passes a 22px image, the reward and vendor rows a 64px tile. */
+.llb-tabelle .gs-zeile {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 2px 12px;
+	padding: 0 4px;
+	align-items: start;
+}
+.llb-tabelle .gs-zeile > .mql-row-icon,
+.llb-tabelle .gs-zeile > .bl-symbol { grid-column: 1; grid-row: 1 / span 3; align-self: start; }
+.llb-tabelle .gs-zeile > .symbol { grid-column: 1; grid-row: 1 / span 2; align-self: start; width: 22px; height: 22px; }
+.llb-tabelle .gs-zeile .gs-name,
+.llb-tabelle .gs-zeile .gs-meta,
+.llb-tabelle .gs-zeile .mql-row-eignung { grid-column: 2; min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.llb-tabelle .gs-zeile .gs-name { grid-row: 1; }
+.llb-tabelle .gs-zeile .gs-meta { grid-row: 2; }
+.llb-tabelle .gs-zeile .mql-row-eignung { grid-row: 3; display: block; }
+/* A finder row selects the quest instead of opening a page. */
+.llb-tabelle .gs-zeile:is(button) {
+	width: 100%;
+	background: none;
+	border: 0;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+.llb-tabelle .gs-zeile:is(button):focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.llb-tabelle .gs-zeile:hover .gs-name,
+.llb-tabelle .gs-zeile:focus-visible .gs-name { color: var(--gold); text-decoration: underline; }
+

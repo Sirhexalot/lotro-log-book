@@ -16,14 +16,14 @@ const base = process.argv[2] || 'http://127.0.0.1:8816';
 		const started = Date.now();
 		const response = await page.goto(base + '/de/tat/', { waitUntil: 'load' });
 		assert.equal(response.status(), 200);
-		await page.locator('.mql-row').first().waitFor();
+		await page.locator('.llb-tabelle tbody tr').first().waitFor();
 		const untilRows = Date.now() - started;
 		const metrics = await page.evaluate(() => {
 			const nav = performance.getEntriesByType('navigation')[0];
 			return {
 				dcl: Math.round(nav.domContentLoadedEventEnd),
 				load: Math.round(nav.loadEventEnd),
-				rows: document.querySelectorAll('.mql-row').length,
+				rows: document.querySelectorAll('.llb-tabelle tbody tr').length,
 				requests: performance.getEntriesByType('resource').length,
 			};
 		});
@@ -46,7 +46,7 @@ const base = process.argv[2] || 'http://127.0.0.1:8816';
 
 		await page.setViewportSize({ width: 390, height: 844 });
 		await page.reload({ waitUntil: 'load' });
-		await page.locator('.mql-row').first().waitFor();
+		await page.locator('.llb-tabelle tbody tr').first().waitFor();
 		assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false,
 			'Tatenindex läuft mobil seitlich über');
 		assert.deepEqual(errors, [], 'JavaScript-Fehler: ' + errors.join(' | '));

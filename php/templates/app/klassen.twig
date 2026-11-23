@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/klassen.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/tabelle.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/entitaeten-listen.css?v={{ asset_stand }}">
 {% endblock %}
@@ -53,7 +54,7 @@
 			<p id="klassen-item-hinweis" class="klassen-hinweis" data-klassen-item-hinweis></p>
 			<div id="filter-gegenstaende" class="klassen-filter related-list">
 				<p class="klassen-filter-fehler" data-filter-error hidden></p>
-				<ol id="klassen-gegenstaende" class="related-results" data-filter-results></ol>
+				<div id="klassen-gegenstaende" class="related-results" data-filter-results></div>
 			</div>
 		</div>
 	</section>
@@ -75,7 +76,9 @@
 <script src="/filter-ui.js?v={{ asset_stand }}" defer></script>
 <script src="/symbole.js?v={{ asset_stand }}" defer></script>
 <script src="/treffer-zeile.js?v={{ asset_stand }}" defer></script>
+<script src="/treffer-tabelle.js?v={{ asset_stand }}" defer></script>
 <script src="/aufgaben-filter.js?v={{ asset_stand }}" defer></script>
+<script src="/listen/gegenstaende.js?v={{ asset_stand }}" defer></script>
 <script src="/gegenstaende-filter.js?v={{ asset_stand }}" defer></script>
 <script src="/klassen-{{ lang }}.js?v={{ asset_stand }}" defer></script>
 <script src="/klassen.js?v={{ asset_stand }}" defer></script>

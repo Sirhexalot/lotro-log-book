@@ -2,9 +2,9 @@
 (function () {
 	'use strict';
 	var labels = {
-		de: { search:'Aufgaben suchen', placeholder:'Aufgabe, Auftraggeber oder Gebiet', filter:'Filter', close:'Schließen', sort:'Sortierung', reset:'Zurücksetzen', more:'Weitere anzeigen', count:'%s Aufgaben', show:'%s Treffer anzeigen', loading:'Lade …', error:'Ergebnisse nicht aktualisiert.', retry:'Erneut versuchen', fallback:'Als Seite öffnen', invalidRange:'Ungültiger Bereich', min:'Von', max:'Bis', topic:'Thema', class:'Klasse', origin:'Herkunft', geography:'Region und Gebiet', flags:'Merkmale', level:'Stufe', status:'Fortschritt', all:'alle', open:'offen', done:'erledigt', machbar:'annehmbar', running:'läuft', unknown:'Kein Import', excluded:'Nicht im Journal', name:'Name', daily:'täglich', repeat:'wiederholbar', group:'Gruppe', small:'kleine Gemeinschaft', fellowship:'große Gemeinschaft', instance:'Instanz', scaling:'skaliert mit Stufe', task:'Aufgabenbrett', noResults:'Keine passenden Aufgaben gefunden.' },
-		en: { search:'Search quests', placeholder:'Quest, giver or area', filter:'Filters', close:'Close', sort:'Sort', reset:'Reset', more:'Show more', count:'%s quests', show:'Show %s results', loading:'Loading …', error:'Results not updated.', retry:'Try again', fallback:'Open page', invalidRange:'Invalid range', min:'From', max:'To', topic:'Topic', class:'Class', origin:'Origin', geography:'Region and area', flags:'Properties', level:'Level', status:'Progress', all:'all', open:'open', done:'done', machbar:'available', running:'in progress', unknown:'No import', excluded:'Not in journal', name:'Name', daily:'daily', repeat:'repeatable', group:'Group', small:'small fellowship', fellowship:'fellowship', instance:'instance', scaling:'scales with level', task:'Task board', noResults:'No matching quests found.' },
-		fr: { search:'Chercher des quêtes', placeholder:'Quête, donneur ou pays', filter:'Filtres', close:'Fermer', sort:'Tri', reset:'Réinitialiser', more:'Afficher davantage', count:'%s quêtes', show:'Afficher %s résultats', loading:'Chargement …', error:'Résultats non actualisés.', retry:'Réessayer', fallback:'Ouvrir la page', invalidRange:'Plage incorrecte', min:'De', max:'À', topic:'Thème', class:'Classe', origin:'Origine', geography:'Région et pays', flags:'Caractéristiques', level:'Niveau', status:'Progression', all:'toutes', open:'à faire', done:'terminées', machbar:'disponibles', running:'en cours', unknown:'Non importée', excluded:'Absent du journal', name:'Nom', daily:'quotidienne', repeat:'répétable', group:'Groupe', small:'petite communauté', fellowship:'communauté', instance:'instance', scaling:'évolue avec le niveau', task:'Tableau des tâches', noResults:'Aucune quête correspondante.' }
+		de: { search:'Aufgaben suchen', placeholder:'Aufgabe, Auftraggeber oder Gebiet', filter:'Filter', close:'Schließen', sort:'Sortierung', reset:'Zurücksetzen', more:'Weitere anzeigen', count:'%s Aufgaben', show:'%s Treffer anzeigen', loading:'Lade …', error:'Ergebnisse nicht aktualisiert.', retry:'Erneut versuchen', fallback:'Als Seite öffnen', invalidRange:'Ungültiger Bereich', min:'Von', max:'Bis', topic:'Thema', class:'Klasse', origin:'Herkunft', geography:'Region und Landschaft', flags:'Merkmale', level:'Stufe', status:'Fortschritt', all:'alle', open:'offen', done:'erledigt', machbar:'annehmbar', running:'läuft', unknown:'Kein Import', excluded:'Nicht im Journal', name:'Name', daily:'täglich', repeat:'wiederholbar', group:'Gruppe', small:'kleine Gemeinschaft', fellowship:'große Gemeinschaft', instance:'Instanz', scaling:'skaliert mit Stufe', task:'Aufgabenbrett', noResults:'Keine passenden Aufgaben gefunden.' },
+		en: { search:'Search quests', placeholder:'Quest, giver or area', filter:'Filters', close:'Close', sort:'Sort', reset:'Reset', more:'Show more', count:'%s quests', show:'Show %s results', loading:'Loading …', error:'Results not updated.', retry:'Try again', fallback:'Open page', invalidRange:'Invalid range', min:'From', max:'To', topic:'Topic', class:'Class', origin:'Origin', geography:'Region and landscape', flags:'Properties', level:'Level', status:'Progress', all:'all', open:'open', done:'done', machbar:'available', running:'in progress', unknown:'No import', excluded:'Not in journal', name:'Name', daily:'daily', repeat:'repeatable', group:'Group', small:'small fellowship', fellowship:'fellowship', instance:'instance', scaling:'scales with level', task:'Task board', noResults:'No matching quests found.' },
+		fr: { search:'Chercher des quêtes', placeholder:'Quête, donneur ou pays', filter:'Filtres', close:'Fermer', sort:'Tri', reset:'Réinitialiser', more:'Afficher davantage', count:'%s quêtes', show:'Afficher %s résultats', loading:'Chargement …', error:'Résultats non actualisés.', retry:'Réessayer', fallback:'Ouvrir la page', invalidRange:'Plage incorrecte', min:'De', max:'À', topic:'Thème', class:'Classe', origin:'Origine', geography:'Région et zone', flags:'Caractéristiques', level:'Niveau', status:'Progression', all:'toutes', open:'à faire', done:'terminées', machbar:'disponibles', running:'en cours', unknown:'Non importée', excluded:'Absent du journal', name:'Nom', daily:'quotidienne', repeat:'répétable', group:'Groupe', small:'petite communauté', fellowship:'communauté', instance:'instance', scaling:'évolue avec le niveau', task:'Tableau des tâches', noResults:'Aucune quête correspondante.' }
 	};
 	var topicNames = {
 		de: {epic:'Epische Geschichte',class:'Klassenaufgaben',origin:'Herkunftsaufgaben',festivals:'Feste und Ereignisse',missions:'Missionen',instances:'Instanzen und Schlachten',craft:'Handwerk',board:'Aufgabenbrett',other:'Weitere Aufgaben'},
@@ -151,9 +151,9 @@
 		var defaults = function () {
 			var filters = {topic:[],class:[],origin:[],geography:[],flag:[],level:{min:null,max:null}};
 			filters.status = 'all';
-			return {q:'',filters:filters,sort:'name',pagination:{kind:'limit',limit:30}};
+			return {q:'',filters:filters,sort:'name',sortDir:'asc',pagination:{kind:'limit',limit:50}};
 		};
-		var fields = [{param:'q',path:['q']},{param:'sort',path:['sort'],omit:'name'}];
+		var fields = [{param:'q',path:['q']}];
 		groups.forEach(function (group) {
 			if (group.kind === 'range') {
 				fields.push({param:'von',path:['filters',group.id,'min'],type:'number'},{param:'bis',path:['filters',group.id,'max'],type:'number'});
@@ -163,13 +163,40 @@
 				fields.push({param:group.id,path:['filters',group.id],type:group.kind === 'boolean' ? 'boolean' : group.kind === 'single' ? 'text' : 'multi',omit:group.kind === 'boolean' ? false : group.kind === 'single' ? 'all' : undefined});
 			}
 		});
+		var baseCodec = window.MQL_FILTERADAPTER.codec(fields, defaults);
+		// `levelDesc` is the old select value; the head sends a direction instead.
+		function sortLesen(roh) {
+			if (roh === 'levelDesc') { return {key:'level',dir:'desc'}; }
+			if (roh === 'level' || roh === 'name') { return {key:roh,dir:'asc'}; }
+			var dir = roh.charAt(0) === '-' ? 'desc' : 'asc', key = dir === 'desc' ? roh.slice(1) : roh;
+			return key === 'name' || key === 'level' ? {key:key,dir:dir} : null;
+		}
 		var config = {
 			area:'karten-aufgabenfinder',lang:lang,labels:Object.assign({},w),rootUrl:location.origin+location.pathname,groups:groups,
 			search:{submit:'debounce',debounceMs:180},
-			sort:{options:[{value:'name',label:w.name},{value:'level',label:w.level}]},
-			pagination:{kind:'limit',size:30},
+			sort:{keys:['name','level'],ersteRichtung:{name:'asc',level:'asc'},options:[]},
+			pagination:{kind:'limit',size:50},
 			defaults:defaults,
-			urlCodec:window.MQL_FILTERADAPTER.codec(fields,defaults)
+			urlCodec:{
+				decode:function (url) {
+					var parsed = baseCodec.decode(url);
+					var roh = url.searchParams.get('sort');
+					if (roh) {
+						var gelesen = sortLesen(roh);
+						if (gelesen) { parsed.state.sort = gelesen.key; parsed.state.sortDir = gelesen.dir; }
+						parsed.explicit = true;
+					}
+					return parsed;
+				},
+				encode:function (state, url) {
+					url = baseCodec.encode(state, url);
+					url.searchParams.delete('sort');
+					if (state.sort !== 'name' || state.sortDir === 'desc') {
+						url.searchParams.set('sort', (state.sortDir === 'desc' ? '-' : '') + state.sort);
+					}
+					return url;
+				}
+			}
 		};
 		function rowFlags(q) {
 			var flags=[];
@@ -250,9 +277,50 @@
 				return group.id === skipGroup || matchesGroup(row,group,state.filters[group.id]);
 			});
 		}
+		/* Fallback without the shared table (old pages, unit tests): the row list
+		 * stays readable instead of an empty result. */
+		function legacyRender(result,target) {
+			if (!result.payload.length) {
+				var empty=document.createElement('li'); empty.className='finder-keine-treffer'; empty.textContent=w.noResults;
+				target.appendChild(empty); return;
+			}
+			var counts={};
+			result.payload.forEach(function (q) { counts[q.n]=(counts[q.n]||0)+1; });
+			result.payload.forEach(function (q) {
+				var li=document.createElement('li'),button=document.createElement('button'),name=document.createElement('strong'),meta=document.createElement('small'),status=document.createElement('span');
+				button.type='button';button.className='finder-treffer';name.textContent=q.n;
+				var stand=progressState(q);
+				status.className='questfinder-status questfinder-status-'+stand;
+				status.textContent={done:'✓ '+progress.done,open:'● '+progress.open,running:'◒ '+progress.running,unknown:'○ '+w.unknown,excluded:'– '+w.excluded}[stand];
+				var rewardCount = Array.isArray(q.rw) ? q.rw.length : 0;
+				var details=[q.l?w.level+' '+q.l:'',q.a===boardValue?w.task:'',q.g||(counts[q.n]>1?w.name+' · '+q.i:''),rewardCount ? ((window.MQL_T && window.MQL_T('belohnungen')) || 'Belohnungen')+' '+rewardCount:''].filter(Boolean);
+				meta.textContent=details.join(' · ');
+				var control=window.MQL_STATUS_UI&&window.MQL_STATUS_UI.create('quests',q.i,null,'questfinder',
+					{done:'fertig',running:'laufend',open:'offen'}[stand] || null);
+				button.append(name);
+				if (!control) { button.append(status); }
+				button.append(meta);
+				button.addEventListener('click',function () { selectQuest(q); });
+				li.appendChild(button);
+				if (control) {
+					control.addEventListener('click',function (event) { event.stopPropagation(); });
+					li.appendChild(control);
+				}
+				target.appendChild(li);
+			});
+		}
 		var adapter = window.MQL_FILTERADAPTER.client({
 			rows:quests,id:function (q) { return String(q.i); },matches:matches,
-			compare:function (a,b,sort) { return (sort === 'level' ? (Number(a.l)||Infinity)-(Number(b.l)||Infinity) : 0) || MQL_SORT.compare(a.n,b.n) || String(a.i).localeCompare(String(b.i)); },
+			compare:function (a,b,sort,dir) {
+				var richtung=dir==='desc'?-1:1;
+				if(sort==='level'){
+					var al=Number(a.l)||0, bl=Number(b.l)||0;
+					if(!al&&bl){return 1;} if(al&&!bl){return -1;}
+					if(al!==bl){return (al-bl)*richtung;}
+					return MQL_SORT.compare(a.n,b.n)||String(a.i).localeCompare(String(b.i));
+				}
+				return (MQL_SORT.compare(a.n,b.n)||String(a.i).localeCompare(String(b.i)))*richtung;
+			},
 			facets:function (all,state) {
 				var result={};
 				groups.forEach(function (group) {
@@ -277,53 +345,41 @@
 			},
 		renderResults:function (result,target) {
 			target.replaceChildren();
-			var rowUI=window.MQL_TREFFERZEILE;
-			if(rowUI){
-				rowUI.header(target,{progress:true,levelHeading:rowUI.words.questLevel});
-				if(!hasMachbar){rowUI.help(target,rowUI.words.noProgress);}
+			var rowUI=window.MQL_TREFFERZEILE, TBL=window.MQL_TABELLE;
+			if(!TBL||!rowUI){ legacyRender(result,target); return; }
+			var spalten=[{label:w.name,sortierung:'name'},{label:rowUI.words.questLevel,sortierung:'level',zahl:true}];
+			if(hasQuestProgress){spalten.push({label:progress.progress});}
+			var bau=TBL.bauen(target,spalten,{key:result.state.sort,dir:result.state.sortDir});
+			if(!hasMachbar){
+				var help=document.createElement('p');help.className='mql-row-help';
+				help.appendChild(document.createTextNode(rowUI.words.noProgress+' '));
+				var weiter=document.createElement('a');weiter.href='/'+lang+'/'+(lang==='fr'?'progression':lang==='en'?'progress':'spielstand')+'/';weiter.textContent=rowUI.words.import;
+				help.appendChild(weiter);target.insertBefore(help,bau.tabelle);
 			}
-			if (!result.payload.length) {
-				var empty=document.createElement('li'); empty.className='finder-keine-treffer'; empty.textContent=w.noResults;
-					target.appendChild(empty); return;
-				}
-				var counts={};
-				result.payload.forEach(function (q) { counts[q.n]=(counts[q.n]||0)+1; });
-				result.payload.forEach(function (q) {
-					if(rowUI){
-						var stand=progressState(q);
-						var control=window.MQL_STATUS_UI&&window.MQL_STATUS_UI.create('quests',q.i,null,'questfinder',
-							{done:'fertig',running:'laufend',open:'offen'}[stand]||null);
-						var meta=[q.g,q.z||q.r,q.a===boardValue?w.task:''].filter(Boolean).join(' · ');
-						var values=q.l?[{label:rowUI.words.questLevel,value:q.l}]:[];
-						target.appendChild(rowUI.row(target,{
-							// Older cached catalogue builds can contain an orphaned chapter separator.
-							icon:'aufgabe',name:q.n.replace(/^\.\s+/, ''),meta:meta,values:values,progress:control,levelHeading:rowUI.words.questLevel,
-							onActivate:function(){selectQuest(q);}
-						}));
-						return;
-					}
-					var li=document.createElement('li'),button=document.createElement('button'),name=document.createElement('strong'),meta=document.createElement('small'),status=document.createElement('span');
-					button.type='button';button.className='finder-treffer';name.textContent=q.n;
-					var stand=progressState(q);
-					status.className='questfinder-status questfinder-status-'+stand;
-					status.textContent={done:'✓ '+progress.done,open:'● '+progress.open,running:'◒ '+progress.running,unknown:'○ '+w.unknown,excluded:'– '+w.excluded}[stand];
-					var rewardCount = Array.isArray(q.rw) ? q.rw.length : 0;
-					var details=[q.l?w.level+' '+q.l:'',q.a===boardValue?w.task:'',q.g||(counts[q.n]>1?w.name+' · '+q.i:''),rewardCount ? ((window.MQL_T && window.MQL_T('belohnungen')) || 'Belohnungen')+' '+rewardCount:''].filter(Boolean);
-					meta.textContent=details.join(' · ');
+			if(!result.payload.length){
+				var leer=document.createElement('tr');leer.setAttribute('role','row');
+				var zelle=document.createElement('td');zelle.setAttribute('role','cell');zelle.colSpan=spalten.length;zelle.textContent=w.noResults;
+				leer.appendChild(zelle);bau.koerper.appendChild(leer);return;
+			}
+			result.payload.forEach(function (q) {
+				var stand=progressState(q);
+				var zeile=document.createElement('button');
+				zeile.type='button';zeile.className='gs-zeile';zeile.addEventListener('click',function(){selectQuest(q);});
+				zeile.appendChild(rowUI.entityIcon('aufgabe'));
+				var titel=document.createElement('span');titel.className='gs-name';titel.textContent=q.n.replace(/^\.\s+/, '');zeile.appendChild(titel);
+				var metaText=[q.g,q.z||q.r,q.a===boardValue?w.task:''].filter(Boolean).join(' · ');
+				if(metaText){var meta=document.createElement('span');meta.className='gs-meta';meta.textContent=metaText;zeile.appendChild(meta);}
+				var zellen=[zeile,q.l?String(q.l):''];
+				if(hasQuestProgress){
+					var huelle=document.createElement('span');huelle.className='mql-row-progress';
 					var control=window.MQL_STATUS_UI&&window.MQL_STATUS_UI.create('quests',q.i,null,'questfinder',
-						{done:'fertig',running:'laufend',open:'offen'}[stand] || null);
-					button.append(name);
-					if (!control) { button.append(status); }
-					button.append(meta);
-					button.addEventListener('click',function () { selectQuest(q); });
-					li.appendChild(button);
-					if (control) {
-						control.addEventListener('click',function (event) { event.stopPropagation(); });
-						li.appendChild(control);
-					}
-					target.appendChild(li);
-				});
-			}
+						{done:'fertig',running:'laufend',open:'offen'}[stand]||null);
+					if(control){huelle.appendChild(control);}
+					zellen.push(huelle);
+				}
+				bau.koerper.appendChild(TBL.zeile(spalten,zellen));
+			});
+		}
 		});
 		var controller=window.MQL_FILTER_UI.mount(root,{config:config,adapter:adapter});
 		if (window.addEventListener) {

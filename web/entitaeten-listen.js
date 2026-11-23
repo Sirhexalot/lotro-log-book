@@ -123,7 +123,7 @@
 					options:regionOptions,exclusivePaths:true,
 					validatePath:function(path){return !!path.region&&(!path.area||String(areaRegion[path.area])===String(path.region));},
 					pathLabel:function(path){return path.area?(regionLabels[path.region]+' · '+areaLabels[path.area]):regionLabels[path.region];}},
-				{id:'type',kind:'multi',label:lang==='de'?'Art':lang==='fr'?'Type':'Type',
+				{id:'type',kind:'multi',label:lang==='de'?'Händlerart':lang==='fr'?'Type de marchand':'Vendor type',
 					options:Object.keys(typeLabels).map(function(v){return {value:v,label:typeLabels[v]};})}
 			],
 			sort:{options:[{value:'name',label:'Name'}]},

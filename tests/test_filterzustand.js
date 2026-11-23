@@ -108,4 +108,28 @@ assert.deepEqual(api.chips(baum,baumState).map(chip => chip.label),
 const ohneBlatt = api.reduce(baum,baumState,api.chips(baum,baumState)[2].action).state;
 assert.deepEqual(ohneBlatt.filters.kategorie,[]);
 
+// Sorting by column carries a key and a direction; a select sends only the key.
+const directed = {
+	groups: [],
+	sort: {keys:['name','level'], ersteRichtung:{level:'desc'}},
+	pagination: {size:50},
+	defaults: () => ({q:'',filters:{},sort:'name',sortDir:'asc',pagination:{kind:'limit',limit:50}})
+};
+let sorted = api.normalize(directed,{});
+assert.deepEqual([sorted.state.sort,sorted.state.sortDir],['name','asc']);
+sorted = api.reduce(directed,sorted.state,{type:'sortToggle',key:'level'});
+assert.deepEqual([sorted.state.sort,sorted.state.sortDir],['level','desc']);
+sorted = api.reduce(directed,sorted.state,{type:'sortToggle',key:'level'});
+assert.deepEqual([sorted.state.sort,sorted.state.sortDir],['level','asc']);
+sorted = api.reduce(directed,sorted.state,{type:'sortToggle',key:'name'});
+assert.deepEqual([sorted.state.sort,sorted.state.sortDir],['name','asc']);
+assert.equal(api.normalize(directed,{sort:'unbekannt',sortDir:'desc'}).state.sort,'name');
+assert.equal(api.normalize(directed,{sort:'level',sortDir:'desc'}).state.sortDir,'desc');
+assert.equal(api.normalize(directed,{sort:'level',sortDir:'quer'}).state.sortDir,'asc');
+assert.throws(() => api.reduce(directed,sorted.state,{type:'sortToggle',key:'rarity'}));
+assert.equal(api.reduce(directed,sorted.state,{type:'sort',value:'level'}).state.sortDir,'asc');
+assert.equal(api.reduce(directed,sorted.state,{type:'sort',value:{key:'level',dir:'desc'}}).state.sortDir,'desc');
+// A list without column sorting keeps its old state shape (no direction field).
+assert.equal('sortDir' in api.normalize(config,{}).state,false);
+
 console.log('Filter state: normalization, validation, branch deduplication, reset and pagination passed.');

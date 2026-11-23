@@ -14,7 +14,7 @@ const base=process.env.LLB_ITEM_PREVIEW || 'http://127.0.0.1:8924';
 			for(const width of [390,768,901,1280,1440]) {
 				await page.setViewportSize({width,height:900});
 				assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-				assert.equal(await page.locator('.filter-result-toolbar select').evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth;}),true);
+				assert.equal(await page.locator('.filter-result-toolbar select').isHidden(),true);
 			}
 			// Each category occurs exactly once; no duplicate checkbox + expansion caption.
 			assert.equal(await page.locator('.filter-panel').evaluate(n=>{
@@ -23,7 +23,9 @@ const base=process.env.LLB_ITEM_PREVIEW || 'http://127.0.0.1:8924';
 			}),true);
 			assert.equal(await page.locator('#gs-ergebnis .gs-name').count(),50);
 			assert.equal(await page.locator('#gs-ergebnis .gs-meta').count(),50);
-			assert.equal(await page.locator('#gs-ergebnis .symbol').count(),50);
+			assert.equal(await page.locator('#gs-ergebnis tbody tr').count(),50);
+			// Every row carries the 64 px icon tile; a missing id falls back to the symbol.
+			assert.equal(await page.locator('#gs-ergebnis .mql-row-icon').count(),50);
 			if(lang==='de') {
 				const longName=page.locator('.filter-option>span').filter({hasText:/^Legendärer Gegenstand$/});
 				assert.equal(await longName.evaluate(n=>n.getBoundingClientRect().height<=parseFloat(getComputedStyle(n).lineHeight)+1),true);
@@ -45,7 +47,7 @@ const base=process.env.LLB_ITEM_PREVIEW || 'http://127.0.0.1:8924';
 					const summary=row.closest('summary');
 					if(summary){const arrow=rect(summary.querySelector('svg'));if(!near(arrow.y+arrow.height/2,input.y+input.height/2)){failures.push('arrow center');}}
 				}
-				const first=document.querySelector('#gs-ergebnis li'), title=rect(first.querySelector('.gs-name')),meta=rect(first.querySelector('.gs-meta'));
+				const first=document.querySelector('#gs-ergebnis tbody tr'), title=rect(first.querySelector('.gs-name')),meta=rect(first.querySelector('.gs-meta'));
 				const list=rect(document.querySelector('.filter-results-home')),header=rect(document.querySelector('.filter-result-header'));
 				if(!near(title.left,meta.left)){failures.push('result text');}
 				const gap=parseFloat(getComputedStyle(document.querySelector('.filter-grid')).rowGap)||0;

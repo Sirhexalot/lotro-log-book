@@ -35,15 +35,15 @@
 {% if hat_was %}<section id="haendler-tab-was" class="katalog-abschnitt vendor-goods{% if not beide %} llb-flaeche{% endif %}"{% if beide %} role="tabpanel" aria-labelledby="haendler-was" tabindex="0"{% endif %}>
 {% if vendor.item_total %}<h2>{{ vendor.items_label }}</h2>
 {% if vendor.item_total > 5 %}<div class="vendor-items" data-item-filter-root data-item-ids="{{ vendor.item_ids }}" data-filter-area="haendler">
-<ul class="gs-ergebnis" data-filter-results>{% for item in vendor.items %}<li><a class="gs-zeile" href="{{ item.url }}"><span class="gs-name">{{ item.name }}</span>{% if item.level %}<span class="gs-meta">{{ gw.level }} {{ item.level }}</span>{% endif %}</a></li>{% endfor %}</ul>
+<div class="gs-ergebnis" data-filter-results><ul class="gs-ergebnis">{% for item in vendor.items %}<li><a class="gs-zeile" href="{{ item.url }}"><span class="gs-name">{{ item.name }}</span>{% if item.level %}<span class="gs-meta">{{ gw.level }} {{ item.level }}</span>{% endif %}</a></li>{% endfor %}</ul></div>
 </div>
 {% else %}<ul class="gs-ergebnis">{% for item in vendor.items %}<li><a class="gs-zeile" href="{{ item.url }}"><span class="gs-name">{{ item.name }}</span>{% if item.level %}<span class="gs-meta">{{ gw.level }} {{ item.level }}</span>{% endif %}</a></li>{% endfor %}</ul>
 {% endif %}{% endif %}
 {% if vendor.offer_total %}<h2>{{ gw.barter_offers }}</h2>
 <div class="vendor-barter" data-tausch-root data-filter-area="haendler-tausch">
-<ul class="gs-ergebnis" data-filter-results>
+<div class="gs-ergebnis" data-filter-results><ul class="gs-ergebnis">
 {% set gezeigt = 0 %}{% for group in vendor.offers %}{% for offer in group.rows %}{% if gezeigt < 50 %}<li><a class="gs-zeile" href="{{ offer.receive[0].url }}"><span class="gs-name">{{ offer.receive[0].name }}</span><span class="gs-meta">{% for part in offer.give %}{% if not loop.first %} + {% endif %}{{ part.qty }} {{ part.text }}{% endfor %}</span></a></li>{% endif %}{% set gezeigt = gezeigt + 1 %}{% endfor %}{% endfor %}
-</ul>
+</ul></div>
 <noscript><p class="llb-hinweis">{{ gw.barter_noscript }}</p></noscript>
 <script type="application/json" id="tausch-daten">{{ vendor.tausch|json_encode|raw }}</script>
 </div>{% endif %}

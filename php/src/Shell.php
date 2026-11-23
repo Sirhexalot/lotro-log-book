@@ -83,6 +83,7 @@ final class Shell
              $this->assetTag('sets.css'),
              $this->assetTag('gegenstaende.css'),
              $this->assetTag('filter-ui.css'),
+             $this->assetTag('tabelle.css'),
              $this->assetTag('aufgabenfinder.css'),
              $this->assetTag('auftraggeber.css'),
              $this->assetTag('haendler.css'),
@@ -104,9 +105,11 @@ final class Shell
               $this->scriptTag('klassen-proficiency.js'),
               $this->scriptTag('eignung.js'),
               $this->scriptTag('treffer-zeile.js'),
+              $this->scriptTag('treffer-tabelle.js'),
               $this->scriptTag('treffer-fortschritt.js'),
              $this->scriptTag('auftraggeber.js'), $this->scriptTag('aufgaben-filter.js'),
               $this->scriptTag('karten-aufgabenfilter.js'),
+              $this->scriptTag('listen/gegenstaende.js'),
               $this->scriptTag('gegenstaende-filter.js'),
               $this->scriptTag('item-detail.js'), $this->scriptTag('item-task-filter.js')]);
     }
@@ -115,9 +118,9 @@ final class Shell
     public function assetStand(): string
     {
         $teile = [];
-        foreach (['*.js', '*.css'] as $muster) {
+        foreach (['*.js', '*.css', 'listen/*.js'] as $muster) {
             foreach (glob($this->webRoot . '/' . $muster) ?: [] as $datei) {
-                $teile[] = basename($datei) . ':' . filemtime($datei);
+                $teile[] = str_replace($this->webRoot . '/', '', $datei) . ':' . filemtime($datei);
             }
         }
         sort($teile);

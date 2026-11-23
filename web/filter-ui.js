@@ -23,6 +23,24 @@
 		var openStates = new Map();
 		var listeners = [], dialogBase = null, closing = null, restoreFocus = null, scrollY = 0, oldOverflow;
 		var media = window.matchMedia('(max-width: 900px)');
+		/* The filter column sticks below the sticky page header; its height is
+		 * measured here because the header wraps with the viewport. */
+		function kopfHoehe() {
+			var kopf = document.querySelector('.kopf');
+			return kopf ? Math.round(kopf.getBoundingClientRect().height) : 0;
+		}
+		function setzeKopfHoehe() {
+			document.documentElement.style.setProperty('--kopf-hoehe', kopfHoehe() + 'px');
+		}
+		setzeKopfHoehe();
+		var kopfBeobachter = null;
+		if (window.ResizeObserver) {
+			var kopfElement = document.querySelector('.kopf');
+			if (kopfElement) {
+				kopfBeobachter = new ResizeObserver(setzeKopfHoehe);
+				kopfBeobachter.observe(kopfElement);
+			}
+		}
 		if (!window.fetch || !window.AbortController || typeof HTMLDialogElement === 'undefined' || !HTMLDialogElement.prototype.showModal) {
 			throw new Error('Filter enhancement unsupported; keep GET fallback');
 		}
@@ -46,7 +64,7 @@
 		var open = node('button',text('filter')); open.type = 'button'; open.className = 'filter-open';
 		var count = node('span'); count.setAttribute('role','status'); count.setAttribute('aria-live','polite');
 		var sort = node('select'); sort.setAttribute('aria-label',text('sort'));
-		if (config.sort) { config.sort.options.forEach(function (o) { var n = node('option',o.label); n.value = o.value; sort.appendChild(n); }); }
+		if (config.sort && config.sort.options && config.sort.options.length) { config.sort.options.forEach(function (o) { var n = node('option',o.label); n.value = o.value; sort.appendChild(n); }); }
 		else { sort.hidden = true; }
 		toolbar.append(search,searchButton);
 		var resultToolbar = node('div'); resultToolbar.className = 'filter-result-toolbar';
@@ -71,6 +89,19 @@
 		resultsHome.appendChild(target);
 		var more = node('button',text('more')); more.type = 'button'; more.hidden = true;
 		resultsHome.appendChild(more);
+		/* Infinite scroll: the sentinel loads the next block as soon as it comes
+		 * into view. The button stays the fallback where no observer exists. */
+		var sentinel = node('div'); sentinel.className = 'filter-sentinel'; sentinel.setAttribute('aria-hidden','true');
+		resultsHome.appendChild(sentinel);
+		var observer = null;
+		if (window.IntersectionObserver && config.pagination.kind === 'limit') {
+			observer = new IntersectionObserver(function (entries) {
+				if (!entries.some(function (e) { return e.isIntersecting; })) { return; }
+				if (request || !result || !result.pagination.hasMore) { return; }
+				dispatch({type:'more'});
+			},{rootMargin:'400px 0px'});
+			observer.observe(sentinel);
+		}
 		var resultHeader = node('div'); resultHeader.className = 'filter-result-header';
 		resultHeader.append(resultToolbar,chips,error); grid.append(resultHeader,home,resultsHome);
 		var dialog = node('dialog'); dialog.className = 'filter-dialog'; dialog.setAttribute('aria-modal','true'); dialog.setAttribute('aria-label',text('filter'));
@@ -223,7 +254,7 @@
 			if (document.activeElement !== search) { search.value = state.q; }
 			count.textContent = request ? text('loading') : result ? text('count').replace('%s',result.total.toLocaleString(config.lang)) : '';
 			show.textContent = request ? text('loading') : text('show').replace('%s',result ? result.total.toLocaleString(config.lang) : '');
-			more.hidden = !result || !result.pagination.hasMore;
+			more.hidden = !result || !result.pagination.hasMore || !!observer;
 			more.textContent = text('more');
 			if (state.pagination.kind === 'page') {
 				more.hidden = true;
@@ -251,6 +282,8 @@
 		}
 		async function dispatch(action) {
 			if (dead) { return; }
+			// The sentinel may fire while a request runs or after the last page.
+			if (action.type === 'more' && (request || !result || !result.pagination.hasMore)) { return; }
 			if (action.type === 'openDialog') { openDialog(); return; }
 			if (action.type === 'closeDialog') { return closeDialog(); }
 			if (action.type === 'retry') { return load(); }
@@ -317,8 +350,10 @@
 			dispatch({type:'searchInput',value:search.value});
 		});
 		listen(search,'blur',function () { searching = false; });
-		listen(window,'resize',markWrappedOptions);
+		listen(window,'resize',function () { markWrappedOptions(); setzeKopfHoehe(); });
 		listen(target,'click',function (e) {
+			var sortKnopf = e.target.closest('button[data-sort-key]');
+			if (sortKnopf) { e.preventDefault(); dispatch({type:'sortToggle',key:sortKnopf.dataset.sortKey}); return; }
 			var link = e.target.closest('a[data-filter-page]');
 			if (link && !e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) { e.preventDefault(); dispatch({type:'page',value:Number(link.dataset.filterPage)}); }
 		});
@@ -330,6 +365,8 @@
 			setCharacterContext:function (c) { context = c; state = core.normalize(config,state,c).state; return load(); },
 			destroy:async function () {
 				dead = true; ++sequence; if (request) { request.abort(); } clearTimeout(timer);
+				if (observer) { observer.disconnect(); observer = null; }
+				if (kopfBeobachter) { kopfBeobachter.disconnect(); kopfBeobachter = null; }
 				if (dialogBase) { await closeDialog(); }
 				listeners.forEach(function (off) { off(); });
 				if (dialogBase) { dialog.close(); document.body.style.overflow = oldOverflow; dialogBase = null; }

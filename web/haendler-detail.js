@@ -10,6 +10,7 @@
 	var lang = document.documentElement.lang || 'de';
 	var seg = { de: 'gegenstand', en: 'item', fr: 'objet' }[lang] || 'gegenstand';
 	var T = window.MQL_T || function (key) { return key; };
+	var EIGN = window.MQL_EIGNUNG || null;
 	var extra = {
 		de: ['Schließen', '%s Treffer anzeigen', 'Ergebnisse nicht aktualisiert.', 'Erneut versuchen',
 			'Als Seite öffnen', 'Ungültiger Stufenbereich', 'Tauschliste'],
@@ -85,7 +86,7 @@
 			if (!eintrag) {
 				eintrag = {
 					id: ware[0], name: row[1], icon: row[2] || null, quality: row[4] || 0,
-					level: row[7] || 0, minLevel: row[14] || 0, liste: [], preise: []
+					level: row[7] || 0, minLevel: row[14] || 0, liste: [], preise: [], quelle: row
 				};
 				jeWare.set(ware[0], eintrag);
 				rows.push(eintrag);
@@ -103,10 +104,11 @@
 			var level = s.filters.level || { min: null, max: null };
 			var quality = s.filters.quality || [];
 			var liste = s.filters.liste || [];
+			// The level range means the wear requirement, not the item level.
 			if (skip !== 'level' && (level.min !== null || level.max !== null)) {
-				if (!(row.level > 0)) { return false; }
-				if (level.min !== null && row.level < level.min) { return false; }
-				if (level.max !== null && row.level > level.max) { return false; }
+				if (!(row.minLevel > 0)) { return false; }
+				if (level.min !== null && row.minLevel < level.min) { return false; }
+				if (level.max !== null && row.minLevel > level.max) { return false; }
 			}
 			if (skip !== 'quality' && quality.length && quality.indexOf(row.quality) < 0) { return false; }
 			if (skip !== 'liste' && liste.length && !row.liste.some(function (i) { return liste.indexOf(i) >= 0; })) { return false; }
@@ -118,13 +120,15 @@
 			return true;
 		}
 
-		function compare(a, b, sort) {
-			if (sort === 'itemLevel') {
-				var la = a.level || Infinity, lb = b.level || Infinity;
-				if (la !== lb) { return la - lb; }
+		function compare(a, b, sort, dir) {
+			if (sort === 'mindeststufe') {
+				var ma = a.minLevel || 0, mb = b.minLevel || 0, richtung = dir === 'desc' ? -1 : 1;
+				if (!ma && mb) { return 1; }
+				if (ma && !mb) { return -1; }
+				if (ma !== mb) { return (ma - mb) * richtung; }
 			}
-			if (window.MQL_SORT && window.MQL_SORT.compare) { return window.MQL_SORT.compare(a.name, b.name); }
-			return a.name.localeCompare(b.name, lang) || a.id.localeCompare(b.id);
+			var c = (window.MQL_SORT && window.MQL_SORT.compare ? window.MQL_SORT.compare(a.name, b.name) : a.name.localeCompare(b.name, lang)) || a.id.localeCompare(b.id);
+			return dir === 'desc' ? -c : c;
 		}
 
 		function facets(rows, s) {
@@ -142,29 +146,25 @@
 
 		function renderResults(result, target) {
 			target.replaceChildren();
-			var ui = window.MQL_TREFFERZEILE;
-			if (ui) { ui.header(target, { progress: false, levelHeading: ui.words.itemLevel }); }
+			var tabelle = window.MQL_TABELLE;
+			if (!tabelle) { return; }
+			var spalten = [
+				{label: T('gs_sort_name'), sortierung: 'name'},
+				{label: T('gs_mindeststufe'), sortierung: 'mindeststufe', zahl: true}
+			];
+			var bau = tabelle.bauen(target, spalten, {key: result.state.sort, dir: result.state.sortDir});
+			var charakter = EIGN ? EIGN.charakter() : null;
 			result.payload.forEach(function (row) {
-				var preis = row.preise.join(' · ');
-				var meta = [preis, T('gs_qual_' + row.quality)].filter(Boolean).join(' · ');
-				if (ui) {
-					target.appendChild(ui.row(target, {
-						image: row.icon, icon: 'gegenstand', name: row.name,
-						href: '/' + lang + '/' + seg + '/' + row.id + '/',
-						meta: meta, levelHeading: ui.words.itemLevel,
-						values: row.level > 0 ? [{ label: ui.words.itemLevel, value: row.level }] : [],
-						progress: null
-					}));
-					return;
-				}
-				var li = document.createElement('li');
 				var a = document.createElement('a');
 				a.className = 'gs-zeile';
 				a.href = '/' + lang + '/' + seg + '/' + row.id + '/';
-				if (row.icon) {
+				var zeichen = window.MQL_TREFFERZEILE && window.MQL_TREFFERZEILE.itemIcon
+					? window.MQL_TREFFERZEILE.itemIcon(row.icon, 'gegenstand') : null;
+				if (zeichen) { a.appendChild(zeichen); }
+				else if (row.icon) {
 					var bild = document.createElement('img');
 					bild.className = 'symbol';
-					bild.width = 26; bild.height = 26; bild.alt = ''; bild.loading = 'lazy';
+					bild.width = 22; bild.height = 22; bild.alt = ''; bild.loading = 'lazy';
 					bild.src = '/bild/items/' + row.icon + '.webp';
 					bild.addEventListener('error', function () { bild.hidden = true; });
 					a.appendChild(bild);
@@ -173,25 +173,34 @@
 				name.className = 'gs-name q' + row.quality;
 				name.textContent = row.name;
 				a.appendChild(name);
-				var text = document.createElement('span');
-				text.className = 'gs-meta';
-				text.textContent = meta;
-				a.appendChild(text);
-				li.appendChild(a);
-				target.appendChild(li);
+				var meta = [row.preise.join(' · '), T('gs_qual_' + row.quality)].filter(Boolean).join(' · ');
+				if (meta) {
+					var text = document.createElement('span');
+					text.className = 'gs-meta';
+					text.textContent = meta;
+					a.appendChild(text);
+				}
+				var stand = charakter && EIGN && row.quelle ? EIGN.zeile(row.quelle, charakter) : null;
+				if (stand) {
+					var marke = document.createElement('span');
+					marke.className = 'mql-row-eignung';
+					marke.appendChild(EIGN.chip(stand));
+					a.appendChild(marke);
+				}
+				bau.koerper.appendChild(tabelle.zeile(spalten, [a, row.minLevel > 0 ? String(row.minLevel) : '']));
 			});
 			if (!result.total) {
-				var leer = document.createElement('li');
-				leer.className = 'gs-leer';
-				leer.textContent = T('gs_keine');
-				target.appendChild(leer);
+				var leer = document.createElement('tr'); leer.setAttribute('role', 'row');
+				var zelle = document.createElement('td'); zelle.setAttribute('role', 'cell');
+				zelle.colSpan = 2; zelle.className = 'gs-leer'; zelle.textContent = T('gs_keine');
+				leer.appendChild(zelle); bau.koerper.appendChild(leer);
 			}
 		}
 
 		var defaults = function () {
 			return {
 				q: '', filters: { level: { min: null, max: null }, quality: [], liste: [] },
-				sort: 'name', pagination: { kind: 'limit', limit: 50 }
+				sort: 'name', sortDir: 'asc', pagination: { kind: 'limit', limit: 50 }
 			};
 		};
 		var labels = {
@@ -208,31 +217,53 @@
 			labels: labels,
 			search: { submit: 'debounce', debounceMs: 200 },
 			groups: [
-				{ id: 'level', kind: 'range', label: T('gs_stufe'), min: 0, max: 2000,
+				{ id: 'level', kind: 'range', label: T('gs_mindeststufe'), min: 0, max: 2000,
 					rangeLabel: function (bereich) {
-						return T('gs_stufe') + ' ' + (bereich.min === null ? '…' : bereich.min)
+						return T('gs_mindeststufe') + ' ' + (bereich.min === null ? '…' : bereich.min)
 							+ '–' + (bereich.max === null ? '…' : bereich.max);
 					} },
 				{ id: 'quality', kind: 'multi', label: T('gs_qualitaet'),
 					options: [0, 1, 2, 3, 4, 5].map(function (v) { return { value: v, label: T('gs_qual_' + v) }; }) },
 				{ id: 'liste', kind: 'multi', label: extra[6], options: listen }
 			],
-			sort: { options: [{ value: 'name', label: T('gs_sort_name') },
-				{ value: 'itemLevel', label: T('gs_sort_stufe') }] },
+			sort: { keys: ['name', 'mindeststufe'], ersteRichtung: { name: 'asc', mindeststufe: 'asc' }, options: [] },
 			pagination: { kind: 'limit', size: 50 },
 			defaults: defaults
 		};
-		var codec = window.MQL_FILTERADAPTER.codec([
+		var baseCodec = window.MQL_FILTERADAPTER.codec([
 			{ param: 'q', path: ['q'] },
 			{ param: 'tvon', path: ['filters', 'level', 'min'], type: 'number' },
 			{ param: 'tbis', path: ['filters', 'level', 'max'], type: 'number' },
 			{ param: 'tqual', path: ['filters', 'quality'], type: 'csv' },
-			{ param: 'tliste', path: ['filters', 'liste'], type: 'csv' },
-			{ param: 'sort', path: ['sort'],
-				decode: function (v) { return v === 'stufe' ? 'itemLevel' : 'name'; },
-				encode: function (v) { return v === 'itemLevel' ? 'stufe' : null; } }
+			{ param: 'tliste', path: ['filters', 'liste'], type: 'csv' }
 		], defaults);
-		config.urlCodec = codec;
+		// The old `stufe` meant the item level; it now reads as the minimum level.
+		function sortLesen(roh) {
+			if (roh === 'stufe') { return { key: 'mindeststufe', dir: 'asc' }; }
+			if (roh === 'stufe-ab') { return { key: 'mindeststufe', dir: 'desc' }; }
+			var dir = roh.charAt(0) === '-' ? 'desc' : 'asc', name = dir === 'desc' ? roh.slice(1) : roh;
+			return name === 'name' || name === 'mindeststufe' ? { key: name, dir: dir } : null;
+		}
+		config.urlCodec = {
+			decode: function (url) {
+				var parsed = baseCodec.decode(url);
+				var roh = url.searchParams.get('sort');
+				if (roh) {
+					var gelesen = sortLesen(roh);
+					if (gelesen) { parsed.state.sort = gelesen.key; parsed.state.sortDir = gelesen.dir; }
+					parsed.explicit = true;
+				}
+				return parsed;
+			},
+			encode: function (state, url) {
+				url = baseCodec.encode(state, url);
+				url.searchParams.delete('sort');
+				if (state.sort !== 'name' || state.sortDir === 'desc') {
+					url.searchParams.set('sort', (state.sortDir === 'desc' ? '-' : '') + state.sort);
+				}
+				return url;
+			}
+		};
 
 		var adapter = window.MQL_FILTERADAPTER.client({
 			rows: rows,

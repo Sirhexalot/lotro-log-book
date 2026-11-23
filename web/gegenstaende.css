@@ -120,3 +120,8 @@ body { background: var(--grund); color: var(--text); }
 .gs-tiefe-3 { padding-left: 46px; }
 .gs-tiefe-2 .gs-option { font-size: var(--text-fliesstext-kompakt); }
 .gs-tiefe-3 .gs-option { font-size: var(--text-bedienung); }
+
+/* Result rows live in the shared table (tabelle.css). */
+.gs-ergebnis .llb-tabelle .gs-zeile { padding: 0 4px; }
+.gs-ergebnis .llb-tabelle .mql-row-eignung { grid-column: 2; }
+.gs-ergebnis .llb-tabelle td { vertical-align: top; }

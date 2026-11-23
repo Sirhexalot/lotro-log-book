@@ -43,14 +43,25 @@ A `?lang=de` does not count as a filter and is replaced.
 
 ## Sorting
 
-- In the address: `sort=name` (default, may be missing) or `sort=stufe`.
-- **Level** is ascending. Entries without proven level stand last, for
-  the same level the name decides.
-- Items and recipes sort in the browser before „mehr laden“ or the
-  100 limit.
+Two kinds exist: the older lists sort through a select, item lists sort by
+clicking a column head (22.11.2026).
+
+- In the address: `sort=name` (default, may be missing), `sort=level` for the
+  quest lists, and for item lists `sort=mindeststufe` ascending or
+  `sort=-mindeststufe` descending. The old `sort=stufe` and `sort=stufe-ab` are
+  read as the minimum level, so bookmarks keep working.
+- **Level** in item lists is the wear requirement. The item level is strength,
+  stays in the name cell and does not sort. Entries without a level stand last
+  in both directions, for the same level the name decides.
+- **The table head** carries the key and `aria-sort`. A click sorts, a second
+  click turns the direction; a new column starts in its first direction (name
+  and minimum level ascending, the class profile descending).
+- Items and recipes sort in the browser before "mehr laden" or the 50 limit.
 - Quest givers are sorted by the server (`Givers::sorted`) before the page split;
   „Stufe“ there is the lowest quest of the quest giver. Works also
   without JavaScript and when paging.
+- A filter or sort change resets the loaded rows to the first block; scrolling
+  loads the next 50 instead of a page control.
 - The sorting is stored like a filter and carried along in language links,
   pagination and canonical. Sorted lists remain `noindex`.
 

@@ -63,22 +63,24 @@
         <section id="{{ key }}" class="instanz-listenflaeche" data-instance-panel>
             <h2>{{ section.heading }}</h2>
             <div data-instance-list>
-                <ul class="mql-row-list" data-filter-results>
-                    {% if key == 'aufgaben' %}
-                        {{ result.heading(lang) }}
-                        {% for row in section.rows %}{{ result.row(lang, row.url, row.text, '', symbol('aufgabe')) }}{% endfor %}
-                    {% elseif key == 'aufgabenbelohnungen' %}
-                        {{ result.heading(lang, iw.reward_quest) }}
-                        {% for row in section.rows %}
-                        {{ result.row(lang, row.url, row.name, row.meta, symbol(row.icon), row.image, iw.reward_quest, row.quest, '', '', '', row.quest_url, row.eignung|default({})) }}
-                        {% endfor %}
-                    {% else %}
-                        {{ result.heading(lang, iw.loot_chance) }}
-                        {% for row in section.rows %}
-                        {{ result.row(lang, row.url, row.name, '', symbol('gegenstand'), row.image, iw.loot_chance, row.chance, '', '', '', '', row.eignung|default({})) }}
-                        {% endfor %}
-                    {% endif %}
-                </ul>
+                <div data-filter-results>
+                    <ul class="mql-row-list">
+                        {% if key == 'aufgaben' %}
+                            {{ result.heading(lang) }}
+                            {% for row in section.rows %}{{ result.row(lang, row.url, row.text, '', symbol('aufgabe')) }}{% endfor %}
+                        {% elseif key == 'aufgabenbelohnungen' %}
+                            {{ result.heading(lang, iw.reward_quest) }}
+                            {% for row in section.rows %}
+                            {{ result.row(lang, row.url, row.name, row.meta, symbol(row.icon), row.image, iw.reward_quest, row.quest, '', '', '', row.quest_url, row.eignung|default({})) }}
+                            {% endfor %}
+                        {% else %}
+                            {{ result.heading(lang, iw.loot_chance) }}
+                            {% for row in section.rows %}
+                            {{ result.row(lang, row.url, row.name, '', symbol('gegenstand'), row.image, iw.loot_chance, row.chance, '', '', '', '', row.eignung|default({})) }}
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
         </section>
         {% endfor %}

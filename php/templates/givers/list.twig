@@ -29,11 +29,16 @@
                 </fieldset>{% endif %}
             </fieldset>
             {% endif %}
-            {% for key, options in facets %}{% if key != 'region' and key != 'area' and options %}
+            {% for key, options in facets %}{% if key != 'region' and key != 'area' and key != 'tag' and options %}
             <fieldset><legend>{{ attribute(gw, key) }}</legend>
                 {% for option in options %}<label class="sets-option"><input type="checkbox" name="{{ key }}[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
             </fieldset>{% endif %}{% endfor %}
             <fieldset><legend>{{ gw.level }}</legend><div class="sets-range"><label>{{ gw.from }}<input type="number" name="from" min="0" max="999" value="{{ filters.from }}"></label><label>{{ gw.to }}<input type="number" name="to" min="0" max="999" value="{{ filters.to }}"></label></div></fieldset>
+            {% if facets.tag %}
+            <fieldset><legend>{{ gw.tag }}</legend>
+                {% for option in facets.tag %}<label class="sets-option"><input type="checkbox" name="tag[]" value="{{ option.value }}"{% if option.checked %} checked{% endif %}><span>{{ option.label }}</span><small>{{ option.count }}</small></label>{% endfor %}
+            </fieldset>
+            {% endif %}
             <div class="sets-filter-actions"><button type="submit">{{ gw.apply }}</button><a href="{{ list_url }}">{{ gw.reset }}</a></div>
         </details>
         <section class="sets-results" data-filter-results aria-label="{{ gw.title }}">

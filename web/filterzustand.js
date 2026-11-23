@@ -2,6 +2,12 @@
 (function (root) {
 	'use strict';
 	function copy(value) { return JSON.parse(JSON.stringify(value)); }
+	/** Sort keys a list offers: its column keys or its select options. */
+	function sortKeys(config) {
+		if (!config.sort) { return []; }
+		if (config.sort.keys) { return config.sort.keys; }
+		return (config.sort.options || []).map(function (o) { return o.value; });
+	}
 	function enthaeltPfad(ober, unter) {
 		return Object.keys(ober).every(function (key) {
 			return Object.prototype.hasOwnProperty.call(unter,key) && unter[key] === ober[key];
@@ -65,7 +71,12 @@
 				}
 			}
 		});
-		if (config.sort && config.sort.options.some(function (o) { return o.value === candidate.sort; })) { state.sort = candidate.sort; }
+		var keys = sortKeys(config);
+		if (keys.indexOf(candidate.sort) >= 0) { state.sort = candidate.sort; }
+		if (candidate.sortDir === 'asc' || candidate.sortDir === 'desc') { state.sortDir = candidate.sortDir; }
+		// Only lists that sort by column carry a direction; the older select
+		// keeps its single ascending order and its state shape.
+		else if (state.sortDir === undefined && config.sort && (config.sort.keys || config.sort.ersteRichtung)) { state.sortDir = 'asc'; }
 		var p = candidate.pagination;
 		if (p && p.kind === state.pagination.kind) {
 			var key = p.kind === 'page' ? 'page' : p.kind === 'limit' ? 'limit' : null;
@@ -77,7 +88,22 @@
 		if (action.type === 'reset') { return normalize(config, {}, context); }
 		var next = copy(state);
 		if (action.type === 'searchSubmit' || action.type === 'searchInput') { next.q = action.value; }
-		else if (action.type === 'sort') { next.sort = action.value; }
+		else if (action.type === 'sort') {
+			// A select sends its value, a table head sends key and direction.
+			if (action.value && typeof action.value === 'object') {
+				next.sort = action.value.key;
+				next.sortDir = action.value.dir === 'desc' ? 'desc' : 'asc';
+			} else { next.sort = action.value; next.sortDir = 'asc'; }
+		}
+		else if (action.type === 'sortToggle') {
+			var sortKey = action.key, available = sortKeys(config);
+			if (available.indexOf(sortKey) < 0) { throw new Error('Unknown sort key'); }
+			if (next.sort === sortKey) { next.sortDir = next.sortDir === 'asc' ? 'desc' : 'asc'; }
+			else {
+				next.sort = sortKey;
+				next.sortDir = ((config.sort.ersteRichtung || {})[sortKey]) || 'asc';
+			}
+		}
 		else if (action.type === 'setValues' || action.type === 'setRange') {
 			if (!(config.groups || []).some(function (g) { return g.id === action.groupId; })) { throw new Error('Unknown filter group'); }
 			next.filters[action.groupId] = action.value;

@@ -50,7 +50,7 @@ const base = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 			// „Was“: the barter list uses the standard rows and filters by level.
 			await page.locator('[data-reiter-knopf="was"]').click();
 			await page.waitForTimeout(400);
-			const rows = page.locator('[data-tausch-root] [data-filter-results] li.mql-row');
+			const rows = page.locator('[data-tausch-root] [data-filter-results] tbody tr');
 			assert.equal(await rows.count(), 50, 'first page should hold 50 rows');
 			const first = await rows.first().innerText();
 			assert.match(first, /\d{3}/, 'row lacks price or item level');
@@ -78,7 +78,7 @@ const base = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 			assert.equal(plain.status(), 200);
 			assert.equal(await page.locator('.llb-reiter').count(), 1);
 			assert.match((await page.locator('.llb-reiter [data-reiter-knopf]').allTextContents()).join(' '), /\d/);
-			assert.ok(await page.locator('[data-tausch-root] li.mql-row').count() > 0);
+			assert.ok(await page.locator('[data-tausch-root] tbody tr').count() > 0);
 
 			/* A vendor with only one of the two sections has no bar; that single
 			   section carries the shared surface `llb-flaeche` instead. */

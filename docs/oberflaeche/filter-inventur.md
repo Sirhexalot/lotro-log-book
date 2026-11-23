@@ -49,7 +49,7 @@ wording.
 | Instances | instance group → type → level → players → difficulty | usable; no place, no sorting |
 | Factions | region and landscape → with reputation sources | sound |
 | Landmarks | region and landscape → with quests | sound |
-| Vendor detail (stock/barter) | item level → rarity → stock group | ok; no suitability |
+| Vendor detail (stock/barter) | minimum level → rarity → stock group | sound (22.11.2026) |
 | Instance detail, loot | level → difficulty → players | ok; no suitability |
 | Item detail "where from" | quest list as above; chests search only | ok |
 | Search | no filters, grouped by type | type chips missing |
@@ -68,11 +68,13 @@ direction, `aria-sort` names the state.
 
 | Surface | Header today | Columns (target) | Sort keys | Direction | Default | Paging | State |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Item search | "Treffer · Gegenstandsstufe", not clickable | Name · Mindeststufe; item level, rarity and suitability stay in the name cell | `name`, `mindeststufe` (item level only as a legacy link) | both, first click ascending | `name` | scroll, 50 | B, reference |
-| Class profile (items, quests, deeds) | same row header, one level column | Name · Stufe · Fortschritt | `name`, `level`, `levelDesc`, `itemLevelDesc` | both | `levelDesc` (quests, deeds) / `itemLevelDesc` (items) | scroll, 50 | C |
-| Quest finder, quest/deed lists, deed index | "Treffer · Stufen" | Name · Stufe · Fortschritt | `name`, `level` | ascending only today | `name` | scroll, 50 | C |
+| Item search | "Treffer · Gegenstandsstufe", not clickable | Name · Mindeststufe; item level, rarity and suitability stay in the name cell | `name`, `mindeststufe` (item level only as a legacy link) | both, first click ascending | `name` | scroll, 50 | umgesetzt (lokal) |
+| Class profile (items, quests, deeds) | same row header, one level column | Name · Stufe · Fortschritt | `name`, `level`, `levelDesc` (quests, deeds); `name`, `mindeststufe` (items) | both | `levelDesc` (quests, deeds) / `mindeststufe` descending (items) | scroll, 50 | umgesetzt (lokal) |
+| Quest finder, quest/deed lists, deed index | "Treffer · Stufen" | Name · Stufe · Fortschritt | `name`, `level` | both | `name` | scroll, 50 | umgesetzt (lokal) |
 | Crafting (recipes, materials, professions) | real `<th>` (result, profession) | Name/result · Tier · Level or learning state | `name`, `tier`, `stufe` | ascending only today | `name` | scroll, 50 | C |
-| Rewards | no head, no sort | Name · Art | none today | - | - | scroll, 50 | open |
+| Vendor detail (stock, barter) | no head, a select | Name · Mindeststufe | `name`, `mindeststufe` | both | `name` | scroll, 50 | umgesetzt (lokal) |
+| Instance detail (loot, rewards) | no head, a "Name" select | Name · Chance (loot) or Aufgabe (rewards) | `name` | ascending | `name` | scroll, 50 (was 30) | umgesetzt (lokal) |
+| Rewards | no head, no sort | Name; item level and reward type stay in the name cell | `name` | ascending | `name` | scroll, 50 | umgesetzt (lokal) |
 | Map list (left column) | none | Name · Stufe | `name`, `level` | ascending | `name` | scroll, 30 | keep narrow |
 | Server lists (quest givers, vendors, sets, titles, instances, factions, landmarks) | no clickable head; sort links or a select | Name · Level | `name`, `stufe` | both | `name` | "Page 1 of N" | D |
 
@@ -81,22 +83,25 @@ direction, `aria-sort` names the state.
   the name cell. Rarity is name colour plus meta text and never a column.
 - **Progress** is a column that shows the state. The select that sets a state
   stays its own control, it is not a header control and progress does not sort
-  in the reference.
+  in the reference. Quest and deed lists carry the control in the progress cell.
 - **Unknown levels** stand last in both directions, the name is the tie-breaker.
   The rule is unchanged, see [Filter memory and sorting](filter-sortierung.md).
 - **Page links** stay in the no-JS source of catalogue pages. In the browser both
   kinds become scrolling, "Weitere anzeigen" stays as the fallback.
+- **The chance of instance loot** depends on level, tier and players of the
+  chest; it is a value, not a sort key.
+- **Rewards stay a source browser.** Name sorts, rarity and suitability filter.
+  No category tree and no level column: only 27 % of the 6.568 rows carry a
+  minimum level.
 - Relational lists on detail pages follow their standard list's axis; the
   relation itself stays fixed context.
 
 ## Findings
 
-- **Suitability is a filter in two places only.** Item search and the class
-  profile filter by it (`eig`). Rewards, vendor stock and instance loot show
-  the chip but cannot filter by it - and the vendor detail rows show neither
-  the chip nor the minimum level they carry in field 14, while their level
-  filter uses the item level. That contradicts the rule that always the
-  minimum level decides.
+- **Suitability is a filter in three places.** Item search, class profile and
+  rewards filter by it (`eig`); the vendor barter list and instance loot carry
+  the chip but not the filter. The vendor barter level range means the minimum
+  level since 22.11.2026, so filter and column agree.
 - **Quests have two different orders.** The finder puts level and place before
   theme and properties; the shared quest/deed list puts type and properties
   before place and level.
@@ -160,9 +165,10 @@ twice.
 | D Server lists | PHP model as `data-filter-model`, Twig renders from it, scraping goes | `php/src/*`, `php/templates/*`, `filter-server.js` | one paging mode |
 | E Contract test | configuration against the entity JSON | `tests/test_listen_config.py` | deviations become findings |
 
-B waits until the parallel work in the shared checkout has a save point; the
-item search reference touches no file of step A. Step A changes no component,
-no adapter and no state module.
+B is implemented locally on 22.11.2026: `web/listen/gegenstaende.js`,
+`web/treffer-tabelle.js`, the sort direction in `filterzustand.js`, head clicks
+and scrolling in `filter-ui.js`. Not published. Step A still changes no
+component, no adapter and no state module.
 
 ## Step 1 - cleanup (safe, no new data)
 
@@ -200,9 +206,9 @@ publication or upload. "Mindeststufe" keeps its name because
 
 | Gap | What exactly | Data | Cost |
 | --- | --- | --- | --- |
-| Suitability everywhere | rewards, vendor detail, instance loot (chip exists) | present | small |
-| Vendor stock level | show the minimum level and the chip; filter by the minimum level, not the item level | present in the row (`ml`) | small |
-| Rewards | suitability, level, rarity in the filter | present in the row | small |
+| Suitability everywhere | rewards and vendor stock done 22.11.2026; instance loot shows the chip only | present | small |
+| Vendor stock level | done 22.11.2026: minimum level in the filter, the column and the chip | present in the row (`ml`) | small |
+| Rewards | done 22.11.2026: rarity and suitability, no level column | present in the row | small |
 | Search | type chips with counts | present in the index | small |
 | Titles | "only with a recorded source" (574 of 3,095 have none) | present | small |
 | Crafting | "only missing" as a chip (next to the single learning-state group) | character present | small |
@@ -233,8 +239,19 @@ publication or upload. "Mindeststufe" keeps its name because
   `sort=-mindeststufe`; `sort=stufe` and `sort=stufe-ab` are read as the minimum
   level for old links.
 - **Paging** scrolls in steps of 50, "Weitere anzeigen" stays as the fallback.
-- **Reference** is the item search. The class profile keeps its descending item
-  level sort until step C.
+- **Instance loot** takes the same step of 50; its chance stays a value.
+- **Vendor detail** filters and sorts by the minimum level and shows the
+  suitability chip (was the item level).
+- **Class profile** starts at the minimum level descending; the item level no
+  longer sorts there either.
+- **Rewards** get deed kind, region and landscape, rarity and suitability, a
+  sortable name, and no level column.
+- **Reference** is the item search; the class profile follows it with the same
+  columns and the minimum level as its default sort.
+
+Implemented locally on 22.11.2026 with the same table: rewards, instance loot,
+instance rewards, the vendor barter list, the quest finder, the deed index and
+every quest/deed list on detail pages. Nothing is published.
 
 ## Verification
 

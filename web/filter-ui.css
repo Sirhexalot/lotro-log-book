@@ -91,19 +91,27 @@
 .filter-ui-ohne-gruppen .filter-home, .filter-ui-ohne-gruppen .filter-open { display: none; }
 /* The filter column starts level with the result bar, not below it: the left
  * column is the page's second axis and must not look indented by the count. */
-.filter-result-header { grid-column:4 / -1; grid-row:1; }
+.filter-result-header { grid-column:4 / -1; grid-row:1; align-self:stretch; }
 .filter-home { grid-column:1 / span 3; grid-row:1 / span 2; min-width:0; }
+/* The filter column stays in view while the results scroll. Its top begins
+ * below the sticky page header; a long panel scrolls inside the column. */
+@media (min-width: 901px) {
+	.filter-home {
+		position: sticky;
+		top: calc(var(--kopf-hoehe, 0px) + 12px);
+		align-self: start;
+		max-height: calc(100vh - var(--kopf-hoehe, 0px) - 24px);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		scrollbar-gutter: stable;
+	}
+}
 .filter-results-home { grid-column:4 / -1; grid-row:2; }
 .filter-results-home>[data-filter-results] { max-width:100%; overflow-x:auto; }
 .filter-craft-row { border-bottom:1px solid var(--rand,var(--llb-palette-526078)); padding:12px 0; }
 .filter-craft-row h3 { margin:0 0 8px; font-size: var(--text-normal); }
 .filter-craft-row p { margin:4px 0; font-size: var(--text-bedienung); color:var(--schwach,var(--llb-palette-a89c8a)); }
 .filter-results-home .sets-list>li:not(:has(>a)) { padding:12px 0; }
-.filter-ui .gs-zeile { grid-template-columns:32px minmax(0,1fr); column-gap:12px; row-gap:4px; padding:12px 0; }
-.filter-ui .gs-zeile .symbol { grid-column:1; grid-row:1 / 3; align-self:start; width:26px; height:26px; }
-.filter-ui .gs-zeile .gs-name,.filter-ui .gs-zeile .gs-meta { grid-column:2; margin:0; min-width:0; overflow-wrap:anywhere; }
-.filter-ui .gs-zeile .gs-name { grid-row:1; }
-.filter-ui .gs-zeile .gs-meta { grid-row:2; }
 .filter-result-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
 .filter-result-toolbar [role=status] { flex:1 1 10rem; color:var(--schwach,var(--llb-palette-a89c8a)); font-size: var(--text-bedienung); }
 .filter-result-toolbar select, select.auswahl-chevron {

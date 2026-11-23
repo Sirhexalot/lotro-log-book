@@ -25,8 +25,8 @@
 <meta name="twitter:card" content="summary_large_image">
 {{ tracking|raw }}
 {{ styles|raw }}<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-{% if related_lists|default([]) %}<link rel="stylesheet" href="/handwerk.css?v={{ asset_stand }}"><link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}"><link rel="stylesheet" href="/entitaeten-listen.css?v={{ asset_stand }}">{% endif %}
-{% if index_filter|default(false) %}<link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}"><link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}"><link rel="stylesheet" href="/entitaeten-listen.css?v={{ asset_stand }}">{% endif %}
+{% if related_lists|default([]) %}<link rel="stylesheet" href="/handwerk.css?v={{ asset_stand }}"><link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}"><link rel="stylesheet" href="/entitaeten-listen.css?v={{ asset_stand }}"><link rel="stylesheet" href="/tabelle.css?v={{ asset_stand }}">{% endif %}
+{% if index_filter|default(false) %}<link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}"><link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}"><link rel="stylesheet" href="/entitaeten-listen.css?v={{ asset_stand }}"><link rel="stylesheet" href="/tabelle.css?v={{ asset_stand }}">{% endif %}
 <noscript><style>.kopf .menue,.kopf .charakter{display:flex}.menue-knopf{display:none}</style></noscript>
 </head><body class="seite-text katalog-seite" data-art="{{ kind }}" data-entity-id="{{ entity_id|default('') }}" data-katalog-texte="{{ katalog_texte }}">
 <header class="kopf"><div class="kopf-innen">
@@ -53,10 +53,10 @@
 {% if related_lists|default([]) %}
 <script type="application/json" id="related-lists">{{ related_json|raw }}</script>
 <script type="application/json" id="related-list-symbols">{{ related_icons_json|raw }}</script>
-{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','listen-sprache.js','referenz.js','symbole.js','treffer-zeile.js','handwerk-filter.js','rezepte.js','gegenstaende-filter.js','aufgaben-filter.js','entitaeten-listen.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
+{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','listen-sprache.js','referenz.js','symbole.js','treffer-zeile.js','treffer-tabelle.js','handwerk-filter.js','rezepte.js','gegenstaende-filter.js','aufgaben-filter.js','entitaeten-listen.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
 {% endif %}
 {% if index_filter|default(false) %}
-{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','filterzustand.js','filteradapter.js','filter-ui.js','symbole.js','treffer-zeile.js','aufgaben-filter.js','taten-index.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
+{% for asset in ['texte.js','texte-spielstand.js','texte-logbuch.js','texte-site.js','filterzustand.js','filteradapter.js','filter-ui.js','symbole.js','treffer-zeile.js','treffer-tabelle.js','aufgaben-filter.js','taten-index.js'] %}<script src="/{{ asset }}?v={{ asset_stand }}" defer></script>{% endfor %}
 <script src="/taten-index-{{ lang }}.js?v={{ asset_stand }}" defer></script>
 <script src="/taten-index.js?v={{ asset_stand }}" defer></script>
 {% endif %}

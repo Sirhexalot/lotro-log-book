@@ -4,6 +4,7 @@
 
 {% block stile %}<link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/gegenstaende.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/tabelle.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">{% endblock %}
 
 {% block kopf_extra %}{% endblock %}
@@ -35,7 +36,7 @@
 				</select>
 			</div>
 			<p class="gs-stand" id="gs-stand" role="status" data-t="gs_lade">Lade Gegenstände …</p>
-			<ul class="gs-ergebnis" id="gs-ergebnis"></ul>
+			<div class="gs-ergebnis" id="gs-ergebnis"></div>
 			<p class="gs-mehr-feld"><button type="button" id="gs-mehr" class="llb-knopf" hidden></button></p>
 		</section>
 	</div>
@@ -57,5 +58,7 @@
 <script src="/filteradapter.js?v={{ asset_stand }}" defer></script>
 <script src="/filter-ui.js?v={{ asset_stand }}" defer></script>
 <script src="/treffer-zeile.js?v={{ asset_stand }}" defer></script>
+<script src="/treffer-tabelle.js?v={{ asset_stand }}" defer></script>
+<script src="/listen/gegenstaende.js?v={{ asset_stand }}" defer></script>
 <script src="/gegenstaende-filter.js?v={{ asset_stand }}" defer></script>
 {% endblock %}

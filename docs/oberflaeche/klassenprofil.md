@@ -33,13 +33,13 @@ suitability](eignung.md) marks. The level colour on these rows follows the
 class, race and level chosen above, not the import.
 
 The item level is strength, not a wear requirement. It stays visible in the
-result column and in the sort, but it is not a gate. A level-130 ring does not
-appear at level 123 even when its item level is 456.
+name cell of each row; it no longer sorts (22.11.2026). A level-130 ring does
+not appear at level 123 even when its item level is 456.
 
 Default sorting on this page:
 
 - quests/deeds: `levelDesc` (highest level first, name as tie-breaker);
-- items: `itemLevelDesc` (item level descending, then minimum level, then name).
+- items: the minimum level descending, name as tie-breaker.
 
 Sort values are page-scoped in `kf-…sort`. A level change clears all `kf-`
 parameters, rebuilds the lists and updates the tab badges.

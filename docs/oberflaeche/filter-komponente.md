@@ -36,6 +36,13 @@ Domain filter predicates, sorting and facets remain in the data adapter.
 The public server adapter serialises only the configured URL codec,
 never the character context.
 
+Sorting by column (22.11.2026): the state carries `sort` and `sortDir`
+(`asc`/`desc`). A list that sorts through its table head passes
+`sort.keys` and an empty `sort.options` (no select), sets `aria-sort` in its
+own head and leaves the click to the shell, which dispatches `sortToggle`.
+A list that keeps its select still sends only the key; the direction stays
+`asc`.
+
 Page-specific options (class profile, 22.11.2026):
 
 - `MQL_ITEM_FILTER_SETUP(data, {ids, area, levelGroups, defaultSort,

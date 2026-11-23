@@ -14,7 +14,7 @@
 			more: 'Weitere anzeigen', count: '%s Einträge', show: '%s Treffer anzeigen', loading: 'Lade …',
 			error: 'Ergebnisse nicht aktualisiert.', retry: 'Erneut versuchen', fallback: 'Als Seite öffnen',
 			invalidRange: 'Ungültiger Bereich', min: 'Von', max: 'Bis',
-			flag: 'Merkmale', geography: 'Region und Gebiet', region: 'Region', area: 'Gebiet', level: 'Stufe', levelDesc: 'Stufe absteigend', status: 'Abschluss',
+			flag: 'Merkmale', geography: 'Region und Landschaft', region: 'Region', area: 'Gebiet', level: 'Stufe', levelDesc: 'Stufe absteigend', status: 'Abschluss',
 			all: 'Alle', done: 'Erledigt', rest: 'Nicht als erledigt importiert',
 			name: 'Name', kind: 'Art', reward: 'Belohnung', points: 'LOTRO-Punkte', virtue: 'Tugend', title: 'Titel',
 			item: 'Gegenstand', doneMark: 'Erledigt',
@@ -25,7 +25,7 @@
 			more: 'Show more', count: '%s entries', show: 'Show %s results', loading: 'Loading …',
 			error: 'Results not updated.', retry: 'Try again', fallback: 'Open page',
 			invalidRange: 'Invalid range', min: 'From', max: 'To',
-			flag: 'Properties', geography: 'Region and area', region: 'Region', area: 'Area', level: 'Level', levelDesc: 'Level descending', status: 'Completion',
+			flag: 'Properties', geography: 'Region and landscape', region: 'Region', area: 'Area', level: 'Level', levelDesc: 'Level descending', status: 'Completion',
 			all: 'All', done: 'Completed', rest: 'Not imported as completed',
 			name: 'Name', kind: 'Type', reward: 'Reward', points: 'LOTRO Points', virtue: 'Virtue', title: 'Title',
 			item: 'Item', doneMark: 'Completed',
@@ -87,10 +87,13 @@
 				options: distinct.map(function (value) { return { value: value, label: value }; }) };
 		}
 
-		var groups = [];
+		/* Visible order: completion, level, region and landscape, then what only
+		   this relation can answer (deeds: kind and reward, quests: properties).
+		   The groups are built first and appended last for that order. */
+		var groups = [], kindGroups = [];
 		if (kind === 'd') {
 			var types = multi('type', w.kind, rows.map(function (r) { return r.type; }));
-			if (types) { groups.push(types); }
+			if (types) { kindGroups.push(types); }
 			var rewards = new Set();
 			rows.forEach(function (r) { r.rewards.forEach(function (key) { rewards.add(key); }); });
 			var rewardsAvailable = [{ value: 'points', label: w.points }]
@@ -98,7 +101,7 @@
 				.concat(rewards.has('t') ? [{ value: 't', label: w.title }] : [])
 				.concat(rewards.has('i') ? [{ value: 'i', label: w.item }] : []);
 			if (rewardsAvailable.length > 1 || rows.some(function (r) { return r.points > 0; })) {
-				groups.push({ id: 'reward', kind: 'multi', label: w.reward, options: rewardsAvailable });
+				kindGroups.push({ id: 'reward', kind: 'multi', label: w.reward, options: rewardsAvailable });
 			}
 		} else {
 			var present = new Set();
@@ -107,7 +110,7 @@
 				.sort(function (a, b) { return MQL_SORT.compare(w[a], w[b]); })
 				.map(function (key) { return { value: key, label: w[key] }; });
 			if (flags.length > 1) {
-				groups.push({ id: 'flag', kind: 'multi', label: w.flag, options: flags });
+				kindGroups.push({ id: 'flag', kind: 'multi', label: w.flag, options: flags });
 			}
 		}
 		var regions = Array.from(new Set(rows.map(function (r) { return r.region; }).filter(Boolean)))
@@ -139,12 +142,13 @@
 			},
 			exclusivePaths: true
 		} : null;
-		if (geography) { groups.push(geography); }
 		var levels = new Set(rows.map(function (r) { return r.level; }).filter(function (v) { return v !== null; }));
 		if (options.level !== false && levels.size > 1) {
 			groups.push({id: 'level', kind: 'range', label: w.level,
 				rangeLabel: function (r) { return w.level+' '+(r.min ?? '…')+'–'+(r.max ?? '…'); }});
 		}
+		if (geography) { groups.push(geography); }
+		groups = groups.concat(kindGroups);
 		groups.unshift({ id: 'status', kind: 'single', label: progress.progress,
 				available: function () { return hasStatus; },
 				options: ['all', 'open', 'running', 'done'].map(function (key) {
@@ -155,21 +159,33 @@
 		groups.forEach(function (g) {
 			filters[g.id] = g.kind === 'single' ? 'all' : g.kind === 'range' ? { min: null, max: null } : [];
 		});
-		var sortOptions = [{ value: 'name', label: w.name }, { value: 'level', label: w.level }];
-		if (options.descendingSort) { sortOptions.push({ value: 'levelDesc', label: w.levelDesc }); }
+		/* The column head sends key and direction; `levelDesc` is the old
+		 * select value and stays readable for bookmarks. */
+		var sortVorgabe = (function () {
+			if (options.defaultSort === 'levelDesc') { return { key: 'level', dir: 'desc' }; }
+			if (options.defaultSort === 'level') { return { key: 'level', dir: 'asc' }; }
+			return { key: 'name', dir: 'asc' };
+		})();
+		function sortLesen(roh) {
+			if (roh === 'levelDesc') { return { key: 'level', dir: 'desc' }; }
+			if (roh === 'level' || roh === 'name') { return { key: roh, dir: 'asc' }; }
+			var dir = roh.charAt(0) === '-' ? 'desc' : 'asc', key = dir === 'desc' ? roh.slice(1) : roh;
+			return key === 'name' || key === 'level' ? { key: key, dir: dir } : null;
+		}
 		var config = {
 			area: kind === 'd' ? 'taten' : 'aufgaben', lang: lang, labels: labels,
 			rootUrl: location.origin + location.pathname, groups: groups,
 			search: { submit: 'debounce', debounceMs: 200 },
-			sort: { options: sortOptions },
+			sort: { keys: ['name', 'level'], ersteRichtung: { name: 'asc', level: 'asc' }, options: [] },
 			pagination: { kind: 'limit', size: 50 },
 			defaults: function () {
-				return { q: '', filters: JSON.parse(JSON.stringify(filters)), sort: options.defaultSort || 'name',
+				return { q: '', filters: JSON.parse(JSON.stringify(filters)),
+					sort: sortVorgabe.key, sortDir: sortVorgabe.dir,
 					pagination: { kind: 'limit', limit: 50 } };
 			}
 		};
 
-		var fields = [{ param: 'q', path: ['q'] }, { param: 'sort', path: ['sort'], omit: options.defaultSort || 'name' }];
+		var fields = [{ param: 'q', path: ['q'] }];
 		groups.forEach(function (g) {
 			if (g.kind === 'range') {
 				fields.push({ param: 'von', path: ['filters', g.id, 'min'], type: 'number' },
@@ -188,7 +204,27 @@
 					type: g.kind === 'single' ? 'text' : 'multi', omit: g.kind === 'single' ? 'all' : undefined });
 			}
 		});
-		config.urlCodec = A.codec(fields, config.defaults);
+		var baseCodec = A.codec(fields, config.defaults);
+		config.urlCodec = {
+			decode: function (url) {
+				var parsed = baseCodec.decode(url);
+				var roh = url.searchParams.get('sort');
+				if (roh) {
+					var gelesen = sortLesen(roh);
+					if (gelesen) { parsed.state.sort = gelesen.key; parsed.state.sortDir = gelesen.dir; }
+					parsed.explicit = true;
+				}
+				return parsed;
+			},
+			encode: function (state, url) {
+				url = baseCodec.encode(state, url);
+				url.searchParams.delete('sort');
+				if (state.sort !== sortVorgabe.key || state.sortDir !== sortVorgabe.dir) {
+					url.searchParams.set('sort', (state.sortDir === 'desc' ? '-' : '') + state.sort);
+				}
+				return url;
+			}
+		};
 
 		var searchIndex = new Map(), searchQuery = null, searchNeedle = '';
 		rows.forEach(function (row) {
@@ -246,14 +282,17 @@
 			rows: rows,
 			id: function (row) { return row.id; },
 			matches: matches,
-			compare: function (a, b, sort) {
-				if (sort === 'levelDesc') {
-					var al = a.level === null ? -Infinity : a.level;
-					var bl = b.level === null ? -Infinity : b.level;
-					if (al !== bl) { return bl - al; }
+			compare: function (a, b, sort, dir) {
+				var richtung = dir === 'desc' ? -1 : 1;
+				if (sort === 'level') {
+					var al = a.level === null || a.level === undefined ? 0 : a.level;
+					var bl = b.level === null || b.level === undefined ? 0 : b.level;
+					if (!al && bl) { return 1; }
+					if (al && !bl) { return -1; }
+					if (al !== bl) { return (al - bl) * richtung; }
+					return MQL_SORT.compare(a.name, b.name) || a.id.localeCompare(b.id);
 				}
-				return (sort === 'level' ? (a.level || Infinity) - (b.level || Infinity) : 0)
-					|| MQL_SORT.compare(a.name, b.name) || a.id.localeCompare(b.id);
+				return (MQL_SORT.compare(a.name, b.name) || a.id.localeCompare(b.id)) * richtung;
 			},
 			facets: function (all, state) {
 				var facets = {};
@@ -278,68 +317,62 @@
 			},
 			renderResults: function (result, target) {
 				target.replaceChildren();
-				var rowUI = window.MQL_TREFFERZEILE;
-				var levelHeading = rowUI && (kind === 'q' ? rowUI.words.questLevel : rowUI.words.deedLevel);
-				if (rowUI) {
-					rowUI.header(target, { progress: true, levelHeading: levelHeading });
-					if (!hasImportedStatus) { rowUI.help(target, rowUI.words.noProgress); }
+				var rowUI = window.MQL_TREFFERZEILE, TBL = window.MQL_TABELLE;
+				if (!TBL || !rowUI) { return; }
+				var levelHeading = kind === 'q' ? rowUI.words.questLevel : rowUI.words.deedLevel;
+				var spalten = [
+					{label: w.name, sortierung: 'name'},
+					{label: levelHeading, sortierung: 'level', zahl: true}
+				];
+				if (hasStatus) { spalten.push({label: progress.progress}); }
+				var bau = TBL.bauen(target, spalten, {key: result.state.sort, dir: result.state.sortDir});
+				if (!hasImportedStatus) {
+					var help = document.createElement('p');
+					help.className = 'mql-row-help';
+					help.appendChild(document.createTextNode(rowUI.words.noProgress + ' '));
+					var weiter = document.createElement('a');
+					weiter.href = '/' + lang + '/' + (lang === 'fr' ? 'progression' : lang === 'en' ? 'progress' : 'spielstand') + '/';
+					weiter.textContent = rowUI.words.import;
+					help.appendChild(weiter);
+					target.insertBefore(help, bau.tabelle);
 				}
-				var symbols = document.getElementById('related-list-symbols');
-				var symbol = symbols && JSON.parse(symbols.textContent)[kind];
-				// Only what differs inside this relation belongs in the row.
+				if (!result.payload.length) {
+					if (options.emptyLabel) {
+						var leer = document.createElement('tr'); leer.setAttribute('role', 'row');
+						var zelle = document.createElement('td'); zelle.setAttribute('role', 'cell');
+						zelle.colSpan = spalten.length; zelle.textContent = options.emptyLabel;
+						leer.appendChild(zelle); bau.koerper.appendChild(leer);
+					}
+					return;
+				}
 				var showRegion = !!geography, showArea = !!geography;
 				result.payload.forEach(function (row) {
-					if (rowUI) {
-						var mappedStatus = status(row);
-						var control = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(
-							dataset, row.id, null, 'questfinder', mappedStatus);
-						var metaParts = [row.type].concat(row.flags.map(function (key) { return w[key]; }));
-						if (geography) { metaParts.push(row.region, row.area); }
-						target.appendChild(rowUI.row(target, {
-							icon: kind === 'q' ? 'aufgabe' : 'tat',
-							name: kind === 'q' ? row.name.replace(/^\.\s+/, '') : row.name,
-							href: '/' + lang + '/' + SEGMENT[kind][lang] + '/' + row.id + '/',
-							meta: metaParts.filter(Boolean).join(' · '),
-							levelHeading: levelHeading,
-							values: row.level ? [{ label: levelHeading,
-								value: row.level }] : [],
-							progress: control
-						}));
-						return;
-					}
-					var line = document.createElement('li'), link = document.createElement('a');
-					var mark = document.createElement('span'), body = document.createElement('span'), meta = document.createElement('small');
-					link.className = 'related-result';
+					var link = document.createElement('a');
+					link.className = 'gs-zeile';
 					link.href = '/' + lang + '/' + SEGMENT[kind][lang] + '/' + row.id + '/';
-					var rowStatus = status(row);
-					mark.className = 'related-symbol' + (rowStatus === 'fertig' ? ' fertig' : '');
-					if (symbol) {
-						// Only the server's established Lucide SVG, never game or user text.
-						var template = document.createElement('template');
-						template.innerHTML = symbol;
-						mark.appendChild(template.content.cloneNode(true));
+					link.appendChild(rowUI.entityIcon(kind === 'q' ? 'aufgabe' : 'tat'));
+					var titel = document.createElement('span');
+					titel.className = 'gs-name';
+					titel.textContent = kind === 'q' ? row.name.replace(/^\.\s+/, '') : row.name;
+					link.appendChild(titel);
+					var metaParts = [row.type].concat(row.flags.map(function (key) { return w[key]; }));
+					if (geography) { metaParts.push(row.region, row.area); }
+					var metaText = metaParts.filter(Boolean).join(' · ');
+					if (metaText) {
+						var meta = document.createElement('span');
+						meta.className = 'gs-meta'; meta.textContent = metaText; link.appendChild(meta);
 					}
-					body.textContent = row.name;
-					meta.textContent = [row.type, row.level ? w.level + ' ' + row.level : '']
-						.concat(row.flags.map(function (key) { return w[key]; }))
-						.concat([showRegion ? row.region : '', showArea ? row.area : ''])
-						.filter(Boolean).join(' · ');
-					body.appendChild(meta);
-					link.append(mark, body);
-					line.appendChild(link);
-					var control = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(dataset, row.id);
-					if (control) {
-						control.addEventListener('click', function (event) { event.stopPropagation(); });
-						line.appendChild(control);
+					var zellen = [link, row.level ? String(row.level) : ''];
+					if (hasStatus) {
+						var huelle = document.createElement('span');
+						huelle.className = 'mql-row-progress';
+						var control = window.MQL_STATUS_UI && window.MQL_STATUS_UI.create(
+							dataset, row.id, null, 'questfinder', status(row));
+						if (control) { huelle.appendChild(control); }
+						zellen.push(huelle);
 					}
-					target.appendChild(line);
+					bau.koerper.appendChild(TBL.zeile(spalten, zellen));
 				});
-				if (!result.payload.length && options.emptyLabel) {
-					var empty = document.createElement('li');
-					empty.className = 'gs-leer';
-					empty.textContent = options.emptyLabel;
-					target.appendChild(empty);
-				}
 			}
 		});
 		var load = adapter.load;

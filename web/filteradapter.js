@@ -55,7 +55,7 @@
 					var id = options.id(row); if (seen.has(id)) { return false; } seen.add(id); return true;
 				});
 				var selected = rows.filter(function (row) { return options.matches(row, state, null, context.characterContext); });
-				selected.sort(function (a,b) { return options.compare(a,b,state.sort); });
+				selected.sort(function (a,b) { return options.compare(a,b,state.sort,state.sortDir); });
 				var facets = options.facets(rows, state, context.characterContext);
 				var pagination = Object.assign({}, state.pagination), start = 0, end = selected.length;
 				if (pagination.kind === 'limit') { end = pagination.limit; }
