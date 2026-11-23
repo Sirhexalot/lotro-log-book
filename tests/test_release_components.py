@@ -24,6 +24,8 @@ class ReleaseComponentTests(unittest.TestCase):
             "fonts/OFL.txt": "font license",
             "fonts/roboto-latin.woff2": "font",
             "karten/de/map.webp": "map",
+            "erkennung/de/000.js": "recognition shard",
+            "listen/aufgaben.js": "list configuration",
             "phptmp/twig/cache.php": "runtime",
             "release-2026-11-16/old.js": "old",
         }
@@ -41,6 +43,10 @@ class ReleaseComponentTests(unittest.TestCase):
         self.assertEqual(manifest["files"]["abenteuer-karte.js"]["component"], "programm")
         self.assertEqual(manifest["files"]["daten-de.js"]["component"], "daten")
         self.assertEqual(manifest["files"]["bild/item.svg"]["component"], "assets")
+        # Generated recognition shards are data, like the map and note shards.
+        self.assertEqual(manifest["files"]["erkennung/de/000.js"]["component"], "daten")
+        # Client list configurations are code, like the other page scripts.
+        self.assertEqual(manifest["files"]["listen/aufgaben.js"]["component"], "programm")
         self.assertEqual(manifest["files"]["fonts/OFL.txt"]["component"], "assets")
         self.assertEqual(manifest["files"]["fonts/roboto-latin.woff2"]["component"], "assets")
         self.assertNotIn("release-manifest.json", manifest["files"])

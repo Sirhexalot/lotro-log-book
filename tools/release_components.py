@@ -23,8 +23,8 @@ _PROGRAM_EXTENSIONS = {
     ".css", ".html", ".htaccess", ".js", ".json", ".php", ".txt", ".xml",
 }
 _KNOWN_DIRS = {
-    "bild", "fonts", "gelaende", "karten", "karten-daten", "notizen", "php",
-    "phpdata", "vendor", "vorkommen",
+    "bild", "erkennung", "fonts", "gelaende", "karten", "karten-daten",
+    "listen", "notizen", "php", "phpdata", "vendor", "vorkommen",
 }
 _EXCLUDED_DIRS = {"phptmp", ".git", "__pycache__", "tests"}
 _CONFLICT_COPY = re.compile(r" \d+\.[^/]+$")
@@ -73,7 +73,9 @@ def classify(relative: str | Path) -> str | None:
         raise ReleaseError(f"Unbekannter Releaseordner: {path}")
     if top in {"bild", "fonts", "gelaende", "karten"}:
         return "assets"
-    if top in {"phpdata", "karten-daten", "notizen", "vorkommen"}:
+    # The recognition shards are generated data (tools/build_gegenstand_erkennung.py),
+    # like the map and note shards.
+    if top in {"phpdata", "karten-daten", "notizen", "vorkommen", "erkennung"}:
         return "daten"
     if top in {"php", "vendor"}:
         return "programm"
