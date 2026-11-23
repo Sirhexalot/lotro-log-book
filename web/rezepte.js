@@ -584,11 +584,6 @@
 		}
 	}
 
-	window.MQL_RECIPE_RESULTS = function(rows) {
-		bekannt = {}; meineBerufe = {}; charakter();
-		if (window.MQL_TREFFERZEILE) { return filterTreffer(rows); }
-		return tabelle([{name:'',zeilen:rows}],{mitBeruf:true,mitStufe:true});
-	};
 	window.MQL_RECIPE_CONTEXT_RESULTS = function(rows) {
 		bekannt = {}; meineBerufe = {}; charakter();
 		if (window.MQL_TREFFERZEILE) { return filterTreffer(rows); }
@@ -619,7 +614,7 @@
 		window.MQL_REZEPTE_ZEICHNEN = function () {
 			if (!window.MQL_REZEPTE) { return; }
 			bekannt = {}; meineBerufe = {}; charakter();
-			window.MQL_HANDWERK_FILTER.recipes(window.MQL_REZEPTE.r, window.MQL_RECIPE_RESULTS);
+			window.MQL_HANDWERK_FILTER.recipes(window.MQL_REZEPTE.r);
 		};
 		if (window.MQL_REZEPTE) { window.MQL_REZEPTE_ZEICHNEN(); }
 		return;

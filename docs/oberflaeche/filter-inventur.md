@@ -161,7 +161,7 @@ twice.
 | --- | --- | --- | --- |
 | A Cleanup | order and wording only, scheduled run 22.11.2026 23:00, no commit | `web/aufgaben-filter.js`, `givers/list.twig`, `titles/list.twig`, texts, vendor and instance labels | marked as a transition step |
 | B Reference | item search: configuration, table head, sorting, scrolling | `web/listen/gegenstaende.js`, `treffer-tabelle.js`, `filter-ui.js`, `filterzustand.js`, `gegenstaende-filter.js`, CSS | result axis and the reference state |
-| C Rollout | quest/deed lists, crafting, class profile; the filter order moves into the configuration | `aufgaben-filter.js`, `handwerk-filter.js`, `klassen.js`, `klassenprofil.md` | quests/deeds and finder done, crafting open |
+| C Rollout | quest/deed lists, crafting, class profile; the filter order moves into the configuration | `aufgaben-filter.js`, `handwerk-filter.js`, `klassen.js`, `klassenprofil.md` | quests/deeds, finder and crafting done |
 | D Server lists | PHP model as `data-filter-model`, Twig renders from it, scraping goes | `php/src/*`, `php/templates/*`, `filter-server.js` | one paging mode |
 | E Contract test | configuration against the entity JSON | `tests/test_listen_config.py` | deviations become findings |
 
@@ -173,6 +173,17 @@ component, no adapter and no state module.
 The order of the quest/deed lists and the finder stands in
 `web/listen/aufgaben.js` and `web/listen/aufgabenfinder.js`; the modules only
 build the groups and listen to the definition.
+
+The crafting lists follow on 23.11.2026. `web/listen/handwerk.js` holds the
+group order, the columns and the sort keys of recipes and raw materials.
+Recipes show Ergebnis · Beruf · Handwerksstufe · Gegenstandsstufe, plus
+"Dein Fortschritt" when the import carries recipe data; materials show Sorte ·
+Beruf · Handwerksstufe · Fundstellen. The table head sorts by result name,
+crafting tier and result level; the sort select is gone, and `sort=stufe`
+keeps its meaning for bookmarks. Ingredients, the critical success and the
+category tree stay in the filters and on the recipe page, not in table
+columns. The professions entry keeps the retired tab's order; the personal
+profession overview is not a filter list.
 
 ## Step 1 - cleanup (safe, no new data)
 

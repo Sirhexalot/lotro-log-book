@@ -6,7 +6,9 @@
 {% block stile %}<link rel="stylesheet" href="/style.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/gemeinsam.css?v={{ asset_stand }}">
 <link rel="stylesheet" href="/handwerk.css?v={{ asset_stand }}">
-<link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">{% endblock %}
+<link rel="stylesheet" href="/filter-ui.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/hinweis.css?v={{ asset_stand }}">
+<link rel="stylesheet" href="/tabelle.css?v={{ asset_stand }}">{% endblock %}
 
 {% block kopf_extra %}{% endblock %}
 
@@ -58,6 +60,8 @@
 <script src="/filter-ui.js?v={{ asset_stand }}" defer></script>
 <script src="/symbole.js?v={{ asset_stand }}" defer></script>
 <script src="/treffer-zeile.js?v={{ asset_stand }}" defer></script>
+<script src="/treffer-tabelle.js?v={{ asset_stand }}" defer></script>
+<script src="/listen/handwerk.js?v={{ asset_stand }}" defer></script>
 <script src="/handwerk-filter.js?v={{ asset_stand }}" defer></script>
 <script src="/handwerk.js?v={{ asset_stand }}" defer></script>
 <script>window.MQL_ZUTATEN_OHNE = {{ zutaten_ohne_json|raw }};</script>

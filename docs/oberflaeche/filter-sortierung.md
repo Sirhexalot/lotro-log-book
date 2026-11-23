@@ -56,6 +56,10 @@ clicking a column head (22.11.2026).
 - **The table head** carries the key and `aria-sort`. A click sorts, a second
   click turns the direction; a new column starts in its first direction (name
   and minimum level ascending, the class profile descending).
+- Crafting recipes and raw materials sort under the same head since
+  23.11.2026: recipes by result name (`name`), crafting tier (`tier`) and
+  result item level (`stufe`), materials by name and crafting tier. The old
+  selects are gone; `sort=stufe` keeps its meaning.
 - Items and recipes sort in the browser before "mehr laden" or the 50 limit.
 - Quest givers are sorted by the server (`Givers::sorted`) before the page split;
   „Stufe“ there is the lowest quest of the quest giver. Works also

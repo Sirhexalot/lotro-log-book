@@ -245,8 +245,10 @@ type → category). Two additions came with the crafting tree:
 `handwerk-filter.js` manages exactly one active filter instance for professions,
 recipes and resources. Tabs and URL remain on switch/reload;
 search texts are separate per tab. Profession/level/scope can be taken over.
-The old recipe controller delivers only its result renderer;
-old filter/tab listeners are not registered on the migrated page.
+Since 23.11.2026 the crafting page renders both lists through the shared table
+(`web/listen/handwerk.js` for columns and sort keys); contextual recipe lists
+on item pages keep the shared row. Old filter/tab listeners are not registered
+on the migrated page.
 The profession overview is a public catalogue without an import; with proven
 profession data the scope can be limited to own professions.
 

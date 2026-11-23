@@ -3,6 +3,7 @@
 	'use strict';
 	var A=window.MQL_FILTERADAPTER, recipeRows=[], recipeRenderer, resources=null, controller=null;
 	var lang=window.MQL_SPRACHE || 'de', T=window.MQL_T || function(k){return k;};
+	var L=(window.MQL_LISTEN||{}).handwerk||null;
 	var refs=(window.MQL_REFERENZ || {}).berufe || {}, activeTab='', queue=Promise.resolve(), tabStates={};
 	var geographyNode=document.getElementById('craft-geography');
 	var geography=geographyNode?JSON.parse(geographyNode.textContent):{};
@@ -170,6 +171,7 @@
 	}
 	function make(tab,settings){
 		settings=settings||{};
+		var def=L?L[tab]:null;
 		var recipeRows=settings.rows||window.MQL_CRAFT_RECIPE_ROWS||[], recipeRenderer=settings.renderer;
 		var c=character(),mine=own(c),known=new Set(c&&c.rezepte||[]),isRecipe=tab==='rezepte',isMaterial=tab==='rohstoffe';
 		if(isRecipe){merkeStufen(recipeRows);}
@@ -204,23 +206,41 @@
 				{id:'landschaft',kind:'multi',label:words[28],nestedOnly:true,options:sorted(landscapes.values())},
 				{id:'gebiet',kind:'multi',label:words[28],nestedOnly:true,options:sorted(zones.values())});
 		}
+		if (def && def.filter) {
+			var nachId = {};
+			groups.forEach(function (group) { nachId[group.id] = group; });
+			groups = def.filter.map(function (id) { return nachId[id]; }).filter(Boolean);
+		}
+		var sortErlaubt = (def && def.sortierung && def.sortierung.erlaubt) || ['name'];
+		var ersteRichtung = (def && def.sortierung && def.sortierung.ersteRichtung) || {name:'asc'};
+		var sortStandard = (def && def.sortierung && def.sortierung.standard) || 'name';
+		var groesse = (def && def.blaettern && def.blaettern.groesse) || 50;
 		var labels={};['search','filter','close','sort','reset','more','count','show','loading','error','retry','fallback','invalidRange','min','max'].forEach(function(k,i){labels[k]=words[i];});
 		// Without a placeholder the search field renders as an empty box.
 		labels.placeholder={de:'Beruf, Rezept oder Rohstoff suchen',en:'Search profession, recipe or resource',fr:'Chercher un métier, une recette ou une ressource'}[lang];
+		// Detail-page relation lists keep the row and its sort select; the
+		// crafting page itself has no select, because its column heads sort.
+		var sortOptionen=settings.area&&def&&def.spalten?def.spalten.filter(function(s){return s.sortierung;}).map(function(s){return {value:s.sortierung,label:T(s.labelKey||s.sortierung)};}):[];
 		var config={area:settings.area||(isRecipe?'rezepte':isMaterial?'rohstoffe':'berufe'),lang:lang,rootUrl:location.origin+location.pathname,labels:labels,search:{submit:'debounce',debounceMs:200},groups:groups,
-			sort:{options:[{value:'name',label:words[29]}].concat(tab==='berufe'?[]:[{value:'tier',label:words[16]}]).concat(isRecipe?[{value:'stufe',label:({de:'Gegenstandsstufe',en:'Item level',fr:'Niveau d’objet'})[lang]}]:[])},pagination:{kind:'limit',size:50},
-			defaults:function(){var f={};groups.forEach(function(g){f[g.id]=g.kind==='boolean'?false:g.kind==='single'?'alle':[];});f.eigene=!settings.area&&mine.length>0;return {q:'',filters:f,sort:'name',pagination:{kind:'limit',limit:50}};}};
-		var fields=[{param:'q',path:['q']},{param:'sort',path:['sort'],omit:'name'}];
-		groups.forEach(function(g){fields.push({param:g.id,path:['filters',g.id],type:g.kind==='boolean'?'boolean':g.kind==='single'?'text':'multi',omit:g.kind==='single'?'alle':undefined,encode:g.id==='eigene'?function(v){return v?'1':'0';}:undefined});});
-		var codec=A.codec(fields,config.defaults,['#'+tab]);
+			sort:{keys:sortErlaubt,ersteRichtung:ersteRichtung,options:sortOptionen},pagination:{kind:'limit',size:groesse},
+			defaults:function(){var f={};groups.forEach(function(g){f[g.id]=g.kind==='boolean'?false:g.kind==='single'?'alle':[];});f.eigene=!settings.area&&mine.length>0;return {q:'',filters:f,sort:sortStandard,sortDir:ersteRichtung[sortStandard]||'asc',pagination:{kind:'limit',limit:groesse}};}};
+		var fields=[{param:'q',path:['q']}];
+		groups.forEach(function(g){fields.push({param:g.id,path:['filters',g.id],type:g.kind==='boolean'?'boolean':g.kind==='single'?'text':'multi',omit:g.kind==='single'?'alle':undefined,encode:g.id==='eigene'?function(v){return v?'1':null;}:undefined});});
+		var baseCodec=A.codec(fields,config.defaults,['#'+tab]);
+		function sortLesen(roh){
+			var dir=roh.charAt(0)==='-'?'desc':'asc', key=dir==='desc'?roh.slice(1):roh;
+			return sortErlaubt.indexOf(key)>=0?{key:key,dir:dir}:null;
+		}
 		config.urlCodec={decode:function(u){
-			var parsed=codec.decode(u);
+			var parsed=baseCodec.decode(u);
+			var roh=u.searchParams.get('sort');
+			if(roh){var gelesen=sortLesen(roh);if(gelesen){parsed.state.sort=gelesen.key;parsed.state.sortDir=gelesen.dir;}parsed.explicit=true;}
 			if(u.searchParams.get('fehlend')==='1'&&isRecipe&&complete(c)){parsed.state.filters.lernstand='nicht-gelernt';}
 			if(isMaterial&&u.searchParams.has('rohstoff')){var node=rows.find(function(r){return r.resource===u.searchParams.get('rohstoff');});if(node){parsed.state.q=node.name;}}
 			if(settings.area){parsed.explicit=true;}
 			if(parsed.state.filters.beruf.length&&parsed.state.filters.beruf.some(function(k){return !mine.includes(k);})){parsed.state.filters.eigene=false;}
 			return parsed;
-		},encode:function(s,u){u=codec.encode(s,u);['fehlend','quelle','optional','aktuell','gemeistert'].forEach(function(k){u.searchParams.delete(k);});if(!settings.area){u.hash=tab;}return u;}};
+		},encode:function(s,u){u=baseCodec.encode(s,u);u.searchParams.delete('sort');if(s.sort!==sortStandard||s.sortDir==='desc'){u.searchParams.set('sort',(s.sortDir==='desc'?'-':'')+s.sort);}['fehlend','quelle','optional','aktuell','gemeistert'].forEach(function(k){u.searchParams.delete(k);});if(!settings.area){u.hash=tab;}return u;}};
 		var searchIndex=new Map(),searchQuery=null,searchNeedle='';
 		rows.forEach(function(r){searchIndex.set(r,[r.name,r.id,isRecipe?r.raw[6].map(function(z){return z[0];}).join(' '):''].join(' ').toLocaleLowerCase(lang));});
 		function matches(r,s,skip){var f=s.filters;
@@ -234,7 +254,24 @@
 						return (skip==='gebiet'||!f.gebiet.length||f.gebiet.includes(a.id))&&(skip==='region'||!f.region.length||f.region.includes(a.region))&&(skip==='landschaft'||!f.landschaft.length||f.landschaft.includes(a.landscape));
 					}))) ;
 		}
-		var adapter=A.client({rows:rows,id:function(r){return r.id;},matches:matches,compare:function(a,b,sort){return (sort==='stufe'?(a.raw[2]||Infinity)-(b.raw[2]||Infinity):sort==='tier'?Math.min.apply(null,a.uses.map(function(u){return Number(u.tier)||Infinity;}))-Math.min.apply(null,b.uses.map(function(u){return Number(u.tier)||Infinity;})):0)||MQL_SORT.compare(a.name,b.name)||String(a.id).localeCompare(String(b.id));},
+		var adapter=A.client({rows:rows,id:function(r){return r.id;},matches:matches,compare:function(a,b,sort,dir){
+			var richtung=dir==='desc'?-1:1;
+			var nenner=MQL_SORT.compare(a.name,b.name)||String(a.id).localeCompare(String(b.id));
+			if(sort==='stufe'){
+				var sa=a.raw&&a.raw[2]||0,sb=b.raw&&b.raw[2]||0;
+				if(!sa&&sb){return 1;} if(sa&&!sb){return -1;}
+				if(sa!==sb){return (sa-sb)*richtung;}
+				return nenner;
+			}
+			if(sort==='tier'){
+				var ta=Math.min.apply(null,a.uses.map(function(u){return Number(u.tier)||0;})),
+					tb=Math.min.apply(null,b.uses.map(function(u){return Number(u.tier)||0;}));
+				if(!ta&&tb){return 1;} if(ta&&!tb){return -1;}
+				if(ta!==tb){return (ta-tb)*richtung;}
+				return nenner;
+			}
+			return nenner*richtung;
+		},
 			facets:function(all,s){
 				var out={},baumIds=['ziel','grund','kategorie'];
 				// Each of the three levels counts from a base set in which its own
@@ -249,39 +286,59 @@
 				});}
 				groups.forEach(function(g){if((g.kind==='multi'||g.kind==='single')&&baumIds.indexOf(g.id)<0){out[g.id]=g.options.map(function(o){var candidate=JSON.parse(JSON.stringify(s));candidate.filters[g.id]=g.kind==='multi'?[o.value]:o.value;return {value:o.value,count:all.filter(function(r){return matches(r,candidate);}).length};});}});return out;},
 			renderResults:function(result,target){target.replaceChildren();
-				if(isRecipe&&recipeRenderer){target.appendChild(recipeRenderer(result.payload.map(function(r){return r.raw;})));return;}
-				if(isMaterial&&window.MQL_TREFFERZEILE){
-					var ui=window.MQL_TREFFERZEILE,list=document.createElement('ul');
-					list.className='mql-row-list';
-					ui.header(list,{progress:false});
-					result.payload.forEach(function(r){
-						var professions=Array.from(new Set(r.uses.map(function(u){return profession(u.profession);}).filter(Boolean)));
-						var tiers=Array.from(new Set(r.uses.map(function(u){return tierText(u.tier);}).filter(Boolean)));
-						var areas=(r.areas||[]).slice().sort(function(a,b){return b.count-a.count;});
-						var href=r.kind==='resource'
-							?(areas.length?'/'+lang+'/'+({de:'karte',en:'map',fr:'carte'})[lang]+'/?vorkommen='+encodeURIComponent(r.resource)+'&vorkarte='+encodeURIComponent(areas[0].map):'')
-							:url('item',r.id);
-						var row=ui.row(list,{
-							image:r.symbol,icon:'gegenstand',name:r.name,meta:professions.join(' · '),
-							href:href,
-							values:tiers.length?[{label:ui.words.professionLevel,value:tiers.join(' · ')}]:[],
-							progress:null
-						});
-						if(r.kind==='resource'&&areas.length){
-							var details=document.createElement('details');
-							details.className='handwerk-rohstoff-orte';
-							details.appendChild(text('summary',T('hw_roh_gebiet')+' ('+areas.length+')'));
-							areas.forEach(function(a){
-								var link=text('a',a.name+' ('+a.count.toLocaleString(lang)+')');
-								link.href='/'+lang+'/'+({de:'karte',en:'map',fr:'carte'})[lang]+'/?vorkommen='+encodeURIComponent(r.resource)+'&vorkarte='+encodeURIComponent(a.map);
-								details.appendChild(link);
-							});
-							row.appendChild(details);
-						}
-						list.appendChild(row);
+				// Detail-page relation lists keep the shared row; only the crafting
+				// page itself shows the table with its own head.
+				if(isRecipe&&recipeRenderer&&settings.area){target.appendChild(recipeRenderer(result.payload.map(function(r){return r.raw;})));return;}
+				if((isRecipe||isMaterial)&&window.MQL_TABELLE){
+					var tabelle=window.MQL_TABELLE,ui=window.MQL_TREFFERZEILE;
+					var fortschritt=isRecipe&&ui&&ui.recipeHasProgressData&&ui.recipeHasProgressData();
+					if(isRecipe&&ui&&ui.recipeHelp){var hilfe=ui.recipeHelp();if(hilfe){
+						var hinweis=text('p',hilfe+' ');hinweis.className='llb-hinweis';
+						var importLink=text('a',ui.words.import);
+						importLink.href='/'+lang+'/'+({de:'spielstand',en:'progress',fr:'progression'})[lang]+'/';
+						hinweis.appendChild(importLink);target.appendChild(hinweis);
+					}}
+					var spalten=((def&&def.spalten)||[]).map(function(s){
+						return {label:T(s.labelKey||s.id),sortierung:s.sortierung,zahl:s.zahl,breite:s.breite};
 					});
-					if(!result.total){target.appendChild(text('p',T('hw_keine_rezepte')));}
-					else{target.appendChild(list);}
+					if(fortschritt){spalten.push({label:ui.words.progress});}
+					var bau=tabelle.bauen(target,spalten,{key:result.state.sort,dir:result.state.sortDir});
+					if(!result.total){
+						var leer=document.createElement('tr');leer.setAttribute('role','row');
+						var zelle=document.createElement('td');zelle.setAttribute('role','cell');zelle.colSpan=spalten.length;
+						zelle.textContent=T(isRecipe?'hw_keine_rezepte':'hw_roh_auswahl');leer.appendChild(zelle);bau.koerper.appendChild(leer);return;
+					}
+					result.payload.forEach(function(r){
+						var a=document.createElement('a');a.className='gs-zeile';
+						if(isRecipe){a.href=url('recipe',r.id);}else if(r.kind!=='resource'){a.href=url('item',r.id);}
+						var zeichen=null;
+						if(isRecipe&&r.raw&&r.raw[16]&&ui){zeichen=ui.itemIcon(r.raw[16],'rezept');}
+						else if(r.symbol&&ui){zeichen=ui.itemIcon(r.symbol,'gegenstand');}
+						else if(r.kind==='resource'&&symbols.vorkommen){zeichen=document.createElement('span');zeichen.className='mql-row-icon';zeichen.innerHTML=symbols.vorkommen;}
+						if(zeichen){a.appendChild(zeichen);}
+						var bezeichnung=text('span',r.name);bezeichnung.className='gs-name'+(isRecipe?' q'+((r.raw&&r.raw[1])||0):'');
+						a.appendChild(bezeichnung);
+						var professions=Array.from(new Set(r.uses.map(function(u){return profession(u.profession);}).filter(Boolean))).join(' · ');
+						var tiers=Array.from(new Set(r.uses.map(function(u){return tierText(u.tier);}).filter(Boolean))).join(' · ');
+						var zellen=[a,professions,tiers];
+						if(isRecipe){
+							zellen.push(r.raw&&r.raw[2]?String(r.raw[2]):'');
+							if(fortschritt){zellen.push(ui.recipeProgress(r.id)||'');}
+						}else{
+							var areas=(r.areas||[]).slice().sort(function(x,y){return y.count-x.count;});
+							if(r.kind==='resource'&&areas.length){
+								var details=document.createElement('details');details.className='handwerk-rohstoff-orte';
+								details.appendChild(text('summary',T('hw_roh_gebiet')+' ('+areas.length+')'));
+								areas.forEach(function(area){
+									var link=text('a',area.name+' ('+area.count.toLocaleString(lang)+')');
+									link.href='/'+lang+'/'+({de:'karte',en:'map',fr:'carte'})[lang]+'/?vorkommen='+encodeURIComponent(r.resource)+'&vorkarte='+encodeURIComponent(area.map);
+									details.appendChild(link);
+								});
+								zellen.push(details);
+							}else{zellen.push('');}
+						}
+						bau.koerper.appendChild(tabelle.zeile(spalten,zellen));
+					});
 					return;
 				}
 				result.payload.forEach(function(r){var section=document.createElement('section');section.className='filter-craft-row';

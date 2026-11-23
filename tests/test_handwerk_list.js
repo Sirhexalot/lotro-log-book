@@ -1,4 +1,5 @@
-/* The recipe browser uses the same result-row component as other lists. */
+/* Contextual recipe lists use the shared result row; the crafting page itself
+ * renders the shared table (browser_handwerk_tabelle.js checks that). */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -11,7 +12,8 @@ class Element {
 }
 
 const root = new Element('div');
-let rendered;
+let renderedRows;
+let rendered = false;
 let rowOptions;
 const data = [[
   '24 Months Aged Erebor Ham', 4, 373, 'Cook', 'Ironfold', 'Trail Food',
@@ -21,9 +23,8 @@ const ui = {
   words: {professionLevel: 'Crafting tier', resultLevel: 'Result item level'},
   recipeHasProgressData: () => false,
   recipeHelp: () => '',
-  header(list, options) {
+  header(list) {
     const header = new Element('li');
-    header.options = options;
     list.appendChild(header);
   },
   row(_list, options) {
@@ -38,7 +39,10 @@ const window = {
   MQL_SPEICHER: {aktiv: () => null},
   MQL_TREFFERZEILE: ui,
   MQL_HANDWERK_FILTER: {
-    recipes(rows, renderer) { rendered = renderer(rows); }
+    recipes(rows) {
+      rendered = rows;
+      renderedRows = window.MQL_RECIPE_CONTEXT_RESULTS(rows);
+    }
   }
 };
 const document = {
@@ -49,7 +53,8 @@ vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../web/rezepte.js'), 'u
   window, document, URL
 });
 
-assert.equal(rendered.className, 'mql-row-list');
+assert.deepEqual(rendered, data, 'the page hands its rows to the crafting filter');
+assert.equal(renderedRows.className, 'mql-row-list');
 assert.equal(rowOptions.name, data[0][0]);
 assert.equal(rowOptions.meta, 'Cook');
 assert.equal(rowOptions.image, data[0][16]);
@@ -61,4 +66,4 @@ assert.deepEqual(
     {label: 'Result item level', value: 373}
   ]
 );
-console.log('PASS: recipe results use shared rows with profession and labelled levels');
+console.log('PASS: contextual recipe lists use shared rows with profession and labelled levels');
