@@ -73,15 +73,19 @@ carries the target in the query, so it is shareable and survives a reload:
   draws one temporary marker. It is not a quest dot and does not change the
   list or the filter. Without a recorded coordinate no link and no pin exist.
 
-**"Wo" never appears in a list with filters.** Each row of a filtered vendor or
-barter list carries identity and classification only; a "Wo" per row would
-repeat the same places hundreds of times. From six sources the filter list
-takes over and the places stay on the vendor page. The item model builds the
-same place entries the vendor page shows (`vendor_source_places` in
-`php_viewmodel.py`), so name, chain, coordinates and both actions read the same
-on both pages; nothing is merged, because the vendor page lists every recorded
-position as well.
+**"Wo" never appears inside any list.** On item and recipe detail pages, a
+source group of up to five entries is rendered as short source rows; each
+source's "Wo" disclosure sits beside, not inside, that list row. From six
+entries the shared filter list takes over and contains no place disclosures.
+Recipe sources use the same threshold and the separate vendor/barter filter
+adapters as item sources. A source row in a filtered list carries identity and
+classification only; repeating places in every row would add noise and
+duplicate links. The item and recipe models build the same place entries the
+vendor page shows (`vendor_source_places` in `php_viewmodel.py`), so name,
+chain, coordinates and both actions read the same on both pages; nothing is
+merged, because the vendor page lists every recorded position as well.
 
-The "Wo" list is a `<details>` element (`components/wo_orte.twig`), so it works
-without JavaScript. On an item page it sits after the source row, outside the
-row link; a result row never nests a second link inside its detail link.
+The "Wo" list is a `<details>` element from the shared place component
+(`ort.quellen` in `components/ort.twig`), so it works without JavaScript. On
+item and recipe pages it sits beside the short source row, never inside a
+filtered list row or another link.

@@ -57,13 +57,11 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-inhalt h1 img.symbol { width: 34px; height: 34px; vertical-align: -6px; margin-right: 10px; }
 
 /* Entity page: a short chip row under the title, then the sections. */
-.katalog-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; }
+.katalog-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; padding: 0; list-style: none; }
 .entity-filter-link { margin: 4px 0 10px; font-size: var(--text-bedienung); }
 .katalog-inhalt .katalog-varianten { padding: 0; list-style: none; }
 
-.item-bezugsreiter {
-	margin-top: 22px;
-}
+.item-bezugsreiter { margin-top: 0; }
 /* The tab panel surface lives in reiter.css: it belongs to the tab component.
    Every other framed section uses `.llb-flaeche` from flaeche.css. */
 .item-bezugsreiter > [role="tabpanel"][hidden] { display: none; }
@@ -102,7 +100,10 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-titelzeile { display: flex; align-items: flex-start; gap: 11px; }
 .katalog-titelzeile h1 { min-width: 0; padding-top: 2px; }
 .katalog-titelzeile > .mql-row-icon { flex-shrink: 0; }
-.katalog-inhalt article.katalog-detailraster { max-width: none; }
+/* Entity detail pages use the header's shell width, never a narrower column.
+   The reading text keeps its 68-character measure inside that width. */
+.katalog-inhalt article.katalog-detailraster,
+.katalog-inhalt article.entity-detail-layout { max-width: none; }
 .katalog-detailraster .katalog-text { max-width: 68ch; }
 .katalog-detailraster > .katalog-text { margin-top: 16px; }
 .katalog-metazeile { margin: 0; color: var(--schwach); font-size: var(--text-bedienung); }
@@ -112,13 +113,12 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .katalog-kompaktleiste { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; }
 .katalog-kompaktleiste > p { margin: 0; }
 .katalog-kompaktleiste #katalog-status { margin-inline-start: auto; }
-.katalog-werteflaeche { max-width: 52rem; }
 .katalog-werteflaeche .katalog-metazeile { margin: 0 0 8px; }
 .katalog-werte-raster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; margin: 10px 0 0; }
 .katalog-werte-raster > div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid var(--rand); }
 .katalog-werte-raster dt { color: var(--schwach); }
 .katalog-werte-raster dd { margin: 0; text-align: end; font-variant-numeric: tabular-nums; }
-.katalog-detailspalten { display: grid; grid-template-columns: minmax(0,1fr); gap: 18px; align-items: start; max-width: 60rem; }
+.katalog-detailspalten { display: grid; grid-template-columns: minmax(0,1fr); gap: 18px; align-items: start; }
 .katalog-detailspalten:has(> section + section) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .entity-detail-grid { margin-block-start: 18px; row-gap: 12px; }
 .entity-detail-grid:not(:has(> :not(script))) { display: none; }
@@ -147,6 +147,10 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 .entity-item-description > p:first-child { margin-block-start: 0; }
 .entity-item-description > p:last-child { margin-block-end: 0; }
 .katalog-beziehungen, .katalog-detailraster .related-list { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--rand); }
+/* Inside a tab panel the frame belongs to the tab component; the relation
+   list must not draw a second divider. */
+.llb-reiter ~ [role="tabpanel"] .related-list { margin-top: 8px; padding-top: 0; border-top: 0; }
+.llb-reiter ~ [role="tabpanel"] > h3:first-child { margin-top: 0; }
 .llb-flaeche .katalog-gabe svg { width: 30px; height: 30px; margin-inline: 3px; }
 @media (max-width: 700px) {
 	.katalog-detailspalten:has(> section + section), .katalog-werte-raster { grid-template-columns: minmax(0, 1fr); }

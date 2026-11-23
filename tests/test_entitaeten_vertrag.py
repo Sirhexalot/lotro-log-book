@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / 'tools'))
 import build_katalogseiten as katalog  # noqa: E402
 
 KINDS = {'q', 'd', 'i', 'recipe', 'set', 'giver', 'vendor',
-         'title', 'virtue', 'f', 'l', 'area', 'region'}
+         'title', 'virtue', 'f', 'l', 'area', 'region', 'instance'}
 STATUS = {'component', 'direct', 'open'}
 
 
@@ -47,7 +47,10 @@ class VertragTest(unittest.TestCase):
         from giver_viewmodel import SEGMENT as GIVER
         from set_viewmodel import SEGMENT as SET
         from vendor_viewmodel import SEGMENT as VENDOR
+        from php_viewmodel import APP_SEGMENTS
         eigen['giver'], eigen['set'], eigen['vendor'] = GIVER, SET, VENDOR
+        # The instance finder's address segment is the one its detail pages use.
+        eigen['instance'] = {lang: APP_SEGMENTS[lang]['instances'] for lang in ('de', 'en', 'fr')}
         for kind, eintrag in self.entitaeten.items():
             for lang in ('de', 'en', 'fr'):
                 if kind in eigen:

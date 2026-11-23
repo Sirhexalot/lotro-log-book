@@ -1,18 +1,30 @@
 {% extends 'layout.twig' %}
 {% import 'components/eignung.twig' as eignung %}
-{% import 'components/wo_orte.twig' as wo %}
+{% import 'components/ort.twig' as ort %}
+{% import 'components/fakten.twig' as fakten %}
 
-{# Recipe page: profession, tier, ingredients, all result variants and the recipe's own sources. #}
+{# Recipe page: profession, tier, ingredients, all result variants and the
+   recipe's own sources. Same skeleton as every entity page: facts, then the
+   content, then where it comes from. #}
 {% block inhalt %}
-<article data-zutaten-auto-open>{{ include('entity/_heading.twig') }}<p id="katalog-status" hidden data-id="{{ page.id }}" data-kind="{{ kind }}" data-profession="{{ page.profession_key }}"></p>
-<dl class="llb-fakten"><dt>{{ w.plabel }}</dt><dd><a href="{{ page.profession.url }}">{{ page.profession.text }}</a></dd><dt>{{ w.tier }}</dt><dd>{{ page.tier }}</dd><dt>{{ w.category }}</dt><dd>{{ page.category }}</dd></dl>
-{% if page.level %}<p>{{ w.level }} {{ page.level }}</p>{% endif %}
-<section><h2>{{ w.ingredients }}</h2><ul>{% for item in page.ingredients %}<li>{% if item.icon %}<img class="symbol" src="/bild/items/{{ item.icon }}.webp" alt="" width="22" height="22" decoding="async">{% endif %}{{ item.amount }} × {% if item.url and item.herkunft %}<a data-zutat href="{{ item.url }}">{{ item.text }}</a>{% elseif item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}</li>{% endfor %}</ul></section>
-{% if page.optional %}<section><h2>{{ w.optional }}</h2><ul>{% for item in page.optional %}<li>{% if item.icon %}<img class="symbol" src="/bild/items/{{ item.icon }}.webp" alt="" width="22" height="22" decoding="async">{% endif %}{{ item.amount }} × {% if item.url and item.herkunft %}<a data-zutat href="{{ item.url }}">{{ item.text }}</a>{% elseif item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}{% if item.chance is defined and item.chance %} ({{ w.chance }} {{ item.chance }} %){% endif %}</li>{% endfor %}</ul></section>{% endif %}
-{% if page.results %}<section><h2>{{ w.results }}</h2><ul>{% for item in page.results %}<li>{% if item.symbol %}<img class="symbol" src="/bild/items/{{ item.symbol }}.webp" alt="" width="22" height="22" decoding="async">{% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.name }}</a>{% else %}{{ item.name }}{% endif %}{% if item.level %} <span class="schwach"{{ eignung.attribute(item.eignung|default({})) }}>{{ w.level }} {{ item.level }}</span>{% endif %}</li>{% endfor %}</ul></section>{% endif %}
-{% if page.sources %}<section><h2>{{ w.tab_where_from }}</h2><ul>{% for source in page.sources %}<li>{% if source.url %}<a href="{{ source.url }}">{{ source.name }}</a>{% else %}{{ source.name }}{% endif %} <span class="schwach">{{ source.label }}</span>{{ wo.liste(lang, source.map_places|default([]), gw) }}</li>{% endfor %}</ul></section>{% endif %}
-{% if page.chance %}<p>{{ w.chance }}: {{ page.chance }} %</p>{% endif %}
-{% if page.time %}<p>{{ w.time }}: {{ page.time }} s</p>{% endif %}
-<p><a href="{{ page.craft_url }}">{{ w.craftlist }}</a></p>
+<article class="entity-detail-layout recipe-detail" data-zutaten-auto-open>
+{{ include('entity/_heading.twig') }}
+<p id="katalog-status" hidden data-id="{{ page.id }}" data-kind="{{ kind }}" data-profession="{{ page.profession_key }}"></p>
+{% set rows = [
+    {'label': w.plabel, 'text': page.profession.text, 'url': page.profession.url},
+    {'label': w.tier, 'text': page.tier},
+    {'label': w.category, 'text': page.category}
+] %}
+{% if page.level %}{% set rows = rows|merge([{'label': w.level, 'text': page.level}]) %}{% endif %}
+{% if page.time %}{% set rows = rows|merge([{'label': w.time, 'text': page.time ~ ' s'}]) %}{% endif %}
+<section class="llb-flaeche"><h2>{{ {de: 'Einordnung', en: 'Classification', fr: 'Classement'}[lang] }}</h2>{{ fakten.liste(rows) }}</section>
+<div class="entity-detail-grid llb-raster">
+<section class="llb-flaeche"><h2>{{ w.ingredients }}</h2><ul>{% for item in page.ingredients %}<li>{% if item.icon %}<img class="symbol" src="/bild/items/{{ item.icon }}.webp" alt="" width="22" height="22" decoding="async">{% endif %}{{ item.amount }} × {% if item.url and item.herkunft %}<a data-zutat href="{{ item.url }}">{{ item.text }}</a>{% elseif item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}</li>{% endfor %}</ul></section>
+{% if page.optional %}<section class="llb-flaeche"><h2>{{ w.optional }}</h2><ul>{% for item in page.optional %}<li>{% if item.icon %}<img class="symbol" src="/bild/items/{{ item.icon }}.webp" alt="" width="22" height="22" decoding="async">{% endif %}{{ item.amount }} × {% if item.url and item.herkunft %}<a data-zutat href="{{ item.url }}">{{ item.text }}</a>{% elseif item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}{% if item.chance is defined and item.chance %} ({{ w.chance }} {{ item.chance }} %){% endif %}</li>{% endfor %}</ul></section>{% endif %}
+</div>
+{% if page.results %}<section class="llb-flaeche" data-ton="hell"><h2>{{ w.results }}</h2><ul>{% for item in page.results %}<li>{% if item.symbol %}<img class="symbol" src="/bild/items/{{ item.symbol }}.webp" alt="" width="22" height="22" decoding="async">{% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.name }}</a>{% else %}{{ item.name }}{% endif %}{% if item.level %} <span class="schwach"{{ eignung.attribute(item.eignung|default({})) }}>{{ w.level }} {{ item.level }}</span>{% endif %}</li>{% endfor %}</ul></section>{% endif %}
+{% if page.chance %}<p class="llb-hinweis">{{ w.chance }}: {{ page.chance }} %</p>{% endif %}
+{% if page.sources %}<section class="llb-flaeche"><h2>{{ w.tab_where_from }}</h2><ul>{% for source in page.sources %}<li>{% if source.url %}<a href="{{ source.url }}">{{ source.name }}</a>{% else %}{{ source.name }}{% endif %} <span class="schwach">{{ source.label }}</span>{{ ort.quellen(lang, source.map_places|default([]), gw) }}</li>{% endfor %}</ul></section>{% endif %}
+<p class="llb-aktionen"><a href="{{ page.craft_url }}">{{ w.craftlist }}</a></p>
 </article>
 {% endblock %}

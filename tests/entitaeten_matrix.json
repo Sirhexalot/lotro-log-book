@@ -5,27 +5,27 @@
     {
       "kind": "q",
       "list": "/de/aufgabenfinder/",
-      "row": ".mql-row",
+      "row": ".gs-zeile",
       "detail": "/de/aufgabe/70000003/",
       "map": "/de/karte/"
     },
     {
       "kind": "d",
       "list": "/de/tat/",
-      "row": ".mql-row",
+      "row": ".gs-zeile",
       "detail": "/de/tat/70045CB1/",
       "map": "/de/karte/taten/"
     },
     {
       "kind": "i",
       "list": "/de/gegenstandssuche/",
-      "row": ".mql-row",
+      "row": ".gs-zeile",
       "detail": "/de/gegenstand/70001B7E/"
     },
     {
       "kind": "recipe",
       "list": "/de/handwerk/rezepte/",
-      "row": ".mql-row",
+      "row": ".gs-zeile",
       "detail": "/de/rezept/7000386B/"
     },
     {
@@ -37,19 +37,19 @@
     {
       "kind": "giver",
       "list": "/de/auftraggeber/",
-      "row": ".mql-row",
+      "row": ".gs-zeile",
       "detail": "/de/auftraggeber/7000838B/"
     },
     {
       "kind": "vendor",
       "list": "/de/haendler/",
-      "row": ".mql-row",
+      "row": ".gs-zeile",
       "detail": "/de/haendler/7001F05B/"
     },
     {
       "kind": "title",
       "list": "/de/titel/",
-      "row": ".mql-row",
+      "row": ".gs-zeile",
       "detail": "/de/titel/700182F4/"
     },
     {
@@ -61,13 +61,13 @@
     {
       "kind": "f",
       "list": "/de/fraktion/",
-      "row": ".mql-row",
+      "row": ".gs-zeile",
       "detail": "/de/fraktion/700694C4/"
     },
     {
       "kind": "l",
       "list": "/de/landmarke/",
-      "row": ".mql-row",
+      "row": ".gs-zeile",
       "detail": "/de/landmarke/7000EE27/"
     },
     {
@@ -81,6 +81,12 @@
       "list": null,
       "row": null,
       "detail": "/de/region/268437557/"
+    },
+    {
+      "kind": "instance",
+      "list": "/de/instanz/",
+      "row": ".gs-zeile",
+      "detail": "/de/instanz/7001A78B/"
     }
   ]
 }

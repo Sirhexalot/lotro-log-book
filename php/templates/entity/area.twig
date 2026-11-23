@@ -1,15 +1,22 @@
 {% extends 'layout.twig' %}
 {% import 'components/karte.twig' as karte %}
+{% import 'components/fakten.twig' as fakten %}
+{% import 'entity/_result_row.twig' as result %}
 
-{# Area or region page: map entry point, parent, sub-areas and what lies here.
+{# Area or region page: map entry point, region, sub-areas and what lies here.
    The three content groups are real tabs. The page carries the complete member
    list once; the browser filters it, so a tab never searches only the rendered
    excerpt. Without JavaScript the server-rendered links below stay usable. #}
 {% block inhalt %}
-<article class="gebiet">{{ include('entity/_heading.twig') }}
+<article class="gebiet entity-detail-layout">{{ include('entity/_heading.twig') }}
+{% if page.sections %}
+<ul class="katalog-metazeile katalog-chips">
+{% for section in page.sections %}<li class="katalog-chip">{{ section.count }} {{ section.title }}</li>{% endfor %}
+</ul>
+{% endif %}
 {% if page.image %}{{ karte.karte(lang, page.image, '', null, null, '', true, '', page.name) }}{% endif %}
 <p class="llb-aktionen"><a class="llb-knopf" href="{{ page.map_url }}">{{ w.area_map }}</a></p>
-{% if page.parent %}<p><a href="{{ page.parent.url }}">{{ page.parent.text }}</a></p>{% endif %}
+{% if page.parent %}{{ fakten.liste([{'label': {de: 'Region', en: 'Region', fr: 'Région'}[lang], 'text': page.parent.text, 'url': page.parent.url}]) }}{% endif %}
 {% if page.children %}<section><h2>{{ page.children_title }}</h2><ul class="katalog-liste">{% for child in page.children %}<li><a href="{{ child.url }}">{{ child.text }}</a></li>{% endfor %}</ul></section>{% endif %}
 
 {% if page.sections %}
@@ -17,7 +24,12 @@
 	{% for section in page.sections %}
 	<section><h2>{{ section.title }} ({{ section.count }})</h2>
 		{% set segment = {q: {de: 'aufgabe', en: 'quest', fr: 'quete'}, d: {de: 'tat', en: 'deed', fr: 'prouesse'}, i: {de: 'gegenstand', en: 'item', fr: 'objet'}} %}
-		<ul class="katalog-liste">{% for entry in page.members[section.kind] %}<li><a href="/{{ lang }}/{{ segment[section.kind][lang] }}/{{ entry[0] }}/">{{ entry[1] }}</a></li>{% endfor %}</ul>
+		<ul class="mql-row-list">
+		{% for entry in page.members[section.kind] %}
+		{% set art = section.kind == 'i' ? 'gegenstand' : (section.kind == 'd' ? 'tat' : 'aufgabe') %}
+		{{ result.row(lang, '/' ~ lang ~ '/' ~ segment[section.kind][lang] ~ '/' ~ entry[0] ~ '/', entry[1], '', symbol(art), section.kind == 'i' ? (entry[2]|default('')) : '') }}
+		{% endfor %}
+		</ul>
 	</section>
 	{% endfor %}
 </div>

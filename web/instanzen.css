@@ -1,8 +1,5 @@
 .instanz-detail { display: grid; gap: var(--llb-raster-abstand, 1rem); }
 .instanz-fakten { margin: 0; }
-.instanz-karte { margin: 0; max-width: 100%; }
-.instanz-karte img { display: block; width: auto; max-width: min(100%, 56rem); height: auto; }
-.instanz-karte-klein img { width: 24rem; }
 .instanz-gegner { columns: 14rem; }
 .instanz-gegner li { break-inside: avoid; }
 .instanz-bosse { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; }
@@ -12,7 +9,6 @@
 .instanz-art { margin: 0 0 .3rem; padding-left: .9rem; }
 .instanz-art-name { color: var(--gold); font-size: var(--text-kompakt); font-weight: var(--gewicht-medium); margin-right: .45rem; }
 .instanz-art-namen { color: var(--schwach); font-size: var(--text-kompakt); line-height: var(--zeile-detail); }
-.instanz-detail > .katalog-abschnitt { max-width: 960px; }
 .instanz-reiter > [role="tabpanel"] > h2 { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
 .instanz-listenflaeche:not([role="tabpanel"]) {
 	box-sizing:border-box; min-width:0; padding:var(--llb-flaechen-innen);

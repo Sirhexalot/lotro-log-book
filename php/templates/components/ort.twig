@@ -1,0 +1,92 @@
+{# One place component for the whole site. Twig here, look in `web/ort.css`,
+   behaviour in `web/ort.js`. A page supplies places and words, never markup.
+
+   The form follows the number of places, not the page:
+
+     block(lang, place, labels, titel, map_link)
+       exactly one place: map cut, area, coordinates, actions, and the quiet
+       second row with route and resource occurrences.
+
+     wahl(lang, orte, labels)
+       two or more places: one map, one row per place, a row switches the map.
+       Without JavaScript the first map stays and every row is readable.
+
+     quellen(lang, orte, labels)
+       the same two forms inside the collapsed "Wo" of a short source list.
+
+   place/orte entries: {image, map_url, map_name, chain [{name, url}], coords,
+   ort, pin_x, pin_y, travel_url, occurrences_url, points, hint} #}
+
+{% macro block(lang, place, labels, titel = '', map_link = '') %}
+{% import 'components/karte.twig' as karte %}
+{% set bild = place.image|default('') %}
+{% set kette = place.chain|default([]) %}
+{% set kartenname = place.map_name|default('') %}
+{% set koordinaten = place.coords|default('') %}
+{% set punkte = place.points|default(0) %}
+{% set hinweis = place.hint|default('') %}
+{% set ziel = map_link|default(place.map_link|default(place.map_url|default(''))) %}
+<section class="llb-ort llb-flaeche">
+{% if titel %}<h2>{{ titel }}</h2>{% endif %}
+{% if place.images|default([]) %}
+{% for map in place.images %}{{ karte.karte(lang, map.map, '', map.pin_x, map.pin_y) }}{% endfor %}
+{% elseif bild %}
+{{ karte.karte(lang, bild, ziel, place.pin_x|default(null), place.pin_y|default(null)) }}
+{% endif %}
+{% if kette %}<p class="llb-hinweis llb-ort-kette">{% for part in kette %}{% if not loop.first %} › {% endif %}{% set teil_name = part.name is defined ? part.name : part %}{% if part.url is defined and part.url %}<a href="{{ part.url }}">{{ teil_name }}</a>{% else %}{{ teil_name }}{% endif %}{% endfor %}</p>{% endif %}
+{% if kartenname or koordinaten or punkte or hinweis %}<p class="llb-hinweis">
+{%- if kartenname and not kette %}<a href="{{ place.area_url|default(place.map_url|default('')) }}">{{ kartenname }}</a>{% endif %}
+{%- if koordinaten %}{% if kartenname and not kette %} · {% endif %}{{ koordinaten }}{% endif %}
+{%- if punkte %}{% if koordinaten or (kartenname and not kette) %} · {% endif %}{{ labels.points_count|replace({'%s': punkte}) }}{% endif %}
+{%- if hinweis %}{% if koordinaten or punkte or (kartenname and not kette) %} · {% endif %}{{ hinweis }}{% endif %}
+</p>{% endif %}
+{% if ziel %}<p class="llb-aktionen"><a href="{{ ziel }}" class="llb-knopf">{{ labels.map }}</a></p>{% endif %}
+{% if place.travel_url|default('') or place.occurrences_url|default('') %}<p class="llb-ort-neben">
+{%- if place.travel_url|default('') %}<a href="{{ place.travel_url }}">{{ labels.route }}</a>{% endif %}
+{%- if place.occurrences_url|default('') %}<a href="{{ place.occurrences_url }}">{{ labels.occurrences }}</a>{% endif %}
+</p>{% endif %}
+</section>
+{% endmacro %}
+
+{% macro wahl(lang, orte, labels) %}
+{% import 'components/karte.twig' as karte %}
+{% set mit_bild = orte|filter(platz => platz.image|default('')) %}
+{% set erst = mit_bild|first %}
+{% set waehlbar = mit_bild|length > 1 %}
+{% set erst_pin = erst and erst.pin_x is not null and erst.pin_y is not null %}
+<div class="llb-ort llb-ort-wahl llb-flaeche" data-ort-karte>
+{% if erst %}
+{{ karte.karte(lang, erst.image, '', erst.pin_x|default(0), erst.pin_y|default(0), '', false, '', '', '', '', 'data-ort-bild', erst_pin ? 'data-ort-pin' : 'data-ort-pin hidden') }}
+{% endif %}
+<ul class="llb-ort-wahl-liste">
+{% for place in orte %}<li{% if (erst and place is same as(erst)) or (not erst and loop.first) %} class="ist-aktiv"{% endif %}>
+{% set bild = place.image|default('') %}
+{# A place without a picture, or the only picture, is a statement, not a button. #}
+{% if waehlbar and bild %}<button type="button" class="ort-zeile" data-bild="{{ bild }}" data-pin-x="{{ place.pin_x is not null ? place.pin_x|pin : '' }}" data-pin-y="{{ place.pin_y is not null ? place.pin_y|pin : '' }}">{% else %}<div class="ort-zeile ort-zeile-fest">{% endif %}
+<span class="ort-name">{% if place.ort|default('') %}{{ place.ort }}{% elseif place.chain|default([]) %}{% for part in place.chain %}{% if not loop.first %} › {% endif %}{{ part.name is defined ? part.name : part }}{% endfor %}{% elseif place.map_name|default('') %}{{ place.map_name }}{% endif %}</span>
+{% if place.ort|default('') and place.chain|default([]) %}<span class="ort-meta">{% for part in place.chain %}{% if not loop.first %} › {% endif %}{% if part.url is defined and part.url and not (waehlbar and bild) %}<a href="{{ part.url }}">{{ part.name is defined ? part.name : part }}</a>{% else %}{{ part.name is defined ? part.name : part }}{% endif %}{% endfor %}</span>{% endif %}
+{% if place.coords|default('') %}<span class="ort-meta">{{ place.coords }}</span>{% endif %}
+{% if waehlbar and bild %}</button>{% else %}</div>{% endif %}
+<span class="ort-aktionen">{% if place.map_url|default('') %}<a href="{{ place.map_url }}">{{ labels.map }}</a>{% endif %}{% if place.travel_url|default('') %}<a href="{{ place.travel_url }}">{{ labels.route }}</a>{% endif %}</span>
+</li>{% endfor %}
+</ul>
+</div>
+{% endmacro %}
+
+{# A short source list names its places compactly: name, chain, coordinates and
+   both actions, no map. The map belongs to the detail pages, where the place
+   is the subject; inside a source row it would take over the page. A filtered
+   list never carries this, because every row would repeat it. #}
+{% macro quellen(lang, orte, labels) %}
+{% if orte %}<details class="wo-liste">
+<summary>{{ {de: 'Wo', en: 'Where', fr: 'Où'}[lang] }}</summary>
+<ul class="wo-orte">
+{% for place in orte %}<li class="wo-ort">
+<span class="wo-ort-name">{% if place.ort|default('') %}{{ place.ort }}{% elseif place.chain|default([]) %}{% for teil in place.chain %}{% if not loop.first %} › {% endif %}{{ teil.name is defined ? teil.name : teil }}{% endfor %}{% elseif place.map_name|default('') %}{{ place.map_name }}{% endif %}</span>
+{% if place.ort|default('') and place.chain|default([]) %}<span class="wo-ort-meta">{% for teil in place.chain %}{% if not loop.first %} › {% endif %}{{ teil.name is defined ? teil.name : teil }}{% endfor %}</span>{% endif %}
+{% if place.coords|default('') %}<span class="wo-ort-meta">{{ place.coords }}</span>{% endif %}
+<span class="wo-ort-aktionen">{% if place.map_url|default('') %}<a href="{{ place.map_url }}">{{ labels.map }}</a>{% endif %}{% if place.travel_url|default('') %}<a href="{{ place.travel_url }}">{{ labels.route }}</a>{% endif %}</span>
+</li>{% endfor %}
+</ul>
+</details>{% endif %}
+{% endmacro %}

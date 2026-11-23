@@ -1,0 +1,30 @@
+{# Rewards, one component for quests and deeds.
+
+   gruppen(groups, sicher)
+     groups [{label, items}] – quest rewards arrive grouped by kind, a deed
+     passes its fixed and its selectable rewards as two groups.
+     `sicher` is the word for the fixed group; when it is the only group its
+     heading is dropped, because the section heading already says "Belohnungen".
+
+   The row keeps the 64/54 px icon tile of every list (`kachel.css`), the
+   rarity colour of the name and the suitability chip of the imported
+   character. A page never writes its own reward row. #}
+{% macro gabe(item) %}
+{% import 'components/eignung.twig' as eignung %}
+<div class="katalog-gabe"{{ eignung.attribute(item.eignung|default({})) }}>
+{%- set art = item.kind|default(item.icon is defined and item.icon ? 'item' : (item.symbol is defined and item.symbol ? 'entity' : 'plain')) -%}
+{%- if item.icon|default(null) %}<span class="mql-row-icon mql-row-icon-item" aria-hidden="true"><img src="/bild/items/{{ item.icon }}.webp" alt="" width="48" height="48" loading="lazy" decoding="async"></span>
+{%- elseif art == 'title' %}<span class="mql-row-icon mql-row-icon-entity" aria-hidden="true">{{ symbol('titel')|raw }}</span>
+{%- elseif art == 'virtue' %}<span class="mql-row-icon mql-row-icon-entity" aria-hidden="true">{{ symbol('tugend')|raw }}</span>
+{%- elseif item.symbol is defined and item.symbol %}<span class="mql-row-icon mql-row-icon-entity" aria-hidden="true">{{ symbol(item.symbol)|raw }}</span>
+{%- endif -%}
+<span>{% if item.label is defined and item.label and art in ['title', 'virtue', 'plain'] %}<span class="katalog-gabe-art">{{ item.label }}</span> {% endif %}{% if item.qty is defined and item.qty > 1 %}{{ item.qty }} × {% endif %}{% if item.url is defined and item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}</span>
+</div>
+{% endmacro %}
+
+{% macro gruppen(groups, sicher) %}
+{% for group in groups %}
+{% if groups|length > 1 or group.label != sicher %}<h3>{{ group.label }}</h3>{% endif %}
+<div class="katalog-gaben">{% for item in group.items %}{{ _self.gabe(item) }}{% endfor %}</div>
+{% endfor %}
+{% endmacro %}

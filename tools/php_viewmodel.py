@@ -69,8 +69,8 @@ def vendor_source_places(pages: dict | None) -> dict:
 
     The vendor page already resolved every place from the client's landblocks:
     name, chain, coordinates and both links. A source row on an item or recipe
-    page offers the same places row for row, so "Wo" reads the same everywhere;
-    only the picture and the pin stay on the vendor page. Nothing is merged:
+    page offers the same places row for row, so "Wo" answers the same question;
+    only the picture and the pin stay on the detail pages. Nothing is merged:
     the vendor page shows every recorded position, and a source list that hid
     one of them would answer the question differently.
     """
@@ -176,8 +176,12 @@ class ViewBuilder:
         return {'url': route(self.lang, kind, str(map_id)), 'text': name}
 
 
-def quest_view(builder: ViewBuilder, quest: dict) -> dict:
-    """Everything a quest page prints, already resolved."""
+def quest_view(builder: ViewBuilder, quest: dict, givers: list | None = None) -> dict:
+    """Everything a quest page prints, already resolved.
+
+    `givers` is the complete list of evidenced bestowers for this quest
+    ({'url', 'text'} each), built once per language by `giver_quest_map`.
+    """
     w, lang = builder.w, builder.lang
     rel = quest.get('rel') or {}
 
@@ -351,6 +355,9 @@ def quest_view(builder: ViewBuilder, quest: dict) -> dict:
         'giver': ({'url': giver_url(lang, quest['gi']) if quest.get('gi')
                    else app_url(lang, 'suche', q=quest['g']),
                    'text': quest['g']} if quest.get('g') else None),
+        # Every evidenced giver, not only the first: the client records all
+        # bestowers of a quest and the page names them all.
+        'givers': (givers or []) if givers is not None else [],
         'area_trail': area_trail,
         'requirements': requirements,
         'reward_groups': groups,
@@ -510,11 +517,14 @@ def deed_view(builder: ViewBuilder, deed: dict, index: dict, categories: dict) -
     # eight-entry excerpt hid up to 633 related deeds.
     # Only IDs travel in the page model; the renderer resolves names from the
     # relation shards. Full text here would add hundreds of megabytes.
-    context_deeds = {}
-    for entry in more_area + more_kind:
-        context_deeds[entry['i']] = entry
-    context_ids = [entry['i'] for entry in
-                   sorted(context_deeds.values(), key=lambda e: e['n'].lower())]
+    # The two groups travel separately so the page can offer them as tabs;
+    # a deed that stands in both lists counts under the area only.
+    area_ids = [entry['i'] for entry in
+                sorted(more_area, key=lambda e: e['n'].lower())]
+    gesehen = set(area_ids)
+    kind_ids = [entry['i'] for entry in
+                sorted(more_kind, key=lambda e: e['n'].lower())
+                if entry['i'] not in gesehen]
 
     return {
         'kind': 'd',
@@ -528,7 +538,12 @@ def deed_view(builder: ViewBuilder, deed: dict, index: dict, categories: dict) -
         'facts': facts,
         'rewards_fixed': fixed,
         'rewards_choice': choice,
-        'related_deeds': context_ids,
+        'related_area': area_ids,
+        'related_kind': kind_ids,
+        'related_area_label': {'de': 'Gleiches Gebiet', 'en': 'Same area',
+                               'fr': 'Même zone'}[lang],
+        'related_kind_label': {'de': 'Gleiche Kategorie', 'en': 'Same category',
+                               'fr': 'Même catégorie'}[lang],
         'related_label': {'de': 'Zusammenhang', 'en': 'Context', 'fr': 'Contexte'}[lang],
         'steps': steps,
         'crumb_maps': crumb_maps,
@@ -554,11 +569,17 @@ def honor_view(builder: ViewBuilder, art: str, entry: dict) -> dict:
         sort = row[5] if len(row) > 5 else ''
         extra = ' · '.join(part for part in (sort, region, zone) if part)
         reference = None
+        stufe = ''
         if kind == 'q':
             reference = route(lang, 'q', qid) if qid in builder.quests else app_url(lang, 'karte', id=qid)
+            stufe = (builder.quests.get(qid) or {}).get('l') or ''
         elif kind == 'd':
             reference = route(lang, 'd', qid) if qid in builder.deeds else app_url(lang, 'taten', id=qid)
-        sources.append({'url': reference, 'text': qname, 'extra': extra})
+            stufe = (builder.deeds.get(qid) or {}).get('l') or ''
+        # The kind keeps the two source lists apart; the level lets the row
+        # read like every other result row.
+        sources.append({'url': reference, 'text': qname, 'extra': extra,
+                        'kind': kind, 'level': stufe})
     from titelarten import label as titelart
     arten = [titelart(kind, lang) for kind in (entry.get('k') or [])]
     return {
@@ -655,12 +676,45 @@ def landmark_view(builder: ViewBuilder, entry: dict) -> dict:
                 ort['pin_y'] = round(min(100.0, max(0.0, (karte['north'] - entry['lat']) / hoehe * 100)), 1)
                 ort['coords'] = coords(entry['lat'], entry['lon'])
 
+    # Landblock room/area names are authoritative for places without a
+    # landscape map. Keep the existing map hierarchy for landscape places.
+    place_name = ((entry.get('ort') or {}).get(lang)
+                  if isinstance(entry.get('ort'), dict) else entry.get('ort'))
+    if entry.get('map') is not None:
+        place_name = None
+    chain = []
+    if entry.get('map') is None:
+        for part in entry.get('kette') or []:
+            names = part.get('name') or {}
+            text = names.get(lang) if isinstance(names, dict) else names
+            text = text or ''
+            if not text:
+                continue
+            map_id = part.get('map')
+            linked = builder.map_link(map_id, text) if map_id else None
+            chain.append({
+                'text': text,
+                'url': linked['url'] if linked else None,
+            })
+        if entry.get('bild'):
+            ort['image'] = entry['bild']
+            ort['pin_x'] = entry.get('pin_x')
+            ort['pin_y'] = entry.get('pin_y')
+        if entry.get('lat') is not None and entry.get('lon') is not None:
+            ort['coords'] = coords(entry['lat'], entry['lon'])
+        ort['map_name'] = None
+        ort['map_url'] = None
+
     ziele = []
     for ident in entry.get('targets') or []:
         if ident in builder.quests:
-            ziele.append({'url': route(lang, 'q', ident), 'text': builder.quests[ident]['n'], 'art': 'q'})
+            quest = builder.quests[ident]
+            ziele.append({'url': route(lang, 'q', ident), 'text': quest['n'], 'art': 'q',
+                          'level': quest.get('l') or ''})
         elif ident in builder.deeds:
-            ziele.append({'url': route(lang, 'd', ident), 'text': builder.deeds[ident]['n'], 'art': 'd'})
+            deed = builder.deeds[ident]
+            ziele.append({'url': route(lang, 'd', ident), 'text': deed['n'], 'art': 'd',
+                          'level': deed.get('l') or ''})
 
     return {
         'kind': 'l',
@@ -668,6 +722,8 @@ def landmark_view(builder: ViewBuilder, entry: dict) -> dict:
         'name': name,
         'icon': 'landmarke',
         'place': ort,
+        'place_name': place_name,
+        'place_chain': chain,
         'quests': ziele,
         # Open the map at this area, not at the overview: `vorkarte` is the
         # map id the app already understands (it preselects the area).
@@ -676,7 +732,7 @@ def landmark_view(builder: ViewBuilder, entry: dict) -> dict:
                     punkt='%.5f,%.5f' % (entry['lat'], entry['lon']), name=name)
             if entry.get('map') and entry.get('lat') is not None and entry.get('lon') is not None
             else app_url(lang, 'karte', vorkarte=entry['map'])
-            if entry.get('map') else app_url(lang, 'karte')),
+            if entry.get('map') else None),
         'seo': seo.landmark(lang, name=name, area=ort.get('map_name') or '',
                             region=(ort.get('region') or {}).get('text') or '',
                             quests=len(ziele)),
@@ -746,6 +802,9 @@ def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None,
         text = str(raw or '').strip()
         return '%08X' % (int(text) & 0xffffffff) if text.isdigit() else text.upper()
     provenance = []
+    vendor_entries = []
+    barter_entries = []
+    barter_sources = []
     names = vendor_names or {}
     known = vendor_ids or set()
     for source in sources or []:
@@ -753,14 +812,38 @@ def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None,
         vendor = names.get(ident) or {}
         source_name = (vendor.get(lang) or vendor.get('en') or vendor.get('de')
                        or source.get('name') or ident)
+        url = vendor_url(lang, ident) if ident in known else ''
+        places = (vendor_places or {}).get(ident, [])
         provenance.append({
             'id': ident,
             'name': source_name,
             'label': w['source_vendors'] if source.get('art') == 'haendler'
                      else w['source_barters'],
-            'url': vendor_url(lang, ident) if ident in known else '',
-            'map_places': (vendor_places or {}).get(ident, []),
+            'url': url,
+            'map_places': places,
         })
+        if source.get('art') == 'haendler':
+            vendor_entries.append({'id': ident, 'text': source_name,
+                                   'url': url, 'map_places': places})
+        else:
+            # A barter source is its own group: the two lists ask different
+            # questions and the shared filter adapters differ, so they stay
+            # apart exactly as on an item page.
+            barter_entries.append({'id': ident, 'name': source_name,
+                                   'text': source_name,
+                                   'extra': source.get('gebiet') or '',
+                                   'url': url, 'map_places': places})
+            barter_sources.append({'id': ident, 'name': source_name,
+                                   'area': source.get('gebiet') or ''})
+    # Up to five sources the page lists them directly (with "Wo"); from six
+    # the shared filter list takes over, as on every other relation list.
+    source_groups = []
+    if vendor_entries:
+        source_groups.append({'label': w['source_vendors'], 'art': 'vendor',
+                              'entries': vendor_entries})
+    if barter_entries:
+        source_groups.append({'label': w['source_barters'], 'art': 'barter',
+                              'entries': barter_entries})
 
     return {
         'kind': 'recipe',
@@ -777,6 +860,8 @@ def recipe_view(builder: ViewBuilder, row: list, ohne_herkunft=None,
         'optional': optional,
         'results': results,
         'sources': provenance,
+        'source_groups': source_groups,
+        'barter_sources': barter_sources,
         'critical': row[8] or '',
         'critical_id': row[19] if len(row) > 19 and row[19] else None,
         'critical_symbol': row[17] if len(row) > 17 else None,

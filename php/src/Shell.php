@@ -79,6 +79,7 @@ final class Shell
             $this->assetTag('hinweis.css'),
             $this->assetTag('knopf.css'),
             $this->assetTag('karte.css'),
+            $this->assetTag('ort.css'),
             $this->assetTag('reiter.css'),
              $this->assetTag('sets.css'),
              $this->assetTag('gegenstaende.css'),
@@ -112,7 +113,8 @@ final class Shell
               $this->scriptTag('karten-aufgabenfilter.js'),
               $this->scriptTag('listen/gegenstaende.js'),
               $this->scriptTag('gegenstaende-filter.js'),
-              $this->scriptTag('item-detail.js'), $this->scriptTag('item-task-filter.js')]);
+              $this->scriptTag('item-detail.js'), $this->scriptTag('item-task-filter.js'),
+              $this->scriptTag('ort.js')]);
     }
 
     /** Stamp for every app script and stylesheet, so a change reaches browsers. */

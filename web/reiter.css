@@ -1,5 +1,6 @@
 /* One tab bar for every page: item, instance, class, area, companion,
- * handwerk. The active tab merges into the panel below it, which is why the
+ * handwerk, vendor, quest. The bar keeps a gap to the section above it, so a
+ * tab never touches the surface it follows. The active tab merges into the panel below it, which is why the
  * bar overlaps the panel's top border by one pixel. Colours come only from
  * theme tokens, so both themes stay readable.
  *
@@ -7,7 +8,7 @@
  * `reiter.js`. Do not restyle a single page: change this file instead. */
 .llb-reiter {
 	display: flex; flex-wrap: wrap; gap: 2px;
-	margin: 0; padding: 0 8px;
+	margin: 0; margin-top: var(--llb-flaechen-abstand); padding: 0 8px;
 	position: relative; z-index: 1; margin-bottom: -1px;
 }
 .llb-reiter button {

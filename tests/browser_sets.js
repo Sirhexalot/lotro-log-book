@@ -91,8 +91,8 @@ async function bereit(page) {
 
 			/* The same verdict in the set head, from the piece requirements. */
 			await page.goto(base + sprache.detail, {waitUntil: 'networkidle'});
-			await page.waitForSelector('.set-kopf .eignung-chip');
-			const kopf = await page.locator('.set-kopf .eignung-chip').innerText();
+			await page.waitForSelector('.set-detail .set-eignung .eignung-chip');
+			const kopf = await page.locator('.set-detail .set-eignung .eignung-chip').innerText();
 			assert.match(kopf, sprache.teil, sprache.lang + ': Set-Kopf ohne Anteil');
 			await context.close();
 			console.log(sprache.lang + ': Chips, Anteil und Set-Kopf ok');

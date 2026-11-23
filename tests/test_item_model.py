@@ -245,7 +245,7 @@ class ItemModelTests(unittest.TestCase):
         self.assertEqual(len(groups['Herstellung']['entries']), 2)
         self.assertNotIn('Tauschhändler', groups)
 
-    def test_vendor_entity_has_map_and_item_links_in_all_languages(self):
+    def test_vendor_entity_has_evidenced_place_and_item_links_in_all_languages(self):
         for lang, name, path in (
             ('de', 'Karlo Schwarzhain', 'haendler'),
             ('en', 'Carlo Blagrove', 'vendor'),
@@ -256,10 +256,18 @@ class ItemModelTests(unittest.TestCase):
                 (DATEN / ('%s/page-vendor/%s.json' % (lang, shard))).read_text()
             )['entities']['70000002']
             self.assertEqual(page['name'], name)
-            self.assertTrue(page['places'][0]['map_url'])
+            self.assertTrue(any(place['map_url'] or place['image']
+                                for place in page['places']))
             self.assertTrue(page['items'][0]['url'].startswith('/%s/gegenstand/' % lang)
-                            if lang == 'de' else page['items'][0]['url'].startswith(
-                                '/%s/%s/' % (lang, 'item' if lang == 'en' else 'objet')))
+             if lang == 'de' else page['items'][0]['url'].startswith(
+                                 '/%s/%s/' % (lang, 'item' if lang == 'en' else 'objet')))
+
+    def test_vendor_source_rows_do_not_repeat_their_where_disclosure(self):
+        template = (ROOT / 'php/templates/entity/_item_group.twig').read_text(
+            encoding='utf-8')
+        self.assertIn(
+            "gefiltert or group.vendor_filter|default(false) ? '' : ort.quellen(",
+            template)
 
 
 if __name__ == '__main__':

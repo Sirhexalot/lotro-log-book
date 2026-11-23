@@ -1,0 +1,135 @@
+/* One place component, one form per count. Markup comes from
+ * `php/templates/components/ort.twig`, behaviour from `ort.js`.
+ *
+ *   .llb-ort        one place: map, area, coordinates, actions
+ *   .llb-ort-wahl   several places: one map, one row per place, a row switches
+ *   .wo-liste       the collapsed "Wo" of a short source list
+ *
+ * The form follows the number of places, never the page. */
+
+.llb-ort { margin: 0; }
+
+/* The map keeps its 4:3 cut and fills the column it stands in. */
+.llb-ort .llb-karte { margin: 0 0 6px; max-width: none; }
+.llb-ort .llb-karte img { width: 100%; height: auto; }
+.llb-ort .llb-hinweis { margin-block: 6px; }
+.llb-ort .llb-aktionen { margin-block: 6px 0; }
+
+/* The quiet second row: route and resource occurrences beside the main action. */
+.llb-ort-neben {
+	display: flex; flex-wrap: wrap; gap: 2px 12px;
+	margin-block: 6px 0;
+	font-size: var(--text-bedienung);
+}
+
+/* --- several places with one map ----------------------------------------- */
+
+/* One map beside the list, and the map gets the larger share: a 320 px cut was
+ * too small to recognise the spot it points at. The list keeps its own scroll
+ * field so the picture stays in view while the visitor walks down the places. */
+.llb-ort-wahl {
+	display: grid;
+	grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+	gap: 18px;
+	align-items: start;
+}
+
+.llb-ort-wahl .llb-karte { margin: 0; max-width: none; }
+
+@media (max-width: 900px) {
+	.llb-ort-wahl { grid-template-columns: 1fr; }
+}
+
+.llb-ort-wahl-liste,
+.katalog-abschnitt ul.llb-ort-wahl-liste {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	border-top: 1px solid var(--rand);
+	/* A long list scrolls in its own field: the picture beside it stays in
+	   view, so a row far down still shows its map when clicked. */
+	max-height: 58vh;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
+.llb-ort-wahl-liste li {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border-bottom: 1px solid var(--rand);
+	padding: 0 6px 0 8px;
+}
+
+.llb-ort-wahl-liste li.ist-aktiv {
+	box-shadow: inset 3px 0 0 var(--gold);
+}
+
+.ort-zeile {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 8px 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.ort-zeile:hover .ort-name,
+.ort-zeile:focus-visible .ort-name {
+	text-decoration: underline;
+}
+/* A place without a map image is only named, not offered: it must not look
+   clickable. */
+.ort-zeile-fest { cursor: default; }
+.ort-zeile-fest:hover .ort-name { text-decoration: none; }
+
+.ort-name {
+	color: var(--zeile-titel, var(--text));
+	overflow-wrap: anywhere;
+}
+
+.ort-meta {
+	color: var(--schwach);
+	font-size: var(--text-klein);
+}
+
+.ort-aktionen {
+	display: flex;
+	gap: 10px;
+	font-size: var(--text-klein);
+	white-space: nowrap;
+}
+
+.ort-aktionen a {
+	color: var(--text-bedienung);
+}
+
+@media (max-width: 760px) {
+	.ort-aktionen { flex-direction: column; gap: 2px; }
+}
+
+/* --- the compact "Wo" of a source list ------------------------------------ */
+
+/* A source row names its places without a map: name, chain, coordinates and
+ * the same two actions. The map belongs to the detail pages, where the place
+ * is the subject. */
+.wo-liste { margin: 6px 0 0; }
+.wo-liste > summary {
+	cursor: pointer; color: var(--gold);
+	font-size: var(--text-bedienung); list-style-position: inside;
+}
+.wo-liste .wo-orte { margin: 4px 0 0; padding-left: 0; list-style: none; }
+.wo-liste .wo-ort { margin: 6px 0; }
+.wo-ort-name { display: block; color: var(--zeile-titel, var(--text)); }
+.wo-ort-meta { display: block; color: var(--schwach); font-size: var(--text-klein); }
+.wo-ort-aktionen { display: flex; gap: 10px; font-size: var(--text-klein); }
+.wo-ort-aktionen a { color: var(--text-bedienung); }
+@media (max-width: 700px) {
+	.wo-ort-aktionen { flex-direction: column; gap: 2px; }
+}

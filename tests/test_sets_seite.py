@@ -108,17 +108,17 @@ class SetPageTest(unittest.TestCase):
 
     def test_piece_without_item_data_keeps_its_link(self):
         html = self.render('/de/set/%s/' % SET_ID)
-        self.assertEqual(html.count('<article class="set-card'), 3)
-        # The complete piece keeps icon, rarity class and values.
-        self.assertIn('<a class="q4" href="/de/gegenstand/7006D9C1/">', html)
+        self.assertEqual(html.count('<li class="mql-row'), 3)
+        # The complete piece keeps its icon and stays a link.
+        self.assertIn('<a class="mql-row-hit" href="/de/gegenstand/7006D9C1/">', html)
         self.assertIn('/bild/items/1234.webp', html)
-        # A piece with an item page but without data stays a link, no invented
-        # rarity colour and no values.
+        # A piece with an item page but without data stays a link, without an
+        # invented icon or values.
         row = html.split('Shagâni-Buch des verhüllenden Sandes')[0]
-        self.assertIn('<a href="/de/gegenstand/7006D9C2/">', row)
-        self.assertNotIn('class=""', row)
+        self.assertIn('<a class="mql-row-hit" href="/de/gegenstand/7006D9C2/">', row)
+        self.assertNotIn('/bild/items/', row.split('Armkette des Windsehers')[1])
         # A name without any item page stays plain text and counts its rows.
-        self.assertIn('Unbekanntes Teil <span class="set-card-count">· 2×</span>', html)
+        self.assertIn('Unbekanntes Teil</strong><small class="mql-row-meta">× 2</small>', html)
 
     def test_all_three_languages_render(self):
         for url in ('/de/set/%s/', '/en/set/%s/', '/fr/ensemble/%s/'):
@@ -129,7 +129,7 @@ class SetPageTest(unittest.TestCase):
     def test_set_head_carries_wear_requirements(self):
         """The chip in the set head is computed in the browser from `teile`."""
         html = self.render('/de/set/%s/' % SET_ID)
-        kopf = html.split('class="set-kopf"')[1].split('</p>')[0]
+        kopf = html.split('class="katalog-metazeile katalog-chips"')[1].split('</ul>')[0]
         self.assertIn('data-eignung-teile=', kopf)
         # Twig escapes the JSON for the attribute; the values stay readable.
         self.assertIn('120,', kopf)

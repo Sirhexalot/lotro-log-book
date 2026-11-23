@@ -4,7 +4,7 @@
    `t` in the reputation sources is a deed, not a title. The character's own
    standing stays in the browser; the page is static. #}
 {% block inhalt %}
-<article>{{ include('entity/_heading.twig') }}
+<article class="entity-detail-layout">{{ include('entity/_heading.twig') }}
 {% for absatz in page.paragraphs %}<p class="katalog-text">{{ absatz }}</p>{% endfor %}
 <p class="fraktion-ruf" id="fraktion-ruf" data-fraktion="{{ entity_id }}" data-stufe="{{ w.level }}" data-ruf="{{ w.reputation }}" hidden></p>
 {% if page.tiers %}<section><h2>{{ w.tiers }}</h2><ol class="katalog-stufen">{% for tier in page.tiers %}<li><b>{{ tier.nr }}</b> {{ tier.name }}</li>{% endfor %}</ol></section>{% endif %}

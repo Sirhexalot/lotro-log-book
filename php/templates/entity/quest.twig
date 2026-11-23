@@ -1,25 +1,37 @@
 {% extends 'layout.twig' %}
-{% import 'components/karte.twig' as karte %}
+{% import 'components/ort.twig' as ort %}
+{% import 'components/belohnungen.twig' as gaben %}
+{% import 'components/ziele.twig' as ziele %}
+{% import 'components/fakten.twig' as fakten %}
+{% import 'components/reiter.twig' as reiter %}
 
-{# Quest page: title with icon, chips, then description · place · where from ·
-   rewards · context. Objectives stay behind a closed <details>. #}
+{# Quest page: title, compact facts, then description · where from · rewards ·
+   objectives in the reading column and the place beside it. The relations are
+   tabs: what requires this quest, and the other quest connections. #}
 {% block inhalt %}
 <article class="katalog-detailraster entity-detail-layout quest-detail">
 {{ include('entity/_heading.twig') }}
 {% set area_name = page.area_trail|default([])|map(part => part.text)|join(' › ') %}
 {% set progress_chips = page.chips|default([])|filter(chip => chip != page.giver.text|default('') and chip != area_name and not (chip ends with (' ' ~ w.steps_label) or chip ends with (' ' ~ w.rewards))) %}
 {{ include('entity/_progress.twig') }}
+{% set giver_list = page.givers|default([]) %}
+{% if not giver_list and page.giver %}{% set giver_list = [page.giver] %}{% endif %}
+{% set herkunft_rows = [] %}
+{% if giver_list %}
+{% set giver_items = [] %}
+{% for eintrag in giver_list %}{% set giver_items = giver_items|merge([{'text': eintrag.text, 'url': eintrag.url}]) %}{% endfor %}
+{% set herkunft_rows = herkunft_rows|merge([{'label': w.giver, 'items': giver_items}]) %}
+{% endif %}
+{% if page.area_trail and not page.place.map_name|default('') %}
+{% set herkunft_rows = herkunft_rows|merge([{'label': w.area_label, 'items': page.area_trail}]) %}
+{% endif %}
+{% set has_requirements = page.requirements.level or page.requirements.all or page.requirements.one or page.requirements.extra %}
 {% set introductory_sections %}
 {% if page.description %}<section class="katalog-abschnitt llb-flaeche"><h2>{{ w.description }}</h2><p class="katalog-text">{{ page.description }}</p></section>{% endif %}
-{% set has_requirements = page.requirements.level or page.requirements.all or page.requirements.one or page.requirements.extra %}
-{% set show_area_trail = page.area_trail and not page.place.map_name|default('') %}
-{% if page.giver or show_area_trail or has_requirements %}
+{% if herkunft_rows or has_requirements %}
 <section class="quest-herkunft llb-flaeche" aria-labelledby="quest-herkunft">
 <h2 id="quest-herkunft">{{ w.where_from }}</h2>
-{% if page.giver or show_area_trail %}<dl class="llb-fakten">
-{% if page.giver %}<dt>{{ w.giver }}</dt><dd><a href="{{ page.giver.url }}">{{ page.giver.text }}</a></dd>{% endif %}
-{% if show_area_trail %}<dt>{{ w.area_label }}</dt><dd>{% for part in page.area_trail %}{% if not loop.first %} › {% endif %}{% if part.url %}<a href="{{ part.url }}">{{ part.text }}</a>{% else %}{{ part.text }}{% endif %}{% endfor %}</dd>{% endif %}
-</dl>{% endif %}
+{% if herkunft_rows %}{{ fakten.liste(herkunft_rows) }}{% endif %}
 {% if has_requirements %}<h3>{{ w.requirements }}</h3><ul>
 {% if page.requirements.level %}<li>{{ w.level }} {{ page.requirements.level }}</li>{% endif %}
 {% if page.requirements.all %}<li>{% for entry in page.requirements.all %}{% if not loop.first %} · {% endif %}<a href="{{ entry.url }}">{{ entry.text }}</a>{% endfor %}</li>{% endif %}
@@ -29,22 +41,38 @@
 </section>{% endif %}
 {% endset %}
 {% set place_panel %}
-{% if page.place %}<section class="quest-detail-ort llb-flaeche" aria-labelledby="quest-ort">
-<h2 id="quest-ort">{{ w.place }}</h2>
-{% if page.place.image %}{{ karte.karte(lang, page.place.image, page.place.map_link, page.place.pin_x, page.place.pin_y, '', false, w.map) }}{% endif %}
-{% if page.place.coords or page.place.map_name %}<p class="llb-hinweis">{% if page.place.map_name %}<a href="{{ page.place.area_url|default(page.place.map_url) }}">{{ page.place.map_name }}</a>{% endif %}{% if page.place.coords %}{% if page.place.map_name %} · {% endif %}{{ page.place.coords }}{% endif %}{% if page.place.points %} · {{ w.points_count|replace({'%s': page.place.points}) }}{% endif %}</p>{% endif %}
-<p class="llb-aktionen"><a href="{{ page.place.map_link }}" class="llb-knopf">{{ w.map }}</a></p>
-{% if page.place.travel_url or page.place.occurrences_url %}<p class="quest-ort-nebenlinks">{% if page.place.travel_url %}<a href="{{ page.place.travel_url }}">{{ w.route }}</a>{% endif %}{% if page.place.occurrences_url %}<a href="{{ page.place.occurrences_url }}">{{ w.occurrences }}</a>{% endif %}</p>{% endif %}
-</section>{% endif %}
+{% if page.place %}{{ ort.block(lang, page.place, {'map': w.map, 'route': w.route, 'occurrences': w.occurrences, 'points_count': w.points_count}, w.place) }}{% endif %}
 {% endset %}
 {% set reading_panel %}
 {{ introductory_sections }}
-{% import 'components/eignung.twig' as eignung %}
-{% if page.reward_groups %}<section class="katalog-abschnitt llb-flaeche" data-ton="hell"><h2>{{ w.rewards }}</h2><div class="katalog-gaben">{% for group in page.reward_groups %}<div class="katalog-geben"><div class="katalog-geben-art">{{ group.label }}</div>{% for item in group.items %}<div class="katalog-gabe"{{ eignung.attribute(item.eignung|default({})) }}>{% if item.icon %}<span class="mql-row-icon mql-row-icon-item" aria-hidden="true"><img src="/bild/items/{{ item.icon }}.webp" alt="" width="48" height="48" loading="lazy" decoding="async"></span>{% elseif item.symbol %}<span class="mql-row-icon mql-row-icon-entity" aria-hidden="true">{{ symbol(item.symbol)|raw }}</span>{% endif %}<span>{% if item.qty > 1 %}{{ item.qty }} × {% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}</span></div>{% endfor %}</div>{% endfor %}</div></section>{% endif %}
-{% if page.steps %}<details class="katalog-ziele llb-flaeche" data-nosnippet><summary>{{ w.objectives }}</summary><ol>{% for step in page.steps %}<li>{% for paragraph in step.paragraphs %}<p class="katalog-text">{{ paragraph }}</p>{% endfor %}<ul>{% for goal in step.objectives %}<li>{{ goal }}</li>{% endfor %}</ul></li>{% endfor %}</ol></details>{% endif %}
+{% if page.reward_groups %}<section class="katalog-abschnitt llb-flaeche" data-ton="hell"><h2>{{ w.rewards }}</h2>{{ gaben.gruppen(page.reward_groups, w.sure) }}</section>{% endif %}
+{{ ziele.ziele(w.objectives, page.steps) }}
 {% endset %}
 {{ include('entity/_detail_grid.twig') }}
-{% for group in related_lists|default([]) %}{% if group.fallback is defined %}<section class="katalog-abschnitt llb-flaeche"><h2>{{ {de: 'Aufgaben, die diese Aufgabe voraussetzen', en: 'Quests that require this quest', fr: 'Quêtes qui nécessitent cette quête'}[lang] }}</h2><ul data-quellen-liste>{% for entry in group.fallback %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul><ul class="related-results" data-filter-results hidden></ul></section>{% endif %}{% endfor %}
-{% if page.context_columns %}<section class="katalog-abschnitt llb-flaeche"><h2>{{ {de: 'Weitere Aufgabenbezüge', en: 'Other quest connections', fr: 'Autres liens entre quêtes'}[lang] }}</h2><div class="katalog-zwei">{% for column in page.context_columns %}<dl class="llb-fakten">{% for row in column %}<dt>{{ row.label }}</dt><dd>{% for item in row['items'] %}{% if not loop.first %}{{ row.separator }}{% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}{% endfor %}</dd>{% endfor %}</dl>{% endfor %}</div></section>{% endif %}
+
+{% set weitere_label = {de: 'Weitere Aufgabenbezüge', en: 'Other quest connections', fr: 'Autres liens entre quêtes'}[lang] %}
+{% set bezug_tabs = [] %}
+{% if page.related_quests|default([]) %}{% set bezug_tabs = bezug_tabs|merge([{'key': 'voraus', 'label': w.required_by, 'panel': 'bezug-panel-voraus', 'zahl': page.related_quests|length}]) %}{% endif %}
+{% if page.context_columns|default([]) %}{% set bezug_tabs = bezug_tabs|merge([{'key': 'weitere', 'label': weitere_label, 'panel': 'bezug-panel-weitere', 'zahl': page.context_columns|length}]) %}{% endif %}
+{% set hat_reiter = bezug_tabs|length > 1 %}
+{% if bezug_tabs %}{% if hat_reiter %}{# The bar ships hidden: without JavaScript every area stays readable. #}
+{{ reiter.reiter('bezug', w.qlabel, bezug_tabs, 'voraus', true) }}{% endif %}
+{% if page.related_quests|default([]) %}
+<section id="bezug-panel-voraus"{% if hat_reiter %} role="tabpanel" aria-labelledby="bezug-voraus" tabindex="0"{% else %} class="katalog-abschnitt llb-flaeche"{% endif %}>
+{% if not hat_reiter %}<h2>{{ w.required_by }}</h2>{% endif %}
+{% for group in related_lists|default([]) %}{% if group.fallback is defined %}
+<h3>{{ group.label|default(w.required_by) }}</h3>
+<ul data-quellen-liste>{% for entry in group.fallback %}<li><a href="{{ entry.url }}">{{ entry.text }}</a></li>{% endfor %}</ul>
+<ul class="related-results" data-filter-results hidden></ul>
+{% endif %}{% endfor %}
+</section>
+{% endif %}
+{% if page.context_columns|default([]) %}
+<section id="bezug-panel-weitere"{% if hat_reiter %} role="tabpanel" aria-labelledby="bezug-weitere" tabindex="0"{% else %} class="katalog-abschnitt llb-flaeche"{% endif %}>
+{% if not hat_reiter %}<h2>{{ weitere_label }}</h2>{% endif %}
+<div class="katalog-zwei">{% for column in page.context_columns %}{{ fakten.liste(column) }}{% endfor %}</div>
+</section>
+{% endif %}
+{% endif %}
 </article>
 {% endblock %}

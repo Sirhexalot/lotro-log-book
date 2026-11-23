@@ -33,23 +33,23 @@ j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNo
 	<p class="import-statistik" data-statistik-importe hidden></p>
 	<div class="ablage" id="ablage">
 		<input id="ordner" type="file" webkitdirectory directory multiple hidden>
-		<button type="button" class="knopf-gold" id="ordner-waehlen" data-t="sp_ordner_waehlen">Companion-Ordner auswählen</button>
+		<button type="button" class="llb-knopf" data-art="rand" data-groesse="gross" id="ordner-waehlen" data-t="sp_ordner_waehlen">Companion-Ordner auswählen</button>
 		<p class="schwach" data-t="sp_ablage">Oder den Ordner „characters“ hierher ziehen</p>
 	</div>
 	<p class="meldung" id="meldung" role="status"></p>
 	<p data-t-html="sp_hilfe_companion"></p>
 	<details class="import-ordnerhilfe">
 		<summary data-t="sp_ordner_hilfe">Wo finde ich den Ordner?</summary>
-		<p data-t="sp_laden"></p>
-		<div class="reiter" role="tablist">
-			<button type="button" data-reiter="windows" aria-pressed="true">Windows</button>
-			<button type="button" data-reiter="mac" aria-pressed="false">macOS</button>
+		<p data-t-html="sp_laden"></p>
+		<div class="llb-reiter" role="tablist" aria-label="Betriebssystem">
+			<button type="button" role="tab" id="ordner-windows" aria-controls="ordner-panel-windows" aria-selected="true" tabindex="0" data-reiter-knopf="windows">Windows</button>
+			<button type="button" role="tab" id="ordner-mac" aria-controls="ordner-panel-mac" aria-selected="false" tabindex="-1" data-reiter-knopf="mac">macOS</button>
 		</div>
-		<div data-inhalt="windows">
+		<div id="ordner-panel-windows" role="tabpanel" aria-labelledby="ordner-windows">
 			<p data-t="sp_ordner_windows"></p>
 			<code>%USERPROFILE%\.lotrocompanion\data\characters</code>
 		</div>
-		<div data-inhalt="mac" hidden>
+		<div id="ordner-panel-mac" role="tabpanel" aria-labelledby="ordner-mac" hidden>
 			<p data-t="sp_ordner_mac"></p>
 			<code>~/Applications/The Lord of the Rings Online.app/Contents/SharedSupport/prefix/drive_c/users/Wineskin/.lotrocompanion/data/characters</code>
 		</div>

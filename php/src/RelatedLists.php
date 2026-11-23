@@ -21,6 +21,14 @@ final class RelatedLists
         foreach ($page['related_quests'] ?? [] as $id) {
             $ids['q'][] = (string) $id;
         }
+        // Deeds carry their context in two groups (same area, same category)
+        // so the page can offer them as tabs. Older models name one list.
+        foreach ($page['related_area'] ?? [] as $id) {
+            $ids['d_area'][] = (string) $id;
+        }
+        foreach ($page['related_kind'] ?? [] as $id) {
+            $ids['d_kind'][] = (string) $id;
+        }
         foreach ($page['related_deeds'] ?? [] as $id) {
             $ids['d'][] = (string) $id;
         }
@@ -63,6 +71,22 @@ final class RelatedLists
                 static fn (array $entry): string => (string) ($entry['id'] ?? ''),
                 $page['barter_sources']
             );
+        }
+        if ($kind === 'recipe') {
+            // A recipe names its provenance in two groups. The ids they carry
+            // are exactly the rows the two filter lists show, so neither list
+            // has to parse a URL or mix barter into the vendor rows.
+            $ids['vendor'] = [];
+            $ids['barter'] = [];
+            foreach ($page['source_groups'] ?? [] as $group) {
+                $type = ($group['art'] ?? '') === 'barter' ? 'barter' : 'vendor';
+                foreach ($group['entries'] ?? [] as $entry) {
+                    if (($entry['id'] ?? '') !== '') {
+                        $ids[$type][] = (string) $entry['id'];
+                    }
+                }
+            }
+            $ids = array_filter($ids);
         }
         $lists = [];
         foreach ($ids as $type => $members) {
@@ -130,18 +154,30 @@ final class RelatedLists
                 }
                 continue;
             }
-            $shard = in_array($type, ['recipe', 'recipe_made'], true) ? 'recipe' : 'filter-' . $type;
+            $shard = in_array($type, ['recipe', 'recipe_made'], true) ? 'recipe'
+                : (in_array($type, ['d_area', 'd_kind'], true) ? 'filter-d' : 'filter-' . $type);
             $rows = $this->data->relationRows($this->lang, $shard, $members);
             if (!$rows) { continue; }
+            // The two deed groups render and filter exactly like a deed list;
+            // only the tab label differs, so the row adapter gets 'd'.
             $lists[$type] = ['rows' => $rows];
+            if (in_array($type, ['d_area', 'd_kind'], true)) {
+                $lists[$type]['kind'] = 'd';
+                $lists[$type]['label'] = (string) ($page[
+                    $type === 'd_area' ? 'related_area_label' : 'related_kind_label'] ?? '');
+            }
             // Server-rendered fallback: the same names and addresses, so the
             // page works without JavaScript and Twig need not repeat them.
-            if ($this->catalogue !== null && in_array($type, ['q', 'd'], true)) {
+            if ($this->catalogue !== null && in_array($type, ['q', 'd', 'd_area', 'd_kind'], true)) {
                 $lists[$type]['fallback'] = array_map(fn (array $row): array => [
-                    'url' => $this->catalogue->route($this->lang, $type, (string) $row['id']),
+                    'url' => $this->catalogue->route($this->lang,
+                        in_array($type, ['d_area', 'd_kind'], true) ? 'd' : $type,
+                        (string) $row['id']),
                     'text' => (string) ($row['name'] ?? $row['id']),
                 ], $rows);
-                $lists[$type]['label'] = (string) ($page['related_label'] ?? '');
+                if (!isset($lists[$type]['label'])) {
+                    $lists[$type]['label'] = (string) ($page['related_label'] ?? '');
+                }
             }
             if ($type === 'i') {
                 $lists[$type]['index'] = $this->data->itemFilterLabels($this->lang) + ['e' => $rows];

@@ -5,11 +5,19 @@
  * catalogue. The relation itself is never a filter the user can clear. */
 (function () {
 	'use strict';
+	// A page may ship a tab bar for its own areas (the quest's relations).
+	// It is the same component; mounting it here keeps every page from
+	// loading a script of its own just for one bar.
+	// Pages that ship their own tab bar mount it in their own script (quest and
+	// title here, set in sets.js, instance in instanz-detail.js), so no page
+	// needs the relation-list scripts just for one bar.
+	document.querySelectorAll('.quest-detail > .llb-reiter, .title-detail > .llb-reiter')
+		.forEach(function(leiste){ if(window.MQL_REITER){window.MQL_REITER.mount(leiste,{hash:false});} });
 	var dataNode=document.getElementById('related-lists');if(!dataNode){return;}
 	var lists=JSON.parse(dataNode.textContent),lang=document.documentElement.lang;
-	var labels={de:{q:'Aufgaben',d:'Taten',i:'Gegenstände',recipe:'Rezepte',recipe_made:'Herstellung',vendor:'Händler'},en:{q:'Quests',d:'Deeds',i:'Items',recipe:'Recipes',recipe_made:'Crafting',vendor:'Vendors'},fr:{q:'Quêtes',d:'Prouesses',i:'Objets',recipe:'Recettes',recipe_made:'Fabrication',vendor:'Marchands'}}[lang];
+	var labels={de:{q:'Aufgaben',d:'Taten',d_area:'Gleiches Gebiet',d_kind:'Gleiche Kategorie',i:'Gegenstände',recipe:'Rezepte',recipe_made:'Herstellung',vendor:'Händler'},en:{q:'Quests',d:'Deeds',d_area:'Same area',d_kind:'Same category',i:'Items',recipe:'Recipes',recipe_made:'Crafting',vendor:'Vendors'},fr:{q:'Quêtes',d:'Prouesses',d_area:'Même zone',d_kind:'Même catégorie',i:'Objets',recipe:'Recettes',recipe_made:'Fabrication',vendor:'Marchands'}}[lang];
 	// Owner first, then what it awards or consumes; never the JSON key order.
-	var ORDER=['q','d','i','recipe','recipe_made','vendor'];
+	var ORDER=['q','d','d_area','d_kind','i','recipe','recipe_made','vendor'];
 	var area=document.getElementById('gebiet-buehne');
 	var source=document.querySelector('[data-quellen-liste]');
 	var host=area||(source&&source.closest('section'))||document.querySelector('.giver-quests');
@@ -19,10 +27,13 @@
 	var hasPanel=!!host;
 	var filterLimit=Number((document.querySelector('.katalog-inhalt')||document.body).getAttribute('data-related-filter-limit'))||5;
 	var needsFilter=function(count){return count>filterLimit;};
+	// A group may say how many entries it carries. Its list then decides by the
+	// page's own count, not by how many rows the index happens to deliver.
+	var groupCount=function(node,rows){var own=Number(node.getAttribute('data-group-count'));return own>0?own:rows;};
 	window.MQL_RELATED_FILTER_LIMIT=filterLimit;
 	window.MQL_RELATED_NEEDS_FILTER=needsFilter;
 	var controller=null,active='',queue=Promise.resolve();
-	var types=Object.keys(lists).filter(function(k){return ORDER.includes(k)&&k!=='vendor'&&k!=='recipe_made'&&(!isItem||(k!=='q'&&k!=='d'));})
+	var types=Object.keys(lists).filter(function(k){return ORDER.includes(k)&&k!=='vendor'&&k!=='recipe_made'&&(!isItem||(k!=='q'&&k!=='d'&&k!=='d_area'&&k!=='d_kind'));})
 		.sort(function(a,b){return ORDER.indexOf(a)-ORDER.indexOf(b);});
 	active=types[0]||'';
 	// The tab panel exists only where a relation list has a host section.
@@ -197,11 +208,15 @@
 			root.replaceChildren();
 			var target=document.createElement(active==='recipe'?'div':'ul');
 			target.className='related-results';target.dataset.filterResults='';root.appendChild(target);
+			// A list may name the row adapter it renders with: the two deed
+			// groups filter and read exactly like a deed list, only their tab
+			// key and label differ.
+			var art=lists[active].kind||active;
 			var setup=active==='recipe'
 				? window.MQL_RECIPE_FILTER.create({rows:lists.recipe.rows,area:'context',renderer:window.MQL_RECIPE_CONTEXT_RESULTS})
 				: active==='i' ? window.MQL_ITEM_FILTER_SETUP(lists.i.index,{area:'context'})
 				: active==='vendor' ? vendorSetup(lists.vendor.rows)
-				: window.MQL_TASK_FILTER_SETUP(lists[active].rows,active);
+				: window.MQL_TASK_FILTER_SETUP(lists[active].rows,art);
 			if(types.length>1){root.setAttribute('aria-labelledby','related-tab-'+active);}
 			setup=contextual(setup,active);
 			if(!needsFilter(lists[active].rows.length)){
@@ -239,7 +254,7 @@
 	});
 	if(lists.vendor){
 		var vendorGroup=document.querySelector('[data-vendor-filter-group]');
-		if(vendorGroup&&needsFilter(lists.vendor.rows.length)){
+		if(vendorGroup&&needsFilter(groupCount(vendorGroup,lists.vendor.rows.length))){
 			var vendorFallback=document.createElement('div');vendorFallback.dataset.filterFallback='';
 			Array.from(vendorGroup.children).forEach(function(n){if(n.tagName!=='H3'){vendorFallback.appendChild(n);}});
 			vendorGroup.appendChild(vendorFallback);
@@ -251,7 +266,7 @@
 	}
 	if(lists.barter){
 		var barterGroup=document.querySelector('[data-barter-filter-group]');
-		if(barterGroup&&needsFilter(lists.barter.rows.length)){
+		if(barterGroup&&needsFilter(groupCount(barterGroup,lists.barter.rows.length))){
 			var barterFallback=document.createElement('div');barterFallback.dataset.filterFallback='';
 			Array.from(barterGroup.children).forEach(function(n){if(n.tagName!=='H3'){barterFallback.appendChild(n);}});
 			barterGroup.appendChild(barterFallback);

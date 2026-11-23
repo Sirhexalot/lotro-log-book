@@ -37,7 +37,9 @@ class DarstellungIststandTest(unittest.TestCase):
         self.assertNotIn('data-dichte', read('web/app.js'))
         makro = read('php/templates/components/flaeche.twig')
         self.assertIn('{% macro flaeche(', makro)
-        self.assertIn('caller()', makro)
+        # Twig has no `call` tag: the content comes as one argument.
+        self.assertIn('{{ inhalt }}', makro)
+        self.assertNotIn('caller()', makro)
         # Loaded by the catalogue shell and by the map application.
         self.assertIn("assetTag('flaeche.css')", read('php/src/Shell.php'))
         self.assertIn('flaeche.css', read('php/templates/app/karte.twig'))
@@ -56,10 +58,12 @@ class DarstellungIststandTest(unittest.TestCase):
         self.assertIn("fakten.dataset.dichte = 'kompakt'", read('web/app.js'))
         self.assertIn("assetTag('fakten.css')", read('php/src/Shell.php'))
         self.assertIn('fakten.css', read('php/templates/app/karte.twig'))
+        # Pages call the macro; the grid itself lives in the component.
+        self.assertIn('llb-fakten', read('php/templates/components/fakten.twig'))
         for page in ('php/templates/entity/quest.twig', 'php/templates/entity/deed.twig',
                      'php/templates/entity/recipe.twig'):
             text = read(page)
-            self.assertIn('llb-fakten', text, page)
+            self.assertIn('fakten.liste(', text, page)
             self.assertNotIn('katalog-fakten', text, page)
         for page in ('web/katalog.css', 'web/style.css'):
             self.assertNotIn('.katalog-fakten', read(page), page)
@@ -151,12 +155,25 @@ class DarstellungIststandTest(unittest.TestCase):
         self.assertIn('{% macro karte(', makro)
         self.assertIn('llb-karte-pin', makro)
         self.assertIn("assetTag('karte.css')", read('php/src/Shell.php'))
+        # The place block is one component; it owns the map cut for every page.
+        ort = read('php/templates/components/ort.twig')
+        self.assertIn('karte.karte(', ort)
+        self.assertIn('llb-ort', ort)
+        self.assertIn('wo-liste', ort)
         for page in ('php/templates/entity/quest.twig', 'php/templates/entity/deed.twig',
-                     'php/templates/entity/landmarke.twig', 'php/templates/entity/area.twig',
-                     'php/templates/givers/detail.twig', 'php/templates/vendors/detail.twig'):
+                     'php/templates/givers/detail.twig'):
+            text = read(page)
+            self.assertIn('ort.', text, page)
+            self.assertNotIn('class="katalog-ort"', text, page)
+            self.assertNotIn('class="katalog-pin"', text, page)
+        # The vendor page takes its places from the same component.
+        self.assertIn('ort.wahl(', read('php/templates/vendors/detail.twig'))
+        # The landmark page takes its place from the shared place component.
+        self.assertIn('ort.block(', read('php/templates/entity/landmarke.twig'))
+        # The area and instance pages show a plain map, not a place cut.
+        for page in ('php/templates/entity/area.twig', 'php/templates/instances/detail.twig'):
             text = read(page)
             self.assertIn('karte.karte(', text, page)
-            self.assertNotIn('class="katalog-ort"', text, page)
             self.assertNotIn('class="katalog-pin"', text, page)
         for page in ('web/katalog.css', 'web/style.css'):
             text = read(page)
@@ -254,9 +271,12 @@ class DarstellungIststandTest(unittest.TestCase):
     def test_lists_use_one_separator_and_large_icons(self):
         css = read('web/filter-ui.css')
         self.assertIn('> li:is(.mql-row, .mql-row-heading) { border-bottom: 0; }', css)
-        quest = read('php/templates/entity/quest.twig')
-        self.assertIn('mql-row-icon mql-row-icon-item', quest)
-        self.assertIn('width="48"', quest)
+        # Reward rows are one component; the 48 px tile lives there now.
+        gaben = read('php/templates/components/belohnungen.twig')
+        self.assertIn('mql-row-icon mql-row-icon-item', gaben)
+        self.assertIn('width="48"', gaben)
+        for page in ('php/templates/entity/quest.twig', 'php/templates/entity/deed.twig'):
+            self.assertIn('gaben.gruppen(', read(page), page)
 
     def test_overview_jumps_and_cards_are_uniform(self):
         css = read('web/landschaft.css')

@@ -1,11 +1,48 @@
 {% extends 'layout.twig' %}
+{% import 'entity/_result_row.twig' as result %}
+{% import 'components/reiter.twig' as reiter %}
 
-{# Title or virtue page: the award sources and the limits of the catalogue. #}
+{# Title page: the title kind and the tasks that award it. No description and
+   no invented facts; a title without a source keeps its kind as the only
+   statement. The sources are tabs: what comes from quests, what from deeds. #}
 {% block inhalt %}
-<article>{{ include('entity/_heading.twig') }}
-{% if page.categories|default([]) %}<p class="katalog-metazeile">{% for kategorie in page.categories %}<span class="katalog-chip">{{ kategorie }}</span>{% if not loop.last %} {% endif %}{% endfor %}</p>{% endif %}
-{% if page.sources %}<section><h2>{{ w.sources }}</h2>
-<ul class="katalog-liste quellen-liste" data-quellen-liste>{% for source in page.sources %}<li{% if source.url %} data-url="{{ source.url }}"{% endif %}>{% if source.url %}<a href="{{ source.url }}">{{ source.text }}</a>{% else %}{{ source.text }}{% endif %}{% if source.extra %} · {{ source.extra }}{% endif %}</li>{% endfor %}</ul></section>{% endif %}
+<article class="title-detail entity-detail-layout">
+{{ include('entity/_heading.twig') }}
+{% if page.categories|default([]) %}<ul class="katalog-metazeile katalog-chips">{% for kategorie in page.categories %}<li class="katalog-chip">{{ kategorie }}</li>{% endfor %}</ul>{% endif %}
+
+{% set aus_aufgaben = page.sources|default([])|filter(quelle => quelle.kind|default('') == 'q') %}
+{% set aus_taten = page.sources|default([])|filter(quelle => quelle.kind|default('') == 'd') %}
+{% set andere = page.sources|default([])|filter(quelle => quelle.kind|default('') not in ['q', 'd']) %}
+{% set tabs = [] %}
+{% if aus_aufgaben %}{% set tabs = tabs|merge([{'key': 'aufgaben', 'label': w.qlist, 'panel': 'titel-panel-aufgaben', 'zahl': aus_aufgaben|length}]) %}{% endif %}
+{% if aus_taten %}{% set tabs = tabs|merge([{'key': 'taten', 'label': w.dlist, 'panel': 'titel-panel-taten', 'zahl': aus_taten|length}]) %}{% endif %}
+{% set mit_reitern = tabs|length > 1 %}
+
+{% if page.sources|default([]) %}
+{% if mit_reitern %}{{ reiter.reiter('titel', w.sources, tabs, (tabs|first).key, true) }}{% endif %}
+{% for gruppe in [{'key': 'aufgaben', 'zeilen': aus_aufgaben}, {'key': 'taten', 'zeilen': aus_taten}] %}
+{% if gruppe.zeilen %}
+<section id="titel-panel-{{ gruppe.key }}"{% if mit_reitern %} role="tabpanel" aria-labelledby="titel-{{ gruppe.key }}" tabindex="0"{% else %} class="katalog-abschnitt llb-flaeche"{% endif %}>
+{% if not mit_reitern %}<h2>{{ gruppe.key == 'aufgaben' ? w.qlist : w.dlist }}</h2>{% endif %}
+<ul class="mql-row-list">
+{{ result.heading(lang, w.level) }}
+{% for quelle in gruppe.zeilen %}
+{{ result.row(lang, quelle.url, quelle.text, quelle.extra|default(''), symbol(gruppe.key == 'aufgaben' ? 'aufgabe' : 'tat'), '', w.level, quelle.level|default('')) }}
+{% endfor %}
+</ul>
+</section>
+{% endif %}
+{% endfor %}
+{% if andere %}
+<section class="katalog-abschnitt llb-flaeche"><h2>{{ w.sources }}</h2>
+<ul class="mql-row-list">{% for quelle in andere %}{{ result.row(lang, quelle.url, quelle.text, quelle.extra|default('')) }}{% endfor %}</ul>
+</section>
+{% endif %}
+{% else %}
+<p class="llb-hinweis">{{ w.no_source }}</p>
+{% endif %}
+
 {% if page.ranked %}<p class="llb-hinweis">{{ w.ranked }}</p>{% endif %}
+{% if entity_filter_url|default('') %}<p class="llb-aktionen"><a href="{{ entity_filter_url }}">‹ {{ w.titlelist }}</a></p>{% endif %}
 </article>
 {% endblock %}

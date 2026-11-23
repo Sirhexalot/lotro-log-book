@@ -1,32 +1,34 @@
 {% extends 'layout.twig' %}
-{% import 'components/karte.twig' as karte %}
+{% import 'components/ort.twig' as ort %}
 {# Quest-giver page: who it is, where it stands, and every quest it gives.
    Completion comes from the imported character in the browser; the page works
    without one and then claims nothing about progress. #}
 {% block inhalt %}
-<article class="giver-detail">
+<article class="giver-detail entity-detail-layout">
 {% import 'entity/_header.twig' as heading %}
 {{ heading.detail(kind, lang, w, giver.name, icon, '', '', entity_filter_url|default(''), entity_filter_label|default('')) }}
-{% if giver.kind != 'unknown' or giver.title %}<p class="giver-art">{% if giver.kind != 'unknown' %}{{ attribute(kind_words, 'kind_' ~ giver.kind) }}{% endif %}{% if giver.title %}{% if giver.kind != 'unknown' %} · {% endif %}{{ giver.title }}{% endif %}</p>{% endif %}
+{% set art = giver.kind != 'unknown' ? attribute(kind_words, 'kind_' ~ giver.kind) : '' %}
+{% set stufen = giver.levels|default([]) %}
+{% set stufe_text = stufen|length > 1 ? (stufen[0] == stufen[1] ? gw.level_short ~ ' ' ~ stufen[0] : gw.level_short ~ ' ' ~ stufen[0] ~ '–' ~ stufen[1]) : (stufen|length == 1 ? gw.level_short ~ ' ' ~ stufen[0] : '') %}
+<ul class="katalog-metazeile katalog-chips">
+{% if art %}<li class="katalog-chip">{{ art }}</li>{% endif %}
+{% if giver.title %}<li class="katalog-chip">{{ giver.title }}</li>{% endif %}
+{% if stufe_text %}<li class="katalog-chip">{{ stufe_text }}</li>{% endif %}
+<li class="katalog-chip">{{ (giver.total == 1 ? gw.quests_one : gw.quests)|replace({'%s': giver.total}) }}</li>
+</ul>
 
-{% if giver.description %}<section class="katalog-abschnitt"><h2>{{ gw.background }}</h2><p class="katalog-text">{{ giver.description }}</p></section>{% endif %}
+{% if giver.description %}<section class="katalog-abschnitt llb-flaeche"><h2>{{ gw.background }}</h2><p class="katalog-text">{{ giver.description }}</p></section>{% endif %}
 
-{% if giver.greeting %}<details class="katalog-ziele giver-greeting"><summary>{{ gw.greeting }}</summary><p class="katalog-text">{{ giver.greeting }}</p></details>{% endif %}
+{% if giver.greeting %}<details class="katalog-ziele llb-flaeche giver-greeting"><summary>{{ gw.greeting }}</summary><p class="katalog-text">{{ giver.greeting }}</p></details>{% endif %}
 
-{% if giver.places %}<section class="katalog-abschnitt"><h2>{{ gw.places }}</h2>
-{% for place in giver.places %}
-    <div class="katalog-ort-flex">
-        {% if place.image %}{{ karte.karte(lang, place.image, place.map_url, place.pin_x, place.pin_y) }}{% endif %}
-        <div>
-            {% if place.chain %}<p class="llb-hinweis giver-weg">{% for part in place.chain %}{% if not loop.first %} › {% endif %}<a href="{{ part.url }}">{{ part.name }}</a>{% endfor %}</p>{% endif %}
-            {% if place.coords %}<p class="llb-hinweis">{{ place.coords }}</p>{% endif %}
-            <p class="llb-aktionen">{% if place.map_url %}<a href="{{ place.map_url }}" class="llb-knopf">{{ gw.map }}</a> {% endif %}<a href="{{ place.travel_url }}" class="katalog-link">{{ gw.route }}</a></p>
-        </div>
-    </div>
-{% endfor %}
+{% if giver.places %}<section class="katalog-abschnitt llb-flaeche"><h2>{{ gw.places }}</h2>
+{# The form follows the number of places: one place as a block, several as
+   the picker. #}
+{% if giver.places|length == 1 %}{{ ort.block(lang, giver.places|first, gw) }}
+{% else %}{{ ort.wahl(lang, giver.places, gw) }}{% endif %}
 </section>{% endif %}
 
-<section class="katalog-abschnitt giver-quests"
+<section class="katalog-abschnitt giver-quests llb-flaeche"
          data-done-label="{{ gw.done }}" data-open-label="{{ gw.open }}"
          data-progress="{{ gw.progress }}" data-unknown="{{ gw.progress_unknown }}"
          data-hide-label="{{ gw.hide_done }}">
@@ -45,12 +47,12 @@
     </ul>
 </section>
 
-{% if giver.same_name %}<section class="katalog-abschnitt giver-gleichnamig">
+{% if giver.same_name %}<section class="katalog-abschnitt giver-gleichnamig llb-flaeche">
     <h2>{{ gw.same_name }}</h2>
     <ul>{% for entry in giver.same_name[:12] %}<li><a href="{{ entry.url }}">{% if entry.place %}{{ entry.place }} · {% endif %}{{ (entry.count == 1 ? gw.quests_one : gw.quests)|replace({'%s': entry.count}) }}</a></li>{% endfor %}</ul>
     {% if giver.same_name|length > 12 %}<p><a href="{{ giver.same_name_url }}">{{ gw.same_name_all }}</a></p>{% endif %}
 </section>{% endif %}
 
-<p><a href="{{ list_url }}">‹ {{ gw.back }}</a></p>
+<p class="llb-aktionen"><a href="{{ list_url }}">‹ {{ gw.back }}</a></p>
 </article>
 {% endblock %}

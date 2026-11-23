@@ -62,11 +62,6 @@
 		return filters;
 	}
 
-	/* Eine Stufe, die nicht aus diesem Filter stammt (etwa „Ware für meine
-	   Stufe“ aus dem Spielstand), bleibt beim Filtern in der Adresse. Ohne sie
-	   würde jede Änderung den Filter stillschweigend aufheben. */
-	var stufeStart=Number(new URL(location.href).searchParams.get('stufe'))||null;
-
 	var inline=modelFrom(root), config;
 	if(inline && inline.definition){
 		var definition=inline.definition;
@@ -77,7 +72,6 @@
 			pagination:definition.pagination||{kind:'page',size:30},
 			defaults:function(){
 				var filters=defaultFilters(config.groups);
-				if(stufeStart){filters.stufe=stufeStart;}
 				var first=config.sort.standard||'name';
 				return {q:'',filters:filters,sort:first,
 					sortDir:((config.sort.ersteRichtung||{})[first])||'asc',
@@ -92,7 +86,6 @@
 			pagination:{kind:'page',size:30},
 			defaults:function(){
 				var filters=defaultFilters(config.groups);
-				if(stufeStart){filters.stufe=stufeStart;}
 				return {q:'',filters:filters,sort:'name',
 					sortDir:'asc',pagination:{kind:'page',page:1}};
 			}};
@@ -108,7 +101,6 @@
 		}
 	});
 	var fields=[{param:'q',path:['q']},{param:'page',path:['pagination','page'],type:'number',omit:1}];
-	if(stufeStart){fields.push({param:'stufe',path:['filters','stufe'],type:'number'});}
 	config.groups.forEach(function(g){
 		if(g.kind==='range'){
 			fields.push({param:g.paramMin,path:['filters',g.id,'min'],type:'number'},

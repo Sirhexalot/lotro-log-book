@@ -1,7 +1,13 @@
 {# One source group of an item page: chest loot, direct tasks or a plain list.
-   Included by both the "Woher" and the "Tauschhändler" panel. #}
+   Included by both the "Woher" and the "Tauschhändler" panel.
+
+   Every row uses the shared result row (`entity/_result_row.twig`), so a
+   source reads like every other catalogue list: 64/54 px tile, name, one line
+   of facts. A short source list keeps the compact "Wo" beside its row (name,
+   chain, coordinates, both actions, no map); a vendor row does not, because the
+   vendor page names its own place; a filtered list carries none. #}
 {% import 'entity/_result_row.twig' as result %}
-{% import 'components/wo_orte.twig' as wo %}
+{% import 'components/ort.twig' as ort %}
 {% if group.instance_chests|default(false) %}
 <section>
 <h3>{{ group.label }}</h3>
@@ -31,7 +37,45 @@
 </ul>
 </section>
 {% else %}
-<section{% if group.barter_filter|default(false) and group.entries|length > direct_list_max %} data-barter-filter-group{% elseif group.vendor_filter|default(false) and group.entries|length > direct_list_max %} data-vendor-filter-group{% elseif group.filter|default('') == 'recipes' and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-recipe-filter-group{% elseif group.filter|default('') and group.entries|length > direct_list_max and not group.source_kind|default('') %} data-item-filter-group{% endif %}>
+{% set gefiltert = group.entries|length > direct_list_max %}
+<section{% if group.barter_filter|default(false) and gefiltert %} data-barter-filter-group{% elseif group.vendor_filter|default(false) and gefiltert %} data-vendor-filter-group{% elseif group.filter|default('') == 'recipes' and gefiltert and not group.source_kind|default('') %} data-recipe-filter-group{% elseif group.filter|default('') and gefiltert and not group.source_kind|default('') %} data-item-filter-group{% endif %}>
 <h3>{{ group.label }}</h3>
-{% if group.source_kind|default('') and group.entries|length > direct_list_max %}<div class="questfinder item-task-filter" data-item-task-filter="{{ group.source_kind }}"><div data-item-task-fallback><ul>{% for entry in group.entries %}<li>{% if entry.url|default('') %}<a href="{{ entry.url }}">{{ entry.text }}</a>{% else %}{{ entry.text }}{% endif %}{% if entry.extra|default('') %} · {{ entry.extra }}{% endif %}</li>{% endfor %}</ul></div><ul class="finder-ergebnisse" data-filter-results hidden></ul></div>{% else %}{% if group.filter|default('') and group.filter != 'recipes' and group.entries|length > direct_list_max %}<p class="katalog-detail-filter"><label>{{ w.search }} <input type="search" data-item-filter-search></label>{% if group.filter|default('') == 'recipes' %}<label><select data-item-filter-role><option value="">{{ w.all }}</option><option value="{{ w.regular_result }}">{{ w.regular_result }}</option><option value="{{ w.critical_result }}">{{ w.critical_result }}</option></select></label>{% endif %}</p>{% endif %}<ul>{% for entry in group.entries %}<li{% if group.filter|default('') and group.entries|length > direct_list_max %} data-item-filter-row{% endif %}{% if entry.role|default('') %} data-role="{{ entry.role }}"{% endif %}>{% if entry.places is defined %}<strong>{{ entry.text }}</strong>{% if entry.extra|default('') %} <span class="katalog-gabe-art">{{ entry.extra }}</span>{% endif %}<br><span class="schwach">{% for place in entry.places %}{% if not loop.first %}, {% endif %}<a href="{{ place.url }}">{{ place.name }}</a> ({{ place.count }}){% endfor %}</span>{% else %}{% if entry.url|default('') %}<a href="{{ entry.url }}">{{ entry.text }}</a>{% else %}{{ entry.text }}{% endif %}{% if group.filter|default('') == 'recipes' %}{% if entry.role|default('') and entry.role != w.regular_result %} · {{ entry.role }}{% endif %}{% else %}{% if entry.role|default('') %} · {{ entry.role }}{% endif %}{% if entry.quantity|default(0) %} · {{ w.quantity }}: {{ entry.quantity }}{% endif %}{% if entry.recipe_level|default(0) %} · {{ w.level }}: {{ entry.recipe_level }}{% endif %}{% if entry.result is defined and entry.result %} · {{ entry.result.name }}{% if entry.result.level %} ({{ w.level }} {{ entry.result.level }}){% endif %}{% endif %}{% endif %}{% if group.filter|default('') != 'recipes' %}{% if entry.other_result is defined and entry.other_result %} · {{ entry.other_result.name }}{% endif %}{% endif %}{% if entry.extra|default('') %} · {{ entry.extra }}{% endif %}{% endif %}{# A filtered list never carries "Wo": the places belong to the short source list. #}{{ group.entries|length <= direct_list_max ? wo.liste(lang, entry.map_places|default([]), gw) : '' }}</li>{% endfor %}</ul>{% endif %}
-</section>{% endif %}
+{% if group.source_kind|default('') and gefiltert %}
+<div class="questfinder item-task-filter" data-item-task-filter="{{ group.source_kind }}">
+<div data-item-task-fallback><ul class="mql-row-list">
+{% for entry in group.entries %}{{ result.row(lang, entry.url|default(''), entry.text, entry.extra|default(''), symbol(group.source_kind == 'q' ? 'aufgabe' : 'tat')) }}{% endfor %}
+</ul></div>
+<ul class="finder-ergebnisse" data-filter-results hidden></ul>
+</div>
+{% else %}
+{% if group.filter|default('') and group.filter != 'recipes' and gefiltert %}
+<p class="katalog-detail-filter"><label>{{ w.search }} <input type="search" data-item-filter-search></label>{% if group.filter|default('') == 'recipes' %}<label><select data-item-filter-role><option value="">{{ w.all }}</option><option value="{{ w.regular_result }}">{{ w.regular_result }}</option><option value="{{ w.critical_result }}">{{ w.critical_result }}</option></select></label>{% endif %}</p>
+{% endif %}
+<ul class="mql-row-list">
+{% for entry in group.entries %}
+{% if entry.places is defined %}
+{# A resource occurrence names the areas where it can stand; the areas stay
+   links, so they get their own quiet line under the name. #}
+{% set orte = [] %}
+{% for place in entry.places %}{% set orte = orte|merge(['<a href="' ~ place.url ~ '">' ~ place.name|e('html') ~ '</a> (' ~ place.count ~ ')']) %}{% endfor %}
+{{ result.row(lang, '', entry.text, entry.extra|default(''), symbol('vorkommen'), '', '', '', '', '', '', '', {}, '', orte|join(' · ')) }}
+{% else %}
+{% set teile = [] %}
+{% if group.filter|default('') == 'recipes' %}
+{% if entry.role|default('') and entry.role != w.regular_result %}{% set teile = teile|merge([entry.role]) %}{% endif %}
+{% else %}
+{% if entry.role|default('') %}{% set teile = teile|merge([entry.role]) %}{% endif %}
+{% if entry.quantity|default(0) %}{% set teile = teile|merge([w.quantity ~ ': ' ~ entry.quantity]) %}{% endif %}
+{% if entry.recipe_level|default(0) %}{% set teile = teile|merge([w.level ~ ': ' ~ entry.recipe_level]) %}{% endif %}
+{% endif %}
+{% if entry.result is defined and entry.result %}{% set teile = teile|merge([entry.result.name ~ (entry.result.level ? ' (' ~ w.level ~ ' ' ~ entry.result.level ~ ')' : '')]) %}{% endif %}
+{% if group.filter|default('') != 'recipes' and entry.other_result is defined and entry.other_result %}{% set teile = teile|merge([entry.other_result.name]) %}{% endif %}
+{% if entry.extra|default('') %}{% set teile = teile|merge([entry.extra]) %}{% endif %}
+{% set art = group.filter|default('') == 'recipes' ? 'rezept' : (group.vendor_filter|default(false) ? 'haendler' : 'gegenstand') %}
+{{ result.row(lang, entry.url|default(''), entry.text, teile|join(' · '), symbol(art), '', '', '', '', '', '', '', {}, (gefiltert ? 'data-item-filter-row data-role="' ~ (entry.role|default('')) ~ '"' : ''), (gefiltert or group.vendor_filter|default(false) ? '' : ort.quellen(lang, entry.map_places|default([]), gw))) }}
+{% endif %}
+{% endfor %}
+</ul>
+{% endif %}
+</section>
+{% endif %}

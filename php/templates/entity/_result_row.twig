@@ -13,10 +13,10 @@
 </li>
 {% endmacro %}
 
-{% macro row(lang, url, name, meta = '', icon = '', image = '', middle = '', value = '', progress = '', progress_kind = '', progress_id = '', value_url = '', name_eignung = {}) %}
+{% macro row(lang, url, name, meta = '', icon = '', image = '', middle = '', value = '', progress = '', progress_kind = '', progress_id = '', value_url = '', name_eignung = {}, attrs = '', detail = '') %}
 {# Twig gives macros only the imports declared inside their own body. #}
 {% import 'components/eignung.twig' as eignung %}
-<li class="mql-row{% if not middle %} mql-row-no-levels{% endif %}{% if not progress or progress_kind %} mql-row-no-progress{% endif %}"{% if progress_kind %} data-progress-kind="{{ progress_kind }}" data-progress-id="{{ progress_id }}"{% endif %}>
+<li class="mql-row{% if not middle %} mql-row-no-levels{% endif %}{% if not progress or progress_kind %} mql-row-no-progress{% endif %}"{% if progress_kind %} data-progress-kind="{{ progress_kind }}" data-progress-id="{{ progress_id }}"{% endif %}{% if attrs %} {{ attrs|raw }}{% endif %}>
     <{{ url ? 'a' : 'div' }} class="mql-row-hit"{% if url %} href="{{ url }}"{% endif %}>
         <span class="mql-row-icon{% if image %} mql-row-icon-item{% else %} mql-row-icon-entity{% endif %}">
             {% if image %}<img src="/bild/items/{{ image }}.webp" alt="" width="48" height="48" loading="lazy" decoding="async">
@@ -24,6 +24,7 @@
         </span>
         <span class="mql-row-body"><strong class="mql-row-name">{% if name_eignung|default({})|length %}<span class="mql-row-eignung"{{ eignung.attribute(name_eignung) }}></span>{% endif %}{{ name }}</strong>{% if meta %}<small class="mql-row-meta">{{ meta }}</small>{% endif %}</span>
     </{{ url ? 'a' : 'div' }}>
+    {% if detail %}<div class="mql-row-detail">{{ detail|raw }}</div>{% endif %}
     {% if middle %}<span class="mql-row-levels">{% if value %}<span class="mql-row-value"><span class="mql-row-value-label">{{ middle }}: </span>{% if value is iterable %}{% for line in value %}{% if not loop.first %}<br>{% endif %}{{ line }}{% endfor %}{% elseif value_url %}<a href="{{ value_url }}">{{ value }}</a>{% else %}<b>{{ value }}</b>{% endif %}</span>{% endif %}</span>{% endif %}
     {% if progress %}<span class="mql-row-progress">{{ progress|raw }}</span>{% endif %}
 </li>

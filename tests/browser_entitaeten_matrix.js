@@ -18,6 +18,18 @@ const { chromium } = require('playwright');
 const base = process.argv[2] || 'http://127.0.0.1:8817';
 const matrix = JSON.parse(fs.readFileSync(path.join(__dirname, 'entitaeten_matrix.json'), 'utf8'));
 
+/* The icon tile of the first row, measured once the list is laid out. A list
+ * that re-renders on resize replaces its rows, so the width is polled instead
+ * of read from a node that may already be detached. */
+async function iconBreite(page, selector) {
+	const handle = await page.waitForFunction((sel) => {
+		const el = document.querySelector(sel);
+		const w = el ? el.getBoundingClientRect().width : 0;
+		return w > 0 ? Math.round(w) : false;
+	}, selector, {timeout: 20000});
+	return handle.jsonValue();
+}
+
 async function listePruefen(page, entity, breite) {
 	const antwort = await page.goto(base + entity.list, { waitUntil: 'load' });
 	assert.equal(antwort.status(), 200, entity.kind + ' Liste');
@@ -31,15 +43,19 @@ async function listePruefen(page, entity, breite) {
 			unten: getComputedStyle(row).borderBottomWidth,
 		}));
 		assert.ok(!(rahmen.oben === '1px' && rahmen.unten === '1px'), entity.kind + ': doppelte Trennlinie');
-		const kachel = erste.locator('.mql-row-icon').first();
-		assert.equal(await kachel.count(), 1, entity.kind + ': Icon fehlt');
-		const box = await kachel.boundingBox();
-		assert.ok(box, entity.kind + ': Icon nicht sichtbar');
-		assert.equal(Math.round(box.width), breite > 700 ? 64 : 54, entity.kind + ': Icon-Größe');
+		const icon = await iconBreite(page, entity.row + ' .mql-row-icon');
+		assert.equal(icon, breite > 700 ? 64 : 54, entity.kind + ': Icon-Größe (' + breite + 'px)');
 		/* A header only exists where a row carries a value column. */
 		if (await page.locator('.mql-row-value').count()) {
 			assert.ok(await page.locator('.mql-row-heading').count() > 0, entity.kind + ': Spaltenkopf fehlt');
 		}
+	} else if (entity.row === '.gs-zeile') {
+		/* The shared table (since 23.11.2026): one row per entry, the head
+		 * names the columns, the icon keeps its 64/54 px tile. */
+		assert.ok(await page.locator('table.llb-tabelle thead th').count() > 0,
+			entity.kind + ': Spaltenkopf fehlt');
+		const icon = await iconBreite(page, entity.row + ' .mql-row-icon');
+		assert.equal(icon, breite > 700 ? 64 : 54, entity.kind + ': Icon-Größe (' + breite + 'px)');
 	}
 	assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false,
 		entity.kind + ': Liste läuft über (' + breite + 'px)');
@@ -114,6 +130,15 @@ async function detailPruefen(page, entity, breite) {
 	}
 	assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false,
 		entity.kind + ': Detail läuft über (' + breite + 'px)');
+	/* A page that ships relation IDs must also mount them; otherwise it loads
+	 * the relation scripts for nothing (a title or landmark page names its
+	 * quests itself and therefore carries no relation data). */
+	const beziehungen = await page.evaluate(() => ({
+		daten: !!document.getElementById('related-lists'),
+		gemountet: !!(window.MQL_RELATED_FILTER || document.querySelector('.related-results')),
+	}));
+	assert.ok(!(beziehungen.daten && !beziehungen.gemountet),
+		entity.kind + ': Beziehungsdaten ohne Liste (' + breite + 'px)');
 }
 
 (async () => {

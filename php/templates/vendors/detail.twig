@@ -1,8 +1,9 @@
 {% extends 'layout.twig' %}
 {% import 'components/karte.twig' as karte %}
 {% import 'components/reiter.twig' as reiter %}
+{% import 'components/ort.twig' as ort %}
 {% block inhalt %}
-<article class="giver-detail vendor-detail">
+<article class="giver-detail vendor-detail entity-detail-layout">
 {% import 'entity/_header.twig' as heading %}
 {{ heading.detail(kind, lang, w, vendor.name, icon, '', '', entity_filter_url|default(''), entity_filter_label|default('')) }}
 {% if vendor.title %}<p class="giver-art">{{ vendor.title }}</p>{% endif %}
@@ -17,19 +18,8 @@
 
 {% if hat_wo %}<section id="haendler-tab-wo" class="katalog-abschnitt vendor-places{% if not beide %} llb-flaeche{% endif %}"{% if beide %} role="tabpanel" aria-labelledby="haendler-wo" tabindex="0" hidden{% endif %}>
 <h2>{{ gw.places }}</h2>
-{% set erst = vendor.places|first %}
-<div class="vendor-ortsicht" data-ort-karte>
-{% if erst.image %}{{ karte.karte(lang, erst.image, '', erst.pin_x, erst.pin_y, '', false, '', '', 'vendor-karte-bild', 'vendor-karte-pin') }}{% endif %}
-<ul class="vendor-orte">
-{% for place in vendor.places %}<li{% if loop.first %} class="ist-aktiv"{% endif %}>
-<button type="button" class="ort-zeile" data-bild="{{ place.image }}" data-pin-x="{{ place.pin_x is not null ? place.pin_x|pin : '' }}" data-pin-y="{{ place.pin_y is not null ? place.pin_y|pin : '' }}">
-<span class="ort-name">{% if place.chain %}{% for part in place.chain %}{% if not loop.first %} › {% endif %}{{ part.name }}{% endfor %}{% else %}{{ vendor.name }}{% endif %}</span>
-{% if place.coords %}<span class="ort-meta">{{ place.coords }}</span>{% endif %}
-</button>
-<span class="ort-aktionen">{% if place.map_url %}<a href="{{ place.map_url }}">{{ gw.map }}</a>{% endif %}{% if place.travel_url %}<a href="{{ place.travel_url }}">{{ gw.route }}</a>{% endif %}</span>
-</li>{% endfor %}
-</ul>
-</div>
+{% if vendor.places|length == 1 %}{{ ort.block(lang, vendor.places|first, gw) }}
+{% else %}{{ ort.wahl(lang, vendor.places, gw) }}{% endif %}
 </section>{% endif %}
 
 {% if hat_was %}<section id="haendler-tab-was" class="katalog-abschnitt vendor-goods{% if not beide %} llb-flaeche{% endif %}"{% if beide %} role="tabpanel" aria-labelledby="haendler-was" tabindex="0"{% endif %}>
@@ -42,7 +32,7 @@
 {% if vendor.offer_total %}<h2>{{ gw.barter_offers }}</h2>
 <div class="vendor-barter" data-tausch-root data-filter-area="haendler-tausch">
 <div class="gs-ergebnis" data-filter-results><ul class="gs-ergebnis">
-{% set gezeigt = 0 %}{% for group in vendor.offers %}{% for offer in group.rows %}{% if gezeigt < 50 %}<li><a class="gs-zeile" href="{{ offer.receive[0].url }}"><span class="gs-name">{{ offer.receive[0].name }}</span><span class="gs-meta">{% for part in offer.give %}{% if not loop.first %} + {% endif %}{{ part.qty }} {{ part.text }}{% endfor %}</span></a></li>{% endif %}{% set gezeigt = gezeigt + 1 %}{% endfor %}{% endfor %}
+{% for group in vendor.offers %}{% for offer in group.rows %}<li><a class="gs-zeile" href="{{ offer.receive[0].url }}"><span class="gs-name">{{ offer.receive[0].name }}</span><span class="gs-meta">{% for part in offer.give %}{% if not loop.first %} + {% endif %}{{ part.qty }} {{ part.text }}{% endfor %}</span></a></li>{% endfor %}{% endfor %}
 </ul></div>
 <noscript><p class="llb-hinweis">{{ gw.barter_noscript }}</p></noscript>
 <script type="application/json" id="tausch-daten">{{ vendor.tausch|json_encode|raw }}</script>

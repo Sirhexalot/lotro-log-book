@@ -1,0 +1,13 @@
+{# Facts: label and value, the same grid on every entity page.
+
+   rows [{label, text, url, items}]
+     url    the whole value is one link
+     items  a list of {text, url} inside one value (a chain, a group of names)
+
+   Look lives in `web/fakten.css` (`dl.llb-fakten`). #}
+{% macro liste(rows) %}
+<dl class="llb-fakten">{% for row in rows %}
+<dt>{{ row.label }}</dt>
+<dd>{% if row.items is defined and row.items %}{% for item in row.items %}{% if not loop.first %}{{ row.separator|default(' · ') }}{% endif %}{% if item.url is defined and item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}{% endfor %}{% elseif row.url is defined and row.url %}<a href="{{ row.url }}">{{ row.text }}</a>{% else %}{{ row.text }}{% endif %}</dd>
+{% endfor %}</dl>
+{% endmacro %}

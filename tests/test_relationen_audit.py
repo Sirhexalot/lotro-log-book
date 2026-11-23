@@ -34,13 +34,22 @@ def where_groups(page: dict):
 @unittest.skipUnless((DATA / 'de' / 'page-d').is_dir(), 'PHP-Daten zuerst bauen')
 class OffeneLueckenTest(unittest.TestCase):
     def test_deed_context_is_a_complete_relation(self):
-        mit_kontext = [p for p in pages('d') if p.get('related_deeds')]
+        # Since 23.11.2026 the context travels as two groups (same area, same
+        # category) so the page can offer them as tabs. The union is the
+        # complete relation the old single list carried.
+        mit_kontext = [p for p in pages('d')
+                       if p.get('related_area') or p.get('related_kind')]
         self.assertGreater(len(mit_kontext), 0)
         for page in mit_kontext:
             self.assertNotIn('more_area', page, page.get('id'))
             self.assertNotIn('more_kind', page, page.get('id'))
-            self.assertTrue(page.get('related_label'), page.get('id'))
-        over = [p for p in mit_kontext if len(p['related_deeds']) > SCHWELLE]
+            self.assertTrue(page.get('related_area_label'), page.get('id'))
+            self.assertTrue(page.get('related_kind_label'), page.get('id'))
+            # A deed that stands in both lists counts once, under the area.
+            self.assertFalse(set(page.get('related_area') or [])
+                             & set(page.get('related_kind') or []), page.get('id'))
+        over = [p for p in mit_kontext
+                if len(p.get('related_area') or []) + len(p.get('related_kind') or []) > SCHWELLE]
         self.assertGreater(len(over), 0, 'Die Schwelle wird von keiner Tat mehr erreicht')
 
     def test_quest_required_by_is_a_list_not_a_reward(self):

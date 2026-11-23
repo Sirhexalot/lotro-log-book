@@ -1,19 +1,45 @@
 {% extends 'layout.twig' %}
-{% import 'components/karte.twig' as karte %}
+{% import 'components/ort.twig' as ort %}
+{% import 'entity/_result_row.twig' as result %}
 
 {# Landmark page: the spot on its map and the quests that lead there.
-   No category and no description: the client export leaves both empty. #}
+   The place is the shared place component; no category and no description,
+   because the client export leaves both empty. #}
 {% block inhalt %}
-<article>{{ include('entity/_heading.twig') }}
-{% if page.place.image %}
-<section class="katalog-abschnitt"><h2>{{ w.place }}</h2>
-{{ karte.karte(lang, page.place.image, '', page.place.pin_x, page.place.pin_y) }}
-<p class="llb-hinweis">{{ page.place.coords }}{% if page.place.map_name %} · {% if page.place.map_url %}<a href="{{ page.place.map_url }}">{{ page.place.map_name }}</a>{% else %}{{ page.place.map_name }}{% endif %}{% endif %}{% if page.place.region %} · <a href="{{ page.place.region.url }}">{{ page.place.region.text }}</a>{% endif %}</p>
-{% if page.place.map_name %}<p class="llb-aktionen"><a class="llb-knopf" data-art="rand" href="{{ page.map_link }}">{{ w.area_map }}</a></p>{% endif %}
-<p class="llb-aktionen"><a href="{{ page.map_link }}" class="llb-knopf">{{ w.map }}</a></p></section>
+<article class="landmark-detail entity-detail-layout">
+{{ include('entity/_heading.twig') }}
+{% set orte = page.place|default({}) %}
+{% set kette = [] %}
+{% for part in page.place_chain|default([]) %}
+{% set kette = kette|merge([{'name': part.text, 'url': part.url|default('')}]) %}
+{% endfor %}
+{% set ort_daten = {
+    'image': orte.image|default(''), 'pin_x': orte.pin_x|default(null), 'pin_y': orte.pin_y|default(null),
+    'map_name': page.place_name|default(orte.map_name|default('')), 'coords': orte.coords|default(''),
+    'map_url': orte.map_url|default(''), 'map_link': page.map_link|default(''),
+    'chain': kette
+} %}
+<ul class="katalog-metazeile katalog-chips">
+{% if orte.map_name|default('') %}<li class="katalog-chip">{{ orte.map_name }}</li>{% endif %}
+{% if orte.region|default({}) %}<li class="katalog-chip"><a href="{{ orte.region.url }}">{{ orte.region.text }}</a></li>{% endif %}
+{% if page.quests %}<li class="katalog-chip">{{ page.quests|length }} {{ w.qlist }}</li>{% endif %}
+</ul>
+
+{% if page.place_name or orte.coords or orte.map_name or orte.image %}
+{{ ort.block(lang, ort_daten, {'map': w.map, 'route': w.route, 'occurrences': w.occurrences, 'points_count': w.points_count}, w.place, page.map_link|default('')) }}
 {% endif %}
-{% if page.quests %}<section><h2>{{ w.landmark_here }}</h2>
-<ul class="katalog-liste quellen-liste" data-quellen-liste>{% for goal in page.quests %}<li data-kind="{{ goal.art }}" data-url="{{ goal.url }}"><a href="{{ goal.url }}">{{ goal.text }}</a></li>{% endfor %}</ul>
-</section>{% endif %}
+
+{% if page.quests %}
+<section class="katalog-abschnitt llb-flaeche"><h2>{{ w.landmark_here }}</h2>
+<ul class="mql-row-list" data-quellen-liste>
+{{ result.heading(lang, w.level) }}
+{% for ziel in page.quests %}
+{{ result.row(lang, ziel.url, ziel.text, '', symbol(ziel.art == 'q' ? 'aufgabe' : 'tat'), '', w.level, ziel.level|default('')) }}
+{% endfor %}
+</ul>
+</section>
+{% endif %}
+
+{% if entity_filter_url|default('') %}<p class="llb-aktionen"><a href="{{ entity_filter_url }}">‹ {{ w.llist }}</a></p>{% endif %}
 </article>
 {% endblock %}

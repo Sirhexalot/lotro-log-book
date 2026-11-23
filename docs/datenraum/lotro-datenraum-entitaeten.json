@@ -62,7 +62,109 @@
           "oberflaeche": "detail",
           "status": "direct"
         }
-      ]
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name, Weg zur Liste",
+            "komponente": "entity/_heading.twig + entity/_header.twig",
+            "quelle": [
+              "kind",
+              "icon",
+              "name"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "lage",
+            "titel": "Chips und Fortschritt",
+            "komponente": "entity/_progress.twig",
+            "quelle": [
+              "chips",
+              "id",
+              "kind"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "beschreibung",
+            "titel": "Beschreibung",
+            "komponente": "components/flaeche.twig",
+            "quelle": [
+              "description"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "description vorhanden"
+          },
+          {
+            "id": "woher",
+            "titel": "Auftraggeber (alle), Gebietspfad, Voraussetzungen",
+            "komponente": "components/fakten.twig",
+            "quelle": [
+              "givers",
+              "giver",
+              "area_trail",
+              "requirements"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "mindestens eine Angabe vorhanden"
+          },
+          {
+            "id": "belohnungen",
+            "titel": "Feste Gaben und Auswahl",
+            "komponente": "components/belohnungen.twig",
+            "quelle": [
+              "reward_groups"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "reward_groups vorhanden"
+          },
+          {
+            "id": "ziele",
+            "titel": "Ziele und Schritte, eingeklappt",
+            "komponente": "components/ziele.twig",
+            "quelle": [
+              "steps"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "steps vorhanden"
+          },
+          {
+            "id": "ort",
+            "titel": "Ort mit Karte, Koordinaten, Aktionen",
+            "komponente": "components/ort.twig",
+            "quelle": [
+              "place"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "place vorhanden"
+          },
+          {
+            "id": "bezug",
+            "titel": "Reiter: Wird vorausgesetzt von / Weitere Aufgabenbezüge",
+            "komponente": "components/reiter.twig + components/fakten.twig",
+            "quelle": [
+              "related_quests",
+              "context_columns"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "mindestens eine Relation vorhanden"
+          },
+          {
+            "id": "brotkrumen",
+            "titel": "Seitenpfad mit Kartenpfad",
+            "komponente": "php/src/Shell.php (crumbs)",
+            "quelle": [
+              "crumb_maps"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegter Kartenpfad"
+          }
+        ]
+      }
     },
     "d": {
       "name": "Tat",
@@ -102,7 +204,108 @@
           "oberflaeche": "detail",
           "status": "component"
         }
-      ]
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name, Weg zur Liste",
+            "komponente": "entity/_heading.twig + entity/_header.twig",
+            "quelle": [
+              "kind",
+              "icon",
+              "name"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "lage",
+            "titel": "Chips und Fortschritt",
+            "komponente": "entity/_progress.twig",
+            "quelle": [
+              "chips",
+              "id",
+              "kind"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "beschreibung",
+            "titel": "Beschreibung",
+            "komponente": "components/flaeche.twig",
+            "quelle": [
+              "description"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "description vorhanden"
+          },
+          {
+            "id": "woher",
+            "titel": "Tat-Art, Kategorie, Gebiet",
+            "komponente": "components/fakten.twig",
+            "quelle": [
+              "facts"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "belohnungen",
+            "titel": "Feste Gaben und Auswahl",
+            "komponente": "components/belohnungen.twig",
+            "quelle": [
+              "rewards_fixed",
+              "rewards_choice"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "mindestens eine Gabe vorhanden"
+          },
+          {
+            "id": "ziele",
+            "titel": "Ziele und Schritte, eingeklappt",
+            "komponente": "components/ziele.twig",
+            "quelle": [
+              "steps"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "steps vorhanden"
+          },
+          {
+            "id": "ort",
+            "titel": "Ort mit Karte, Koordinaten, Aktion",
+            "komponente": "components/ort.twig",
+            "quelle": [
+              "place",
+              "map_link"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "place vorhanden"
+          },
+          {
+            "id": "verwandte",
+            "titel": "Reiter: Gleiches Gebiet / Gleiche Kategorie",
+            "komponente": "web/entitaeten-listen.js (Reiter aus related-lists)",
+            "quelle": [
+              "related_area",
+              "related_kind"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "mindestens eine Gruppe vorhanden"
+          },
+          {
+            "id": "brotkrumen",
+            "titel": "Seitenpfad mit Kartenpfad",
+            "komponente": "php/src/Shell.php (crumbs)",
+            "quelle": [
+              "crumb_maps"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegter Kartenpfad"
+          }
+        ]
+      }
     },
     "i": {
       "name": "Gegenstand",
@@ -193,7 +396,114 @@
           "status": "open",
           "grund": "Quelle disenchantments.xml und Modell stehen; die Seite baut die Gruppe noch nicht."
         }
-      ]
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name, Einordnung, Weg zur Suche",
+            "komponente": "entity/_heading.twig + entity/_header.twig",
+            "quelle": [
+              "kind",
+              "name",
+              "eyebrow",
+              "icon",
+              "symbol"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "chips",
+            "titel": "Seltenheit, Stufe, Bindung, Eignung",
+            "komponente": "entity/item.twig",
+            "quelle": [
+              "chips"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "keine Wertefläche vorhanden"
+          },
+          {
+            "id": "beschreibung",
+            "titel": "Beschreibung",
+            "komponente": "components/flaeche.twig",
+            "quelle": [
+              "description"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "description vorhanden"
+          },
+          {
+            "id": "werte",
+            "titel": "Rüstung, Schaden, Boni, Skalierungshinweis",
+            "komponente": "entity/item.twig",
+            "quelle": [
+              "has_values",
+              "values",
+              "armour",
+              "bonuses",
+              "values_note",
+              "scale",
+              "required_class"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "has_values"
+          },
+          {
+            "id": "varianten",
+            "titel": "Gleicher Name, andere Stufe",
+            "komponente": "entity/item.twig",
+            "quelle": [
+              "variants"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "mehr als eine Variante"
+          },
+          {
+            "id": "set",
+            "titel": "Setteile und Setboni",
+            "komponente": "entity/item.twig",
+            "quelle": [
+              "set",
+              "set_links"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "Set belegt"
+          },
+          {
+            "id": "bezug",
+            "titel": "Reiter: Woher / Wofür / Tausch",
+            "komponente": "components/reiter.twig + entity/_item_group.twig",
+            "quelle": [
+              "where_groups",
+              "used_in",
+              "barter_sources"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "mindestens zwei Bereiche"
+          },
+          {
+            "id": "wo",
+            "titel": "Fundorte je Quelle, kompakt",
+            "komponente": "components/ort.twig",
+            "quelle": [
+              "where_groups[].entries[].map_places"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "Quelle mit belegten Orten"
+          },
+          {
+            "id": "suche",
+            "titel": "Gleicher Platz, gleiche Art",
+            "komponente": "components/flaeche.twig + components/knopf.css",
+            "quelle": [
+              "browse"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "browse vorhanden"
+          }
+        ]
+      }
     },
     "recipe": {
       "name": "Rezept",
@@ -236,7 +546,99 @@
           "oberflaeche": "detail",
           "status": "component"
         }
-      ]
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name, Weg zur Rezeptliste",
+            "komponente": "entity/_heading.twig + entity/_header.twig",
+            "quelle": [
+              "kind",
+              "name",
+              "symbol"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "einordnung",
+            "titel": "Beruf, Handwerksstufe, Kategorie, Stufe, Zeit",
+            "komponente": "components/fakten.twig",
+            "quelle": [
+              "profession",
+              "tier",
+              "category",
+              "level",
+              "time"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "zutaten",
+            "titel": "Zutaten",
+            "komponente": "components/flaeche.twig",
+            "quelle": [
+              "ingredients"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "optional",
+            "titel": "Optionale Zutaten mit Chance",
+            "komponente": "components/flaeche.twig",
+            "quelle": [
+              "optional"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "optional vorhanden"
+          },
+          {
+            "id": "ergebnisse",
+            "titel": "Alle Ergebnisvarianten",
+            "komponente": "components/flaeche.twig + components/eignung.twig",
+            "quelle": [
+              "results"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "results vorhanden"
+          },
+          {
+            "id": "kritisch",
+            "titel": "Kritisches Ergebnis als zweite Variante",
+            "komponente": "components/flaeche.twig",
+            "quelle": [
+              "critical",
+              "critical_id"
+            ],
+            "status": "bewusst-nicht",
+            "bedingung": "immer",
+            "grund": "Steht bereits als zweite Ergebnisvariante in results; ein eigenes Feld würde dieselbe Angabe doppelt zeigen."
+          },
+          {
+            "id": "quellen",
+            "titel": "Händler und Tauschhändler mit Wo",
+            "komponente": "components/ort.twig",
+            "quelle": [
+              "sources"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "sources vorhanden"
+          },
+          {
+            "id": "aktion",
+            "titel": "Weg zur Handwerksliste",
+            "komponente": "components/knopf.css",
+            "quelle": [
+              "craft_url"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          }
+        ]
+      }
     },
     "set": {
       "name": "Set",
@@ -267,7 +669,73 @@
           "status": "direct",
           "hinweis": "Setteile sind die Definition des Sets, keine Browsing-Relation. Teile ohne Item-Seite werden je Name zu einer gezaehlten Zeile zusammengefasst."
         }
-      ]
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name, Weg zur Liste",
+            "komponente": "entity/_header.twig",
+            "quelle": [
+              "name"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "lage",
+            "titel": "Teilezahl und Eignungs-Chip (Passt x von y)",
+            "komponente": "sets/detail.twig",
+            "quelle": [
+              "parts",
+              "teile"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "teile",
+            "titel": "Reiter Setteile: Ergebniszeilen mit Name, Einordnung und Stufe",
+            "komponente": "components/reiter.twig + entity/_result_row.twig",
+            "quelle": [
+              "members"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "boni",
+            "titel": "Reiter Setboni nach Schwelle",
+            "komponente": "components/reiter.twig",
+            "quelle": [
+              "bonuses"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "werte",
+            "titel": "Werte und Boni der einzelnen Teile",
+            "komponente": "—",
+            "quelle": [
+              "members[].card"
+            ],
+            "status": "bewusst-nicht",
+            "bedingung": "immer",
+            "grund": "Werte und Boni eines Teils stehen auf seiner Gegenstandsseite; die Set-Seite nennt nur Name, Einordnung und Stufe."
+          },
+          {
+            "id": "zurueck",
+            "titel": "Weg zur Set-Liste",
+            "komponente": "components/knopf.css",
+            "quelle": [
+              "list_url"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          }
+        ]
+      }
     },
     "giver": {
       "name": "Auftraggeber",
@@ -300,7 +768,107 @@
           "oberflaeche": "detail",
           "status": "component"
         }
-      ]
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name, Weg zur Übersicht",
+            "komponente": "entity/_header.twig",
+            "quelle": [
+              "kind",
+              "name"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "lage",
+            "titel": "Art, Titel, Stufenspanne, Aufgabenzahl",
+            "komponente": "givers/detail.twig",
+            "quelle": [
+              "kind",
+              "title",
+              "levels",
+              "total"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "beschreibung",
+            "titel": "Hintergrund",
+            "komponente": "components/flaeche.twig",
+            "quelle": [
+              "description"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "description vorhanden"
+          },
+          {
+            "id": "begruessung",
+            "titel": "Begrüßung, eingeklappt",
+            "komponente": "components/ziele.twig (Klappmuster)",
+            "quelle": [
+              "greeting"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "greeting vorhanden"
+          },
+          {
+            "id": "orte",
+            "titel": "Orte mit Karte, Kette, Koordinaten, Aktionen",
+            "komponente": "components/ort.twig",
+            "quelle": [
+              "places"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "places vorhanden"
+          },
+          {
+            "id": "aufgaben",
+            "titel": "Aufgaben mit Fortschritt, Suche, Ausblenden",
+            "komponente": "givers/detail.twig + web/auftraggeber.js",
+            "quelle": [
+              "quests",
+              "total"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "gleichnamige",
+            "titel": "Weitere Auftraggeber desselben Namens",
+            "komponente": "components/flaeche.twig",
+            "quelle": [
+              "same_name"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "same_name vorhanden"
+          },
+          {
+            "id": "geschlecht",
+            "titel": "Geschlecht des Auftraggebers",
+            "komponente": "—",
+            "quelle": [
+              "gender"
+            ],
+            "status": "bewusst-nicht",
+            "bedingung": "immer",
+            "grund": "Der Client liefert nur MALE/FEMALE, keinen Spieltext; ein Rohwert wäre Entwicklerjargon."
+          },
+          {
+            "id": "zurueck",
+            "titel": "Weg zurück zur Liste",
+            "komponente": "components/knopf.css",
+            "quelle": [
+              "list_url"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          }
+        ]
+      }
     },
     "vendor": {
       "name": "Haendler",
@@ -339,7 +907,65 @@
           "status": "open",
           "grund": "Quelle barters.xml und Modell stehen; die Händlerseite zeigt noch kein Tauschsortiment."
         }
-      ]
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name, Weg zur Übersicht",
+            "komponente": "entity/_header.twig",
+            "quelle": [
+              "kind",
+              "name",
+              "icon"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "lage",
+            "titel": "Händlerart, Titel",
+            "komponente": "vendors/detail.twig",
+            "quelle": [
+              "type_label",
+              "title"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "wo",
+            "titel": "Reiter Wo: Orte mit Karte und Ortswahl",
+            "komponente": "components/ort.twig (wahl) + components/reiter.twig",
+            "quelle": [
+              "places"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "places vorhanden"
+          },
+          {
+            "id": "was",
+            "titel": "Reiter Was: Warenangebot und Tauschware",
+            "komponente": "vendors/detail.twig + web/haendler-detail.js",
+            "quelle": [
+              "items",
+              "offers"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "Ware oder Tauschware vorhanden"
+          },
+          {
+            "id": "zurueck",
+            "titel": "Weg zurück zur Händlerliste",
+            "komponente": "components/knopf.css",
+            "quelle": [
+              "list_url"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          }
+        ]
+      }
     },
     "title": {
       "name": "Titel",
@@ -369,7 +995,72 @@
           "oberflaeche": "detail",
           "status": "component"
         }
-      ]
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name, Weg zur Liste",
+            "komponente": "entity/_heading.twig + entity/_header.twig",
+            "quelle": [
+              "kind",
+              "name"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "lage",
+            "titel": "Titelart als Chips",
+            "komponente": "entity/title.twig",
+            "quelle": [
+              "categories"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "categories vorhanden"
+          },
+          {
+            "id": "quellen",
+            "titel": "Reiter: Aus Aufgaben / Aus Taten, je Quelle eine Ergebniszeile mit Stufe",
+            "komponente": "components/reiter.twig + entity/_result_row.twig",
+            "quelle": [
+              "sources"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "mindestens eine Quelle"
+          },
+          {
+            "id": "ohne_quelle",
+            "titel": "Titelart statt leerer Quellenflaeche",
+            "komponente": "components/hinweis.css",
+            "quelle": [
+              "categories"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "keine Quelle"
+          },
+          {
+            "id": "rang",
+            "titel": "Hinweis auf Rang-Titel",
+            "komponente": "components/hinweis.css",
+            "quelle": [
+              "ranked"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "Name traegt RANG/NAME"
+          },
+          {
+            "id": "zurueck",
+            "titel": "Weg zur Titelliste",
+            "komponente": "components/knopf.css",
+            "quelle": [
+              "entity_filter_url"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          }
+        ]
+      }
     },
     "virtue": {
       "name": "Tugend",
@@ -455,7 +1146,66 @@
           "oberflaeche": "detail",
           "status": "component"
         }
-      ]
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name, Weg zur Liste",
+            "komponente": "entity/_heading.twig + entity/_header.twig",
+            "quelle": [
+              "kind",
+              "name"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "lage",
+            "titel": "Gebiet, Region, Anzahl Aufgaben als Chips",
+            "komponente": "entity/landmarke.twig",
+            "quelle": [
+              "place",
+              "quests"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "ort",
+            "titel": "Ortsblock mit Karte, Koordinaten, Aktionen",
+            "komponente": "components/ort.twig",
+            "quelle": [
+              "place",
+              "place_name",
+              "place_chain",
+              "map_link"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegter Ort"
+          },
+          {
+            "id": "aufgaben",
+            "titel": "Aufgaben an diesem Ort als Ergebniszeilen mit Stufe",
+            "komponente": "entity/_result_row.twig",
+            "quelle": [
+              "quests"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "quests vorhanden"
+          },
+          {
+            "id": "zurueck",
+            "titel": "Weg zur Landmarkenliste",
+            "komponente": "components/knopf.css",
+            "quelle": [
+              "entity_filter_url"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          }
+        ]
+      }
     },
     "area": {
       "name": "Gebiet",
@@ -486,7 +1236,65 @@
           "oberflaeche": "detail",
           "status": "component"
         }
-      ]
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name",
+            "komponente": "entity/_heading.twig + entity/_header.twig",
+            "quelle": [
+              "kind",
+              "name"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "lage",
+            "titel": "Anzahl Aufgaben, Taten und Gegenstaende als Chips",
+            "komponente": "entity/area.twig",
+            "quelle": [
+              "sections"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "karte",
+            "titel": "Grosse Gebietskarte mit Aktion",
+            "komponente": "components/karte.twig",
+            "quelle": [
+              "image",
+              "map_url"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "hierarchie",
+            "titel": "Region als Fakt, Untergebiete als Liste",
+            "komponente": "components/fakten.twig + entity/area.twig",
+            "quelle": [
+              "parent",
+              "children"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegt"
+          },
+          {
+            "id": "listen",
+            "titel": "Reiter Aufgaben / Taten / Gegenstaende mit Ergebniszeilen",
+            "komponente": "web/entitaeten-listen.js + entity/_result_row.twig",
+            "quelle": [
+              "sections",
+              "members"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "Inhalte vorhanden"
+          }
+        ]
+      }
     },
     "region": {
       "name": "Region",
@@ -515,7 +1323,235 @@
           "oberflaeche": "detail",
           "status": "component"
         }
-      ]
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name",
+            "komponente": "entity/_heading.twig + entity/_header.twig",
+            "quelle": [
+              "kind",
+              "name"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "lage",
+            "titel": "Anzahl Aufgaben, Taten und Gegenstaende als Chips",
+            "komponente": "entity/area.twig",
+            "quelle": [
+              "sections"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "karte",
+            "titel": "Regionskarte mit Aktion",
+            "komponente": "components/karte.twig",
+            "quelle": [
+              "image",
+              "map_url"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "gebiete",
+            "titel": "Untergebiete der Region",
+            "komponente": "entity/area.twig",
+            "quelle": [
+              "children"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "listen",
+            "titel": "Reiter Aufgaben / Taten / Gegenstaende mit Ergebniszeilen",
+            "komponente": "web/entitaeten-listen.js + entity/_result_row.twig",
+            "quelle": [
+              "sections",
+              "members"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "Inhalte vorhanden"
+          }
+        ]
+      }
+    },
+    "instance": {
+      "name": "Instanz",
+      "segmente": {
+        "de": "instanz",
+        "en": "instance",
+        "fr": "instance"
+      },
+      "zeilenfelder": [
+        "symbol",
+        "name",
+        "art",
+        "stufe"
+      ],
+      "filter": [
+        "art",
+        "stufe",
+        "gruppe",
+        "schwierigkeit"
+      ],
+      "relationen": [
+        "q",
+        "i"
+      ],
+      "fortschritt": false,
+      "listen": [
+        {
+          "id": "quests",
+          "label": "Aufgaben in dieser Instanz",
+          "oberflaeche": "detail",
+          "status": "component"
+        },
+        {
+          "id": "quest_rewards",
+          "label": "Belohnungen aus Aufgaben",
+          "oberflaeche": "detail",
+          "status": "component"
+        },
+        {
+          "id": "chest_loot",
+          "label": "Beute aus Truhen",
+          "oberflaeche": "detail",
+          "status": "component"
+        }
+      ],
+      "detailseiten": {
+        "abschnitte": [
+          {
+            "id": "kopf",
+            "titel": "Typ, Symbol, Name",
+            "komponente": "entity/_heading.twig + entity/_header.twig",
+            "quelle": [
+              "kind",
+              "name"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          },
+          {
+            "id": "lage",
+            "titel": "Chips: Art, Stufe, Spieler, Schwierigkeit",
+            "komponente": "instances/detail.twig",
+            "quelle": [
+              "cluster",
+              "facts"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegt"
+          },
+          {
+            "id": "geografie",
+            "titel": "Landschaft und Region als Faktenraster",
+            "komponente": "components/fakten.twig",
+            "quelle": [
+              "facts"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegt"
+          },
+          {
+            "id": "beschreibung",
+            "titel": "Beschreibung",
+            "komponente": "components/flaeche.twig",
+            "quelle": [
+              "description"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegt"
+          },
+          {
+            "id": "gegner",
+            "titel": "Bosse und Gegnergruppen, eingeklappt",
+            "komponente": "components/flaeche.twig + web/instanzen.css",
+            "quelle": [
+              "bosses",
+              "enemy_groups"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegt"
+          },
+          {
+            "id": "karte",
+            "titel": "Innenkarte",
+            "komponente": "components/karte.twig",
+            "quelle": [
+              "map"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegt"
+          },
+          {
+            "id": "aufgaben",
+            "titel": "Aufgaben in dieser Instanz",
+            "komponente": "components/reiter.twig + web/instanz-detail.js",
+            "quelle": [
+              "tasks"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegt"
+          },
+          {
+            "id": "belohnungen",
+            "titel": "Belohnungen aus Aufgaben",
+            "komponente": "components/reiter.twig + web/instanz-detail.js",
+            "quelle": [
+              "quest_rewards"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegt"
+          },
+          {
+            "id": "beute",
+            "titel": "Beute aus Truhen",
+            "komponente": "components/reiter.twig + web/instanz-detail.js",
+            "quelle": [
+              "chest_loot"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "belegt"
+          },
+          {
+            "id": "zurueck",
+            "titel": "Weg zur Instanzliste",
+            "komponente": "components/knopf.css",
+            "quelle": [
+              "list_url"
+            ],
+            "status": "umgesetzt",
+            "bedingung": "immer"
+          }
+        ]
+      }
     }
+  },
+  "detailseiten_regeln": {
+    "breite": "Entitätsseiten nutzen dieselbe Hülle wie der Kopf (--huelle). Nur Lesetext bleibt bei 68 Zeichen; Abschnitte und Tabellen laufen über die volle Hüllenbreite.",
+    "zonen": [
+      "kopf",
+      "lage",
+      "inhalt",
+      "beziehungen",
+      "abschluss"
+    ],
+    "tabs": "Reiter nur bei mindestens zwei Bereichen. Ein einzelner Bereich bleibt eine Fläche ohne Reiterleiste; die Leiste liefert immer components/reiter.twig.",
+    "keine_stillen_verluste": "Jedes Feld des Seitenmodells ist dargestellt oder in detailseiten.abschnitte als bewusst nicht dargestellt begründet.",
+    "komponenten": "Twig, CSS und nötiges JavaScript liegen beim Baustein: php/templates/components/<baustein>.twig und web/<baustein>.css. Seiten setzen ein, statt nachzubauen.",
+    "ohne_javascript": "Was in Reitern liegt, ist ohne JavaScript vollständig lesbar; die Leiste wird erst im Browser sichtbar.",
+    "orte": "Auf Detailseiten: ein Ort ist ein Ortsblock, ab zwei Orten die Ortswahl (eine Karte, eine Zeile je Ort); die Form folgt der Anzahl, nie der Seite. Eine kurze Quellenliste in Gegenstand oder Rezept nennt ihre Orte kompakt ohne Karte, eine gefilterte Liste trägt kein \"Wo\". Komponente: components/ort.twig + web/ort.css + web/ort.js."
+  },
+  "detailseiten_offen": {
+    "virtue": "Quellenliste steht auf der Seite; der Detailvertrag folgt mit der Umstellung.",
+    "f": "Beschreibung, Rufstufen und Quellen stehen auf der Seite; der Detailvertrag folgt mit der Umstellung."
   }
 }

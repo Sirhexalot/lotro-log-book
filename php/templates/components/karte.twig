@@ -4,15 +4,20 @@
  * The page decides the width (columns, flex rows) and whether a link wraps it.
  *
  * karte(lang, bild, link, pin_x, pin_y, klasse, gross, label, alt, bild_id, pin_id)
- *   bild    file name under /karten/<lang>/, .png or .webp
+ *   bild    file name under /karten/<lang>/, .png or .webp; a path starting
+ *           with "/" is used as it stands (interior maps live outside it)
  *   link    wraps the figure in a link to the map application
  *   pin     omitted for a map without a marked place
- *   gross   the large map at the top of an area page (640 px) */
-{% macro karte(lang, bild, link = '', pin_x = null, pin_y = null, klasse = '', gross = false, label = '', alt = '', bild_id = '', pin_id = '') %}
+ *   gross   the large map at the top of an area page (640 px)
+ *   form    "bild" for an illustration: whole picture, its own aspect ratio
+ *   breite, hoehe  real pixel size for an illustration
+ *   bild_attr, pin_attr  extra attributes for the place picker (data hooks) */
+{% macro karte(lang, bild, link = '', pin_x = null, pin_y = null, klasse = '', gross = false, label = '', alt = '', bild_id = '', pin_id = '', bild_attr = '', pin_attr = '', form = '', breite = null, hoehe = null) %}
+{% set pfad = bild starts with '/' ? bild : '/karten/' ~ lang ~ '/' ~ bild|replace({'.png': '.webp'}) %}
 {% if link %}<a class="katalog-ortlink" href="{{ link }}"{% if label %} aria-label="{{ label }}"{% endif %}>{% endif %}
-<figure class="llb-karte{{ klasse ? ' ' ~ klasse : '' }}"{% if gross %} data-groesse="gross"{% endif %}>
-<img{% if bild_id %} id="{{ bild_id }}"{% endif %} src="/karten/{{ lang }}/{{ bild|replace({'.png': '.webp'}) }}" alt="{{ alt }}" width="{{ gross ? 640 : 320 }}" height="{{ gross ? 480 : 240 }}" loading="lazy" decoding="async">
-{% if pin_x is not null and pin_y is not null %}<i{% if pin_id %} id="{{ pin_id }}"{% endif %} class="llb-karte-pin" style="left:{{ pin_x|pin }}%;top:{{ pin_y|pin }}%"></i>{% endif %}
+<figure class="llb-karte{{ klasse ? ' ' ~ klasse : '' }}"{% if gross %} data-groesse="gross"{% endif %}{% if form %} data-form="{{ form }}"{% endif %}>
+<img{% if bild_id %} id="{{ bild_id }}"{% endif %}{% if bild_attr %} {{ bild_attr|raw }}{% endif %} src="{{ pfad }}" alt="{{ alt }}" width="{{ breite|default(gross ? 640 : 320) }}" height="{{ hoehe|default(gross ? 480 : 240) }}" loading="lazy" decoding="async">
+{% if pin_x is not null and pin_y is not null %}<i{% if pin_id %} id="{{ pin_id }}"{% endif %}{% if pin_attr %} {{ pin_attr|raw }}{% endif %} class="llb-karte-pin" style="left:{{ pin_x|pin }}%;top:{{ pin_y|pin }}%"></i>{% endif %}
 </figure>
 {% if link %}</a>{% endif %}
 {% endmacro %}

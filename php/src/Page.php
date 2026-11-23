@@ -49,7 +49,12 @@ final class Page
         }
         $template = 'entity/' . self::templateFor($kind) . '.twig';
         $maps = $page['crumb_maps'] ?? $this->crumbMaps($page, $identifier);
-        $related = (new RelatedLists($this->data, $this->lang, $this->catalogue))->forPage($kind, $page);
+        // Only the pages that render the relation list component carry it. A
+        // title or landmark page names its quests and deeds itself, so shipping
+        // the IDs would load the relation scripts for nothing.
+        $related = in_array($kind, ['q', 'd', 'i', 'area', 'region'], true)
+            ? (new RelatedLists($this->data, $this->lang, $this->catalogue))->forPage($kind, $page)
+            : [];
 
         $context = [
             'lang' => $this->lang,

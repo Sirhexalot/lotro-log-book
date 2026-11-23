@@ -1,6 +1,7 @@
 # Interface rules
 
 - [Common building blocks](bausteine.md)
+- [Entity detail pages](entitaetsseiten.md)
 - [Embedded entity lists](entitaeten-listen.md)
 - [Common filter component](filter-komponente.md)
 - [Filter memory and sorting](filter-sortierung.md)

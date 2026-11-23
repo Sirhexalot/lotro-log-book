@@ -1,6 +1,11 @@
 /* Progressive enhancement only: the GET form also works without JavaScript. */
 (function () {
 	'use strict';
+	// The set page ships its own tab bar. Mounting it here keeps the page from
+	// loading the relation-list scripts, which only entity pages with related
+	// lists need.
+	var leiste = document.querySelector('.set-detail > .llb-reiter');
+	if (leiste && window.MQL_REITER) { window.MQL_REITER.mount(leiste, {}); }
 	if (document.querySelector('[data-filter-schema="1"]')) { return; }
 	// Die Set-Liste filtert im Browser (sets-filter.js): kein zweiter Lader.
 	if (document.querySelector('[data-set-browser]')) { return; }

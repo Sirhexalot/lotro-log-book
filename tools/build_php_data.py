@@ -741,6 +741,15 @@ def language_data(model: dict, lang: str, fraktionen: dict, landmarken: dict) ->
             'id': ident, 'name': name, 'targets': entry.get('targets') or [],
             'map': entry.get('map'), 'lat': entry.get('lat'), 'lon': entry.get('lon'),
             'area': entry.get('area'), 'region': entry.get('region'),
+            'ort': (entry.get('ort') or {}).get(lang),
+            'kette': [
+                {'id': part.get('id'), 'tier': part.get('tier'),
+                 'name': (part.get('name') or {}).get(lang) or '',
+                  'map': part.get('map'), 'maptier': part.get('maptier')}
+                for part in entry.get('kette') or []
+            ],
+            'bild': entry.get('bild'), 'pin_x': entry.get('pin_x'),
+            'pin_y': entry.get('pin_y'),
             'quests': len(entry.get('targets') or []),
         }
 
@@ -896,7 +905,7 @@ def main() -> int:
     if not (DATEN / 'auftraggeber.json').is_file():
         raise SystemExit('MISSING: daten/auftraggeber.json (run python3 build_auftraggeber.py first)')
     GIVER_SOURCE = json.loads((DATEN / 'auftraggeber.json').read_text(encoding='utf-8'))
-    from giver_viewmodel import giver_index, giver_pages, quest_givers
+    from giver_viewmodel import giver_index, giver_pages, giver_quest_map, quest_givers
     QUEST_GIVERS = quest_givers(GIVER_SOURCE)
     if not (DATEN / 'haendler.json').is_file():
         raise SystemExit('MISSING: daten/haendler.json (run python3 build_haendler.py first)')
@@ -961,7 +970,10 @@ def main() -> int:
                                    landmark_view, list_pages, members_index, profession_view,
                                    quest_view, recipe_view, vendor_source_places)
         builder = ViewBuilder(lang, model, maps)
-        quest_pages = {ident: quest_view(builder, quest) for ident, quest in data['q'].items()}
+        # Every evidenced giver per quest, so the page can name all of them.
+        quest_giver_rows = giver_quest_map(GIVER_SOURCE, lang)
+        quest_pages = {ident: quest_view(builder, quest, quest_giver_rows.get(ident))
+                       for ident, quest in data['q'].items()}
         counts['page-q'] = len(quest_pages)
         write_pages(target, lang, 'q', quest_pages)
 

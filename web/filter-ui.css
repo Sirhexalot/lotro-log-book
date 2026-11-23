@@ -234,3 +234,8 @@ details[open]>.filter-group-heading>.filter-arrow,details[open]>summary>.filter-
 
 /* Eignung unter dem Namen: eigene Zeile, links, Zahlen bleiben neutral. */
 .mql-row-eignung { display: block; margin-top: .3rem; }
+
+/* A quiet second line inside a result row: the places of a source, the
+   chain of a vendor. Links stay links, the block never pushes the row. */
+.mql-row-detail { display: block; margin-top: 2px; }
+.mql-row-detail a { font-size: inherit; }

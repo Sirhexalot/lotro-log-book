@@ -86,8 +86,14 @@ for (const binding of ['sp_voraussetzungen', 'sp_datenschutz', 'sp_faq', 'sp_win
 }
 const twig = fs.readFileSync(path.join(__dirname, '../php/templates/app/spielstand.twig'), 'utf8');
 const normalize = text => text.replace(/\s+/g, ' ').replace(/\{\{ lang \}\}/g, 'de');
-assert.equal(normalize(html.match(/<main[\s\S]*?<\/main>/)[0]),
-  normalize(twig.match(/<main[\s\S]*?<\/main>/)[0]), 'Static and PHP import markup differ');
+/* The tab bar comes from the shared macro on the PHP side, so that one block
+ * is masked on both pages before the rest is compared: everything else must
+ * stay identical, including the controls and their ids. */
+const ohneReiter = text => text
+  .replace(/\{\{ reiter\.reiter\([\s\S]*?\) \}\}/, '[reiter]')
+  .replace(/<div class="llb-reiter"[\s\S]*?<\/div>/, '[reiter]');
+assert.equal(ohneReiter(normalize(html.match(/<main[\s\S]*?<\/main>/)[0])),
+  ohneReiter(normalize(twig.match(/<main[\s\S]*?<\/main>/)[0])), 'Static and PHP import markup differ');
 for (const id of ['schreiben', 'zip', 'meldung-plugin', 'schreiben-hinweis']) {
   assert.ok(!html.includes('id="' + id + '"'), 'Import page still carries the plugin control: ' + id);
   assert.ok(pluginHtml.includes('id="' + id + '"'), 'Plugin page lacks: ' + id);

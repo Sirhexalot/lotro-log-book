@@ -15,7 +15,7 @@ Something only becomes a building block if it has **the same meaning** in at lea
 
 `php/templates/components/flaeche.twig`, `web/flaeche.css`, loaded via `Shell::styles()` and in the map app via `karte.twig`. Catalogue pages and the map detail column carry the same surface, the same heading and the same rhythm.
 
-- Macro: `flaeche(titel, ebene = 2, klasse = '', kennung = '')`, content via `{% call %}`.
+- Macro: `flaeche(titel, inhalt, ebene = 2, klasse = '', kennung = '')`. Twig has no `{% call %}` tag, so the content is built with `{% set inhalt %}…{% endset %}` and passed as one argument; the block stays markup and is not escaped.
 - The heading belongs to the building block: h2/h3/h4 uniformly `--text-abschnitt` (20 px), weight 500, `0 0 8px`; no spacing to the top. The level follows only the document hierarchy (h2 in the catalogue, h3 in the panel).
 - An inner padding via `--llb-flaechen-innen`; the spacing between surfaces is `--llb-flaechen-abstand` (12 px) for the catalogue column as for the panel column.
 - `data-ton="hell"` is the lighter ground for rewards and values; border, rounding and spacings remain the same.
@@ -25,12 +25,60 @@ Something only becomes a building block if it has **the same meaning** in at lea
 
 ## Facts (label and value)
 
-`web/fakten.css`, without its own Twig macro: the form is already unambiguous `<dl><dt>Label</dt><dd>Wert</dd>…</dl>`, and that is exactly how `app.js` writes it. A macro would have to build arrays for composite values (area paths with several links) and would only make the templates longer.
+`php/templates/components/fakten.twig`, `web/fakten.css`. Since 23.11.2026 the
+grid also has a macro, because quest, deed, recipe and quest-giver pages wrote
+the same `<dl>` four times:
 
+- Macro: `liste(rows)`, rows `{label, text, url}`; `items` carries a composite
+  value (an area path, a group of giver names) as `{text, url}` entries.
+- `app.js` keeps writing the same markup itself for the map detail column; the
+  classes are the same, so both cannot drift apart.
 - `.llb-fakten` – two columns, label weak, value breakable, links in gold.
 - `data-dichte="kompakt"` – smaller font, tighter spacing, two columns on mobile as well (map detail column, where the labels are short).
 - On mobile without `kompakt` the label stands above the value.
-- `.katalog-werte-raster` (item values, instance facts) remains separate: it is a value table with dividing lines, not a label-value list.
+- `.katalog-werte-raster` (item values) remains separate: it is a value table with dividing lines, not a label-value list. The instance page moved its geography facts to `llb-fakten` on 23.11.2026 and keeps only level, group size and difficulty as chips.
+
+## Place (one rule, two forms)
+
+`php/templates/components/ort.twig`, `web/ort.css`, `web/ort.js`. One component
+for every place on every entity page; before 23.11.2026 four markups existed
+side by side.
+
+**The form follows the number of places, never the page:**
+
+- `block(lang, place, labels, titel, map_link)` — **exactly one place**: map
+  cut, area and chain, coordinates, the map action, and the quiet second row
+  with route and resource occurrences.
+- `wahl(lang, orte, labels)` — **two or more places**: one map, one row per
+  place, a row switches the map. The active row carries the gold bar. Without
+  JavaScript the first map stays and every row is readable.
+- `quellen(lang, orte, labels)` — the collapsed "Wo" of a short source list:
+  name, chain, coordinates and both actions, **without a map**. The map belongs
+  to the detail pages, where the place is the subject; inside a source row it
+  would take over the page.
+
+A filtered source list never carries the "Wo", because every row would repeat
+it. The map cut itself stays `components/karte.twig`; `ort` composes it and
+never redraws it. The switching lives in `web/ort.js` and binds every
+`[data-ort-karte]`, so several pickers on one page (an item with several
+sources) work without ids.
+
+## Rewards
+
+`php/templates/components/belohnungen.twig`. Quest and deed wrote two different
+reward rows before; now both call the same one.
+
+- `gruppen(groups, sicher)` — groups `{label, items}`. A deed passes its fixed
+  and selectable rewards as two groups; the fixed group's heading is dropped
+  when it is the only group.
+- `gabe(item)` — the 48 px tile, the rarity colour of the name and the
+  suitability chip of the imported character.
+
+## Objectives
+
+`php/templates/components/ziele.twig`. `ziele(titel, steps)` renders the closed
+`<details data-nosnippet>` with the steps and their objectives. The text spoils
+the quest, so it never stands open and never enters a search snippet.
 
 ## Tabs
 
@@ -65,8 +113,9 @@ Something only becomes a building block if it has **the same meaning** in at lea
 
 `php/templates/components/karte.twig`, `web/karte.css` – the map excerpt from the client with a marked spot.
 
-- Macro `karte(lang, bild, link, pin_x, pin_y, klasse, gross, label, alt)`: image name under `/karten/<sprache>/`, optional link into the map view, optional pin coordinates, `gross` for the map at the top of an area page (640 px).
+- Macro `karte(lang, bild, link, pin_x, pin_y, klasse, gross, label, alt, bild_id, pin_id, bild_attr, pin_attr, form, breite, hoehe)`: image name under `/karten/<sprache>/` (a path starting with `/` is used as it stands, as interior maps live outside it), optional link into the map view, optional pin coordinates, `gross` for the map at the top of an area page (640 px).
 - `.llb-karte` is 4:3 with a dark ground behind transparent image edges; `.llb-karte-pin` sits proportionally in the image.
+- `form="bild"` is an illustration, not a place cut: the whole picture in its own aspect ratio, `breite`/`hoehe` carry its pixel size. The instance page uses it for the interior map.
 - The width is determined by the surroundings: 320 px standard, 240 px in the row next to text (`.katalog-ort-flex`), full column in the place area, 640 px as area map.
 - The row `.katalog-ort-flex` (image next to notes and actions) remains a page rule for now; it is layout, not the image.
 

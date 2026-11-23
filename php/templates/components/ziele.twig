@@ -1,0 +1,12 @@
+{# Objectives and steps, one disclosure for quests and deeds.
+
+   The text stays behind a closed <details data-nosnippet>: it spoils the
+   quest and search engines should not lift it into a snippet. The marker
+   belongs inside the text flow (`list-style-position: inside`), which
+   `katalog.css` sets for every surface. #}
+{% macro ziele(titel, steps, kennung = '') %}
+{% if steps %}<details class="katalog-ziele llb-flaeche" data-nosnippet{% if kennung %} id="{{ kennung }}"{% endif %}>
+<summary>{{ titel }}</summary>
+<ol>{% for step in steps %}<li>{% for paragraph in step.paragraphs %}<p class="katalog-text">{{ paragraph }}</p>{% endfor %}{% if step.objectives %}<ul>{% for goal in step.objectives %}<li>{{ goal }}</li>{% endfor %}</ul>{% endif %}</li>{% endfor %}</ol>
+</details>{% endif %}
+{% endmacro %}
