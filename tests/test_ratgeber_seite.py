@@ -39,16 +39,26 @@ class RatgeberRouteTests(unittest.TestCase):
 
 
 class RatgeberMenuTests(unittest.TestCase):
-    def test_menu_entry_sits_in_the_character_family(self):
+    """The advisor page exists but is not in the navigation (23.11.2026).
+
+    It is not finished, so the character family names only classes and the
+    character progress. The page keeps its family mark and stays reachable at
+    its own address until it is released; the menu words stay for that day.
+    """
+
+    def test_menu_does_not_offer_the_advisor(self):
         shell = read('php/src/Shell.php')
-        self.assertIn("['ratgeber', $app('ratgeber'), $w['menue_ratgeber']", shell)
-        self.assertIn("'ratgeber', 'spielstand' => 'charakter'", shell)
+        self.assertNotIn("['ratgeber', $app('ratgeber')", shell)
         menue = read('web/menue.js')
-        self.assertIn("ratgeber: 'ratgeber'", menue)
-        self.assertIn("ratgeber: 'advisor'", menue)
-        self.assertIn("ratgeber: 'conseiller'", menue)
-        self.assertIn("{ seite: 'ratgeber', href: app('ratgeber')", menue)
+        self.assertNotIn("{ seite: 'ratgeber', href: app('ratgeber')", menue)
+
+    def test_page_keeps_its_family_and_address(self):
+        shell = read('php/src/Shell.php')
+        self.assertIn("'ratgeber', 'spielstand' => 'charakter'", shell)
+        self.assertIn("'ratgeber' => ['charakter', $w['menue_ratgeber']", shell)
+        menue = read('web/menue.js')
         self.assertIn("ratgeber: 'charakter'", menue)
+        self.assertIn("ratgeber: 'advisor'", menue)
 
     def test_menu_words_exist_in_three_languages(self):
         words = read('build_katalogseiten.py')

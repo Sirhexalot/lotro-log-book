@@ -178,7 +178,6 @@ final class Shell
              ['key' => 'charakter', 'text' => $w['familie_charakter'], 'tabs' => [
                 ['klassen', $app('klassen'), ['de' => 'Klassen & Völker', 'en' => 'Classes & races', 'fr' => 'Classes et races'][$lang],
                     ['de' => 'Spielbare Kombinationen und Klassenprofile', 'en' => 'Playable combinations and class profiles', 'fr' => 'Combinaisons jouables et profils de classe'][$lang]],
-                ['ratgeber', $app('ratgeber'), $w['menue_ratgeber'] ?? 'Ratgeber', $w['d_ratgeber'] ?? ''],
                 ['spielstand', $app('spielstand'), $w['menue_fortschritt'], $w['d_fortschritt']],
             ]],
         ];

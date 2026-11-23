@@ -100,7 +100,6 @@
 			{ seite: 'fraktion', href: pfad('fraktion'), text: t('menue_fraktionen'), desc: 'd_fraktionen' }] },
 		{ key: 'charakter', text: t('nav_charakter'), tab: [
 			{ seite: 'klassen', href: app('klassen'), text: t('menue_klassen'), desc: 'd_klassen' },
-			{ seite: 'ratgeber', href: app('ratgeber'), text: t('menue_ratgeber'), desc: 'd_ratgeber' },
 			{ seite: 'spielstand', href: app('spielstand'), text: t('menue_fortschritt'), desc: 'd_fortschritt' }] }
 	];
 
