@@ -48,7 +48,20 @@ class SeoTest(unittest.TestCase):
             self.assertEqual(len(locations), len(PAGES) - 2)  # ohne Gegenstand und Suche
             self.assertNotIn(BASE + '/gegenstand.html', locations)
             self.assertTrue(all(url.startswith(BASE + '/') for url in locations))
-            self.assertIn('Sitemap: ' + BASE + '/sitemap.xml', (target / 'robots.txt').read_text())
+            robots = (target / 'robots.txt').read_text()
+            self.assertIn('Sitemap: ' + BASE + '/sitemap.xml', robots)
+            # One public site: the default group allows everything, and the
+            # crawlers that collect training and link data are refused by name
+            # (the same list the host refuses with 403).
+            self.assertIn('User-agent: *\nAllow: /', robots)
+            for agent in ('GPTBot', 'ClaudeBot', 'meta-externalagent', 'Amazonbot',
+                          'Bytespider', 'MJ12bot', 'Scrapy', 'SemrushBot'):
+                self.assertIn('User-agent: %s\n' % agent, robots)
+            self.assertIn('Disallow: /', robots)
+            # Search and user-triggered fetches must not be named as blocked.
+            for agent in ('OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot',
+                          'Claude-User', 'PerplexityBot', 'Googlebot', 'bingbot'):
+                self.assertNotIn('User-agent: %s' % agent, robots)
 
 
 if __name__ == '__main__':

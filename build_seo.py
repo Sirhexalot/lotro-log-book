@@ -111,6 +111,33 @@ def preview_images(ziel):
         image.convert('RGB').save(ziel / 'bild' / ('vorschau-' + lang + '.jpg'), quality=90, optimize=True)
 
 
+# Hetzner refuses these user agents at server level with 403 on webhosting and
+# managed servers (since 16.09.2026, docs.hetzner.com: "Serverseitig blockierte
+# User Agents"): they collect content for AI training or for link and marketing
+# databases. The rules below say the same thing and keep their meaning if that
+# block is ever lifted. AI search and user-triggered fetches stay welcome and
+# match the "*" group: OAI-SearchBot, ChatGPT-User, Claude-SearchBot,
+# Claude-User, PerplexityBot, DuckAssistBot.
+BLOCKIERTE_AGENTS = ('GPTBot', 'ClaudeBot', 'meta-externalagent', 'Amazonbot',
+                     'Bytespider', 'MJ12bot', 'Scrapy', 'SemrushBot')
+
+
+def robots_text() -> str:
+    """robots.txt for every release: one public site, one honest bot rule."""
+    zeilen = [
+        '# LOTRO Log Book. Everything public is open to search engines and visitors.',
+        'User-agent: *',
+        'Allow: /',
+        '',
+        '# Crawlers that collect content for AI training or for link and marketing',
+        '# databases; Hetzner refuses them at server level already. These rules say',
+        '# the same and hold if that block is ever lifted.',
+    ]
+    zeilen += ['User-agent: %s' % agent for agent in BLOCKIERTE_AGENTS]
+    zeilen += ['Disallow: /', '', 'Sitemap: %s/sitemap.xml' % BASE, '']
+    return '\n'.join(zeilen)
+
+
 def build(ziel):
     ziel = Path(ziel)
     preview_images(ziel)
@@ -147,4 +174,4 @@ def build(ziel):
     # No empty entity shells, searches or invented lastmod dates.
     write_sitemap(ziel, 'sitemap-seiten.xml', ['/' + name for name in PAGES if name not in ('gegenstand.html', 'suche.html')])
     write_sitemap(ziel, 'sitemap.xml', ['/sitemap-seiten.xml'], index=True)
-    (ziel / 'robots.txt').write_text('User-agent: *\nAllow: /\n\nSitemap: %s/sitemap.xml\n' % BASE, encoding='utf-8')
+    (ziel / 'robots.txt').write_text(robots_text(), encoding='utf-8')

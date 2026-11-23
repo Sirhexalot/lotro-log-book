@@ -154,9 +154,9 @@ def seo_dateien(ziel: Path) -> None:
     sys.path.insert(0, str(HIER))
     import build_seo
     build_seo.preview_images(ziel)
-    (ziel / 'robots.txt').write_text(
-        'User-agent: *\nAllow: /\n\nSitemap: %s/sitemap.xml\n' % build_seo.BASE,
-        encoding='utf-8')
+    # One source for the bot rules; build_seo.build() writes the same text for
+    # the static pages.
+    (ziel / 'robots.txt').write_text(build_seo.robots_text(), encoding='utf-8')
 
 
 def kopiere_karten(ziel: Path) -> None:
