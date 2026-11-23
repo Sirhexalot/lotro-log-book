@@ -36,12 +36,14 @@ const QUESTS = `<?xml version="1.0" encoding="UTF-8"?>
 		const ohne = await browser.newContext({ viewport: { width: 1280, height: 950 } });
 		const seite = await ohne.newPage();
 		await seite.goto(base + '/de/haendler/', { waitUntil: 'load' });
+		await seite.waitForSelector('.filter-ui table.llb-tabelle tbody tr');
 		assert.equal(await seite.evaluate(() => document.getElementById('vendor-level-field').hidden), true,
 			'Stufenfilter ohne Import sichtbar');
-		assert.equal(await seite.evaluate(() => Array.from(document.querySelectorAll('.mql-row-heading span')).map((s) => s.textContent.trim()).join('|')), 'Treffer|Ware ab Stufe',
+		assert.equal(await seite.evaluate(() => Array.from(document.querySelectorAll('.filter-ui thead th'))
+			.map((th) => th.textContent.replace(/[↕↑↓]/g, '').trim()).join('|')), 'Name|Ware ab Stufe',
 			'Kopfzeile ohne Stufenspalte');
-		const ohneWert = await seite.locator('.mql-row-value').first().textContent();
-		assert.match(ohneWert, /^Ware ab Stufe: \d+/, 'Zeile ohne „Ware ab Stufe“');
+		const ohneWert = await seite.locator('.filter-ui tbody td.llb-zahl').first().textContent();
+		assert.match(ohneWert, /^\d+/, 'Zeile ohne „Ware ab Stufe“');
 		await ohne.close();
 
 		const context = await browser.newContext({ viewport: { width: 1280, height: 950 } });
@@ -54,23 +56,26 @@ const QUESTS = `<?xml version="1.0" encoding="UTF-8"?>
 		await page.waitForTimeout(3500);
 
 		await page.goto(base + '/de/haendler/', { waitUntil: 'load' });
+		await page.waitForSelector('.filter-ui table.llb-tabelle tbody tr');
+		await page.waitForFunction(() => Number((document.querySelector('.filter-result-toolbar [role=status]')?.textContent || '').replace(/\D/g, '')) > 1000);
 		assert.equal(await page.evaluate(() => document.getElementById('vendor-level-field').hidden), false,
 			'Stufenfilter mit Import versteckt');
 		assert.match(await page.locator('#vendor-level-link').textContent(), new RegExp(String(STUFE)),
 			'Beschriftung nennt die Stufe nicht');
-		const gesamt = Number((await page.locator('.sets-count').textContent()).replace(/\D/g, ''));
+		const gesamt = Number((await page.locator('.filter-result-toolbar [role=status]').textContent()).replace(/\D/g, ''));
 		assert.ok(gesamt > 1000, 'Gesamtzahl unerwartet: ' + gesamt);
 
 		/* Verweis folgen: die Stufe muss in der Adresse landen. */
 		await page.click('#vendor-level-link');
 		await page.waitForLoadState('load');
+		await page.waitForFunction(() => Number((document.querySelector('.filter-result-toolbar [role=status]')?.textContent || '').replace(/\D/g, '')) > 0);
 		assert.match(page.url(), new RegExp('[?&]stufe=' + STUFE), 'Stufe fehlt in der Adresse: ' + page.url());
-		const gefiltert = Number((await page.locator('.sets-count').textContent()).replace(/\D/g, ''));
+		const gefiltert = Number((await page.locator('.filter-result-toolbar [role=status]').textContent()).replace(/\D/g, ''));
 		assert.ok(gefiltert > 0, 'Filter liefert nichts');
 		assert.ok(gefiltert < gesamt, 'Filter grenzt nicht ein: ' + gefiltert + ' von ' + gesamt);
 
 		/* Jede sichtbare Zeile bietet Ware, die höchstens die eigene Stufe verlangt. */
-		const stufen = await page.$$eval('.mql-row-value', (nodes) => nodes.map((n) => {
+		const stufen = await page.$$eval('.filter-ui tbody td.llb-zahl', (nodes) => nodes.map((n) => {
 			const treffer = n.textContent.match(/(\d+)/);
 			return treffer ? Number(treffer[1]) : null;
 		}));
@@ -89,10 +94,17 @@ const QUESTS = `<?xml version="1.0" encoding="UTF-8"?>
 				'Stufe fiel bei einer weiteren Auswahl weg: ' + page.url());
 		}
 
-		/* Zurücksetzen bringt den vollen Bestand. */
-		await page.locator('.sets-turn a').last().click();
-		await page.waitForLoadState('load');
-		assert.equal(Number((await page.locator('.sets-count').textContent()).replace(/\D/g, '')), gesamt,
+		/* Zurücksetzen bringt den vollen Bestand. Der Server-Verweis allein
+		   würde den gemerkten Filter im Browser wiederherstellen; die
+		   gemeinsame Schaltfläche leert ihn. */
+		await page.locator('.filter-panel button').last().click();
+		await page.waitForFunction(() => !document.querySelector('.filter-chips button'));
+		await Promise.all([
+			page.waitForURL('**/de/haendler/'),
+			page.locator('.sets-turn a').last().click(),
+		]);
+		await page.waitForFunction((total) => Number((document.querySelector('.filter-result-toolbar [role=status]')?.textContent || '').replace(/\D/g, '')) === total, gesamt);
+		assert.equal(Number((await page.locator('.filter-result-toolbar [role=status]').textContent()).replace(/\D/g, '')), gesamt,
 			'Zurücksetzen stellt den Bestand nicht her');
 
 		await page.setViewportSize({ width: 390, height: 844 });

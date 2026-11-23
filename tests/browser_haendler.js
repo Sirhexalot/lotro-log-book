@@ -111,14 +111,14 @@ const base = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 			const answer = await page.goto(`${base}/${lang}/${seg}/?type[]=barter`);
 			assert.equal(answer.status(), 200);
 			await page.waitForFunction(() => /\d/.test((document.querySelector('[role=status]') || {}).textContent || ''));
-			const total = Number(((await page.locator('[role=status]').first().textContent()) || '').replace(/\D/g, ''));
+			const total = Number(((await page.locator('.filter-result-toolbar [role=status]').first().textContent()) || '').replace(/\D/g, ''));
 			assert.ok(total > 900, `${lang}: ${total}`);
 
-			const sort = page.locator('select[aria-label]').last();
-			await sort.selectOption({ label: sortLabel });
-			await page.waitForTimeout(700);
+			// The stock level is a table column since 23.11.2026; its head sorts.
+			await page.evaluate(() => document.querySelector('.filter-ui thead [data-sort-key="stufe"]').click());
+			await page.waitForFunction(() => document.querySelector('.filter-ui thead th:nth-child(2)')?.getAttribute('aria-sort') === 'ascending');
 			assert.match(decodeURIComponent(page.url()), /sort=stufe/);
-			const stufen = (await page.locator('.mql-row-value b').allTextContents())
+			const stufen = (await page.locator('.filter-ui tbody td.llb-zahl').allTextContents())
 				.map(text => Number(String(text).split('–')[0]));
 			assert.ok(stufen.length > 1, lang);
 			const sortiert = stufen.slice().sort((a, b) => a - b);

@@ -35,6 +35,9 @@
 		start();
 	}
 	/* Dieses Skript steht vor speicher.js im Dokument; nach „load“ ist der
-	   Spielstand sicher da. */
+	   Spielstand sicher da. Die Ergebnistabelle wird beim Filtern neu
+	   geschrieben, deshalb den Verweis danach erneut setzen. */
 	window.addEventListener('load', start);
+	document.addEventListener('mql:filterchange', start);
+	document.addEventListener('mql:filter-rendered', start);
 })();

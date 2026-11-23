@@ -13,10 +13,10 @@ const base = process.argv[2] || 'http://127.0.0.1:8817';
 		const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 
 		await page.goto(base + '/de/gegenstandssuche/', { waitUntil: 'load' });
-		await page.locator('.mql-row').first().waitFor();
-		const border = await page.locator('.mql-row').first().evaluate(row => ({
-			top: getComputedStyle(row).borderTopWidth,
-			bottom: getComputedStyle(row).borderBottomWidth,
+		await page.locator('#gs-ergebnis tbody tr td').first().waitFor();
+		const border = await page.locator('#gs-ergebnis tbody tr td').first().evaluate(cell => ({
+			top: getComputedStyle(cell).borderTopWidth,
+			bottom: getComputedStyle(cell).borderBottomWidth,
 		}));
 		assert.ok((border.top === '1px') !== (border.bottom === '1px'), 'Ergebniszeile hat doppelte Trennlinien');
 		assert.equal(Math.round((await page.locator('.mql-row-icon').first().boundingBox()).width), 64);
