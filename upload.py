@@ -576,6 +576,9 @@ def hochladen(daten, basis, dateien, workers=1, trocken=False, filtern=False):
     alle = {rel for _, rel in dateien}
     ziel = daten['path']
     stand = lade_stand()
+    # The folder inventory takes a while on a large release; say so instead of
+    # staying silent until the first progress line.
+    print('Vergleiche mit dem Server …', flush=True)
     ftp = verbinde(daten)
     try:
         ftp.cwd(ziel)
@@ -587,6 +590,8 @@ def hochladen(daten, basis, dateien, workers=1, trocken=False, filtern=False):
             ftp.close()
     if fern is None:
         print('  remote sizes unknown, no sizes to compare', file=sys.stderr)
+    else:
+        print('  %d Dateien auf dem Server' % len(fern), flush=True)
 
     auftraege = deque(dateien)
     zaehler = {'neu': 0, 'gleich': 0, 'bytes': 0, 'geprueft': 0}
@@ -637,9 +642,10 @@ def hochladen(daten, basis, dateien, workers=1, trocken=False, filtern=False):
                     if not noetig or not trocken:
                         stand[rel] = eintrag_neu
                     geprueft = zaehler['geprueft']
-                    if geprueft % 5000 == 0 or geprueft == gesamt:
-                        print('  %d/%d geprüft, %d neu' % (geprueft, gesamt, zaehler['neu']),
-                              flush=True)
+                    if geprueft % 200 == 0 or geprueft == gesamt:
+                        print('  %d/%d Dateien, %d neu, %.1f MB' % (
+                            geprueft, gesamt, zaehler['neu'],
+                            zaehler['bytes'] / 1048576.0), flush=True)
                     if geprueft % 2000 == 0:
                         sichern()
         except BaseException as error:
@@ -651,6 +657,9 @@ def hochladen(daten, basis, dateien, workers=1, trocken=False, filtern=False):
             except ftplib.all_errors:
                 verbindung.close()
 
+    print('Upload läuft: %d Dateien mit %d Verbindung%s.' % (
+        gesamt, 1 if trocken else workers, '' if trocken or workers == 1 else 'en'),
+        flush=True)
     if workers > 1 and not trocken:
         faeden = [threading.Thread(target=arbeit) for _ in range(workers)]
         for faden in faeden:
