@@ -5,19 +5,29 @@
  * rows reuse the catalogue row markup (`gs-zeile`), so only the place picker
  * needs its own rules: one map, a compact list of every known spot. */
 
+/* The page uses the full shell width, not the reading column: the place card
+ * wants the horizontal room the header already has (23.11.2026). */
+.katalog-inhalt article.vendor-detail {
+	max-width: none;
+}
+
+/* One map beside the list, and the map gets the larger share: a 320 px cut was
+ * too small to recognise the spot it points at. The list keeps its own scroll
+ * field so the picture stays in view while the visitor walks down the places. */
 .vendor-ortsicht {
 	display: grid;
-	grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+	grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
 	gap: 18px;
 	align-items: start;
 }
 
-@media (max-width: 760px) {
-	.vendor-ortsicht { grid-template-columns: 1fr; }
-}
-
 .vendor-ortsicht .llb-karte {
 	margin: 0;
+	max-width: none;
+}
+
+@media (max-width: 900px) {
+	.vendor-ortsicht { grid-template-columns: 1fr; }
 }
 
 .vendor-orte {
@@ -25,6 +35,11 @@
 	margin: 0;
 	padding: 0;
 	border-top: 1px solid var(--rand);
+	/* A long list scrolls in its own field: the picture beside it stays in
+	   view, so a row far down still shows its map when clicked. */
+	max-height: 58vh;
+	overflow-y: auto;
+	overscroll-behavior: contain;
 }
 
 .vendor-orte li {
