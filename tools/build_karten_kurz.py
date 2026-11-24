@@ -26,6 +26,26 @@ SUMMARY_KEEP = {'i', 'z', 'ie', 'x', 'mp', 'e', 'l', 'ls', 'vl', 'vb', 'v', 'vo'
 DETAIL_KEEP = ('d', 's', 't', 'u', 'gi', 'nq', 'pq', 'tl', 'lp')
 
 
+def leeren(pfad: Path) -> None:
+    """Remove a generated folder completely.
+
+    On macOS the Finder keeps writing `.DS_Store` into a folder it is watching,
+    and a plain `rmtree` then dies with "Directory not empty" in the middle of a
+    release build. Retry, delete what appeared, and only then give up.
+    """
+    for _ in range(5):
+        shutil.rmtree(pfad, ignore_errors=True)
+        if not pfad.exists():
+            return
+        for rest in pfad.rglob('*'):
+            if rest.is_file():
+                try:
+                    rest.unlink()
+                except OSError:
+                    pass
+    shutil.rmtree(pfad, ignore_errors=True)
+
+
 def assignment(text: str, name: str):
     match = re.search(r'window\.%s\s*=\s*' % re.escape(name), text)
     if not match:
@@ -96,9 +116,8 @@ def build(lang: str, deeds: bool = False) -> None:
         encoding='utf-8')
     art_dir = 'taten' if deeds else 'aufgaben'
     shard_dir = WEB / 'karten-daten' / art_dir / lang
-    if shard_dir.exists():
-        shutil.rmtree(shard_dir)
-    shard_dir.mkdir(parents=True)
+    leeren(shard_dir)
+    shard_dir.mkdir(parents=True, exist_ok=True)
     detail_dir = shard_dir
     detail_bytes = 0
     for map_id, rows in map_shards.items():
@@ -147,8 +166,7 @@ def build(lang: str, deeds: bool = False) -> None:
 
 if __name__ == '__main__':
     shard_root = WEB / 'karten-daten'
-    if shard_root.exists():
-        shutil.rmtree(shard_root)
+    leeren(shard_root)
     for language in LANGS:
         build(language)
         build(language, deeds=True)
