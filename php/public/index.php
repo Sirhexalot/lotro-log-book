@@ -65,15 +65,18 @@ $view = new View($root . '/php/templates', is_writable($cacheDir) ? $cacheDir : 
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 
+// One access file for everything that talks to the database (feedback, page
+// views). A checkout without it keeps those features quiet.
+$documentRoot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
+$envFile = getenv('LLB_FEEDBACK_ENV')
+    ?: (is_file($root . '/phptmp/llb-feedback.env')
+        ? $root . '/phptmp/llb-feedback.env'
+        : Feedback::defaultEnvPath($documentRoot ?: $root, dirname($root, 2)));
+
 if ($path === '/api/feedback') {
     header('Content-Type: application/json; charset=utf-8');
     header('Cache-Control: no-store');
     header('X-Content-Type-Options: nosniff');
-    $documentRoot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
-    $envFile = getenv('LLB_FEEDBACK_ENV')
-        ?: (is_file($root . '/phptmp/llb-feedback.env')
-            ? $root . '/phptmp/llb-feedback.env'
-            : Feedback::defaultEnvPath($documentRoot ?: $root, dirname($root, 2)));
     $feedback = new Feedback(
         $envFile,
         dirname($envFile) . '/llb-feedback-rate.json',
@@ -212,3 +215,13 @@ if (isset($result['app']) && $result['app'] === 'feedback') {
     header('Cache-Control: public, max-age=0, must-revalidate');
 }
 echo $html;
+
+// One count per entity view, language-independent. It runs after the response:
+// with FastCGI the visitor never waits, and every database failure is swallowed
+// inside Aufrufe, so the page cannot break.
+if (isset($result['kind'], $result['id'])) {
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    }
+    (new \Llb\Aufrufe($envFile))->zaehle($result['kind'], $result['id'], $_SERVER);
+}
