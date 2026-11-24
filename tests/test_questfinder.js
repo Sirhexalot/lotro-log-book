@@ -60,8 +60,14 @@ function finder(imported) {
 	vm.runInNewContext(fs.readFileSync('web/karten-aufgabenfilter.js', 'utf8'), context);
 	const root = {};
 	const quests = [
-		{i:'CLASS001',n:'Klassenaufgabe',th:'class',f:['themeClass','Jäger'],r:'Eriador',z:'Breeland',l:5},
-		{i:'ORIGIN01',n:'Herkunftsaufgabe',th:'origin',f:['themeOrigin','Hobbit'],r:'Eriador',z:'Breeland',l:5},
+		/* `tp` is the theme path (stable key + label); `f` carries the map path,
+		 * exactly as the build writes it. */
+		{i:'CLASS001',n:'Klassenaufgabe',th:'class',
+			tp:[['theme:class','Klassenaufgaben'],['category:37','Jäger']],
+			f:['Eriador','Breeland','Archet'],r:'Eriador',z:'Breeland',l:5},
+		{i:'ORIGIN01',n:'Herkunftsaufgabe',th:'origin',
+			tp:[['theme:origin','Herkunftsaufgaben'],['category:210','Hobbit']],
+			f:['Eriador','Breeland','Archet'],r:'Eriador',z:'Breeland',l:5},
 		{i:'BOARD001',n:'Brettaufgabe',a:'Auftrag',r:'Eriador',z:'Breeland',l:5},
 		{i:'DONE0001',n:'Erledigt',r:'Eriador',z:'Breeland',l:5},
 		{i:'RUN00001',n:'Läuft',r:'Eriador',z:'Breeland',l:5},
@@ -84,8 +90,11 @@ assert.ok(groups.origin, 'origin is an independent filter group');
 assert.ok(groups.status, 'progress is a filter group');
 assert.equal(groups.board, undefined, 'task board is not a separate filter group');
 assert.deepEqual(Array.from(groups.topic.options, option => option.value), ['class', 'origin', 'board']);
-assert.deepEqual(Array.from(groups.class.options, option => option.value), ['Jäger']);
-assert.deepEqual(Array.from(groups.origin.options, option => option.value), ['Hobbit']);
+assert.deepEqual(Array.from(groups.class.options, option => option.value), ['category:37'],
+	'class values are the client keys, so a link survives a language switch');
+assert.deepEqual(Array.from(groups.class.options, option => option.label), ['Jäger']);
+assert.deepEqual(Array.from(groups.origin.options, option => option.value), ['category:210']);
+assert.deepEqual(Array.from(groups.origin.options, option => option.label), ['Hobbit']);
 assert.equal(groups.status.available(), false, 'no progress filter without known quest status');
 assert.deepEqual(Array.from(groups.status.options, option => option.value), ['all']);
 assert.equal(filterState.normalize(unimported.config, {filters:{status:'done'}}, null).state.filters.status, 'all',
@@ -96,12 +105,16 @@ const state = filters => ({ q:'', filters:Object.assign({
 	topic:[], class:[], origin:[], geography:[], flag:[], level:{min:null,max:null}, status:'all'
 }, filters) });
 const rows = unimported.adapter.rows;
-assert.equal(unimported.adapter.matches(rows[0], state({class:['Jäger']})), true);
+assert.equal(unimported.adapter.matches(rows[0], state({class:['category:37']})), true);
+assert.equal(unimported.adapter.matches(rows[0], state({class:['category:99']})), false,
+	'another class key does not match');
+assert.equal(unimported.adapter.matches(rows[3], state({class:['category:37']})), false,
+	'a quest without a class path never matches the class filter');
 assert.equal(unimported.adapter.matches(rows[0], Object.assign(state({}), {q:'KLASSENAUFGABE'})), true,
 	'search remains case-insensitive with the prepared search index');
-assert.equal(unimported.adapter.matches(rows[1], state({origin:['Hobbit']})), true);
+assert.equal(unimported.adapter.matches(rows[1], state({origin:['category:210']})), true);
 assert.equal(unimported.adapter.matches(rows[2], state({topic:['board']})), true);
-assert.equal(unimported.adapter.matches(rows[2], state({topic:['board'],origin:['Hobbit']})), false);
+assert.equal(unimported.adapter.matches(rows[2], state({topic:['board'],origin:['category:210']})), false);
 assert.equal(unimported.adapter.matches(rows[5], state({status:'open'})), false,
 	'no imported progress must not classify every quest as open');
 let geographyState = filterState.normalize(unimported.config, {}, null).state;
@@ -114,7 +127,7 @@ assert.deepEqual(JSON.parse(JSON.stringify(geographyState.filters.geography)),
 	'choosing a sub-area replaces its broader selected region');
 assert.equal(unimported.adapter.matches(rows[6], geographyState), true);
 assert.equal(unimported.adapter.matches(rows[7], geographyState), false);
-const geographyFacets = unimported.adapter.facets(rows, state({topic:['class'],class:['Jäger']})).geography;
+const geographyFacets = unimported.adapter.facets(rows, state({topic:['class'],class:['category:37']})).geography;
 const facetCount = path => geographyFacets.find(facet => JSON.stringify(facet.value) === JSON.stringify(path)).count;
 assert.equal(facetCount({region:'Eriador'}), 1,
 	'regions without matches under the active topic and class filters have zero facet counts');

@@ -621,6 +621,19 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
             if text and (len(etiketten) < 2 or etiketten[-1] != text):
                 etiketten.append(text)
                 arten.append(1 if schluessel.startswith('area:') else 0)
+        # The theme path (theme → class/race/guild → volume/story/book) stays
+        # available with stable keys and their display names. The map path below
+        # replaces `etiketten`/`f` for placement, so without this copy the class
+        # and origin of a quest would be lost.
+        themenpfad = []
+        for part in step_list(record['p'] if 'p' in record else None):
+            schluessel = str(part['k'])
+            if not schluessel.startswith(('theme:', 'category:', 'volume:', 'story:', 'section:')):
+                continue
+            text = label(schluessel, part['n'], sprache)
+            text = re.sub(r'\[[a-z]{1,3}\]', '', clean(text, '', sprache)).strip()
+            if text and not text.startswith('@'):
+                themenpfad.append([schluessel, text])
         # A deeper name often repeats what is above it ("Imlad Morgul: Cirith Ungol"
         # under Cirith Ungol): the area prefix goes, and a part that only repeats
         # the previous one is dropped.
@@ -694,6 +707,10 @@ def baue(katalog, karten_datei, orte=None, sprache='de', art='aufgaben'):
             # Stable thematic classification from the client path. Keep it
             # separate from the geographic path used by the map and deeds.
             **({'th': thema} if thema else {}),
+            # Theme path as [key, label] pairs: theme, then class/race/guild or
+            # volume/story, then the book. The finder reads the class and origin
+            # values from here; `f` carries the map path.
+            **({'tp': themenpfad} if thema and themenpfad else {}),
             # Internal: the catalogue files this under a section of its own (epic
             # story, instances, festivals, crafting, missions), not under a place.
             **({'_sek': 1} if any(key.startswith('section:') and key != 'section:other' for key in pfad) else {}),

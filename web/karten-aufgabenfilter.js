@@ -24,13 +24,22 @@
 		};
 		var progress = window.MQL_STATUS_UI?.words?.(lang) || progressFallback[lang] || progressFallback.de;
 		var boardValue = {de:'Auftrag',en:'Task',fr:'Tâche'}[lang] || 'Task';
-		var classMarker = 'themeClass', originMarker = 'themeOrigin';
-		var classValues = Array.from(new Set(quests.filter(function (q) {
-			return q.th === 'class' && q.f && q.f[0] === classMarker;
-		}).map(function (q) { return q.f[1]; }).filter(Boolean))).sort(MQL_SORT.compare);
-		var originValues = Array.from(new Set(quests.filter(function (q) {
-			return q.th === 'origin' && q.f && q.f[0] === originMarker;
-		}).map(function (q) { return q.f[1]; }).filter(Boolean))).sort(MQL_SORT.compare);
+		/* The theme path (`tp`) carries [key, label] pairs: theme, then the class
+		 * or race. The map path (`f`) replaced it for placement, so the class and
+		 * origin values come from `tp`. The client key stays in the address, the
+		 * label is shown. */
+		function themenWerte(thema) {
+			var werte = {};
+			quests.forEach(function (q) {
+				if (q.th !== thema || !Array.isArray(q.tp) || !q.tp[1]) { return; }
+				var teil = q.tp[1];
+				if (teil[0] && teil[1]) { werte[teil[0]] = teil[1]; }
+			});
+			return Object.keys(werte).map(function (key) {
+				return { value: key, label: werte[key] };
+			}).sort(function (a, b) { return MQL_SORT.compare(a.label, b.label); });
+		}
+		var classValues = themenWerte('class'), originValues = themenWerte('origin');
 		var replaced = window.MQL_REPLACED || {}, store = window.MQL_SPEICHER;
 		var known, manual, hasQuestProgress, hasMachbar, laufend, characterLevel, progressCache;
 		var searchIndex = new Map(), searchQuery = null, searchNeedle = '';
@@ -123,8 +132,8 @@
 		}).map(function (key) { return {value:key,label:topics[key]}; });
 		var groups = [
 			{id:'topic',kind:'multi',label:w.topic,initialOpen:true,options:topicOptions},
-			{id:'class',kind:'multi',label:w.class,options:classValues.map(function (value) { return {value:value,label:value}; })},
-			{id:'origin',kind:'multi',label:w.origin,options:originValues.map(function (value) { return {value:value,label:value}; })},
+			{id:'class',kind:'multi',label:w.class,options:classValues},
+			{id:'origin',kind:'multi',label:w.origin,options:originValues},
 			{id:'geography',kind:'tree',label:w.geography,options:geoOptions,validatePath:validPath,pathLabel:pathLabel,exclusivePaths:true},
 			{id:'flag',kind:'multi',label:w.flags,options:[
 				{value:'daily',label:w.daily},{value:'repeat',label:w.repeat},{value:'group',label:w.group},
@@ -243,11 +252,9 @@
 						return topic === 'board' ? row.a === boardValue : topic === (row.th || '');
 					});
 				}
-				if (group.id === 'class') {
-					return !value.length || (row.th === 'class' && row.f && row.f[0] === classMarker && value.indexOf(row.f[1]) >= 0);
-				}
-				if (group.id === 'origin') {
-					return !value.length || (row.th === 'origin' && row.f && row.f[0] === originMarker && value.indexOf(row.f[1]) >= 0);
+				if (group.id === 'class' || group.id === 'origin') {
+					var teil = row.tp && row.tp[1];
+					return !value.length || (row.th === group.id && teil && value.indexOf(teil[0]) >= 0);
 				}
 				if (group.id === 'geography') {
 					return !value.length || value.some(function (path) {

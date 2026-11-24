@@ -28,7 +28,7 @@ wording.
 | --- | --- | --- |
 | Item search (`/de/gegenstandssuche/`) | category (tree) → suitability → item level → minimum level → source → damage type → rarity | sound; "source" is a single checkbox |
 | Class profile, items tab | category → suitability → damage type → rarity | sound (level sits above the list on purpose) |
-| Quest finder (`/de/aufgabenfinder/`) | progress → level → region and area → theme → class → origin → properties | reference order, keep |
+| Quest finder (`/de/aufgabenfinder/`) | progress → level → region and area → theme → class → origin → properties | reference order, keep; class and origin values come from the theme path `tp` (client key in the address, label shown) |
 | Quest/deed lists on detail pages | completion → (deed: type, reward - quest: properties) → region and area → level | differs from the finder |
 | Deed index (`/de/tat/`) | completion → type → reward → region and area → level | same component as the quest lists; adopts their order in step 1 |
 | Map list (left column) | progress → reward (deeds only) + search | deliberately narrow, correct |

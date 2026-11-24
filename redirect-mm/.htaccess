@@ -1,8 +1,9 @@
-# One public address: https://llb.sirhexalot.de. Every other name that reaches
-# this folder - sirhexalot.de, www, mm - goes there in one 301, path and query
-# kept. Plain http is upgraded by the host's HTTPS redirect before this runs,
-# so no %{HTTPS} check here: a TLS-terminating proxy would make it loop.
+# One public address: https://llb.sirhexalot.de. This rule also upgrades plain
+# HTTP directly to the canonical host; the host-level HTTPS redirect must stay
+# off, or it would redirect to the original host first.
 RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://llb.sirhexalot.de%{REQUEST_URI} [R=301,L]
 RewriteCond %{HTTP_HOST} !^llb\.sirhexalot\.de$ [NC]
 RewriteRule ^ https://llb.sirhexalot.de%{REQUEST_URI} [R=301,L]
 

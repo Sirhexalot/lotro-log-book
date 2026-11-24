@@ -62,6 +62,11 @@ def build(lang: str, deeds: bool = False) -> None:
                 del eintrag['t']
             else:
                 eintrag['t'] = eintrag['t'][:1]
+        # The quest finder reads the class and the race from the theme path.
+        # Only those two themes need it in the compact payload; the full path of
+        # the epic, crafting and other themes stays in the catalogue file.
+        if quest.get('th') in ('class', 'origin') and quest.get('tp'):
+            eintrag['tp'] = quest['tp']
         compact.append(eintrag)
         karten = quest.get('fk') or []
         if karten:

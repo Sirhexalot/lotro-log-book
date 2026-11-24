@@ -198,10 +198,11 @@ class CatalogueTest(unittest.TestCase):
         self.assertNotIn('IfModule mod_speling', rules)
 
     def test_every_foreign_host_name_goes_to_llb(self):
-        """One public host: the folder is reachable under three names."""
+        """HTTP and foreign hosts go straight to the one public HTTPS address."""
         rules = (ROOT / 'redirect-mm/.htaccess').read_text()
         block = rules.split('RewriteEngine On', 1)[1]
-        self.assertIn('RewriteCond %{HTTP_HOST} !^llb\\.sirhexalot\\.de$ [NC]', block)
+        self.assertIn('RewriteCond %{HTTPS} !=on', block)
         self.assertIn('RewriteRule ^ https://llb.sirhexalot.de%{REQUEST_URI} [R=301,L]', block)
-        # A TLS-terminating proxy would report HTTPS=off and loop forever.
-        self.assertNotIn('%{HTTPS}', block.split('# BEGIN')[0])
+        self.assertIn('RewriteCond %{HTTP_HOST} !^llb\\.sirhexalot\\.de$ [NC]', block)
+        self.assertLess(block.index('RewriteCond %{HTTPS} !=on'),
+                        block.index('RewriteCond %{HTTP_HOST}'))
