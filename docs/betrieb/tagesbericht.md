@@ -18,14 +18,16 @@ Hetzner's web hosting console (**konsoleH**) has a cron manager under
 | Field | Value |
 |---|---|
 | Interpreter | the PHP version konsoleH offers, e.g. `/usr/bin/php84` |
-| Script | `/usr/www/users/<konto>/public_html/mm/php/cron/report.php` |
+| Script | `/usr/www/users/onlysy/mm/php/cron/report.php` |
 | Schedule | `0 8 * * *` (daily at 08:00 server time) |
 
-The absolute script path is the account's home directory plus the FTP target
-from `~/.config/mql-upload.conf` (`/public_html/mm`) plus `/php/cron/report.php`;
-konsoleH shows the home directory (`/usr/www/users/…`) next to the field. The
-`.htaccess` blocks `/php` from the web, so the script is reachable only from the
-shell.
+Use the **document root as the web server sees it**: `/usr/www/users/<konto>/mm`
+(confirmed in the host's error log, `AH00128: File does not exist:
+/usr/www/users/onlysy/mm/favicon.ico`). The FTP path `/public_html/mm` from
+`~/.config/mql-upload.conf` reaches the same folder through a symlink, but the
+cron job is better off with the plain path – a `php.ini` with `open_basedir`
+compares the written path, not the resolved one. The `.htaccess` blocks `/php`
+from the web, so the script is reachable only from the shell.
 
 If the job reports `Could not open input file`, the release on the server is
 older than the script: upload the `programm` component first, then start the
