@@ -5,6 +5,7 @@
 - **Publish:** [binding approval and upload rules](../../AGENTS.md#publication-privacy-and-rights)
 - **Understand deployment:** [arc42 distribution view](../arc42/07-deployment-view.md) with artefacts, target paths, cache and open infrastructure details
 - **Check titles and search engine descriptions:** [SEO rules](seo.md)
+- **Sitemap `<lastmod>` policy and change tracking:** [Sitemap dates](sitemaps.md)
 - **Daily report by mail:** [top ten entities of the month](tagesbericht.md) –
   `php/cron/report.php`, set up in the konsoleH cron manager
 

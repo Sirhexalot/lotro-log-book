@@ -13,7 +13,7 @@ namespace Llb;
  */
 final class Sitemap
 {
-    private const NAMESPACE = 'http://www.sitemaps.org/schemas/sitemap/0.9';
+    private const XML_NAMESPACE = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 
     private array $data;
 
@@ -32,9 +32,24 @@ final class Sitemap
             return null;
         }
         $out = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
-            . '<sitemapindex xmlns="' . self::NAMESPACE . '">';
+            . '<sitemapindex xmlns="' . self::XML_NAMESPACE . '">';
+        $lastmod = $this->data['lastmod'] ?? [];
         foreach ($names as $name) {
-            $out .= '<sitemap><loc>' . esc($this->base . $name) . '</loc></sitemap>';
+            $dates = $lastmod[$name] ?? [];
+            $urls = $this->data['sections'][$name] ?? [];
+            $date = null;
+            if (is_array($dates) && is_array($urls) && count($dates) === count($urls)) {
+                foreach ($dates as $candidate) {
+                    if ($this->validDate($candidate) && ($date === null || $candidate > $date)) {
+                        $date = $candidate;
+                    }
+                }
+            }
+            $out .= '<sitemap><loc>' . esc($this->base . $name) . '</loc>';
+            if ($date !== null) {
+                $out .= '<lastmod>' . $date . '</lastmod>';
+            }
+            $out .= '</sitemap>';
         }
         return $out . '</sitemapindex>';
     }
@@ -47,10 +62,28 @@ final class Sitemap
             return null;
         }
         $out = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
-            . '<urlset xmlns="' . self::NAMESPACE . '">';
-        foreach ($urls as $path) {
-            $out .= '<url><loc>' . esc($this->base . $path) . '</loc></url>';
+            . '<urlset xmlns="' . self::XML_NAMESPACE . '">';
+        $dates = $this->data['lastmod'][$name] ?? [];
+        if (!is_array($dates) || count($dates) !== count($urls)) {
+            $dates = [];
+        }
+        foreach ($urls as $index => $path) {
+            $out .= '<url><loc>' . esc($this->base . $path) . '</loc>';
+            $date = is_array($dates) ? ($dates[$index] ?? null) : null;
+            if ($this->validDate($date)) {
+                $out .= '<lastmod>' . $date . '</lastmod>';
+            }
+            $out .= '</url>';
         }
         return $out . '</urlset>';
+    }
+
+    private function validDate(mixed $value): bool
+    {
+        if (!is_string($value) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return false;
+        }
+        $parsed = \DateTimeImmutable::createFromFormat('!Y-m-d', $value);
+        return $parsed !== false && $parsed->format('Y-m-d') === $value;
     }
 }

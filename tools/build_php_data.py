@@ -22,6 +22,7 @@ a global index.
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 import hashlib
 import json
 import re
@@ -30,6 +31,7 @@ import sys
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 HIER = Path(__file__).resolve().parents[1]
 DATEN = HIER / 'daten'
@@ -172,7 +174,7 @@ def write_shards(target: Path, lang: str, kind: str, records: dict) -> int:
     return len(shards)
 
 
-def write_sitemaps(target: Path, sections: dict) -> None:
+def write_sitemaps(target: Path, sections: dict, lastmod: dict | None = None) -> None:
     """The URL set of every sitemap file, ready for PHP to render as XML."""
     # Application pages now live at one address per language; the search pages
     # are query driven and stay out of the sitemap, as before.
@@ -194,6 +196,11 @@ def write_sitemaps(target: Path, sections: dict) -> None:
     sections['/sitemap-seiten.xml'] = seiten
     payload = {'schema': 1, 'sections': {name: urls for name, urls in sorted(sections.items())},
                'index': sorted(sections)}
+    if lastmod is not None:
+        if set(lastmod) != set(sections) or any(
+                len(lastmod[name]) != len(urls) for name, urls in sections.items()):
+            raise ValueError('Sitemap lastmod does not match section URL lists')
+        payload['lastmod'] = {name: lastmod[name] for name in sorted(sections)}
     (target / 'sitemaps.json').write_text(
         json.dumps(payload, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 
@@ -510,7 +517,8 @@ def chest_source_rows(sources, lang, item_id):
 
 def write_instance_details(target: Path, lang: str, instanzen: dict, quests: dict,
                            maps: dict, items: dict, quest_pages: dict, loot_data: dict,
-                           map_previews: dict, instance_data: dict) -> dict:
+                           map_previews: dict, instance_data: dict,
+                           sitemap_hashes: dict | None = None) -> dict:
     """Localized instance pages from the finder, quest catalogue and loot audit."""
     from php_viewmodel import route, eignung_daten
     loot_instances = loot_data.get('instanzen') or {}
@@ -637,10 +645,16 @@ def write_instance_details(target: Path, lang: str, instanzen: dict, quests: dic
     (target / lang / 'instance-details.json').write_text(
         json.dumps({'instances': details}, ensure_ascii=False, separators=(',', ':')),
         encoding='utf-8')
+    if sitemap_hashes is not None:
+        from sitemap_lastmod import fingerprint
+        segment = {'de': 'instanz', 'en': 'instance', 'fr': 'instance'}[lang]
+        for ident, page in details.items():
+            sitemap_hashes['/%s/%s/%s/' % (lang, segment, ident)] = fingerprint(page)
     return item_sources
 
 
-def write_pages(target: Path, lang: str, kind: str, pages: dict) -> int:
+def write_pages(target: Path, lang: str, kind: str, pages: dict,
+                sitemap_hashes: dict | None = None) -> int:
     """Render-ready view models, one shard per hash bucket.
 
     These are what PHP hands to Twig. Keeping them apart from the raw records
@@ -650,6 +664,22 @@ def write_pages(target: Path, lang: str, kind: str, pages: dict) -> int:
     # Zwei Einträge mit gleichem Namen und gleichen Fakten bekommen einen
     # unterscheidenden Zusatz, bevor sie geschrieben werden (tools/seo.py).
     seo.dedupe(lang, kind, pages)
+    if sitemap_hashes is not None:
+        from php_viewmodel import route
+        if kind == 'set':
+            from set_viewmodel import SEGMENT
+            make_url = lambda ident: '/%s/%s/%s/' % (lang, SEGMENT[lang], ident)
+        elif kind == 'giver':
+            from giver_viewmodel import SEGMENT
+            make_url = lambda ident: '/%s/%s/%s/' % (lang, SEGMENT[lang], ident)
+        elif kind == 'vendor':
+            from vendor_viewmodel import vendor_url
+            make_url = lambda ident: vendor_url(lang, ident)
+        else:
+            make_url = lambda ident: route(lang, kind, ident)
+        from sitemap_lastmod import fingerprint
+        for ident, page in pages.items():
+            sitemap_hashes[make_url(ident)] = fingerprint(page)
     return write_shards(target, lang, 'page-' + kind, pages)
 
 
@@ -881,10 +911,22 @@ def main() -> int:
     parser.add_argument('--ziel', type=Path, default=HIER / 'phpdata')
     parser.add_argument('--sprache', choices=(*SPRACHEN, 'alle'), default='alle')
     parser.add_argument('--still', action='store_true', help='keine Fortschrittszeilen')
+    parser.add_argument('--sitemap-neu', metavar='YYYY-MM-DD',
+                        help='manuell alle sitemap lastmod dates auf dieses Datum setzen')
+    parser.add_argument('--sitemap-state', type=Path,
+                        help='Pfad für den persistenten Sitemap-Hashstand')
     options = parser.parse_args()
+    if options.sitemap_neu:
+        try:
+            if datetime.strptime(options.sitemap_neu, '%Y-%m-%d').strftime('%Y-%m-%d') \
+                    != options.sitemap_neu:
+                raise ValueError
+        except ValueError:
+            parser.error('--sitemap-neu muss ein gültiges Datum im Format YYYY-MM-DD sein')
     languages = SPRACHEN if options.sprache == 'alle' else (options.sprache,)
     target = options.ziel
     target.mkdir(parents=True, exist_ok=True)
+    sitemap_hashes: dict[str, str] = {}
     if not (DATEN / 'sets.json').is_file():
         raise SystemExit('MISSING: daten/sets.json (run python3 build_sets.py first)')
     set_source = json.loads((DATEN / 'sets.json').read_text(encoding='utf-8'))
@@ -975,14 +1017,14 @@ def main() -> int:
         quest_pages = {ident: quest_view(builder, quest, quest_giver_rows.get(ident))
                        for ident, quest in data['q'].items()}
         counts['page-q'] = len(quest_pages)
-        write_pages(target, lang, 'q', quest_pages)
+        write_pages(target, lang, 'q', quest_pages, sitemap_hashes)
 
         index = deed_index(model)
         categories = deed_categories()
         deed_pages = {ident: deed_view(builder, deed, index, categories)
                       for ident, deed in data['d'].items()}
         counts['page-d'] = len(deed_pages)
-        write_pages(target, lang, 'd', deed_pages)
+        write_pages(target, lang, 'd', deed_pages, sitemap_hashes)
 
         # Reuse the public list schemas for embedded lists; PHP reads only the
         # requested relation IDs from these shards, not a browser-wide index.
@@ -1012,24 +1054,24 @@ def main() -> int:
             pages = {ident: honor_view(builder, art, entry)
                      for ident, entry in data[art].items()}
             counts['page-' + art] = len(pages)
-            write_pages(target, lang, art, pages)
+            write_pages(target, lang, art, pages, sitemap_hashes)
 
         faction_pages = {ident: faction_view(builder, entry)
                          for ident, entry in data['f'].items()}
         counts['page-f'] = len(faction_pages)
-        write_pages(target, lang, 'f', faction_pages)
+        write_pages(target, lang, 'f', faction_pages, sitemap_hashes)
 
         landmark_pages = {ident: landmark_view(builder, entry)
                           for ident, entry in data['l'].items()}
         counts['page-l'] = len(landmark_pages)
-        write_pages(target, lang, 'l', landmark_pages)
+        write_pages(target, lang, 'l', landmark_pages, sitemap_hashes)
         write_landmark_index(target, lang, data['l'], maps)
         write_title_index(target, lang, data['title'], builder.quests, builder.deeds, maps)
         write_faction_index(target, lang, data['f'], builder.quests, builder.deeds, maps)
         write_instance_index(target, lang, instanz_source, maps)
         loot_sources = write_instance_details(
             target, lang, instanz_source, data['q'], maps, data['i'], quest_pages, instance_loot,
-            instance_maps, instance_data)
+            instance_maps, instance_data, sitemap_hashes)
 
         # The vendor pages already resolve every place from the client's
         # landblocks. Item and recipe sources show that same list, so "Wo"
@@ -1077,7 +1119,7 @@ def main() -> int:
             item_pages[ident]['task_filter'] = task_filter
         link_items(item_pages, set_source, lang)
         counts['page-i'] = len(item_pages)
-        write_pages(target, lang, 'i', item_pages)
+        write_pages(target, lang, 'i', item_pages, sitemap_hashes)
 
         # Recipe pages link their ingredients; the toggle "Show sources"
         # only makes sense where the item page answers something. Item pages
@@ -1096,12 +1138,12 @@ def main() -> int:
                                            vendor_names, vendor_ids, vendor_places)
                         for ident, row in data['recipe'].items()}
         counts['page-recipe'] = len(recipe_pages)
-        write_pages(target, lang, 'recipe', recipe_pages)
+        write_pages(target, lang, 'recipe', recipe_pages, sitemap_hashes)
 
         sets = set_pages(set_source, lang, item_pages, builder.items)
         data['set'] = {sid: {'id': sid, 'name': row['name']} for sid, row in sets.items()}
         write_shards(target, lang, 'set', data['set'])
-        write_pages(target, lang, 'set', sets)
+        write_pages(target, lang, 'set', sets, sitemap_hashes)
         counts['set'] = counts['page-set'] = len(sets)
         shutil.copy2(DATEN / ('sets-suche-%s.json' % lang), folder / 'sets-index.json')
 
@@ -1117,7 +1159,7 @@ def main() -> int:
         write_shards(target, lang, 'giver', data['giver'])
         giver_detail = giver_pages(GIVER_SOURCE, lang, data['q'], maps,
                                    app_url, coords, builder.w)
-        write_pages(target, lang, 'giver', giver_detail)
+        write_pages(target, lang, 'giver', giver_detail, sitemap_hashes)
         counts['giver'] = counts['page-giver'] = len(giver_detail)
 
         vendors = vendor_index(VENDOR_SOURCE, lang, maps)
@@ -1126,7 +1168,7 @@ def main() -> int:
         data['vendor'] = {row['id']: {'id': row['id'], 'name': row['name']}
                           for row in vendors['vendors']}
         write_shards(target, lang, 'vendor', data['vendor'])
-        write_pages(target, lang, 'vendor', vendor_detail)
+        write_pages(target, lang, 'vendor', vendor_detail, sitemap_hashes)
         counts['vendor'] = counts['page-vendor'] = len(vendor_detail)
 
         members = members_index(builder, model)
@@ -1134,7 +1176,7 @@ def main() -> int:
             pages = {ident: area_view(builder, entry, kind, members)
                      for ident, entry in data[kind].items()}
             counts['page-' + kind] = len(pages)
-            write_pages(target, lang, kind, pages)
+            write_pages(target, lang, kind, pages, sitemap_hashes)
 
         by_profession = {}
         for ident, row in data['recipe'].items():
@@ -1143,12 +1185,15 @@ def main() -> int:
                                                  by_profession.get(key, []))
                             for key, entry in data['p'].items()}
         counts['page-p'] = len(profession_pages)
-        write_pages(target, lang, 'p', profession_pages)
+        write_pages(target, lang, 'p', profession_pages, sitemap_hashes)
 
         # Overview pages, addressed by their own path instead of an id.
         lists = {lang + '/' + key: value for key, value in list_pages(builder, model, data).items()}
         counts['page-list'] = len(lists)
         listen.update(lists)
+        from sitemap_lastmod import fingerprint
+        for page in lists.values():
+            sitemap_hashes[page['canonical']] = fingerprint(page)
         from php_viewmodel import route as _route
         detail_routes[lang] = {}
         instance_segment = {'de': 'instanz', 'en': 'instance', 'fr': 'instance'}[lang]
@@ -1211,7 +1256,31 @@ def main() -> int:
             unique = sorted(set(urls))
             for number, start in enumerate(range(0, len(unique), 45000), 1):
                 split[name.replace('.xml', '-%d.xml' % number)] = unique[start:start + 45000]
-        write_sitemaps(target, split)
+        from php_viewmodel import APP_SEGMENTS
+        application_pages = sorted({
+            '/' + lang + '/' + (segment + '/' if segment else '')
+            for lang, pages in APP_SEGMENTS.items()
+            for page, segment in pages.items()
+            if page not in ('suche', 'gegenstandssuche')
+        })
+        split['/sitemap-seiten.xml'] = application_pages
+        from sitemap_lastmod import apply_lastmod, load_state, save_state
+        previous_path = target / 'sitemaps.json'
+        previous = json.loads(previous_path.read_text(encoding='utf-8')) \
+            if previous_path.is_file() else {}
+        state_path = options.sitemap_state or (
+            Path.home() / '.cache' / 'llb-php' / 'sitemap-state.json.gz')
+        state = load_state(state_path)
+        anchor = json.loads((HIER / 'referenz' / 'sitemap-start.json').read_text(
+            encoding='utf-8'))['start']
+        lastmod, next_state = apply_lastmod(
+            split, sitemap_hashes, state, anchor,
+            datetime.now(ZoneInfo('Europe/Berlin')).date().isoformat(),
+            reset_date=options.sitemap_neu,
+            previous_lastmod=previous.get('lastmod'),
+            previous_sections=previous.get('sections'))
+        write_sitemaps(target, split, lastmod)
+        save_state(state_path, next_state)
         if not options.still:
             print('sitemaps: %d Dateien, %d URLs' % (len(split), sum(len(u) for u in split.values())),
                   flush=True)
