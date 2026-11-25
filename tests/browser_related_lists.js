@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 const fs = require('node:fs');
 const path = require('node:path');
-const base = process.argv[2] || 'http://127.0.0.1:8813';
+const base = process.argv[2] || 'http://127.0.0.1:8817';
 const artifacts = path.join(require('node:os').homedir(), '.cache/llb-related-tests');
 
 (async () => {

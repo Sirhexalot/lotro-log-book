@@ -5,12 +5,12 @@
  * context, so search and filters cover the whole member list of the area, not
  * just the rendered first page. Completion comes from a synthetic character.
  *
- * Usage: node tests/browser_area_tabs.js [http://127.0.0.1:8813]
+ * Usage: node tests/browser_area_tabs.js [http://127.0.0.1:8817]
  */
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
-const basis = (process.argv[2] || 'http://127.0.0.1:8813').replace(/\/$/, '');
+const basis = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 const seiten = ['/de/gebiet/268437634/', '/en/area/268437634/', '/fr/zone/268437634/'];
 
 async function bereit(page, type) {

@@ -3,12 +3,12 @@
  * its type icon (an item shows the concrete game image instead). Section
  * headings read as sections, not as fine print.
  *
- * Usage: node tests/browser_entity_headers.js [http://127.0.0.1:8813]
+ * Usage: node tests/browser_entity_headers.js [http://127.0.0.1:8817]
  */
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
-const basis = (process.argv[2] || 'http://127.0.0.1:8813').replace(/\/$/, '');
+const basis = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 const seiten = [
 	['/de/gebiet/268437634/', 'Nordhöhen'],
 	['/de/region/268437557/', 'Eriador'],

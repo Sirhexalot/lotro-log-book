@@ -1,11 +1,11 @@
 'use strict';
 /* Tatenindex (/de/tat/): Ladebudget und Grunddarstellung.
  * Browser-Prüfskript (Playwright), kein Unit-Test:
- *   node tests/browser_tatenindex.js http://127.0.0.1:8816
+ *   node tests/browser_tatenindex.js http://127.0.0.1:8817
  */
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
-const base = process.argv[2] || 'http://127.0.0.1:8816';
+const base = process.argv[2] || 'http://127.0.0.1:8817';
 
 (async () => {
 	const browser = await chromium.launch({ channel: 'chrome' });

@@ -5,12 +5,12 @@
  * filter and search as the standalone catalogue, only restricted to the entity
  * in question. Marks appear only when that data type was imported.
  *
- * Usage: node tests/browser_entity_sources.js [http://127.0.0.1:8813]
+ * Usage: node tests/browser_entity_sources.js [http://127.0.0.1:8817]
  */
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
-const basis = (process.argv[2] || 'http://127.0.0.1:8813').replace(/\/$/, '');
+const basis = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 
 async function bereit(page, area) {
 	await page.waitForFunction((teil) => window.MQL_RELATED_FILTER

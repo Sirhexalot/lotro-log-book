@@ -2,7 +2,7 @@
 // Isolated browser: tab URLs must survive reload despite <base href="/">.
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
-const base = process.argv[2] || 'http://127.0.0.1:8813';
+const base = process.argv[2] || 'http://127.0.0.1:8817';
 (async () => {
 	const browser = await chromium.launch({ channel: 'chrome' });
 	try {

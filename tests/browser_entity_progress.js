@@ -4,12 +4,12 @@
  * a faction shows its standing only when reputation was imported; an area
  * offers the completion filter only for the data type it really has.
  *
- * Usage: node tests/browser_entity_progress.js [http://127.0.0.1:8813]
+ * Usage: node tests/browser_entity_progress.js [http://127.0.0.1:8817]
  */
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
-const basis = (process.argv[2] || 'http://127.0.0.1:8813').replace(/\/$/, '');
+const basis = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 
 function char(meta, extra = {}) {
 	return {

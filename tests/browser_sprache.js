@@ -2,12 +2,12 @@
 /* Language without a language path: browser list wins, chosen language wins
  * over the browser, English is the fallback.
  *
- * Usage: node tests/browser_sprache.js [http://127.0.0.1:8813]
+ * Usage: node tests/browser_sprache.js [http://127.0.0.1:8817]
  */
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
-const basis = (process.argv[2] || 'http://127.0.0.1:8813').replace(/\/$/, '');
+const basis = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 
 async function start(browser, locale) {
 	const context = await browser.newContext({ locale });

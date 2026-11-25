@@ -1,11 +1,11 @@
 'use strict';
 /* Gesamtkartenübersicht: Sprungmarken, Gruppen-Gebiete und lokales Budget.
  * Browser-Prüfskript (Playwright), kein Unit-Test:
- *   node tests/browser_kartenuebersicht.js http://127.0.0.1:8814
+ *   node tests/browser_kartenuebersicht.js http://127.0.0.1:8817
  */
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
-const base = process.argv[2] || 'http://127.0.0.1:8814';
+const base = process.argv[2] || 'http://127.0.0.1:8817';
 
 (async () => {
 	const browser = await chromium.launch({ channel: 'chrome' });

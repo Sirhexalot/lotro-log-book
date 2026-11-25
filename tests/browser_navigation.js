@@ -3,12 +3,12 @@
  *
  * A family is a group: clicking it opens its pages and never navigates. Every
  * page is visible on a phone, including the one that shares the family's name.
- * Usage: node tests/browser_navigation.js [http://127.0.0.1:8813]
+ * Usage: node tests/browser_navigation.js [http://127.0.0.1:8817]
  */
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
-const basis = (process.argv[2] || 'http://127.0.0.1:8813').replace(/\/$/, '');
+const basis = (process.argv[2] || 'http://127.0.0.1:8817').replace(/\/$/, '');
 const seiten = ['/de/karte/', '/de/karte/taten/', '/de/handwerk/rezepte/', '/de/instanz/',
 	'/de/set/', '/de/gegenstandssuche/', '/de/auftraggeber/', '/de/fraktion/',
 	'/de/belohnungen/', '/de/abenteuer/', '/en/crafting/recipes/', '/fr/carte/prouesses/'];
