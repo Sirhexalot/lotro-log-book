@@ -40,7 +40,7 @@
 <main class="katalog-inhalt" data-related-filter-limit="{{ related_direct_list_max|default(5) }}">
 <div class="katalog-orientierung">
 	<nav aria-label="Breadcrumb" class="katalog-pfad">{{ crumbs|raw }}</nav>
-	{% if entity_id|default('') %}<a class="entity-feedback-link" href="/{{ lang }}/{{ lang == 'fr' ? 'retour' : 'feedback' }}/" data-feedback-link>{{ {de: 'Feedback zu dieser Seite', en: 'Feedback on this page', fr: 'Donner votre avis sur cette page'}[lang] }} →</a>{% endif %}
+	{% if entity_id|default('') %}<a class="entity-feedback-link llb-knopf" data-art="haupt" href="/{{ lang }}/{{ lang == 'fr' ? 'retour' : 'feedback' }}/" data-feedback-link>{{ {de: 'Feedback zu dieser Seite', en: 'Feedback on this page', fr: 'Donner votre avis sur cette page'}[lang] }} →</a>{% endif %}
 </div>
 {% block inhalt %}{% endblock %}
 </main>

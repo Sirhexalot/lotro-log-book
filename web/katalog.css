@@ -21,7 +21,7 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	border-radius: 2px;
 }
 .katalog-orientierung { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:4px 16px; }
-.entity-feedback-link { font-size: var(--text-bedienung); }
+.entity-feedback-link { flex: 0 0 auto; }
 .katalog-orientierung .katalog-pfad a {
 	color: var(--schwach);
 	text-decoration: none;
@@ -31,7 +31,7 @@ body.katalog-seite { display: block; height: auto; min-height: 100vh; }
 	color: var(--gold);
 	text-decoration: underline;
 }
-.katalog-inhalt a.llb-knopf {
+.katalog-inhalt a.llb-knopf:not([data-art="haupt"]) {
 	color: var(--gold);
 }
 .katalog-inhalt a.llb-knopf,
