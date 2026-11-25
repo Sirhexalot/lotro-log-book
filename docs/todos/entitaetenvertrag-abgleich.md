@@ -200,7 +200,11 @@ Code: [`instances/list.twig`](../../php/templates/instances/list.twig#L1), [`Ins
 
 - [ ] **Item quest/deed sources:** unify the 6/11 threshold (item, EAV-01).
 - [ ] **Item „Wofür“:** shared recipe component instead of local search/role filter without sorting/pagination (item/recipe, EAV-02).
-- [ ] **Quest/deed row:** concretely permit `flags` in finder/relation hits by contract or remove them from the visible row (quest/deed, EAV-03).
+- [x] **Quest/deed row:** the muted meta line ("Aufgabe · täglich · Gruppe") is
+  classification, not content, so the contract permits it as `merkmale` for
+  `q` and `d` instead of removing it from the row. `tests/test_entitaeten_vertrag.py`
+  checks the field and the renderer (`web/aufgaben-filter.js`, `row.flags.map`)
+  together (quest/deed, EAV-03).
 - [ ] **Set browser row:** decide part count and class/armour meta against permitted contract fields (set, EAV-04).
 - [ ] **Quest giver browser row:** reconcile title/quest count and missing icon with contract fields (quest giver, EAV-05).
 

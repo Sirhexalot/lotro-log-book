@@ -23,7 +23,8 @@
         "name",
         "stufe",
         "gebiet",
-        "status"
+        "status",
+        "merkmale"
       ],
       "filter": [
         "thema",
@@ -179,7 +180,8 @@
         "art",
         "stufe",
         "gebiet",
-        "status"
+        "status",
+        "merkmale"
       ],
       "filter": [
         "art",

@@ -76,6 +76,16 @@ class VertragTest(unittest.TestCase):
                     self.assertTrue(liste.get('grund', '').strip(),
                                     '%s/%s braucht einen Grund' % (kind, liste['id']))
 
+    def test_quest_and_deed_rows_name_their_meta_line(self):
+        # The finder and relation rows print type and properties in one muted
+        # line ("Aufgabe · täglich · Gruppe"). That is classification, so the
+        # contract names it instead of leaving it to the renderer.
+        for kind in ('q', 'd'):
+            felder = {feld.lower() for feld in self.entitaeten[kind]['zeilenfelder']}
+            self.assertIn('merkmale', felder, kind)
+        quelle = (ROOT / 'web/aufgaben-filter.js').read_text(encoding='utf-8')
+        self.assertIn('row.flags.map', quelle)
+
     def test_row_fields_are_identity_and_classification_only(self):
         verboten = {'zutaten', 'quellen', 'beschreibung', 'werte', 'herkunft',
                     'verwendung', 'bezugsquellen', 'rezept_oeffnen', 'details'}
