@@ -17,15 +17,20 @@ Hetzner's web hosting console (**konsoleH**) has a cron manager under
 
 | Field | Value |
 |---|---|
-| Interpreter | `/usr/bin/php` (the account's configured PHP version) |
+| Interpreter | the PHP version konsoleH offers, e.g. `/usr/bin/php84` |
 | Script | `/usr/www/users/<konto>/public_html/mm/php/cron/report.php` |
-| Schedule | `0 6 * * *` (daily at 06:00 server time) |
+| Schedule | `0 8 * * *` (daily at 08:00 server time) |
 
-The absolute script path is the document root plus `/php/cron/report.php`. The
-document root is the FTP target from `~/.config/mql-upload.conf` (`path`), here
-`/public_html/mm`; konsoleH shows the account's home directory next to the
-field. The `.htaccess` blocks `/php` from the web, so the script is reachable
-only from the shell.
+The absolute script path is the account's home directory plus the FTP target
+from `~/.config/mql-upload.conf` (`/public_html/mm`) plus `/php/cron/report.php`;
+konsoleH shows the home directory (`/usr/www/users/…`) next to the field. The
+`.htaccess` blocks `/php` from the web, so the script is reachable only from the
+shell.
+
+If the job reports `Could not open input file`, the release on the server is
+older than the script: upload the `programm` component first, then start the
+job again. On failure konsoleH mails the job's output to the address given above
+the list of jobs, so a broken run does not stay silent.
 
 The cron job needs the release on the server: `php/cron/report.php` is part of
 the `programm` component and is copied with every release. Nothing else is
