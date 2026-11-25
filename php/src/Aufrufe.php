@@ -111,6 +111,30 @@ final class Aufrufe
         }
     }
 
+    /**
+     * The whole month: all views and how many entities they spread over.
+     *
+     * The top list alone cannot answer this — its rows are the ten busiest
+     * entities, not the month. {zahl: views, eintraege: entities}.
+     */
+    public function uebersicht(?string $monat = null): array
+    {
+        try {
+            $statement = $this->database()->prepare(
+                'SELECT COALESCE(SUM(zahl), 0) AS zahl, COUNT(*) AS eintraege '
+                . 'FROM llb_aufrufe WHERE monat = :monat');
+            $statement->execute([':monat' => $monat ?? self::monat()]);
+            $row = $statement->fetch() ?: [];
+            return [
+                'zahl' => (int) ($row['zahl'] ?? 0),
+                'eintraege' => (int) ($row['eintraege'] ?? 0),
+            ];
+        } catch (\Throwable) {
+            $this->pdo = null;
+            return ['zahl' => 0, 'eintraege' => 0];
+        }
+    }
+
     public static function monat(?int $zeit = null): string
     {
         return gmdate('Y-m', $zeit ?? time());

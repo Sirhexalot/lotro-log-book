@@ -81,6 +81,14 @@ class TagesberichtTest(unittest.TestCase):
                        '<th>DE</th>', '<th>EN</th>', '<th>FR</th>'):
             self.assertIn(spalte, quelle)
 
+    def test_the_intro_separates_the_list_from_the_whole_month(self):
+        # "31 Aufrufe" once read like the month's total; it is only the sum of
+        # the ten rows. The mail must name both numbers.
+        quelle = SKRIPT.read_text(encoding='utf-8')
+        self.assertIn('->uebersicht($monat)', quelle)
+        self.assertIn('im ganzen ', quelle)
+        self.assertIn("' Aufrufe auf '", quelle)
+
     def test_the_mail_goes_to_the_shared_address_by_default(self):
         quelle = SKRIPT.read_text(encoding='utf-8')
         self.assertIn("'llb@sirhexalot.de'", quelle)

@@ -41,10 +41,19 @@ needed – no database schema change, no new table.
 ## What the mail contains
 
 - Subject: `LOTRO Log Book · Top 10 im November 2026`
+- Opening line with **two numbers**: the views inside the ten rows and the
+  month's total over all entities (`Aufrufe::uebersicht()`). They differ, because
+  every entity with one or two views is missing from a top ten
 - HTML table: count, type (German name such as *Aufgabe* or *Gegenstand*),
   German entity name, links DE/EN/FR
 - Plain-text alternative for mail clients without HTML
 - A closing note that the count is language-independent and excludes bots
+
+The number of **rows** in `llb_aufrufe` is the number of distinct entities
+viewed, not the number of views: a new entity starts with one view and adds a
+row, so the row count grows with variety while the views stay in the `zahl`
+column. When checking against phpMyAdmin, `SELECT COUNT(*)` and `SUM(zahl)` are
+two different answers.
 
 At the start of a month the table is empty; the mail then says so in one line
 instead of showing an empty table. Names come from the prepared page models in

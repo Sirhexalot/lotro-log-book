@@ -148,10 +148,15 @@ foreach ($spitze as $eintrag) {
 }
 
 $betreff = 'LOTRO Log Book · Top ' . count($zeilen) . ' im ' . $monatsname;
+// The list's own sum is not the month: the ten busiest entities leave out
+// every entity with one or two views. Say both, so nobody reads 31 as the total.
+$monatlich = $aufrufe->uebersicht($monat);
 $einleitung = $zeilen === []
     ? 'Im ' . $monatsname . ' wurde noch keine Entität aufgerufen.'
-    : 'Die meistgeöffneten Entitäten im ' . $monatsname . ' (' . $summe
-        . ' Aufrufe insgesamt, sprachübergreifend gezählt):';
+    : 'Die meistgeöffneten Entitäten im ' . $monatsname . '. Die '
+        . count($zeilen) . ' Zeilen kommen auf ' . $summe . ' Aufrufe; im ganzen '
+        . 'Monat sind es ' . $monatlich['zahl'] . ' Aufrufe auf '
+        . $monatlich['eintraege'] . ' Entitäten:';
 
 $html = '<p>' . htmlspecialchars($einleitung, ENT_QUOTES) . '</p>';
 if ($zeilen !== []) {
@@ -228,5 +233,7 @@ try {
     exit(1);
 }
 
-protokoll($root, $monat, count($zeilen) . ' Zeilen, ' . $summe . ' Aufrufe, gesendet an ' . $empfaenger);
-echo 'Gesendet an ' . $empfaenger . ': ' . count($zeilen) . ' Zeilen, ' . $summe . ' Aufrufe.' . PHP_EOL;
+protokoll($root, $monat, count($zeilen) . ' Zeilen, ' . $summe . ' Aufrufe darin, '
+    . $monatlich['zahl'] . ' Aufrufe im Monat, gesendet an ' . $empfaenger);
+echo 'Gesendet an ' . $empfaenger . ': ' . count($zeilen) . ' Zeilen, ' . $summe
+    . ' Aufrufe darin, ' . $monatlich['zahl'] . ' Aufrufe im Monat.' . PHP_EOL;
