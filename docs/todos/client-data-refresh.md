@@ -27,14 +27,43 @@ Two families are published; the catalogue (quests, deeds, positions) is not.
   files, 189.6 MB) and checked live: the two recipes answer 200 in DE/EN/FR,
   the withheld recipe and the withheld title 404, `70070BD9` shows „Teakbrett".
 
-Still open, and the reason this stays a partial adoption:
+## Catalogue: quests, deeds and the 13 objective coordinates
 
-- **Quests, deeds and the 13 objective coordinates** need the plugin catalogues
-  regenerated from the same export first
-  (`MagicQuestLog/tools/build_catalog_from_export.py --export
-  <export>/catalogue --enums <enum-names.json> --output <scratch>`), then
-  `build_daten.py` and the PHP data again. That step also carries the quest text
-  changes from the patch and touches the plugin checkout, so it is its own run.
+The plugin catalogues are regenerated from the same export, but into a scratch
+directory — the plugin checkout stays untouched:
+
+    python3 MagicQuestLog/tools/build_catalog_from_export.py \
+      --export ~/.cache/llb-data-update-20261122-verified/catalogue \
+      --enums <source-exporter>/enums/enum-names.json \
+      --lore "<Companion>/app/data/lore" \
+      --landblocks "<Companion>/app/data/lore/landblocks.xml" \
+      --did-positions <source-exporter>/did-positions-2026-11-03/positions.jsonl \
+      --placed-entities <source-exporter>/placed-2026-11-03/raw.jsonl \
+      --npcs <source-exporter>/npcs-2026-11-03 \
+      --rewards ~/.cache/llb-data-update-20261122-verified/rewards/rewards.json \
+      --output ~/.cache/llb-adopt-20261122/lua2
+
+The three auxiliary families (positions, placed entities, NPCs) are the 03.11
+snapshot: the 22.11 run did not export them, and the client DATs are unchanged
+since 22.11, so a re-export would give the same rows. Without them the deeds
+lose `h`, `lat`, `lon`, `map`, `rw`, `species`, `step` and `territory` — the
+first attempt produced a 3.8 MB `Deeds_de.lua` instead of 6.8 MB and was
+discarded.
+
+The only field the build cannot fill is `map`, the MoorMap map number for the
+plugin's "Show in MoorMap" button: MoorMap is not installed, so the numbers are
+not derivable. The website does not use them; a plugin release would have to
+merge them from the previous `Data/` files.
+
+`build_daten.py --sprache <de|en|fr> [--art taten] --katalog <scratch>/Quests_<sprache>.lua`
+then writes `web/daten-*.js`. Measured against the live state: 74 quests and 13
+deeds change in German, 23 quests and 11 deeds in English and French. The 13
+reviewed records are all among them and change in `t`, the objective positions
+(e.g. `700715A7` moves from -63.09507 to -63.09576 on map 268454945).
+
+`~/.cache/llb-php-candidate-92vrxog0/` (the 22.11 candidate with its
+`review.json`) was deleted on 25.11. as superseded; the evidence for the 13
+records now lives in `diff.json` (`locations`) and in this file.
 - The remaining checkboxes below (withheld recipes and title, Golwen mission,
   Rhûn labels, source families not covered) are unchanged.
 

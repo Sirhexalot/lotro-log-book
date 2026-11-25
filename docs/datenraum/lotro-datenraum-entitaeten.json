@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "stand": "2026-11-23",
+  "stand": "2026-11-25",
   "regeln": {
     "komponente": "web/filter-ui.js mit filterzustand.js, filteradapter.js, filtergedaechtnis.js und filter-ui.css",
     "schwelle": 5,
