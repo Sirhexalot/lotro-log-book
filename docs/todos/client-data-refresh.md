@@ -4,6 +4,40 @@ The 22 November patch was exported separately under
 `~/.cache/llb-data-update-20261122-verified/` using `tools/update_data.py`.
 The active catalogue and game plugin were not updated.
 
+## Adopted on 25.11.2026: recipes and items
+
+Two families are published; the catalogue (quests, deeds, positions) is not.
+
+- **Recipes** from `recipes/recipes.json` of the export, filtered by the four
+  withheld IDs below into `~/.cache/llb-adopt-20261122/recipes.json`:
+  `build_rezepte.py --sprache <de|en|fr> --quelle <filtered> --ziel web`.
+  7 924 → 7 926 recipes in every language, i.e. exactly `7007764C` and
+  `700777B8`. 50 German rows changed, mostly the result-item names that follow
+  from the item export (e.g. „Teak-Brett" → „Teakbrett").
+- **Items** from `items/items.json` of the export:
+  `LLB_REZEPTE_EXPORT=<filtered> LLB_ITEM_EXPORT=<export>/items/items.json
+  python3 build_items.py` (the two environment variables were added for this
+  run; the defaults still point at the 06.11./08.11. exports). 22 records
+  changed, 10 of them German names — the `n.de` corrections from `diff.json`.
+  The four result items of the withheld recipes (`70076B37`, `70076B3E`,
+  `70076B42`, `70076B58`) were removed again, so no German-only item page
+  appears.
+- `tools/build_php_data.py --sprache alle` rebuilt the whole PHP data
+  (18 041 files); the release was uploaded as the `daten` component (1 113
+  files, 189.6 MB) and checked live: the two recipes answer 200 in DE/EN/FR,
+  the withheld recipe and the withheld title 404, `70070BD9` shows „Teakbrett".
+
+Still open, and the reason this stays a partial adoption:
+
+- **Quests, deeds and the 13 objective coordinates** need the plugin catalogues
+  regenerated from the same export first
+  (`MagicQuestLog/tools/build_catalog_from_export.py --export
+  <export>/catalogue --enums <enum-names.json> --output <scratch>`), then
+  `build_daten.py` and the PHP data again. That step also carries the quest text
+  changes from the patch and touches the plugin checkout, so it is its own run.
+- The remaining checkboxes below (withheld recipes and title, Golwen mission,
+  Rhûn labels, source families not covered) are unchanged.
+
 - [x] Read the four result IDs and the Nan Ogol reward title directly from
   the updated DATs. A targeted DE/EN/FR export and separate EN and FR runs
   confirm that the decoder returns only German names for these IDs. The

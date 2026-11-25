@@ -15,6 +15,7 @@ itself has no ID (the resource spawn table), and then only as a hint.
     python3 build_items.py            # writes daten/items.json
 """
 import json
+import os
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -27,13 +28,17 @@ HIER = Path(__file__).resolve().parent
 WEB = HIER / 'web'
 DATEN = HIER / 'daten'
 SPRACHEN = ('de', 'en', 'fr')
-REZEPTE = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
-               '/rezepte-2026-11-06/recipes.json')
+REZEPTE = Path(os.environ.get(
+    'LLB_REZEPTE_EXPORT',
+    '/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
+    '/rezepte-2026-11-06/recipes.json'))
 VENDOR_ITEMS = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
                     '/vendor-items-2026-11-08/vendor-items.json')
 # Full item export: supplies the client icon ID (`ic`) for every item.
-VOLL = Path('/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
-            '/items-2026-11-08/items.json')
+VOLL = Path(os.environ.get(
+    'LLB_ITEM_EXPORT',
+    '/Users/adrian/Documents/07_Hobbys/Lotro/Companion-Test/source-exporter'
+    '/items-2026-11-08/items.json'))
 ITEM_LORE = Path('/Users/adrian/Applications/LOTRO-Companion-Test/LotRO Companion'
                  '/app/data/lore/items.xml')
 # Was man an einem Tauschhändler bekommt. Die Liste steht im Companion-Repo und
