@@ -50,6 +50,22 @@ final class Aufrufe
         }
     }
 
+    /**
+     * Whether the database answers at all. The daily report needs to tell
+     * "no views yet" from "the counter is unreachable"; both would otherwise
+     * look like an empty list.
+     */
+    public function verbunden(): bool
+    {
+        try {
+            $this->database()->query('SELECT 1');
+            return true;
+        } catch (\Throwable) {
+            $this->pdo = null;
+            return false;
+        }
+    }
+
     /** Views of one entity in one month; 0 when nothing is recorded. */
     public function zahl(string $art, string $kennung, ?string $monat = null): int
     {

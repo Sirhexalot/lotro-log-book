@@ -275,7 +275,8 @@ def pruefen(ziel: Path) -> list[str]:
                  'php/templates/givers/list.twig', 'php/templates/givers/detail.twig',
                  'abenteuer.css', 'abenteuer.js', 'abenteuer-logik.js', 'texte-abenteuer.js',
                  'epik.js', 'epik.css',
-                 'php/src/Adventures.php', 'php/templates/app/abenteuer.twig'):
+                 'php/src/Adventures.php', 'php/templates/app/abenteuer.twig',
+                 'php/src/Aufrufe.php', 'php/cron/report.php'):
         if not (ziel / name).is_file():
             fehler.append('fehlt: ' + name)
     for sprache in SPRACHEN:
